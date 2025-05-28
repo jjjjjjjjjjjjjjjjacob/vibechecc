@@ -248,7 +248,7 @@ function CreateVibe() {
                 >
                   {isSubmitting ? 'creating...' : 'create vibe'}
                 </Button>
-                            </div>
+              </div>
             </form>
           </CardContent>
         </Card>

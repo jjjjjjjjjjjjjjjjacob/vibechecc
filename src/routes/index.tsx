@@ -45,7 +45,7 @@ function Home() {
             <p className="text-lg md:text-xl mb-6 opacity-90">
               welcome to vibecheck, where you can discover, share, and rate vibes from around the world.
             </p>
-            <CreateVibeButton variant="secondary" className="bg-white text-primary hover:bg-white/90" />
+            <CreateVibeButton variant="outline" className="bg-secondary/20 text-primary hover:bg-secondary-foreground/20" />
           </div>
         </div>
       </section>
