@@ -32,7 +32,7 @@ export interface Vibe {
   title: string
   description: string
   image?: string
-  createdBy: User
+  createdBy: User | null
   createdAt: string
   ratings: Rating[]
   tags?: string[]

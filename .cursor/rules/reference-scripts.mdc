@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Reference [package.json](mdc:package.json) as well as the current workspace's project.json & package.json for relevant scripts

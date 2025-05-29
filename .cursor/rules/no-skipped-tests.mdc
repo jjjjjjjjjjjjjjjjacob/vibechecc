@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- No skipped tests
+- Tests aren't complete if they're being skipped
+- A skipped test is considered a failing test

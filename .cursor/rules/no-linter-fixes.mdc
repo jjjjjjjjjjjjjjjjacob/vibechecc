@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Do not fix linter errors in an existing or context file unless explicitly requested to do so

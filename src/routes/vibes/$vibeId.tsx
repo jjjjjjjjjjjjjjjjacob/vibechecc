@@ -105,16 +105,33 @@ function VibePage() {
           </div>
           
           <div className="flex items-center mb-4">
-            <Avatar className="h-10 w-10 mr-3">
-              <AvatarImage src={vibe.createdBy.avatar} alt={vibe.createdBy.name} />
-              <AvatarFallback>{vibe.createdBy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium">{vibe.createdBy.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {new Date(vibe.createdAt).toLocaleDateString()}
-              </p>
-            </div>
+            {vibe.createdBy ? (
+              <>
+                <Avatar className="h-10 w-10 mr-3">
+                  <AvatarImage src={vibe.createdBy.avatar} alt={vibe.createdBy.name} />
+                  <AvatarFallback>{vibe.createdBy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{vibe.createdBy.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(vibe.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <Avatar className="h-10 w-10 mr-3">
+                  {/* You might want a generic placeholder avatar icon here */}
+                  <AvatarFallback>??</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">Unknown User</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(vibe.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
           
           <p className="text-foreground mb-6 whitespace-pre-line">

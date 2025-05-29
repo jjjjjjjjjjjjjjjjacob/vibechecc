@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+- Import `@testing-library/jest-dom` directly in your test files to make DOM-specific matchers available:
+  `import '@testing-library/jest-dom';`
+- Use `bun:test` for core test functionalities (describe, it, expect, mock, hooks):
+  `import { describe, it, expect, mock, afterEach, beforeEach } from 'bun:test';`
+- Utilize `@testing-library/react` for rendering and interacting with React components:
+  `import { render, screen, fireEvent, cleanup } from '@testing-library/react';`
+- Perform cleanup after each test, especially when using `@testing-library/react`, to ensure a clean state between tests:
+  ```typescript
+  afterEach(() => {
+    cleanup();
+  });
+  ```
+- Use `mock()` from `bun:test` for creating mock functions (e.g., `const handleClick = mock();`).
+- Ensure tests are descriptive and cover relevant use cases, including edge cases and error conditions.
+- Prefer `getBy*` queries for elements that *must* be present (test will fail if not found).
+- Use `queryBy*` for asserting an element is *not* present.
+- Use `findBy*` for elements that will appear asynchronously.

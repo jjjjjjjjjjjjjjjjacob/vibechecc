@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- The monorepo uses `bun` for runtime & `nx` for workspace management
+- When running commands, use `bun`, not `yarn` or `npm`

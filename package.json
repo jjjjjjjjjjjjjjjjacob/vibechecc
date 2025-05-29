@@ -8,7 +8,8 @@
     "dev:web": "vinxi dev",
     "dev:db": "convex dev --run board:seed",
     "build": "vinxi build",
-    "start": "vinxi start"
+    "start": "vinxi start",
+    "test": "vitest"
   },
   "dependencies": {
     "@convex-dev/react-query": "0.0.0-alpha.8",
@@ -41,12 +42,20 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
+    "@happy-dom/global-registrator": "^17.5.6",
     "@tailwindcss/vite": "^4.1.7",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/bun": "^1.2.15",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "autoprefixer": "^10.4.20",
+    "convex-test": "^0.0.37",
+    "jsdom": "^26.1.0",
     "tailwindcss": "^4.1",
     "typescript": "^5.7.2",
-    "vite-tsconfig-paths": "^5.1.4"
-  }
+    "vitest": "^3.1.4"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

@@ -108,11 +108,17 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
           <CardFooter className={cn("flex flex-col items-start p-4 pt-0 gap-2", compact && "p-3 pt-0")}>
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={vibe.createdBy.avatar} alt={vibe.createdBy.name} />
-                  <AvatarFallback>{vibe.createdBy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-muted-foreground">{vibe.createdBy.name}</span>
+                {vibe.createdBy ? (
+                  <>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={vibe.createdBy.avatar} alt={vibe.createdBy.name} />
+                      <AvatarFallback>{vibe.createdBy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-muted-foreground">{vibe.createdBy.name}</span>
+                  </>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Unknown User</span>
+                )}
               </div>
 
               <div className="flex items-center gap-1">
@@ -162,11 +168,17 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
           <CardFooter className={cn("flex flex-col items-start p-4 pt-0 gap-2", compact && "p-3 pt-0")}>
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={vibe.createdBy.avatar} alt={vibe.createdBy.name} />
-                  <AvatarFallback>{vibe.createdBy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-muted-foreground">{vibe.createdBy.name}</span>
+                {vibe.createdBy ? (
+                  <>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={vibe.createdBy.avatar} alt={vibe.createdBy.name} />
+                      <AvatarFallback>{vibe.createdBy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-muted-foreground">{vibe.createdBy.name}</span>
+                  </>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Unknown User</span>
+                )}
               </div>
 
               <div className="flex items-center gap-1">
