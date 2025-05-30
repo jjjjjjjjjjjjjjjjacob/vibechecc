@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "../utils/utils"
 import { PlusCircle } from "lucide-react"
-import { currentUser } from "../db/sample-data"
+import { useUser } from "@clerk/tanstack-react-start"
 import type { EmojiReaction as EmojiReactionType } from "../types"
 
 interface EmojiReactionProps {
@@ -13,8 +13,9 @@ interface EmojiReactionProps {
 
 export function EmojiReaction({ reaction, onReact, className, showAddButton = false }: EmojiReactionProps) {
   const [isHovered, setIsHovered] = React.useState(false)
+  const { user } = useUser()
 
-  const hasReacted = reaction.users.includes(currentUser.id)
+  const hasReacted = user?.id ? reaction.users.includes(user.id) : false
 
   const handleReact = () => {
     if (onReact) {

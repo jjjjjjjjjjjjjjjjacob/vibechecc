@@ -7,7 +7,7 @@ import { cn } from "../utils/utils"
 import { SimpleVibePlaceholder } from "./simple-vibe-placeholder"
 import { useState } from "react"
 import { EmojiReactions } from "./emoji-reaction"
-import { currentUser } from "../db/sample-data"
+import { useUser } from "@clerk/tanstack-react-start"
 import type { Vibe, EmojiReaction } from "../types"
 
 interface VibeCardProps {
@@ -19,6 +19,7 @@ interface VibeCardProps {
 export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
   const [imageError, setImageError] = useState(false)
   const [reactions, setReactions] = useState<EmojiReaction[]>(vibe.reactions || [])
+  const { user } = useUser()
 
   // Calculate average rating
   const averageRating =
@@ -29,7 +30,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
 
   // Handle emoji reactions
   const handleReact = (emoji: string) => {
-    if (preview) return
+    if (preview || !user?.id) return
 
     // Find if this emoji already exists in reactions
     const existingReactionIndex = reactions.findIndex((r) => r.emoji === emoji)
@@ -37,14 +38,14 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
     if (existingReactionIndex >= 0) {
       // Check if user already reacted with this emoji
       const existingReaction = reactions[existingReactionIndex]
-      const userIndex = existingReaction.users.indexOf(currentUser.id)
+      const userIndex = existingReaction.users.indexOf(user.id)
 
       if (userIndex >= 0) {
         // User already reacted, remove their reaction
         const updatedReaction = {
           ...existingReaction,
           count: Math.max(0, existingReaction.count - 1),
-          users: existingReaction.users.filter((id) => id !== currentUser.id),
+          users: existingReaction.users.filter((id) => id !== user.id),
         }
 
         // If no users left, remove the reaction entirely
@@ -60,7 +61,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
         const updatedReaction = {
           ...existingReaction,
           count: existingReaction.count + 1,
-          users: [...existingReaction.users, currentUser.id],
+          users: [...existingReaction.users, user.id],
         }
 
         const newReactions = [...reactions]
@@ -74,7 +75,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
         {
           emoji,
           count: 1,
-          users: [currentUser.id],
+          users: [user.id],
         },
       ])
     }

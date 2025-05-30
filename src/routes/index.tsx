@@ -1,9 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import * as React from 'react'
-import { useVibes } from '~/queries'
-import { VibeGrid } from '~/components/vibe-grid'
-import { VibeCategoryRow } from '~/components/vibe-category-row'
-import { CreateVibeButton } from '~/components/create-vibe-button'
+import { useVibes } from '@/queries'
+import { VibeGrid } from '@/components/vibe-grid'
+import { VibeCategoryRow } from '@/components/vibe-category-row'
+import { CreateVibeButton } from '@/components/create-vibe-button'
+import {
+  SignedIn,
+  SignedOut,
+} from '@clerk/tanstack-react-start'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -32,8 +36,14 @@ function Home() {
     )
   }
 
-  const featuredVibes = vibes?.slice(0, 4) || []
-  const recentVibes = vibes?.slice(0, 8) || []
+  const safeVibes = (vibes || []).filter(vibe => {
+    if (!vibe.createdBy) return false;
+    if (vibe.ratings && vibe.ratings.some(rating => !rating.user)) return false;
+    return true;
+  });
+
+  const featuredVibes = safeVibes.slice(0, 4);
+  const recentVibes = safeVibes.slice(0, 8);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -45,7 +55,12 @@ function Home() {
             <p className="text-lg md:text-xl mb-6 opacity-90">
               welcome to vibecheck, where you can discover, share, and rate vibes from around the world.
             </p>
-            <CreateVibeButton variant="outline" className="bg-secondary/20 text-primary hover:bg-secondary-foreground/20" />
+            <SignedIn>
+              <CreateVibeButton variant="outline" className="bg-secondary/20 text-primary hover:bg-secondary-foreground/20" />
+            </SignedIn>
+            <SignedOut>
+              <p className="text-lg opacity-75">sign in to start creating and sharing your own vibes!</p>
+            </SignedOut>
           </div>
         </div>
       </section>

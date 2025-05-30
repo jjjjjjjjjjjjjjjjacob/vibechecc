@@ -1,21 +1,16 @@
-import * as React from "react"
 import { Link, useRouter } from "@tanstack/react-router"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu"
 import { Search, Menu, X } from "lucide-react"
 import { useState } from "react"
-import { currentUser } from "../db/sample-data"
 import { cn } from "../utils/utils"
 import { ThemeToggle } from "./theme-toggle"
+import { 
+  SignedIn, 
+  SignedOut, 
+  UserButton, 
+  SignInButton,
+} from "@clerk/tanstack-react-start"
 
 export function Header() {
   const router = useRouter()
@@ -45,24 +40,26 @@ export function Header() {
             >
               discover
             </Link>
-            <Link
-              to="/vibes/my-vibes"
-              className={cn(
-                "transition-colors hover:text-foreground/80 lowercase",
-                currentPath === "/vibes/my-vibes" ? "text-foreground font-medium" : "text-foreground/60",
-              )}
-            >
-              my vibes
-            </Link>
-            <Link
-              to="/profile"
-              className={cn(
-                "transition-colors hover:text-foreground/80 lowercase",
-                currentPath === "/profile" ? "text-foreground font-medium" : "text-foreground/60",
-              )}
-            >
-              profile
-            </Link>
+            <SignedIn>
+              <Link
+                to="/vibes/my-vibes"
+                className={cn(
+                  "transition-colors hover:text-foreground/80 lowercase",
+                  currentPath === "/vibes/my-vibes" ? "text-foreground font-medium" : "text-foreground/60",
+                )}
+              >
+                my vibes
+              </Link>
+              <Link
+                to="/profile"
+                className={cn(
+                  "transition-colors hover:text-foreground/80 lowercase",
+                  currentPath === "/profile" ? "text-foreground font-medium" : "text-foreground/60",
+                )}
+              >
+                profile
+              </Link>
+            </SignedIn>
           </nav>
         </div>
 
@@ -105,33 +102,18 @@ export function Header() {
           </Button>
 
           <ThemeToggle />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-                  <AvatarFallback>{currentUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
+          
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+          
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button variant="outline" size="sm">
+                sign in
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="lowercase">my account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/profile" className="lowercase">
-                  profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/vibes/my-vibes" className="lowercase">
-                  my vibes
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="lowercase">settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="lowercase">log out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </SignInButton>
+          </SignedOut>
         </div>
       </div>
 
@@ -148,26 +130,28 @@ export function Header() {
             >
               discover
             </Link>
-            <Link
-              to="/vibes/my-vibes"
-              className={cn(
-                "transition-colors hover:text-foreground/80 p-2 rounded-md lowercase",
-                currentPath === "/vibes/my-vibes" ? "bg-muted font-medium" : "",
-              )}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              my vibes
-            </Link>
-            <Link
-              to="/profile"
-              className={cn(
-                "transition-colors hover:text-foreground/80 p-2 rounded-md lowercase",
-                currentPath === "/profile" ? "bg-muted font-medium" : "",
-              )}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              profile
-            </Link>
+            <SignedIn>
+              <Link
+                to="/vibes/my-vibes"
+                className={cn(
+                  "transition-colors hover:text-foreground/80 p-2 rounded-md lowercase",
+                  currentPath === "/vibes/my-vibes" ? "bg-muted font-medium" : "",
+                )}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                my vibes
+              </Link>
+              <Link
+                to="/profile"
+                className={cn(
+                  "transition-colors hover:text-foreground/80 p-2 rounded-md lowercase",
+                  currentPath === "/profile" ? "bg-muted font-medium" : "",
+                )}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                profile
+              </Link>
+            </SignedIn>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input type="search" placeholder="search vibes..." className="w-full pl-8" />

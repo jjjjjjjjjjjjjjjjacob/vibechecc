@@ -1,0 +1,19 @@
+# Build outputs
+dist/
+build/
+.vinxi/
+.output/
+
+# Generated files
+convex/_generated/
+app.config.timestamp_*.js
+
+# Dependencies
+node_modules/
+
+# Lock files
+bun.lock
+yarn.lock
+
+# Logs
+*.log 

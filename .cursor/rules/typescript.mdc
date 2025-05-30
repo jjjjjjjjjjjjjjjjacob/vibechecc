@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+- Filenames should use `kebab-case` (e.g. `user-profile.tsx`)
+- Classes, components, and types should use `PascalCase` (e.g. `UserProfile`)
+- Variables & non-component functions should use `camelCase` (e.g. `isSignedIn`, `userProfileSignIn()`)

@@ -3,8 +3,8 @@ import invariant from 'tiny-invariant'
 
 import { Icon } from '../icons/icons'
 import { useCreateColumnMutation } from '../queries'
-import { CancelButton } from '~/components/CancelButton'
-import { SaveButton } from '~/components/SaveButton'
+import { CancelButton } from '@/components/cancel-button'
+import { SaveButton } from '@/components/save-button'
 
 export function NewColumn({
   boardId,

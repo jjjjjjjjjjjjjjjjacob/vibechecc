@@ -11,6 +11,8 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SignUpImport } from './routes/sign-up'
+import { Route as SignInImport } from './routes/sign-in'
 import { Route as ProfileImport } from './routes/profile'
 import { Route as IndexImport } from './routes/index'
 import { Route as VibesIndexImport } from './routes/vibes/index'
@@ -20,6 +22,18 @@ import { Route as VibesVibeIdImport } from './routes/vibes/$vibeId'
 import { Route as BoardsBoardIdImport } from './routes/boards.$boardId'
 
 // Create/Update Routes
+
+const SignUpRoute = SignUpImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SignInRoute = SignInImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const ProfileRoute = ProfileImport.update({
   id: '/profile',
@@ -81,6 +95,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileImport
       parentRoute: typeof rootRoute
     }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpImport
+      parentRoute: typeof rootRoute
+    }
     '/boards/$boardId': {
       id: '/boards/$boardId'
       path: '/boards/$boardId'
@@ -124,6 +152,8 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/boards/$boardId': typeof BoardsBoardIdRoute
   '/vibes/$vibeId': typeof VibesVibeIdRoute
   '/vibes/create': typeof VibesCreateRoute
@@ -134,6 +164,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/boards/$boardId': typeof BoardsBoardIdRoute
   '/vibes/$vibeId': typeof VibesVibeIdRoute
   '/vibes/create': typeof VibesCreateRoute
@@ -145,6 +177,8 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/boards/$boardId': typeof BoardsBoardIdRoute
   '/vibes/$vibeId': typeof VibesVibeIdRoute
   '/vibes/create': typeof VibesCreateRoute
@@ -157,6 +191,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/profile'
+    | '/sign-in'
+    | '/sign-up'
     | '/boards/$boardId'
     | '/vibes/$vibeId'
     | '/vibes/create'
@@ -166,6 +202,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/profile'
+    | '/sign-in'
+    | '/sign-up'
     | '/boards/$boardId'
     | '/vibes/$vibeId'
     | '/vibes/create'
@@ -175,6 +213,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/profile'
+    | '/sign-in'
+    | '/sign-up'
     | '/boards/$boardId'
     | '/vibes/$vibeId'
     | '/vibes/create'
@@ -186,6 +226,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProfileRoute: typeof ProfileRoute
+  SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
   BoardsBoardIdRoute: typeof BoardsBoardIdRoute
   VibesVibeIdRoute: typeof VibesVibeIdRoute
   VibesCreateRoute: typeof VibesCreateRoute
@@ -196,6 +238,8 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProfileRoute: ProfileRoute,
+  SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
   BoardsBoardIdRoute: BoardsBoardIdRoute,
   VibesVibeIdRoute: VibesVibeIdRoute,
   VibesCreateRoute: VibesCreateRoute,
@@ -215,6 +259,8 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/profile",
+        "/sign-in",
+        "/sign-up",
         "/boards/$boardId",
         "/vibes/$vibeId",
         "/vibes/create",
@@ -227,6 +273,12 @@ export const routeTree = rootRoute
     },
     "/profile": {
       "filePath": "profile.tsx"
+    },
+    "/sign-in": {
+      "filePath": "sign-in.tsx"
+    },
+    "/sign-up": {
+      "filePath": "sign-up.tsx"
     },
     "/boards/$boardId": {
       "filePath": "boards.$boardId.tsx"

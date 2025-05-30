@@ -4,10 +4,10 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../convex/_generated/api.js'
 import { useUpdateBoardMutation } from '../queries.js'
-import { NewColumn } from './NewColumn.js'
+import { NewColumn } from './new-column.js'
 import { Column as ColumnComponent } from './Column.js'
 import type { Column } from 'convex/schema.js'
-import { EditableText } from '~/components/EditableText.js'
+import { EditableText } from '@/components/editable-text.js'
 
 export function Board({ boardId }: { boardId: string }) {
   const newColumnAddedRef = useRef(false)

@@ -1,18 +1,40 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
-import { useCreateVibeMutation } from '~/queries'
-import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
-import { Textarea } from '~/components/ui/textarea'
-import { Label } from '~/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { useCreateVibeMutation } from '@/queries'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useUser } from '@clerk/tanstack-react-start'
+import { createServerFn } from '@tanstack/react-start'
+import { getAuth } from '@clerk/tanstack-react-start/server'
+import { getWebRequest } from '@tanstack/react-start/server'
+import { redirect } from '@tanstack/react-router'
+
+// Server function to check authentication
+const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
+  const request = getWebRequest()
+  if (!request) throw new Error('No request found')
+  const { userId } = await getAuth(request)
+
+  if (!userId) {
+    throw redirect({
+      to: '/sign-in',
+    })
+  }
+
+  return { userId }
+})
 
 export const Route = createFileRoute('/vibes/create')({
   component: CreateVibe,
+  beforeLoad: async () => await requireAuth(),
 })
 
 function CreateVibe() {
   const navigate = useNavigate()
+  const { user } = useUser()
   const [title, setTitle] = React.useState('')
   const [description, setDescription] = React.useState('')
   const [image, setImage] = React.useState('')
@@ -57,6 +79,11 @@ function CreateVibe() {
       return
     }
 
+    if (!user?.id) {
+      setError('You must be signed in to create a vibe')
+      return
+    }
+
     setIsSubmitting(true)
     setError('')
 
@@ -66,7 +93,7 @@ function CreateVibe() {
         description: description.trim(),
         image: image || undefined,
         tags: tags.length > 0 ? tags : undefined,
-        createdById: 'demo-user', // Use demo user ID for now
+        createdById: user.id, // Use actual user ID from Clerk
       })
       
       // Redirect to home page after successful creation
@@ -201,7 +228,7 @@ function CreateVibe() {
                         variant="ghost"
                         size="icon"
                         onClick={() => removeTag(tag)}
-                        className="ml-1 h-4 w-4 text-primary hover:text-primary/80"
+                        className="ml-1 h-4 w-4 p-0 hover:bg-destructive/20"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -222,7 +249,6 @@ function CreateVibe() {
                   ))}
                 </div>
                 <Input
-                  type="text"
                   id="tags"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
@@ -230,23 +256,25 @@ function CreateVibe() {
                   placeholder="add tags (press enter to add)"
                 />
                 <p className="text-sm text-muted-foreground">
-                  press enter to add a tag
+                  press enter to add a tag. tags help others discover your vibe.
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting ? 'creating vibe...' : 'create vibe'}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => navigate({ to: '/' })}
-                >
-                  cancel
-                </Button>
-                <Button
-                  type="submit"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'creating...' : 'create vibe'}
+                  cancel
                 </Button>
               </div>
             </form>

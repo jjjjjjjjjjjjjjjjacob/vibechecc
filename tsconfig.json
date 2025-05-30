@@ -15,9 +15,12 @@
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
+    "noEmit": true,
     "paths": {
-      "~/*": ["./src/*"]
-    },
-    "noEmit": true
-  }
+      "@/*": ["./src/*"]
+    }
+  },
+  "exclude": [
+    "vitest.setup.ts"
+  ]
 }

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Board } from '~/components/Board'
-import { Loader } from '~/components/Loader'
-import { boardQueries } from '~/queries'
+import { Board } from '@/components/board'
+import { Loader } from '@/components/loader'
+import { boardQueries } from '@/queries'
 
 export const Route = createFileRoute('/boards/$boardId')({
   component: Home,

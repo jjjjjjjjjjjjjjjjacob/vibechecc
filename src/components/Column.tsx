@@ -10,8 +10,8 @@ import {
   useUpdateCardMutation,
   useUpdateColumnMutation,
 } from '../queries'
-import { EditableText } from './EditableText'
-import { NewCard } from './NewCard'
+import { EditableText } from './editable-text'
+import { NewCard } from './new-card'
 import { Card } from './Card'
 import type { RenderedItem } from '../types'
 

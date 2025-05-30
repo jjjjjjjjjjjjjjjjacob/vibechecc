@@ -4,8 +4,8 @@ import invariant from 'tiny-invariant'
 import { ItemMutationFields } from '../types'
 import { useCreateItemMutation } from '../queries'
 import { itemSchema } from '../db/schema'
-import { SaveButton } from '~/components/SaveButton'
-import { CancelButton } from '~/components/CancelButton'
+import { SaveButton } from '@/components/save-button'
+import { CancelButton } from '@/components/cancel-button'
 
 export function NewCard({
   columnId,

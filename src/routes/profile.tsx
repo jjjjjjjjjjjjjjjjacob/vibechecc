@@ -1,23 +1,42 @@
 import { createFileRoute } from '@tanstack/react-router'
 import * as React from 'react'
-import { useUser, useUserVibes, useUpdateUserMutation } from '~/queries'
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
-import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
-import { VibeGrid } from '~/components/vibe-grid'
-import { CreateVibeButton } from '~/components/create-vibe-button'
+import { useUserVibes, useUpdateUserMutation } from '@/queries'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { VibeGrid } from '@/components/vibe-grid'
+import { CreateVibeButton } from '@/components/create-vibe-button'
+import { useUser } from '@clerk/tanstack-react-start'
+import { createServerFn } from '@tanstack/react-start'
+import { getAuth } from '@clerk/tanstack-react-start/server'
+import { getWebRequest } from '@tanstack/react-start/server'
+import { redirect } from '@tanstack/react-router'
+
+// Server function to check authentication
+const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
+  const request = getWebRequest()
+  if (!request) throw new Error('No request found')
+  const { userId } = await getAuth(request)
+
+  if (!userId) {
+    throw redirect({
+      to: '/sign-in',
+    })
+  }
+
+  return { userId }
+})
 
 export const Route = createFileRoute('/profile')({
   component: Profile,
+  beforeLoad: async () => await requireAuth(),
 })
 
 function Profile() {
-  // Using demo user for now
-  const userId = 'demo-user'
-  const { data: user, isLoading: userLoading, error: userError } = useUser(userId)
-  const { data: vibes, isLoading: vibesLoading } = useUserVibes(userId)
+  const { user, isLoaded } = useUser()
+  const { data: vibes, isLoading: vibesLoading } = useUserVibes(user?.id || '')
   const updateUserMutation = useUpdateUserMutation()
   
   const [name, setName] = React.useState('')
@@ -28,12 +47,12 @@ function Profile() {
   // Initialize form with user data when loaded
   React.useEffect(() => {
     if (user) {
-      setName(user.name)
-      setAvatar(user.avatar)
+      setName(user.fullName || user.firstName || '')
+      setAvatar(user.imageUrl || '')
     }
   }, [user])
   
-  if (userLoading) {
+  if (!isLoaded) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
@@ -43,7 +62,7 @@ function Profile() {
     )
   }
   
-  if (userError || !user) {
+  if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
@@ -71,10 +90,12 @@ function Profile() {
     setIsSaving(true)
     
     try {
-      await updateUserMutation.mutateAsync({
-        id: userId,
-        name: name.trim(),
-        avatar: avatar,
+      // Note: Clerk handles user profile updates differently
+      // You might want to use Clerk's user.update() method or 
+      // store additional profile data in your own database
+      await user.update({
+        firstName: name.split(' ')[0],
+        lastName: name.split(' ').slice(1).join(' '),
       })
       setIsEditing(false)
     } catch (error) {
@@ -83,6 +104,9 @@ function Profile() {
       setIsSaving(false)
     }
   }
+  
+  const userDisplayName = user.fullName || user.firstName || user.emailAddresses[0]?.emailAddress || 'User'
+  const userJoinDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -93,9 +117,9 @@ function Profile() {
               <div className="flex-shrink-0">
                 <div className="relative">
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src={avatar} alt={user.name} />
+                    <AvatarImage src={user.imageUrl} alt={userDisplayName} />
                     <AvatarFallback className="text-2xl">
-                      {user.name.substring(0, 2).toUpperCase()}
+                      {userDisplayName.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   {isEditing && (
@@ -160,8 +184,8 @@ function Profile() {
                       variant="outline"
                       onClick={() => {
                         setIsEditing(false)
-                        setName(user.name)
-                        setAvatar(user.avatar)
+                        setName(userDisplayName)
+                        setAvatar(user.imageUrl || '')
                       }}
                     >
                       cancel
@@ -170,9 +194,12 @@ function Profile() {
                 </form>
               ) : (
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold mb-2 lowercase">{user.name}</h1>
+                  <h1 className="text-2xl font-bold mb-2 lowercase">{userDisplayName}</h1>
+                  <p className="text-muted-foreground mb-2">
+                    {user.emailAddresses[0]?.emailAddress}
+                  </p>
                   <p className="text-muted-foreground mb-4">
-                    member since {new Date(user.joinDate).toLocaleDateString()}
+                    member since {userJoinDate}
                   </p>
                   <Button
                     variant="outline"

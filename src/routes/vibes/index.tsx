@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import * as React from 'react'
-import { useVibes } from '~/queries'
-import { VibeGrid } from '~/components/vibe-grid'
+import { useVibes } from '@/queries'
+import { VibeGrid } from '@/components/vibe-grid'
 
 export const Route = createFileRoute('/vibes/')({
   component: AllVibes,

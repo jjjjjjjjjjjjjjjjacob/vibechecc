@@ -1,18 +1,39 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import * as React from 'react'
-import { useUserVibes } from '~/queries'
-import { VibeGrid } from '~/components/vibe-grid'
-import { CreateVibeButton } from '~/components/create-vibe-button'
+import { useUserVibes } from '@/queries'
+import { VibeGrid } from '@/components/vibe-grid'
+import { CreateVibeButton } from '@/components/create-vibe-button'
+import { useUser } from '@clerk/tanstack-react-start'
+import { createServerFn } from '@tanstack/react-start'
+import { getAuth } from '@clerk/tanstack-react-start/server'
+import { getWebRequest } from '@tanstack/react-start/server'
+import { redirect } from '@tanstack/react-router'
+
+// Server function to check authentication
+const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
+  const request = getWebRequest()
+  if (!request) throw new Error('No request found')
+  const { userId } = await getAuth(request)
+
+  if (!userId) {
+    throw redirect({
+      to: '/sign-in',
+    })
+  }
+
+  return { userId }
+})
 
 export const Route = createFileRoute('/vibes/my-vibes')({
   component: MyVibes,
+  beforeLoad: async () => await requireAuth(),
 })
 
 function MyVibes() {
-  // Using demo user for now
-  const { data: vibes, isLoading, error } = useUserVibes('demo-user')
+  const { user, isLoaded } = useUser()
+  const { data: vibes, isLoading, error } = useUserVibes(user?.id || '')
 
-  if (isLoading) {
+  if (!isLoaded || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">

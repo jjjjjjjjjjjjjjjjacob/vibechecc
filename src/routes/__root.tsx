@@ -10,13 +10,13 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import * as React from 'react'
 import { Toaster } from 'react-hot-toast'
 import type { QueryClient } from '@tanstack/react-query'
-import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
-import { NotFound } from '~/components/NotFound'
-import { Header } from '~/components/header'
-import { ThemeProvider } from '~/components/theme-provider'
-import appCss from '~/styles/app.css?url'
-import { seo } from '~/utils/seo'
-import { Loader } from '~/components/Loader'
+import { DefaultCatchBoundary } from '@/components/default-catch-boundary'
+import { NotFound } from '@/components/not-found'
+import { Header } from '@/components/header'
+import { ThemeProvider } from '@/components/theme-provider'
+import appCss from '@/styles/app.css?url'
+import { seo } from '@/utils/seo'
+import { ClerkProvider } from '@clerk/tanstack-react-start'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -84,35 +84,46 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body className="min-h-screen bg-background text-foreground">
-        <ThemeProvider>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <LoadingIndicator />
-            
-            <main className="flex-1">
-              {children}
-            </main>
-            
-            <footer className="border-t bg-background py-6">
-              <div className="container mx-auto px-4">
-                <p className="text-center text-muted-foreground text-sm">
-                  © {new Date().getFullYear()} vibecheck. all rights reserved.
-                </p>
-              </div>
-            </footer>
-            <Toaster />
-          </div>
-        </ThemeProvider>
-        <ReactQueryDevtools />
-        <TanStackRouterDevtools position="bottom-right" />
-        <Scripts />
-      </body>
-    </html>
+    <ClerkProvider
+      appearance={{
+        baseTheme: undefined, // Use this to set a base theme (e.g., dark)
+        elements: {
+          card: 'bg-card shadow-lg',
+          buttonPrimary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+          footerActionLink: 'text-primary hover:text-primary/90',
+        }
+      }}
+    >
+      <html lang="en">
+        <head>
+          <HeadContent />
+        </head>
+        <body className="min-h-screen bg-background text-foreground">
+          <ThemeProvider>
+            <div className="min-h-screen flex flex-col">
+              <Header />
+              <LoadingIndicator />
+              
+              <main className="flex-1">
+                {children}
+              </main>
+              
+              <footer className="border-t bg-background py-6">
+                <div className="container mx-auto px-4">
+                  <p className="text-center text-muted-foreground text-sm">
+                    © {new Date().getFullYear()} vibecheck. all rights reserved.
+                  </p>
+                </div>
+              </footer>
+              <Toaster />
+            </div>
+          </ThemeProvider>
+          <ReactQueryDevtools />
+          <TanStackRouterDevtools position="bottom-right" />
+          <Scripts />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
 

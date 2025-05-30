@@ -1,16 +1,13 @@
 import type { User, Vibe } from "../types"
 
-// Current user
-export const currentUser: User = {
-  id: "user-1",
-  name: "Alex Johnson",
-  avatar: "/placeholder.svg?height=100&width=100",
-  joinDate: "2023-01-15T00:00:00Z",
-}
-
-// Sample users
+// Sample users - these would come from your database in a real app
 const users: User[] = [
-  currentUser,
+  {
+    id: "user-1",
+    name: "Alex Johnson",
+    avatar: "/placeholder.svg?height=100&width=100",
+    joinDate: "2023-01-15T00:00:00Z",
+  },
   {
     id: "user-2",
     name: "Sofia Davis",
@@ -197,4 +194,7 @@ export const sampleVibes: Vibe[] = [
       { emoji: "⏱️", count: 15, users: ["user-5"] },
     ],
   },
-] 
+]
+
+// Export users for reference if needed
+export { users } 
