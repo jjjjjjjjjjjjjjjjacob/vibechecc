@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: *.ts,*.tsx,*.js,*.jsx
 alwaysApply: false
 ---
 - Filenames should use `kebab-case` (e.g. `user-profile.tsx`)

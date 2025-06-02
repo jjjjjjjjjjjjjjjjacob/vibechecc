@@ -1,5 +1,5 @@
 import { convexTest } from 'convex-test';
-import { modules } from '../vitest.setup'
+import { modules } from '../vitest.setup';
 import { describe, it, expect } from 'vitest';
 import schema from './schema'; // Your schema definition
 import { api } from './_generated/api'; // Typed API methods
@@ -31,7 +31,7 @@ describe('Vibes Mutations', () => {
       // To query by the custom `id` we generate, we need to adjust or use `_id`.
       // Let's assume the `create` mutation returns the Convex `_id` which is typical.
       const newVibe = await t.query(api.vibes.getById, { id: vibeId }); // Assuming getById can fetch by _id or custom id
-      
+
       // If getById fetches by the *custom* ID field (`id`) we set in the mutation,
       // and `api.vibes.create` returns that custom ID, then the above is fine.
       // If `api.vibes.create` returns the Convex `_id`, and `getById` expects the *custom* `id`,
@@ -43,13 +43,16 @@ describe('Vibes Mutations', () => {
 
       // For a more direct test of creation, let's fetch all vibes by the creator
       // and check the last one, or query directly using the returned _id if possible via another helper or direct db access.
-      
+
       // Simpler check: query the database directly for the vibe using the known data
-      const allVibesByCreator = await t.query(api.vibes.getByUser, { userId: mockVibeData.createdById });
-      const createdVibe = allVibesByCreator.find(v => 
-        v.title === mockVibeData.title && 
-        v.description === mockVibeData.description &&
-        v.createdById === mockVibeData.createdById
+      const allVibesByCreator = await t.query(api.vibes.getByUser, {
+        userId: mockVibeData.createdById,
+      });
+      const createdVibe = allVibesByCreator.find(
+        (v) =>
+          v.title === mockVibeData.title &&
+          v.description === mockVibeData.description &&
+          v.createdById === mockVibeData.createdById
       );
 
       expect(createdVibe).toBeDefined();
@@ -58,7 +61,9 @@ describe('Vibes Mutations', () => {
         expect(createdVibe.description).toBe(mockVibeData.description);
         expect(createdVibe.createdById).toBe(mockVibeData.createdById);
         expect(createdVibe.image).toBe(mockVibeData.image);
-        expect(createdVibe.tags).toEqual(expect.arrayContaining(mockVibeData.tags));
+        expect(createdVibe.tags).toEqual(
+          expect.arrayContaining(mockVibeData.tags)
+        );
         expect(createdVibe.id).toBeTypeOf('string'); // The custom ID field
       }
     });
@@ -74,8 +79,12 @@ describe('Vibes Mutations', () => {
       const vibeId = await t.mutation(api.vibes.create, mockVibeDataMinimal);
       expect(vibeId).toBeTypeOf('string');
 
-      const allVibesByCreator = await t.query(api.vibes.getByUser, { userId: mockVibeDataMinimal.createdById });
-      const createdVibe = allVibesByCreator.find(v => v.title === mockVibeDataMinimal.title);
+      const allVibesByCreator = await t.query(api.vibes.getByUser, {
+        userId: mockVibeDataMinimal.createdById,
+      });
+      const createdVibe = allVibesByCreator.find(
+        (v) => v.title === mockVibeDataMinimal.title
+      );
 
       expect(createdVibe).toBeDefined();
       if (createdVibe) {
@@ -84,8 +93,8 @@ describe('Vibes Mutations', () => {
         expect(createdVibe.createdById).toBe(mockVibeDataMinimal.createdById);
         expect(createdVibe.image).toBeUndefined();
         // The schema defines tags as optional(array), so if not provided, it defaults to [] in the mutation.
-        expect(createdVibe.tags).toEqual([]); 
+        expect(createdVibe.tags).toEqual([]);
       }
     });
   });
-}); 
+});

@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { GlobalRegistrator } from '@happy-dom/global-registrator';
 
-GlobalRegistrator.register(); 
+GlobalRegistrator.register();
 
-export const modules = import.meta.glob("./**/!(*.*.*)*.*s");
+export const modules = import.meta.glob('./**/!(*.*.*)*.*s');

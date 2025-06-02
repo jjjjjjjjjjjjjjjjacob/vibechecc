@@ -1,25 +1,25 @@
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools/production'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools/production';
 import {
   Outlet,
   createRootRouteWithContext,
   useRouterState,
   HeadContent,
   Scripts,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import * as React from 'react'
-import { Toaster } from 'react-hot-toast'
-import type { QueryClient } from '@tanstack/react-query'
-import { DefaultCatchBoundary } from '@/components/default-catch-boundary'
-import { NotFound } from '@/components/not-found'
-import { Header } from '@/components/header'
-import { ThemeProvider } from '@/components/theme-provider'
-import appCss from '@/styles/app.css?url'
-import { seo } from '@/utils/seo'
-import { ClerkProvider } from '@clerk/tanstack-react-start'
+} from '@tanstack/react-router';
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import * as React from 'react';
+import { Toaster } from 'react-hot-toast';
+import type { QueryClient } from '@tanstack/react-query';
+import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
+import { NotFound } from '@/components/not-found';
+import { Header } from '@/components/header';
+import { ThemeProvider } from '@/components/theme-provider';
+import appCss from '@/styles/app.css?url';
+import { seo } from '@/utils/seo';
+import { ClerkProvider } from '@clerk/tanstack-react-start';
 
 export const Route = createRootRouteWithContext<{
-  queryClient: QueryClient
+  queryClient: QueryClient;
 }>()({
   head: () => ({
     meta: [
@@ -57,10 +57,10 @@ export const Route = createRootRouteWithContext<{
       { rel: 'manifest', href: '/site.webmanifest' },
       { rel: 'icon', href: '/favicon.ico' },
       // Google Font for our app
-      { 
+      {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
-      }
+        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+      },
     ],
   }),
   errorComponent: (props) => {
@@ -68,50 +68,49 @@ export const Route = createRootRouteWithContext<{
       <RootDocument>
         <DefaultCatchBoundary {...props} />
       </RootDocument>
-    )
+    );
   },
   notFoundComponent: () => <NotFound />,
   component: RootComponent,
-})
+});
 
 function RootComponent() {
   return (
     <RootDocument>
       <Outlet />
     </RootDocument>
-  )
+  );
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: undefined, // Use this to set a base theme (e.g., dark)
+        baseTheme: undefined,
         elements: {
-          card: 'bg-card shadow-lg',
-          buttonPrimary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+          card: 'bg-card shadow-lg text-primary',
+          buttonPrimary: 'bg-card text-primary hover:bg-card/90',
           footerActionLink: 'text-primary hover:text-primary/90',
-        }
+        },
       }}
     >
       <html lang="en">
         <head>
           <HeadContent />
         </head>
-        <body className="min-h-screen bg-background text-foreground">
+        <body className="bg-background text-foreground min-h-screen">
           <ThemeProvider>
-            <div className="min-h-screen flex flex-col">
+            <div className="flex min-h-screen flex-col">
               <Header />
               <LoadingIndicator />
-              
-              <main className="flex-1">
-                {children}
-              </main>
-              
-              <footer className="border-t bg-background py-6">
+
+              <main className="flex-1">{children}</main>
+
+              <footer className="bg-background border-t py-6">
                 <div className="container mx-auto px-4">
-                  <p className="text-center text-muted-foreground text-sm">
-                    © {new Date().getFullYear()} vibecheck. all rights reserved.
+                  <p className="text-muted-foreground text-center text-sm">
+                    © {new Date().getFullYear()} vibecheck. all rights
+                    reserved.
                   </p>
                 </div>
               </footer>
@@ -124,18 +123,18 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         </body>
       </html>
     </ClerkProvider>
-  )
+  );
 }
 
 function LoadingIndicator() {
-  const isLoading = useRouterState({ select: (s) => s.isLoading })
+  const isLoading = useRouterState({ select: (s) => s.isLoading });
   return (
     <div
-      className={`fixed top-16 left-0 right-0 h-1 z-50 transition-all duration-300 ${
+      className={`fixed top-16 right-0 left-0 z-50 h-1 transition-all duration-300 ${
         isLoading ? `opacity-100 delay-300` : `opacity-0 delay-0`
       }`}
     >
-      <div className="h-full bg-gradient-to-r from-pink-500 to-orange-500 animate-pulse" />
+      <div className="h-full animate-pulse bg-gradient-to-r from-pink-500 to-orange-500" />
     </div>
-  )
+  );
 }

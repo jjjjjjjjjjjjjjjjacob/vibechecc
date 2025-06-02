@@ -7,8 +7,8 @@ export const Route = createFileRoute('/sign-in')({
 
 function SignInPage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+    <div className="bg-background flex min-h-screen flex-col items-center justify-center">
       <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
     </div>
   );
-} 
+}

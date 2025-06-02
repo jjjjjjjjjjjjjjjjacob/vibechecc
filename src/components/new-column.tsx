@@ -1,44 +1,44 @@
-import { useRef, useState } from 'react'
-import invariant from 'tiny-invariant'
+import { useRef, useState } from 'react';
+import invariant from 'tiny-invariant';
 
-import { Icon } from '../icons/icons'
-import { useCreateColumnMutation } from '../queries'
-import { CancelButton } from '@/components/cancel-button'
-import { SaveButton } from '@/components/save-button'
+import { Icon } from '../icons/icons';
+import { useCreateColumnMutation } from '../queries';
+import { CancelButton } from '@/components/cancel-button';
+import { SaveButton } from '@/components/save-button';
 
 export function NewColumn({
   boardId,
   editInitially,
   onNewColumnAdded,
 }: {
-  boardId: string
-  editInitially: boolean
-  onNewColumnAdded: () => void
+  boardId: string;
+  editInitially: boolean;
+  onNewColumnAdded: () => void;
 }) {
-  const [editing, setEditing] = useState(editInitially)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [editing, setEditing] = useState(editInitially);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const newColumnMutation = useCreateColumnMutation()
+  const newColumnMutation = useCreateColumnMutation();
 
   return editing ? (
     <form
-      className="ml-2 p-2 flex-shrink-0 flex flex-col gap-5 overflow-hidden max-h-full w-80 border rounded-xl shadow bg-slate-100"
+      className="ml-2 flex max-h-full w-80 flex-shrink-0 flex-col gap-5 overflow-hidden rounded-xl border bg-slate-100 p-2 shadow"
       onSubmit={(event) => {
-        event.preventDefault()
-        invariant(inputRef.current, 'missing input ref')
+        event.preventDefault();
+        invariant(inputRef.current, 'missing input ref');
 
         newColumnMutation.mutate({
           boardId,
           name: inputRef.current.value,
-        })
+        });
 
-        inputRef.current.value = ''
+        inputRef.current.value = '';
 
-        onNewColumnAdded()
+        onNewColumnAdded();
       }}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
-          setEditing(false)
+          setEditing(false);
         }
       }}
     >
@@ -49,7 +49,7 @@ export function NewColumn({
         type="text"
         name="columnName"
         autoComplete="off"
-        className="border border-slate-400 w-full rounded-lg py-1 px-2 font-medium text-black"
+        className="w-full rounded-lg border border-slate-400 px-2 py-1 font-medium text-black"
       />
       <div className="flex justify-between">
         <SaveButton>Save Column</SaveButton>
@@ -59,12 +59,12 @@ export function NewColumn({
   ) : (
     <button
       onClick={() => {
-        setEditing(true)
+        setEditing(true);
       }}
       aria-label="Add new column"
-      className="ml-2 flex-shrink-0 flex justify-center h-16 w-16 bg-black hover:bg-white bg-opacity-10 hover:bg-opacity-5 rounded-xl"
+      className="bg-opacity-10 hover:bg-opacity-5 ml-2 flex h-16 w-16 flex-shrink-0 justify-center rounded-xl bg-black hover:bg-white"
     >
       <Icon name="plus" size="xl" />
     </button>
-  )
+  );
 }

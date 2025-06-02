@@ -1,39 +1,43 @@
-import { createFileRoute } from '@tanstack/react-router'
-import * as React from 'react'
-import { useVibes } from '@/queries'
-import { VibeGrid } from '@/components/vibe-grid'
+import { createFileRoute } from '@tanstack/react-router';
+import * as React from 'react';
+import { useVibes } from '@/queries';
+import { VibeGrid } from '@/components/vibe-grid';
+import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const Route = createFileRoute('/vibes/')({
   component: AllVibes,
-})
+});
 
 function AllVibes() {
-  const { data: vibes, isLoading, error } = useVibes()
+  const { data: vibes, isLoading, error } = useVibes();
 
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="mb-8">
+          <Skeleton className="mb-2 h-9 w-32" />
+          <Skeleton className="h-5 w-80" />
         </div>
+        <VibeGridSkeleton />
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
+        <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-4 py-3">
           <p>failed to load vibes. please try again later.</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 lowercase">all vibes</h1>
+        <h1 className="mb-2 text-3xl font-bold lowercase">all vibes</h1>
         <p className="text-muted-foreground">
           discover and explore all vibes shared by our community.
         </p>
@@ -41,7 +45,5 @@ function AllVibes() {
 
       <VibeGrid vibes={vibes || []} />
     </div>
-  )
+  );
 }
-
- 

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 // Zod is necessary for client side parsing.
 
@@ -9,6 +9,6 @@ export const itemSchema = z.object({
   order: z.coerce.number(),
   columnId: z.string().uuid(),
   boardId: z.coerce.string(),
-})
+});
 
-export const deleteItemSchema = itemSchema.pick({ id: true, boardId: true })
+export const deleteItemSchema = itemSchema.pick({ id: true, boardId: true });

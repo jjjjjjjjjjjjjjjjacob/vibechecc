@@ -1,91 +1,91 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import * as React from 'react'
-import { useCreateVibeMutation } from '@/queries'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useUser } from '@clerk/tanstack-react-start'
-import { createServerFn } from '@tanstack/react-start'
-import { getAuth } from '@clerk/tanstack-react-start/server'
-import { getWebRequest } from '@tanstack/react-start/server'
-import { redirect } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import * as React from 'react';
+import { useCreateVibeMutation } from '@/queries';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser } from '@clerk/tanstack-react-start';
+import { createServerFn } from '@tanstack/react-start';
+import { getAuth } from '@clerk/tanstack-react-start/server';
+import { getWebRequest } from '@tanstack/react-start/server';
+import { redirect } from '@tanstack/react-router';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
-  const request = getWebRequest()
-  if (!request) throw new Error('No request found')
-  const { userId } = await getAuth(request)
+  const request = getWebRequest();
+  if (!request) throw new Error('No request found');
+  const { userId } = await getAuth(request);
 
   if (!userId) {
     throw redirect({
       to: '/sign-in',
-    })
+    });
   }
 
-  return { userId }
-})
+  return { userId };
+});
 
 export const Route = createFileRoute('/vibes/create')({
   component: CreateVibe,
   beforeLoad: async () => await requireAuth(),
-})
+});
 
 function CreateVibe() {
-  const navigate = useNavigate()
-  const { user } = useUser()
-  const [title, setTitle] = React.useState('')
-  const [description, setDescription] = React.useState('')
-  const [image, setImage] = React.useState('')
-  const [tags, setTags] = React.useState<string[]>([])
-  const [tagInput, setTagInput] = React.useState('')
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [error, setError] = React.useState('')
-  const createVibeMutation = useCreateVibeMutation()
+  const navigate = useNavigate();
+  const { user } = useUser();
+  const [title, setTitle] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  const [image, setImage] = React.useState('');
+  const [tags, setTags] = React.useState<string[]>([]);
+  const [tagInput, setTagInput] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const createVibeMutation = useCreateVibeMutation();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      const reader = new FileReader()
+      const file = e.target.files[0];
+      const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
-          setImage(e.target.result as string)
+          setImage(e.target.result as string);
         }
-      }
-      reader.readAsDataURL(file)
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      e.preventDefault()
+      e.preventDefault();
       if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()])
-        setTagInput('')
+        setTags([...tags, tagInput.trim()]);
+        setTagInput('');
       }
     }
-  }
+  };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove))
-  }
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!title.trim() || !description.trim()) {
-      setError('Title and description are required')
-      return
+      setError('Title and description are required');
+      return;
     }
 
     if (!user?.id) {
-      setError('You must be signed in to create a vibe')
-      return
+      setError('You must be signed in to create a vibe');
+      return;
     }
 
-    setIsSubmitting(true)
-    setError('')
+    setIsSubmitting(true);
+    setError('');
 
     try {
       await createVibeMutation.mutateAsync({
@@ -94,31 +94,31 @@ function CreateVibe() {
         image: image || undefined,
         tags: tags.length > 0 ? tags : undefined,
         createdById: user.id, // Use actual user ID from Clerk
-      })
-      
+      });
+
       // Redirect to home page after successful creation
-      navigate({ to: '/' })
+      navigate({ to: '/' });
     } catch (error) {
       if (error instanceof Error) {
-        setError(error.message)
+        setError(error.message);
       } else {
-        setError('An error occurred while creating your vibe')
+        setError('An error occurred while creating your vibe');
       }
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 lowercase">create a new vibe</h1>
-        
+      <div className="mx-auto max-w-2xl">
+        <h1 className="mb-6 text-3xl font-bold lowercase">create a new vibe</h1>
+
         {error && (
-          <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg mb-4">
+          <div className="bg-destructive/10 border-destructive/20 text-destructive mb-4 rounded-lg border px-4 py-3">
             <p>{error}</p>
           </div>
         )}
-        
+
         <Card>
           <CardHeader>
             <CardTitle className="lowercase">vibe details</CardTitle>
@@ -151,10 +151,10 @@ function CreateVibe() {
               <div className="space-y-2">
                 <Label htmlFor="image">image</Label>
                 <div className="flex items-center space-x-4">
-                  <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-input rounded-lg cursor-pointer hover:border-primary transition-colors">
+                  <label className="border-input hover:border-primary flex h-32 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors">
                     <div className="space-y-1 text-center">
                       <svg
-                        className="mx-auto h-12 w-12 text-muted-foreground"
+                        className="text-muted-foreground mx-auto h-12 w-12"
                         stroke="currentColor"
                         fill="none"
                         viewBox="0 0 48 48"
@@ -167,8 +167,9 @@ function CreateVibe() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium">click to upload</span> or drag and drop
+                      <div className="text-muted-foreground text-sm">
+                        <span className="font-medium">click to upload</span> or
+                        drag and drop
                       </div>
                     </div>
                     <input
@@ -179,9 +180,9 @@ function CreateVibe() {
                       className="hidden"
                     />
                   </label>
-                  
+
                   {image && (
-                    <div className="relative h-32 w-32 rounded-lg overflow-hidden">
+                    <div className="relative h-32 w-32 overflow-hidden rounded-lg">
                       <img
                         src={image}
                         alt="Preview"
@@ -216,11 +217,11 @@ function CreateVibe() {
 
               <div className="space-y-2">
                 <Label htmlFor="tags">tags</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="mb-2 flex flex-wrap gap-2">
                   {tags.map((tag) => (
                     <div
                       key={tag}
-                      className="bg-primary/10 text-primary px-2 py-1 rounded-full text-sm flex items-center"
+                      className="bg-primary/10 text-primary flex items-center rounded-full px-2 py-1 text-sm"
                     >
                       #{tag}
                       <Button
@@ -228,7 +229,7 @@ function CreateVibe() {
                         variant="ghost"
                         size="icon"
                         onClick={() => removeTag(tag)}
-                        className="ml-1 h-4 w-4 p-0 hover:bg-destructive/20"
+                        className="hover:bg-destructive/20 ml-1 h-4 w-4 p-0"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -255,7 +256,7 @@ function CreateVibe() {
                   onKeyDown={handleTagKeyDown}
                   placeholder="add tags (press enter to add)"
                 />
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   press enter to add a tag. tags help others discover your vibe.
                 </p>
               </div>
@@ -282,5 +283,5 @@ function CreateVibe() {
         </Card>
       </div>
     </div>
-  )
-} 
+  );
+}

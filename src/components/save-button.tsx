@@ -1,4 +1,4 @@
-import { forwardRef } from 'react'
+import { forwardRef } from 'react';
 
 export const SaveButton = forwardRef<
   HTMLButtonElement,
@@ -13,7 +13,7 @@ export const SaveButton = forwardRef<
       // https://bugs.webkit.org/show_bug.cgi?id=22261
       tabIndex={0}
       {...props}
-      className="text-sm rounded-lg text-left p-2 font-medium text-white bg-blue-500"
+      className="rounded-lg bg-blue-500 p-2 text-left text-sm font-medium text-white"
     />
-  )
-})
+  );
+});

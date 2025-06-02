@@ -20,7 +20,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "exclude": [
-    "vitest.setup.ts"
-  ]
+  "exclude": ["vitest.setup.ts"]
 }
