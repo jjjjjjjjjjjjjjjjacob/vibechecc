@@ -1,24 +1,30 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as React from 'react';
-import { useVibes } from '@/queries';
+import { useVibes, useAllTags, useVibesByTag, useTopRatedVibes } from '@/queries';
 import { VibeGrid } from '@/components/vibe-grid';
 import { VibeCategoryRow } from '@/components/vibe-category-row';
 import { CreateVibeButton } from '@/components/create-vibe-button';
 import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import { HomepageSkeleton } from '@/components/ui/homepage-skeleton';
+import { VibeCategoryRowSkeleton } from '@/components/ui/vibe-category-row-skeleton';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
 
 function Home() {
-  const { data: vibes, isLoading, error } = useVibes();
+  const { data: vibes, isLoading: vibesLoading, error: vibesError } = useVibes();
+  const { data: allTags, isLoading: tagsLoading } = useAllTags();
+  const { data: topRatedVibes, isLoading: topRatedLoading } = useTopRatedVibes(10);
 
-  if (isLoading) {
+  // Get vibes for the most popular tags (top 6 tags)
+  const popularTags = allTags?.slice(0, 6) || [];
+  
+  if (vibesLoading) {
     return <HomepageSkeleton />;
   }
 
-  if (error) {
+  if (vibesError) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-4 py-3">
@@ -35,8 +41,8 @@ function Home() {
     return true;
   });
 
-  const featuredVibes = safeVibes.slice(0, 4);
-  const recentVibes = safeVibes.slice(0, 8);
+  const featuredVibes = safeVibes.slice(0, 8);
+  const recentVibes = safeVibes.slice(0, 12);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -67,18 +73,55 @@ function Home() {
       </section>
 
       {/* Featured Vibes */}
-      <VibeCategoryRow title="featured vibes" vibes={featuredVibes} />
+      <VibeCategoryRow title="featured vibes" vibes={featuredVibes} priority />
+
+      {/* Top Rated Vibes */}
+      {topRatedLoading ? (
+        <VibeCategoryRowSkeleton />
+      ) : (
+        topRatedVibes && topRatedVibes.length > 0 && (
+          <VibeCategoryRow title="top rated" vibes={topRatedVibes} />
+        )
+      )}
 
       {/* Recent Vibes */}
-      <section className="mb-12">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold lowercase">recent vibes</h2>
-          <Link to="/vibes" className="text-primary lowercase hover:underline">
-            view all
-          </Link>
-        </div>
-        <VibeGrid vibes={recentVibes} />
+      <VibeCategoryRow title="trending now" vibes={recentVibes} />
+
+      {/* Tag-based Categories */}
+      {!tagsLoading && popularTags.map((tagData) => (
+        <TagBasedSection key={tagData.tag} tag={tagData.tag} />
+      ))}
+
+      {/* Show all vibes link */}
+      <section className="mt-12 text-center">
+        <Link to="/vibes" className="text-primary lowercase hover:underline text-lg">
+          explore all vibes →
+        </Link>
       </section>
     </div>
+  );
+}
+
+// Component for tag-based sections
+function TagBasedSection({ tag }: { tag: string }) {
+  const { data: tagVibes, isLoading } = useVibesByTag(tag, 10);
+
+  if (isLoading) {
+    return <VibeCategoryRowSkeleton />;
+  }
+
+  // Only show sections with at least 3 vibes for a good experience
+  if (!tagVibes || tagVibes.length < 3) {
+    return null;
+  }
+
+  // Capitalize tag name for better display
+  const displayTitle = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+
+  return (
+    <VibeCategoryRow 
+      title={`${displayTitle} vibes`} 
+      vibes={tagVibes} 
+    />
   );
 }

@@ -9,6 +9,9 @@ import { useState } from 'react';
 import { EmojiReactions } from './emoji-reaction';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
+import { useAddRatingMutation } from '@/queries';
+import toast from 'react-hot-toast';
+import { computeUserDisplayName, getUserAvatarUrl, getUserInitials } from '../utils/user-utils';
 import type { Vibe, EmojiReaction } from '../types';
 
 interface VibeCardProps {
@@ -22,12 +25,14 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
   const [reactions, setReactions] = useState<EmojiReaction[]>(
     vibe.reactions || []
   );
+  const [userRating, setUserRating] = useState(0);
   const { user } = useUser();
   const { trackEvents } = usePostHog();
+  const addRatingMutation = useAddRatingMutation();
 
-  // Calculate average rating
+  // Calculate average rating with null-safe check
   const averageRating =
-    vibe.ratings.length > 0
+    vibe.ratings && vibe.ratings.length > 0
       ? vibe.ratings.reduce((sum, r) => sum + r.rating, 0) / vibe.ratings.length
       : 0;
 
@@ -89,6 +94,33 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
 
     return [...new Set(keywords)]; // Remove duplicates
   }, [vibe.title, vibe.description]);
+
+  // Handle quick rating
+  const handleRating = async (rating: number) => {
+    if (preview || !user?.id) return;
+
+    setUserRating(rating);
+
+    try {
+      await addRatingMutation.mutateAsync({
+        vibeId: vibe.id,
+        userId: user.id,
+        rating,
+      });
+
+      toast.success(`quick rated ${rating} circle${rating === 1 ? '' : 's'}!`, {
+        duration: 2000,
+        icon: '⚡',
+      });
+    } catch (error) {
+      console.error('Failed to submit rating:', error);
+      toast.error('failed to rate vibe. please try again.', {
+        duration: 2000,
+        icon: '❌',
+      });
+      setUserRating(0); // Reset on error
+    }
+  };
 
   // Handle emoji reactions
   const handleReact = (emoji: string) => {
@@ -204,15 +236,15 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                   <>
                     <Avatar className="h-6 w-6">
                       <AvatarImage
-                        src={vibe.createdBy.avatar}
-                        alt={vibe.createdBy.username}
+                        src={getUserAvatarUrl(vibe.createdBy)}
+                        alt={computeUserDisplayName(vibe.createdBy)}
                       />
                       <AvatarFallback>
-                        {vibe.createdBy.username.substring(0, 2).toUpperCase()}
+                        {getUserInitials(vibe.createdBy)}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-muted-foreground text-xs">
-                      {vibe.createdBy.username}
+                      {computeUserDisplayName(vibe.createdBy)}
                     </span>
                   </>
                 ) : (
@@ -223,12 +255,26 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
               </div>
 
               <div className="flex items-center gap-1">
-                <StarRating value={averageRating} readOnly size="sm" />
+                <div
+                  onClick={(e) => {
+                    if (!preview) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
+                >
+                  <StarRating
+                    value={userRating || averageRating}
+                    onChange={!preview ? handleRating : undefined}
+                    readOnly={preview}
+                    size="sm"
+                  />
+                </div>
                 <span className="text-xs font-medium">
                   {averageRating > 0 ? averageRating.toFixed(1) : '-'}
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  ({vibe.ratings.length})
+                  ({vibe.ratings?.length || 0})
                 </span>
               </div>
             </div>
@@ -311,15 +357,15 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                   <>
                     <Avatar className="h-6 w-6">
                       <AvatarImage
-                        src={vibe.createdBy.avatar}
-                        alt={vibe.createdBy.username}
+                        src={getUserAvatarUrl(vibe.createdBy)}
+                        alt={computeUserDisplayName(vibe.createdBy)}
                       />
                       <AvatarFallback>
-                        {vibe.createdBy.username.substring(0, 2).toUpperCase()}
+                        {getUserInitials(vibe.createdBy)}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-muted-foreground text-xs">
-                      {vibe.createdBy.username}
+                      {computeUserDisplayName(vibe.createdBy)}
                     </span>
                   </>
                 ) : (
@@ -330,12 +376,26 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
               </div>
 
               <div className="flex items-center gap-1">
-                <StarRating value={averageRating} readOnly size="sm" />
+                <div
+                  onClick={(e) => {
+                    if (!preview) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
+                >
+                  <StarRating
+                    value={userRating || averageRating}
+                    onChange={!preview ? handleRating : undefined}
+                    readOnly={preview}
+                    size="sm"
+                  />
+                </div>
                 <span className="text-xs font-medium">
                   {averageRating > 0 ? averageRating.toFixed(1) : '-'}
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  ({vibe.ratings.length})
+                  ({vibe.ratings?.length || 0})
                 </span>
               </div>
             </div>

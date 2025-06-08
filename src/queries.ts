@@ -130,9 +130,14 @@ export function useUpdateColumnMutation() {
 
 // VIBECHECK QUERIES
 
-// Query to get all vibes
+// Query to get all vibes (simple version for performance)
 export function useVibes() {
-  return useQuery(convexQuery(api.vibes.getAll, {}));
+  return useQuery(convexQuery(api.vibes.getAllSimple, {}));
+}
+
+// Query to get paginated vibes with full details
+export function useVibesPaginated(limit?: number, cursor?: string) {
+  return useQuery(convexQuery(api.vibes.getAll, { limit, cursor }));
 }
 
 // Query to get a vibe by ID
@@ -197,6 +202,11 @@ export function useUser(id: string) {
   });
 }
 
+// Query to get current user from Convex
+export function useCurrentUser() {
+  return useQuery(convexQuery(api.users.current, {}));
+}
+
 // Mutation to create a user
 export function useCreateUserMutation() {
   const queryClient = useQueryClient();
@@ -217,4 +227,33 @@ export function useUpdateUserMutation() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
+}
+
+// Mutation to update user profile (new schema)
+export function useUpdateProfileMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: useConvexMutation(api.users.updateProfile),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+}
+
+// Query to get vibes by tag
+export function useVibesByTag(tag: string, limit?: number) {
+  return useQuery({
+    ...convexQuery(api.vibes.getByTag, { tag, limit }),
+    enabled: !!tag,
+  });
+}
+
+// Query to get all available tags
+export function useAllTags() {
+  return useQuery(convexQuery(api.vibes.getAllTags, {}));
+}
+
+// Query to get top-rated vibes
+export function useTopRatedVibes(limit?: number) {
+  return useQuery(convexQuery(api.vibes.getTopRated, { limit }));
 }

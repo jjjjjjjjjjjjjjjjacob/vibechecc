@@ -14,6 +14,9 @@ import { StarRating } from '@/components/star-rating';
 import { EmojiReactions } from '@/components/emoji-reaction';
 import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
 import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
+import { computeUserDisplayName, getUserAvatarUrl, getUserInitials } from '@/utils/user-utils';
+import { useUser } from '@clerk/tanstack-react-start';
+import toast from 'react-hot-toast';
 
 export const Route = createFileRoute('/vibes/$vibeId')({
   component: VibePage,
@@ -24,6 +27,7 @@ function VibePage() {
   const { data: vibe, isLoading, error } = useVibe(vibeId);
   const [rating, setRating] = React.useState(0);
   const [review, setReview] = React.useState('');
+  const { user } = useUser();
   const addRatingMutation = useAddRatingMutation();
   const reactToVibeMutation = useReactToVibeMutation();
 
@@ -97,8 +101,21 @@ function VibePage() {
       });
       setReview('');
       // We don't reset rating to allow the user to see what they rated
+      
+      // Show success toast
+      toast.success(
+        `vibe rated ${rating} circle${rating === 1 ? '' : 's'}! ${review.trim() ? 'review submitted.' : ''}`,
+        {
+          duration: 3000,
+          icon: '✨',
+        }
+      );
     } catch (error) {
       console.error('Failed to submit rating:', error);
+      toast.error('failed to submit rating. please try again.', {
+        duration: 3000,
+        icon: '❌',
+      });
     }
   };
 
@@ -148,15 +165,15 @@ function VibePage() {
               <>
                 <Avatar className="mr-3 h-10 w-10">
                   <AvatarImage
-                    src={vibe.createdBy.avatar}
-                    alt={vibe.createdBy.name}
+                    src={getUserAvatarUrl(vibe.createdBy)}
+                    alt={computeUserDisplayName(vibe.createdBy)}
                   />
                   <AvatarFallback>
-                    {vibe.createdBy.name.substring(0, 2).toUpperCase()}
+                    {getUserInitials(vibe.createdBy)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{vibe.createdBy.name}</p>
+                  <p className="font-medium">{computeUserDisplayName(vibe.createdBy)}</p>
                   <p className="text-muted-foreground text-sm">
                     {new Date(vibe.createdAt).toLocaleDateString()}
                   </p>
@@ -165,7 +182,6 @@ function VibePage() {
             ) : (
               <>
                 <Avatar className="mr-3 h-10 w-10">
-                  {/* You might want a generic placeholder avatar icon here */}
                   <AvatarFallback>??</AvatarFallback>
                 </Avatar>
                 <div>
@@ -244,15 +260,15 @@ function VibePage() {
                       <div className="mb-2 flex items-center">
                         <Avatar className="mr-2 h-8 w-8">
                           <AvatarImage
-                            src={rating.user.avatar}
-                            alt={rating.user.name}
+                            src={getUserAvatarUrl(rating.user)}
+                            alt={computeUserDisplayName(rating.user)}
                           />
                           <AvatarFallback>
-                            {rating.user.name.substring(0, 2).toUpperCase()}
+                            {getUserInitials(rating.user)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <p className="font-medium">{rating.user.name}</p>
+                          <p className="font-medium">{computeUserDisplayName(rating.user)}</p>
                           <div className="flex items-center gap-2">
                             <StarRating
                               value={rating.rating}

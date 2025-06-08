@@ -6,21 +6,43 @@ import {
 } from './schema';
 import { v } from 'convex/values';
 
-// Get all vibes
-export const getAll = query({
+// Simple get all vibes (for backwards compatibility)
+export const getAllSimple = query({
   handler: async (ctx) => {
-    const vibes = await ctx.db.query('vibes').collect();
-    return await Promise.all(
-      vibes.map(async (vibe) => {
+    // Just return basic vibe data without complex joins
+    return await ctx.db.query('vibes').order('desc').take(50);
+  },
+});
+
+// Get all vibes (paginated to avoid document read limits)
+export const getAll = query({
+  args: { 
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string())
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20; // Default to 20 vibes to limit reads
+    
+    // Get vibes with pagination
+    const vibesQuery = ctx.db.query('vibes').order('desc');
+    const vibes = await vibesQuery.paginate({
+      cursor: args.cursor || null,
+      numItems: limit
+    });
+
+    const vibesWithDetails = await Promise.all(
+      vibes.page.map(async (vibe) => {
+        // Use more efficient user lookup
         const creator = await ctx.db
           .query('users')
           .filter((q) => q.eq(q.field('id'), vibe.createdById))
           .first();
 
+        // Limit ratings to avoid excessive reads
         const ratings = await ctx.db
           .query('ratings')
-          .filter((q) => q.eq(q.field('vibeId'), vibe.id))
-          .collect();
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(10); // Limit to 10 most recent ratings
 
         const ratingDetails = await Promise.all(
           ratings.map(async (rating) => {
@@ -37,10 +59,11 @@ export const getAll = query({
           })
         );
 
+        // Limit reactions to avoid excessive reads
         const reactions = await ctx.db
           .query('reactions')
-          .filter((q) => q.eq(q.field('vibeId'), vibe.id))
-          .collect();
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(50); // Limit to 50 reactions
 
         // Group reactions by emoji
         const emojiReactions = reactions.reduce(
@@ -71,6 +94,12 @@ export const getAll = query({
         };
       })
     );
+
+    return {
+      vibes: vibesWithDetails,
+      continueCursor: vibes.continueCursor,
+      isDone: vibes.isDone,
+    };
   },
 });
 
@@ -304,5 +333,204 @@ export const reactToVibe = mutation({
       });
       return { added: true };
     }
+  },
+});
+
+// Get vibes by tag
+export const getByTag = query({
+  args: { tag: v.string(), limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 10; // Default limit for tag-based rows
+    
+    const allVibes = await ctx.db.query('vibes').order('desc').take(100); // Get recent vibes
+    
+    // Filter vibes that contain the specified tag
+    const vibesWithTag = allVibes.filter(vibe => 
+      vibe.tags && vibe.tags.includes(args.tag)
+    ).slice(0, limit);
+
+    return await Promise.all(
+      vibesWithTag.map(async (vibe) => {
+        const creator = await ctx.db
+          .query('users')
+          .filter((q) => q.eq(q.field('id'), vibe.createdById))
+          .first();
+
+        // Get limited ratings for performance
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(5);
+
+        const ratingDetails = await Promise.all(
+          ratings.map(async (rating) => {
+            const user = await ctx.db
+              .query('users')
+              .filter((q) => q.eq(q.field('id'), rating.userId))
+              .first();
+            return {
+              user,
+              rating: rating.rating,
+              review: rating.review,
+              date: rating.date,
+            };
+          })
+        );
+
+        // Get limited reactions for performance
+        const reactions = await ctx.db
+          .query('reactions')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(20);
+
+        // Group reactions by emoji
+        const emojiReactions = reactions.reduce(
+          (acc, reaction) => {
+            const existingReaction = acc.find(
+              (r) => r.emoji === reaction.emoji
+            );
+            if (existingReaction) {
+              existingReaction.users.push(reaction.userId);
+              existingReaction.count++;
+            } else {
+              acc.push({
+                emoji: reaction.emoji,
+                count: 1,
+                users: [reaction.userId],
+              });
+            }
+            return acc;
+          },
+          [] as { emoji: string; count: number; users: string[] }[]
+        );
+
+        return {
+          ...vibe,
+          createdBy: creator,
+          ratings: ratingDetails,
+          reactions: emojiReactions,
+        };
+      })
+    );
+  },
+});
+
+// Get all available tags from vibes
+export const getAllTags = query({
+  handler: async (ctx) => {
+    const vibes = await ctx.db.query('vibes').collect();
+    
+    // Extract all tags and count their usage
+    const tagCounts = new Map<string, number>();
+    
+    vibes.forEach(vibe => {
+      if (vibe.tags) {
+        vibe.tags.forEach(tag => {
+          tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+        });
+      }
+    });
+
+    // Convert to array and sort by usage count
+    return Array.from(tagCounts.entries())
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count);
+  },
+});
+
+// Get top-rated vibes
+export const getTopRated = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 10;
+    
+    // Get all vibes and calculate their average ratings
+    const vibes = await ctx.db.query('vibes').order('desc').take(50);
+    
+    const vibesWithRatings = await Promise.all(
+      vibes.map(async (vibe) => {
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .collect();
+
+        const averageRating = ratings.length > 0 
+          ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+          : 0;
+
+        return {
+          vibe,
+          averageRating,
+          ratingCount: ratings.length,
+        };
+      })
+    );
+
+    // Sort by average rating (with minimum 2 ratings to qualify)
+    const topRated = vibesWithRatings
+      .filter(item => item.ratingCount >= 2)
+      .sort((a, b) => b.averageRating - a.averageRating)
+      .slice(0, limit);
+
+    return await Promise.all(
+      topRated.map(async ({ vibe }) => {
+        const creator = await ctx.db
+          .query('users')
+          .filter((q) => q.eq(q.field('id'), vibe.createdById))
+          .first();
+
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(5);
+
+        const ratingDetails = await Promise.all(
+          ratings.map(async (rating) => {
+            const user = await ctx.db
+              .query('users')
+              .filter((q) => q.eq(q.field('id'), rating.userId))
+              .first();
+            return {
+              user,
+              rating: rating.rating,
+              review: rating.review,
+              date: rating.date,
+            };
+          })
+        );
+
+        const reactions = await ctx.db
+          .query('reactions')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(20);
+
+        const emojiReactions = reactions.reduce(
+          (acc, reaction) => {
+            const existingReaction = acc.find(
+              (r) => r.emoji === reaction.emoji
+            );
+            if (existingReaction) {
+              existingReaction.users.push(reaction.userId);
+              existingReaction.count++;
+            } else {
+              acc.push({
+                emoji: reaction.emoji,
+                count: 1,
+                users: [reaction.userId],
+              });
+            }
+            return acc;
+          },
+          [] as { emoji: string; count: number; users: string[] }[]
+        );
+
+        return {
+          ...vibe,
+          createdBy: creator,
+          ratings: ratingDetails,
+          reactions: emojiReactions,
+        };
+      })
+    );
   },
 });

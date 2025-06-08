@@ -8,10 +8,25 @@ export interface RenderedItem {
 
 // VibeCheck types
 export interface User {
-  id: string;
-  name: string;
-  avatar: string;
-  joinDate: string;
+  // Legacy fields (for backward compatibility)
+  id?: string;
+  name?: string;
+  avatar?: string;
+  joinDate?: string;
+  
+  // Clerk integration fields
+  externalId?: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  image_url?: string;
+  profile_image_url?: string;
+  has_image?: boolean;
+  primary_email_address_id?: string;
+  last_sign_in_at?: number;
+  last_active_at?: number;
+  created_at?: number;
+  updated_at?: number;
 }
 
 export interface Rating {

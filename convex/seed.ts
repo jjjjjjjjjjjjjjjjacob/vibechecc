@@ -7,7 +7,7 @@ export const clear = action({
     try {
       // Get all data
       const users = await ctx.runQuery(api.users.getAll);
-      const vibes = await ctx.runQuery(api.vibes.getAll);
+      const vibes = await ctx.runQuery(api.vibes.getAllSimple);
       
       // Delete all ratings
       const allRatings = await ctx.db.query('ratings').collect();
@@ -36,10 +36,10 @@ export const clear = action({
         message: 'Database cleared successfully',
       };
     } catch (error) {
+      console.error('Error clearing database:', error);
       return {
         success: false,
-        message: `Error clearing database: ${error}`,
-        error,
+        message: `Error clearing database: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   },
@@ -153,7 +153,7 @@ export const seed = action({
 
       // Get the created vibes to map their actual IDs
       console.log('Mapping vibe IDs...');
-      const createdVibes = await ctx.runQuery(api.vibes.getAll);
+      const createdVibes = await ctx.runQuery(api.vibes.getAllSimple);
       const vibeMap: Record<string, string> = {};
 
       const titleMap: Record<string, string> = {
@@ -397,10 +397,10 @@ export const seed = action({
         },
       };
     } catch (error) {
+      console.error('Error seeding database:', error);
       return {
         success: false,
-        message: `Error seeding database: ${error}`,
-        error,
+        message: `Error seeding database: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   },

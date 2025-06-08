@@ -147,7 +147,8 @@
   @apply mx-auto w-full px-4;
 }
 
-.cl-formButtonPrimary {
+.cl-formButtonPrimary,
+.cl-socialButtonsBlockButton {
   @apply inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-primary px-3  font-medium text-primary-foreground !shadow-none ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
 }
 
@@ -160,7 +161,6 @@
 }
 
 .cl-headerTitle,
-.cl-socialButtonsBlockButtonText,
 .cl-loading,
 .cl-formFieldLabel,
 .cl-formHeaderTitle,
@@ -237,6 +237,19 @@ p[data-localization-key='userProfile.profilePage.successMessage'] {
   @apply text-foreground;
 }
 
+/* Prevent icon blowout */
+.cl-internal-icon,
+.cl-internal-icon svg,
+.cl-userButtonPopoverActionButton svg,
+.cl-socialButtonsBlockButton svg,
+.cl-alternativeMethodsBlockButton svg {
+  width: 1rem !important;
+  height: 1rem !important;
+  max-width: 1rem !important;
+  max-height: 1rem !important;
+  flex-shrink: 0;
+}
+
 button[data-localization-key='userProfile.start.dangerSection.deleteAccountButton'] {
   @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
 }
@@ -308,7 +321,7 @@ button[data-localization-key='userProfile.start.dangerSection.deleteAccountButto
 }
 
 .cl-socialButtonsBlockButton {
-  @apply h-10 !border;
+  @apply h-10 !border bg-foreground;
 }
 
 .cl-alternativeMethods .cl-alternativeMethodsBlockButton {

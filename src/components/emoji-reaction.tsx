@@ -413,8 +413,7 @@ function HorizontalEmojiPicker({
                   className="bg-muted hover:bg-muted-foreground/20 text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full transition-colors"
                   aria-label="Search emojis"
                 >
-                  {/*<Search className="h-4 w-4" />*/}
-                  Hello
+                  <Search className="h-4 w-4" />
                 </button>
               ) : (
                 <div className="relative">
@@ -430,7 +429,7 @@ function HorizontalEmojiPicker({
                         handleCollapseSearch();
                       }
                     }}
-                    // className="bg-muted animate-in fade-in h-8 w-full rounded-full border-none pr-8 pl-10 text-sm duration-500 outline-none"
+                    className="bg-muted h-8 w-full rounded-full border-none pr-8 pl-10 text-sm duration-500 outline-none"
                   />
                   <button
                     onClick={handleCollapseSearch}

@@ -1,7 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 import * as React from 'react';
-import { useUserVibes, useUpdateUserMutation } from '@/queries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  useUserVibes,
+  useUpdateProfileMutation,
+  useCurrentUser,
+} from '@/queries';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,24 +41,33 @@ export const Route = createFileRoute('/profile')({
 });
 
 function Profile() {
-  const { user, isLoaded } = useUser();
-  const { data: vibes, isLoading: vibesLoading } = useUserVibes(user?.id || '');
-  const updateUserMutation = useUpdateUserMutation();
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+  const { data: convexUser, isLoading: convexUserLoading } = useCurrentUser();
+  const { data: vibes, isLoading: vibesLoading } = useUserVibes(
+    convexUser?._id || ''
+  );
+  const updateProfileMutation = useUpdateProfileMutation();
 
-  const [name, setName] = React.useState('');
-  const [avatar, setAvatar] = React.useState('');
+  const [username, setUsername] = React.useState('');
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
+  const [imageUrl, setImageUrl] = React.useState('');
   const [isEditing, setIsEditing] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
 
   // Initialize form with user data when loaded
   React.useEffect(() => {
-    if (user) {
-      setName(user.fullName || user.firstName || '');
-      setAvatar(user.imageUrl || '');
+    if (convexUser) {
+      setUsername(convexUser.username || '');
+      setFirstName(convexUser.first_name || '');
+      setLastName(convexUser.last_name || '');
+      setImageUrl(convexUser.image_url || '');
     }
-  }, [user]);
+  }, [convexUser]);
 
-  if (!isLoaded) {
+  const isLoading = !clerkLoaded || convexUserLoading;
+
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-4xl">
@@ -83,7 +96,7 @@ function Profile() {
     );
   }
 
-  if (!user) {
+  if (!clerkUser || !convexUser) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-4 py-3">
@@ -93,13 +106,13 @@ function Profile() {
     );
   }
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
-          setAvatar(e.target.result as string);
+          setImageUrl(e.target.result as string);
         }
       };
       reader.readAsDataURL(file);
@@ -111,12 +124,11 @@ function Profile() {
     setIsSaving(true);
 
     try {
-      // Note: Clerk handles user profile updates differently
-      // You might want to use Clerk's user.update() method or
-      // store additional profile data in your own database
-      await user.update({
-        firstName: name.split(' ')[0],
-        lastName: name.split(' ').slice(1).join(' '),
+      await updateProfileMutation.mutateAsync({
+        username: username || undefined,
+        first_name: firstName || undefined,
+        last_name: lastName || undefined,
+        image_url: imageUrl || undefined,
       });
       setIsEditing(false);
     } catch (error) {
@@ -126,14 +138,20 @@ function Profile() {
     }
   };
 
-  const userDisplayName =
-    user.fullName ||
-    user.firstName ||
-    user.emailAddresses[0]?.emailAddress ||
+  const displayName =
+    `${firstName || ''} ${lastName || ''}`.trim() ||
+    username ||
+    clerkUser.fullName ||
+    clerkUser.firstName ||
+    clerkUser.emailAddresses[0]?.emailAddress ||
     'User';
-  const userJoinDate = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString()
-    : 'Unknown';
+
+  const userEmail = clerkUser.emailAddresses[0]?.emailAddress;
+  const userJoinDate = convexUser.created_at
+    ? new Date(convexUser.created_at).toLocaleDateString()
+    : clerkUser.createdAt
+      ? new Date(clerkUser.createdAt).toLocaleDateString()
+      : 'Unknown';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -144,14 +162,19 @@ function Profile() {
               <div className="flex-shrink-0">
                 <div className="relative">
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src={user.imageUrl} alt={userDisplayName} />
+                    <AvatarImage
+                      src={
+                        imageUrl || convexUser.image_url || clerkUser.imageUrl
+                      }
+                      alt={displayName}
+                    />
                     <AvatarFallback className="text-2xl">
-                      {userDisplayName.substring(0, 2).toUpperCase()}
+                      {displayName.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   {isEditing && (
                     <label
-                      htmlFor="avatar-upload"
+                      htmlFor="image-upload"
                       className="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-0 bottom-0 cursor-pointer rounded-full p-1"
                     >
                       <svg
@@ -175,11 +198,11 @@ function Profile() {
                         />
                       </svg>
                       <input
-                        id="avatar-upload"
+                        id="image-upload"
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={handleAvatarChange}
+                        onChange={handleImageChange}
                       />
                     </label>
                   )}
@@ -189,13 +212,46 @@ function Profile() {
               {isEditing ? (
                 <form onSubmit={handleSaveProfile} className="flex-1 space-y-4">
                   <div>
-                    <Label htmlFor="name">name</Label>
+                    <Label htmlFor="username">username</Label>
                     <Input
                       type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Enter username"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="firstName">first name</Label>
+                    <Input
+                      type="text"
+                      id="firstName"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Enter first name"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="lastName">last name</Label>
+                    <Input
+                      type="text"
+                      id="lastName"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Enter last name"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="imageUrl">image url</Label>
+                    <Input
+                      type="url"
+                      id="imageUrl"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="Enter image URL"
                     />
                   </div>
 
@@ -208,8 +264,10 @@ function Profile() {
                       variant="outline"
                       onClick={() => {
                         setIsEditing(false);
-                        setName(userDisplayName);
-                        setAvatar(user.imageUrl || '');
+                        setUsername(convexUser.username || '');
+                        setFirstName(convexUser.first_name || '');
+                        setLastName(convexUser.last_name || '');
+                        setImageUrl(convexUser.image_url || '');
                       }}
                     >
                       cancel
@@ -219,11 +277,12 @@ function Profile() {
               ) : (
                 <div className="flex-1">
                   <h1 className="mb-2 text-2xl font-bold lowercase">
-                    {userDisplayName}
+                    {displayName}
                   </h1>
-                  <p className="text-muted-foreground mb-2">
-                    {user.emailAddresses[0]?.emailAddress}
-                  </p>
+                  {username && (
+                    <p className="text-muted-foreground mb-2">@{username}</p>
+                  )}
+                  <p className="text-muted-foreground mb-2">{userEmail}</p>
                   <p className="text-muted-foreground mb-4">
                     member since {userJoinDate}
                   </p>

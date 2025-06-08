@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import * as React from 'react';
-import { useVibes } from '@/queries';
+import { useVibesPaginated } from '@/queries';
 import { VibeGrid } from '@/components/vibe-grid';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/vibes/')({
 });
 
 function AllVibes() {
-  const { data: vibes, isLoading, error } = useVibes();
+  const { data: vibesData, isLoading, error } = useVibesPaginated(50); // Get more vibes initially
 
   if (isLoading) {
     return (
@@ -43,7 +43,7 @@ function AllVibes() {
         </p>
       </div>
 
-      <VibeGrid vibes={vibes || []} />
+      <VibeGrid vibes={vibesData?.vibes || []} />
     </div>
   );
 }

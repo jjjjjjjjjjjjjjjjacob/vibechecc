@@ -3,11 +3,38 @@ import { type Infer, v } from 'convex/values';
 
 const schema = defineSchema({
   users: defineTable({
-    id: v.string(),
-    username: v.string(),
-    avatar: v.string(),
-    joinDate: v.string(),
-  }).index('id', ['id']),
+    // Clerk User ID - primary identifier for linking with Clerk (optional for backward compatibility)
+    externalId: v.optional(v.string()),
+
+    // Core user identity fields (1:1 with Clerk User object)
+    username: v.optional(v.string()), // Clerk: username (nullable)
+    first_name: v.optional(v.string()), // Clerk: first_name (nullable)
+    last_name: v.optional(v.string()), // Clerk: last_name (nullable)
+
+    // Image/Avatar fields (UI-relevant, safe to cache)
+    image_url: v.optional(v.string()), // Clerk: image_url
+    profile_image_url: v.optional(v.string()), // Clerk: profile_image_url
+    has_image: v.optional(v.boolean()), // Clerk: has_image
+
+    // Email reference (PII-conscious - store ID reference, not actual email)
+    primary_email_address_id: v.optional(v.string()), // Clerk: primary_email_address_id
+
+    // Activity tracking (UI-relevant for showing user status)
+    last_sign_in_at: v.optional(v.number()), // Clerk: last_sign_in_at (timestamp)
+    last_active_at: v.optional(v.number()), // Clerk: last_active_at (timestamp)
+
+    // Timestamps (1:1 with Clerk)
+    created_at: v.optional(v.number()), // Clerk: created_at (timestamp)
+    updated_at: v.optional(v.number()), // Clerk: updated_at (timestamp)
+
+    // Legacy fields (for backward compatibility)
+    id: v.optional(v.string()), // Legacy internal ID
+    name: v.optional(v.string()), // Legacy name field
+    avatar: v.optional(v.string()), // Legacy avatar field
+    joinDate: v.optional(v.string()), // Legacy join date
+  })
+    .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
+    .index('id', ['id']), // Legacy index for backward compatibility
 
   vibes: defineTable({
     id: v.string(),
