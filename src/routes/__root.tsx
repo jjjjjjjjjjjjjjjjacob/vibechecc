@@ -14,6 +14,9 @@ import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
 import { NotFound } from '@/components/not-found';
 import { Header } from '@/components/header';
 import { ThemeProvider } from '@/components/theme-provider';
+import { PostHogProvider } from '@/components/posthog-provider';
+import { PostHogPageTracker } from '@/components/posthog-page-tracker';
+import { ClerkPostHogIntegration } from '@/components/clerk-posthog-integration';
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
 import { ClerkProvider } from '@clerk/tanstack-react-start';
@@ -99,10 +102,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <HeadContent />
         </head>
         <body className="bg-background text-foreground min-h-screen">
-          <ThemeProvider>
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <LoadingIndicator />
+          <PostHogProvider>
+            <ThemeProvider>
+              <div className="flex min-h-screen flex-col">
+                <PostHogPageTracker />
+                <ClerkPostHogIntegration />
+                <Header />
+                <LoadingIndicator />
 
               <main className="flex-1">{children}</main>
 
@@ -115,8 +121,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 </div>
               </footer>
               <Toaster />
-            </div>
-          </ThemeProvider>
+              </div>
+            </ThemeProvider>
+          </PostHogProvider>
           <ReactQueryDevtools />
           <TanStackRouterDevtools position="bottom-right" />
           <Scripts />

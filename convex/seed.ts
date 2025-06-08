@@ -48,70 +48,248 @@ export const clear = action({
 export const seed = action({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: async (ctx: any): Promise<any> => {
-    // Check if we already have ratings/reactions
-    console.log('Checking existing data...');
-    // We can't directly query from actions, so let's just proceed and let the mutations handle duplicates
-    console.log('Proceeding with seeding...');
+    console.log('Starting complete seeding process...');
 
     try {
-      // Get existing vibes and users to work with them
-      console.log('Getting existing data...');
-      const existingUsers = await ctx.runQuery(api.users.getAll);
-      const existingVibes = await ctx.runQuery(api.vibes.getAll);
-      
-      if (existingUsers.length === 0 || existingVibes.length === 0) {
-        return {
-          success: false,
-          message: 'No existing users or vibes found. Please run the base seeding first.',
-        };
-      }
-      
-      console.log(`Found ${existingUsers.length} users and ${existingVibes.length} vibes`);
+      // Sample users from sample-data.ts
+      const users = [
+        {
+          id: 'user-1',
+          username: 'Alex Johnson',
+          avatar: '/placeholder.svg?height=100&width=100',
+          joinDate: '2023-01-15T00:00:00Z',
+        },
+        {
+          id: 'user-2',
+          username: 'Sofia Davis',
+          avatar: '/placeholder.svg?height=100&width=100&text=SD',
+          joinDate: '2022-11-03T00:00:00Z',
+        },
+        {
+          id: 'user-3',
+          username: 'Marcus Lee',
+          avatar: '/placeholder.svg?height=100&width=100&text=ML',
+          joinDate: '2023-02-22T00:00:00Z',
+        },
+        {
+          id: 'user-4',
+          username: 'Olivia Smith',
+          avatar: '/placeholder.svg?height=100&width=100&text=OS',
+          joinDate: '2022-09-14T00:00:00Z',
+        },
+        {
+          id: 'user-5',
+          username: 'Ethan Brown',
+          avatar: '/placeholder.svg?height=100&width=100&text=EB',
+          joinDate: '2023-03-30T00:00:00Z',
+        },
+      ];
 
-      // Map existing vibes to our sample data structure
-      console.log('Mapping existing vibes...');
+      // Create users
+      console.log('Creating users...');
+      for (const user of users) {
+        await ctx.runMutation(api.users.create, {
+          id: user.id,
+          username: user.username,
+          avatar: user.avatar,
+        });
+      }
+
+      // Sample vibes from sample-data.ts
+      const vibes = [
+        {
+          id: 'vibe-1',
+          title: 'Losing virginity but lying about not being your first time',
+          description:
+            "That awkward moment when you're trying to act experienced but have no idea what you're doing. A mix of nervousness, fake confidence, and the constant fear of being found out.",
+          image: undefined,
+          createdById: 'user-2',
+          createdAt: '2023-05-12T14:23:00Z',
+          tags: ['Awkward', 'Embarrassing', 'Life Milestone'],
+        },
+        {
+          id: 'vibe-2',
+          title: 'Being in a public restroom when the lights go out',
+          description:
+            "That moment of pure panic when you're in a public bathroom stall and suddenly everything goes dark. Time stops, your heart races, and you wonder if this is how your life ends.",
+          image: undefined,
+          createdById: 'user-3',
+          createdAt: '2023-06-03T18:45:00Z',
+          tags: ['Terrifying', 'Bathroom Horror', 'Public Spaces'],
+        },
+        {
+          id: 'vibe-3',
+          title: "Finding $20 in old jeans you haven't worn in months",
+          description:
+            "That unexpected joy when you put on an old pair of jeans and discover money you forgot about. It's like a gift from your past self to your present self.",
+          image: undefined,
+          createdById: 'user-4',
+          createdAt: '2023-04-22T11:30:00Z',
+          tags: ['Satisfying', 'Unexpected Joy', 'Money'],
+        },
+        {
+          id: 'vibe-4',
+          title: 'Awkward elevator small talk with your boss',
+          description:
+            "That painfully long elevator ride where you're trapped with your boss and forced to make conversation about the weather, weekend plans, or worse - work.",
+          image: undefined,
+          createdById: 'user-5',
+          createdAt: '2023-07-14T09:15:00Z',
+          tags: ['Awkward', 'Work Life', 'Social Anxiety'],
+        },
+      ];
+
+      // Create vibes
+      console.log('Creating vibes...');
+      for (const vibe of vibes) {
+        await ctx.runMutation(api.vibes.create, {
+          title: vibe.title,
+          description: vibe.description,
+          image: vibe.image,
+          createdById: vibe.createdById,
+          tags: vibe.tags,
+        });
+      }
+
+      // Get the created vibes to map their actual IDs
+      console.log('Mapping vibe IDs...');
+      const createdVibes = await ctx.runQuery(api.vibes.getAll);
       const vibeMap: Record<string, string> = {};
-      
-      // Try to match existing vibes by title to our sample data
+
       const titleMap: Record<string, string> = {
         'Losing virginity but lying about not being your first time': 'vibe-1',
-        'Being in a public restroom when the lights go out': 'vibe-2', 
+        'Being in a public restroom when the lights go out': 'vibe-2',
         "Finding $20 in old jeans you haven't worn in months": 'vibe-3',
-        'Awkward elevator small talk with your boss': 'vibe-4'
+        'Awkward elevator small talk with your boss': 'vibe-4',
       };
-      
-      for (const existingVibe of existingVibes) {
-        const sampleVibeId = titleMap[existingVibe.title];
+
+      for (const createdVibe of createdVibes) {
+        const sampleVibeId = titleMap[createdVibe.title];
         if (sampleVibeId) {
-          vibeMap[sampleVibeId] = existingVibe.id;
-          console.log(`Mapped: ${sampleVibeId} -> ${existingVibe.id} (${existingVibe.title})`);
+          vibeMap[sampleVibeId] = createdVibe.id;
+          console.log(
+            `Mapped: ${sampleVibeId} -> ${createdVibe.id} (${createdVibe.title})`
+          );
         }
       }
 
       // Sample ratings data
       const ratings = [
         // Ratings for vibe-1
-        { vibeId: 'vibe-1', userId: 'user-1', rating: 4, review: "Too real. The anxiety of trying to seem experienced while having no clue what you're doing is a universal experience.", date: '2023-05-13T09:15:00Z' },
-        { vibeId: 'vibe-1', userId: 'user-3', rating: 5, review: 'The perfect mix of excitement and absolute terror. Been there, regretted that.', date: '2023-05-14T16:42:00Z' },
-        { vibeId: 'vibe-1', userId: 'user-4', rating: 3, date: '2023-05-15T11:30:00Z' },
-        { vibeId: 'vibe-1', userId: 'user-5', rating: 5, review: 'The mental gymnastics required for this situation deserve an Olympic medal.', date: '2023-05-16T20:18:00Z' },
-        
+        {
+          vibeId: 'vibe-1',
+          userId: 'user-1',
+          rating: 4,
+          review:
+            "Too real. The anxiety of trying to seem experienced while having no clue what you're doing is a universal experience.",
+          date: '2023-05-13T09:15:00Z',
+        },
+        {
+          vibeId: 'vibe-1',
+          userId: 'user-3',
+          rating: 5,
+          review:
+            'The perfect mix of excitement and absolute terror. Been there, regretted that.',
+          date: '2023-05-14T16:42:00Z',
+        },
+        {
+          vibeId: 'vibe-1',
+          userId: 'user-4',
+          rating: 3,
+          date: '2023-05-15T11:30:00Z',
+        },
+        {
+          vibeId: 'vibe-1',
+          userId: 'user-5',
+          rating: 5,
+          review:
+            'The mental gymnastics required for this situation deserve an Olympic medal.',
+          date: '2023-05-16T20:18:00Z',
+        },
+
         // Ratings for vibe-2
-        { vibeId: 'vibe-2', userId: 'user-1', rating: 2, review: 'Absolutely terrifying. Had this happen at an airport once and I still have nightmares.', date: '2023-06-04T10:22:00Z' },
-        { vibeId: 'vibe-2', userId: 'user-2', rating: 1, review: 'Pure horror movie material. -10/10 would not recommend.', date: '2023-06-05T14:37:00Z' },
-        { vibeId: 'vibe-2', userId: 'user-4', rating: 2, date: '2023-06-06T09:15:00Z' },
-        
+        {
+          vibeId: 'vibe-2',
+          userId: 'user-1',
+          rating: 2,
+          review:
+            'Absolutely terrifying. Had this happen at an airport once and I still have nightmares.',
+          date: '2023-06-04T10:22:00Z',
+        },
+        {
+          vibeId: 'vibe-2',
+          userId: 'user-2',
+          rating: 1,
+          review: 'Pure horror movie material. -10/10 would not recommend.',
+          date: '2023-06-05T14:37:00Z',
+        },
+        {
+          vibeId: 'vibe-2',
+          userId: 'user-4',
+          rating: 2,
+          date: '2023-06-06T09:15:00Z',
+        },
+
         // Ratings for vibe-3
-        { vibeId: 'vibe-3', userId: 'user-1', rating: 5, review: "One of life's purest joys. Better than finding money on the street because it's technically already yours.", date: '2023-04-23T15:42:00Z' },
-        { vibeId: 'vibe-3', userId: 'user-2', rating: 5, review: "The universe's way of saying 'here's a little treat for making it through another day'.", date: '2023-04-24T09:18:00Z' },
-        { vibeId: 'vibe-3', userId: 'user-3', rating: 4, date: '2023-04-25T12:33:00Z' },
-        { vibeId: 'vibe-3', userId: 'user-5', rating: 5, review: 'Better than any lottery win. The perfect surprise.', date: '2023-04-26T17:55:00Z' },
-        
+        {
+          vibeId: 'vibe-3',
+          userId: 'user-1',
+          rating: 5,
+          review:
+            "One of life's purest joys. Better than finding money on the street because it's technically already yours.",
+          date: '2023-04-23T15:42:00Z',
+        },
+        {
+          vibeId: 'vibe-3',
+          userId: 'user-2',
+          rating: 5,
+          review:
+            "The universe's way of saying 'here's a little treat for making it through another day'.",
+          date: '2023-04-24T09:18:00Z',
+        },
+        {
+          vibeId: 'vibe-3',
+          userId: 'user-3',
+          rating: 4,
+          date: '2023-04-25T12:33:00Z',
+        },
+        {
+          vibeId: 'vibe-3',
+          userId: 'user-5',
+          rating: 5,
+          review: 'Better than any lottery win. The perfect surprise.',
+          date: '2023-04-26T17:55:00Z',
+        },
+
         // Ratings for vibe-4
-        { vibeId: 'vibe-4', userId: 'user-1', rating: 2, review: 'The longest 30 seconds of your life. Every. Single. Time.', date: '2023-07-15T14:22:00Z' },
-        { vibeId: 'vibe-4', userId: 'user-2', rating: 3, date: '2023-07-16T10:37:00Z' },
-        { vibeId: 'vibe-4', userId: 'user-3', rating: 1, review: "I've started taking the stairs up 8 flights just to avoid this exact situation.", date: '2023-07-17T16:15:00Z' },
-        { vibeId: 'vibe-4', userId: 'user-4', rating: 2, review: 'The way time slows down should be studied by physicists.', date: '2023-07-18T11:48:00Z' },
+        {
+          vibeId: 'vibe-4',
+          userId: 'user-1',
+          rating: 2,
+          review: 'The longest 30 seconds of your life. Every. Single. Time.',
+          date: '2023-07-15T14:22:00Z',
+        },
+        {
+          vibeId: 'vibe-4',
+          userId: 'user-2',
+          rating: 3,
+          date: '2023-07-16T10:37:00Z',
+        },
+        {
+          vibeId: 'vibe-4',
+          userId: 'user-3',
+          rating: 1,
+          review:
+            "I've started taking the stairs up 8 flights just to avoid this exact situation.",
+          date: '2023-07-17T16:15:00Z',
+        },
+        {
+          vibeId: 'vibe-4',
+          userId: 'user-4',
+          rating: 2,
+          review: 'The way time slows down should be studied by physicists.',
+          date: '2023-07-18T11:48:00Z',
+        },
       ];
 
       // Create ratings using the mapped vibe IDs
@@ -204,16 +382,18 @@ export const seed = action({
 
       return {
         success: true,
-        message: `Successfully seeded ratings and reactions for ${Object.keys(vibeMap).length} vibes with ${ratings.length} ratings and ${reactions.length} emoji reactions.`,
+        message: `Successfully seeded complete database with ${users.length} users, ${vibes.length} vibes, ${ratings.length} ratings, and ${reactions.length} reactions.`,
         data: {
-          vibesMapped: Object.keys(vibeMap).length,
+          usersCreated: users.length,
+          vibesCreated: vibes.length,
           ratingsCreated: ratings.length,
           reactionsCreated: reactions.length,
           details: {
-            ratingsWithReviews: ratings.filter(r => r.review).length,
-            ratingsWithoutReviews: ratings.filter(r => !r.review).length,
-            uniqueEmojisUsed: [...new Set(reactions.map(r => r.emoji))].length,
-          }
+            ratingsWithReviews: ratings.filter((r) => r.review).length,
+            ratingsWithoutReviews: ratings.filter((r) => !r.review).length,
+            uniqueEmojisUsed: [...new Set(reactions.map((r) => r.emoji))]
+              .length,
+          },
         },
       };
     } catch (error) {

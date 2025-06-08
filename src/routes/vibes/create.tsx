@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@clerk/tanstack-react-start';
+import { usePostHog } from '@/hooks/usePostHog';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
@@ -35,6 +36,7 @@ export const Route = createFileRoute('/vibes/create')({
 function CreateVibe() {
   const navigate = useNavigate();
   const { user } = useUser();
+  const { trackEvents } = usePostHog();
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [image, setImage] = React.useState('');
@@ -88,13 +90,16 @@ function CreateVibe() {
     setError('');
 
     try {
-      await createVibeMutation.mutateAsync({
+      const result = await createVibeMutation.mutateAsync({
         title: title.trim(),
         description: description.trim(),
         image: image || undefined,
         tags: tags.length > 0 ? tags : undefined,
         createdById: user.id, // Use actual user ID from Clerk
       });
+
+      // Track vibe creation
+      trackEvents.vibeCreated(result.id || 'unknown', tags);
 
       // Redirect to home page after successful creation
       navigate({ to: '/' });

@@ -23,7 +23,7 @@ export const getById = query({
 export const create = mutation({
   args: {
     id: v.string(),
-    name: v.string(),
+    username: v.string(),
     avatar: v.string(),
   },
   handler: async (ctx, args) => {
@@ -41,7 +41,7 @@ export const create = mutation({
 
     return await ctx.db.insert('users', {
       id: args.id,
-      name: args.name,
+      username: args.username,
       avatar: args.avatar,
       joinDate,
     });
@@ -104,7 +104,7 @@ export const seedDemoUser = mutation({
       const userId = 'demo-user';
       await ctx.db.insert('users', {
         id: userId,
-        name: 'Demo User',
+        username: 'Demo User',
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
         joinDate: new Date().toISOString(),
       });

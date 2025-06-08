@@ -8,6 +8,7 @@ import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
 import { useState } from 'react';
 import { EmojiReactions } from './emoji-reaction';
 import { useUser } from '@clerk/tanstack-react-start';
+import { usePostHog } from '@/hooks/usePostHog';
 import type { Vibe, EmojiReaction } from '../types';
 
 interface VibeCardProps {
@@ -22,6 +23,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
     vibe.reactions || []
   );
   const { user } = useUser();
+  const { trackEvents } = usePostHog();
 
   // Calculate average rating
   const averageRating =
@@ -35,37 +37,65 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
   // Extract context keywords from vibe for emoji suggestions
   const contextKeywords = React.useMemo(() => {
     const keywords: string[] = [];
-    
+
     // Extract words from title and description
-    const titleWords = vibe.title.toLowerCase().split(/\W+/).filter(word => word.length > 2);
-    const descriptionWords = vibe.description?.toLowerCase().split(/\W+/).filter(word => word.length > 2) || [];
-    
+    const titleWords = vibe.title
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((word) => word.length > 2);
+    const descriptionWords =
+      vibe.description
+        ?.toLowerCase()
+        .split(/\W+/)
+        .filter((word) => word.length > 2) || [];
+
     keywords.push(...titleWords, ...descriptionWords);
-    
+
     // Add some context-based keywords based on common patterns
     const title = vibe.title.toLowerCase();
     const description = vibe.description?.toLowerCase() || '';
-    
+
     // Add contextual keywords based on content analysis
-    if (title.includes('money') || title.includes('rich') || title.includes('expensive') || description.includes('money')) {
+    if (
+      title.includes('money') ||
+      title.includes('rich') ||
+      title.includes('expensive') ||
+      description.includes('money')
+    ) {
       keywords.push('money', 'rich', 'expensive');
     }
-    if (title.includes('time') || title.includes('clock') || title.includes('fast') || description.includes('time')) {
+    if (
+      title.includes('time') ||
+      title.includes('clock') ||
+      title.includes('fast') ||
+      description.includes('time')
+    ) {
       keywords.push('time', 'fast', 'speed');
     }
-    if (title.includes('love') || title.includes('heart') || description.includes('love')) {
+    if (
+      title.includes('love') ||
+      title.includes('heart') ||
+      description.includes('love')
+    ) {
       keywords.push('love', 'heart');
     }
-    if (title.includes('fire') || title.includes('hot') || description.includes('fire')) {
+    if (
+      title.includes('fire') ||
+      title.includes('hot') ||
+      description.includes('fire')
+    ) {
       keywords.push('fire', 'hot', 'amazing');
     }
-    
+
     return [...new Set(keywords)]; // Remove duplicates
   }, [vibe.title, vibe.description]);
 
   // Handle emoji reactions
   const handleReact = (emoji: string) => {
     if (preview || !user?.id) return;
+
+    // Track the reaction event
+    trackEvents.vibeReacted(vibe.id, emoji);
 
     // Find if this emoji already exists in reactions
     const existingReactionIndex = reactions.findIndex((r) => r.emoji === emoji);
@@ -175,14 +205,14 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                     <Avatar className="h-6 w-6">
                       <AvatarImage
                         src={vibe.createdBy.avatar}
-                        alt={vibe.createdBy.name}
+                        alt={vibe.createdBy.username}
                       />
                       <AvatarFallback>
-                        {vibe.createdBy.name.substring(0, 2).toUpperCase()}
+                        {vibe.createdBy.username.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-muted-foreground text-xs">
-                      {vibe.createdBy.name}
+                      {vibe.createdBy.username}
                     </span>
                   </>
                 ) : (
@@ -227,6 +257,10 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
           to="/vibes/$vibeId"
           params={{ vibeId: vibe.id }}
           className="block h-full"
+          onClick={() => {
+            // Track vibe view when clicked
+            trackEvents.vibeViewed(vibe.id);
+          }}
         >
           <div className="relative">
             <div
@@ -278,14 +312,14 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                     <Avatar className="h-6 w-6">
                       <AvatarImage
                         src={vibe.createdBy.avatar}
-                        alt={vibe.createdBy.name}
+                        alt={vibe.createdBy.username}
                       />
                       <AvatarFallback>
-                        {vibe.createdBy.name.substring(0, 2).toUpperCase()}
+                        {vibe.createdBy.username.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-muted-foreground text-xs">
-                      {vibe.createdBy.name}
+                      {vibe.createdBy.username}
                     </span>
                   </>
                 ) : (

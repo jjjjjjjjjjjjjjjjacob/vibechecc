@@ -13,8 +13,6 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as board from "../board.js";
-import type * as crons from "../crons.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 import type * as vibes from "../vibes.js";
@@ -28,8 +26,6 @@ import type * as vibes from "../vibes.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  board: typeof board;
-  crons: typeof crons;
   seed: typeof seed;
   users: typeof users;
   vibes: typeof vibes;
