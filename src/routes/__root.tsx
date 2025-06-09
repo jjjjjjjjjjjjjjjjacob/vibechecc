@@ -16,10 +16,15 @@ import { Header } from '@/components/header';
 import { ThemeProvider } from '@/components/theme-provider';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
-import { ClerkPostHogIntegration } from '@/components/clerk-posthog-integration';
+import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
-import { ClerkProvider } from '@clerk/tanstack-react-start';
+import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
+import { ConvexProviderWithAuth, ConvexReactClient } from 'convex/react';
+
+const convexClient = new ConvexReactClient(
+  (import.meta as any).env.VITE_CONVEX_URL!
+);
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -97,38 +102,40 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      <html lang="en">
-        <head>
-          <HeadContent />
-        </head>
-        <body className="bg-background text-foreground min-h-screen">
-          <PostHogProvider>
-            <ThemeProvider>
-              <div className="flex min-h-screen flex-col">
-                <PostHogPageTracker />
-                <ClerkPostHogIntegration />
-                <Header />
-                <LoadingIndicator />
+      <ConvexProviderWithAuth client={convexClient} useAuth={useAuth as any}>
+        <html lang="en">
+          <head>
+            <HeadContent />
+          </head>
+          <body className="bg-background text-foreground min-h-screen">
+            <PostHogProvider>
+              <ThemeProvider>
+                <div className="flex min-h-screen flex-col">
+                  <PostHogPageTracker />
+                  <ClerkPostHogIntegration />
+                  <Header />
+                  <LoadingIndicator />
 
-              <main className="flex-1">{children}</main>
+                  <main className="flex-1">{children}</main>
 
-              <footer className="bg-background border-t py-6">
-                <div className="container mx-auto px-4">
-                  <p className="text-muted-foreground text-center text-sm">
-                    © {new Date().getFullYear()} vibecheck. all rights
-                    reserved.
-                  </p>
+                  <footer className="bg-background border-t py-6">
+                    <div className="container mx-auto px-4">
+                      <p className="text-muted-foreground text-center text-sm">
+                        © {new Date().getFullYear()} vibecheck. all rights
+                        reserved.
+                      </p>
+                    </div>
+                  </footer>
+                  <Toaster />
                 </div>
-              </footer>
-              <Toaster />
-              </div>
-            </ThemeProvider>
-          </PostHogProvider>
-          <ReactQueryDevtools />
-          <TanStackRouterDevtools position="bottom-right" />
-          <Scripts />
-        </body>
-      </html>
+              </ThemeProvider>
+            </PostHogProvider>
+            <ReactQueryDevtools />
+            <TanStackRouterDevtools position="bottom-right" />
+            <Scripts />
+          </body>
+        </html>
+      </ConvexProviderWithAuth>
     </ClerkProvider>
   );
 }

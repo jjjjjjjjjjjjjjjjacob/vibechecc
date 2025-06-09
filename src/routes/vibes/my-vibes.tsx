@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import { useUserVibes } from '@/queries';
 import { VibeGrid } from '@/components/vibe-grid';
@@ -7,7 +7,6 @@ import { useUser } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
-import { redirect } from '@tanstack/react-router';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 

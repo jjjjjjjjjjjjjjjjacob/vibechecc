@@ -36,19 +36,19 @@ export function EnhancedEmojiPicker({
       const rect = triggerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       const pickerHeight = 400; // Approximate height of the picker
-      
+
       // Calculate if there's enough space above or below
       const spaceAbove = rect.top;
       const spaceBelow = viewportHeight - rect.bottom;
-      
+
       let top = rect.top - pickerHeight - 8; // 8px gap
       let left = rect.left;
-      
+
       // If not enough space above, position below
       if (spaceAbove < pickerHeight && spaceBelow > spaceAbove) {
         top = rect.bottom + 8;
       }
-      
+
       // Ensure the picker doesn't go off-screen horizontally
       const pickerWidth = 320;
       if (left + pickerWidth > window.innerWidth) {
@@ -57,7 +57,7 @@ export function EnhancedEmojiPicker({
       if (left < 16) {
         left = 16;
       }
-      
+
       setPosition({ top, left });
     }
   }, [triggerRef]);
@@ -65,19 +65,21 @@ export function EnhancedEmojiPicker({
   // Calculate relevance score for context-aware suggestions
   const calculateRelevanceScore = (emojiData: EmojiData): number => {
     if (contextKeywords.length === 0) return 0;
-    
+
     let score = 0;
-    const allKeywords = [emojiData.name, ...emojiData.keywords].map(k => k.toLowerCase());
-    
-    contextKeywords.forEach(contextKeyword => {
+    const allKeywords = [emojiData.name, ...emojiData.keywords].map((k) =>
+      k.toLowerCase()
+    );
+
+    contextKeywords.forEach((contextKeyword) => {
       const contextLower = contextKeyword.toLowerCase();
-      allKeywords.forEach(keyword => {
+      allKeywords.forEach((keyword) => {
         if (keyword.includes(contextLower) || contextLower.includes(keyword)) {
           score += keyword === contextLower ? 10 : 5; // Exact match gets higher score
         }
       });
     });
-    
+
     return score;
   };
 
@@ -88,16 +90,18 @@ export function EnhancedEmojiPicker({
     // Filter by search if there's a search value
     if (searchValue.trim()) {
       const searchLower = searchValue.toLowerCase();
-      filtered = EMOJI_DATABASE.filter(emojiData => {
-        const searchableText = [emojiData.name, ...emojiData.keywords].join(' ').toLowerCase();
+      filtered = EMOJI_DATABASE.filter((emojiData) => {
+        const searchableText = [emojiData.name, ...emojiData.keywords]
+          .join(' ')
+          .toLowerCase();
         return searchableText.includes(searchLower);
       });
     }
 
     // Calculate relevance scores and sort
-    const withScores = filtered.map(emoji => ({
+    const withScores = filtered.map((emoji) => ({
       ...emoji,
-      relevanceScore: calculateRelevanceScore(emoji)
+      relevanceScore: calculateRelevanceScore(emoji),
     }));
 
     // Sort by relevance score (descending), then by category
@@ -112,8 +116,8 @@ export function EnhancedEmojiPicker({
   // Group emojis by category for better organization
   const groupedEmojis = React.useMemo(() => {
     const groups: Record<string, typeof filteredEmojis> = {};
-    
-    filteredEmojis.forEach(emoji => {
+
+    filteredEmojis.forEach((emoji) => {
       if (!groups[emoji.category]) {
         groups[emoji.category] = [];
       }
@@ -130,30 +134,37 @@ export function EnhancedEmojiPicker({
 
   // Get quick suggestions (top relevant emojis)
   const quickSuggestions = filteredEmojis
-    .filter(e => e.relevanceScore > 0)
+    .filter((e) => e.relevanceScore > 0)
     .slice(0, 8);
 
-  const categoryOrder = ['smileys', 'people', 'animals', 'food', 'activities', 'travel', 'objects', 'symbols', 'flags'];
+  const categoryOrder = [
+    'smileys',
+    'people',
+    'animals',
+    'food',
+    'activities',
+    'travel',
+    'objects',
+    'symbols',
+    'flags',
+  ];
 
   return (
     <div
-      className={cn(
-        "animate-in fade-in duration-200",
-        className
-      )}
+      className={cn('animate-in fade-in duration-200', className)}
       style={{
         top: position.top,
         left: position.left,
       }}
       data-emoji-picker
     >
-      <Command className="max-h-96 h-full">
+      <Command className="h-full max-h-96">
         <CommandInput
           placeholder="Search emojis..."
           value={searchValue}
           onValueChange={setSearchValue}
         />
-        
+
         <CommandList asChild>
           <ScrollArea className="h-80">
             <div className="p-2">
@@ -169,11 +180,11 @@ export function EnhancedEmojiPicker({
                         value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
                         onSelect={() => handleEmojiClick(emojiData.emoji)}
                         className={cn(
-                          "flex h-8 w-8 items-center justify-center p-0 text-lg cursor-pointer",
-                          "animate-in fade-in duration-150"
+                          'flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg',
+                          'animate-in fade-in duration-150'
                         )}
                         style={{
-                          animationDelay: `${index * 30}ms`
+                          animationDelay: `${index * 30}ms`,
                         }}
                       >
                         {emojiData.emoji}
@@ -184,14 +195,16 @@ export function EnhancedEmojiPicker({
               )}
 
               {/* Grouped emojis by category */}
-              {categoryOrder.map(category => {
+              {categoryOrder.map((category) => {
                 const categoryEmojis = groupedEmojis[category];
                 if (!categoryEmojis || categoryEmojis.length === 0) return null;
 
                 return (
-                  <CommandGroup 
-                    key={category} 
-                    heading={category.charAt(0).toUpperCase() + category.slice(1)}
+                  <CommandGroup
+                    key={category}
+                    heading={
+                      category.charAt(0).toUpperCase() + category.slice(1)
+                    }
                   >
                     <div className="grid grid-cols-8 gap-1 py-2">
                       {categoryEmojis.map((emojiData, index) => (
@@ -200,11 +213,11 @@ export function EnhancedEmojiPicker({
                           value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
                           onSelect={() => handleEmojiClick(emojiData.emoji)}
                           className={cn(
-                            "flex h-8 w-8 items-center justify-center p-0 text-lg cursor-pointer",
-                            "animate-in fade-in duration-150"
+                            'flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg',
+                            'animate-in fade-in duration-150'
                           )}
                           style={{
-                            animationDelay: `${index * 20}ms`
+                            animationDelay: `${index * 20}ms`,
                           }}
                           title={emojiData.name}
                         >
@@ -218,15 +231,18 @@ export function EnhancedEmojiPicker({
 
               {/* Show remaining categories that aren't in the priority order */}
               {Object.keys(groupedEmojis)
-                .filter(category => !categoryOrder.includes(category))
-                .map(category => {
+                .filter((category) => !categoryOrder.includes(category))
+                .map((category) => {
                   const categoryEmojis = groupedEmojis[category];
-                  if (!categoryEmojis || categoryEmojis.length === 0) return null;
+                  if (!categoryEmojis || categoryEmojis.length === 0)
+                    return null;
 
                   return (
-                    <CommandGroup 
-                      key={category} 
-                      heading={category.charAt(0).toUpperCase() + category.slice(1)}
+                    <CommandGroup
+                      key={category}
+                      heading={
+                        category.charAt(0).toUpperCase() + category.slice(1)
+                      }
                     >
                       <div className="grid grid-cols-8 gap-1 py-2">
                         {categoryEmojis.map((emojiData, index) => (
@@ -235,11 +251,11 @@ export function EnhancedEmojiPicker({
                             value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
                             onSelect={() => handleEmojiClick(emojiData.emoji)}
                             className={cn(
-                              "flex h-8 w-8 items-center justify-center p-0 text-lg cursor-pointer",
-                              "animate-in fade-in duration-150"
+                              'flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg',
+                              'animate-in fade-in duration-150'
                             )}
                             style={{
-                              animationDelay: `${index * 20}ms`
+                              animationDelay: `${index * 20}ms`,
                             }}
                             title={emojiData.name}
                           >
@@ -256,4 +272,4 @@ export function EnhancedEmojiPicker({
       </Command>
     </div>
   );
-} 
+}

@@ -11,7 +11,7 @@ describe('User Utils', () => {
         last_name: 'Doe',
         name: 'John Smith',
       };
-      
+
       expect(computeUserDisplayName(user)).toBe('johndoe');
     });
 
@@ -21,7 +21,7 @@ describe('User Utils', () => {
         last_name: 'Doe',
         name: 'John Smith',
       };
-      
+
       expect(computeUserDisplayName(user)).toBe('John Doe');
     });
 
@@ -30,7 +30,7 @@ describe('User Utils', () => {
         first_name: 'John',
         name: 'John Smith',
       };
-      
+
       expect(computeUserDisplayName(user)).toBe('John');
     });
 
@@ -38,13 +38,13 @@ describe('User Utils', () => {
       const user: User = {
         name: 'John Smith',
       };
-      
+
       expect(computeUserDisplayName(user)).toBe('John Smith');
     });
 
     it('should return Unknown User as fallback when no fields are available', () => {
       const user: User = {};
-      
+
       expect(computeUserDisplayName(user)).toBe('Unknown User');
     });
 
@@ -57,7 +57,7 @@ describe('User Utils', () => {
         first_name: '  John  ',
         last_name: '  Doe  ',
       };
-      
+
       expect(computeUserDisplayName(user)).toBe('John Doe');
     });
   });
@@ -69,7 +69,7 @@ describe('User Utils', () => {
         first_name: 'John',
         last_name: 'Doe',
       };
-      
+
       expect(getUserInitials(user)).toBe('JO');
     });
 
@@ -77,7 +77,7 @@ describe('User Utils', () => {
       const user: User = {
         username: 'johndoe',
       };
-      
+
       expect(getUserInitials(user)).toBe('JO');
     });
 
@@ -85,7 +85,7 @@ describe('User Utils', () => {
       const user: User = {
         username: 'x',
       };
-      
+
       expect(getUserInitials(user)).toBe('X');
     });
 
@@ -93,4 +93,4 @@ describe('User Utils', () => {
       expect(getUserInitials(null)).toBe('UU'); // "Unknown User" -> "UU"
     });
   });
-}); 
+});

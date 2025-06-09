@@ -1,18 +1,22 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import { Card, CardContent, CardFooter } from './ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { StarRating } from './star-rating';
-import { cn } from '../utils/tailwind-utils';
-import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { StarRating } from '@/components/star-rating';
+import { cn } from '@/utils/tailwind-utils';
+import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { useState } from 'react';
-import { EmojiReactions } from './emoji-reaction';
+import { EmojiReactions } from '@/components/emoji-reaction';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
 import { useAddRatingMutation } from '@/queries';
 import toast from 'react-hot-toast';
-import { computeUserDisplayName, getUserAvatarUrl, getUserInitials } from '../utils/user-utils';
-import type { Vibe, EmojiReaction } from '../types';
+import {
+  computeUserDisplayName,
+  getUserAvatarUrl,
+  getUserInitials,
+} from '@/utils/user-utils';
+import type { Vibe, EmojiReaction } from '@/types';
 
 interface VibeCardProps {
   vibe: Vibe;
@@ -238,6 +242,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                       <AvatarImage
                         src={getUserAvatarUrl(vibe.createdBy)}
                         alt={computeUserDisplayName(vibe.createdBy)}
+                        className="object-cover"
                       />
                       <AvatarFallback>
                         {getUserInitials(vibe.createdBy)}
@@ -359,6 +364,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                       <AvatarImage
                         src={getUserAvatarUrl(vibe.createdBy)}
                         alt={computeUserDisplayName(vibe.createdBy)}
+                        className="object-cover"
                       />
                       <AvatarFallback>
                         {getUserInitials(vibe.createdBy)}

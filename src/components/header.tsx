@@ -14,7 +14,7 @@ import {
 import { useTheme } from './theme-provider';
 
 export function Header() {
-  const { resolvedTheme }= useTheme();
+  const { resolvedTheme } = useTheme();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -24,9 +24,9 @@ export function Header() {
   });
 
   return (
-    <header 
+    <header
       data-isDark={resolvedTheme === 'dark'}
-      className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full data-[showBottomBorder=true]:border-b backdrop-blur"
+      className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full backdrop-blur data-[showBottomBorder=true]:border-b"
     >
       <div className="container flex h-16 items-center">
         <div className="flex items-center gap-2 md:gap-4">
@@ -77,7 +77,7 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-2">
           {isSearchOpen ? (
-            <div className="relative mr-2 flex-1 md:w-80 animate-in slide-in-from-right duration-300">
+            <div className="animate-in slide-in-from-right relative mr-2 flex-1 duration-300 md:w-80">
               <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
               <Input
                 type="search"
@@ -101,7 +101,7 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setIsSearchOpen(true)}
-              className="hidden md:flex animate-in fade-in duration-200"
+              className="animate-in fade-in hidden duration-200 md:flex"
             >
               <Search className="h-5 w-5" />
               <span className="sr-only">search</span>

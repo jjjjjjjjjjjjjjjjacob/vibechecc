@@ -16,18 +16,18 @@ export const getAllSimple = query({
 
 // Get all vibes (paginated to avoid document read limits)
 export const getAll = query({
-  args: { 
+  args: {
     limit: v.optional(v.number()),
-    cursor: v.optional(v.string())
+    cursor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 20; // Default to 20 vibes to limit reads
-    
+
     // Get vibes with pagination
     const vibesQuery = ctx.db.query('vibes').order('desc');
     const vibes = await vibesQuery.paginate({
       cursor: args.cursor || null,
-      numItems: limit
+      numItems: limit,
     });
 
     const vibesWithDetails = await Promise.all(
@@ -35,7 +35,7 @@ export const getAll = query({
         // Use more efficient user lookup
         const creator = await ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('id'), vibe.createdById))
+          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
           .first();
 
         // Limit ratings to avoid excessive reads
@@ -48,7 +48,7 @@ export const getAll = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('id'), rating.userId))
+              .filter((q) => q.eq(q.field('externalId'), rating.userId))
               .first();
             return {
               user,
@@ -118,7 +118,7 @@ export const getById = query({
 
     const creator = await ctx.db
       .query('users')
-      .filter((q) => q.eq(q.field('id'), vibe.createdById))
+      .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
       .first();
 
     const ratings = await ctx.db
@@ -130,7 +130,7 @@ export const getById = query({
       ratings.map(async (rating) => {
         const user = await ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('id'), rating.userId))
+          .filter((q) => q.eq(q.field('externalId'), rating.userId))
           .first();
         return {
           user,
@@ -187,7 +187,7 @@ export const getByUser = query({
       vibes.map(async (vibe) => {
         const creator = await ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('id'), vibe.createdById))
+          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
           .first();
 
         const ratings = await ctx.db
@@ -199,7 +199,7 @@ export const getByUser = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('id'), rating.userId))
+              .filter((q) => q.eq(q.field('externalId'), rating.userId))
               .first();
             return {
               user,
@@ -341,19 +341,19 @@ export const getByTag = query({
   args: { tag: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 10; // Default limit for tag-based rows
-    
+
     const allVibes = await ctx.db.query('vibes').order('desc').take(100); // Get recent vibes
-    
+
     // Filter vibes that contain the specified tag
-    const vibesWithTag = allVibes.filter(vibe => 
-      vibe.tags && vibe.tags.includes(args.tag)
-    ).slice(0, limit);
+    const vibesWithTag = allVibes
+      .filter((vibe) => vibe.tags && vibe.tags.includes(args.tag))
+      .slice(0, limit);
 
     return await Promise.all(
       vibesWithTag.map(async (vibe) => {
         const creator = await ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('id'), vibe.createdById))
+          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
           .first();
 
         // Get limited ratings for performance
@@ -366,7 +366,7 @@ export const getByTag = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('id'), rating.userId))
+              .filter((q) => q.eq(q.field('externalId'), rating.userId))
               .first();
             return {
               user,
@@ -419,13 +419,13 @@ export const getByTag = query({
 export const getAllTags = query({
   handler: async (ctx) => {
     const vibes = await ctx.db.query('vibes').collect();
-    
+
     // Extract all tags and count their usage
     const tagCounts = new Map<string, number>();
-    
-    vibes.forEach(vibe => {
+
+    vibes.forEach((vibe) => {
       if (vibe.tags) {
-        vibe.tags.forEach(tag => {
+        vibe.tags.forEach((tag) => {
           tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
         });
       }
@@ -443,10 +443,10 @@ export const getTopRated = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 10;
-    
+
     // Get all vibes and calculate their average ratings
     const vibes = await ctx.db.query('vibes').order('desc').take(50);
-    
+
     const vibesWithRatings = await Promise.all(
       vibes.map(async (vibe) => {
         const ratings = await ctx.db
@@ -454,9 +454,10 @@ export const getTopRated = query({
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
           .collect();
 
-        const averageRating = ratings.length > 0 
-          ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
-          : 0;
+        const averageRating =
+          ratings.length > 0
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            : 0;
 
         return {
           vibe,
@@ -468,7 +469,7 @@ export const getTopRated = query({
 
     // Sort by average rating (with minimum 2 ratings to qualify)
     const topRated = vibesWithRatings
-      .filter(item => item.ratingCount >= 2)
+      .filter((item) => item.ratingCount >= 2)
       .sort((a, b) => b.averageRating - a.averageRating)
       .slice(0, limit);
 
@@ -476,7 +477,7 @@ export const getTopRated = query({
       topRated.map(async ({ vibe }) => {
         const creator = await ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('id'), vibe.createdById))
+          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
           .first();
 
         const ratings = await ctx.db
@@ -488,7 +489,7 @@ export const getTopRated = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('id'), rating.userId))
+              .filter((q) => q.eq(q.field('externalId'), rating.userId))
               .first();
             return {
               user,

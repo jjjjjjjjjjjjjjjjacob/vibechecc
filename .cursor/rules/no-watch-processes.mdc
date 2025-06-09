@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Watch processes refer to processes that take over the terminal (`bun run dev`, `ngrok http 80`, `tsc --watch`, `vitest`, `docker compose up`)
+- Do not run watch processes-- instead tell the user to run the process and provide its output.p

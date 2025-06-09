@@ -8,24 +8,24 @@ export const clear = action({
       // Get all data
       const users = await ctx.runQuery(api.users.getAll);
       const vibes = await ctx.runQuery(api.vibes.getAllSimple);
-      
+
       // Delete all ratings
       const allRatings = await ctx.db.query('ratings').collect();
       for (const rating of allRatings) {
         await ctx.db.delete(rating._id);
       }
-      
+
       // Delete all reactions
       const allReactions = await ctx.db.query('reactions').collect();
       for (const reaction of allReactions) {
         await ctx.db.delete(reaction._id);
       }
-      
+
       // Delete all vibes
       for (const vibe of vibes) {
         await ctx.db.delete(vibe._id);
       }
-      
+
       // Delete all users
       for (const user of users) {
         await ctx.db.delete(user._id);
@@ -51,37 +51,37 @@ export const seed = action({
     console.log('Starting complete seeding process...');
 
     try {
-      // Sample users from sample-data.ts
+      // Sample users updated for new schema
       const users = [
         {
-          id: 'user-1',
+          externalId: 'user-1',
           username: 'Alex Johnson',
-          avatar: '/placeholder.svg?height=100&width=100',
-          joinDate: '2023-01-15T00:00:00Z',
+          image_url: '/placeholder.svg?height=100&width=100',
+          created_at: new Date('2023-01-15T00:00:00Z').getTime(),
         },
         {
-          id: 'user-2',
+          externalId: 'user-2',
           username: 'Sofia Davis',
-          avatar: '/placeholder.svg?height=100&width=100&text=SD',
-          joinDate: '2022-11-03T00:00:00Z',
+          image_url: '/placeholder.svg?height=100&width=100&text=SD',
+          created_at: new Date('2022-11-03T00:00:00Z').getTime(),
         },
         {
-          id: 'user-3',
+          externalId: 'user-3',
           username: 'Marcus Lee',
-          avatar: '/placeholder.svg?height=100&width=100&text=ML',
-          joinDate: '2023-02-22T00:00:00Z',
+          image_url: '/placeholder.svg?height=100&width=100&text=ML',
+          created_at: new Date('2023-02-22T00:00:00Z').getTime(),
         },
         {
-          id: 'user-4',
+          externalId: 'user-4',
           username: 'Olivia Smith',
-          avatar: '/placeholder.svg?height=100&width=100&text=OS',
-          joinDate: '2022-09-14T00:00:00Z',
+          image_url: '/placeholder.svg?height=100&width=100&text=OS',
+          created_at: new Date('2022-09-14T00:00:00Z').getTime(),
         },
         {
-          id: 'user-5',
+          externalId: 'user-5',
           username: 'Ethan Brown',
-          avatar: '/placeholder.svg?height=100&width=100&text=EB',
-          joinDate: '2023-03-30T00:00:00Z',
+          image_url: '/placeholder.svg?height=100&width=100&text=EB',
+          created_at: new Date('2023-03-30T00:00:00Z').getTime(),
         },
       ];
 
@@ -89,9 +89,9 @@ export const seed = action({
       console.log('Creating users...');
       for (const user of users) {
         await ctx.runMutation(api.users.create, {
-          id: user.id,
+          externalId: user.externalId,
           username: user.username,
-          avatar: user.avatar,
+          image_url: user.image_url,
         });
       }
 
@@ -322,7 +322,7 @@ export const seed = action({
         { vibeId: 'vibe-1', emoji: '💯', userId: 'user-1' },
         // 👀 reactions (5 total)
         { vibeId: 'vibe-1', emoji: '👀', userId: 'user-3' },
-        
+
         // Reactions for vibe-2 (😱: 32, 🚽: 18, 🔦: 7)
         // 😱 reactions (32 total)
         { vibeId: 'vibe-2', emoji: '😱', userId: 'user-1' },
@@ -334,7 +334,7 @@ export const seed = action({
         { vibeId: 'vibe-2', emoji: '🚽', userId: 'user-1' },
         // 🔦 reactions (7 total)
         { vibeId: 'vibe-2', emoji: '🔦', userId: 'user-4' },
-        
+
         // Reactions for vibe-3 (🤑: 42, 💰: 28, 🎉: 15, 👖: 9)
         // 🤑 reactions (42 total)
         { vibeId: 'vibe-3', emoji: '🤑', userId: 'user-1' },
@@ -351,7 +351,7 @@ export const seed = action({
         { vibeId: 'vibe-3', emoji: '🎉', userId: 'user-1' },
         // 👖 reactions (9 total)
         { vibeId: 'vibe-3', emoji: '👖', userId: 'user-1' },
-        
+
         // Reactions for vibe-4 (😬: 38, 🙈: 22, ⏱️: 15)
         // 😬 reactions (38 total)
         { vibeId: 'vibe-4', emoji: '😬', userId: 'user-1' },

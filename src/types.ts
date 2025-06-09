@@ -8,29 +8,37 @@ export interface RenderedItem {
 
 // VibeCheck types
 export interface User {
-  // Legacy fields (for backward compatibility)
-  id?: string;
-  name?: string;
-  avatar?: string;
-  joinDate?: string;
-  
-  // Clerk integration fields
-  externalId?: string;
+  // Primary identifier (Clerk user ID stored as externalId in our DB)
+  externalId: string;
+
+  // Core user identity fields (synced with Clerk)
   username?: string;
   first_name?: string;
   last_name?: string;
+
+  // Image/Avatar fields
   image_url?: string;
   profile_image_url?: string;
   has_image?: boolean;
+
+  // Email reference (PII-conscious - store ID reference, not actual email)
   primary_email_address_id?: string;
+
+  // Activity tracking
   last_sign_in_at?: number;
   last_active_at?: number;
+
+  // Timestamps
   created_at?: number;
   updated_at?: number;
+
+  // Onboarding fields
+  onboardingCompleted?: boolean;
+  interests?: string[];
 }
 
 export interface Rating {
-  user: User;
+  user: User | null;
   rating: number;
   review?: string;
   date: string;

@@ -14,13 +14,13 @@ export function PostHogPageTracker({ title }: PostHogPageTrackerProps) {
 
   useEffect(() => {
     const currentPath = router.state.location.pathname;
-    
+
     // Track page view
     capturePageView(currentPath);
-    
+
     // Also use our custom tracking event
     trackEvents.pageViewed(currentPath, title || document.title);
   }, [router.state.location.pathname, capturePageView, trackEvents, title]);
 
   return null; // This component doesn't render anything
-} 
+}

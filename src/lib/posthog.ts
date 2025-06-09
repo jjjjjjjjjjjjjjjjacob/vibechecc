@@ -94,23 +94,22 @@ export const trackEvents = {
   // User actions
   userSignedUp: (userId: string, method: string) =>
     analytics.capture('user_signed_up', { method, user_id: userId }),
-  
+
   userSignedIn: (userId: string, method: string) =>
     analytics.capture('user_signed_in', { method, user_id: userId }),
-  
-  userSignedOut: () =>
-    analytics.capture('user_signed_out'),
+
+  userSignedOut: () => analytics.capture('user_signed_out'),
 
   // Vibe-related events
   vibeCreated: (vibeId: string, tags?: string[]) =>
     analytics.capture('vibe_created', { vibe_id: vibeId, tags }),
-  
+
   vibeViewed: (vibeId: string) =>
     analytics.capture('vibe_viewed', { vibe_id: vibeId }),
-  
+
   vibeRated: (vibeId: string, rating: number) =>
     analytics.capture('vibe_rated', { vibe_id: vibeId, rating }),
-  
+
   vibeReacted: (vibeId: string, emoji: string) =>
     analytics.capture('vibe_reacted', { vibe_id: vibeId, emoji }),
 
@@ -125,4 +124,4 @@ export const trackEvents = {
   // Errors
   errorOccurred: (error: string, context?: Record<string, any>) =>
     analytics.capture('error_occurred', { error, ...context }),
-} as const; 
+} as const;

@@ -27,8 +27,10 @@ export function ClerkPostHogIntegration() {
         lastName: user.lastName,
         username: user.username,
         hasImage: !!user.imageUrl,
-        emailVerified: user.primaryEmailAddress?.verification?.status === 'verified',
-        phoneVerified: user.primaryPhoneNumber?.verification?.status === 'verified',
+        emailVerified:
+          user.primaryEmailAddress?.verification?.status === 'verified',
+        phoneVerified:
+          user.primaryPhoneNumber?.verification?.status === 'verified',
         twoFactorEnabled: user.twoFactorEnabled,
       });
 
@@ -42,4 +44,4 @@ export function ClerkPostHogIntegration() {
   }, [isSignedIn, user, identify, setPersonProperties, reset, trackEvents]);
 
   return null; // This component doesn't render anything
-} 
+}

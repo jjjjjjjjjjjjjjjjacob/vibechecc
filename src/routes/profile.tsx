@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import {
   useUserVibes,
@@ -16,9 +16,10 @@ import { useUser } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
-import { redirect } from '@tanstack/react-router';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
+import { Sparkles } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -37,12 +38,17 @@ const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
 
 export const Route = createFileRoute('/profile')({
   component: Profile,
-  beforeLoad: async () => await requireAuth(),
+  beforeLoad: async () => {
+    const { userId } = await requireAuth();
+    return { userId };
+  },
 });
 
 function Profile() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+  console.log('clerkUser', clerkUser);
   const { data: convexUser, isLoading: convexUserLoading } = useCurrentUser();
+  console.log('convexUser', convexUser);
   const { data: vibes, isLoading: vibesLoading } = useUserVibes(
     convexUser?._id || ''
   );
@@ -54,6 +60,9 @@ function Profile() {
   const [imageUrl, setImageUrl] = React.useState('');
   const [isEditing, setIsEditing] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [uploadedImageFile, setUploadedImageFile] = React.useState<File | null>(
+    null
+  );
 
   // Initialize form with user data when loaded
   React.useEffect(() => {
@@ -95,6 +104,7 @@ function Profile() {
       </div>
     );
   }
+  console.log('convexUser', convexUser);
 
   if (!clerkUser || !convexUser) {
     return (
@@ -107,13 +117,25 @@ function Profile() {
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
-        if (e.target?.result) {
-          setImageUrl(e.target.result as string);
-        }
+        const url = e.target?.result as string;
+        setImageUrl(url);
+        setUploadedImageFile(file);
       };
       reader.readAsDataURL(file);
     }
@@ -123,16 +145,53 @@ function Profile() {
     e.preventDefault();
     setIsSaving(true);
 
+    if (!clerkUser) {
+      toast.error('User not found');
+      setIsSaving(false);
+      return;
+    }
+
     try {
-      await updateProfileMutation.mutateAsync({
-        username: username || undefined,
-        first_name: firstName || undefined,
-        last_name: lastName || undefined,
-        image_url: imageUrl || undefined,
-      });
+      const promises: Promise<any>[] = [];
+
+      // Prepare Convex updates
+      const convexUpdates: any = {};
+      if (username) convexUpdates.username = username;
+      if (firstName) convexUpdates.first_name = firstName;
+      if (lastName) convexUpdates.last_name = lastName;
+      if (imageUrl) convexUpdates.image_url = imageUrl;
+
+      // Add Convex update to promises
+      if (Object.keys(convexUpdates).length > 0) {
+        promises.push(updateProfileMutation.mutateAsync(convexUpdates));
+      }
+
+      // Prepare Clerk updates
+      const clerkUpdates: any = {};
+      if (username) clerkUpdates.username = username;
+      if (firstName) clerkUpdates.firstName = firstName;
+      if (lastName) clerkUpdates.lastName = lastName;
+
+      // Add Clerk user update to promises if there are field updates
+      if (Object.keys(clerkUpdates).length > 0) {
+        promises.push(clerkUser.update(clerkUpdates));
+      }
+
+      // Add Clerk avatar update to promises if there's an uploaded image
+      if (uploadedImageFile) {
+        promises.push(clerkUser.setProfileImage({ file: uploadedImageFile }));
+      }
+
+      // Execute all updates in parallel
+      if (promises.length > 0) {
+        await Promise.all(promises);
+        toast.success('Profile updated successfully!');
+      }
+
       setIsEditing(false);
     } catch (error) {
-      console.error('Failed to update profile:', error);
+      console.error('(Profile Page) Failed to update profile:', error);
+      toast.error('Failed to update profile. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -167,6 +226,7 @@ function Profile() {
                         imageUrl || convexUser.image_url || clerkUser.imageUrl
                       }
                       alt={displayName}
+                      className="object-cover"
                     />
                     <AvatarFallback className="text-2xl">
                       {displayName.substring(0, 2).toUpperCase()}
@@ -286,9 +346,20 @@ function Profile() {
                   <p className="text-muted-foreground mb-4">
                     member since {userJoinDate}
                   </p>
-                  <Button variant="outline" onClick={() => setIsEditing(true)}>
-                    edit profile
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      edit profile
+                    </Button>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/onboarding">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        take tour
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

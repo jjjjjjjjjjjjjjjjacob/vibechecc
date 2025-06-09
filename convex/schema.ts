@@ -3,10 +3,10 @@ import { type Infer, v } from 'convex/values';
 
 const schema = defineSchema({
   users: defineTable({
-    // Clerk User ID - primary identifier for linking with Clerk (optional for backward compatibility)
-    externalId: v.optional(v.string()),
+    // Clerk User ID - primary identifier for linking with Clerk
+    externalId: v.string(), // Required - stores Clerk's user.id
 
-    // Core user identity fields (1:1 with Clerk User object)
+    // Core user identity fields (synced with Clerk)
     username: v.optional(v.string()), // Clerk: username (nullable)
     first_name: v.optional(v.string()), // Clerk: first_name (nullable)
     last_name: v.optional(v.string()), // Clerk: last_name (nullable)
@@ -27,14 +27,10 @@ const schema = defineSchema({
     created_at: v.optional(v.number()), // Clerk: created_at (timestamp)
     updated_at: v.optional(v.number()), // Clerk: updated_at (timestamp)
 
-    // Legacy fields (for backward compatibility)
-    id: v.optional(v.string()), // Legacy internal ID
-    name: v.optional(v.string()), // Legacy name field
-    avatar: v.optional(v.string()), // Legacy avatar field
-    joinDate: v.optional(v.string()), // Legacy join date
-  })
-    .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
-    .index('id', ['id']), // Legacy index for backward compatibility
+    // Onboarding fields
+    onboardingCompleted: v.optional(v.boolean()), // Whether user completed onboarding
+    interests: v.optional(v.array(v.string())), // User selected interests/tags
+  }).index('byExternalId', ['externalId']), // Primary index for Clerk user lookups
 
   vibes: defineTable({
     id: v.string(),
@@ -70,12 +66,12 @@ const schema = defineSchema({
 });
 export default schema;
 
-const user = schema.tables.users.validator;
+const _user = schema.tables.users.validator;
 const vibe = schema.tables.vibes.validator;
 const rating = schema.tables.ratings.validator;
 const reaction = schema.tables.reactions.validator;
 
-export type User = Infer<typeof user>;
+export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
 export type Rating = Infer<typeof rating>;
 export type Reaction = Infer<typeof reaction>;

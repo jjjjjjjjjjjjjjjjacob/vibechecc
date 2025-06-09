@@ -1,7 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as React from 'react';
-import { useVibes, useAllTags, useVibesByTag, useTopRatedVibes } from '@/queries';
-import { VibeGrid } from '@/components/vibe-grid';
+import {
+  useVibes,
+  useAllTags,
+  useVibesByTag,
+  useTopRatedVibes,
+} from '@/queries';
 import { VibeCategoryRow } from '@/components/vibe-category-row';
 import { CreateVibeButton } from '@/components/create-vibe-button';
 import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
@@ -13,13 +17,18 @@ export const Route = createFileRoute('/')({
 });
 
 function Home() {
-  const { data: vibes, isLoading: vibesLoading, error: vibesError } = useVibes();
+  const {
+    data: vibes,
+    isLoading: vibesLoading,
+    error: vibesError,
+  } = useVibes();
   const { data: allTags, isLoading: tagsLoading } = useAllTags();
-  const { data: topRatedVibes, isLoading: topRatedLoading } = useTopRatedVibes(10);
+  const { data: topRatedVibes, isLoading: topRatedLoading } =
+    useTopRatedVibes(10);
 
   // Get vibes for the most popular tags (top 6 tags)
   const popularTags = allTags?.slice(0, 6) || [];
-  
+
   if (vibesLoading) {
     return <HomepageSkeleton />;
   }
@@ -79,7 +88,8 @@ function Home() {
       {topRatedLoading ? (
         <VibeCategoryRowSkeleton />
       ) : (
-        topRatedVibes && topRatedVibes.length > 0 && (
+        topRatedVibes &&
+        topRatedVibes.length > 0 && (
           <VibeCategoryRow title="top rated" vibes={topRatedVibes} />
         )
       )}
@@ -88,13 +98,17 @@ function Home() {
       <VibeCategoryRow title="trending now" vibes={recentVibes} />
 
       {/* Tag-based Categories */}
-      {!tagsLoading && popularTags.map((tagData) => (
-        <TagBasedSection key={tagData.tag} tag={tagData.tag} />
-      ))}
+      {!tagsLoading &&
+        popularTags.map((tagData) => (
+          <TagBasedSection key={tagData.tag} tag={tagData.tag} />
+        ))}
 
       {/* Show all vibes link */}
       <section className="mt-12 text-center">
-        <Link to="/vibes" className="text-primary lowercase hover:underline text-lg">
+        <Link
+          to="/vibes"
+          className="text-primary text-lg lowercase hover:underline"
+        >
           explore all vibes →
         </Link>
       </section>
@@ -118,10 +132,5 @@ function TagBasedSection({ tag }: { tag: string }) {
   // Capitalize tag name for better display
   const displayTitle = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
 
-  return (
-    <VibeCategoryRow 
-      title={`${displayTitle} vibes`} 
-      vibes={tagVibes} 
-    />
-  );
+  return <VibeCategoryRow title={`${displayTitle} vibes`} vibes={tagVibes} />;
 }

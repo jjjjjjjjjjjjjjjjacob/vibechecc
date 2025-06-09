@@ -30,7 +30,7 @@ export function StarRating({
   const handleClick = (rating: number) => {
     if (readOnly) return;
     onChange?.(rating);
-    
+
     // Show toast when rating is changed
     if (!readOnly && onChange) {
       toast.success(`rated ${rating} circle${rating === 1 ? '' : 's'}!`, {
@@ -85,7 +85,7 @@ export function StarRating({
       {circles.map((circle, index) => {
         const isFilled = circle <= Math.round(displayValue);
         const isHovering = hoverValue > 0 && circle <= hoverValue;
-        
+
         return (
           <button
             key={index}
@@ -103,11 +103,11 @@ export function StarRating({
             aria-checked={circle === Math.round(value)}
             aria-label={`${circle} circle${circle === 1 ? '' : 's'}`}
           >
-            <Circle 
+            <Circle
               className={cn(
                 sizeClasses[size],
-                (isFilled || isHovering) ? 'fill-current' : ''
-              )} 
+                isFilled || isHovering ? 'fill-current' : ''
+              )}
             />
           </button>
         );

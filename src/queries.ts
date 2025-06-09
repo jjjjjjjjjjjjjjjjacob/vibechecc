@@ -1,132 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
+import {
+  convexQuery,
+  useConvexMutation,
+  useConvexAction,
+} from '@convex-dev/react-query';
 import { api } from '../convex/_generated/api';
-
-export const boardQueries = {
-  list: () => convexQuery(api.board.getBoards, {}),
-  detail: (id: string) => convexQuery(api.board.getBoard, { id }),
-};
-
-export function useCreateColumnMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: useConvexMutation(api.board.createColumn),
-    onSuccess: (data) => {
-      if (
-        data &&
-        typeof data === 'object' &&
-        'boardId' in data &&
-        'name' in data
-      ) {
-        queryClient.invalidateQueries({
-          queryKey: ['boards', data.boardId, data.name],
-        });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['boards'] });
-      }
-    },
-  });
-}
-
-export function useCreateItemMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: useConvexMutation(api.board.createItem),
-    onSuccess: (data) => {
-      if (
-        data &&
-        typeof data === 'object' &&
-        'boardId' in data &&
-        'name' in data
-      ) {
-        queryClient.invalidateQueries({
-          queryKey: ['boards', data.boardId, data.name],
-        });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['boards'] });
-      }
-    },
-  });
-}
-
-export function useUpdateCardMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: useConvexMutation(api.board.updateItem),
-    onSuccess: (data) => {
-      if (
-        data &&
-        typeof data === 'object' &&
-        'boardId' in data &&
-        'name' in data
-      ) {
-        queryClient.invalidateQueries({
-          queryKey: ['boards', data.boardId, data.name],
-        });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['boards'] });
-      }
-    },
-  });
-}
-
-export function useDeleteCardMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: useConvexMutation(api.board.deleteItem),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['boards'] });
-    },
-  });
-}
-
-export function useDeleteColumnMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: useConvexMutation(api.board.deleteColumn),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['boards'] });
-    },
-  });
-}
-
-export function useUpdateBoardMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: useConvexMutation(api.board.updateBoard),
-    onSuccess: (data) => {
-      if (data && typeof data === 'object' && 'id' in data && 'name' in data) {
-        queryClient.invalidateQueries({ queryKey: ['boards', data.id] });
-        queryClient.invalidateQueries({
-          queryKey: ['boards', data.id, data.name],
-        });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['boards'] });
-      }
-    },
-  });
-}
-
-export function useUpdateColumnMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: useConvexMutation(api.board.updateColumn),
-    onSuccess: (data) => {
-      if (
-        data &&
-        typeof data === 'object' &&
-        'boardId' in data &&
-        'name' in data
-      ) {
-        queryClient.invalidateQueries({
-          queryKey: ['boards', data.boardId, data.name],
-        });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['boards'] });
-      }
-    },
-  });
-}
+import { useAuth } from '@clerk/tanstack-react-start';
 
 // VIBECHECK QUERIES
 
@@ -204,7 +83,14 @@ export function useUser(id: string) {
 
 // Query to get current user from Convex
 export function useCurrentUser() {
-  return useQuery(convexQuery(api.users.current, {}));
+  return useQuery({
+    ...convexQuery(api.users.current, {}),
+    enabled: !!useAuth(),
+    select: (data) => {
+      console.log('data', data);
+      return data;
+    },
+  });
 }
 
 // Mutation to create a user
@@ -229,11 +115,11 @@ export function useUpdateUserMutation() {
   });
 }
 
-// Mutation to update user profile (new schema)
+// Action to update user profile (syncs with both Convex and Clerk)
 export function useUpdateProfileMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: useConvexMutation(api.users.updateProfile),
+    mutationFn: useConvexAction(api.users.updateProfile),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
@@ -256,4 +142,52 @@ export function useAllTags() {
 // Query to get top-rated vibes
 export function useTopRatedVibes(limit?: number) {
   return useQuery(convexQuery(api.vibes.getTopRated, { limit }));
+}
+
+// ONBOARDING QUERIES
+
+// Debug authentication (temporary)
+export function useDebugAuth() {
+  return useQuery(convexQuery(api.users.debugAuth, {}));
+}
+
+// Query to get user onboarding status
+export function useOnboardingStatus() {
+  return useQuery(convexQuery(api.users.getOnboardingStatus, {}));
+}
+
+// Action to update onboarding data (syncs with both Convex and Clerk)
+export function useUpdateOnboardingDataMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: useConvexAction(api.users.updateOnboardingData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
+}
+
+// Action to complete onboarding (syncs with both Convex and Clerk)
+export function useCompleteOnboardingMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: useConvexAction(api.users.completeOnboarding),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
+}
+
+// Mutation to ensure user exists in Convex
+export function useEnsureUserExistsMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: useConvexMutation(api.users.ensureUserExists),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
 }

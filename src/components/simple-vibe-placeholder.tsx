@@ -1,5 +1,5 @@
 import { useTheme } from './theme-provider';
-import { cn } from '../utils/tailwind-utils';
+import { cn } from '@/utils/tailwind-utils';
 import { useEffect, useState } from 'react';
 
 interface SimplePlaceholderProps {

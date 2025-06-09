@@ -14,7 +14,11 @@ import { StarRating } from '@/components/star-rating';
 import { EmojiReactions } from '@/components/emoji-reaction';
 import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
 import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
-import { computeUserDisplayName, getUserAvatarUrl, getUserInitials } from '@/utils/user-utils';
+import {
+  computeUserDisplayName,
+  getUserAvatarUrl,
+  getUserInitials,
+} from '@/utils/user-utils';
 import { useUser } from '@clerk/tanstack-react-start';
 import toast from 'react-hot-toast';
 
@@ -34,38 +38,63 @@ function VibePage() {
   // Extract context keywords from vibe for emoji suggestions
   const contextKeywords = React.useMemo(() => {
     if (!vibe) return [];
-    
+
     const keywords: string[] = [];
-    
+
     // Extract words from title and description
-    const titleWords = vibe.title.toLowerCase().split(/\W+/).filter(word => word.length > 2);
-    const descriptionWords = vibe.description?.toLowerCase().split(/\W+/).filter(word => word.length > 2) || [];
-    
+    const titleWords = vibe.title
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((word) => word.length > 2);
+    const descriptionWords =
+      vibe.description
+        ?.toLowerCase()
+        .split(/\W+/)
+        .filter((word) => word.length > 2) || [];
+
     keywords.push(...titleWords, ...descriptionWords);
-    
+
     // Add keywords from tags
     if (vibe.tags) {
-      keywords.push(...vibe.tags.map(tag => tag.toLowerCase()));
+      keywords.push(...vibe.tags.map((tag) => tag.toLowerCase()));
     }
-    
+
     // Add some context-based keywords based on common patterns
     const title = vibe.title.toLowerCase();
     const description = vibe.description?.toLowerCase() || '';
-    
+
     // Add contextual keywords based on content analysis
-    if (title.includes('money') || title.includes('rich') || title.includes('expensive') || description.includes('money')) {
+    if (
+      title.includes('money') ||
+      title.includes('rich') ||
+      title.includes('expensive') ||
+      description.includes('money')
+    ) {
       keywords.push('money', 'rich', 'expensive');
     }
-    if (title.includes('time') || title.includes('clock') || title.includes('fast') || description.includes('time')) {
+    if (
+      title.includes('time') ||
+      title.includes('clock') ||
+      title.includes('fast') ||
+      description.includes('time')
+    ) {
       keywords.push('time', 'fast', 'speed');
     }
-    if (title.includes('love') || title.includes('heart') || description.includes('love')) {
+    if (
+      title.includes('love') ||
+      title.includes('heart') ||
+      description.includes('love')
+    ) {
       keywords.push('love', 'heart');
     }
-    if (title.includes('fire') || title.includes('hot') || description.includes('fire')) {
+    if (
+      title.includes('fire') ||
+      title.includes('hot') ||
+      description.includes('fire')
+    ) {
       keywords.push('fire', 'hot', 'amazing');
     }
-    
+
     return [...new Set(keywords)]; // Remove duplicates
   }, [vibe]);
 
@@ -101,7 +130,7 @@ function VibePage() {
       });
       setReview('');
       // We don't reset rating to allow the user to see what they rated
-      
+
       // Show success toast
       toast.success(
         `vibe rated ${rating} circle${rating === 1 ? '' : 's'}! ${review.trim() ? 'review submitted.' : ''}`,
@@ -173,7 +202,9 @@ function VibePage() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{computeUserDisplayName(vibe.createdBy)}</p>
+                  <p className="font-medium">
+                    {computeUserDisplayName(vibe.createdBy)}
+                  </p>
                   <p className="text-muted-foreground text-sm">
                     {new Date(vibe.createdAt).toLocaleDateString()}
                   </p>
@@ -268,7 +299,9 @@ function VibePage() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <p className="font-medium">{computeUserDisplayName(rating.user)}</p>
+                          <p className="font-medium">
+                            {computeUserDisplayName(rating.user)}
+                          </p>
                           <div className="flex items-center gap-2">
                             <StarRating
                               value={rating.rating}

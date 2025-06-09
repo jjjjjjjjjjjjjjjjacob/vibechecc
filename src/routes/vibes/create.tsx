@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import { useCreateVibeMutation } from '@/queries';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import { usePostHog } from '@/hooks/usePostHog';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
-import { redirect } from '@tanstack/react-router';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {

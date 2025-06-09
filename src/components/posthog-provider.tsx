@@ -13,7 +13,8 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
     if (typeof window !== 'undefined') {
       const config: PostHogConfig = {
         apiKey: import.meta.env.VITE_POSTHOG_API_KEY || '',
-        apiHost: import.meta.env.VITE_POSTHOG_API_HOST || 'https://app.posthog.com',
+        apiHost:
+          import.meta.env.VITE_POSTHOG_API_HOST || 'https://app.posthog.com',
         projectId: import.meta.env.VITE_POSTHOG_PROJECT_ID || '',
         region: import.meta.env.VITE_POSTHOG_REGION || 'us',
       };
@@ -22,10 +23,12 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
       if (config.apiKey) {
         analytics.init(config);
       } else {
-        console.warn('PostHog API key not found. Analytics will not be initialized.');
+        console.warn(
+          'PostHog API key not found. Analytics will not be initialized.'
+        );
       }
     }
   }, []);
 
   return <>{children}</>;
-} 
+}

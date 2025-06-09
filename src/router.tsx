@@ -7,7 +7,6 @@ import {
 import { routerWithQueryClient } from '@tanstack/react-router-with-query';
 import toast from 'react-hot-toast';
 import { ConvexQueryClient } from '@convex-dev/react-query';
-import { ConvexProvider } from 'convex/react';
 import { routeTree } from './routeTree.gen';
 import { DefaultCatchBoundary } from './components/default-catch-boundary';
 import { NotFound } from './components/not-found';
@@ -45,11 +44,6 @@ export function createRouter() {
       defaultErrorComponent: DefaultCatchBoundary,
       defaultNotFoundComponent: () => <NotFound />,
       context: { queryClient },
-      Wrap: ({ children }) => (
-        <ConvexProvider client={convexQueryClient.convexClient}>
-          {children}
-        </ConvexProvider>
-      ),
       scrollRestoration: true,
     }),
     queryClient
