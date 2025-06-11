@@ -2,6 +2,7 @@ import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import {
   useUserVibes,
+  useUserReactedVibes,
   useUpdateProfileMutation,
   useCurrentUser,
 } from '@/queries';
@@ -18,8 +19,10 @@ import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Globe, Twitter, Instagram, Youtube } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -52,12 +55,23 @@ function Profile() {
   const { data: vibes, isLoading: vibesLoading } = useUserVibes(
     convexUser?._id || ''
   );
+  const { data: reactedVibes, isLoading: reactedVibesLoading } = useUserReactedVibes(
+    convexUser?.externalId || ''
+  );
   const updateProfileMutation = useUpdateProfileMutation();
 
   const [username, setUsername] = React.useState('');
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [imageUrl, setImageUrl] = React.useState('');
+  const [bio, setBio] = React.useState('');
+  const [socials, setSocials] = React.useState({
+    twitter: '',
+    instagram: '',
+    tiktok: '',
+    youtube: '',
+    website: '',
+  });
   const [isEditing, setIsEditing] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [uploadedImageFile, setUploadedImageFile] = React.useState<File | null>(
@@ -71,6 +85,14 @@ function Profile() {
       setFirstName(convexUser.first_name || '');
       setLastName(convexUser.last_name || '');
       setImageUrl(convexUser.image_url || '');
+      setBio(convexUser.bio || '');
+      setSocials({
+        twitter: convexUser.socials?.twitter || '',
+        instagram: convexUser.socials?.instagram || '',
+        tiktok: convexUser.socials?.tiktok || '',
+        youtube: convexUser.socials?.youtube || '',
+        website: convexUser.socials?.website || '',
+      });
     }
   }, [convexUser]);
 

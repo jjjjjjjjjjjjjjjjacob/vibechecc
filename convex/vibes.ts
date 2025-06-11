@@ -247,6 +247,94 @@ export const getByUser = query({
   },
 });
 
+// Get vibes that a user has reacted to
+export const getUserReactedVibes = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    // Get all reactions by the user
+    const userReactions = await ctx.db
+      .query('reactions')
+      .withIndex('user', (q) => q.eq('userId', args.userId))
+      .collect();
+
+    // Get unique vibe IDs that the user has reacted to
+    const reactedVibeIds = [...new Set(userReactions.map(r => r.vibeId))];
+
+    // Get the vibes for those IDs
+    const vibes = await Promise.all(
+      reactedVibeIds.map(async (vibeId) => {
+        const vibe = await ctx.db
+          .query('vibes')
+          .filter((q) => q.eq(q.field('id'), vibeId))
+          .first();
+        
+        if (!vibe) return null;
+
+        const creator = await ctx.db
+          .query('users')
+          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
+          .first();
+
+        const ratings = await ctx.db
+          .query('ratings')
+          .filter((q) => q.eq(q.field('vibeId'), vibe.id))
+          .collect();
+
+        const ratingDetails = await Promise.all(
+          ratings.map(async (rating) => {
+            const user = await ctx.db
+              .query('users')
+              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .first();
+            return {
+              user,
+              rating: rating.rating,
+              review: rating.review,
+              date: rating.date,
+            };
+          })
+        );
+
+        const reactions = await ctx.db
+          .query('reactions')
+          .filter((q) => q.eq(q.field('vibeId'), vibe.id))
+          .collect();
+
+        // Group reactions by emoji
+        const emojiReactions = reactions.reduce(
+          (acc, reaction) => {
+            const existingReaction = acc.find(
+              (r) => r.emoji === reaction.emoji
+            );
+            if (existingReaction) {
+              existingReaction.users.push(reaction.userId);
+              existingReaction.count++;
+            } else {
+              acc.push({
+                emoji: reaction.emoji,
+                count: 1,
+                users: [reaction.userId],
+              });
+            }
+            return acc;
+          },
+          [] as { emoji: string; count: number; users: string[] }[]
+        );
+
+        return {
+          ...vibe,
+          createdBy: creator,
+          ratings: ratingDetails,
+          reactions: emojiReactions,
+        };
+      })
+    );
+
+    // Filter out null values and return
+    return vibes.filter(vibe => vibe !== null);
+  },
+});
+
 // Create a new vibe
 export const create = mutation({
   args: createVibeSchema,

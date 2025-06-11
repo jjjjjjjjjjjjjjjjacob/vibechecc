@@ -25,8 +25,8 @@ export function Header() {
 
   return (
     <header
-      data-isDark={resolvedTheme === 'dark'}
-      className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full backdrop-blur data-[showBottomBorder=true]:border-b"
+      data-is-dark={resolvedTheme === 'dark'}
+      className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full backdrop-blur data-[is-dark=true]:border-b"
     >
       <div className="container flex h-16 items-center">
         <div className="flex items-center gap-2 md:gap-4">

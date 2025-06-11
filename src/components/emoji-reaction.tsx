@@ -270,182 +270,122 @@ function HorizontalEmojiPicker({
     'flags',
   ];
 
-  return (
-    <PopoverContent
-      className={cn(
-        'w-full max-w-80 p-3 transition-all duration-300',
-        showFullPicker && 'h-96 w-80 p-0',
-        showSearchResults && !showFullPicker && 'pb-6'
-      )}
-      side="top"
-      align="start"
-      sideOffset={8}
-    >
-      {showFullPicker ? (
-        <div className="relative h-full">
-          <Command className="h-full">
-            <CommandInput
-              placeholder="Search emojis..."
-              value={searchValue}
-              onValueChange={setSearchValue}
-            />
-
-            <CommandList asChild>
-              <ScrollArea className="h-80">
-                <div className="p-2">
-                  <CommandEmpty>No emojis found.</CommandEmpty>
-
-                  {/* Quick suggestions based on context */}
-                  {quickSuggestions.length > 0 && (
-                    <CommandGroup heading="Suggested">
-                      <div className="grid grid-cols-6 gap-1 py-2">
-                        {quickSuggestions.map((emojiData) => (
-                          <CommandItem
-                            key={`suggested-${emojiData.emoji}`}
-                            value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
-                            onSelect={() => handleEmojiClick(emojiData.emoji)}
-                            className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
-                          >
-                            {emojiData.emoji}
-                          </CommandItem>
-                        ))}
-                      </div>
-                    </CommandGroup>
-                  )}
-
-                  {/* Grouped emojis by category */}
-                  {categoryOrder.map((category) => {
-                    const categoryEmojis = groupedEmojis[category];
-                    if (!categoryEmojis || categoryEmojis.length === 0)
-                      return null;
-
-                    return (
-                      <CommandGroup
-                        key={category}
-                        heading={
-                          category.charAt(0).toUpperCase() + category.slice(1)
-                        }
-                      >
-                        <div className="grid grid-cols-6 gap-1 py-2">
-                          {categoryEmojis.map((emojiData) => (
-                            <CommandItem
-                              key={`${category}-${emojiData.emoji}`}
-                              value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
-                              onSelect={() => handleEmojiClick(emojiData.emoji)}
-                              className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
-                              title={emojiData.name}
-                            >
-                              {emojiData.emoji}
-                            </CommandItem>
-                          ))}
-                        </div>
-                      </CommandGroup>
-                    );
-                  })}
-
-                  {/* Show remaining categories that aren't in the priority order */}
-                  {Object.keys(groupedEmojis)
-                    .filter((category) => !categoryOrder.includes(category))
-                    .map((category) => {
-                      const categoryEmojis = groupedEmojis[category];
-                      if (!categoryEmojis || categoryEmojis.length === 0)
-                        return null;
-
-                      return (
-                        <CommandGroup
-                          key={category}
-                          heading={
-                            category.charAt(0).toUpperCase() + category.slice(1)
-                          }
-                        >
-                          <div className="grid grid-cols-8 gap-1 py-2">
-                            {categoryEmojis.map((emojiData) => (
-                              <CommandItem
-                                key={`${category}-${emojiData.emoji}`}
-                                value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
-                                onSelect={() =>
-                                  handleEmojiClick(emojiData.emoji)
-                                }
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
-                                title={emojiData.name}
-                              >
-                                {emojiData.emoji}
-                              </CommandItem>
-                            ))}
-                          </div>
-                        </CommandGroup>
-                      );
-                    })}
-                </div>
-              </ScrollArea>
-            </CommandList>
-          </Command>
-
-          {/* Chevron up in bottom right corner when full picker is shown */}
-          <button
-            onClick={() => setShowFullPicker(false)}
-            className={cn(
-              'bg-primary text-primary-foreground absolute right-2 bottom-2 z-10 flex h-8 w-8 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105',
-              showFullPicker
-                ? 'animate-in fade-in zoom-in delay-100 duration-200'
-                : 'animate-out fade-out zoom-out duration-200'
-            )}
-            aria-label="Collapse to horizontal picker"
-          >
-            <ChevronDown className="h-4 w-4 rotate-180" />
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-0">
-          {/* Main horizontal row */}
-          <div className="flex items-center gap-2">
-            {/* Phase 1: Search icon morphs into search field */}
-            <div
-              data-state={isSearchExpanded ? 'expanded' : 'collapsed'}
-              className={cn(
-                'relative transition-[width] ease-in-out data-[state=collapsed]:duration-100 data-[state=expanded]:duration-300',
-                'data-[state=collapsed]:w-8 data-[state=expanded]:w-full'
-              )}
+  const horizontalPicker = (
+    <div className="space-y-0">
+      {/* Main horizontal row */}
+      <div className="flex items-center gap-2">
+        {/* Phase 1: Search icon morphs into search field */}
+        <div
+          data-state={isSearchExpanded ? 'expanded' : 'collapsed'}
+          className={cn(
+            'relative transition-[width] ease-in-out data-[state=collapsed]:duration-100 data-[state=expanded]:duration-300',
+            'data-[state=collapsed]:w-8 data-[state=expanded]:w-full'
+          )}
+        >
+          {!isSearchExpanded ? (
+            <button
+              onClick={handleSearchClick}
+              className="bg-muted hover:bg-muted-foreground/20 text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+              aria-label="Search emojis"
             >
-              {!isSearchExpanded ? (
-                <button
-                  onClick={handleSearchClick}
-                  className="bg-muted hover:bg-muted-foreground/20 text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-                  aria-label="Search emojis"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              ) : (
-                <div className="relative">
-                  <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 transform" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search emojis..."
-                    value={searchValue}
-                    onChange={(e) => handleSearchInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') {
-                        handleCollapseSearch();
-                      }
-                    }}
-                    className="bg-muted h-8 w-full rounded-full border-none pr-8 pl-10 text-sm duration-500 outline-none"
-                  />
-                  <button
-                    onClick={handleCollapseSearch}
-                    className="hover:bg-background/80 animate-in fade-in absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 transform items-center justify-center rounded-full transition-colors duration-500"
-                    aria-label="Close search"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
+              <Search className="h-4 w-4" />
+            </button>
+          ) : (
+            <div className="relative">
+              <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 transform" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search emojis..."
+                value={searchValue}
+                onChange={(e) => handleSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    handleCollapseSearch();
+                  }
+                }}
+                className="bg-muted h-8 w-full rounded-full border-none pr-8 pl-10 text-sm duration-500 outline-none"
+              />
+              <button
+                onClick={handleCollapseSearch}
+                className="hover:bg-background/80 animate-in fade-in absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 transform items-center justify-center rounded-full transition-colors duration-500"
+                aria-label="Close search"
+              >
+                <X className="h-3 w-3" />
+              </button>
             </div>
+          )}
+        </div>
 
-            {/* Default suggested emojis (always visible unless search is expanded) */}
-            {!isSearchExpanded && (
-              <div className="animate-in fade-in slide-in-from-right-4 flex items-center gap-1 duration-300">
-                {suggestedEmojis.slice(0, 6).map((emojiData, index) => (
+        {/* Default suggested emojis (always visible unless search is expanded) */}
+        {!isSearchExpanded && (
+          <div className="animate-in fade-in slide-in-from-right-4 flex items-center gap-1 duration-300">
+            {suggestedEmojis.slice(0, 6).map((emojiData, index) => (
+              <button
+                key={emojiData.emoji}
+                onClick={() => handleEmojiClick(emojiData.emoji)}
+                className={cn(
+                  'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
+                  'animate-in fade-in zoom-in duration-150'
+                )}
+                style={{
+                  animationDelay: `${index * 30}ms`,
+                }}
+                title={emojiData.name}
+              >
+                {emojiData.emoji}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <button
+          onClick={handleShowFullPicker}
+          className="bg-muted hover:bg-muted/80 flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+          aria-label="Show full emoji picker"
+        >
+          <ChevronDown className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Phase 2 & 3: Search results expand down then right */}
+      {isSearchExpanded && !searchValue && (
+        <div className="animate-in fade-in slide-in-from-right-4 flex items-center gap-1 duration-300">
+          {suggestedEmojis.map((emojiData, index) => (
+            <button
+              key={emojiData.emoji}
+              onClick={() => handleEmojiClick(emojiData.emoji)}
+              className={cn(
+                'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
+                'animate-in fade-in zoom-in duration-150'
+              )}
+              style={{
+                animationDelay: `${index * 30}ms`,
+              }}
+              title={emojiData.name}
+            >
+              {emojiData.emoji}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {showSearchResults && searchValue.trim() && (
+        <div
+          className={cn(
+            'overflow-hidden pt-3',
+            'animate-in slide-in-from-top-4 fade-in delay-100 duration-300'
+          )}
+        >
+          <div
+            className={cn(
+              'overflow-hidden',
+              'animate-in slide-in-from-left-8 fade-in delay-200 duration-300'
+            )}
+          >
+            {searchResults.length > 0 ? (
+              <div className="grid grid-cols-8 gap-1">
+                {searchResults.map((emojiData, index) => (
                   <button
                     key={emojiData.emoji}
                     onClick={() => handleEmojiClick(emojiData.emoji)}
@@ -454,7 +394,7 @@ function HorizontalEmojiPicker({
                       'animate-in fade-in zoom-in duration-150'
                     )}
                     style={{
-                      animationDelay: `${index * 30}ms`,
+                      animationDelay: `${300 + index * 30}ms`,
                     }}
                     title={emojiData.name}
                   >
@@ -462,81 +402,142 @@ function HorizontalEmojiPicker({
                   </button>
                 ))}
               </div>
-            )}
-
-            <button
-              onClick={handleShowFullPicker}
-              className="bg-muted hover:bg-muted/80 flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-              aria-label="Show full emoji picker"
-            >
-              <ChevronDown className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Phase 2 & 3: Search results expand down then right */}
-          {isSearchExpanded && !searchValue && (
-            <div className="animate-in fade-in slide-in-from-right-4 flex items-center gap-1 duration-300">
-              {suggestedEmojis.map((emojiData, index) => (
-                <button
-                  key={emojiData.emoji}
-                  onClick={() => handleEmojiClick(emojiData.emoji)}
-                  className={cn(
-                    'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
-                    'animate-in fade-in zoom-in duration-150'
-                  )}
-                  style={{
-                    animationDelay: `${index * 30}ms`,
-                  }}
-                  title={emojiData.name}
-                >
-                  {emojiData.emoji}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {showSearchResults && searchValue.trim() && (
-            <div
-              className={cn(
-                'overflow-hidden pt-3',
-                'animate-in slide-in-from-top-4 fade-in delay-100 duration-300'
-              )}
-            >
-              <div
-                className={cn(
-                  'overflow-hidden',
-                  'animate-in slide-in-from-left-8 fade-in delay-200 duration-300'
-                )}
-              >
-                {searchResults.length > 0 ? (
-                  <div className="grid grid-cols-8 gap-1">
-                    {searchResults.map((emojiData, index) => (
-                      <button
-                        key={emojiData.emoji}
-                        onClick={() => handleEmojiClick(emojiData.emoji)}
-                        className={cn(
-                          'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
-                          'animate-in fade-in zoom-in duration-150'
-                        )}
-                        style={{
-                          animationDelay: `${300 + index * 30}ms`,
-                        }}
-                        title={emojiData.name}
-                      >
-                        {emojiData.emoji}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-muted-foreground animate-in fade-in py-2 text-center text-sm delay-400 duration-200">
-                    No emojis found
-                  </div>
-                )}
+            ) : (
+              <div className="text-muted-foreground animate-in fade-in py-2 text-center text-sm delay-400 duration-200">
+                No emojis found
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
+    </div>
+  );
+
+  const fullPicker = (
+    <div className="relative h-full w-full">
+      <Command className="h-full">
+        <CommandInput
+          placeholder="Search emojis..."
+          value={searchValue}
+          onValueChange={setSearchValue}
+        />
+
+        <CommandList asChild>
+          <ScrollArea className="h-80">
+            <div className="p-2">
+              <CommandEmpty>No emojis found.</CommandEmpty>
+
+              {/* Quick suggestions based on context  */}
+              {quickSuggestions.length > 0 && (
+                <CommandGroup heading="Suggested">
+                  <div className="grid grid-cols-8 gap-1 py-2">
+                    {quickSuggestions.map((emojiData) => (
+                      <CommandItem
+                        key={`suggested-${emojiData.emoji}`}
+                        value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
+                        onSelect={() => handleEmojiClick(emojiData.emoji)}
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
+                      >
+                        {emojiData.emoji}
+                      </CommandItem>
+                    ))}
+                  </div>
+                </CommandGroup>
+              )}
+
+              {/* Grouped emojis by category */}
+              {categoryOrder.map((category) => {
+                const categoryEmojis = groupedEmojis[category];
+                if (!categoryEmojis || categoryEmojis.length === 0) return null;
+
+                return (
+                  <CommandGroup
+                    key={category}
+                    heading={
+                      category.charAt(0).toUpperCase() + category.slice(1)
+                    }
+                  >
+                    <div className="grid grid-cols-8 gap-1 py-2">
+                      {categoryEmojis.map((emojiData, index) => (
+                        <CommandItem
+                          key={`${category}-${emojiData.emoji}`}
+                          value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
+                          onSelect={() => handleEmojiClick(emojiData.emoji)}
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
+                          title={emojiData.name}
+                          style={{
+                            animationDelay: `${index * 30}ms`,
+                          }}
+                        >
+                          {emojiData.emoji}
+                        </CommandItem>
+                      ))}
+                    </div>
+                  </CommandGroup>
+                );
+              })}
+
+              {/* Show remaining categories that aren't in the priority order */}
+              {Object.keys(groupedEmojis)
+                .filter((category) => !categoryOrder.includes(category))
+                .map((category) => {
+                  const categoryEmojis = groupedEmojis[category];
+                  if (!categoryEmojis || categoryEmojis.length === 0)
+                    return null;
+
+                  return (
+                    <CommandGroup
+                      key={category}
+                      heading={
+                        category.charAt(0).toUpperCase() + category.slice(1)
+                      }
+                    >
+                      <div className="grid grid-cols-8 gap-1 py-2">
+                        {categoryEmojis.map((emojiData) => (
+                          <CommandItem
+                            key={`${category}-${emojiData.emoji}`}
+                            value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
+                            onSelect={() => handleEmojiClick(emojiData.emoji)}
+                            className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
+                            title={emojiData.name}
+                          >
+                            {emojiData.emoji}
+                          </CommandItem>
+                        ))}
+                      </div>
+                    </CommandGroup>
+                  );
+                })}
+            </div>
+          </ScrollArea>
+        </CommandList>
+      </Command>
+
+      {/* Chevron up in bottom right corner when full picker is shown */}
+      <button
+        onClick={() => setShowFullPicker(false)}
+        className={cn(
+          'bg-primary text-primary-foreground absolute right-2 bottom-2 z-10 flex h-8 w-8 items-center justify-center rounded-full shadow-lg hover:scale-105'
+        )}
+        aria-label="Collapse to horizontal picker"
+      >
+        <ChevronDown className="h-4 w-4 rotate-180" />
+      </button>
+    </div>
+  );
+
+  return (
+    <PopoverContent
+      className={cn(
+        'w-80 p-3 h-14 transition-[height]',
+        showFullPicker && 'h-96 p-0',
+        (showSearchResults || isSearchExpanded) && !showFullPicker && 'h-24 pb-6'
+      )}
+      side="top"
+      align="start"
+      sideOffset={8}
+    >
+      {showFullPicker ? fullPicker : horizontalPicker}
     </PopoverContent>
   );
 }

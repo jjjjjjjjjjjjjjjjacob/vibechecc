@@ -35,6 +35,14 @@ export function useUserVibes(userId: string) {
   });
 }
 
+// Query to get vibes a user has reacted to
+export function useUserReactedVibes(userId: string) {
+  return useQuery({
+    ...convexQuery(api.vibes.getUserReactedVibes, { userId }),
+    enabled: !!userId,
+  });
+}
+
 // Mutation to create a vibe
 export function useCreateVibeMutation() {
   const queryClient = useQueryClient();

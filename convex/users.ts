@@ -98,6 +98,14 @@ export const updateProfile = action({
     first_name: v.optional(v.string()),
     last_name: v.optional(v.string()),
     image_url: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    socials: v.optional(v.object({
+      twitter: v.optional(v.string()),
+      instagram: v.optional(v.string()),
+      tiktok: v.optional(v.string()),
+      youtube: v.optional(v.string()),
+      website: v.optional(v.string()),
+    })),
   },
   handler: async (ctx, args): Promise<any> => {
     const identity = await ctx.auth.getUserIdentity();
@@ -121,6 +129,14 @@ export const updateProfileInternal = internalMutation({
     first_name: v.optional(v.string()),
     last_name: v.optional(v.string()),
     image_url: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    socials: v.optional(v.object({
+      twitter: v.optional(v.string()),
+      instagram: v.optional(v.string()),
+      tiktok: v.optional(v.string()),
+      youtube: v.optional(v.string()),
+      website: v.optional(v.string()),
+    })),
   },
   handler: async (ctx, args) => {
     const user = await userByExternalId(ctx, args.externalId);
@@ -128,7 +144,7 @@ export const updateProfileInternal = internalMutation({
       throw new Error('User not found');
     }
 
-    const updates: Record<string, string> = {};
+    const updates: Record<string, any> = {};
 
     if (args.username !== undefined) {
       updates.username = args.username;
@@ -142,6 +158,12 @@ export const updateProfileInternal = internalMutation({
     if (args.image_url !== undefined) {
       updates.image_url = args.image_url;
       updates.profile_image_url = args.image_url; // Keep both fields synced
+    }
+    if (args.bio !== undefined) {
+      updates.bio = args.bio;
+    }
+    if (args.socials !== undefined) {
+      updates.socials = args.socials;
     }
 
     if (Object.keys(updates).length > 0) {

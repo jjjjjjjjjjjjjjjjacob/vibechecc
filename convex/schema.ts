@@ -30,6 +30,16 @@ const schema = defineSchema({
     // Onboarding fields
     onboardingCompleted: v.optional(v.boolean()), // Whether user completed onboarding
     interests: v.optional(v.array(v.string())), // User selected interests/tags
+
+    // Profile customization fields
+    bio: v.optional(v.string()), // User bio/description
+    socials: v.optional(v.object({
+      twitter: v.optional(v.string()),
+      instagram: v.optional(v.string()),
+      tiktok: v.optional(v.string()),
+      youtube: v.optional(v.string()),
+      website: v.optional(v.string()),
+    })), // Social media links
   }).index('byExternalId', ['externalId']), // Primary index for Clerk user lookups
 
   vibes: defineTable({
