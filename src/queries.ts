@@ -5,7 +5,7 @@ import {
   useConvexAction,
 } from '@convex-dev/react-query';
 import { api } from '../convex/_generated/api';
-import { useAuth } from '@clerk/tanstack-react-start';
+// import { useAuth } from '@clerk/tanstack-react-start';
 
 // VIBECHECK QUERIES
 
@@ -93,7 +93,6 @@ export function useUser(id: string) {
 export function useCurrentUser() {
   return useQuery({
     ...convexQuery(api.users.current, {}),
-    enabled: !!useAuth(),
     select: (data) => {
       console.log('data', data);
       return data;

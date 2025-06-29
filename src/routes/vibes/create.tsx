@@ -94,7 +94,6 @@ function CreateVibe() {
         description: description.trim(),
         image: image || undefined,
         tags: tags.length > 0 ? tags : undefined,
-        createdById: user.id, // Use actual user ID from Clerk
       });
 
       // Track vibe creation

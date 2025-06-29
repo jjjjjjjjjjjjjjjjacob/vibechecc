@@ -1,9 +1,4 @@
-import { mutation, query } from './_generated/server';
-import {
-  createVibeSchema,
-  createRatingSchema,
-  reactToVibeSchema,
-} from './schema';
+import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 
 // Simple get all vibes (for backwards compatibility)
@@ -254,11 +249,11 @@ export const getUserReactedVibes = query({
     // Get all reactions by the user
     const userReactions = await ctx.db
       .query('reactions')
-      .withIndex('user', (q) => q.eq('userId', args.userId))
+      .withIndex('userAndVibe', (q) => q.eq('userId', args.userId))
       .collect();
 
     // Get unique vibe IDs that the user has reacted to
-    const reactedVibeIds = [...new Set(userReactions.map(r => r.vibeId))];
+    const reactedVibeIds = [...new Set(userReactions.map((r) => r.vibeId))];
 
     // Get the vibes for those IDs
     const vibes = await Promise.all(
@@ -267,7 +262,7 @@ export const getUserReactedVibes = query({
           .query('vibes')
           .filter((q) => q.eq(q.field('id'), vibeId))
           .first();
-        
+
         if (!vibe) return null;
 
         const creator = await ctx.db
@@ -331,14 +326,25 @@ export const getUserReactedVibes = query({
     );
 
     // Filter out null values and return
-    return vibes.filter(vibe => vibe !== null);
+    return vibes.filter((vibe) => vibe !== null);
   },
 });
 
 // Create a new vibe
 export const create = mutation({
-  args: createVibeSchema,
+  args: {
+    title: v.string(),
+    description: v.string(),
+    image: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+  },
   handler: async (ctx, args) => {
+    // Check if user is authenticated
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('You must be logged in to create a vibe');
+    }
+
     // Generate a unique ID for the vibe
     const id = Math.random().toString(36).substring(2, 15);
     const now = new Date().toISOString();
@@ -348,7 +354,7 @@ export const create = mutation({
       title: args.title,
       description: args.description,
       image: args.image,
-      createdById: args.createdById,
+      createdById: identity.subject, // Use the authenticated user's ID from JWT
       createdAt: now,
       tags: args.tags || [],
     });
@@ -357,8 +363,18 @@ export const create = mutation({
 
 // Add a rating to a vibe
 export const addRating = mutation({
-  args: createRatingSchema,
+  args: {
+    vibeId: v.string(),
+    rating: v.number(),
+    review: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
+    // Check if user is authenticated
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('You must be logged in to rate a vibe');
+    }
+
     const now = new Date().toISOString();
 
     // Check if user already rated this vibe
@@ -367,7 +383,7 @@ export const addRating = mutation({
       .filter((q) =>
         q.and(
           q.eq(q.field('vibeId'), args.vibeId),
-          q.eq(q.field('userId'), args.userId)
+          q.eq(q.field('userId'), identity.subject)
         )
       )
       .first();
@@ -383,7 +399,7 @@ export const addRating = mutation({
       // Create a new rating
       return await ctx.db.insert('ratings', {
         vibeId: args.vibeId,
-        userId: args.userId,
+        userId: identity.subject, // Use the authenticated user's ID from JWT
         rating: args.rating,
         review: args.review,
         date: now,
@@ -394,15 +410,24 @@ export const addRating = mutation({
 
 // React to a vibe with an emoji
 export const reactToVibe = mutation({
-  args: reactToVibeSchema,
+  args: {
+    vibeId: v.string(),
+    emoji: v.string(),
+  },
   handler: async (ctx, args) => {
+    // Check if user is authenticated
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('You must be logged in to react to a vibe');
+    }
+
     // Check if user already reacted with this emoji
     const existingReaction = await ctx.db
       .query('reactions')
       .filter((q) =>
         q.and(
           q.eq(q.field('vibeId'), args.vibeId),
-          q.eq(q.field('userId'), args.userId),
+          q.eq(q.field('userId'), identity.subject),
           q.eq(q.field('emoji'), args.emoji)
         )
       )
@@ -417,7 +442,7 @@ export const reactToVibe = mutation({
       await ctx.db.insert('reactions', {
         vibeId: args.vibeId,
         emoji: args.emoji,
-        userId: args.userId,
+        userId: identity.subject, // Use the authenticated user's ID from JWT
       });
       return { added: true };
     }
@@ -623,3 +648,134 @@ export const getTopRated = query({
     );
   },
 });
+
+// Get current authenticated user
+export const getCurrentUser = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    // Look up user in database
+    const user = await ctx.db
+      .query('users')
+      .filter((q) => q.eq(q.field('externalId'), identity.subject))
+      .first();
+
+    return (
+      user || {
+        externalId: identity.subject,
+        email: identity.email,
+        name: identity.name,
+        // Add other fields as needed
+      }
+    );
+  },
+});
+
+// INTERNAL MUTATIONS FOR SEEDING (only used by seed script)
+// These bypass authentication for seeding purposes only
+
+export const createForSeed = internalMutation({
+  args: {
+    title: v.string(),
+    description: v.string(),
+    image: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+    createdById: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Generate a unique ID for the vibe
+    const id = Math.random().toString(36).substring(2, 15);
+    const now = new Date().toISOString();
+
+    return await ctx.db.insert('vibes', {
+      id,
+      title: args.title,
+      description: args.description,
+      image: args.image,
+      createdById: args.createdById,
+      createdAt: now,
+      tags: args.tags || [],
+    });
+  },
+});
+
+export const addRatingForSeed = internalMutation({
+  args: {
+    vibeId: v.string(),
+    rating: v.number(),
+    review: v.optional(v.string()),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = new Date().toISOString();
+
+    // Check if user already rated this vibe
+    const existingRating = await ctx.db
+      .query('ratings')
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('vibeId'), args.vibeId),
+          q.eq(q.field('userId'), args.userId)
+        )
+      )
+      .first();
+
+    if (existingRating) {
+      // Update the existing rating
+      return await ctx.db.patch(existingRating._id, {
+        rating: args.rating,
+        review: args.review,
+        date: now,
+      });
+    } else {
+      // Create a new rating
+      return await ctx.db.insert('ratings', {
+        vibeId: args.vibeId,
+        userId: args.userId,
+        rating: args.rating,
+        review: args.review,
+        date: now,
+      });
+    }
+  },
+});
+
+export const reactToVibeForSeed = internalMutation({
+  args: {
+    vibeId: v.string(),
+    emoji: v.string(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Check if user already reacted with this emoji
+    const existingReaction = await ctx.db
+      .query('reactions')
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('vibeId'), args.vibeId),
+          q.eq(q.field('userId'), args.userId),
+          q.eq(q.field('emoji'), args.emoji)
+        )
+      )
+      .first();
+
+    if (existingReaction) {
+      // Remove the reaction (toggle)
+      await ctx.db.delete(existingReaction._id);
+      return { added: false };
+    } else {
+      // Add the reaction
+      await ctx.db.insert('reactions', {
+        vibeId: args.vibeId,
+        emoji: args.emoji,
+        userId: args.userId,
+      });
+      return { added: true };
+    }
+  },
+});
+
+

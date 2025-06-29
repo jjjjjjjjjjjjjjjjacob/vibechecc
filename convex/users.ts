@@ -31,7 +31,7 @@ export const current = query({
   args: {},
   handler: async (ctx) => {
     console.log('current called', await ctx.auth.getUserIdentity());
-    return await getCurrentUserOrCreate(ctx);
+    return await getCurrentUser(ctx);
   },
 });
 
@@ -99,13 +99,15 @@ export const updateProfile = action({
     last_name: v.optional(v.string()),
     image_url: v.optional(v.string()),
     bio: v.optional(v.string()),
-    socials: v.optional(v.object({
-      twitter: v.optional(v.string()),
-      instagram: v.optional(v.string()),
-      tiktok: v.optional(v.string()),
-      youtube: v.optional(v.string()),
-      website: v.optional(v.string()),
-    })),
+    socials: v.optional(
+      v.object({
+        twitter: v.optional(v.string()),
+        instagram: v.optional(v.string()),
+        tiktok: v.optional(v.string()),
+        youtube: v.optional(v.string()),
+        website: v.optional(v.string()),
+      })
+    ),
   },
   handler: async (ctx, args): Promise<any> => {
     const identity = await ctx.auth.getUserIdentity();
@@ -130,13 +132,15 @@ export const updateProfileInternal = internalMutation({
     last_name: v.optional(v.string()),
     image_url: v.optional(v.string()),
     bio: v.optional(v.string()),
-    socials: v.optional(v.object({
-      twitter: v.optional(v.string()),
-      instagram: v.optional(v.string()),
-      tiktok: v.optional(v.string()),
-      youtube: v.optional(v.string()),
-      website: v.optional(v.string()),
-    })),
+    socials: v.optional(
+      v.object({
+        twitter: v.optional(v.string()),
+        instagram: v.optional(v.string()),
+        tiktok: v.optional(v.string()),
+        youtube: v.optional(v.string()),
+        website: v.optional(v.string()),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const user = await userByExternalId(ctx, args.externalId);
@@ -333,6 +337,11 @@ export const updateOnboardingDataInternal = internalMutation({
             externalId: updatedUser.externalId,
             username: updatedUser.username,
             onboardingCompleted: updatedUser.onboardingCompleted,
+            interests: updatedUser.interests,
+            image_url: updatedUser.image_url,
+            profile_image_url: updatedUser.profile_image_url,
+            bio: updatedUser.bio,
+            socials: updatedUser.socials,
           }
         : 'null'
     );
@@ -525,7 +534,9 @@ async function userByExternalId(ctx: QueryCtx, externalId: string) {
 
 // Get current authenticated user from Clerk JWT
 export async function getCurrentUser(ctx: QueryCtx) {
+  console.log('getCurrentUser called');
   const identity = await ctx.auth.getUserIdentity();
+  console.log('identity', identity);
   if (identity === null) {
     return null;
   }
@@ -600,123 +611,6 @@ async function createUserIfNotExistsInternal(
     console.log(`Creating user for Clerk ID: ${externalId}`);
     const userAttributes = {
       externalId: externalId,
-      created_at: Date.now(),
-      updated_at: Date.now(),
-    };
-
-    const userId = await ctx.db.insert('users', userAttributes);
-    user = await ctx.db.get(userId);
-    console.log(`Created user with ID: ${userId}`);
-  }
-
-  return user;
-}
-
-// LEGACY FUNCTIONS (maintained for backward compatibility)
-
-// Get the current user's vibes
-export const getCurrentUserVibes = query({
-  args: { userId: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query('vibes')
-      .filter((q) => q.eq(q.field('createdById'), args.userId))
-      .collect();
-  },
-});
-
-// Seed a demo user if none exists
-export const seedDemoUser = mutation({
-  handler: async (ctx) => {
-    const existingUsers = await ctx.db.query('users').collect();
-
-    if (existingUsers.length === 0) {
-      // Create a demo user
-      const userId = 'demo-user';
-      await ctx.db.insert('users', {
-        externalId: userId,
-        username: 'Demo User',
-        image_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
-        created_at: Date.now(),
-      });
-
-      // Create some demo vibes
-      const vibe1Id = 'demo-vibe-1';
-      await ctx.db.insert('vibes', {
-        id: vibe1Id,
-        title: 'Morning Coffee Vibe',
-        description:
-          'Perfect for starting your day with a calm, focused energy',
-        image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085',
-        createdById: userId,
-        createdAt: new Date().toISOString(),
-        tags: ['morning', 'calm', 'focus'],
-      });
-
-      const vibe2Id = 'demo-vibe-2';
-      await ctx.db.insert('vibes', {
-        id: vibe2Id,
-        title: 'Summer Beach Sunset',
-        description: 'Relaxing beach vibes with golden hour lighting',
-        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
-        createdById: userId,
-        createdAt: new Date().toISOString(),
-        tags: ['summer', 'beach', 'sunset', 'relaxing'],
-      });
-
-      // Add some ratings
-      await ctx.db.insert('ratings', {
-        vibeId: vibe1Id,
-        userId,
-        rating: 4,
-        review: 'Really helps me get into the right mindset in the morning!',
-        date: new Date().toISOString(),
-      });
-
-      // Add emoji reactions
-      await ctx.db.insert('reactions', {
-        vibeId: vibe1Id,
-        emoji: '☕',
-        userId,
-      });
-
-      await ctx.db.insert('reactions', {
-        vibeId: vibe2Id,
-        emoji: '🌅',
-        userId,
-      });
-
-      return {
-        success: true,
-        message: 'Demo user and data created successfully',
-      };
-    }
-
-    return {
-      success: false,
-      message: 'Users already exist, skipping seed',
-    };
-  },
-});
-
-// Helper function to create user if not exists (for mutations only)
-async function createUserIfNotExists(ctx: MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error('User not authenticated');
-  }
-
-  let user = await userByExternalId(ctx, identity.subject);
-
-  if (!user) {
-    console.log(`Creating user for Clerk ID: ${identity.subject}`);
-    const userAttributes = {
-      externalId: identity.subject,
-      first_name: identity.givenName || undefined,
-      last_name: identity.familyName || undefined,
-      image_url: identity.pictureUrl || undefined,
-      profile_image_url: identity.pictureUrl || undefined,
-      username: identity.nickname || undefined,
       created_at: Date.now(),
       updated_at: Date.now(),
     };

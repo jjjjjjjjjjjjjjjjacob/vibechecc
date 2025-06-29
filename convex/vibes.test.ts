@@ -12,54 +12,42 @@ describe('Vibes Mutations', () => {
       const mockVibeData = {
         title: 'Test Vibe',
         description: 'This is a test vibe description.',
-        createdById: 'user_test_id_123',
         image: 'https://example.com/test-image.jpg',
         tags: ['test', 'convex'],
       };
 
-      // Before calling the mutation, you might want to ensure the user exists
-      // or mock the user creation if it's a prerequisite.
-      // For simplicity, we assume createdById is valid or doesn't need prior creation for this test scope.
+      // Mock an authenticated user
+      const mockIdentity = {
+        subject: 'user_test_id_123',
+        tokenIdentifier: 'test_token_123',
+        email: 'test@example.com',
+        givenName: 'Test',
+        familyName: 'User',
+      };
 
-      const vibeId = await t.mutation(api.vibes.create, mockVibeData);
+      // Create the vibe using the real mutation with authentication
+      const vibeId = await t
+        .withIdentity(mockIdentity)
+        .mutation(api.vibes.create, mockVibeData);
 
       expect(vibeId).toBeTypeOf('string'); // The mutation returns the new document's _id
 
-      // Verify the vibe was created in the database
-      // Note: The `id` field in the vibes table is the one we generate in the mutation,
-      // not the `_id` from Convex. The `create` mutation returns the `_id`.
-      // To query by the custom `id` we generate, we need to adjust or use `_id`.
-      // Let's assume the `create` mutation returns the Convex `_id` which is typical.
-      const newVibe = await t.query(api.vibes.getById, { id: vibeId }); // Assuming getById can fetch by _id or custom id
-
-      // If getById fetches by the *custom* ID field (`id`) we set in the mutation,
-      // and `api.vibes.create` returns that custom ID, then the above is fine.
-      // If `api.vibes.create` returns the Convex `_id`, and `getById` expects the *custom* `id`,
-      // we'd need to adjust how we fetch or what `create` returns.
-      // The `create` mutation actually inserts a *custom* `id`. Let's adjust the expectation.
-      // The `create` mutation in `vibes.ts` returns the Convex `_id` of the inserted document.
-      // The `getById` query in `vibes.ts` filters by `q.eq(q.field('id'), args.id)`, where `args.id` refers to the *custom* ID.
-      // This means we cannot directly use the returned `_id` from `create` with `getById` as written.
-
-      // For a more direct test of creation, let's fetch all vibes by the creator
-      // and check the last one, or query directly using the returned _id if possible via another helper or direct db access.
-
-      // Simpler check: query the database directly for the vibe using the known data
+      // Verify the vibe was created in the database by querying by creator
       const allVibesByCreator = await t.query(api.vibes.getByUser, {
-        userId: mockVibeData.createdById,
+        userId: mockIdentity.subject,
       });
       const createdVibe = allVibesByCreator.find(
         (v) =>
           v.title === mockVibeData.title &&
           v.description === mockVibeData.description &&
-          v.createdById === mockVibeData.createdById
+          v.createdById === mockIdentity.subject
       );
 
       expect(createdVibe).toBeDefined();
       if (createdVibe) {
         expect(createdVibe.title).toBe(mockVibeData.title);
         expect(createdVibe.description).toBe(mockVibeData.description);
-        expect(createdVibe.createdById).toBe(mockVibeData.createdById);
+        expect(createdVibe.createdById).toBe(mockIdentity.subject);
         expect(createdVibe.image).toBe(mockVibeData.image);
         expect(createdVibe.tags).toEqual(
           expect.arrayContaining(mockVibeData.tags)
@@ -70,17 +58,28 @@ describe('Vibes Mutations', () => {
 
     it('should create a vibe without optional fields (image, tags)', async () => {
       const t = convexTest(schema, modules);
+
       const mockVibeDataMinimal = {
         title: 'Minimal Test Vibe',
         description: 'Minimal description.',
-        createdById: 'user_test_id_456',
       };
 
-      const vibeId = await t.mutation(api.vibes.create, mockVibeDataMinimal);
+      // Mock an authenticated user
+      const mockIdentity = {
+        subject: 'user_test_id_456',
+        tokenIdentifier: 'test_token_456',
+        email: 'minimal@example.com',
+        givenName: 'Minimal',
+        familyName: 'User',
+      };
+
+      const vibeId = await t
+        .withIdentity(mockIdentity)
+        .mutation(api.vibes.create, mockVibeDataMinimal);
       expect(vibeId).toBeTypeOf('string');
 
       const allVibesByCreator = await t.query(api.vibes.getByUser, {
-        userId: mockVibeDataMinimal.createdById,
+        userId: mockIdentity.subject,
       });
       const createdVibe = allVibesByCreator.find(
         (v) => v.title === mockVibeDataMinimal.title
@@ -90,11 +89,145 @@ describe('Vibes Mutations', () => {
       if (createdVibe) {
         expect(createdVibe.title).toBe(mockVibeDataMinimal.title);
         expect(createdVibe.description).toBe(mockVibeDataMinimal.description);
-        expect(createdVibe.createdById).toBe(mockVibeDataMinimal.createdById);
+        expect(createdVibe.createdById).toBe(mockIdentity.subject);
         expect(createdVibe.image).toBeUndefined();
         // The schema defines tags as optional(array), so if not provided, it defaults to [] in the mutation.
         expect(createdVibe.tags).toEqual([]);
       }
+    });
+
+    it('should throw an error when not authenticated', async () => {
+      const t = convexTest(schema, modules);
+
+      const mockVibeData = {
+        title: 'Test Vibe',
+        description: 'This is a test vibe description.',
+      };
+
+      // Try to create a vibe without authentication using the auth-required mutation
+      await expect(
+        t.mutation(api.vibes.create, mockVibeData)
+      ).rejects.toThrow('You must be logged in to create a vibe');
+    });
+  });
+
+  describe('addRating', () => {
+    it('should allow users to rate a vibe', async () => {
+      const t = convexTest(schema, modules);
+
+      // Mock an authenticated user
+      const mockIdentity = {
+        subject: 'user_test_id_789',
+        tokenIdentifier: 'test_token_789',
+        email: 'rating@example.com',
+        givenName: 'Rating',
+        familyName: 'User',
+      };
+
+      // First create a vibe to rate
+      const vibeData = {
+        title: 'Vibe to Rate',
+        description: 'This vibe will be rated.',
+      };
+
+      await t.withIdentity(mockIdentity).mutation(api.vibes.create, vibeData);
+
+      // Get the created vibe to get its custom ID
+      const createdVibes = await t.query(api.vibes.getByUser, {
+        userId: mockIdentity.subject,
+      });
+      const createdVibe = createdVibes.find((v) => v.title === vibeData.title);
+
+      expect(createdVibe).toBeDefined();
+
+      if (createdVibe) {
+        // Now rate the vibe using the real mutation with authentication
+        const ratingData = {
+          vibeId: createdVibe.id,
+          rating: 5,
+          review: 'Great vibe!',
+        };
+
+        const ratingId = await t
+          .withIdentity(mockIdentity)
+          .mutation(api.vibes.addRating, ratingData);
+
+        expect(ratingId).toBeTypeOf('string');
+      }
+    });
+
+    it('should throw an error when not authenticated', async () => {
+      const t = convexTest(schema, modules);
+
+      const ratingData = {
+        vibeId: 'some-vibe-id',
+        rating: 5,
+        review: 'Great vibe!',
+      };
+
+      // Try to rate without authentication using the auth-required mutation
+      await expect(
+        t.mutation(api.vibes.addRating, ratingData)
+      ).rejects.toThrow('You must be logged in to rate a vibe');
+    });
+  });
+
+  describe('reactToVibe', () => {
+    it('should allow users to react to a vibe', async () => {
+      const t = convexTest(schema, modules);
+
+      // Mock an authenticated user
+      const mockIdentity = {
+        subject: 'user_test_id_101',
+        tokenIdentifier: 'test_token_101',
+        email: 'reaction@example.com',
+        givenName: 'Reaction',
+        familyName: 'User',
+      };
+
+      // First create a vibe to react to
+      const vibeData = {
+        title: 'Vibe to React To',
+        description: 'This vibe will get reactions.',
+      };
+
+      await t.withIdentity(mockIdentity).mutation(api.vibes.create, vibeData);
+
+      // Get the created vibe to get its custom ID
+      const createdVibes = await t.query(api.vibes.getByUser, {
+        userId: mockIdentity.subject,
+      });
+      const createdVibe = createdVibes.find((v) => v.title === vibeData.title);
+
+      expect(createdVibe).toBeDefined();
+
+      if (createdVibe) {
+        // Now react to the vibe using the real mutation with authentication
+        const reactionData = {
+          vibeId: createdVibe.id,
+          emoji: '😍',
+        };
+
+        const result = await t
+          .withIdentity(mockIdentity)
+          .mutation(api.vibes.reactToVibe, reactionData);
+
+        expect(result.added).toBe(true);
+      }
+    });
+
+    it('should throw an error when not authenticated', async () => {
+      const t = convexTest(schema, modules);
+
+      const reactionData = {
+        vibeId: 'some-vibe-id',
+        emoji: '😍',
+      };
+
+      // Try to react without authentication using the auth-required mutation
+      await expect(
+        t.mutation(api.vibes.reactToVibe, reactionData)
+      ).rejects.toThrow('You must be logged in to react to a vibe');
     });
   });
 });

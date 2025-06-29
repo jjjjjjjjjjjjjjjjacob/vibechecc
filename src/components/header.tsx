@@ -18,15 +18,17 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Get the current route to highlight active links - now reactive to route changes
-  const currentPath = useRouterState({
-    select: (state) => state.location.pathname,
-  });
+  const { location, matches } = useRouterState();
+  const isVibePage = matches.some(
+    (match) => match.routeId === '/vibes/$vibeId'
+  );
 
   return (
     <header
       data-is-dark={resolvedTheme === 'dark'}
-      className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full backdrop-blur data-[is-dark=true]:border-b"
+      className={cn(
+        'bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full backdrop-blur'
+      )}
     >
       <div className="container flex h-16 items-center">
         <div className="flex items-center gap-2 md:gap-4">
@@ -41,7 +43,7 @@ export function Header() {
               to="/"
               className={cn(
                 'hover:text-foreground/80 lowercase transition-colors',
-                currentPath === '/'
+                location.pathname === '/'
                   ? 'text-foreground font-medium'
                   : 'text-foreground/60'
               )}
@@ -53,7 +55,7 @@ export function Header() {
                 to="/vibes/my-vibes"
                 className={cn(
                   'hover:text-foreground/80 lowercase transition-colors',
-                  currentPath === '/vibes/my-vibes'
+                  location.pathname === '/vibes/my-vibes'
                     ? 'text-foreground font-medium'
                     : 'text-foreground/60'
                 )}
@@ -64,7 +66,7 @@ export function Header() {
                 to="/profile"
                 className={cn(
                   'hover:text-foreground/80 lowercase transition-colors',
-                  currentPath === '/profile'
+                  location.pathname === '/profile'
                     ? 'text-foreground font-medium'
                     : 'text-foreground/60'
                 )}
@@ -141,7 +143,7 @@ export function Header() {
               to="/"
               className={cn(
                 'hover:text-foreground/80 rounded-md p-2 lowercase transition-colors',
-                currentPath === '/' ? 'bg-muted font-medium' : ''
+                location.pathname === '/' ? 'bg-muted font-medium' : ''
               )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -152,7 +154,7 @@ export function Header() {
                 to="/vibes/my-vibes"
                 className={cn(
                   'hover:text-foreground/80 rounded-md p-2 lowercase transition-colors',
-                  currentPath === '/vibes/my-vibes'
+                  location.pathname === '/vibes/my-vibes'
                     ? 'bg-muted font-medium'
                     : ''
                 )}
@@ -164,7 +166,7 @@ export function Header() {
                 to="/profile"
                 className={cn(
                   'hover:text-foreground/80 rounded-md p-2 lowercase transition-colors',
-                  currentPath === '/profile' ? 'bg-muted font-medium' : ''
+                  location.pathname === '/profile' ? 'bg-muted font-medium' : ''
                 )}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -180,6 +182,30 @@ export function Header() {
               />
             </div>
           </nav>
+        </div>
+      )}
+
+      {isVibePage && (
+        <div className="border-border/50 container">
+          <div className="grid grid-cols-3 gap-8">
+            <div className="col-span-3 sm:col-span-2">
+              <div className="text-muted-foreground py-3 text-sm">
+                <Link
+                  to="/"
+                  className="hover:text-foreground transition-colors"
+                >
+                  home
+                </Link>
+                <span className="mx-2">/</span>
+                <span>vibe</span>
+              </div>
+            </div>
+            <div className="col-span-1 hidden sm:block">
+              <h2 className="py-2 text-md text-muted-foreground py-2 font-bold lowercase lg:text-xl">
+                similar vibes
+              </h2>
+            </div>
+          </div>
         </div>
       )}
     </header>

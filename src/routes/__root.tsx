@@ -5,8 +5,12 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
+  useRouteContext,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { createServerFn } from '@tanstack/react-start';
+import { getAuth } from '@clerk/tanstack-react-start/server';
+import { getWebRequest } from '@tanstack/react-start/server';
 import * as React from 'react';
 import { Toaster } from 'react-hot-toast';
 import type { QueryClient } from '@tanstack/react-query';
@@ -20,14 +24,31 @@ import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-postho
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
-import { ConvexProviderWithAuth, ConvexReactClient } from 'convex/react';
+import { ConvexReactClient } from 'convex/react';
+import { ConvexProviderWithClerk } from 'convex/react-clerk';
+import { ConvexQueryClient } from '@convex-dev/react-query';
 
 const convexClient = new ConvexReactClient(
   (import.meta as any).env.VITE_CONVEX_URL!
 );
 
+// Server function to fetch Clerk auth and get Convex token
+const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
+  const request = getWebRequest();
+  if (!request) throw new Error('No request found');
+  const auth = await getAuth(request);
+  const token = await auth.getToken({ template: 'convex' });
+
+  return {
+    userId: auth.userId,
+    token,
+  };
+});
+
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
+  convexClient: ConvexReactClient;
+  convexQueryClient: ConvexQueryClient;
 }>()({
   head: () => ({
     meta: [
@@ -71,6 +92,21 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
+  beforeLoad: async (ctx) => {
+    const auth = await fetchClerkAuth();
+    const { userId, token } = auth;
+
+    // During SSR, set the Clerk auth token for authenticated Convex requests
+    if (token) {
+      // Set auth on the convex client for server-side requests
+      ctx.context.convexQueryClient.serverHttpClient?.setAuth(token);
+    }
+
+    return {
+      userId,
+      token,
+    };
+  },
   errorComponent: (props) => {
     return (
       <RootDocument>
@@ -83,16 +119,10 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootComponent() {
-  return (
-    <RootDocument>
-      <Outlet />
-    </RootDocument>
-  );
-}
-
-function RootDocument({ children }: { children: React.ReactNode }) {
+  const context = useRouteContext({ from: Route.id });
   return (
     <ClerkProvider
+      publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
       appearance={{
         baseTheme: undefined,
         elements: {
@@ -102,41 +132,49 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      <ConvexProviderWithAuth client={convexClient} useAuth={useAuth as any}>
-        <html lang="en">
-          <head>
-            <HeadContent />
-          </head>
-          <body className="bg-background text-foreground min-h-screen">
-            <PostHogProvider>
-              <ThemeProvider>
-                <div className="flex min-h-screen flex-col">
-                  <PostHogPageTracker />
-                  <ClerkPostHogIntegration />
-                  <Header />
-                  <LoadingIndicator />
-
-                  <main className="flex-1">{children}</main>
-
-                  <footer className="bg-background border-t py-6">
-                    <div className="container mx-auto px-4">
-                      <p className="text-muted-foreground text-center text-sm">
-                        © {new Date().getFullYear()} vibecheck. all rights
-                        reserved.
-                      </p>
-                    </div>
-                  </footer>
-                  <Toaster />
-                </div>
-              </ThemeProvider>
-            </PostHogProvider>
-            <ReactQueryDevtools />
-            <TanStackRouterDevtools position="bottom-right" />
-            <Scripts />
-          </body>
-        </html>
-      </ConvexProviderWithAuth>
+      <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
+        <RootDocument>
+          <Outlet />
+        </RootDocument>
+      </ConvexProviderWithClerk>
     </ClerkProvider>
+  );
+}
+
+function RootDocument({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body className="bg-background text-foreground min-h-screen">
+        <PostHogProvider>
+          <ThemeProvider>
+            <div className="flex min-h-screen flex-col">
+              <PostHogPageTracker />
+              <ClerkPostHogIntegration />
+              <Header />
+              <LoadingIndicator />
+
+              <main className="flex-1">{children}</main>
+
+              <footer className="bg-background border-t py-6">
+                <div className="container mx-auto px-4">
+                  <p className="text-muted-foreground text-center text-sm">
+                    © {new Date().getFullYear()} vibecheck. all rights
+                    reserved.
+                  </p>
+                </div>
+              </footer>
+              <Toaster />
+            </div>
+          </ThemeProvider>
+        </PostHogProvider>
+        <ReactQueryDevtools />
+        <TanStackRouterDevtools position="bottom-right" />
+        <Scripts />
+      </body>
+    </html>
   );
 }
 

@@ -1,5 +1,6 @@
 import { action } from './_generated/server';
 import { api } from './_generated/api';
+import { internal } from './_generated/api';
 
 export const clear = action({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -142,7 +143,7 @@ export const seed = action({
       // Create vibes
       console.log('Creating vibes...');
       for (const vibe of vibes) {
-        await ctx.runMutation(api.vibes.create, {
+        await ctx.runMutation(internal.vibes.createForSeed, {
           title: vibe.title,
           description: vibe.description,
           image: vibe.image,
@@ -297,7 +298,7 @@ export const seed = action({
       for (const rating of ratings) {
         const actualVibeId = vibeMap[rating.vibeId];
         if (actualVibeId) {
-          await ctx.runMutation(api.vibes.addRating, {
+          await ctx.runMutation(internal.vibes.addRatingForSeed, {
             vibeId: actualVibeId,
             userId: rating.userId,
             rating: rating.rating,
@@ -370,7 +371,7 @@ export const seed = action({
       for (const reaction of reactions) {
         const actualVibeId = vibeMap[reaction.vibeId];
         if (actualVibeId) {
-          await ctx.runMutation(api.vibes.reactToVibe, {
+          await ctx.runMutation(internal.vibes.reactToVibeForSeed, {
             vibeId: actualVibeId,
             emoji: reaction.emoji,
             userId: reaction.userId,

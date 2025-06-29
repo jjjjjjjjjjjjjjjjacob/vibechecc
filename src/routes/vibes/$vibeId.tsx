@@ -1,9 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import * as React from 'react';
 import {
   useVibe,
   useAddRatingMutation,
   useReactToVibeMutation,
+  useVibes,
 } from '@/queries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import { StarRating } from '@/components/star-rating';
 import { EmojiReactions } from '@/components/emoji-reaction';
 import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
 import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
+import { VibeCard } from '@/features/vibes/components/vibe-card';
 import {
   computeUserDisplayName,
   getUserAvatarUrl,
@@ -29,6 +31,7 @@ export const Route = createFileRoute('/vibes/$vibeId')({
 function VibePage() {
   const { vibeId } = Route.useParams();
   const { data: vibe, isLoading, error } = useVibe(vibeId);
+  const { data: allVibes } = useVibes();
   const [rating, setRating] = React.useState(0);
   const [review, setReview] = React.useState('');
   const { user } = useUser();
@@ -98,6 +101,44 @@ function VibePage() {
     return [...new Set(keywords)]; // Remove duplicates
   }, [vibe]);
 
+  // Get similar vibes based on tags, creator, or fallback to recent vibes
+  const similarVibes = React.useMemo(() => {
+    if (!vibe || !allVibes) return [];
+
+    // Filter out the current vibe
+    const otherVibes = allVibes.filter((v) => v.id !== vibe.id);
+
+    // Simple similarity algorithm:
+    // 1. Vibes with matching tags
+    // 2. Vibes from the same creator
+    // 3. Fallback to recent vibes
+
+    const vibesWithTags = vibe.tags
+      ? otherVibes.filter((v) =>
+          v.tags?.some((tag) => vibe.tags?.includes(tag))
+        )
+      : [];
+
+    const vibesFromSameCreator = otherVibes.filter(
+      (v) => v.createdById === vibe.createdById
+    );
+
+    // Combine and deduplicate
+    const similar = [...vibesWithTags, ...vibesFromSameCreator].filter(
+      (v, index, arr) => arr.findIndex((item) => item.id === v.id) === index
+    );
+
+    // If we don't have enough similar vibes, add some recent ones
+    if (similar.length < 4) {
+      const recentVibes = otherVibes
+        .filter((v) => !similar.some((s) => s.id === v.id))
+        .slice(0, 4 - similar.length);
+      similar.push(...recentVibes);
+    }
+
+    return similar.slice(0, 4); // Limit to 4 similar vibes
+  }, [vibe, allVibes]);
+
   if (isLoading) {
     return <VibeDetailSkeleton />;
   }
@@ -124,7 +165,6 @@ function VibePage() {
     try {
       await addRatingMutation.mutateAsync({
         vibeId: vibe.id,
-        userId: 'demo-user', // Use demo user ID for now
         rating,
         review: review.trim() || undefined,
       });
@@ -153,7 +193,6 @@ function VibePage() {
       await reactToVibeMutation.mutateAsync({
         vibeId: vibe.id,
         emoji,
-        userId: 'demo-user', // Use demo user ID for now
       });
     } catch (error) {
       console.error('Failed to react:', error);
@@ -161,35 +200,56 @@ function VibePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="mb-8 overflow-hidden">
-        <div className="relative">
-          {vibe.image ? (
-            <img
-              src={vibe.image}
-              alt={vibe.title}
-              className="h-64 w-full object-cover md:h-96"
-            />
-          ) : (
-            <div className="h-64 w-full md:h-96">
-              <SimpleVibePlaceholder title={vibe.title} />
-            </div>
-          )}
-        </div>
-
-        <CardContent className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h1 className="text-3xl font-bold lowercase">{vibe.title}</h1>
-            <div className="flex items-center gap-2">
-              <StarRating value={averageRating} readOnly />
-              <span className="text-muted-foreground text-sm">
-                {averageRating > 0 ? averageRating.toFixed(1) : '-'} (
-                {vibe.ratings.length})
-              </span>
+    <div className="container mx-auto">
+      <div className="grid w-full grid-cols-3 gap-8 transition-all duration-300">
+        {/* Main Content */}
+        <div className="col-span-3 sm:col-span-2 w-full transition-all duration-300">
+          {/* Main Vibe Card */}
+          <div className="relative mb-6 overflow-hidden rounded-lg">
+            {/* Main Image */}
+            <div className="relative aspect-video">
+              {vibe.image ? (
+                <img
+                  src={vibe.image}
+                  alt={vibe.title}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <SimpleVibePlaceholder title={vibe.title} />
+              )}
             </div>
           </div>
 
-          <div className="mb-4 flex items-center">
+          {/* Tags */}
+          {vibe.tags && vibe.tags.length > 0 && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-2">
+                {vibe.tags.map((tag: string) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Title */}
+          <h1 className="mb-6 text-4xl font-bold lowercase">{vibe.title}</h1>
+
+          {/* Rating */}
+          <div className="mb-4 flex items-center gap-2">
+            <StarRating value={averageRating} readOnly />
+            <span className="text-lg font-medium">
+              {averageRating > 0 ? averageRating.toFixed(1) : '-'}
+            </span>
+            <span className="text-muted-foreground text-sm">
+              ({vibe.ratings.length} rating
+              {vibe.ratings.length !== 1 ? 's' : ''})
+            </span>
+          </div>
+
+          {/* Creator Info */}
+          <div className="mb-6 flex items-center">
             {vibe.createdBy ? (
               <>
                 <Avatar className="mr-3 h-10 w-10">
@@ -203,7 +263,7 @@ function VibePage() {
                 </Avatar>
                 <div>
                   <p className="font-medium">
-                    {computeUserDisplayName(vibe.createdBy)}
+                    originally vibed by {computeUserDisplayName(vibe.createdBy)}
                   </p>
                   <p className="text-muted-foreground text-sm">
                     {new Date(vibe.createdAt).toLocaleDateString()}
@@ -225,107 +285,130 @@ function VibePage() {
             )}
           </div>
 
-          <p className="text-foreground mb-6 whitespace-pre-line">
+          {/* Reactions */}
+          <div className="mb-6">
+            <div className="mb-4 flex items-center gap-4">
+              <span className="text-2xl">😂</span>
+              <span className="text-2xl">💰</span>
+              <span className="text-2xl">🎉</span>
+              <span className="text-2xl">💯</span>
+              <button className="border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50 flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed transition-colors">
+                <span className="text-lg">+</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="text-muted-foreground mb-8 leading-relaxed">
             {vibe.description}
           </p>
 
-          {vibe.tags && vibe.tags.length > 0 && (
-            <div className="mb-6">
-              <div className="flex flex-wrap gap-2">
-                {vibe.tags.map((tag: string) => (
-                  <Badge key={tag} variant="secondary">
-                    #{tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Rate This Vibe */}
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <h2 className="mb-4 text-xl font-bold lowercase">
+                rate this vibe
+              </h2>
+              <form onSubmit={handleSubmitRating} className="space-y-4">
+                <div>
+                  <StarRating value={rating} onChange={setRating} size="lg" />
+                </div>
 
-          <div className="mb-6 border-t pt-6">
-            <h2 className="mb-4 text-xl font-bold lowercase">reactions</h2>
-            <EmojiReactions
-              reactions={vibe.reactions || []}
-              onReact={handleReact}
-              showAddButton={true}
-              contextKeywords={contextKeywords}
-            />
-          </div>
+                <Textarea
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  placeholder="write your review (optional)"
+                  rows={4}
+                />
 
-          <div className="mb-6 border-t pt-6">
-            <h2 className="mb-4 text-xl font-bold lowercase">rate this vibe</h2>
-            <form onSubmit={handleSubmitRating} className="space-y-4">
-              <div>
-                <StarRating value={rating} onChange={setRating} size="lg" />
-              </div>
+                <Button
+                  type="submit"
+                  disabled={rating === 0 || addRatingMutation.isPending}
+                >
+                  {addRatingMutation.isPending
+                    ? 'submitting...'
+                    : 'submit rating'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
 
-              <Textarea
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-                placeholder="write your review (optional)"
-                rows={4}
-              />
-
-              <Button
-                type="submit"
-                disabled={rating === 0 || addRatingMutation.isPending}
-              >
-                {addRatingMutation.isPending
-                  ? 'submitting...'
-                  : 'submit rating'}
-              </Button>
-            </form>
-          </div>
-
+          {/* Reviews */}
           {vibe.ratings.length > 0 && (
-            <div className="border-t pt-6">
-              <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
-              <div className="space-y-4">
-                {vibe.ratings
-                  .filter((r: any) => r.review)
-                  .sort(
-                    (a: any, b: any) =>
-                      new Date(b.date).getTime() - new Date(a.date).getTime()
-                  )
-                  .map((rating: any, index: number) => (
-                    <div key={index} className="border-b pb-4 last:border-b-0">
-                      <div className="mb-2 flex items-center">
-                        <Avatar className="mr-2 h-8 w-8">
-                          <AvatarImage
-                            src={getUserAvatarUrl(rating.user)}
-                            alt={computeUserDisplayName(rating.user)}
-                          />
-                          <AvatarFallback>
-                            {getUserInitials(rating.user)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-medium">
-                            {computeUserDisplayName(rating.user)}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <StarRating
-                              value={rating.rating}
-                              readOnly
-                              size="sm"
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
+                <div className="space-y-4">
+                  {vibe.ratings
+                    .filter((r: any) => r.review)
+                    .sort(
+                      (a: any, b: any) =>
+                        new Date(b.date).getTime() - new Date(a.date).getTime()
+                    )
+                    .map((rating: any, index: number) => (
+                      <div
+                        key={index}
+                        className="border-b pb-4 last:border-b-0"
+                      >
+                        <div className="mb-2 flex items-center">
+                          <Avatar className="mr-2 h-8 w-8">
+                            <AvatarImage
+                              src={getUserAvatarUrl(rating.user)}
+                              alt={computeUserDisplayName(rating.user)}
                             />
-                            <span className="text-muted-foreground text-sm">
-                              {new Date(rating.date).toLocaleDateString()}
-                            </span>
+                            <AvatarFallback>
+                              {getUserInitials(rating.user)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              {computeUserDisplayName(rating.user)}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <StarRating
+                                value={rating.rating}
+                                readOnly
+                                size="sm"
+                              />
+                              <span className="text-muted-foreground text-sm">
+                                {new Date(rating.date).toLocaleDateString()}
+                              </span>
+                            </div>
                           </div>
                         </div>
+                        {rating.review && (
+                          <p className="text-muted-foreground whitespace-pre-line">
+                            {rating.review}
+                          </p>
+                        )}
                       </div>
-                      {rating.review && (
-                        <p className="text-muted-foreground whitespace-pre-line">
-                          {rating.review}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Similar Vibes Sidebar */}
+        <div className="col-span-1 hidden overflow-y-auto sm:block">
+          <div className="sticky">
+            <div className="space-y-4">
+              {similarVibes.map((similarVibe) => (
+                <VibeCard
+                  key={similarVibe.id}
+                  vibe={similarVibe}
+                  compact={true}
+                />
+              ))}
+              {similarVibes.length === 0 && (
+                <div className="text-muted-foreground py-8 text-center">
+                  <p>no similar vibes found</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

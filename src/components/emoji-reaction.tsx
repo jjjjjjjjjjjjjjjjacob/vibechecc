@@ -457,13 +457,13 @@ function HorizontalEmojiPicker({
                       category.charAt(0).toUpperCase() + category.slice(1)
                     }
                   >
-                    <div className="grid grid-cols-8 gap-1 py-2">
+                    <div className="grid grid-cols-8 gap-1 py-2 animate-in fade-in duration-300">
                       {categoryEmojis.map((emojiData, index) => (
                         <CommandItem
                           key={`${category}-${emojiData.emoji}`}
                           value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
                           onSelect={() => handleEmojiClick(emojiData.emoji)}
-                          className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg animate-in fade-in zoom-in duration-150"
                           title={emojiData.name}
                           style={{
                             animationDelay: `${index * 30}ms`,
@@ -529,7 +529,7 @@ function HorizontalEmojiPicker({
   return (
     <PopoverContent
       className={cn(
-        'w-80 p-3 h-14 transition-[height]',
+        'w-80 p-3 h-14 transition-[height] overflow-hidden',
         showFullPicker && 'h-96 p-0',
         (showSearchResults || isSearchExpanded) && !showFullPicker && 'h-24 pb-6'
       )}

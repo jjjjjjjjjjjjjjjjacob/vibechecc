@@ -23,32 +23,8 @@ import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
 import { Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
-import { Authenticated } from 'convex/react';
 
-// Server function to check authentication
-const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
-  const request = getWebRequest();
-  if (!request) throw new Error('No request found');
-  const { userId } = await getAuth(request);
-
-  if (!userId) {
-    throw redirect({
-      to: '/sign-in',
-    });
-  }
-
-  return { userId };
-});
-
-export const Route = createFileRoute('/profile')({
-  component: Profile,
-  beforeLoad: async () => {
-    const { userId } = await requireAuth();
-    return { userId };
-  },
-});
-
-function Profile() {
+export function ProfileContent() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   console.log('clerkUser', clerkUser);
   const {
@@ -278,6 +254,7 @@ function Profile() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <DebugAuth />
       <div className="mx-auto max-w-4xl">
         <Card className="mb-8">
           <CardContent className="p-6 sm:p-8">
