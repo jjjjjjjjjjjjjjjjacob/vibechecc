@@ -1,38 +1,72 @@
 # Cloud Deployment Guide
 
-This guide explains the cloud deployment process for the VibeChecc application.
+This document outlines the process for deploying the VibeChecc application to our cloud environments: **Production**, **Development**, and **Ephemeral** (for pull requests). Our infrastructure is managed with Terraform, and deployments are automated via GitHub Actions.
 
 ## Environments
 
-The application is deployed to three distinct environments:
+-   **Production**: The live environment accessible to all users. Deployed from the `main` branch.
+-   **Development**: A staging environment for testing new features. Deployed from the `develop` branch.
+-   **Ephemeral**: Temporary environments created for each pull request to allow for isolated testing and review.
 
-*   **Production:** The live environment, accessible to all users.
-*   **Development:** A staging environment for testing new features before they are released to production.
-*   **Ephemeral:** A temporary environment created for each pull request to test changes in isolation.
+## CI/CD Pipeline Overview
 
-## CI/CD Pipeline
+Our deployment process is automated through a series of GitHub Actions workflows that handle infrastructure and application deployments.
 
-The CI/CD pipeline is managed by GitHub Actions. The workflows are defined in the `.github/workflows` directory.
+### 1. Infrastructure (Terraform)
 
-### Infrastructure (Terraform)
+-   **`terraform-plan.yml`**: Runs on every pull request. Generates a Terraform plan to preview infrastructure changes.
+-   **`terraform-apply.yml`**: Runs when code is merged into `main` or `develop`. Applies the Terraform changes to the corresponding environment.
 
-The cloud infrastructure is managed using Terraform. The Terraform workflows are responsible for creating, updating, and destroying the cloud resources required by the application.
+### 2. Application (Cloudflare Workers & Convex)
 
-*   **`terraform-plan.yml`:** This workflow runs on every pull request and generates a Terraform plan to show the infrastructure changes that will be applied if the PR is merged.
-*   **`terraform-apply.yml`:** This workflow runs when a pull request is merged into the `main` or `develop` branch. It applies the Terraform plan to the corresponding environment.
+-   **`deploy-cloudflare.yml`**: Deploys the frontend application to Cloudflare Workers.
+-   **`deploy-convex.yml`**: Deploys backend functions to Convex.
 
-### Application (Cloudflare & Convex)
+### 3. Ephemeral Environments
 
-The application is deployed to Cloudflare Workers and Convex.
+-   **`pr-environment.yml`**: Creates a new, isolated environment when a pull request is opened.
+-   **`pr-cleanup.yml`**: Destroys the ephemeral environment when a pull request is closed or merged.
 
-*   **`deploy-cloudflare.yml`:** This workflow deploys the frontend application to Cloudflare Workers when a pull request is merged into the `main` or `develop` branch.
-*   **`deploy-convex.yml`:** This workflow deploys the backend functions to Convex when a pull request is merged into the `main` or `develop` branch.
-*   **`pr-environment.yml`:** This workflow creates an ephemeral environment for each pull request. It runs both the Terraform and application deployment workflows to create a fully functional, isolated environment for testing. When the PR is closed, this workflow automatically destroys the ephemeral environment.
+## Manual Deployment Steps
 
-## Manual Deployments
+While deployments are largely automated, manual intervention is sometimes necessary.
 
-While the CI/CD pipeline is fully automated, you can manually trigger a deployment by re-running a workflow in the GitHub Actions tab of the repository.
+### Triggering a Manual Deployment
 
-## Rollbacks
+You can manually trigger a deployment workflow from the "Actions" tab in the GitHub repository:
 
-To roll back a deployment, you can revert the merge commit that triggered the deployment. This will trigger the CI/CD pipeline to redeploy the previous version of the application.
+1.  Go to the "Actions" tab.
+2.  Select the workflow you want to run (e.g., `deploy-cloudflare`).
+3.  Click "Run workflow" and select the appropriate branch.
+
+### Production Deployment Approval
+
+Deployments to the production environment require manual approval to prevent accidental changes:
+
+1.  When a pull request is merged into `main`, the `terraform-apply` workflow will start.
+2.  The workflow will pause and wait for an authorized user to approve the deployment.
+3.  You can approve the deployment from the "Actions" tab in GitHub.
+
+## Viewing Deployment Logs and Status
+
+-   **GitHub Actions**: All deployment logs are available in the "Actions" tab of the repository. You can view the output of each job to diagnose failures.
+-   **Cloudflare Dashboard**: Check the status of your Cloudflare Workers deployments and view logs.
+-   **Convex Dashboard**: Monitor your Convex functions and view logs in the Convex dashboard.
+
+## Rolling Back a Deployment
+
+In case of a critical issue, you can roll back to a previous deployment:
+
+-   **Cloudflare Workers**:
+    1.  Go to your Cloudflare dashboard and select your Workers project.
+    2.  Navigate to the "Deployments" tab.
+    3.  Select a previous deployment and click "Rollback to this deployment."
+
+-   **Convex**:
+    -   Convex automatically retains previous versions of your functions. You can redeploy an older version from the "Deployments" tab in the Convex dashboard.
+
+## Managing Ephemeral Environments
+
+-   **Creation**: An ephemeral environment is automatically created when you open a pull request. The URL for the environment will be posted as a comment on the PR.
+-   **Cleanup**: The environment is automatically destroyed when the PR is merged or closed.
+-   **Manual Cleanup**: If an environment is not cleaned up properly, you can manually run the `pr-cleanup` workflow.

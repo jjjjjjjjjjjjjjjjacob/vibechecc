@@ -7,16 +7,16 @@ alwaysApply: false
 
 This document outlines the implementation plan for the VibeChecc application, which leverages a modern, full-stack architecture. The plan is organized into phases, starting from the foundational infrastructure setup to the final deployment and documentation.
 
-## Current Focus: Finalizing Cloudflare Deployment & DX
+## Current Focus: Creating Developer Documentation
 
-Our immediate goal is to complete the Cloudflare Workers deployment setup and refine the developer experience (DX) by creating comprehensive documentation for local development, cloud deployment, and dependency management.
+Our immediate goal is to create comprehensive documentation for local development, cloud deployment, and dependency management.
 
 **Next Steps:**
-1.  **[In Progress]** Finalize the Cloudflare Workers deployment workflow in GitHub Actions.
-2.  **[Todo]** Create a detailed `LOCAL_DEVELOPMENT.md` guide.
-3.  **[Todo]** Write a `CLOUD_DEPLOYMENT.md` guide explaining the CI/CD process.
-4.  **[Todo]** Document dependency management in `DEPENDENCY_MANAGEMENT.md`.
-5.  **[Todo]** Update the main `README.md` to provide a high-level overview and link to the new documentation.
+1.  **[Done]** Finalize the Cloudflare Workers deployment workflow in GitHub Actions.
+2.  **[In Progress]** Create a detailed `LOCAL_DEVELOPMENT.md` guide.
+3.  **[In Progress]** Write a `CLOUD_DEPLOYMENT.md` guide explaining the CI/CD process.
+4.  **[In Progress]** Document dependency management in `DEPENDENCY_MANAGEMENT.md`.
+5.  **[In Progress]** Update the main `README.md` to provide a high-level overview and link to the new documentation.
 
 ---
 
@@ -295,7 +295,7 @@ This implementation plan outlines the infrastructure setup for the vibechecc app
 ## Phase 9: Developer Documentation
 
 ### Task 9.1: Local Development Guide
-- [ ] Document the local development setup process in `LOCAL_DEVELOPMENT.md`.
+- [In Progress] Document the local development setup process in `LOCAL_DEVELOPMENT.md`.
 - [ ] Explain how to use `bun run dev` and what it does.
 - [ ] Detail the roles of Convex, Clerk, and ngrok in local dev.
 - [ ] Provide a step-by-step guide for new developers.
@@ -307,7 +307,7 @@ This implementation plan outlines the infrastructure setup for the vibechecc app
 - [ ] Create a troubleshooting section for common issues.
 
 ### Task 9.2: Cloud Deployment Guide
-- [ ] Document the process for deploying to each environment in `CLOUD_DEPLOYMENT.md`.
+- [In Progress] Document the process for deploying to each environment in `CLOUD_DEPLOYMENT.md`.
 - [ ] Explain the CI/CD pipeline for infrastructure (Terraform).
 - [ ] Explain the CI/CD pipeline for applications (Cloudflare Workers/Convex).
 - [ ] Detail manual approval steps for production deployments.
@@ -319,7 +319,7 @@ This implementation plan outlines the infrastructure setup for the vibechecc app
 - [ ] Explain how ephemeral environments are managed.
 
 ### Task 9.3: Dependency Management Guide
-- [ ] Document how Clerk and Convex are integrated in `DEPENDENCY_MANAGEMENT.md`.
+- [In Progress] Document how Clerk and Convex are integrated in `DEPENDENCY_MANAGEMENT.md`.
 - [ ] Explain the bidirectional sync mechanism.
 - [ ] Detail the required environment variables for each service.
 - [ ] Provide guidance on updating dependencies.
@@ -331,7 +331,7 @@ This implementation plan outlines the infrastructure setup for the vibechecc app
 - [ ] Provide a guide for testing integrations locally.
 
 ### Task 9.4: Scripts & Automation Guide
-- [ ] Document all scripts available in `package.json` in `SCRIPTS_AND_AUTOMATION.md`.
+- [In Progress] Document all scripts available in `package.json` in `SCRIPTS_AND_AUTOMATION.md`.
 - [ ] Explain what each script does and when to use it.
 - [ ] Provide examples of common script usage.
 - [ ] Detail any dependencies or prerequisites for scripts.

@@ -1,36 +1,82 @@
 # Dependency Management Guide
 
-This guide provides an overview of the key dependencies in the VibeChecc application, with a focus on the integration between Clerk and Convex.
+This guide explains how we manage dependencies in the VibeChecc project, with a focus on the integration between **Clerk** for authentication and **Convex** for the backend.
 
-## Core Dependencies
+## Core Technologies
 
-*   **[Clerk](https://clerk.com/):** Used for user authentication and management.
-*   **[Convex](https://www.convex.dev/):** The backend platform, providing the database and serverless functions.
-*   **[TanStack Start](https://tanstack.com/start/v1):** The full-stack React framework.
+-   **Runtime**: [Bun](https://bun.sh/) is our primary JavaScript runtime and package manager.
+-   **Authentication**: [Clerk](https://clerk.com/) provides user authentication and management.
+-   **Backend**: [Convex](https://convex.dev/) is our real-time backend and database.
 
 ## Clerk & Convex Integration
 
-The integration between Clerk and Convex is essential for ensuring that user data is synchronized between the two services.
+We have a bidirectional synchronization mechanism between Clerk and Convex to ensure that user data is consistent across both services.
 
-### Bidirectional Sync
+### How It Works
 
-A bidirectional sync is achieved using Clerk webhooks and Convex HTTP actions.
-
-1.  **Clerk to Convex:** When a user signs up or updates their profile in Clerk, Clerk sends a webhook to a Convex HTTP action. This action then creates or updates the user's record in the Convex database.
-2.  **Convex to Clerk:** While direct updates from Convex to Clerk are less common, any user data that needs to be reflected in Clerk can be updated via the Clerk API, triggered from a Convex action.
+1.  **User Sign-Up**: When a new user signs up with Clerk, a new user record is created in our Convex database.
+2.  **Webhook Sync**: Clerk is configured to send webhooks to our Convex backend on user-related events (`user.created`, `user.updated`, `user.deleted`).
+3.  **Convex Functions**: Our Convex backend has an HTTP endpoint that listens for these webhooks and processes them to keep our user data in sync.
 
 ### Webhook Setup
 
-The Clerk webhook is configured in the Clerk dashboard. The endpoint for the webhook is `/webhooks/clerk`. In the local development environment, this endpoint is exposed to the internet using ngrok. In the cloud environments, the endpoint is publicly accessible.
+-   **Endpoint**: The webhook endpoint is defined in `convex/http.ts`.
+-   **Local Development**: For local development, we use `ngrok` to expose our local server to the internet so Clerk can send webhooks to it. See the `LOCAL_DEVELOPMENT.md` guide for setup instructions.
+-   **Production**: In production, the webhook points to our deployed Convex HTTP endpoint.
 
-The webhook is secured using a secret, which is stored as the `CLERK_WEBHOOK_SECRET` environment variable.
+## Managing Secrets and Environment Variables
 
-### Managing Secrets
+Both Clerk and Convex require API keys and other secrets to function. These are managed through environment variables.
 
-The secrets for Clerk and Convex are managed using environment variables. For local development, these are stored in the `.env.local` file. For the cloud environments, they are configured as secrets in the Cloudflare dashboard and the GitHub repository settings.
+-   **Local**: In local development, these are stored in a `.env.local` file.
+-   **Cloud**: In our cloud environments, these are managed as secrets in GitHub Actions and passed to Terraform and Cloudflare Workers at build time.
+
+**Required Variables**:
+
+-   `VITE_CONVEX_URL`
+-   `CONVEX_DEPLOYMENT`
+-   `VITE_CLERK_PUBLISHABLE_KEY`
+-   `CLERK_SECRET_KEY`
+-   `CLERK_WEBHOOK_SECRET`
+
+Refer to `LOCAL_DEVELOPMENT.md` for details on how to obtain these values.
 
 ## Updating Dependencies
 
-To update the dependencies, you can use the `bun update` command. It is recommended to update dependencies one at a time and test thoroughly to ensure that the application continues to function as expected.
+To keep our application secure and up-to-date, it's important to regularly update our dependencies.
 
-For major version updates, refer to the official documentation for each dependency to understand the breaking changes and the required migration steps.
+### Bun
+
+Use Bun to manage all JavaScript dependencies:
+
+-   **To add a new dependency**:
+    ```bash
+    bun add <package-name>
+    ```
+
+-   **To update all dependencies**:
+    ```bash
+    bun update
+    ```
+
+-   **To check for outdated dependencies**:
+    ```bash
+    bun pm outdated
+    ```
+
+### Terraform
+
+Our Terraform modules and providers are version-pinned in `terraform/versions.tf`. To update them:
+
+1.  Change the version constraint in the `versions.tf` file.
+2.  Run `terraform init -upgrade` to update the providers.
+
+### Testing after Updates
+
+After updating any dependencies, it is crucial to run all tests to ensure that the changes have not introduced any regressions:
+
+```bash
+bun test
+```
+
+For infrastructure changes, a `terraform plan` should be generated and reviewed before applying.
