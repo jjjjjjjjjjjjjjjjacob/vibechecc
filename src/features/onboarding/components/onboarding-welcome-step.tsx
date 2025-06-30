@@ -42,7 +42,7 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
           <Sparkles className="h-10 w-10 text-white" />
         </div>
         <h1 className="bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-4xl font-bold text-transparent">
-          Welcome to VibeCheck!
+          Welcome to VibeChecc!
         </h1>
         <p className="text-muted-foreground mx-auto max-w-md text-xl">
           The place to discover, share, and connect through vibes that matter to

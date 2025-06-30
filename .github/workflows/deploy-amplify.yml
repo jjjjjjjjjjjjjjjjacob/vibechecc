@@ -1,0 +1,23 @@
+name: Deploy Amplify
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  deploy-amplify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-role
+          aws-region: us-east-1
+      - name: Deploy Amplify
+        run: |
+          # This is a placeholder for the actual Amplify deployment command
+          echo "Deploying Amplify..."
+          # aws amplify start-job --app-id <APP_ID> --branch-name <BRANCH_NAME> --job-type RELEASE

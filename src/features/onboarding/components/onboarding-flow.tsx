@@ -48,7 +48,7 @@ export function OnboardingFlow() {
   const handleSkip = async () => {
     try {
       await completeOnboardingMutation.mutateAsync({});
-      toast.success('Welcome to VibeCheck!');
+      toast.success('Welcome to VibeChecc!');
       navigate({ to: '/' });
     } catch (error) {
       console.error('Error skipping onboarding:', error);
@@ -129,7 +129,7 @@ export function OnboardingFlow() {
       // Execute all updates in parallel
       await Promise.all(promises);
 
-      toast.success('Welcome to VibeCheck! 🎉');
+      toast.success('Welcome to VibeChecc! 🎉');
       navigate({ to: '/' });
     } catch (error) {
       console.error('Error completing onboarding:', error);

@@ -1,6 +1,6 @@
-# VibeCheck Convex Backend
+# VibeChecc Convex Backend
 
-This directory contains the Convex backend functions for the VibeCheck application.
+This directory contains the Convex backend functions for the VibeChecc application.
 
 ## Overview
 

@@ -1,6 +1,6 @@
 # PostHog Usage Examples
 
-This document provides examples of how to use PostHog analytics throughout the VibeCheck application.
+This document provides examples of how to use PostHog analytics throughout the VibeChecc application.
 
 ## Environment Variables
 
@@ -237,9 +237,9 @@ if (analytics.isInitialized()) {
 4. **Performance**: PostHog operations are async and non-blocking
 5. **Testing**: PostHog events won't fire in test environments
 
-## Custom Events for VibeCheck
+## Custom Events for VibeChecc
 
-Here are some custom events specific to the VibeCheck application:
+Here are some custom events specific to the VibeChecc application:
 
 ```tsx
 // Vibe discovery

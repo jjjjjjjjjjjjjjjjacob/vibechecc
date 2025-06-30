@@ -1,0 +1,29 @@
+name: Terraform Apply
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-role
+          aws-region: us-east-1
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: |
+          terraform -chdir=terraform/environments/production init
+          terraform -chdir=terraform/environments/production apply -auto-approve
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          terraform -chdir=terraform/environments/development init
+          terraform -chdir=terraform/environments/development apply -auto-approve

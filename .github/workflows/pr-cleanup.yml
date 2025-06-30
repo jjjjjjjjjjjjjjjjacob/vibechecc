@@ -1,0 +1,21 @@
+name: PR Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  pr-cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-role
+          aws-region: us-east-1
+      - name: Terraform Destroy
+        run: |
+          terraform -chdir=terraform/environments/ephemeral init
+          terraform -chdir=terraform/environments/ephemeral destroy -auto-approve -var="pr_number=${{ github.event.number }}"

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Database seeding script for VibeCheck
+ * Database seeding script for VibeChecc
  *
  * This script populates the database with sample data from src/db/sample-data.ts
  * including users, vibes, ratings, and reactions.

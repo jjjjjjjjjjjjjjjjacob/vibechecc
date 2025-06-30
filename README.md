@@ -1,10 +1,7 @@
-# VibeCheck
+# Vibechek
 
-A modern social platform for sharing and rating life experiences, built with TanStack Start, Convex, and Clerk.
 
-## Overview
-
-VibeCheck is a social application where users can:
+VibeChecc is a social application where users can:
 - Share "vibes" (life experiences, thoughts, situations) with the community
 - Rate and react to other users' vibes with emojis and star ratings
 - Discover trending vibes and connect with like-minded people
@@ -38,7 +35,7 @@ VibeCheck is a social application where users can:
 ## Project Structure
 
 ```
-vibecheck/
+vibechecc/
 ├── src/                          # Frontend source code
 │   ├── components/              # Reusable React components
 │   │   ├── ui/                 # shadcn/ui components
@@ -120,7 +117,7 @@ Before running this project, ensure you have the following installed:
 
 ```bash
 git clone <repository-url>
-cd vibecheck
+cd vibechecc
 bun install
 ```
 

@@ -1,0 +1,52 @@
+name: PR Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+
+jobs:
+  pr-infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-role
+          aws-region: us-east-1
+      - name: Terraform Apply
+        if: github.event.action != 'closed'
+        run: |
+          terraform -chdir=terraform/environments/ephemeral init
+          terraform -chdir=terraform/environments/ephemeral apply -auto-approve -var="pr_number=${{ github.event.number }}"
+      - name: Terraform Destroy
+        if: github.event.action == 'closed'
+        run: |
+          terraform -chdir=terraform/environments/ephemeral init
+          terraform -chdir=terraform/environments/ephemeral destroy -auto-approve -var="pr_number=${{ github.event.number }}"
+
+  pr-app:
+    runs-on: ubuntu-latest
+    needs: pr-infra
+    if: github.event.action != 'closed'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3'
+          command: "deploy --env ephemeral"

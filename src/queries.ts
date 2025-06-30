@@ -7,7 +7,7 @@ import {
 import { api } from '../convex/_generated/api';
 // import { useAuth } from '@clerk/tanstack-react-start';
 
-// VIBECHECK QUERIES
+// vibechecc QUERIES
 
 // Query to get all vibes (simple version for performance)
 export function useVibes() {

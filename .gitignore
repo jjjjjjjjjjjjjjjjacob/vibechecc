@@ -18,3 +18,7 @@ yarn.lock
 .env.sentry-build-plugin
 
 .env.local
+.dev.vars
+
+terraform/terraform.env
+terraform/.envrc
