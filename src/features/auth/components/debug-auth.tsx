@@ -28,6 +28,7 @@ export function DebugAuth() {
           setTokenError(null);
         })
         .catch((error) => {
+          // eslint-disable-next-line no-console
           console.error('Error getting Clerk token:', error);
           setTokenError(error.message);
         });
@@ -99,9 +100,19 @@ export function DebugAuth() {
               <li>
                 needsOnboarding: {String(onboardingData?.needsOnboarding)}
               </li>
-              <li>user exists: {String(!!onboardingData?.user)}</li>
               <li>
-                user.externalId: {onboardingData?.user?.externalId || 'null'}
+                user exists:{' '}
+                {String(
+                  !!onboardingData &&
+                    'user' in onboardingData &&
+                    onboardingData.user
+                )}
+              </li>
+              <li>
+                user.externalId:{' '}
+                {onboardingData && 'user' in onboardingData
+                  ? onboardingData.user?.externalId || 'null'
+                  : 'null'}
               </li>
             </ul>
           )}

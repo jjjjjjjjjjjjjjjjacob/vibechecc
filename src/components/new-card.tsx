@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import invariant from 'tiny-invariant';
 
 import { ItemMutationFields } from '../types';
-import { useCreateItemMutation } from '../queries';
+import { useCreateVibeMutation } from '../queries';
 import { itemSchema } from '../db/schema';
 import { SaveButton } from '@/components/save-button';
 import { CancelButton } from '@/components/cancel-button';
@@ -20,7 +20,7 @@ export function NewCard({
 }) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { mutate } = useCreateItemMutation();
+  const { mutate } = useCreateVibeMutation();
 
   return (
     <form
@@ -36,7 +36,14 @@ export function NewCard({
         invariant(textAreaRef.current);
         textAreaRef.current.value = '';
 
-        mutate(itemSchema.parse(Object.fromEntries(formData.entries())));
+        const itemData = itemSchema.parse(
+          Object.fromEntries(formData.entries())
+        );
+        // Transform card data to vibe format for compatibility
+        mutate({
+          title: itemData.title,
+          description: itemData.content || itemData.title,
+        });
       }}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {

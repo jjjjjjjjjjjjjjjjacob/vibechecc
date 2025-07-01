@@ -28,7 +28,8 @@ import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { ConvexQueryClient } from '@convex-dev/react-query';
 
-const convexClient = new ConvexReactClient(
+const _convexClient = new ConvexReactClient(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (import.meta as any).env.VITE_CONVEX_URL!
 );
 
@@ -60,8 +61,8 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       ...seo({
-        title: 'Vibechek | Share and Discover Vibes',
-        description: `Vibechek is a platform for sharing and discovering vibes. Rate, react, and share your favorite vibes with the world.`,
+        title: 'vibechecc | share and discover vibes',
+        description: `vibechecc is a platform for sharing and discovering vibes. rate, react, and share your favorite vibes with the world.`,
       }),
     ],
     links: [

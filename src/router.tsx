@@ -19,6 +19,7 @@ export function createRouter() {
 
   const CONVEX_URL = import.meta.env.VITE_CONVEX_URL!;
   if (!CONVEX_URL) {
+    // eslint-disable-next-line no-console
     console.error('missing envar CONVEX_URL');
   }
   const convexClient = new ConvexReactClient(CONVEX_URL);

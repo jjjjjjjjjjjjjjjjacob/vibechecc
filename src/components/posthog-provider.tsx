@@ -23,6 +23,7 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
       if (config.apiKey) {
         analytics.init(config);
       } else {
+        // eslint-disable-next-line no-console
         console.warn(
           'PostHog API key not found. Analytics will not be initialized.'
         );

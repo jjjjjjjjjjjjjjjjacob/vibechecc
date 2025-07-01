@@ -3,6 +3,7 @@ import { analytics, trackEvents } from '@/lib/posthog';
 
 export function usePostHog() {
   const capture = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: string, properties?: Record<string, any>) => {
       analytics.capture(event, properties);
     },
@@ -10,15 +11,20 @@ export function usePostHog() {
   );
 
   const identify = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (userId: string, properties?: Record<string, any>) => {
       analytics.identify(userId, properties);
     },
     []
   );
 
-  const setPersonProperties = useCallback((properties: Record<string, any>) => {
-    analytics.setPersonProperties(properties);
-  }, []);
+  const setPersonProperties = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (properties: Record<string, any>) => {
+      analytics.setPersonProperties(properties);
+    },
+    []
+  );
 
   const reset = useCallback(() => {
     analytics.reset();

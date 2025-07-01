@@ -777,5 +777,3 @@ export const reactToVibeForSeed = internalMutation({
     }
   },
 });
-
-

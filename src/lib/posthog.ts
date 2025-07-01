@@ -23,9 +23,9 @@ class PostHogService {
       person_profiles: 'identified_only',
       capture_pageview: false, // We'll handle page views manually
       capture_pageleave: true,
-      loaded: (posthog) => {
+      loaded: (_posthog) => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('PostHog loaded successfully');
+          // console.log('PostHog loaded successfully');
         }
       },
     });
@@ -42,18 +42,21 @@ class PostHogService {
   }
 
   // User identification
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   identify(userId: string, properties?: Record<string, any>) {
     if (!this.initialized) return;
     posthog.identify(userId, properties);
   }
 
   // Event tracking
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   capture(event: string, properties?: Record<string, any>) {
     if (!this.initialized) return;
     posthog.capture(event, properties);
   }
 
   // User properties
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setPersonProperties(properties: Record<string, any>) {
     if (!this.initialized) return;
     posthog.setPersonProperties(properties);
@@ -68,7 +71,7 @@ class PostHogService {
   // Feature flags
   isFeatureEnabled(flag: string): boolean {
     if (!this.initialized) return false;
-    return posthog.isFeatureEnabled(flag);
+    return posthog.isFeatureEnabled(flag) ?? false;
   }
 
   getFeatureFlag(flag: string): string | boolean | undefined {
@@ -122,6 +125,7 @@ export const trackEvents = {
     analytics.capture('search_performed', { query, results_count }),
 
   // Errors
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errorOccurred: (error: string, context?: Record<string, any>) =>
     analytics.capture('error_occurred', { error, ...context }),
 } as const;

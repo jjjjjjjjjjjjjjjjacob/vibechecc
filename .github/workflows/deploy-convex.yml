@@ -4,18 +4,27 @@ on:
   push:
     branches:
       - main
-      - develop
+      - dev
 
 jobs:
   deploy-convex:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Cache Bun dependencies
+        uses: useblacksmith/cache@v5
         with:
-          node-version: '18'
-      - run: npm install -g bun
-      - run: bun install
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
       - name: Deploy Convex
         run: |
           # This is a placeholder for the actual Convex deployment command

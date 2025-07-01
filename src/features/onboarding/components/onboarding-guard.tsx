@@ -15,14 +15,14 @@ export function OnboardingGuard({ children }: OnboardingGuardProps) {
   const { mutate: ensureUserExists } = useEnsureUserExistsMutation();
 
   React.useEffect(() => {
-    console.log('OnboardingGuard:', {
-      isSignedIn,
-      isLoaded,
-      pathname: location.pathname,
-      isLoading,
-      onboardingStatus,
-      error,
-    });
+    // console.log('OnboardingGuard:', {
+    //   isSignedIn,
+    //   isLoaded,
+    //   pathname: location.pathname,
+    //   isLoading,
+    //   onboardingStatus,
+    //   error,
+    // });
 
     // Only check onboarding for signed-in users
     if (!isLoaded || !isSignedIn) return;
@@ -35,20 +35,21 @@ export function OnboardingGuard({ children }: OnboardingGuardProps) {
 
     // Log error if there is one
     if (error) {
+      // eslint-disable-next-line no-console
       console.error('OnboardingGuard error:', error);
       return;
     }
 
     // If user doesn't exist in Convex yet, create them
     if (onboardingStatus && !onboardingStatus.userExists) {
-      console.log('User exists in Clerk but not Convex, creating...');
-      ensureUserExists();
+      // console.log('User exists in Clerk but not Convex, creating...');
+      ensureUserExists({});
       return; // Wait for user creation before proceeding
     }
 
     // Redirect to onboarding if user needs it
     if (onboardingStatus?.needsOnboarding) {
-      console.log('Redirecting to onboarding');
+      // console.log('Redirecting to onboarding');
       navigate({ to: '/onboarding' });
     }
   }, [

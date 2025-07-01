@@ -96,8 +96,8 @@ function CreateVibe() {
         tags: tags.length > 0 ? tags : undefined,
       });
 
-      // Track vibe creation
-      trackEvents.vibeCreated(result.id || 'unknown', tags);
+      // Track vibe creation (result is the document ID)
+      trackEvents.vibeCreated((result as string) || 'unknown', tags);
 
       // Redirect to home page after successful creation
       navigate({ to: '/' });

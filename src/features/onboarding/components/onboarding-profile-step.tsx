@@ -46,9 +46,11 @@ export function OnboardingProfileStep({
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const promises: Promise<any>[] = [];
 
       // Prepare Convex updates
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const convexUpdates: any = {};
       if (formData.username.trim())
         convexUpdates.username = formData.username.trim();
@@ -70,6 +72,7 @@ export function OnboardingProfileStep({
       }
 
       // Prepare Clerk updates
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const clerkUpdates: any = {};
       if (formData.username.trim())
         clerkUpdates.username = formData.username.trim();
@@ -96,6 +99,7 @@ export function OnboardingProfileStep({
 
       onNext();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('(Profile Step) Error updating profile:', error);
       toast.error('Failed to update profile. Please try again.');
     }
@@ -172,7 +176,7 @@ export function OnboardingProfileStep({
                     className="border-2 focus:border-pink-400"
                   />
                   <p className="text-muted-foreground text-xs">
-                    This is how others will find and identify you on VibeChecc
+                    This is how others will find and identify you on vibechecc
                   </p>
                 </div>
 

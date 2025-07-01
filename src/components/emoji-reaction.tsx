@@ -26,7 +26,7 @@ export function EmojiReaction({
   reaction,
   onReact,
   className,
-  showAddButton = false,
+  showAddButton: _showAddButton = false,
 }: EmojiReactionProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const { user } = useUser();
@@ -95,7 +95,7 @@ function HorizontalEmojiPicker({
   onClose,
   contextKeywords = [],
   open,
-  onOpenChange,
+  onOpenChange: _onOpenChange,
 }: HorizontalEmojiPickerProps) {
   const [searchValue, setSearchValue] = React.useState('');
   const [isSearchExpanded, setIsSearchExpanded] = React.useState(false);
@@ -104,25 +104,31 @@ function HorizontalEmojiPicker({
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   // Calculate relevance score for context-aware suggestions
-  const calculateRelevanceScore = (emojiData: EmojiData): number => {
-    if (contextKeywords.length === 0) return 0;
+  const calculateRelevanceScore = React.useCallback(
+    (emojiData: EmojiData): number => {
+      if (contextKeywords.length === 0) return 0;
 
-    let score = 0;
-    const allKeywords = [emojiData.name, ...emojiData.keywords].map((k) =>
-      k.toLowerCase()
-    );
+      let score = 0;
+      const allKeywords = [emojiData.name, ...emojiData.keywords].map((k) =>
+        k.toLowerCase()
+      );
 
-    contextKeywords.forEach((contextKeyword) => {
-      const contextLower = contextKeyword.toLowerCase();
-      allKeywords.forEach((keyword) => {
-        if (keyword.includes(contextLower) || contextLower.includes(keyword)) {
-          score += keyword === contextLower ? 10 : 5;
-        }
+      contextKeywords.forEach((contextKeyword) => {
+        const contextLower = contextKeyword.toLowerCase();
+        allKeywords.forEach((keyword) => {
+          if (
+            keyword.includes(contextLower) ||
+            contextLower.includes(keyword)
+          ) {
+            score += keyword === contextLower ? 10 : 5;
+          }
+        });
       });
-    });
 
-    return score;
-  };
+      return score;
+    },
+    [contextKeywords]
+  );
 
   // Get suggested emojis (top relevant + popular ones)
   const suggestedEmojis = React.useMemo(() => {
@@ -150,7 +156,7 @@ function HorizontalEmojiPicker({
     }
 
     return contextRelevant.slice(0, 8);
-  }, [contextKeywords]);
+  }, [calculateRelevanceScore]);
 
   // Filter emojis based on search
   const searchResults = React.useMemo(() => {
@@ -193,7 +199,7 @@ function HorizontalEmojiPicker({
       }
       return a.category.localeCompare(b.category);
     });
-  }, [searchValue, contextKeywords]);
+  }, [searchValue, calculateRelevanceScore]);
 
   // Group emojis by category for full picker
   const groupedEmojis = React.useMemo(() => {
@@ -457,13 +463,13 @@ function HorizontalEmojiPicker({
                       category.charAt(0).toUpperCase() + category.slice(1)
                     }
                   >
-                    <div className="grid grid-cols-8 gap-1 py-2 animate-in fade-in duration-300">
+                    <div className="animate-in fade-in grid grid-cols-8 gap-1 py-2 duration-300">
                       {categoryEmojis.map((emojiData, index) => (
                         <CommandItem
                           key={`${category}-${emojiData.emoji}`}
                           value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
                           onSelect={() => handleEmojiClick(emojiData.emoji)}
-                          className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg animate-in fade-in zoom-in duration-150"
+                          className="animate-in fade-in zoom-in flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg duration-150"
                           title={emojiData.name}
                           style={{
                             animationDelay: `${index * 30}ms`,
@@ -529,9 +535,11 @@ function HorizontalEmojiPicker({
   return (
     <PopoverContent
       className={cn(
-        'w-80 p-3 h-14 transition-[height] overflow-hidden',
+        'h-14 w-80 overflow-hidden p-3 transition-[height]',
         showFullPicker && 'h-96 p-0',
-        (showSearchResults || isSearchExpanded) && !showFullPicker && 'h-24 pb-6'
+        (showSearchResults || isSearchExpanded) &&
+          !showFullPicker &&
+          'h-24 pb-6'
       )}
       side="top"
       align="start"

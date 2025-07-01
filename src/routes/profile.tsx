@@ -23,7 +23,6 @@ import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
 import { Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
-import { Authenticated } from 'convex/react';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -50,13 +49,13 @@ export const Route = createFileRoute('/profile')({
 
 function Profile() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
-  console.log('clerkUser', clerkUser);
+  // console.log('clerkUser', clerkUser);
   const {
     data: convexUser,
     isLoading: convexUserLoading,
     refetch: refetchUser,
   } = useCurrentUser();
-  console.log('convexUser', convexUser);
+  // console.log('convexUser', convexUser);
   const { mutate: ensureUserExists, isPending: isCreatingUser } =
     useEnsureUserExistsMutation();
   const { data: vibes, isLoading: vibesLoading } = useUserVibes(
@@ -111,15 +110,16 @@ function Profile() {
       !convexUser &&
       !isCreatingUser
     ) {
-      console.log(
-        'User authenticated but not found in Convex, creating user...'
-      );
+      // console.log(
+      //   'User authenticated but not found in Convex, creating user...'
+      // );
       ensureUserExists(undefined, {
         onSuccess: () => {
-          console.log('User created successfully, refetching...');
+          // console.log('User created successfully, refetching...');
           refetchUser();
         },
         onError: (error) => {
+          // eslint-disable-next-line no-console
           console.error('Failed to create user:', error);
           toast.error(
             'Failed to initialize user profile. Please refresh the page.'
@@ -167,7 +167,7 @@ function Profile() {
       </div>
     );
   }
-  console.log('convexUser', convexUser);
+  // console.log('convexUser', convexUser);
 
   if (!clerkUser || !convexUser) {
     return (
@@ -216,9 +216,11 @@ function Profile() {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const promises: Promise<any>[] = [];
 
       // Prepare Convex updates
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const convexUpdates: any = {};
       if (username) convexUpdates.username = username;
       if (firstName) convexUpdates.first_name = firstName;
@@ -231,6 +233,7 @@ function Profile() {
       }
 
       // Prepare Clerk updates
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const clerkUpdates: any = {};
       if (username) clerkUpdates.username = username;
       if (firstName) clerkUpdates.firstName = firstName;
@@ -254,6 +257,7 @@ function Profile() {
 
       setIsEditing(false);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('(Profile Page) Failed to update profile:', error);
       toast.error('Failed to update profile. Please try again.');
     } finally {

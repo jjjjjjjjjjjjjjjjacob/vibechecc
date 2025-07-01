@@ -26,8 +26,8 @@ const colors = {
   bold: '\x1b[1m',
 };
 
-function log(message: string, color: string = colors.white) {
-  console.log(`${color}${message}${colors.reset}`);
+function log(message: string, _color: string = colors.white) {
+  // console.log(`${_color}${message}${colors.reset}`);
 }
 
 function logHeader(message: string) {

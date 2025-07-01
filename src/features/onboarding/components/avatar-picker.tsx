@@ -69,7 +69,19 @@ export function AvatarPicker({
 
   return (
     <div className={cn('flex justify-center', className)}>
-      <div className="relative cursor-pointer" onClick={triggerFileInput}>
+      <div
+        className="relative cursor-pointer"
+        onClick={triggerFileInput}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            triggerFileInput();
+          }
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label="Change avatar"
+      >
         <Avatar
           className={cn(
             sizeClasses[size],

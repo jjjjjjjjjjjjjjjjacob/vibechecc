@@ -5,15 +5,15 @@ on:
   push:
     branches:
       - main
-      - develop
+      - dev
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     permissions:
       contents: read
       id-token: write # Required for OIDC if you use it
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,12 +23,20 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" == "main" ]; then
             echo "environment=production" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref_name }}" == "develop" ]; then
+          elif [ "${{ github.ref_name }}" == "dev" ]; then
             echo "environment=development" >> $GITHUB_OUTPUT
           fi
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
+
+      - name: Cache Bun dependencies
+        uses: useblacksmith/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
@@ -43,4 +51,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3'
           # This tells wrangler which environment in wrangler.toml to use
-          command: "deploy --env ${{ steps.get-env.outputs.environment }}"
+          command: 'deploy --env ${{ steps.get-env.outputs.environment }}'

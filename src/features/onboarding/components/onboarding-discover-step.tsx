@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Heart, MessageCircle, Eye } from 'lucide-react';
+import { Star, Heart, Eye } from 'lucide-react';
 import { useVibes } from '@/queries';
 import { StarRating } from '@/components/star-rating';
 
@@ -137,18 +137,25 @@ export function OnboardingDiscoverStep({
                 <div className="space-y-2">
                   <p className="text-sm font-medium">Rate this vibe:</p>
                   <StarRating
-                    rating={selectedRating}
-                    onRatingChange={handleRatingChange}
+                    value={selectedRating}
+                    onChange={handleRatingChange}
                     size="lg"
-                    interactive={true}
+                    readOnly={false}
                   />
                 </div>
 
                 <div className="space-y-1 text-right">
                   <div className="text-muted-foreground flex items-center gap-1 text-sm">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span>{demoVibe.averageRating}</span>
-                    <span>({demoVibe.totalRatings} ratings)</span>
+                    <span>
+                      {'averageRating' in demoVibe
+                        ? demoVibe.averageRating
+                        : 4.5}
+                    </span>
+                    <span>
+                      ({'totalRatings' in demoVibe ? demoVibe.totalRatings : 12}{' '}
+                      ratings)
+                    </span>
                   </div>
                 </div>
               </div>

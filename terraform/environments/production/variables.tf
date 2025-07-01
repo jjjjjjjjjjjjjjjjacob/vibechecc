@@ -1,11 +1,9 @@
-variable "github_repository" {
-  description = "The GitHub repository (e.g., 'my-org/my-repo')"
+variable "cloudflare_account_id" {
+  description = "The Cloudflare account ID"
   type        = string
-  default     = "your-github-org/your-repo"
 }
 
-variable "amplify_oauth_token" {
-  description = "The GitHub OAuth token for Amplify"
+variable "cloudflare_zone_id" {
+  description = "The Cloudflare Zone ID for the domain"
   type        = string
-  sensitive   = true
 }

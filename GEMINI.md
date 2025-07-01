@@ -2,13 +2,14 @@
 
 ---
 
-## Project "VibeChecc" Overview
+## Project "vibechecc" Overview
 
 This is a full-stack web application that allows users to share, discover, rate, and react to "vibes."
 
 ### Core Technologies
 
 - **Frontend**:
+
   - **Framework**: React with TanStack Router.
   - **UI**: `shadcn/ui` (Radix UI) and custom components.
   - **Styling**: Tailwind CSS.
@@ -17,10 +18,12 @@ This is a full-stack web application that allows users to share, discover, rate,
   - **Package Manager**: Bun.
 
 - **Backend**:
+
   - **Platform**: Convex (real-time database, serverless functions).
   - **Authentication**: Clerk, integrated via webhooks.
 
 - **Testing**:
+
   - **Framework**: Vitest.
   - **Libraries**: `@testing-library/react` (frontend), `convex-test` (backend).
 
@@ -29,6 +32,7 @@ This is a full-stack web application that allows users to share, discover, rate,
 ### Directory Structure & Key Files
 
 - **`convex/`**: All backend logic.
+
   - `schema.ts`: Database schema (`users`, `vibes`, `ratings`, `reactions`).
   - `users.ts`, `vibes.ts`: Core business logic (queries, mutations).
   - `http.ts`: Clerk webhooks for user sync.

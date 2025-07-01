@@ -1,10 +1,11 @@
-# VibeChecc Convex Backend
+# vibechecc Convex Backend
 
-This directory contains the Convex backend functions for the VibeChecc application.
+This directory contains the Convex backend functions for the vibechecc application.
 
 ## Overview
 
 The Convex backend provides:
+
 - **Real-time database** with automatic syncing to frontend
 - **Type-safe functions** for queries, mutations, and actions
 - **Authentication integration** with Clerk
@@ -34,6 +35,7 @@ convex/
 ### Tables
 
 #### Users
+
 - `external_id`: Clerk user ID
 - `username`: Unique username
 - `first_name`, `last_name`: User's name
@@ -43,6 +45,7 @@ convex/
 - Timestamps: `created_at`, `updated_at`
 
 #### Vibes
+
 - `title`: Vibe title/headline
 - `description`: Detailed description
 - `tags`: Array of categorization tags
@@ -51,6 +54,7 @@ convex/
 - Timestamps: `created_at`, `updated_at`
 
 #### Ratings
+
 - `vibe_id`: Reference to Vibes table
 - `user_id`: Reference to Users table
 - `rating`: Number (1-5 stars)
@@ -58,6 +62,7 @@ convex/
 - Timestamps: `created_at`, `updated_at`
 
 #### Reactions
+
 - `vibe_id`: Reference to Vibes table
 - `user_id`: Reference to Users table
 - `emoji`: Emoji character (😂, 😭, 💯, etc.)
@@ -66,51 +71,62 @@ convex/
 ## Function Types
 
 ### Queries (Read-only)
+
 Queries are reactive and automatically update the frontend when data changes.
 
 **User Queries:**
+
 - `getCurrentUser()` - Get current authenticated user
 - `getUserByUsername(username)` - Find user by username
 - `getUserById(userId)` - Get user by ID
 
 **Vibe Queries:**
+
 - `getVibes()` - Get all public vibes with pagination
 - `getVibeById(vibeId)` - Get single vibe with details
 - `getVibesByUser(userId)` - Get user's vibes
 - `getVibeStats(vibeId)` - Get rating/reaction statistics
 
 **Rating/Reaction Queries:**
+
 - `getVibeRatings(vibeId)` - Get all ratings for a vibe
 - `getVibeReactions(vibeId)` - Get all reactions for a vibe
 - `getUserRating(vibeId, userId)` - Get specific user's rating
 
 ### Mutations (Write operations)
+
 Mutations modify database state and trigger reactive updates.
 
 **User Mutations:**
+
 - `createUser(userData)` - Create new user account
 - `updateProfile(profileData)` - Update user profile
 - `completeOnboarding(onboardingData)` - Complete user onboarding
 
 **Vibe Mutations:**
+
 - `createVibe(vibeData)` - Create new vibe
 - `updateVibe(vibeId, updates)` - Update existing vibe
 - `deleteVibe(vibeId)` - Delete vibe
 
 **Rating/Reaction Mutations:**
+
 - `addRating(vibeId, rating, comment)` - Add/update rating
 - `removeRating(vibeId)` - Remove user's rating
 - `addReaction(vibeId, emoji)` - Add/toggle emoji reaction
 - `removeReaction(vibeId, emoji)` - Remove emoji reaction
 
 ### Actions (External integrations)
+
 Actions can call external APIs and perform complex operations.
 
 **User Actions:**
+
 - `updateProfile(profileData)` - Update profile in both Convex and Clerk
 - `completeOnboarding(data)` - Complete onboarding with external sync
 
 **Webhook Actions:**
+
 - `handleClerkWebhook(payload)` - Process Clerk user events
 
 ## Authentication
@@ -121,36 +137,40 @@ Authentication is handled through Clerk integration:
 // In any function, get the current user
 const identity = await ctx.auth.getUserIdentity();
 if (!identity) {
-  throw new Error("Not authenticated");
+  throw new Error('Not authenticated');
 }
 
 // Get user from database
 const user = await ctx.db
-  .query("users")
-  .withIndex("by_external_id", (q) => q.eq("external_id", identity.subject))
+  .query('users')
+  .withIndex('by_external_id', (q) => q.eq('external_id', identity.subject))
   .unique();
 ```
 
 ## Usage Examples
 
 ### Frontend Query Usage
+
 ```typescript
-import { api } from "@/convex/_generated/api";
-import { useQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
+import { api } from '@/convex/_generated/api';
+import { useQuery } from '@tanstack/react-query';
+import { convexQuery } from '@convex-dev/react-query';
 
 // Get current user
 const { data: user } = useQuery(convexQuery(api.users.getCurrentUser, {}));
 
 // Get vibes with real-time updates
-const { data: vibes } = useQuery(convexQuery(api.vibes.getVibes, { limit: 20 }));
+const { data: vibes } = useQuery(
+  convexQuery(api.vibes.getVibes, { limit: 20 })
+);
 ```
 
 ### Frontend Mutation Usage
+
 ```typescript
-import { api } from "@/convex/_generated/api";
-import { useMutation } from "@tanstack/react-query";
-import { useConvexMutation } from "@convex-dev/react-query";
+import { api } from '@/convex/_generated/api';
+import { useMutation } from '@tanstack/react-query';
+import { useConvexMutation } from '@convex-dev/react-query';
 
 // Create vibe mutation
 const createVibeMutation = useConvexMutation(api.vibes.createVibe);
@@ -159,9 +179,9 @@ const createVibeMutation = useConvexMutation(api.vibes.createVibe);
 const handleCreateVibe = async (vibeData) => {
   try {
     const result = await createVibeMutation.mutateAsync(vibeData);
-    toast.success("Vibe created successfully!");
+    toast.success('Vibe created successfully!');
   } catch (error) {
-    toast.error("Failed to create vibe");
+    toast.error('Failed to create vibe');
   }
 };
 ```
@@ -213,6 +233,7 @@ The seed script (`seed.ts`) populates the database with sample data:
 - **33 Reactions**: Emoji reactions from users
 
 Run seeding:
+
 ```bash
 # Via npm script
 bun run seed
@@ -237,6 +258,7 @@ bunx convex test vibes.test.ts
 ```
 
 Tests cover:
+
 - Function input validation
 - Authentication requirements
 - Database operations
@@ -248,11 +270,13 @@ Tests cover:
 The backend handles webhooks from external services:
 
 ### Clerk Webhooks
+
 - **Endpoint**: `/webhooks/clerk`
 - **Events**: `user.created`, `user.updated`, `user.deleted`
 - **Purpose**: Keep Convex user data in sync with Clerk
 
 Configure webhook URL in Clerk dashboard:
+
 ```
 https://your-ngrok-url.ngrok-free.app/webhooks/clerk
 ```
@@ -276,18 +300,21 @@ https://your-ngrok-url.ngrok-free.app/webhooks/clerk
 ### Common Issues
 
 1. **Authentication errors**
+
    ```bash
    # Check Clerk configuration
    bunx convex env list
    ```
 
 2. **Function deployment issues**
+
    ```bash
    # Redeploy functions
    bunx convex deploy --debug
    ```
 
 3. **Database connection issues**
+
    ```bash
    # Restart development server
    bunx convex dev --once

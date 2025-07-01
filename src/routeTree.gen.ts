@@ -10,16 +10,16 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as SignUpImport } from './routes/sign-up'
-import { Route as SignInImport } from './routes/sign-in'
-import { Route as ProfileImport } from './routes/profile'
-import { Route as OnboardingImport } from './routes/onboarding'
-import { Route as IndexImport } from './routes/index'
-import { Route as VibesIndexImport } from './routes/vibes/index'
-import { Route as VibesMyVibesImport } from './routes/vibes/my-vibes'
-import { Route as VibesCreateImport } from './routes/vibes/create'
-import { Route as VibesVibeIdImport } from './routes/vibes/$vibeId'
+import { Route as rootRoute } from './routes/__root';
+import { Route as SignUpImport } from './routes/sign-up';
+import { Route as SignInImport } from './routes/sign-in';
+import { Route as ProfileImport } from './routes/profile';
+import { Route as OnboardingImport } from './routes/onboarding';
+import { Route as IndexImport } from './routes/index';
+import { Route as VibesIndexImport } from './routes/vibes/index';
+import { Route as VibesMyVibesImport } from './routes/vibes/my-vibes';
+import { Route as VibesCreateImport } from './routes/vibes/create';
+import { Route as VibesVibeIdImport } from './routes/vibes/$vibeId';
 
 // Create/Update Routes
 
@@ -27,167 +27,167 @@ const SignUpRoute = SignUpImport.update({
   id: '/sign-up',
   path: '/sign-up',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const SignInRoute = SignInImport.update({
   id: '/sign-in',
   path: '/sign-in',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ProfileRoute = ProfileImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const OnboardingRoute = OnboardingImport.update({
   id: '/onboarding',
   path: '/onboarding',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const VibesIndexRoute = VibesIndexImport.update({
   id: '/vibes/',
   path: '/vibes/',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const VibesMyVibesRoute = VibesMyVibesImport.update({
   id: '/vibes/my-vibes',
   path: '/vibes/my-vibes',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const VibesCreateRoute = VibesCreateImport.update({
   id: '/vibes/create',
   path: '/vibes/create',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const VibesVibeIdRoute = VibesVibeIdImport.update({
   id: '/vibes/$vibeId',
   path: '/vibes/$vibeId',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/';
+      path: '/';
+      fullPath: '/';
+      preLoaderRoute: typeof IndexImport;
+      parentRoute: typeof rootRoute;
+    };
     '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/onboarding';
+      path: '/onboarding';
+      fullPath: '/onboarding';
+      preLoaderRoute: typeof OnboardingImport;
+      parentRoute: typeof rootRoute;
+    };
     '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/profile';
+      path: '/profile';
+      fullPath: '/profile';
+      preLoaderRoute: typeof ProfileImport;
+      parentRoute: typeof rootRoute;
+    };
     '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/sign-in';
+      path: '/sign-in';
+      fullPath: '/sign-in';
+      preLoaderRoute: typeof SignInImport;
+      parentRoute: typeof rootRoute;
+    };
     '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/sign-up';
+      path: '/sign-up';
+      fullPath: '/sign-up';
+      preLoaderRoute: typeof SignUpImport;
+      parentRoute: typeof rootRoute;
+    };
     '/vibes/$vibeId': {
-      id: '/vibes/$vibeId'
-      path: '/vibes/$vibeId'
-      fullPath: '/vibes/$vibeId'
-      preLoaderRoute: typeof VibesVibeIdImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/vibes/$vibeId';
+      path: '/vibes/$vibeId';
+      fullPath: '/vibes/$vibeId';
+      preLoaderRoute: typeof VibesVibeIdImport;
+      parentRoute: typeof rootRoute;
+    };
     '/vibes/create': {
-      id: '/vibes/create'
-      path: '/vibes/create'
-      fullPath: '/vibes/create'
-      preLoaderRoute: typeof VibesCreateImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/vibes/create';
+      path: '/vibes/create';
+      fullPath: '/vibes/create';
+      preLoaderRoute: typeof VibesCreateImport;
+      parentRoute: typeof rootRoute;
+    };
     '/vibes/my-vibes': {
-      id: '/vibes/my-vibes'
-      path: '/vibes/my-vibes'
-      fullPath: '/vibes/my-vibes'
-      preLoaderRoute: typeof VibesMyVibesImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/vibes/my-vibes';
+      path: '/vibes/my-vibes';
+      fullPath: '/vibes/my-vibes';
+      preLoaderRoute: typeof VibesMyVibesImport;
+      parentRoute: typeof rootRoute;
+    };
     '/vibes/': {
-      id: '/vibes/'
-      path: '/vibes'
-      fullPath: '/vibes'
-      preLoaderRoute: typeof VibesIndexImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/vibes/';
+      path: '/vibes';
+      fullPath: '/vibes';
+      preLoaderRoute: typeof VibesIndexImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/vibes/$vibeId': typeof VibesVibeIdRoute
-  '/vibes/create': typeof VibesCreateRoute
-  '/vibes/my-vibes': typeof VibesMyVibesRoute
-  '/vibes': typeof VibesIndexRoute
+  '/': typeof IndexRoute;
+  '/onboarding': typeof OnboardingRoute;
+  '/profile': typeof ProfileRoute;
+  '/sign-in': typeof SignInRoute;
+  '/sign-up': typeof SignUpRoute;
+  '/vibes/$vibeId': typeof VibesVibeIdRoute;
+  '/vibes/create': typeof VibesCreateRoute;
+  '/vibes/my-vibes': typeof VibesMyVibesRoute;
+  '/vibes': typeof VibesIndexRoute;
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/vibes/$vibeId': typeof VibesVibeIdRoute
-  '/vibes/create': typeof VibesCreateRoute
-  '/vibes/my-vibes': typeof VibesMyVibesRoute
-  '/vibes': typeof VibesIndexRoute
+  '/': typeof IndexRoute;
+  '/onboarding': typeof OnboardingRoute;
+  '/profile': typeof ProfileRoute;
+  '/sign-in': typeof SignInRoute;
+  '/sign-up': typeof SignUpRoute;
+  '/vibes/$vibeId': typeof VibesVibeIdRoute;
+  '/vibes/create': typeof VibesCreateRoute;
+  '/vibes/my-vibes': typeof VibesMyVibesRoute;
+  '/vibes': typeof VibesIndexRoute;
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/vibes/$vibeId': typeof VibesVibeIdRoute
-  '/vibes/create': typeof VibesCreateRoute
-  '/vibes/my-vibes': typeof VibesMyVibesRoute
-  '/vibes/': typeof VibesIndexRoute
+  __root__: typeof rootRoute;
+  '/': typeof IndexRoute;
+  '/onboarding': typeof OnboardingRoute;
+  '/profile': typeof ProfileRoute;
+  '/sign-in': typeof SignInRoute;
+  '/sign-up': typeof SignUpRoute;
+  '/vibes/$vibeId': typeof VibesVibeIdRoute;
+  '/vibes/create': typeof VibesCreateRoute;
+  '/vibes/my-vibes': typeof VibesMyVibesRoute;
+  '/vibes/': typeof VibesIndexRoute;
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/'
     | '/onboarding'
@@ -197,8 +197,8 @@ export interface FileRouteTypes {
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
-    | '/vibes'
-  fileRoutesByTo: FileRoutesByTo
+    | '/vibes';
+  fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
     | '/onboarding'
@@ -208,7 +208,7 @@ export interface FileRouteTypes {
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
-    | '/vibes'
+    | '/vibes';
   id:
     | '__root__'
     | '/'
@@ -219,20 +219,20 @@ export interface FileRouteTypes {
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
-    | '/vibes/'
-  fileRoutesById: FileRoutesById
+    | '/vibes/';
+  fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  OnboardingRoute: typeof OnboardingRoute
-  ProfileRoute: typeof ProfileRoute
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
-  VibesVibeIdRoute: typeof VibesVibeIdRoute
-  VibesCreateRoute: typeof VibesCreateRoute
-  VibesMyVibesRoute: typeof VibesMyVibesRoute
-  VibesIndexRoute: typeof VibesIndexRoute
+  IndexRoute: typeof IndexRoute;
+  OnboardingRoute: typeof OnboardingRoute;
+  ProfileRoute: typeof ProfileRoute;
+  SignInRoute: typeof SignInRoute;
+  SignUpRoute: typeof SignUpRoute;
+  VibesVibeIdRoute: typeof VibesVibeIdRoute;
+  VibesCreateRoute: typeof VibesCreateRoute;
+  VibesMyVibesRoute: typeof VibesMyVibesRoute;
+  VibesIndexRoute: typeof VibesIndexRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -245,11 +245,11 @@ const rootRouteChildren: RootRouteChildren = {
   VibesCreateRoute: VibesCreateRoute,
   VibesMyVibesRoute: VibesMyVibesRoute,
   VibesIndexRoute: VibesIndexRoute,
-}
+};
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
 /* ROUTE_MANIFEST_START
 {

@@ -94,7 +94,7 @@ export function useCurrentUser() {
   return useQuery({
     ...convexQuery(api.users.current, {}),
     select: (data) => {
-      console.log('data', data);
+      // console.log('data', data);
       return data;
     },
   });
@@ -195,6 +195,17 @@ export function useEnsureUserExistsMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
+}
+
+// Legacy stub for unused NewColumn component
+export function useCreateColumnMutation() {
+  return useMutation({
+    mutationFn: async (_args: { boardId: string; name: string }) => {
+      throw new Error(
+        'useCreateColumnMutation is deprecated and not implemented'
+      );
     },
   });
 }

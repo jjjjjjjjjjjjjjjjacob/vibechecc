@@ -1,24 +1,24 @@
 /// <reference lib="dom" />
 
-/*
-import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest';
 import {
-  render,
-  screen,
-  fireEvent,
-  cleanup,
-  waitFor,
-} from '@testing-library/react';
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
+  beforeEach,
+  type MockedFunction,
+} from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConvexReactClient } from 'convex/react';
-import { ConvexQueryClient } from '@convex-dev/react-query';
-import { ClerkProvider, useUser } from '@clerk/tanstack-react-start';
+import { useUser } from '@clerk/tanstack-react-start';
 
 // Mock Clerk
 vi.mock('@clerk/tanstack-react-start', () => ({
   ClerkProvider: ({ children }: { children: React.ReactNode }) => children,
   useUser: vi.fn(),
   getAuth: vi.fn(),
+  default: vi.fn(),
 }));
 
 // Mock TanStack Router
@@ -30,7 +30,13 @@ vi.mock('@tanstack/react-router', async () => {
       component: () => <div>Profile Component</div>,
       beforeLoad: vi.fn(),
     })),
-    Link: ({ children, ...props }: any) => <a {...props}>{children}</a>,
+    Link: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode;
+      [key: string]: unknown;
+    }) => <a {...props}>{children}</a>,
     redirect: vi.fn(),
   };
 });
@@ -57,7 +63,11 @@ vi.mock('@/queries', () => mockQueries);
 
 // Mock components
 vi.mock('@/components/vibe-grid', () => ({
-  VibeGrid: ({ vibes }: { vibes: any[] }) => (
+  VibeGrid: ({
+    vibes,
+  }: {
+    vibes: Array<{ title: string; [key: string]: unknown }>;
+  }) => (
     <div data-testid="vibe-grid">
       {vibes.map((vibe, i) => (
         <div key={i} data-testid={`vibe-${i}`}>
@@ -88,18 +98,13 @@ vi.mock('@/features/auth/components/debug-auth', () => ({
 const ProfileComponent = () => {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
 
-  const {
-    data: convexUser,
-    isLoading: convexUserLoading,
-    refetch: refetchUser,
-  } = mockQueries.useCurrentUser();
+  const { data: convexUser, isLoading: convexUserLoading } =
+    mockQueries.useCurrentUser();
 
-  const { mutate: ensureUserExists, isPending: isCreatingUser } =
+  const { isPending: isCreatingUser } =
     mockQueries.useEnsureUserExistsMutation();
 
-  const { data: vibes, isLoading: vibesLoading } = mockQueries.useUserVibes(
-    convexUser?._id || ''
-  );
+  const { data: vibes } = mockQueries.useUserVibes(convexUser?._id || '');
 
   const isLoading = !clerkLoaded || convexUserLoading || isCreatingUser;
 
@@ -120,11 +125,13 @@ const ProfileComponent = () => {
       <button data-testid="edit-profile">edit profile</button>
       {vibes && vibes.length > 0 ? (
         <div data-testid="vibe-grid">
-          {vibes.map((vibe: any, i: number) => (
-            <div key={i} data-testid={`vibe-${i}`}>
-              {vibe.title}
-            </div>
-          ))}
+          {vibes.map(
+            (vibe: { title: string; [key: string]: unknown }, i: number) => (
+              <div key={i} data-testid={`vibe-${i}`}>
+                {vibe.title}
+              </div>
+            )
+          )}
         </div>
       ) : (
         <div data-testid="no-vibes">you haven't created any vibes yet.</div>
@@ -132,6 +139,22 @@ const ProfileComponent = () => {
     </div>
   );
 };
+
+// Define the type for test overrides
+interface TestOverrides {
+  clerkUser?: Partial<ReturnType<typeof useUser>>;
+  convexUser?: Partial<ReturnType<typeof mockQueries.useCurrentUser>>;
+  userVibes?: Partial<ReturnType<typeof mockQueries.useUserVibes>>;
+  userReactedVibes?: Partial<
+    ReturnType<typeof mockQueries.useUserReactedVibes>
+  >;
+  updateProfile?: Partial<
+    ReturnType<typeof mockQueries.useUpdateProfileMutation>
+  >;
+  ensureUser?: Partial<
+    ReturnType<typeof mockQueries.useEnsureUserExistsMutation>
+  >;
+}
 
 describe('Profile Page', () => {
   let queryClient: QueryClient;
@@ -153,8 +176,8 @@ describe('Profile Page', () => {
     cleanup();
   });
 
-  const renderProfile = (overrides = {}) => {
-    const mockUseUser = useUser as vi.MockedFunction<typeof useUser>;
+  const renderProfile = (overrides: TestOverrides = {}) => {
+    const mockUseUser = useUser as MockedFunction<typeof useUser>;
 
     // Default mock implementations
     mockUseUser.mockReturnValue({
@@ -167,10 +190,13 @@ describe('Profile Page', () => {
         createdAt: new Date('2023-01-01'),
         update: vi.fn().mockResolvedValue({}),
         setProfileImage: vi.fn().mockResolvedValue({}),
-      },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
       isLoaded: true,
+      isSignedIn: true,
       ...overrides.clerkUser,
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     mockQueries.useCurrentUser.mockReturnValue({
       data: {
@@ -283,4 +309,3 @@ describe('Profile Page', () => {
     });
   });
 });
-*/

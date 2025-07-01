@@ -6,7 +6,7 @@ export interface RenderedItem {
   columnId: string;
 }
 
-// VibeChecc types
+// vibechecc types
 export interface User {
   // Primary identifier (Clerk user ID stored as externalId in our DB)
   externalId: string;
@@ -15,6 +15,7 @@ export interface User {
   username?: string;
   first_name?: string;
   last_name?: string;
+  full_name?: string;
 
   // Image/Avatar fields
   image_url?: string;

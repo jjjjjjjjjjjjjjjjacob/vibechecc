@@ -14,7 +14,7 @@ function OnboardingPage() {
 
   useEffect(() => {
     if (isLoaded) {
-      getToken().then(console.log);
+      // getToken().then(console.log);
     }
   }, [getToken, isLoaded]);
 

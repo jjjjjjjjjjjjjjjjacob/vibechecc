@@ -6,10 +6,11 @@ describe('User Utils', () => {
   describe('computeUserDisplayName', () => {
     it('should prioritize username over other fields', () => {
       const user: User = {
+        externalId: '123',
         username: 'johndoe',
         first_name: 'John',
         last_name: 'Doe',
-        name: 'John Smith',
+        full_name: 'John Doe',
       };
 
       expect(computeUserDisplayName(user)).toBe('johndoe');
@@ -17,9 +18,10 @@ describe('User Utils', () => {
 
     it('should use first_name + last_name when username is not available', () => {
       const user: User = {
+        externalId: '123',
         first_name: 'John',
         last_name: 'Doe',
-        name: 'John Smith',
+        full_name: 'John Smith',
       };
 
       expect(computeUserDisplayName(user)).toBe('John Doe');
@@ -27,8 +29,9 @@ describe('User Utils', () => {
 
     it('should use only first_name if last_name is missing', () => {
       const user: User = {
+        externalId: '123',
         first_name: 'John',
-        name: 'John Smith',
+        full_name: 'John Smith',
       };
 
       expect(computeUserDisplayName(user)).toBe('John');
@@ -36,14 +39,17 @@ describe('User Utils', () => {
 
     it('should use legacy name field when Clerk fields are not available', () => {
       const user: User = {
-        name: 'John Smith',
+        externalId: '123',
+        full_name: 'John Smith',
       };
 
       expect(computeUserDisplayName(user)).toBe('John Smith');
     });
 
     it('should return Unknown User as fallback when no fields are available', () => {
-      const user: User = {};
+      const user: User = {
+        externalId: '123',
+      };
 
       expect(computeUserDisplayName(user)).toBe('Unknown User');
     });
@@ -54,6 +60,7 @@ describe('User Utils', () => {
 
     it('should trim whitespace from fields', () => {
       const user: User = {
+        externalId: '123',
         first_name: '  John  ',
         last_name: '  Doe  ',
       };
@@ -65,6 +72,7 @@ describe('User Utils', () => {
   describe('getUserInitials', () => {
     it('should return initials from first and last name', () => {
       const user: User = {
+        externalId: '123',
         username: 'johndoe',
         first_name: 'John',
         last_name: 'Doe',
@@ -75,6 +83,7 @@ describe('User Utils', () => {
 
     it('should handle single names', () => {
       const user: User = {
+        externalId: '123',
         username: 'johndoe',
       };
 
@@ -83,6 +92,7 @@ describe('User Utils', () => {
 
     it('should handle short names', () => {
       const user: User = {
+        externalId: '123',
         username: 'x',
       };
 

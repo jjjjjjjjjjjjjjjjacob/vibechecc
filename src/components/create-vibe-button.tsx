@@ -3,12 +3,10 @@ import { Link } from '@tanstack/react-router';
 import { Button, type ButtonProps } from './ui/button';
 import { Plus } from 'lucide-react';
 
-interface CreateVibeButtonProps extends ButtonProps {}
-
 export function CreateVibeButton({
   variant = 'outline',
   ...props
-}: CreateVibeButtonProps) {
+}: ButtonProps) {
   return (
     <Button variant={variant} {...props}>
       <Link to="/vibes/create" className="flex items-center">

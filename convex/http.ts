@@ -25,12 +25,12 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
 
     case 'user.deleted': {
       const clerkUserId = event.data.id!;
-      console.log('Deleting user', clerkUserId);
+      // console.log('Deleting user', clerkUserId);
       await ctx.runMutation(internal.users.deleteFromClerk, { clerkUserId });
       break;
     }
     default:
-      console.log('Ignored Clerk webhook event', event.type);
+    // console.log('Ignored Clerk webhook event', event.type);
   }
 
   return new Response(null, { status: 200 });
@@ -53,6 +53,7 @@ async function validateRequest(req: Request): Promise<WebhookEvent | null> {
   try {
     return wh.verify(payloadString, svixHeaders) as unknown as WebhookEvent;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error verifying webhook event', error);
     return null;
   }

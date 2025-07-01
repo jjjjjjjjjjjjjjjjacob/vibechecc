@@ -1,4 +1,4 @@
-import { Link, useRouter, useRouterState } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Search, Menu, X } from 'lucide-react';
@@ -78,37 +78,34 @@ export function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {isSearchOpen ? (
-            <div className="animate-in slide-in-from-right relative mr-2 flex-1 duration-300 md:w-80">
-              <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-              <Input
-                type="search"
-                placeholder="search vibes..."
-                className="w-full pl-8"
-                autoFocus
-                onBlur={() => setIsSearchOpen(false)}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-0 right-0 h-9 w-9"
-                onClick={() => setIsSearchOpen(false)}
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">close search</span>
-              </Button>
-            </div>
-          ) : (
+          <Button
+            variant="ghost"
+            className="group/search relative m-0 p-2 data-[state=open]:flex data-[state=open]:w-80"
+            data-state={isSearchOpen ? 'open' : 'closed'}
+            onClick={() => {
+              if (!isSearchOpen) {
+                setIsSearchOpen(true);
+              }
+            }}
+          >
+            <Search className="text-muted-foreground m-0 h-4 w-4 p-0" />
+            <Input
+              type="search"
+              placeholder="search vibes..."
+              className="active:ring-none hidden w-full border-none px-0 group-data-[state=open]/search:flex focus:border-none focus:ring-0 focus-visible:ring-0 active:border-none active:ring-0"
+              autoFocus
+              onBlur={() => setIsSearchOpen(false)}
+            />
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsSearchOpen(true)}
-              className="animate-in fade-in hidden duration-200 md:flex"
+              className="absolute top-0 right-0 hidden h-9 w-9 group-data-[state=open]/search:flex"
+              onClick={() => setIsSearchOpen(false)}
             >
-              <Search className="h-5 w-5" />
-              <span className="sr-only">search</span>
+              <X className="h-4 w-4" />
+              <span className="sr-only">close search</span>
             </Button>
-          )}
+          </Button>
 
           <Button
             variant="ghost"
@@ -201,7 +198,7 @@ export function Header() {
               </div>
             </div>
             <div className="col-span-1 hidden sm:block">
-              <h2 className="py-2 text-md text-muted-foreground py-2 font-bold lowercase lg:text-xl">
+              <h2 className="text-md text-muted-foreground py-2 font-bold lowercase lg:text-xl">
                 similar vibes
               </h2>
             </div>

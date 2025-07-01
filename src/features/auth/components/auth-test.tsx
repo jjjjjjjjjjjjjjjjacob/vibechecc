@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
-import { api } from '../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 import { useUser } from '@clerk/tanstack-react-start';
 
 export function AuthTest() {
@@ -18,7 +18,7 @@ export function AuthTest() {
   });
 
   const handleEnsureUser = () => {
-    ensureUserExists.mutate();
+    ensureUserExists.mutate({});
   };
 
   return (

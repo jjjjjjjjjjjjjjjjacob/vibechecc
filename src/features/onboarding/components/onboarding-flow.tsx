@@ -48,9 +48,10 @@ export function OnboardingFlow() {
   const handleSkip = async () => {
     try {
       await completeOnboardingMutation.mutateAsync({});
-      toast.success('Welcome to VibeChecc!');
+      toast.success('Welcome to vibechecc!');
       navigate({ to: '/' });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error skipping onboarding:', error);
       toast.error('Something went wrong. Please try again.');
     }
@@ -64,10 +65,11 @@ export function OnboardingFlow() {
   }) => {
     try {
       setOnboardingData((prev) => ({ ...prev, ...profileData }));
-      console.log('profileData', profileData);
+      // console.log('profileData', profileData);
       await updateOnboardingMutation.mutateAsync(profileData);
       toast.success('Profile updated!');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('(Onboarding Flow) Error updating profile:', error);
       toast.error('Failed to update profile. Please try again.');
       // Don't prevent user from continuing on profile update errors
@@ -80,6 +82,7 @@ export function OnboardingFlow() {
       await updateOnboardingMutation.mutateAsync({ interests });
       toast.success('Interests saved!');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error updating interests:', error);
       toast.error('Failed to save interests. Please try again.');
       // Don't prevent user from continuing on interests errors
@@ -93,9 +96,11 @@ export function OnboardingFlow() {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const promises: Promise<any>[] = [];
 
       // Prepare Convex completion
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const convexData: any = {};
       if (onboardingData.username)
         convexData.username = onboardingData.username;
@@ -108,6 +113,7 @@ export function OnboardingFlow() {
       promises.push(completeOnboardingMutation.mutateAsync(convexData));
 
       // Prepare Clerk updates if needed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const clerkUpdates: any = {};
       if (onboardingData.username)
         clerkUpdates.username = onboardingData.username;
@@ -129,9 +135,10 @@ export function OnboardingFlow() {
       // Execute all updates in parallel
       await Promise.all(promises);
 
-      toast.success('Welcome to VibeChecc! 🎉');
+      toast.success('Welcome to vibechecc! 🎉');
       navigate({ to: '/' });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error completing onboarding:', error);
       toast.error('Something went wrong. Please try again.');
     }

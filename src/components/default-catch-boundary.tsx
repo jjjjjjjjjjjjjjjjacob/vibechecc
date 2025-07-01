@@ -4,8 +4,8 @@ import {
   rootRouteId,
   useMatch,
   useRouter,
+  type ErrorComponentProps,
 } from '@tanstack/react-router';
-import type { ErrorComponentProps } from '@tanstack/react-router';
 
 export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
   const router = useRouter();
@@ -14,6 +14,7 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
     select: (state) => state.id === rootRouteId,
   });
 
+  // eslint-disable-next-line no-console
   console.error(error);
 
   return (

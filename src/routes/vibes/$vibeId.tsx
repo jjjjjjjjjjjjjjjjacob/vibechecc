@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import * as React from 'react';
 import {
   useVibe,
@@ -6,13 +6,12 @@ import {
   useReactToVibeMutation,
   useVibes,
 } from '@/queries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { StarRating } from '@/components/star-rating';
-import { EmojiReactions } from '@/components/emoji-reaction';
 import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
 import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
@@ -34,12 +33,12 @@ function VibePage() {
   const { data: allVibes } = useVibes();
   const [rating, setRating] = React.useState(0);
   const [review, setReview] = React.useState('');
-  const { user } = useUser();
+  const { user: _user } = useUser();
   const addRatingMutation = useAddRatingMutation();
   const reactToVibeMutation = useReactToVibeMutation();
 
   // Extract context keywords from vibe for emoji suggestions
-  const contextKeywords = React.useMemo(() => {
+  const _contextKeywords = React.useMemo(() => {
     if (!vibe) return [];
 
     const keywords: string[] = [];
@@ -154,7 +153,8 @@ function VibePage() {
   }
 
   const averageRating = vibe.ratings.length
-    ? vibe.ratings.reduce((sum: number, r: any) => sum + r.rating, 0) /
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      vibe.ratings.reduce((sum: number, r: any) => sum + r.rating, 0) /
       vibe.ratings.length
     : 0;
 
@@ -180,6 +180,7 @@ function VibePage() {
         }
       );
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit rating:', error);
       toast.error('failed to submit rating. please try again.', {
         duration: 3000,
@@ -188,13 +189,14 @@ function VibePage() {
     }
   };
 
-  const handleReact = async (emoji: string) => {
+  const _handleReact = async (emoji: string) => {
     try {
       await reactToVibeMutation.mutateAsync({
         vibeId: vibe.id,
         emoji,
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to react:', error);
     }
   };
@@ -203,7 +205,7 @@ function VibePage() {
     <div className="container mx-auto">
       <div className="grid w-full grid-cols-3 gap-8 transition-all duration-300">
         {/* Main Content */}
-        <div className="col-span-3 sm:col-span-2 w-full transition-all duration-300">
+        <div className="col-span-3 w-full transition-all duration-300 sm:col-span-2">
           {/* Main Vibe Card */}
           <div className="relative mb-6 overflow-hidden rounded-lg">
             {/* Main Image */}
@@ -340,11 +342,14 @@ function VibePage() {
                 <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
                 <div className="space-y-4">
                   {vibe.ratings
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .filter((r: any) => r.review)
                     .sort(
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (a: any, b: any) =>
                         new Date(b.date).getTime() - new Date(a.date).getTime()
                     )
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .map((rating: any, index: number) => (
                       <div
                         key={index}
@@ -396,7 +401,8 @@ function VibePage() {
               {similarVibes.map((similarVibe) => (
                 <VibeCard
                   key={similarVibe.id}
-                  vibe={similarVibe}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  vibe={similarVibe as any}
                   compact={true}
                 />
               ))}

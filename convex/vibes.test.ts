@@ -105,9 +105,9 @@ describe('Vibes Mutations', () => {
       };
 
       // Try to create a vibe without authentication using the auth-required mutation
-      await expect(
-        t.mutation(api.vibes.create, mockVibeData)
-      ).rejects.toThrow('You must be logged in to create a vibe');
+      await expect(t.mutation(api.vibes.create, mockVibeData)).rejects.toThrow(
+        'You must be logged in to create a vibe'
+      );
     });
   });
 
@@ -166,9 +166,9 @@ describe('Vibes Mutations', () => {
       };
 
       // Try to rate without authentication using the auth-required mutation
-      await expect(
-        t.mutation(api.vibes.addRating, ratingData)
-      ).rejects.toThrow('You must be logged in to rate a vibe');
+      await expect(t.mutation(api.vibes.addRating, ratingData)).rejects.toThrow(
+        'You must be logged in to rate a vibe'
+      );
     });
   });
 

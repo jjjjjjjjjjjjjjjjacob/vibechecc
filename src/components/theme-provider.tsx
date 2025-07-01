@@ -14,7 +14,6 @@ const ThemeContext = React.createContext<ThemeContextType | undefined>(
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<Theme>('system');
-  const [mounted, setMounted] = React.useState(false);
 
   // Get system theme preference
   const getSystemTheme = React.useCallback((): 'light' | 'dark' => {

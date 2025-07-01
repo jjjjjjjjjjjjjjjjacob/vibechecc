@@ -28,5 +28,5 @@ resource "cloudflare_record" "main" {
   value   = "192.0.2.1" # Placeholder IP for proxied CNAME-like behavior
   type    = "A"
   proxied = true
-  comment = "Managed by Terraform for Vibechek Worker"
+  comment = "Managed by Terraform for vibechecc Worker"
 }

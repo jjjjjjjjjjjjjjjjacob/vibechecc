@@ -76,6 +76,7 @@ export function StarRating({
   const displayValue = hoverValue || value;
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       className="flex items-center gap-0.5"
       role={readOnly ? 'img' : 'radiogroup'}

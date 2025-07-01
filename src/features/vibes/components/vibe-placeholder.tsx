@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useTheme } from './theme-provider';
-import { cn } from '../utils/tailwind-utils';
+import { useTheme } from '@/components/theme-provider';
+import { cn } from '@/utils/tailwind-utils';
 
 interface VibePlaceholderProps {
   title?: string;

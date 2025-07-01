@@ -29,8 +29,8 @@ export function computeUserDisplayName(user: User | null | undefined): string {
   }
 
   // Priority 3: legacy name field (for backward compatibility)
-  if (user.name?.trim()) {
-    return user.name.trim();
+  if (user.full_name?.trim()) {
+    return user.full_name.trim();
   }
 
   // Fallback
@@ -56,11 +56,6 @@ export function getUserAvatarUrl(
 
   if (user.profile_image_url) {
     return user.profile_image_url;
-  }
-
-  // Fallback to legacy avatar field
-  if (user.avatar) {
-    return user.avatar;
   }
 
   return undefined;

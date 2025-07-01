@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { VibeCard } from './vibe-card';
-import { cn } from '../utils/tailwind-utils';
-import type { Vibe } from '../types';
+import { cn } from '@/utils/tailwind-utils';
+import type { Vibe } from '@/types';
 
 interface VibeCategoryRowProps {
   title: string;
@@ -104,7 +104,7 @@ export function VibeCategoryRow({
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           onScroll={checkScrollButtons}
         >
-          {vibes.map((vibe, index) => (
+          {vibes.map((vibe, _index) => (
             <div
               key={vibe.id}
               className={cn(

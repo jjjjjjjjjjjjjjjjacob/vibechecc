@@ -30,7 +30,7 @@ export const getById = query({
 export const current = query({
   args: {},
   handler: async (ctx) => {
-    console.log('current called', await ctx.auth.getUserIdentity());
+    // console.log('current called', await ctx.auth.getUserIdentity());
     return await getCurrentUser(ctx);
   },
 });
@@ -109,6 +109,7 @@ export const updateProfile = action({
       })
     ),
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: async (ctx, args): Promise<any> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -148,6 +149,7 @@ export const updateProfileInternal = internalMutation({
       throw new Error('User not found');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: Record<string, any> = {};
 
     if (args.username !== undefined) {
@@ -187,6 +189,7 @@ export const completeOnboarding = action({
     interests: v.optional(v.array(v.string())),
     image_url: v.optional(v.string()),
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: async (ctx, args): Promise<any> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -214,7 +217,7 @@ export const completeOnboardingInternal = internalMutation({
 
     // If user doesn't exist, create them first
     if (!user) {
-      console.log('User not found in completeOnboarding, creating...');
+      // console.log('User not found in completeOnboarding, creating...');
       user = await createUserIfNotExistsInternal(ctx, args.externalId);
     }
 
@@ -222,6 +225,7 @@ export const completeOnboardingInternal = internalMutation({
       throw new Error('User not authenticated');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: Record<string, any> = {
       onboardingCompleted: true,
     };
@@ -251,20 +255,21 @@ export const updateOnboardingData = action({
     interests: v.optional(v.array(v.string())),
     image_url: v.optional(v.string()),
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: async (ctx, args): Promise<any> => {
-    console.log('updateOnboardingData called with args:', args);
+    // console.log('updateOnboardingData called with args:', args);
 
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('User not authenticated');
     }
 
-    console.log('Auth identity:', {
-      subject: identity.subject,
-      tokenIdentifier: identity.tokenIdentifier,
-      givenName: identity.givenName,
-      familyName: identity.familyName,
-    });
+    // console.log('Auth identity:', {
+    //   subject: identity.subject,
+    //   tokenIdentifier: identity.tokenIdentifier,
+    //   givenName: identity.givenName,
+    //   familyName: identity.familyName,
+    // });
 
     // Update Convex only - Clerk will be updated from frontend
     return await ctx.runMutation(internal.users.updateOnboardingDataInternal, {
@@ -286,22 +291,24 @@ export const updateOnboardingDataInternal = internalMutation({
   },
   handler: async (ctx, args) => {
     let user = await userByExternalId(ctx, args.externalId);
-    console.log(
-      'User after getCurrentUser:',
-      user ? { _id: user._id, externalId: user.externalId } : 'null'
-    );
+    // console.log(
+    //   'User after getCurrentUser:',
+    //   user ? { _id: user._id, externalId: user.externalId } : 'null'
+    // );
 
     // If user doesn't exist, create them first
     if (!user) {
-      console.log('User not found, creating...');
+      // console.log('User not found, creating...');
       user = await createUserIfNotExistsInternal(ctx, args.externalId);
     }
 
     if (!user) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get or create user');
       throw new Error('User not authenticated');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: Record<string, any> = {};
 
     if (args.username !== undefined) {
@@ -321,30 +328,30 @@ export const updateOnboardingDataInternal = internalMutation({
       updates.profile_image_url = args.image_url; // Keep both fields synced
     }
 
-    console.log('Updates to apply:', updates);
+    // console.log('Updates to apply:', updates);
 
     if (Object.keys(updates).length > 0) {
       await ctx.db.patch(user._id, updates);
-      console.log('Updates applied successfully');
+      // console.log('Updates applied successfully');
     }
 
     const updatedUser = await ctx.db.get(user._id);
-    console.log(
-      'Final user state:',
-      updatedUser
-        ? {
-            _id: updatedUser._id,
-            externalId: updatedUser.externalId,
-            username: updatedUser.username,
-            onboardingCompleted: updatedUser.onboardingCompleted,
-            interests: updatedUser.interests,
-            image_url: updatedUser.image_url,
-            profile_image_url: updatedUser.profile_image_url,
-            bio: updatedUser.bio,
-            socials: updatedUser.socials,
-          }
-        : 'null'
-    );
+    // console.log(
+    //   'Final user state:',
+    //   updatedUser
+    //     ? {
+    //         _id: updatedUser._id,
+    //         externalId: updatedUser.externalId,
+    //         username: updatedUser.username,
+    //         onboardingCompleted: updatedUser.onboardingCompleted,
+    //         interests: updatedUser.interests,
+    //         image_url: updatedUser.image_url,
+    //         profile_image_url: updatedUser.profile_image_url,
+    //         bio: updatedUser.bio,
+    //         socials: updatedUser.socials,
+    //       }
+    //     : 'null'
+    // );
 
     return updatedUser;
   },
@@ -353,17 +360,17 @@ export const updateOnboardingDataInternal = internalMutation({
 // Debug authentication (temporary)
 export const debugAuth = query({
   handler: async (ctx) => {
-    console.log('debugAuth called');
+    // console.log('debugAuth called');
 
     // Check if there's any auth context at all
-    console.log('ctx.auth exists:', !!ctx.auth);
+    // console.log('ctx.auth exists:', !!ctx.auth);
 
     try {
       const identity = await ctx.auth.getUserIdentity();
-      console.log('Full identity object:', identity);
+      // console.log('Full identity object:', identity);
 
       // Note: Raw token access isn't available in Convex queries
-      console.log('Raw token access not available in queries');
+      // console.log('Raw token access not available in queries');
 
       return {
         hasAuth: !!ctx.auth,
@@ -382,6 +389,7 @@ export const debugAuth = query({
           : null,
       };
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error in debugAuth:', error);
       return {
         hasAuth: !!ctx.auth,
@@ -405,7 +413,7 @@ export const ensureUserExists = mutation({
     let user = await userByExternalId(ctx, identity.subject);
 
     if (!user) {
-      console.log(`Creating user for Clerk ID: ${identity.subject}`);
+      // console.log(`Creating user for Clerk ID: ${identity.subject}`);
       const userAttributes = {
         externalId: identity.subject,
         first_name: identity.givenName || undefined,
@@ -419,7 +427,7 @@ export const ensureUserExists = mutation({
 
       const userId = await ctx.db.insert('users', userAttributes);
       user = await ctx.db.get(userId);
-      console.log(`Created user with ID: ${userId}`);
+      // console.log(`Created user with ID: ${userId}`);
     }
 
     return user;
@@ -429,33 +437,33 @@ export const ensureUserExists = mutation({
 // Get user onboarding status
 export const getOnboardingStatus = query({
   handler: async (ctx) => {
-    console.log('getOnboardingStatus called');
+    // console.log('getOnboardingStatus called');
 
-    const identity = await ctx.auth.getUserIdentity();
-    console.log(
-      'Auth identity in getOnboardingStatus:',
-      identity
-        ? {
-            subject: identity.subject,
-            tokenIdentifier: identity.tokenIdentifier,
-          }
-        : 'null'
-    );
+    // const identity = await ctx.auth.getUserIdentity();
+    // console.log(
+    //   'Auth identity in getOnboardingStatus:',
+    //   identity
+    //     ? {
+    //         subject: identity.subject,
+    //         tokenIdentifier: identity.tokenIdentifier,
+    //       }
+    //     : 'null'
+    // );
 
     const user = await getCurrentUser(ctx);
-    console.log(
-      'User in getOnboardingStatus:',
-      user
-        ? {
-            _id: user._id,
-            externalId: user.externalId,
-            onboardingCompleted: user.onboardingCompleted,
-          }
-        : 'null'
-    );
+    // console.log(
+    //   'User in getOnboardingStatus:',
+    //   user
+    //     ? {
+    //         _id: user._id,
+    //         externalId: user.externalId,
+    //         onboardingCompleted: user.onboardingCompleted,
+    //       }
+    //     : 'null'
+    // );
 
     if (!user) {
-      console.log('No user found, returning needsOnboarding: true');
+      // console.log('No user found, returning needsOnboarding: true');
       return { completed: false, needsOnboarding: true, userExists: false };
     }
 
@@ -466,11 +474,11 @@ export const getOnboardingStatus = query({
       user,
     };
 
-    console.log('getOnboardingStatus result:', {
-      completed: result.completed,
-      needsOnboarding: result.needsOnboarding,
-      userId: result.user._id,
-    });
+    // console.log('getOnboardingStatus result:', {
+    //   completed: result.completed,
+    //   needsOnboarding: result.needsOnboarding,
+    //   userId: result.user._id,
+    // });
 
     return result;
   },
@@ -515,6 +523,7 @@ export const deleteFromClerk = internalMutation({
     if (user !== null) {
       await ctx.db.delete(user._id);
     } else {
+      // eslint-disable-next-line no-console
       console.warn(
         `Can't delete user, there is none for Clerk user ID: ${clerkUserId}`
       );
@@ -534,9 +543,9 @@ async function userByExternalId(ctx: QueryCtx, externalId: string) {
 
 // Get current authenticated user from Clerk JWT
 export async function getCurrentUser(ctx: QueryCtx) {
-  console.log('getCurrentUser called');
+  // console.log('getCurrentUser called');
   const identity = await ctx.auth.getUserIdentity();
-  console.log('identity', identity);
+  // console.log('identity', identity);
   if (identity === null) {
     return null;
   }
@@ -547,7 +556,7 @@ export async function getCurrentUser(ctx: QueryCtx) {
 export async function getCurrentUserOrCreate(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (identity === null) {
-    console.log('No identity found - user not authenticated');
+    // console.log('No identity found - user not authenticated');
     return null;
   }
 
@@ -555,9 +564,9 @@ export async function getCurrentUserOrCreate(ctx: QueryCtx | MutationCtx) {
 
   // If user doesn't exist in Convex yet, create them
   if (user === null) {
-    console.log(
-      `Creating new user in Convex for Clerk user: ${identity.subject}`
-    );
+    // console.log(
+    //   `Creating new user in Convex for Clerk user: ${identity.subject}`
+    // );
     const userAttributes = {
       externalId: identity.subject,
       // Set some defaults from JWT if available
@@ -571,19 +580,20 @@ export async function getCurrentUserOrCreate(ctx: QueryCtx | MutationCtx) {
     };
 
     // Check if this is a mutation context (can insert) or query context (cannot insert)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('db' in ctx && 'insert' in (ctx as any).db) {
       const userId = await (ctx as MutationCtx).db.insert(
         'users',
         userAttributes
       );
       user = await ctx.db.get(userId);
-      console.log(`Created user with ID: ${userId}`);
+      // console.log(`Created user with ID: ${userId}`);
     } else {
       // If we're in a query context, we can't create the user
       // This should trigger the upsert from the webhook eventually
-      console.log(
-        'Cannot create user in query context - user will be created via webhook'
-      );
+      // console.log(
+      //   'Cannot create user in query context - user will be created via webhook'
+      // );
       return null;
     }
   }
@@ -608,7 +618,7 @@ async function createUserIfNotExistsInternal(
   let user = await userByExternalId(ctx, externalId);
 
   if (!user) {
-    console.log(`Creating user for Clerk ID: ${externalId}`);
+    // console.log(`Creating user for Clerk ID: ${externalId}`);
     const userAttributes = {
       externalId: externalId,
       created_at: Date.now(),
@@ -617,7 +627,7 @@ async function createUserIfNotExistsInternal(
 
     const userId = await ctx.db.insert('users', userAttributes);
     user = await ctx.db.get(userId);
-    console.log(`Created user with ID: ${userId}`);
+    // console.log(`Created user with ID: ${userId}`);
   }
 
   return user;

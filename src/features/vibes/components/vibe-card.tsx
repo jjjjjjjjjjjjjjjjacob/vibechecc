@@ -108,7 +108,6 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
     try {
       await addRatingMutation.mutateAsync({
         vibeId: vibe.id,
-        userId: user.id,
         rating,
       });
 
@@ -117,6 +116,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
         icon: '⚡',
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit rating:', error);
       toast.error('failed to rate vibe. please try again.', {
         duration: 2000,
@@ -267,6 +267,14 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                       e.stopPropagation();
                     }
                   }}
+                  onKeyDown={(e) => {
+                    if (!preview && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <StarRating
                     value={userRating || averageRating}
@@ -292,6 +300,14 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                   e.preventDefault();
                   e.stopPropagation();
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <EmojiReactions
                   reactions={reactions}
@@ -389,6 +405,14 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                       e.stopPropagation();
                     }
                   }}
+                  onKeyDown={(e) => {
+                    if (!preview && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <StarRating
                     value={userRating || averageRating}
@@ -414,6 +438,14 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                   e.preventDefault();
                   e.stopPropagation();
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <EmojiReactions
                   reactions={reactions}

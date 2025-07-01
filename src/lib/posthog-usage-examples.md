@@ -1,6 +1,6 @@
 # PostHog Usage Examples
 
-This document provides examples of how to use PostHog analytics throughout the VibeChecc application.
+This document provides examples of how to use PostHog analytics throughout the vibechecc application.
 
 ## Environment Variables
 
@@ -25,9 +25,9 @@ function MyComponent() {
 
   const handleClick = () => {
     // Custom event
-    capture('button_clicked', { 
+    capture('button_clicked', {
       button_name: 'my_button',
-      page: 'home' 
+      page: 'home',
     });
 
     // Pre-defined event
@@ -69,6 +69,7 @@ analytics.capturePageView('/custom-path');
 The application includes pre-defined tracking events for common actions:
 
 ### User Events
+
 ```tsx
 import { trackEvents } from '@/lib/posthog';
 
@@ -79,6 +80,7 @@ trackEvents.userSignedOut();
 ```
 
 ### Vibe Events
+
 ```tsx
 // Vibe interactions
 trackEvents.vibeCreated('vibe_123', ['tag1', 'tag2']);
@@ -88,23 +90,26 @@ trackEvents.vibeReacted('vibe_123', '😂');
 ```
 
 ### Navigation Events
+
 ```tsx
 // Page tracking
 trackEvents.pageViewed('/vibes/123', 'Vibe Details');
 ```
 
 ### Search Events
+
 ```tsx
 // Search tracking
 trackEvents.searchPerformed('funny vibes', 25);
 ```
 
 ### Error Events
+
 ```tsx
 // Error tracking
-trackEvents.errorOccurred('API Error', { 
+trackEvents.errorOccurred('API Error', {
   endpoint: '/api/vibes',
-  status: 500 
+  status: 500,
 });
 ```
 
@@ -154,15 +159,14 @@ function CreateVibeForm() {
   const handleSubmit = async (formData) => {
     try {
       const result = await createVibe(formData);
-      
+
       // Track successful creation
       trackEvents.vibeCreated(result.id, formData.tags);
-      
     } catch (error) {
       // Track errors
       trackEvents.errorOccurred('Vibe creation failed', {
         error: error.message,
-        form_data: formData
+        form_data: formData,
       });
     }
   };
@@ -196,9 +200,9 @@ function MyComponent() {
   return (
     <div>
       {showBetaFeature && <BetaFeature />}
-      <button 
-        style={{ 
-          backgroundColor: buttonColor === 'red' ? 'red' : 'blue' 
+      <button
+        style={{
+          backgroundColor: buttonColor === 'red' ? 'red' : 'blue',
         }}
       >
         Click me
@@ -237,35 +241,35 @@ if (analytics.isInitialized()) {
 4. **Performance**: PostHog operations are async and non-blocking
 5. **Testing**: PostHog events won't fire in test environments
 
-## Custom Events for VibeChecc
+## Custom Events for vibechecc
 
-Here are some custom events specific to the VibeChecc application:
+Here are some custom events specific to the vibechecc application:
 
 ```tsx
 // Vibe discovery
 capture('vibe_discovered', {
   vibe_id: 'vibe_123',
   discovery_method: 'search', // 'search', 'browse', 'recommendation'
-  category: 'funny'
+  category: 'funny',
 });
 
 // Social interactions
 capture('user_followed', {
   followed_user_id: 'user_456',
-  source: 'profile_page'
+  source: 'profile_page',
 });
 
 // Content engagement
 capture('vibe_shared', {
   vibe_id: 'vibe_123',
   share_method: 'copy_link', // 'copy_link', 'social_media'
-  platform: 'twitter'
+  platform: 'twitter',
 });
 
 // App usage patterns
 capture('session_duration', {
   duration_seconds: 300,
   pages_visited: 5,
-  vibes_viewed: 10
+  vibes_viewed: 10,
 });
-``` 
+```
