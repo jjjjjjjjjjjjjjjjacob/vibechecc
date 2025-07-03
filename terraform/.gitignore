@@ -1,0 +1,11 @@
+# Ignore files without extensions (no dot in name) but not directories
+*
+!*/
+!*.*
+!.*
+
+*.tfvars
+
+.env
+.envrc
+.terraform

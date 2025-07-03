@@ -1,0 +1,20 @@
+name: Ephemeral Deployment
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  static-checks:
+    uses: ./.github/workflows/static-checks.yml
+
+  deploy:
+    needs: static-checks
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: development
+      branch: ${{ github.head_ref }}
+      pr_number: ${{ github.event.number }}
+    secrets: inherit 

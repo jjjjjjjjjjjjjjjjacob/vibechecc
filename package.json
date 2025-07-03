@@ -21,7 +21,11 @@
     "format:staged": "prettier --write --cache --ignore-unknown",
     "typecheck": "tsc --noEmit",
     "quality": "bun run typecheck && bun run lint && bun run format:check",
-    "quality:fix": "bun run typecheck && bun run lint:fix && bun run format"
+    "quality:fix": "bun run typecheck && bun run lint:fix && bun run format",
+    "wrangler:dev": "wrangler dev --port 3030",
+    "wrangler:deploy": "wrangler deploy",
+    "deploy": "bun run build && bun run wrangler:deploy",
+    "cf-typegen": "wrangler types --env-interface Env"
   },
   "dependencies": {
     "@clerk/backend": "^2.0.0",
@@ -62,7 +66,6 @@
     "tailwind-merge": "^2.6.0",
     "tiny-invariant": "^1.3.3",
     "tw-animate-css": "^1.3.2",
-    "unenv": "^1.10.0",
     "vaul": "^1.1.2",
     "vinxi": "0.5.3",
     "zod": "^3.24.2"
@@ -92,7 +95,8 @@
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.33.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.4"
+    "vitest": "^3.1.4",
+    "wrangler": "^4.22.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

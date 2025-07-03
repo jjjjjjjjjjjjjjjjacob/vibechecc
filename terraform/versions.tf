@@ -1,16 +1,11 @@
+# This file declares the versions of the providers that are used in the
+# terraform configuration.
+
 terraform {
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-    github = {
-      source  = "integrations/github"
-      version = "~> 5.0"
-    }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "~> 4"
+      version = "~> 5"
     }
   }
 }

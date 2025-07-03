@@ -170,7 +170,7 @@ This section outlines the process for deploying the vibechecc application to our
 
 Our deployment process is automated through a series of GitHub Actions workflows that handle infrastructure and application deployments.
 
-- **Infrastructure (Terraform)**: `terraform-plan.yml` and `terraform-apply.yml` manage infrastructure changes.
+- **Infrastructure (Terraform)**: `terraform-plan.yml` and `terraform-apply.yml` manage infrastructure changes. These workflows automatically run `bun run build` before Terraform operations to ensure the latest application code is deployed.
 - **Application (Cloudflare Workers & Convex)**: `deploy-cloudflare.yml` and `deploy-convex.yml` handle application deployments.
 - **Ephemeral Environments**: `pr-environment.yml` and `pr-cleanup.yml` manage temporary environments for pull requests.
 
@@ -179,6 +179,64 @@ Our deployment process is automated through a series of GitHub Actions workflows
 - Workflows can be triggered manually from the "Actions" tab in GitHub.
 - Production deployments require manual approval.
 - Rollbacks can be performed through the Cloudflare and Convex dashboards.
+
+---
+
+## Terraform State Management
+
+Our infrastructure is managed using Terraform, which requires careful coordination between the application build process and infrastructure deployment.
+
+### Prerequisites for Terraform Operations
+
+**⚠️ Important: You must build the frontend before applying any Terraform changes.**
+
+Before running any `terraform plan` or `terraform apply` commands, ensure the application is built:
+
+```bash
+# Run from the project root
+bun run build
+```
+
+This creates the necessary build artifacts at `.output/server/index.mjs` that Terraform references for the Cloudflare Worker deployment.
+
+### Terraform Workflow
+
+1. **Build the Application**:
+   ```bash
+   bun run build
+   ```
+
+2. **Navigate to Terraform Directory**:
+   ```bash
+   cd terraform
+   ```
+
+3. **Initialize Terraform** (first time only):
+   ```bash
+   terraform init
+   ```
+
+4. **Plan Changes**:
+   ```bash
+   terraform plan
+   ```
+
+5. **Apply Changes**:
+   ```bash
+   terraform apply
+   ```
+
+### State Management
+
+- **Remote State**: Our Terraform state is stored remotely (configured in `terraform/backend.tf`)
+- **Environment Isolation**: Each environment (production, development, ephemeral) has its own state file
+- **Build Dependency**: The Cloudflare Worker script references the built application at `.output/server/index.mjs`
+
+### Common Issues
+
+- **File Not Found Error**: If you see errors about `.output/server/index.mjs` not being found, run `bun run build` first
+- **Stale Build**: Always rebuild before infrastructure changes to ensure the latest code is deployed
+- **State Lock**: If Terraform state is locked, check if another deployment is in progress
 
 ---
 

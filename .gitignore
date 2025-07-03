@@ -17,8 +17,11 @@ yarn.lock
 # Sentry Config File
 .env.sentry-build-plugin
 
-.env.local
+.envrc
 .dev.vars
 
 terraform/terraform.env
 terraform/.envrc
+
+.env.*
+!.env.*.example

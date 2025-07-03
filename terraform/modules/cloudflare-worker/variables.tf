@@ -5,6 +5,11 @@ variable "environment" {
   type        = string
 }
 
+variable "prefix" {
+  description = "The prefix for the worker (e.g., 'prod', 'dev', 'pr-123')."
+  type        = string
+}
+
 variable "cloudflare_account_id" {
   description = "The Cloudflare account ID."
   type        = string
@@ -15,12 +20,12 @@ variable "cloudflare_zone_id" {
   type        = string
 }
 
-variable "zone_name" {
+variable "cloudflare_zone" {
   description = "The root domain name (e.g., 'vibechecc.app')."
   type        = string
 }
 
-variable "worker_hostname" {
+variable "cloudflare_worker_hostname" {
   description = "The full hostname for the worker (e.g., 'vibechecc.app' or 'dev.vibechecc.app')."
   type        = string
 }

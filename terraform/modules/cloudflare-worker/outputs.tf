@@ -1,11 +1,9 @@
-# terraform/modules/cloudflare-worker/outputs.tf
-
-output "worker_url" {
-  description = "The final URL of the deployed worker."
-  value       = "https://${var.worker_hostname}"
+output "frontend_a_record_id" {
+  description = "The ID of the A record for the frontend."
+  value       = cloudflare_dns_record.frontend_a.id
 }
 
-output "worker_name" {
-  description = "The name of the Cloudflare worker script."
-  value       = cloudflare_worker_script.main.name
+output "frontend_aaaa_record_id" {
+  description = "The ID of the AAAA record for the frontend."
+  value       = cloudflare_dns_record.frontend_aaaa.id
 }

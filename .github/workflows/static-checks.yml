@@ -1,21 +1,17 @@
 name: Static Checks
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-  pull_request:
+  workflow_call:
 
 jobs:
   lint:
-    runs-on: blacksmith-2vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
       - name: Cache Bun dependencies
-        uses: useblacksmith/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
@@ -27,13 +23,13 @@ jobs:
         run: bun run lint
 
   type-check:
-    runs-on: blacksmith-2vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
       - name: Cache Bun dependencies
-        uses: useblacksmith/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
@@ -45,13 +41,13 @@ jobs:
         run: bun run typecheck
 
   test:
-    runs-on: blacksmith-2vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
       - name: Cache Bun dependencies
-        uses: useblacksmith/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}

@@ -1,0 +1,18 @@
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  static-checks:
+    uses: ./.github/workflows/static-checks.yml
+
+  deploy:
+    needs: static-checks
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+      branch: main
+    secrets: inherit 
