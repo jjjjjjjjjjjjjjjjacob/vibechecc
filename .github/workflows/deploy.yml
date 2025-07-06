@@ -253,10 +253,11 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4'
           command: 'deploy --env ${{ inputs.environment }} --config apps/frontend/browser/wrangler.toml'
-
-      - name: Update Cloudflare Secrets
-        working-directory: apps/frontend/browser
-        run: |
-          echo ${{ secrets.CLERK_SECRET_KEY }} | bunx wrangler secret put --env ${{ inputs.environment }} CLERK_SECRET_KEY
-          echo ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }} | bunx wrangler secret put --env ${{ inputs.environment }} VITE_CLERK_PUBLISHABLE_KEY
-          echo ${{ secrets.VITE_CONVEX_URL }} | bunx wrangler secret put --env ${{ inputs.environment }} VITE_CONVEX_URL
+          secrets: |
+            CLERK_SECRET_KEY
+            VITE_CLERK_PUBLISHABLE_KEY
+            VITE_CONVEX_URL
+        env:
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_CONVEX_URL: ${{ secrets.VITE_CONVEX_URL }}
