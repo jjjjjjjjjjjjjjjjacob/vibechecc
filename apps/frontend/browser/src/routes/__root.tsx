@@ -28,11 +28,6 @@ import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { ConvexQueryClient } from '@convex-dev/react-query';
 
-const _convexClient = new ConvexReactClient(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (import.meta as any).env.VITE_CONVEX_URL!
-);
-
 // Server function to fetch Clerk auth and get Convex token
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
