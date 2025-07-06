@@ -185,11 +185,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Configure Convex
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: bunx convex dev --configure=existing --project ${{ secrets.CONVEX_PROJECT_SLUG }}  --dev-deployment cloud
+
       # Set Convex environment variables for backend (now in apps/backend)
       - name: Set Environment Variables
         working-directory: apps/backend
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT_NAME }}
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: |
           bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set CLERK_FRONTEND_API_URL ${{ secrets.CLERK_FRONTEND_API_URL }}
           bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set CLERK_WEBHOOK_SIGNING_SECRET ${{ secrets.CLERK_WEBHOOK_SIGNING_SECRET }}
@@ -202,11 +208,12 @@ jobs:
         working-directory: apps/backend
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT_NAME }}
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: |
           if [ "${{ inputs.environment }}" = "production" ]; then
             bunx convex deploy -y
           else
-            bunx convex dev --once
+            echo "Skipping Convex deployment for non-production environment"
           fi
 
   deploy-cloudflare:
