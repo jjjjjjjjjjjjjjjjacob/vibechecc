@@ -1,10 +1,23 @@
 {
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": [],
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/frontend/browser"
+    },
+    {
+      "path": "./apps/backend"
+    },
+    {
+      "path": "./packages/types"
+    },
+    {
+      "path": "./packages/utils"
+    }
+  ],
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
@@ -17,8 +30,14 @@
     "baseUrl": ".",
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@vibechecc/backend": ["./apps/backend"],
+      "@vibechecc/backend/*": ["./apps/backend/*"],
+      "@vibechecc/frontend-browser": ["./apps/frontend/browser"],
+      "@vibechecc/types": ["./packages/types/src"],
+      "@vibechecc/types/*": ["./packages/types/src/*"],
+      "@vibechecc/utils": ["./packages/utils/src"],
+      "@vibechecc/utils/*": ["./packages/utils/src/*"]
     }
   },
-  "exclude": ["vitest.setup.ts"]
+  "exclude": ["vitest.setup.ts", "node_modules", "dist", ".output"]
 }

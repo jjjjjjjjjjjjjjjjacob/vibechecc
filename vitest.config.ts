@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import tsConfigPaths from 'vite-tsconfig-paths';
 
-export default defineConfig({
+export const config = defineConfig({
   plugins: [
     tsConfigPaths({
       projects: ['./tsconfig.json'],
@@ -13,3 +13,5 @@ export default defineConfig({
     exclude: ['./node_modules'],
   },
 });
+
+export default config;

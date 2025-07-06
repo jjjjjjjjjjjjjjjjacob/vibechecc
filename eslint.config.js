@@ -8,12 +8,13 @@ import eslintConfigPrettierRecommended from 'eslint-plugin-prettier/recommended'
 export default tseslint.config(
   {
     ignores: [
-      'dist/**',
-      'build/**',
-      '.vinxi/**',
-      '.output/**',
-      'convex/_generated/**',
-      'node_modules/**',
+      '**/dist',
+      '**/build',
+      '**/.nitro',
+      '**/.output',
+      '**/.tanstack',
+      '**/packages/backend/_generated',
+      '**/node_modules',
       'bun.lock',
       'yarn.lock',
       'app.config.timestamp_*.js',

@@ -15,4 +15,4 @@ jobs:
     with:
       environment: development
       branch: dev
-    secrets: inherit 
+    secrets: inherit

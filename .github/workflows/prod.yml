@@ -15,4 +15,4 @@ jobs:
     with:
       environment: production
       branch: main
-    secrets: inherit 
+    secrets: inherit

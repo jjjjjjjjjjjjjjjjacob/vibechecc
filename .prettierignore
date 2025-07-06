@@ -1,0 +1,23 @@
+# Generated files
+apps/backend/convex/_generated/
+apps/**/dist/
+packages/**/dist/
+.vinxi/
+.output/
+
+# Build outputs
+dist/
+build/
+
+# Cache and temporary files
+.nx/
+node_modules/
+bun.lock
+yarn.lock
+*.log
+
+# Config timestamps
+app.config.timestamp_*.js
+
+# Terraform
+terraform/.terraform/ 

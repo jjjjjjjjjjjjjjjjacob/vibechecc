@@ -1,0 +1,80 @@
+{
+  "name": "@vibechecc/frontend-browser",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/frontend/browser",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run dev",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run build",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": ["convex:build"]
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run preview",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": ["build"]
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "options": {
+        "config": "./vitest.config.ts"
+      },
+      "configurations": {
+        "watch": {
+          "watch": false
+        }
+      },
+      "cwd": "{projectRoot}"
+    },
+    "test:watch": {
+      "executor": "@nx/vite:test",
+      "options": {
+        "config": "./vitest.config.ts"
+      },
+      "watch": true,
+      "cwd": "{projectRoot}"
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "project": "{projectRoot}",
+        "config": "./eslint.config.ts"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun tsc --noEmit --project tsconfig.json",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun wrangler:deploy",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "deploy:dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun wrangler:dev",
+        "cwd": "{projectRoot}"
+      }
+    }
+  },
+  "tags": ["type:app", "platform:web"]
+}

@@ -22,10 +22,12 @@ resource "cloudflare_workers_script" "frontend" {
     }
   EOT
 
+  compatibility_date = "2025-07-06"
+
   lifecycle {
     # Prevent Terraform from updating the content after initial creation
     # This allows wrangler to manage the actual script content
-    ignore_changes = [content]
+    ignore_changes = all
   }
 }
 
@@ -61,7 +63,7 @@ resource "cloudflare_dns_record" "frontend_aaaa" {
 
 resource "cloudflare_dns_record" "frontend_cname" {
   # Only create CNAME record for non-production environments
-  count = var.environment == "production" ? 0 : 1
+  count   = var.environment == "production" ? 0 : 1
   zone_id = var.cloudflare_zone_id
   name    = var.prefix
   type    = "CNAME"

@@ -1,82 +1,56 @@
 # vibechecc Infrastructure
 
+> **Note:** For monorepo setup, scripts, and app details, see the [root README.md](../README.md).
+
 This directory contains the Terraform configuration for the vibechecc application.
 
 ## Overview
 
-The infrastructure is managed by Terraform and deployed to Cloudflare. The following resources are used:
-
-- Cloudflare Workers for frontend hosting and API routing
-- Cloudflare R2 for Terraform state storage
-- Convex for backend and database (managed service)
-- AWS Secrets Manager for secret storage (if needed)
+Infrastructure is managed by Terraform and deployed to Cloudflare. Key resources:
+- Cloudflare Workers (frontend hosting, API routing)
+- Cloudflare R2 (Terraform state storage)
+- Convex (backend, database)
+- AWS Secrets Manager (if needed)
 
 ## Architecture
-
-The application uses a modern serverless architecture:
-
-- **Frontend**: TanStack Start application deployed as Cloudflare Workers
-- **Backend**: Convex provides real-time database and serverless functions
-- **CDN**: Cloudflare's global network for fast content delivery
-- **DNS**: Cloudflare DNS management
+- **Frontend**: TanStack Start app deployed as Cloudflare Workers
+- **Backend**: Convex for real-time DB and serverless functions
+- **CDN**: Cloudflare global network
+- **DNS**: Cloudflare DNS
 
 ## Environments
-
-There are three environments:
-
-- `production`: The live environment at `vibechecc.app`
-- `development`: The development environment at `dev.vibechecc.app`
-- `ephemeral`: Temporary environments for pull requests at `pr-{number}.vibechecc.app`
+- `production`: vibechecc.app
+- `development`: dev.vibechecc.app
+- `ephemeral`: pr-{number}.vibechecc.app (PR previews)
 
 ## CI/CD
-
-The CI/CD pipeline is managed by GitHub Actions with Blacksmith runners for faster execution. The following workflows are used:
-
-- `static-checks.yml`: Performs linting, type-checking, and testing
-- `terraform-plan.yml`: Creates a Terraform plan for pull requests
-- `terraform-apply.yml`: Applies the Terraform configuration to the environments
-- `deploy-convex.yml`: Deploys the Convex backend
-- `deploy-cloudflare.yml`: Deploys the frontend to Cloudflare Workers
-- `pr-environment.yml`: Creates an ephemeral environment for pull requests
-- `pr-cleanup.yml`: Cleans up the ephemeral environment when the pull request is closed
-
----
+- Managed by GitHub Actions (see `.github/workflows/`)
+- Workflows: static checks, terraform plan/apply, deploy-convex, deploy-cloudflare, PR ephemeral envs
 
 ## Infrastructure Management
 
 ### Monitoring
-
-Our Terraform infrastructure is monitored to ensure the health and performance of our application. We use a combination of Cloudflare-native services and third-party tools to achieve comprehensive observability.
-
-- **Key Monitoring Areas**:
-  - **Cloudflare**: Analytics on web traffic, security events, and performance metrics.
-  - **Convex**: Monitoring of function execution, database performance, and real-time connections.
-  - **Workers**: Request metrics, error rates, and performance monitoring.
-- **Dashboards**:
-  - **Cloudflare Dashboard**: Provides an overview of website traffic, security threats, and caching performance.
-  - **Convex Dashboard**: Offers real-time insights into database queries, function logs, and overall backend health.
-- **Alerting**:
-  - Alerts are configured to notify the team of critical issues like high error rates, latency spikes, and resource saturation.
+- Cloudflare: traffic, security, performance analytics
+- Convex: function/database monitoring
+- Workers: request/error metrics
+- Dashboards: Cloudflare, Convex
+- Alerts for critical issues
 
 ### Optimization
-
-We continuously optimize our Terraform-managed infrastructure to improve performance, reduce costs, and enhance scalability.
-
-- **Cost Optimization**: We use Cloudflare's generous free tier and efficient resource allocation to manage costs effectively.
-- **Performance Optimization**: We leverage Cloudflare's global CDN, edge computing capabilities, and optimized Workers runtime for enhanced performance.
+- Cost: Cloudflare free tier, efficient resource allocation
+- Performance: CDN, edge compute, optimized Workers
 
 ### Security
-
-Security is a top priority. We follow best practices to ensure our application and data are protected.
-
-- **Principles**: We adhere to the principle of least privilege, and encrypt data at rest and in transit. Network security is managed through Cloudflare's security features.
-- **Secret Management**: We use Cloudflare Workers secrets and environment variables for secure configuration management.
-- **Auditing and Compliance**: Cloudflare provides comprehensive logging and we conduct regular security scans.
+- Least privilege, encryption at rest/in transit
+- Cloudflare security features
+- Secrets via Workers env vars
+- Auditing and compliance
 
 ### Testing
+- `terraform validate`, `tflint` for static checks
+- PR ephemeral envs for end-to-end testing
+- Manual approval for production applies
 
-We test our Terraform code to ensure it is reliable, secure, and functions as expected.
+---
 
-- **Static Analysis**: We use `terraform validate` and `tflint` for static code checks.
-- **Plan and Apply**: We review `terraform plan` outputs before applying changes, with manual approvals for production.
-- **End-to-End Testing**: We use ephemeral environments for pull requests to test infrastructure changes end-to-end with our application's test suite.
+For monorepo-wide build, deploy, and environment setup, see the [root README.md](../README.md).

@@ -19,7 +19,7 @@ on:
 jobs:
   deploy-terraform:
     runs-on: ubuntu-latest
-    environment: 
+    environment:
       name: ${{ inputs.branch == 'main' && 'main' || 'dev' }}
     permissions:
       contents: read
@@ -91,27 +91,31 @@ jobs:
           curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json" | jq '.' > dns_output.json
-          
+
           # Get Workers scripts from Cloudflare API
           curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json" | jq '.' > workers_output.json
-          
+
           # Extract A record ID for vibechecc.app
           A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == "vibechecc.app") | .id' dns_output.json)
-          
+
           # Extract AAAA record ID for vibechecc.app
           AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == "vibechecc.app") | .id' dns_output.json)
-          
+
+          # Extract CNAME record ID for vibechecc.app
+          CNAME_RECORD_ID=$(jq -r '.result[] | select(.type == "CNAME" and .name == "vibechecc.app") | .id' dns_output.json)
+
           # Extract Worker script name for vibechecc-{environment}-frontend
           WORKER_SCRIPT_NAME="vibechecc-${{ inputs.environment }}-frontend"
           WORKER_SCRIPT_EXISTS=$(jq -r --arg script_name "$WORKER_SCRIPT_NAME" '.result[] | select(.id == $script_name) | .id' workers_output.json)
-          
+
           # Set outputs for potential use in other steps
           echo "a_record_id=$A_RECORD_ID" >> $GITHUB_OUTPUT
           echo "aaaa_record_id=$AAAA_RECORD_ID" >> $GITHUB_OUTPUT
+          echo "cname_record_id=$CNAME_RECORD_ID" >> $GITHUB_OUTPUT
           echo "worker_script_name=$WORKER_SCRIPT_EXISTS" >> $GITHUB_OUTPUT
-          
+
           # Import A record if it exists
           if [ "$A_RECORD_ID" != "null" ] && [ -n "$A_RECORD_ID" ]; then
             echo "Importing A record with ID: $A_RECORD_ID"
@@ -119,7 +123,7 @@ jobs:
           else
             echo "No A record found to import"
           fi
-          
+
           # Import AAAA record if it exists
           if [ "$AAAA_RECORD_ID" != "null" ] && [ -n "$AAAA_RECORD_ID" ]; then
             echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
@@ -127,7 +131,16 @@ jobs:
           else
             echo "No AAAA record found to import"
           fi
-          
+
+          # Import CNAME record if it exists
+
+          if [ "$CNAME_RECORD_ID" != "null" ] && [ -n "$CNAME_RECORD_ID" ]; then
+            echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
+            terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_cname ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
+          else
+            echo "No CNAME record found to import"
+          fi
+
           # Import Worker script if it exists
           if [ "$WORKER_SCRIPT_EXISTS" != "null" ] && [ -n "$WORKER_SCRIPT_EXISTS" ]; then
             echo "Importing Worker script: $WORKER_SCRIPT_EXISTS"
@@ -154,7 +167,7 @@ jobs:
   deploy-convex:
     runs-on: ubuntu-latest
     needs: deploy-terraform
-    environment: 
+    environment:
       name: ${{ inputs.branch == 'main' && 'main' || 'dev' }}
     steps:
       - uses: actions/checkout@v4
@@ -172,19 +185,34 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # Set Convex environment variables for backend (now in apps/backend)
       - name: Set Environment Variables
+        working-directory: apps/backend
+        env:
+          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT_NAME }}
         run: |
           bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set CLERK_FRONTEND_API_URL ${{ secrets.CLERK_FRONTEND_API_URL }}
           bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set CLERK_WEBHOOK_SIGNING_SECRET ${{ secrets.CLERK_WEBHOOK_SIGNING_SECRET }}
 
+      # Build and deploy Convex backend
+      - name: Build Convex Backend
+        run: bun nx build @vibechecc/backend
+
       - name: Deploy Convex
+        working-directory: apps/backend
+        env:
+          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT_NAME }}
         run: |
-          bunx convex deploy -y
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            bunx convex deploy -y
+          else
+            bunx convex dev --once
+          fi
 
   deploy-cloudflare:
     runs-on: ubuntu-latest
     needs: deploy-convex
-    environment: 
+    environment:
       name: ${{ inputs.branch == 'main' && 'main' || 'dev' }}
     permissions:
       contents: read
@@ -206,8 +234,9 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build
-        run: bun run build
+      # Build frontend (now in apps/frontend/browser)
+      - name: Build Frontend
+        run: bun nx build @vibechecc/frontend-browser
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
@@ -215,10 +244,10 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4'
-          command: 'deploy --env ${{ inputs.environment }}'
+          command: 'deploy --env ${{ inputs.environment }} --config apps/frontend/browser/wrangler.toml'
 
       - name: Update Cloudflare Secrets
         run: |
           echo ${{ secrets.CLERK_SECRET_KEY }} | bunx wrangler secret put --env ${{ inputs.environment }} CLERK_SECRET_KEY
           echo ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }} | bunx wrangler secret put --env ${{ inputs.environment }} VITE_CLERK_PUBLISHABLE_KEY
-          echo ${{ secrets.VITE_CONVEX_URL }} | bunx wrangler secret put --env ${{ inputs.environment }} VITE_CONVEX_URL 
+          echo ${{ secrets.VITE_CONVEX_URL }} | bunx wrangler secret put --env ${{ inputs.environment }} VITE_CONVEX_URL

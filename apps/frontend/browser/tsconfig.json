@@ -1,0 +1,26 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@vibechecc/backend": ["../../backend"],
+      "@vibechecc/backend/*": ["../../backend/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../backend/convex/_generated/api.d.ts",
+    "../../backend/convex/_generated/dataModel.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".output",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}
