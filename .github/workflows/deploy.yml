@@ -257,6 +257,7 @@ jobs:
             CLERK_SECRET_KEY
             VITE_CLERK_PUBLISHABLE_KEY
             VITE_CONVEX_URL
+          environment: ${{ inputs.environment }}
         env:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
