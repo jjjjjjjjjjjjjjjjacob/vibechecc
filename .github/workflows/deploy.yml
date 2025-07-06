@@ -262,6 +262,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: 'secrets put --env ${{ inputs.environment }} --config apps/frontend/browser/wrangler.toml'
           secrets: |
             CLERK_SECRET_KEY
             VITE_CLERK_PUBLISHABLE_KEY
