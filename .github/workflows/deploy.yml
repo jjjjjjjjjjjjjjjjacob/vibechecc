@@ -259,6 +259,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          echo ${{ secrets.CLERK_SECRET_KEY }} | bunx wrangler secret put --env ${{ inputs.environment }}
-          echo ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }} | bunx wrangler secret put --env ${{ inputs.environment }}
-          echo ${{ secrets.VITE_CONVEX_URL }} | bunx wrangler secret put --env ${{ inputs.environment }}
+          echo ${{ secrets.CLERK_SECRET_KEY }} | bunx wrangler secret put --env ${{ inputs.environment }} --config wrangler.toml CLERK_SECRET_KEY 
+          echo ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }} | bunx wrangler secret put --env ${{ inputs.environment }} --config wrangler.toml VITE_CLERK_PUBLISHABLE_KEY
+          echo ${{ secrets.VITE_CONVEX_URL }} | bunx wrangler secret put --env ${{ inputs.environment }} --config wrangler.toml VITE_CONVEX_URL
+          echo ${{ secrets.CONVEX_DEPLOYMENT_NAME }} | bunx wrangler secret put --env ${{ inputs.environment }} --config wrangler.toml CONVEX_DEPLOYMENT_NAME
