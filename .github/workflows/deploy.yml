@@ -109,13 +109,13 @@ jobs:
             -H "Content-Type: application/json" | jq '.' > workers_output.json
 
           # Extract A record ID for vibechecc.app
-          A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == ${{ vars.CLOUDFLARE_ZONE }}) | .id' dns_output.json)
+          A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
 
           # Extract AAAA record ID for vibechecc.app
-          AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == ${{ vars.CLOUDFLARE_ZONE }}) | .id' dns_output.json)
+          AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
 
           # Extract CNAME record ID for vibechecc.app
-          CNAME_RECORD_ID=$(jq -r '.result[] | select(.type == "CNAME" and .name == $PREFIX) | .id' dns_output.json)
+          CNAME_RECORD_ID=$(jq -r '.result[] | select(.type == "CNAME" and .name == "$PREFIX") | .id' dns_output.json)
 
           # Extract Worker script name for vibechecc-{prefix}-frontend
           if [ "${{ inputs.environment }}" = "ephemeral" ]; then
