@@ -5,8 +5,8 @@
 # Deployment is handled via wrangler for proper bundling
 resource "cloudflare_workers_script" "frontend" {
   account_id  = var.cloudflare_account_id
-  script_name = "vibechecc-${var.environment}-frontend"
-  
+  script_name = "vibechecc-${var.prefix}-frontend"
+
   # Use a placeholder script for initial provisioning
   # Actual deployment is handled by wrangler
   content = <<-EOT

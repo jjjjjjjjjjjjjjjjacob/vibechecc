@@ -23,6 +23,53 @@ Infrastructure is managed by Terraform and deployed to Cloudflare. Key resources
 - `development`: dev.vibechecc.app
 - `ephemeral`: pr-{number}.vibechecc.app (PR previews)
 
+---
+
+## Local Development & Usage
+
+To manage infrastructure locally, follow these steps:
+
+### 1. Install direnv (if not already)
+```bash
+brew install direnv # macOS
+# or see https://direnv.net/docs/installation.html for other OS
+```
+
+### 2. Allow the .envrc
+```bash
+cd terraform
+# Review the .envrc file, then allow it:
+direnv allow
+```
+This will export all required variables for Terraform, including Cloudflare and R2 credentials.
+
+### 3. Generate backend.tfvars
+Before running `terraform init`, generate the backend config:
+```bash
+chmod +x generate-backend-config.sh
+./generate-backend-config.sh
+```
+This creates `backend.tfvars` with the correct R2 bucket and credentials for remote state.
+
+### 4. Select/Create a Workspace
+Terraform uses workspaces to isolate environments:
+- `production` → main site
+- `development` → dev site
+- `pr-<number>` → ephemeral/PR preview
+
+To select or create a workspace:
+```bash
+terraform workspace select <workspace> || terraform workspace new <workspace>
+```
+For ephemeral/PR environments, set `TF_VAR_environment=ephemeral` and `TF_VAR_pr_number=<pr_number>` in your `.envrc`.
+
+### 5. Usual Terraform Workflow
+```bash
+terraform init -backend-config=backend.tfvars
+terraform plan
+terraform apply
+```
+
 ## CI/CD
 - Managed by GitHub Actions (see `.github/workflows/`)
 - Workflows: static checks, terraform plan/apply, deploy-convex, deploy-cloudflare, PR ephemeral envs
