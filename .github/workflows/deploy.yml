@@ -85,7 +85,18 @@ jobs:
           TF_VAR_environment: ${{ inputs.environment }}
         run: |
           # Set prefix based on environment
-          PREFIX=${{ inputs.environment == 'ephemeral' && "pr-${{ inputs.pr_number }}" || inputs.environment == 'production' && 'prod' || 'dev' }}
+          PREFIX=""
+          if [ "${{ inputs.environment }}" = "ephemeral" ]; then
+            PREFIX="pr-${{ inputs.pr_number }}"
+          elif [ "${{ inputs.environment }}" = "production" ]; then
+            PREFIX="prod"
+          elif [ "${{ inputs.environment }}" = "development" ]; then
+            PREFIX="dev"
+          fi
+          if [ -z "$PREFIX" ]; then
+            echo "Error: Invalid environment: ${{ inputs.environment }}"
+            exit 1
+          fi
 
           # Get DNS records from Cloudflare API
           curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records" \
