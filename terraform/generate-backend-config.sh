@@ -31,6 +31,12 @@ if [ -z "$R2_SECRET_ACCESS_KEY" ]; then
     exit 1
 fi
 
+# Make sure TF_VAR_pr_number exists for ephemeral environments
+if [ "$TF_VAR_environment" = "ephemeral" ] && [ -z "$TF_VAR_pr_number" ]; then
+    echo "Error: TF_VAR_pr_number is required for ephemeral environments"
+    exit 1
+fi
+
 # Set endpoints
 ENDPOINTS="{ s3 = \"https://${TF_VAR_cloudflare_account_id}.r2.cloudflarestorage.com\" }"
 
