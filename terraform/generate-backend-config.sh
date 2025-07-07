@@ -31,20 +31,13 @@ if [ -z "$R2_SECRET_ACCESS_KEY" ]; then
     exit 1
 fi
 
-# Determine the key based on environment and PR number
-if [ "$TF_VAR_environment" = "ephemeral" ] && [ -n "$TF_VAR_pr_number" ]; then
-    KEY="vibechecc/pr-${TF_VAR_pr_number}/terraform.tfstate"
-else
-    KEY="vibechecc/terraform.tfstate"
-fi
-
 # Set endpoints
 ENDPOINTS="{ s3 = \"https://${TF_VAR_cloudflare_account_id}.r2.cloudflarestorage.com\" }"
 
 # Generate the .tfvars file
 cat > backend.tfvars << EOF
 bucket = "$R2_BUCKET"
-key = "$KEY"
+key = "vibechecc/terraform.tfstate"
 endpoints = $ENDPOINTS
 access_key = "$R2_ACCESS_KEY_ID"
 secret_key = "$R2_SECRET_ACCESS_KEY"

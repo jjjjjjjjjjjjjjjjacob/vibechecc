@@ -33,7 +33,7 @@ jobs:
           path: |
             ~/.terraform.d/plugin-cache
             terraform/.terraform
-          key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
+          key: ${{ runner.os }}-terraform-${{ inputs.environment }}-${{ hashFiles('terraform/**/*.tf') }}
           restore-keys: |
             ${{ runner.os }}-terraform-
 
@@ -73,6 +73,7 @@ jobs:
         working-directory: terraform
         run: |
           terraform workspace select ${{ steps.env.outputs.workspace }} || terraform workspace new ${{ steps.env.outputs.workspace }}
+
       - name: Get DNS record IDs and import if they exist
         id: dns_records
         working-directory: terraform
