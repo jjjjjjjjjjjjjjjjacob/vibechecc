@@ -110,7 +110,7 @@ jobs:
             -H "Content-Type: application/json" | jq '.' > workers_output.json
 
           # Extract A record ID for vibechecc.app
-          A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == "${{ vars.CLOUDFLARE_ZONE }}"") | .id' dns_output.json)
+          A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
 
           # Extract AAAA record ID for vibechecc.app
           AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
