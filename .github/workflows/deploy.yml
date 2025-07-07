@@ -84,6 +84,9 @@ jobs:
           TF_VAR_cloudflare_zone: ${{ vars.CLOUDFLARE_ZONE }}
           TF_VAR_environment: ${{ inputs.environment }}
         run: |
+          # Set prefix based on environment
+          PREFIX=${{ inputs.environment == 'ephemeral' && "pr-${{ inputs.pr_number }}" || inputs.environment == 'production' && 'prod' || 'dev' }}
+
           # Get DNS records from Cloudflare API
           curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
@@ -95,16 +98,20 @@ jobs:
             -H "Content-Type: application/json" | jq '.' > workers_output.json
 
           # Extract A record ID for vibechecc.app
-          A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == "vibechecc.app") | .id' dns_output.json)
+          A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == ${{ vars.CLOUDFLARE_ZONE }}) | .id' dns_output.json)
 
           # Extract AAAA record ID for vibechecc.app
-          AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == "vibechecc.app") | .id' dns_output.json)
+          AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == ${{ vars.CLOUDFLARE_ZONE }}) | .id' dns_output.json)
 
           # Extract CNAME record ID for vibechecc.app
-          CNAME_RECORD_ID=$(jq -r '.result[] | select(.type == "CNAME" and .name == "vibechecc.app") | .id' dns_output.json)
+          CNAME_RECORD_ID=$(jq -r '.result[] | select(.type == "CNAME" and .name == $PREFIX) | .id' dns_output.json)
 
-          # Extract Worker script name for vibechecc-{environment}-frontend
-          WORKER_SCRIPT_NAME="vibechecc-${{ inputs.environment }}-frontend"
+          # Extract Worker script name for vibechecc-{prefix}-frontend
+          if [ "${{ inputs.environment }}" = "ephemeral" ]; then
+            WORKER_SCRIPT_NAME="vibechecc-ephemeral-$PREFIX-frontend"
+          else
+            WORKER_SCRIPT_NAME="vibechecc-${{ inputs.environment }}-frontend"
+          fi
           WORKER_SCRIPT_EXISTS=$(jq -r --arg script_name "$WORKER_SCRIPT_NAME" '.result[] | select(.id == $script_name) | .id' workers_output.json)
 
           # Set outputs for potential use in other steps
