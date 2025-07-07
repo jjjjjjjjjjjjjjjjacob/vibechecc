@@ -288,7 +288,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: |
-            bunx wrangler deploy --env ${{ inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number) || inputs.environment }} --config apps/frontend/browser/wrangler.toml
+            deploy --env ${{ inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number) || inputs.environment }} --config apps/frontend/browser/wrangler.toml
         
       - name: Update Cloudflare Secrets
         working-directory: apps/frontend/browser
