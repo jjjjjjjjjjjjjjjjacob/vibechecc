@@ -67,7 +67,7 @@ jobs:
       - name: Initialize Terraform with backend
         working-directory: terraform
         run: |
-          terraform init -backend-config=backend.tfvars
+          terraform init -backend-config=backend.tfvars -migrate-state
 
       - name: Create or select workspace
         working-directory: terraform
