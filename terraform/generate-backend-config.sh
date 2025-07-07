@@ -33,9 +33,9 @@ fi
 
 # Determine the key based on environment and PR number
 if [ "$TF_VAR_environment" = "ephemeral" ] && [ -n "$TF_VAR_pr_number" ]; then
-    KEY="vibechecc/ephemeral/pr-${TF_VAR_pr_number}/terraform.tfstate"
+    KEY="vibechecc/pr-${TF_VAR_pr_number}/terraform.tfstate"
 else
-    KEY="vibechecc/${TF_VAR_environment}/terraform.tfstate"
+    KEY="vibechecc/terraform.tfstate"
 fi
 
 # Set endpoints
