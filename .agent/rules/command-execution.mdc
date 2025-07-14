@@ -1,0 +1,82 @@
+---
+description: Guidelines for executing commands safely and efficiently
+globs: /**/*
+alwaysApply: true
+---
+
+# Command Execution Guidelines
+
+## Core Principles
+Execute commands safely without blocking the terminal or creating long-running processes that can't be controlled.
+
+## Rules for Command Execution
+
+### ❌ Never run these commands without timeout:
+- `bun run dev` or any dev server commands
+- `npm start` or any start commands
+- Any command with `watch` mode
+- Commands that run indefinitely (servers, watchers, etc.)
+- Commands that take over the terminal
+
+### ✅ Safe command patterns:
+```bash
+# Use timeout for potentially long commands
+bun run build --timeout 300000  # 5 minute timeout
+
+# Run tests with proper exit
+bun run test
+
+# Type checking and linting
+bun run typecheck
+bun run lint
+
+# One-time operations
+bun run seed
+```
+
+### ✅ If you need to check dev server:
+```bash
+# Start in background with timeout and kill after checking
+timeout 30s bun run dev &
+PID=$!
+sleep 5  # Wait for server to start
+curl http://localhost:3030  # Check if running
+kill $PID  # Clean up
+```
+
+## Background Process Management
+If absolutely necessary to run a background process:
+1. Always capture the PID
+2. Set a timeout
+3. Clean up the process when done
+4. Never leave processes running
+
+## Testing Recommendations
+Instead of running dev servers to test:
+1. Run build commands to verify compilation
+2. Run type checking to ensure types are correct
+3. Run tests to verify functionality
+4. Check file generation and structure
+
+## Examples
+
+### ❌ Bad: Blocking terminal
+```bash
+bun run dev  # This will block forever
+```
+
+### ✅ Good: Check compilation
+```bash
+bun run build
+bun run typecheck
+```
+
+### ✅ Good: Temporary server check
+```bash
+# Only if absolutely necessary
+timeout 10s bun run dev > /dev/null 2>&1 &
+SERVER_PID=$!
+sleep 3
+# Do quick check
+kill $SERVER_PID 2>/dev/null || true
+```

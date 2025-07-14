@@ -1,5 +1,8 @@
 // Core vibechecc types that can be shared across applications
 
+// Re-export search types
+export * from './search';
+
 export interface User {
   // Primary identifier (Clerk user ID stored as externalId in our DB)
   externalId: string;

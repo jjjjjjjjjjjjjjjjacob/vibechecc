@@ -3,7 +3,7 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/frontend/browser"
+      "path": "./apps/web"
     },
     {
       "path": "./apps/backend"
@@ -30,9 +30,10 @@
     "baseUrl": ".",
     "noEmit": true,
     "paths": {
-      "@vibechecc/backend": ["./apps/backend"],
-      "@vibechecc/backend/*": ["./apps/backend/*"],
-      "@vibechecc/frontend-browser": ["./apps/frontend/browser"],
+      "@vibechecc/convex": ["./apps/convex"],
+      "@vibechecc/convex/*": ["./apps/convex/*"],
+      "@vibechecc/web": ["./apps/web"],
+      "@vibechecc/web/*": ["./apps/web/*"],
       "@vibechecc/types": ["./packages/types/src"],
       "@vibechecc/types/*": ["./packages/types/src/*"],
       "@vibechecc/utils": ["./packages/utils/src"],

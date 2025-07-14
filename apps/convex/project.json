@@ -1,0 +1,77 @@
+{
+  "name": "@vibechecc/convex",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/convex",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "convex dev",
+          "ngrok http --url=https://teal-trusting-unicorn.ngrok-free.app 3211"
+        ],
+        "parallel": true,
+        "cwd": "{projectRoot}"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "convex codegen",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "convex deploy",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "options": {
+        "config": "./vitest.config.ts"
+      },
+      "configurations": {
+        "watch": {
+          "watch": false
+        }
+      },
+      "cwd": "{projectRoot}"
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "convex run seed:seed",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "clear": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "convex run seed:clear",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run clean",
+        "cwd": "{projectRoot}"
+      }
+    }
+  },
+  "tags": ["type:app", "scope:backend"]
+}

@@ -1,0 +1,122 @@
+---
+description: Learnings from implementing the search feature in vibechecc
+tags: search, command-palette, frontend
+---
+
+# Search Feature Implementation Learnings
+
+## Key Insights
+
+### 1. Type Definitions First
+- The search types in `packages/types/src/search.ts` provide a solid foundation
+- All components should import from `@vibechecc/types` for consistency
+- The types are already exported from the package index
+
+### 2. Command Palette Integration
+- shadcn's Command component is already installed and configured
+- The component uses `cmdk` under the hood for keyboard navigation
+- Dialog wrapper provides modal behavior out of the box
+
+### 3. Route Navigation
+- Use `useNavigate()` from `@tanstack/react-router` for programmatic navigation
+- Available routes: `/vibes/create`, `/profile`, `/search`, etc.
+- Route params use the `params` object, search params use `search` object
+
+### 4. Mock Data Strategy
+- Create comprehensive mock data that matches type definitions exactly
+- Include all fields to avoid TypeScript errors
+- Use type predicates for filtering: `(r: any): r is VibeSearchResult`
+
+### 5. Header Integration Pattern
+- Global keyboard shortcuts should be registered at the header level
+- Use `useState` for dialog open state
+- Clean up existing search UI when replacing with command palette
+
+## Common Pitfalls to Avoid
+
+### 1. Don't Run Dev Servers Without Timeout
+- Never run `bun run dev` without proper process management
+- Use build commands to verify implementation instead
+- If dev server check is needed, use timeout and kill the process
+
+### 2. File Creation Order
+- Always create parent directories first
+- Use `touch` command before writing to new files
+- Check if UI components exist before trying to install them
+
+### 3. Type Imports
+- Import types from `@vibechecc/types`, not relative paths
+- The search types are already exported from the package
+- Use type imports when only importing types: `import type { ... }`
+
+## Useful Patterns
+
+### Search Hook with Mock Data
+```typescript
+export function useSearchSuggestions(query: string) {
+  const [isLoading, startTransition] = useTransition();
+  const [data, setData] = useState<ReturnType<typeof getMockSearchSuggestions> | null>(null);
+
+  const fetchSuggestions = useCallback((searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setData(null);
+      return;
+    }
+
+    startTransition(() => {
+      const suggestions = getMockSearchSuggestions(searchQuery);
+      setData(suggestions);
+    });
+  }, []);
+
+  // Auto-fetch when query changes
+  if (query !== (data ? query : '')) {
+    fetchSuggestions(query);
+  }
+
+  return { data, isLoading };
+}
+```
+
+### Result Component Pattern
+```typescript
+interface ResultProps {
+  result: SearchResultType;
+  onSelect?: () => void;
+}
+
+export function Result({ result, onSelect }: ResultProps) {
+  const navigate = useNavigate();
+
+  const handleSelect = () => {
+    navigate({ to: '/route', params: { id: result.id } });
+    onSelect?.();
+  };
+
+  return (
+    <CommandItem onSelect={handleSelect}>
+      {/* Result content */}
+    </CommandItem>
+  );
+}
+```
+
+## Integration Points
+
+### When Backend is Ready
+1. Replace mock data functions with Convex queries
+2. Update hooks to use `useQuery` from Convex
+3. Add error handling and loading states
+4. Implement search tracking mutations
+
+### For Search Results Page
+- The command palette links to `/search?q={query}`
+- Results page will receive query from URL params
+- Filter sidebar will be provided by Agent 4
+
+## Testing Recommendations
+1. Test keyboard navigation thoroughly
+2. Verify all result types render correctly
+3. Check mobile responsiveness
+4. Test with empty states and no results
+5. Verify navigation to all linked pages
