@@ -632,3 +632,34 @@ async function createUserIfNotExistsInternal(
 
   return user;
 }
+
+// Create user for seeding purposes (bypasses authentication)
+export const createForSeed = internalMutation({
+  args: {
+    externalId: v.string(),
+    username: v.optional(v.string()),
+    image_url: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    interests: v.optional(v.array(v.string())),
+    created_at: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // Check if user already exists by externalId
+    const existingUser = await userByExternalId(ctx, args.externalId);
+
+    if (existingUser) {
+      return existingUser;
+    }
+
+    return await ctx.db.insert('users', {
+      externalId: args.externalId,
+      username: args.username,
+      image_url: args.image_url,
+      bio: args.bio,
+      interests: args.interests,
+      created_at: args.created_at || Date.now(),
+      updated_at: Date.now(),
+      onboardingCompleted: true, // Set to true for seeded users
+    });
+  },
+});

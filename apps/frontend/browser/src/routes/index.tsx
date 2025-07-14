@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as React from 'react';
 import {
-  useVibes,
+  useVibesPaginated,
   useAllTags,
   useVibesByTag,
   useTopRatedVibes,
@@ -18,10 +18,10 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   const {
-    data: vibes,
+    data: vibesData,
     isLoading: vibesLoading,
     error: vibesError,
-  } = useVibes();
+  } = useVibesPaginated(50);
   const { data: allTags, isLoading: tagsLoading } = useAllTags();
   const { data: topRatedVibes, isLoading: topRatedLoading } =
     useTopRatedVibes(10);
@@ -43,9 +43,10 @@ function Home() {
     );
   }
 
-  const safeVibes = (vibes || []).filter((vibe) => {
-    if (!vibe.createdById) return false;
-    // Note: simple vibes don't have ratings, so we skip this check
+  const vibes = vibesData?.vibes || [];
+  
+  const safeVibes = vibes.filter((vibe) => {
+    // Now we have full vibe data with createdBy info
     return true;
   });
 
@@ -83,8 +84,7 @@ function Home() {
       {/* Featured Vibes */}
       <VibeCategoryRow
         title="featured vibes"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        vibes={featuredVibes as any}
+        vibes={featuredVibes}
         priority
       />
 
@@ -96,8 +96,7 @@ function Home() {
         topRatedVibes.length > 0 && (
           <VibeCategoryRow
             title="top rated"
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            vibes={topRatedVibes as any}
+            vibes={topRatedVibes}
           />
         )
       )}
@@ -105,8 +104,7 @@ function Home() {
       {/* Recent Vibes */}
       <VibeCategoryRow
         title="trending now"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        vibes={recentVibes as any}
+        vibes={recentVibes}
       />
 
       {/* Tag-based Categories */}
