@@ -94,6 +94,25 @@ const schema = defineSchema({
   })
     .index('byCount', ['count'])
     .index('byTerm', ['term']),
+
+  searchMetrics: defineTable({
+    timestamp: v.number(),
+    type: v.union(v.literal('search'), v.literal('click'), v.literal('error')),
+    query: v.string(),
+    userId: v.optional(v.string()),
+    resultCount: v.optional(v.number()),
+    clickedResultId: v.optional(v.string()),
+    clickedResultType: v.optional(
+      v.union(v.literal('vibe'), v.literal('user'), v.literal('tag'))
+    ),
+    clickPosition: v.optional(v.number()),
+    responseTime: v.optional(v.number()),
+    error: v.optional(v.string()),
+    filters: v.optional(v.any()),
+  })
+    .index('by_timestamp', ['timestamp'])
+    .index('by_user', ['userId', 'timestamp'])
+    .index('by_query', ['query', 'timestamp']),
 });
 export default schema;
 
@@ -103,6 +122,7 @@ const rating = schema.tables.ratings.validator;
 const reaction = schema.tables.reactions.validator;
 const searchHistory = schema.tables.searchHistory.validator;
 const trendingSearches = schema.tables.trendingSearches.validator;
+const searchMetrics = schema.tables.searchMetrics.validator;
 
 export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
@@ -110,6 +130,7 @@ export type Rating = Infer<typeof rating>;
 export type Reaction = Infer<typeof reaction>;
 export type SearchHistory = Infer<typeof searchHistory>;
 export type TrendingSearches = Infer<typeof trendingSearches>;
+export type SearchMetrics = Infer<typeof searchMetrics>;
 
 export const createVibeSchema = v.object({
   title: vibe.fields.title,

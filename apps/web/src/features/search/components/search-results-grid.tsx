@@ -1,26 +1,23 @@
 import { SearchResultCard } from './search-result-card';
 import { SearchEmptyState } from './search-empty-state';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SearchLoading } from './search-loading';
+import { SearchError } from './search-error';
 import type { SearchResult } from '@vibechecc/types';
 
 interface SearchResultsGridProps {
   results?: SearchResult[];
   loading: boolean;
+  error?: Error | unknown;
+  onRetry?: () => void;
 }
 
-export function SearchResultsGrid({ results, loading }: SearchResultsGridProps) {
+export function SearchResultsGrid({ results, loading, error, onRetry }: SearchResultsGridProps) {
+  if (error) {
+    return <SearchError error={error} onRetry={onRetry} />;
+  }
+
   if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="space-y-3">
-            <Skeleton className="aspect-[4/3] rounded-lg" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-        ))}
-      </div>
-    );
+    return <SearchLoading itemCount={9} type="grid" />;
   }
 
   if (!results || results.length === 0) {

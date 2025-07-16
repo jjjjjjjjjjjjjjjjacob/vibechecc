@@ -19,6 +19,7 @@ import { Route as VibesIndexRouteImport } from './routes/vibes/index'
 import { Route as VibesMyVibesRouteImport } from './routes/vibes/my-vibes'
 import { Route as VibesCreateRouteImport } from './routes/vibes/create'
 import { Route as VibesVibeIdRouteImport } from './routes/vibes/$vibeId'
+import { Route as UsersUsernameRouteImport } from './routes/users.$username'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -70,6 +71,11 @@ const VibesVibeIdRoute = VibesVibeIdRouteImport.update({
   path: '/vibes/$vibeId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersUsernameRoute = UsersUsernameRouteImport.update({
+  id: '/users/$username',
+  path: '/users/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRoute
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRoute
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRoute
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sign-in'
     | '/sign-up'
+    | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sign-in'
     | '/sign-up'
+    | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sign-in'
     | '/sign-up'
+    | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  UsersUsernameRoute: typeof UsersUsernameRoute
   VibesVibeIdRoute: typeof VibesVibeIdRoute
   VibesCreateRoute: typeof VibesCreateRoute
   VibesMyVibesRoute: typeof VibesMyVibesRoute
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VibesVibeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users/$username': {
+      id: '/users/$username'
+      path: '/users/$username'
+      fullPath: '/users/$username'
+      preLoaderRoute: typeof UsersUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  UsersUsernameRoute: UsersUsernameRoute,
   VibesVibeIdRoute: VibesVibeIdRoute,
   VibesCreateRoute: VibesCreateRoute,
   VibesMyVibesRoute: VibesMyVibesRoute,

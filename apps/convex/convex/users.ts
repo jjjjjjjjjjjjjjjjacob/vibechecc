@@ -26,6 +26,17 @@ export const getById = query({
   },
 });
 
+// Get user by username
+export const getByUsername = query({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query('users')
+      .filter((q) => q.eq(q.field('username'), args.username))
+      .first();
+  },
+});
+
 // Get current authenticated user
 export const current = query({
   args: {},

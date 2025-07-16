@@ -1,70 +1,80 @@
-import { useState, useCallback, useTransition } from 'react';
-import type { SearchResponse } from '@vibechecc/types';
-import { getMockSearchResults, getMockSearchSuggestions } from '../utils/search-mock-data';
+import { useState, useCallback, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
+import { api } from '@vibechecc/convex';
+import type { SearchResponse, SearchFilters } from '@vibechecc/types';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
 interface UseSearchOptions {
   debounceMs?: number;
   limit?: number;
+  filters?: SearchFilters;
 }
 
 export function useSearch(options: UseSearchOptions = {}) {
+  const { debounceMs = 300, limit = 20, filters } = options;
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResponse | null>(null);
-  const [isLoading, startTransition] = useTransition();
+  const debouncedQuery = useDebouncedValue(query, debounceMs);
+
+  // Use Convex query for search
+  const searchQuery = useQuery({
+    ...convexQuery(api.search.searchAll, {
+      query: debouncedQuery,
+      filters,
+      limit,
+    }),
+    enabled: debouncedQuery.trim().length > 0,
+  });
+
+  // Track search mutation
+  const trackSearchMutation = useMutation({
+    mutationFn: useConvexMutation(api.search.trackSearch),
+  });
+
+  // Track search when debounced query changes
+  useEffect(() => {
+    if (debouncedQuery.trim() && searchQuery.data) {
+      trackSearchMutation.mutate({ 
+        query: debouncedQuery,
+        resultCount: searchQuery.data.totalCount || 0,
+      });
+    }
+  }, [debouncedQuery, searchQuery.data]);
 
   const search = useCallback((searchQuery: string) => {
     setQuery(searchQuery);
-    
-    if (!searchQuery.trim()) {
-      setResults(null);
-      return;
-    }
-
-    startTransition(() => {
-      // TODO: Replace with actual API call when backend is ready
-      const mockResults = getMockSearchResults(searchQuery);
-      setResults(mockResults);
-    });
   }, []);
 
   const clearSearch = useCallback(() => {
     setQuery('');
-    setResults(null);
   }, []);
 
   return {
     query,
-    results,
-    isLoading,
+    results: searchQuery.data ?? null,
+    isLoading: searchQuery.isLoading,
+    isError: searchQuery.isError,
+    error: searchQuery.error,
     search,
     clearSearch,
   };
 }
 
 export function useSearchSuggestions(query: string) {
-  const [isLoading, startTransition] = useTransition();
-  const [data, setData] = useState<ReturnType<typeof getMockSearchSuggestions> | null>(null);
+  const debouncedQuery = useDebouncedValue(query, 150); // Faster debounce for suggestions
 
-  const fetchSuggestions = useCallback((searchQuery: string) => {
-    if (!searchQuery.trim()) {
-      setData(null);
-      return;
-    }
-
-    startTransition(() => {
-      // TODO: Replace with actual API call when backend is ready
-      const suggestions = getMockSearchSuggestions(searchQuery);
-      setData(suggestions);
-    });
-  }, []);
-
-  // Fetch suggestions when query changes
-  if (query !== (data ? query : '')) {
-    fetchSuggestions(query);
-  }
+  // Use Convex query for suggestions
+  const { data, isLoading, isError, error } = useQuery({
+    ...convexQuery(api.search.getSearchSuggestions, {
+      query: debouncedQuery,
+    }),
+    enabled: debouncedQuery.trim().length > 0,
+  });
 
   return {
-    data,
+    data: data ?? null,
     isLoading,
+    isError,
+    error,
   };
 }

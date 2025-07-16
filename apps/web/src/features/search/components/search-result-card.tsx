@@ -31,9 +31,9 @@ function VibeResultCard({ result }: { result: VibeSearchResult }) {
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 h-full">
         {/* Image with badge overlay */}
         <div className="aspect-[4/3] relative bg-muted">
-          {result.imageUrl ? (
+          {result.image ? (
             <img 
-              src={result.imageUrl} 
+              src={result.image} 
               alt={result.title}
               className="w-full h-full object-cover"
             />
@@ -59,22 +59,28 @@ function VibeResultCard({ result }: { result: VibeSearchResult }) {
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star 
                   key={i} 
-                  className={`h-4 w-4 ${i < Math.floor(result.averageRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+                  className={`h-4 w-4 ${result.rating && i < Math.floor(result.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
                 />
               ))}
             </div>
-            <span className="text-sm font-medium ml-1">
-              {result.averageRating.toFixed(1)}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              ({result.ratingCount} reviews)
-            </span>
+            {result.rating && (
+              <>
+                <span className="text-sm font-medium ml-1">
+                  {result.rating.toFixed(1)}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  ({result.ratingCount || 0} reviews)
+                </span>
+              </>
+            )}
           </div>
           
-          {/* Location/Creator */}
-          <div className="text-sm text-muted-foreground">
-            {result.location || result.createdBy?.location || 'Location not specified'}
-          </div>
+          {/* Creator */}
+          {result.createdBy && (
+            <div className="text-sm text-muted-foreground">
+              Created by {result.createdBy.name}
+            </div>
+          )}
         </CardContent>
       </Card>
     </Link>
@@ -83,16 +89,16 @@ function VibeResultCard({ result }: { result: VibeSearchResult }) {
 
 function UserResultCard({ result }: { result: UserSearchResult }) {
   return (
-    <Link to="/profile/$userId" params={{ userId: result.id }}>
+    <Link to="/users/$username" params={{ username: result.username }}>
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 h-full">
         <div className="p-6 flex flex-col items-center text-center space-y-4">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={result.avatar} />
-            <AvatarFallback>{result.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={result.image} />
+            <AvatarFallback>{result.title?.[0] || '?'}</AvatarFallback>
           </Avatar>
           
           <div>
-            <h3 className="font-semibold text-lg">{result.name}</h3>
+            <h3 className="font-semibold text-lg">{result.title}</h3>
             <p className="text-sm text-muted-foreground">@{result.username}</p>
           </div>
           
@@ -102,7 +108,7 @@ function UserResultCard({ result }: { result: UserSearchResult }) {
               <p className="text-muted-foreground">Vibes</p>
             </div>
             <div>
-              <p className="font-semibold">{result.followersCount}</p>
+              <p className="font-semibold">{result.followerCount || 0}</p>
               <p className="text-muted-foreground">Followers</p>
             </div>
           </div>
@@ -116,7 +122,7 @@ function UserResultCard({ result }: { result: UserSearchResult }) {
 
 function TagResultCard({ result }: { result: TagSearchResult }) {
   return (
-    <Link to="/search" search={{ tags: [result.name] }}>
+    <Link to="/search" search={{ tags: [result.title] }}>
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 h-full">
         <div className="p-6 flex flex-col items-center text-center space-y-4">
           <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
@@ -124,9 +130,9 @@ function TagResultCard({ result }: { result: TagSearchResult }) {
           </div>
           
           <div>
-            <h3 className="font-semibold text-lg">#{result.name}</h3>
+            <h3 className="font-semibold text-lg">#{result.title}</h3>
             <p className="text-sm text-muted-foreground mt-2">
-              {result.usageCount} {result.usageCount === 1 ? 'vibe' : 'vibes'}
+              {result.count} {result.count === 1 ? 'vibe' : 'vibes'}
             </p>
           </div>
           

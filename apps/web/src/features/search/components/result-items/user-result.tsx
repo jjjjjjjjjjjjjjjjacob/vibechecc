@@ -25,7 +25,7 @@ export function UserResult({ result, onSelect }: UserResultProps) {
     >
       <Avatar className="h-10 w-10">
         <AvatarImage src={result.image} />
-        <AvatarFallback>{result.title[0]}</AvatarFallback>
+        <AvatarFallback>{result.title?.[0] || '?'}</AvatarFallback>
       </Avatar>
       
       <div className="flex-1">

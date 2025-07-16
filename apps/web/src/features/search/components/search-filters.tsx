@@ -1,18 +1,30 @@
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TagFilter } from './tag-filter';
-import { RatingFilter } from './rating-filter';
-import { DateRangeFilter } from './date-range-filter';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Filter } from 'lucide-react';
+import { TagFilterEnhanced } from './filters/tag-filter-enhanced';
+import { RatingSlider } from './filters/rating-slider';
+import { DateRangePicker } from './filters/date-range-picker';
+import { ActiveFiltersBar } from './filters/active-filters-bar';
+import { useFilterState } from '../hooks/use-filter-state';
 import type { SearchFilters as SearchFiltersType } from '@vibechecc/types';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface SearchFiltersProps {
   filters: Partial<SearchFiltersType>;
   onChange: (filters: Partial<SearchFiltersType>) => void;
-  availableTags?: string[];
+  availableTags?: Array<{ name: string; count: number }>;
+  showActiveFilters?: boolean;
 }
 
-export function SearchFilters({ filters, onChange, availableTags = [] }: SearchFiltersProps) {
+export function SearchFilters({ 
+  filters, 
+  onChange, 
+  availableTags = [],
+  showActiveFilters = true 
+}: SearchFiltersProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const hasActiveFilters = !!(
     filters.tags?.length ||
     filters.minRating ||
@@ -30,19 +42,19 @@ export function SearchFilters({ filters, onChange, availableTags = [] }: SearchF
 
   // Mock available tags if none provided
   const tags = availableTags.length > 0 ? availableTags : [
-    'wholesome',
-    'funny',
-    'cringe',
-    'embarrassing',
-    'awkward',
-    'relatable',
-    'mood',
-    'fail',
-    'win',
-    'random',
+    { name: 'wholesome', count: 45 },
+    { name: 'funny', count: 38 },
+    { name: 'cringe', count: 27 },
+    { name: 'embarrassing', count: 23 },
+    { name: 'awkward', count: 19 },
+    { name: 'relatable', count: 42 },
+    { name: 'mood', count: 31 },
+    { name: 'fail', count: 15 },
+    { name: 'win', count: 22 },
+    { name: 'random', count: 18 },
   ];
 
-  return (
+  const filterContent = (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-lg">Filters</h3>
@@ -60,7 +72,7 @@ export function SearchFilters({ filters, onChange, availableTags = [] }: SearchF
 
       <Separator />
 
-      <TagFilter
+      <TagFilterEnhanced
         selected={filters.tags || []}
         available={tags}
         onChange={(tags) => onChange({ ...filters, tags })}
@@ -68,14 +80,19 @@ export function SearchFilters({ filters, onChange, availableTags = [] }: SearchF
 
       <Separator />
 
-      <RatingFilter
-        value={filters.minRating}
-        onChange={(rating) => onChange({ ...filters, minRating: rating })}
+      <RatingSlider
+        min={filters.minRating}
+        max={filters.maxRating}
+        onChange={(range) => onChange({ 
+          ...filters, 
+          minRating: range?.min, 
+          maxRating: range?.max 
+        })}
       />
 
       <Separator />
 
-      <DateRangeFilter
+      <DateRangePicker
         value={filters.dateRange}
         onChange={(dateRange) => onChange({ ...filters, dateRange })}
       />
@@ -107,5 +124,55 @@ export function SearchFilters({ filters, onChange, availableTags = [] }: SearchF
         </p>
       </div>
     </div>
+  );
+
+  // Mobile view with drawer
+  if (isMobile) {
+    return (
+      <>
+        {showActiveFilters && hasActiveFilters && (
+          <ActiveFiltersBar
+            filters={filters}
+            onChange={onChange}
+            className="mb-4"
+          />
+        )}
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Filter className="h-4 w-4" />
+              Filters
+              {hasActiveFilters && (
+                <span className="ml-1 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-xs">
+                  {Object.keys(filters).filter(k => k !== 'query').length}
+                </span>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[90%] sm:w-[400px]">
+            <SheetHeader>
+              <SheetTitle>Search Filters</SheetTitle>
+            </SheetHeader>
+            <div className="mt-6">
+              {filterContent}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </>
+    );
+  }
+
+  // Desktop view
+  return (
+    <>
+      {showActiveFilters && hasActiveFilters && (
+        <ActiveFiltersBar
+          filters={filters}
+          onChange={onChange}
+          className="mb-4"
+        />
+      )}
+      {filterContent}
+    </>
   );
 }

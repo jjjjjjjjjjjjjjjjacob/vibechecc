@@ -52,7 +52,7 @@ export function VibeResult({ result, onSelect }: VibeResultProps) {
             <div className="flex items-center gap-1">
               <Avatar className="h-4 w-4">
                 <AvatarImage src={result.createdBy.avatar} />
-                <AvatarFallback>{result.createdBy.name[0]}</AvatarFallback>
+                <AvatarFallback>{result.createdBy.name?.[0] || '?'}</AvatarFallback>
               </Avatar>
               <span className="text-xs text-muted-foreground">
                 {result.createdBy.name}

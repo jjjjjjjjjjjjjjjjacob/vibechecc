@@ -10,6 +10,9 @@ import type {
   TagSearchResult,
   SearchSortOption,
 } from '@vibechecc/types';
+import { fuzzyMatch, fuzzyScore } from './search/fuzzy_search';
+import { scoreVibe, scoreUser, scoreTag, rerankResults } from './search/search_scorer';
+import { parseSearchQuery, matchesParsedQuery } from './search/search_utils';
 
 // Main search function
 export const searchAll = query({
@@ -44,10 +47,10 @@ export const searchAll = query({
   },
   handler: async (ctx, args) => {
     const { query: searchQuery, filters, limit = 20, includeTypes } = args;
+    const startTime = Date.now();
     const results: SearchResult[] = [];
-    const normalizedQuery = searchQuery.toLowerCase().trim();
 
-    if (!normalizedQuery) {
+    if (!searchQuery.trim()) {
       return {
         results: [],
         totalCount: 0,
@@ -55,81 +58,69 @@ export const searchAll = query({
       } as SearchResponse;
     }
 
-    // Helper function to calculate relevance score
-    const calculateScore = (text: string, query: string): number => {
-      const normalizedText = text.toLowerCase();
-      const normalizedQueryWords = query.toLowerCase().split(' ');
-      let score = 0;
-
-      // Exact match gets highest score
-      if (normalizedText === query) {
-        score += 100;
-      }
-
-      // Contains exact phrase
-      if (normalizedText.includes(query)) {
-        score += 50;
-      }
-
-      // Contains all words
-      const containsAllWords = normalizedQueryWords.every(word =>
-        normalizedText.includes(word)
-      );
-      if (containsAllWords) {
-        score += 30;
-      }
-
-      // Word matches
-      normalizedQueryWords.forEach(word => {
-        if (normalizedText.includes(word)) {
-          score += 10;
-        }
-      });
-
-      return score;
+    // Parse the query for advanced operators
+    const parsedQuery = parseSearchQuery(searchQuery);
+    
+    // Merge parsed filters with provided filters
+    const mergedFilters = {
+      ...filters,
+      tags: [...(filters?.tags || []), ...parsedQuery.tags],
+      minRating: filters?.minRating || parsedQuery.filters.minRating,
+      maxRating: filters?.maxRating || parsedQuery.filters.maxRating,
+      dateRange: filters?.dateRange || (parsedQuery.filters.dateAfter || parsedQuery.filters.dateBefore ? {
+        start: parsedQuery.filters.dateAfter || '1970-01-01',
+        end: parsedQuery.filters.dateBefore || new Date().toISOString().split('T')[0],
+      } : undefined),
+      creators: filters?.creators || (parsedQuery.filters.user ? [parsedQuery.filters.user] : undefined),
     };
+    
+    // Build search text from parsed query
+    const searchText = [...parsedQuery.terms, ...parsedQuery.exactPhrases].join(' ').toLowerCase();
 
     // Search vibes
     if (!includeTypes || includeTypes.includes('vibe')) {
-      const vibesQuery = ctx.db.query('vibes');
-      const allVibes = await vibesQuery.collect();
+      // Limit initial query for performance
+      const allVibes = await ctx.db.query('vibes').take(500);
 
       for (const vibe of allVibes) {
-        // Calculate relevance score
-        const titleScore = calculateScore(vibe.title, normalizedQuery);
-        const descriptionScore = calculateScore(vibe.description, normalizedQuery);
-        const tagScore = vibe.tags
-          ? Math.max(
-              ...vibe.tags.map(tag => calculateScore(tag, normalizedQuery))
-            )
-          : 0;
-
-        const totalScore = titleScore * 2 + descriptionScore + tagScore;
-
-        if (totalScore > 0) {
+        // Check if vibe matches using fuzzy search
+        const titleMatch = fuzzyMatch(vibe.title, searchText);
+        const descriptionMatch = fuzzyMatch(vibe.description, searchText);
+        const tagMatch = vibe.tags?.some(tag => fuzzyMatch(tag, searchText)) || false;
+        
+        // Check for excluded terms
+        const hasExcludedTerm = parsedQuery.excludedTerms.some(term => 
+          vibe.title.toLowerCase().includes(term.toLowerCase()) ||
+          vibe.description.toLowerCase().includes(term.toLowerCase()) ||
+          vibe.tags?.some(tag => tag.toLowerCase().includes(term.toLowerCase()))
+        );
+        
+        if (hasExcludedTerm) continue;
+        
+        if (titleMatch || descriptionMatch || tagMatch) {
           // Apply filters
           let passesFilters = true;
 
           // Tag filter
-          if (filters?.tags && filters.tags.length > 0) {
+          if (mergedFilters.tags && mergedFilters.tags.length > 0) {
             passesFilters =
               passesFilters &&
-              (vibe.tags?.some(tag => filters.tags!.includes(tag)) ?? false);
+              (vibe.tags?.some(tag => mergedFilters.tags!.includes(tag)) ?? false);
           }
 
           // Date range filter
-          if (filters?.dateRange) {
+          if (mergedFilters.dateRange) {
             const vibeDate = new Date(vibe.createdAt).getTime();
-            const startDate = new Date(filters.dateRange.start).getTime();
-            const endDate = new Date(filters.dateRange.end).getTime();
+            const startDate = new Date(mergedFilters.dateRange.start).getTime();
+            const endDate = new Date(mergedFilters.dateRange.end).getTime();
             passesFilters =
               passesFilters && vibeDate >= startDate && vibeDate <= endDate;
           }
 
           // Creator filter
-          if (filters?.creators && filters.creators.length > 0) {
+          if (mergedFilters.creators && mergedFilters.creators.length > 0) {
             passesFilters =
-              passesFilters && filters.creators.includes(vibe.createdById);
+              passesFilters && mergedFilters.creators.includes(vibe.createdById);
           }
 
           if (passesFilters) {
@@ -153,14 +144,24 @@ export const searchAll = query({
                 : undefined;
 
             // Apply rating filter
-            if (filters?.minRating && avgRating !== undefined) {
-              passesFilters = passesFilters && avgRating >= filters.minRating;
+            if (mergedFilters.minRating && avgRating !== undefined) {
+              passesFilters = passesFilters && avgRating >= mergedFilters.minRating;
             }
-            if (filters?.maxRating && avgRating !== undefined) {
-              passesFilters = passesFilters && avgRating <= filters.maxRating;
+            if (mergedFilters.maxRating && avgRating !== undefined) {
+              passesFilters = passesFilters && avgRating <= mergedFilters.maxRating;
             }
 
             if (passesFilters) {
+              // Calculate advanced relevance score
+              const score = scoreVibe({
+                title: vibe.title,
+                description: vibe.description,
+                tags: vibe.tags,
+                createdAt: vibe.createdAt,
+                rating: avgRating,
+                ratingCount: ratings.length,
+              }, searchText);
+              
               const vibeResult: VibeSearchResult = {
                 id: vibe.id,
                 type: 'vibe',
@@ -171,7 +172,7 @@ export const searchAll = query({
                 rating: avgRating,
                 ratingCount: ratings.length,
                 tags: vibe.tags,
-                score: totalScore,
+                score,
                 createdBy: creator
                   ? {
                       id: creator.externalId,
@@ -189,21 +190,33 @@ export const searchAll = query({
 
     // Search users
     if (!includeTypes || includeTypes.includes('user')) {
-      const usersQuery = ctx.db.query('users');
-      const allUsers = await usersQuery.collect();
+      // Limit initial query for performance
+      const allUsers = await ctx.db.query('users').take(200);
 
       for (const user of allUsers) {
         const username = user.username || '';
         const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
         const bio = user.bio || '';
 
-        const usernameScore = calculateScore(username, normalizedQuery);
-        const nameScore = calculateScore(fullName, normalizedQuery);
-        const bioScore = calculateScore(bio, normalizedQuery) * 0.5;
+        // Check fuzzy matching
+        const usernameMatch = fuzzyMatch(username, searchText);
+        const nameMatch = fuzzyMatch(fullName, searchText);
+        const bioMatch = fuzzyMatch(bio, searchText);
+        
+        // Check for excluded terms
+        const hasExcludedTerm = parsedQuery.excludedTerms.some(term => 
+          username.toLowerCase().includes(term.toLowerCase()) ||
+          fullName.toLowerCase().includes(term.toLowerCase()) ||
+          bio.toLowerCase().includes(term.toLowerCase())
+        );
+        
+        if (hasExcludedTerm) continue;
 
-        const totalScore = usernameScore * 2 + nameScore + bioScore;
-
-        if (totalScore > 0) {
+        if (usernameMatch || nameMatch || bioMatch) {
+          // Apply creator filter if specified
+          if (parsedQuery.filters.user && username.toLowerCase() !== parsedQuery.filters.user.toLowerCase()) {
+            continue;
+          }
           // Get vibe count
           const userVibes = await ctx.db
             .query('vibes')
@@ -212,6 +225,14 @@ export const searchAll = query({
             )
             .collect();
 
+          // Calculate advanced relevance score
+          const score = scoreUser({
+            username,
+            fullName,
+            bio,
+            vibeCount: userVibes.length,
+          }, searchText);
+          
           const userResult: UserSearchResult = {
             id: user.externalId,
             type: 'user',
@@ -220,7 +241,7 @@ export const searchAll = query({
             image: user.image_url,
             username: user.username || 'unknown',
             vibeCount: userVibes.length,
-            score: totalScore,
+            score,
           };
           results.push(userResult);
         }
@@ -229,9 +250,10 @@ export const searchAll = query({
 
     // Search tags
     if (!includeTypes || includeTypes.includes('tag')) {
+      // Limit for performance - tags are aggregated from vibes
       const vibesWithTags = await ctx.db
         .query('vibes')
-        .collect();
+        .take(500);
 
       const tagCounts = new Map<string, number>();
       vibesWithTags.forEach(vibe => {
@@ -241,8 +263,23 @@ export const searchAll = query({
       });
 
       tagCounts.forEach((count, tag) => {
-        const score = calculateScore(tag, normalizedQuery);
-        if (score > 0) {
+        // Check fuzzy matching
+        const tagMatch = fuzzyMatch(tag, searchText);
+        
+        // Check for excluded terms
+        const hasExcludedTerm = parsedQuery.excludedTerms.some(term => 
+          tag.toLowerCase().includes(term.toLowerCase())
+        );
+        
+        if (hasExcludedTerm) return;
+        
+        if (tagMatch) {
+          // Calculate advanced relevance score
+          const score = scoreTag({
+            name: tag,
+            count,
+          }, searchText);
+          
           const tagResult: TagSearchResult = {
             id: tag,
             type: 'tag',
@@ -258,7 +295,7 @@ export const searchAll = query({
 
     // Sort results
     let sortedResults = [...results];
-    const sortOption = filters?.sort || 'relevance';
+    const sortOption = mergedFilters.sort || 'relevance';
 
     switch (sortOption) {
       case 'relevance':
@@ -289,6 +326,9 @@ export const searchAll = query({
     const startIndex = 0; // For now, simple pagination
     const endIndex = Math.min(startIndex + limit, sortedResults.length);
     const paginatedResults = sortedResults.slice(startIndex, endIndex);
+
+    // Note: Search metrics tracking would need to be handled in a separate mutation
+    // since queries cannot schedule functions
 
     return {
       results: paginatedResults,
@@ -340,17 +380,18 @@ export const getSearchSuggestions = query({
       return results;
     }
 
-    // Implement quick search for suggestions
-    const normalizedQuery = searchQuery.toLowerCase().trim();
+    // Implement quick search for suggestions with fuzzy matching
+    const parsedQuery = parseSearchQuery(searchQuery);
+    const searchText = [...parsedQuery.terms, ...parsedQuery.exactPhrases].join(' ').toLowerCase();
     
     // Search vibes (limit 5)
     const vibes = await ctx.db.query('vibes').take(20);
     for (const vibe of vibes) {
       if (results.vibes.length >= 5) break;
       
-      const matches = vibe.title.toLowerCase().includes(normalizedQuery) ||
-                     vibe.description.toLowerCase().includes(normalizedQuery) ||
-                     vibe.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery));
+      const matches = fuzzyMatch(vibe.title, searchText) ||
+                     fuzzyMatch(vibe.description, searchText) ||
+                     vibe.tags?.some(tag => fuzzyMatch(tag, searchText));
       
       if (matches) {
         const creator = await ctx.db
@@ -394,8 +435,8 @@ export const getSearchSuggestions = query({
       const username = user.username || '';
       const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
       
-      if (username.toLowerCase().includes(normalizedQuery) ||
-          fullName.toLowerCase().includes(normalizedQuery)) {
+      if (fuzzyMatch(username, searchText) ||
+          fuzzyMatch(fullName, searchText)) {
         const userVibes = await ctx.db
           .query('vibes')
           .withIndex('createdBy', q => q.eq('createdById', user.externalId))
@@ -418,7 +459,7 @@ export const getSearchSuggestions = query({
     const tagCounts = new Map<string, number>();
     vibesWithTags.forEach(vibe => {
       vibe.tags?.forEach(tag => {
-        if (tag.toLowerCase().includes(normalizedQuery) && results.tags.length < 5) {
+        if (fuzzyMatch(tag, searchText) && results.tags.length < 5) {
           tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
         }
       });

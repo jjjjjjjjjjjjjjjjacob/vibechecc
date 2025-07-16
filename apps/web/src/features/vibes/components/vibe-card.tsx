@@ -236,7 +236,30 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
           >
             <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
-                {vibe.createdBy ? (
+                {vibe.createdBy && vibe.createdBy.username ? (
+                  <Link
+                    to="/users/$username"
+                    params={{ username: vibe.createdBy.username }}
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage
+                        src={getUserAvatarUrl(vibe.createdBy)}
+                        alt={computeUserDisplayName(vibe.createdBy)}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>
+                        {getUserInitials(vibe.createdBy)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-muted-foreground text-xs hover:text-foreground">
+                      {computeUserDisplayName(vibe.createdBy)}
+                    </span>
+                  </Link>
+                ) : (
                   <>
                     <Avatar className="h-6 w-6">
                       <AvatarImage
@@ -249,13 +272,9 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-muted-foreground text-xs">
-                      {computeUserDisplayName(vibe.createdBy)}
+                      {vibe.createdBy ? computeUserDisplayName(vibe.createdBy) : 'Unknown User'}
                     </span>
                   </>
-                ) : (
-                  <span className="text-muted-foreground text-xs">
-                    Unknown User
-                  </span>
                 )}
               </div>
 
@@ -374,7 +393,30 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
           >
             <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
-                {vibe.createdBy ? (
+                {vibe.createdBy && vibe.createdBy.username ? (
+                  <Link
+                    to="/users/$username"
+                    params={{ username: vibe.createdBy.username }}
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage
+                        src={getUserAvatarUrl(vibe.createdBy)}
+                        alt={computeUserDisplayName(vibe.createdBy)}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>
+                        {getUserInitials(vibe.createdBy)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-muted-foreground text-xs hover:text-foreground">
+                      {computeUserDisplayName(vibe.createdBy)}
+                    </span>
+                  </Link>
+                ) : (
                   <>
                     <Avatar className="h-6 w-6">
                       <AvatarImage
@@ -387,13 +429,9 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-muted-foreground text-xs">
-                      {computeUserDisplayName(vibe.createdBy)}
+                      {vibe.createdBy ? computeUserDisplayName(vibe.createdBy) : 'Unknown User'}
                     </span>
                   </>
-                ) : (
-                  <span className="text-muted-foreground text-xs">
-                    Unknown User
-                  </span>
                 )}
               </div>
 

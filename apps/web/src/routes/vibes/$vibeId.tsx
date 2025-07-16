@@ -4,7 +4,7 @@ import {
   useVibe,
   useAddRatingMutation,
   useReactToVibeMutation,
-  useVibes,
+  useVibesPaginated,
 } from '@/queries';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,8 @@ export const Route = createFileRoute('/vibes/$vibeId')({
 function VibePage() {
   const { vibeId } = Route.useParams();
   const { data: vibe, isLoading, error } = useVibe(vibeId);
-  const { data: allVibes } = useVibes();
+  const { data: allVibesData } = useVibesPaginated(50);
+  const allVibes = allVibesData?.vibes || [];
   const [rating, setRating] = React.useState(0);
   const [review, setReview] = React.useState('');
   const { user: _user } = useUser();

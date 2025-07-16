@@ -23,7 +23,7 @@ function SearchResultsPage() {
   const { q, tags, rating, sort, page } = Route.useSearch();
   const filters = { tags, minRating: rating, sort };
   
-  const { data, isLoading } = useSearchResults({
+  const { data, isLoading, isError, error } = useSearchResults({
     query: q || '',
     filters,
     page,
@@ -101,6 +101,8 @@ function SearchResultsPage() {
             <SearchResultsGrid 
               results={data?.results} 
               loading={isLoading}
+              error={isError ? error : undefined}
+              onRetry={() => window.location.reload()}
             />
             
             {!isLoading && data?.results && data.results.length > 0 && (

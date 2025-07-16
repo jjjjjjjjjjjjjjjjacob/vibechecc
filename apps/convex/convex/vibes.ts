@@ -362,6 +362,94 @@ export const create = mutation({
 });
 
 // Add a rating to a vibe
+// Get ratings given by a user (ratings they've left on vibes)
+export const getUserRatings = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const ratings = await ctx.db
+      .query('ratings')
+      .withIndex('user', (q) => q.eq('userId', args.userId))
+      .collect();
+
+    // Get vibe details for each rating
+    const ratingsWithVibes = await Promise.all(
+      ratings.map(async (rating) => {
+        const vibe = await ctx.db
+          .query('vibes')
+          .filter((q) => q.eq(q.field('id'), rating.vibeId))
+          .first();
+
+        if (!vibe) return null;
+
+        // Get vibe creator
+        const creator = await ctx.db
+          .query('users')
+          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
+          .first();
+
+        return {
+          ...rating,
+          vibe: {
+            ...vibe,
+            createdBy: creator,
+          },
+        };
+      })
+    );
+
+    return ratingsWithVibes.filter(Boolean);
+  },
+});
+
+// Get ratings received by a user (ratings on vibes they've created)
+export const getUserReceivedRatings = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    // First get vibes created by this user
+    const userVibes = await ctx.db
+      .query('vibes')
+      .filter((q) => q.eq(q.field('createdById'), args.userId))
+      .collect();
+
+    // Get all ratings for these vibes
+    const allRatings = await Promise.all(
+      userVibes.map(async (vibe) => {
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .collect();
+
+        return ratings.map((rating) => ({
+          ...rating,
+          vibe: {
+            id: vibe.id,
+            title: vibe.title,
+            image: vibe.image,
+          },
+        }));
+      })
+    );
+
+    // Flatten the array and get rater details
+    const flatRatings = allRatings.flat();
+    const ratingsWithRaters = await Promise.all(
+      flatRatings.map(async (rating) => {
+        const rater = await ctx.db
+          .query('users')
+          .filter((q) => q.eq(q.field('externalId'), rating.userId))
+          .first();
+
+        return {
+          ...rating,
+          rater,
+        };
+      })
+    );
+
+    return ratingsWithRaters;
+  },
+});
+
 export const addRating = mutation({
   args: {
     vibeId: v.string(),

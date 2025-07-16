@@ -14,7 +14,7 @@ import { TagResult } from './result-items/tag-result';
 import { ActionResult } from './result-items/action-result';
 import { SearchSuggestions } from './search-suggestions';
 import { useSearchSuggestions } from '../hooks/use-search';
-import { mockRecentSearches, mockTrendingSearches } from '../utils/search-mock-data';
+import { useTrendingSearches } from '../hooks/use-trending-searches';
 import { useNavigate } from '@tanstack/react-router';
 
 interface SearchCommandProps {
@@ -24,7 +24,8 @@ interface SearchCommandProps {
 
 export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
   const [query, setQuery] = useState('');
-  const { data, isLoading } = useSearchSuggestions(query);
+  const { data, isLoading, isError } = useSearchSuggestions(query);
+  const { data: trendingSearches } = useTrendingSearches(5);
   const navigate = useNavigate();
 
   const handleSelect = () => {
@@ -48,6 +49,24 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
     (data.actions && data.actions.length > 0)
   );
 
+  // Extract recent searches from the suggestions data when query is empty
+  const recentSearches = (!query && data && 'recentSearches' in data) ? data.recentSearches : [];
+  
+  // Convert trending searches to SearchSuggestion format
+  const formattedTrendingSearches = trendingSearches?.map(search => ({
+    term: search.term,
+    type: 'trending' as const,
+    metadata: {
+      useCount: search.count,
+    },
+  })) || [];
+  
+  // Convert recent searches to SearchSuggestion format
+  const formattedRecentSearches = recentSearches.map(term => ({
+    term,
+    type: 'recent' as const,
+  }));
+
   return (
     <CommandDialog 
       open={open} 
@@ -64,8 +83,8 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
         <CommandList>
           {!query && (
             <SearchSuggestions
-              recentSearches={mockRecentSearches}
-              trendingSearches={mockTrendingSearches}
+              recentSearches={formattedRecentSearches}
+              trendingSearches={formattedTrendingSearches}
               onSelect={handleSuggestionSelect}
             />
           )}

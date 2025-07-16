@@ -43,6 +43,22 @@ export function useUserReactedVibes(userId: string) {
   });
 }
 
+// Query to get ratings given by a user
+export function useUserRatings(userId: string) {
+  return useQuery({
+    ...convexQuery(api.vibes.getUserRatings, { userId }),
+    enabled: !!userId,
+  });
+}
+
+// Query to get ratings received by a user on their vibes
+export function useUserReceivedRatings(userId: string) {
+  return useQuery({
+    ...convexQuery(api.vibes.getUserReceivedRatings, { userId }),
+    enabled: !!userId,
+  });
+}
+
 // Mutation to create a vibe
 export function useCreateVibeMutation() {
   const queryClient = useQueryClient();
@@ -86,6 +102,14 @@ export function useUser(id: string) {
   return useQuery({
     ...convexQuery(api.users.getById, { id }),
     enabled: !!id,
+  });
+}
+
+// Query to get user by username
+export function useUserByUsername(username: string) {
+  return useQuery({
+    ...convexQuery(api.users.getByUsername, { username }),
+    enabled: !!username,
   });
 }
 
