@@ -13,11 +13,11 @@ export default defineConfig({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
-    react(),
     tanstackStart({
       target: 'cloudflare-module',
       customViteReactPlugin: true,
     }),
+    react(),
   ],
   build: {
     rollupOptions: {
