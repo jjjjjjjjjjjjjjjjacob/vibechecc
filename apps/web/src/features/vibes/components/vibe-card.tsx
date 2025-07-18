@@ -7,7 +7,7 @@ import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { useState } from 'react';
 import { EmojiReactions } from '@/components/emoji-reaction';
-import { useUser } from '@clerk/tanstack-react-start';
+import { useUser, SignInButton } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
 import { useAddRatingMutation } from '@/queries';
 import toast from 'react-hot-toast';
@@ -101,7 +101,15 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
 
   // Handle quick rating
   const handleRating = async (rating: number) => {
-    if (preview || !user?.id) return;
+    if (preview) return;
+    
+    if (!user?.id) {
+      toast.error('you must sign in to rate vibes', {
+        duration: 2000,
+        icon: '🔒',
+      });
+      return;
+    }
 
     setUserRating(rating);
 
@@ -128,7 +136,15 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
 
   // Handle emoji reactions
   const handleReact = (emoji: string) => {
-    if (preview || !user?.id) return;
+    if (preview) return;
+    
+    if (!user?.id) {
+      toast.error('you must sign in to react to vibes', {
+        duration: 2000,
+        icon: '🔒',
+      });
+      return;
+    }
 
     // Track the reaction event
     trackEvents.vibeReacted(vibe.id, emoji);

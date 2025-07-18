@@ -38,7 +38,7 @@ export function VibeResult({ result, onSelect }: VibeResultProps) {
           {result.rating && (
             <div className="flex items-center gap-1">
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs text-muted-foreground">{result.rating}</span>
+              <span className="text-xs text-muted-foreground">{result.rating.toFixed(1)}</span>
             </div>
           )}
         </div>

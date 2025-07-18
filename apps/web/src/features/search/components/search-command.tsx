@@ -14,7 +14,6 @@ import { TagResult } from './result-items/tag-result';
 import { ActionResult } from './result-items/action-result';
 import { SearchSuggestions } from './search-suggestions';
 import { useSearchSuggestions } from '../hooks/use-search';
-import { useTrendingSearches } from '../hooks/use-trending-searches';
 import { useNavigate } from '@tanstack/react-router';
 
 interface SearchCommandProps {
@@ -25,7 +24,6 @@ interface SearchCommandProps {
 export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
   const [query, setQuery] = useState('');
   const { data, isLoading, isError } = useSearchSuggestions(query);
-  const { data: trendingSearches } = useTrendingSearches(5);
   const navigate = useNavigate();
 
   const handleSelect = () => {
@@ -51,14 +49,13 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
 
   // Extract recent searches from the suggestions data when query is empty
   const recentSearches = (!query && data && 'recentSearches' in data) ? data.recentSearches : [];
+  const trendingSearchTerms = (!query && data && 'trendingSearches' in data) ? data.trendingSearches : [];
+  const popularTags = (!query && data && 'popularTags' in data) ? data.popularTags : [];
   
-  // Convert trending searches to SearchSuggestion format
-  const formattedTrendingSearches = trendingSearches?.map(search => ({
-    term: search.term,
+  // Convert trending searches to SearchSuggestion format (use from data instead of separate query)
+  const formattedTrendingSearches = trendingSearchTerms?.map(term => ({
+    term,
     type: 'trending' as const,
-    metadata: {
-      useCount: search.count,
-    },
   })) || [];
   
   // Convert recent searches to SearchSuggestion format
@@ -66,6 +63,15 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
     term,
     type: 'recent' as const,
   }));
+  
+  // Convert popular tags to SearchSuggestion format
+  const formattedPopularTags = popularTags.map(tag => ({
+    term: tag,
+    type: 'tag' as const,
+  }));
+
+  // Check if there are any suggestions or results to show
+  const hasContent = !query || hasResults || formattedRecentSearches.length > 0 || formattedTrendingSearches.length > 0 || formattedPopularTags.length > 0;
 
   return (
     <CommandDialog 
@@ -79,12 +85,14 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
           placeholder="Search vibes, users, or tags..." 
           value={query}
           onValueChange={setQuery}
+          showBorder={hasContent}
         />
         <CommandList>
           {!query && (
             <SearchSuggestions
               recentSearches={formattedRecentSearches}
               trendingSearches={formattedTrendingSearches}
+              popularTags={formattedPopularTags}
               onSelect={handleSuggestionSelect}
             />
           )}

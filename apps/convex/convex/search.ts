@@ -358,10 +358,12 @@ export const getSearchSuggestions = query({
     };
 
     if (!searchQuery.trim()) {
-      // Return recent searches or trending items when query is empty
+      // Return recent searches and trending items when query is empty
       const currentUser = await ctx.auth.getUserIdentity();
+      let recentSearches: string[] = [];
+      
       if (currentUser) {
-        const recentSearches = await ctx.db
+        const recentSearchHistory = await ctx.db
           .query('searchHistory')
           .withIndex('byUser', q =>
             q.eq('userId', currentUser.subject)
@@ -369,15 +371,38 @@ export const getSearchSuggestions = query({
           .order('desc')
           .take(5);
 
-        // Return formatted recent searches
-        return {
-          recentSearches: recentSearches.map(search => search.query),
-          vibes: [],
-          users: [],
-          tags: [],
-        };
+        recentSearches = recentSearchHistory.map(search => search.query);
       }
-      return results;
+      
+      // Get trending searches
+      const trendingSearches = await ctx.db
+        .query('trendingSearches')
+        .withIndex('byCount')
+        .order('desc')
+        .take(5);
+
+      // Get popular tags as fallback suggestions
+      const allVibes = await ctx.db.query('vibes').take(100);
+      const tagCounts = new Map<string, number>();
+      allVibes.forEach(vibe => {
+        vibe.tags?.forEach(tag => {
+          tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+        });
+      });
+      
+      const popularTags = Array.from(tagCounts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([tag]) => tag);
+
+      return {
+        recentSearches,
+        trendingSearches: trendingSearches.map(t => t.term),
+        popularTags,
+        vibes: [],
+        users: [],
+        tags: [],
+      };
     }
 
     // Implement quick search for suggestions with fuzzy matching

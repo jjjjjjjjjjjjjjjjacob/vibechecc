@@ -1,22 +1,20 @@
 import { CommandGroup, CommandItem } from '@/components/ui/command';
-import { Clock, TrendingUp, Search } from 'lucide-react';
+import { Clock, TrendingUp, Search, Hash } from 'lucide-react';
 import type { SearchSuggestion } from '@vibechecc/types';
 
 interface SearchSuggestionsProps {
   recentSearches?: SearchSuggestion[];
   trendingSearches?: SearchSuggestion[];
+  popularTags?: SearchSuggestion[];
   onSelect: (term: string) => void;
 }
 
 export function SearchSuggestions({
   recentSearches = [],
   trendingSearches = [],
+  popularTags = [],
   onSelect,
 }: SearchSuggestionsProps) {
-  if (recentSearches.length === 0 && trendingSearches.length === 0) {
-    return null;
-  }
-
   return (
     <>
       {recentSearches.length > 0 && (
@@ -46,6 +44,22 @@ export function SearchSuggestions({
             >
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
               <span>{search.term}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      )}
+
+      {popularTags.length > 0 && (
+        <CommandGroup heading="Popular tags">
+          {popularTags.map((tag) => (
+            <CommandItem
+              key={tag.term}
+              value={tag.term}
+              onSelect={() => onSelect(tag.term)}
+              className="flex items-center gap-2"
+            >
+              <Hash className="h-4 w-4 text-muted-foreground" />
+              <span>{tag.term}</span>
             </CommandItem>
           ))}
         </CommandGroup>
