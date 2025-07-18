@@ -16,9 +16,6 @@ import { SearchSuggestions } from './search-suggestions';
 import { useSearchSuggestions } from '../hooks/use-search';
 import { useNavigate } from '@tanstack/react-router';
 
-// Constants to avoid rollup issues with empty array literals
-const EMPTY_ARRAY: never[] = [];
-const EMPTY_STRING_ARRAY: string[] = [];
 
 interface SearchCommandProps {
   open: boolean;
@@ -53,38 +50,43 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
 
   // Extract recent searches from the suggestions data when query is empty
   const recentSearches =
-    !query && data && 'recentSearches' in data ? data.recentSearches : EMPTY_STRING_ARRAY;
+    !query && data && 'recentSearches' in data ? data.recentSearches : undefined;
   const trendingSearchTerms =
-    !query && data && 'trendingSearches' in data ? data.trendingSearches : EMPTY_STRING_ARRAY;
+    !query && data && 'trendingSearches' in data ? data.trendingSearches : undefined;
   const popularTags =
-    !query && data && 'popularTags' in data ? data.popularTags : EMPTY_STRING_ARRAY;
+    !query && data && 'popularTags' in data ? data.popularTags : undefined;
 
   // Convert trending searches to SearchSuggestion format (use from data instead of separate query)
-  const formattedTrendingSearches =
-    trendingSearchTerms?.map((term) => ({
-      term,
-      type: 'trending' as const,
-    })) ?? EMPTY_ARRAY;
+  const formattedTrendingSearches = trendingSearchTerms
+    ? trendingSearchTerms.map((term) => ({
+        term,
+        type: 'trending' as const,
+      }))
+    : undefined;
 
   // Convert recent searches to SearchSuggestion format
-  const formattedRecentSearches = recentSearches.map((term) => ({
-    term,
-    type: 'recent' as const,
-  }));
+  const formattedRecentSearches = recentSearches
+    ? recentSearches.map((term) => ({
+        term,
+        type: 'recent' as const,
+      }))
+    : undefined;
 
   // Convert popular tags to SearchSuggestion format
-  const formattedPopularTags = popularTags.map((tag) => ({
-    term: tag,
-    type: 'tag' as const,
-  }));
+  const formattedPopularTags = popularTags
+    ? popularTags.map((tag) => ({
+        term: tag,
+        type: 'tag' as const,
+      }))
+    : undefined;
 
   // Check if there are any suggestions or results to show
   const hasContent =
     !query ||
     hasResults ||
-    formattedRecentSearches.length > 0 ||
-    formattedTrendingSearches.length > 0 ||
-    formattedPopularTags.length > 0;
+    (formattedRecentSearches && formattedRecentSearches.length > 0) ||
+    (formattedTrendingSearches && formattedTrendingSearches.length > 0) ||
+    (formattedPopularTags && formattedPopularTags.length > 0);
 
   return (
     <CommandDialog
@@ -145,10 +147,10 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
 
               {data.tags && data.tags.length > 0 && (
                 <>
-                  {(data.vibes && data.vibes.length > 0) ||
-                    (data.users && data.users.length > 0 && (
-                      <CommandSeparator />
-                    ))}
+                  {((data.vibes && data.vibes.length > 0) ||
+                    (data.users && data.users.length > 0)) && (
+                    <CommandSeparator />
+                  )}
                   <CommandGroup heading="Tags">
                     {data.tags.map((tag) => (
                       <TagResult

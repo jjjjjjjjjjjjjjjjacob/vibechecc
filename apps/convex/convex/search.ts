@@ -69,7 +69,9 @@ export const searchAll = query({
     // Merge parsed filters with provided filters
     const mergedFilters = {
       ...filters,
-      tags: [...(filters?.tags || []), ...parsedQuery.tags],
+      tags: filters?.tags
+        ? filters.tags.concat(parsedQuery.tags)
+        : parsedQuery.tags,
       minRating: filters?.minRating || parsedQuery.filters.minRating,
       maxRating: filters?.maxRating || parsedQuery.filters.maxRating,
       dateRange:
@@ -84,11 +86,11 @@ export const searchAll = query({
           : undefined),
       creators:
         filters?.creators ||
-        (parsedQuery.filters.user ? [parsedQuery.filters.user] : undefined),
+        (parsedQuery.filters.user ? new Array(parsedQuery.filters.user) : undefined),
     };
 
     // Build search text from parsed query
-    const searchText = [...parsedQuery.terms, ...parsedQuery.exactPhrases]
+    const searchText = parsedQuery.terms.concat(parsedQuery.exactPhrases)
       .join(' ')
       .toLowerCase();
 
@@ -439,7 +441,7 @@ export const getSearchSuggestions = query({
 
     // Implement quick search for suggestions with fuzzy matching
     const parsedQuery = parseSearchQuery(searchQuery);
-    const searchText = [...parsedQuery.terms, ...parsedQuery.exactPhrases]
+    const searchText = parsedQuery.terms.concat(parsedQuery.exactPhrases)
       .join(' ')
       .toLowerCase();
 

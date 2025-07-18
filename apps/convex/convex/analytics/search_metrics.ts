@@ -190,7 +190,7 @@ export const getPopularSearchTerms = query({
         searches.length;
       const clickThroughRate =
         searches.length > 0 ? (data.clicks / searches.length) * 100 : 0;
-      const lastSearched = Math.max(...searches.map((s) => s.timestamp));
+      const lastSearched = Math.max.apply(Math, searches.map((s) => s.timestamp));
 
       aggregates.push({
         term,
@@ -363,7 +363,7 @@ export const getFailedSearches = query({
         query,
         failureCount: data.count,
         lastFailed: data.lastFailed,
-        uniqueErrors: [...new Set(data.errors)],
+        uniqueErrors: Array.from(new Set(data.errors)),
       }))
       .sort((a, b) => b.failureCount - a.failureCount)
       .slice(0, limit);

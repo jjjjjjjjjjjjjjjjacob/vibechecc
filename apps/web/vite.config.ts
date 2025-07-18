@@ -2,6 +2,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { defineConfig } from 'vite';
 import tsConfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   server: {
@@ -12,8 +13,15 @@ export default defineConfig({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
+    react(),
     tanstackStart({
       target: 'cloudflare-module',
+      customViteReactPlugin: true,
     }),
   ],
+  build: {
+    rollupOptions: {
+      treeshake: false,
+    },
+  },
 });

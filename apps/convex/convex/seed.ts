@@ -398,7 +398,7 @@ export const seed = action({
           details: {
             ratingsWithReviews: ratings.filter((r) => r.review).length,
             ratingsWithoutReviews: ratings.filter((r) => !r.review).length,
-            uniqueEmojisUsed: [...new Set(reactions.map((r) => r.emoji))]
+            uniqueEmojisUsed: Array.from(new Set(reactions.map((r) => r.emoji)))
               .length,
           },
         },
