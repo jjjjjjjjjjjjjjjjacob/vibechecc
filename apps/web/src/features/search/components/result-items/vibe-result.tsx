@@ -31,35 +31,39 @@ export function VibeResult({ result, onSelect }: VibeResultProps) {
           className="h-12 w-12 rounded-md object-cover"
         />
       )}
-      
+
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
           <span className="font-medium">{result.title}</span>
           {result.rating && (
             <div className="flex items-center gap-1">
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs text-muted-foreground">{result.rating.toFixed(1)}</span>
+              <span className="text-muted-foreground text-xs">
+                {result.rating.toFixed(1)}
+              </span>
             </div>
           )}
         </div>
-        
+
         {result.subtitle && (
-          <p className="text-sm text-muted-foreground">{result.subtitle}</p>
+          <p className="text-muted-foreground text-sm">{result.subtitle}</p>
         )}
-        
+
         <div className="flex items-center gap-2">
           {result.createdBy && (
             <div className="flex items-center gap-1">
               <Avatar className="h-4 w-4">
                 <AvatarImage src={result.createdBy.avatar} />
-                <AvatarFallback>{result.createdBy.name?.[0] || '?'}</AvatarFallback>
+                <AvatarFallback>
+                  {result.createdBy.name?.[0] || '?'}
+                </AvatarFallback>
               </Avatar>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {result.createdBy.name}
               </span>
             </div>
           )}
-          
+
           {result.tags && result.tags.length > 0 && (
             <div className="flex gap-1">
               {result.tags.slice(0, 2).map((tag) => (

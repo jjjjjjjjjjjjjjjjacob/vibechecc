@@ -13,6 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { StarRating } from '@/components/star-rating';
 import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
+
+// Constants to avoid rollup issues with empty array literals
+const EMPTY_ARRAY: never[] = [];
 import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import {
@@ -20,7 +23,12 @@ import {
   getUserAvatarUrl,
   getUserInitials,
 } from '@/utils/user-utils';
-import { useUser, SignedIn, SignedOut, SignInButton } from '@clerk/tanstack-react-start';
+import {
+  useUser,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+} from '@clerk/tanstack-react-start';
 import toast from 'react-hot-toast';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
 import { EmojiReactions } from '@/components/emoji-reaction';
@@ -33,14 +41,16 @@ function VibePage() {
   const { vibeId } = Route.useParams();
   const { data: vibe, isLoading, error } = useVibe(vibeId);
   const { data: allVibesData } = useVibesPaginated(50);
-  const allVibes = allVibesData?.vibes || [];
+  const allVibes = allVibesData?.vibes ?? [];
   const [rating, setRating] = React.useState(0);
   const [review, setReview] = React.useState('');
   const { user: _user, isSignedIn } = useUser();
   const addRatingMutation = useAddRatingMutation();
   const reactToVibeMutation = useReactToVibeMutation();
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
-  const [authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>('react');
+  const [authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
+    'react'
+  );
   const [userQuickRating, setUserQuickRating] = React.useState(0);
   const [reactions, setReactions] = React.useState<any[]>([]);
 
@@ -66,7 +76,7 @@ function VibePage() {
       vibe.description
         ?.toLowerCase()
         .split(/\W+/)
-        .filter((word) => word.length > 2) || [];
+        .filter((word) => word.length > 2) ?? [];
 
     keywords.push(...titleWords, ...descriptionWords);
 
@@ -130,7 +140,7 @@ function VibePage() {
       ? otherVibes.filter((v) =>
           v.tags?.some((tag) => vibe.tags?.includes(tag))
         )
-      : [];
+      : EMPTY_ARRAY;
 
     const vibesFromSameCreator = otherVibes.filter(
       (v) => v.createdById === vibe.createdById
@@ -248,7 +258,9 @@ function VibePage() {
       });
 
       // Update local state optimistically
-      const existingReactionIndex = reactions.findIndex((r) => r.emoji === emoji);
+      const existingReactionIndex = reactions.findIndex(
+        (r) => r.emoji === emoji
+      );
 
       if (existingReactionIndex >= 0) {
         // Check if user already reacted with this emoji
@@ -260,7 +272,9 @@ function VibePage() {
           const updatedReaction = {
             ...existingReaction,
             count: Math.max(0, existingReaction.count - 1),
-            users: existingReaction.users.filter((id: string) => id !== _user.id),
+            users: existingReaction.users.filter(
+              (id: string) => id !== _user.id
+            ),
           };
 
           // If no users left, remove the reaction entirely
@@ -332,7 +346,10 @@ function VibePage() {
                     search={{ q: tag }}
                     className="inline-block"
                   >
-                    <Badge variant="secondary" className="text-xs hover:bg-secondary/80 cursor-pointer transition-colors">
+                    <Badge
+                      variant="secondary"
+                      className="hover:bg-secondary/80 cursor-pointer text-xs transition-colors"
+                    >
                       {tag}
                     </Badge>
                   </Link>
@@ -346,8 +363,8 @@ function VibePage() {
 
           {/* Rating */}
           <div className="mb-4 flex items-center gap-2">
-            <StarRating 
-              value={userQuickRating || averageRating} 
+            <StarRating
+              value={userQuickRating || averageRating}
               onChange={handleQuickRating}
               size="lg"
             />
@@ -366,7 +383,7 @@ function VibePage() {
               <Link
                 to="/users/$username"
                 params={{ username: vibe.createdBy.username }}
-                className="flex items-center hover:opacity-80 transition-opacity"
+                className="flex items-center transition-opacity hover:opacity-80"
               >
                 <Avatar className="mr-3 h-10 w-10">
                   <AvatarImage
@@ -378,7 +395,7 @@ function VibePage() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium hover:text-foreground/80">
+                  <p className="hover:text-foreground/80 font-medium">
                     originally vibed by {computeUserDisplayName(vibe.createdBy)}
                   </p>
                   <p className="text-muted-foreground text-sm">
@@ -448,13 +465,13 @@ function VibePage() {
               <SignedOut>
                 <div className="space-y-4">
                   <div>
-                    <StarRating 
-                      value={0} 
+                    <StarRating
+                      value={0}
                       onChange={() => {
                         setAuthDialogType('rate');
                         setShowAuthDialog(true);
-                      }} 
-                      size="lg" 
+                      }}
+                      size="lg"
                     />
                   </div>
 
@@ -505,7 +522,7 @@ function VibePage() {
                             <Link
                               to="/users/$username"
                               params={{ username: rating.user.username }}
-                              className="flex items-center hover:opacity-80 transition-opacity"
+                              className="flex items-center transition-opacity hover:opacity-80"
                             >
                               <Avatar className="mr-2 h-8 w-8">
                                 <AvatarImage
@@ -533,9 +550,9 @@ function VibePage() {
                               <Link
                                 to="/users/$username"
                                 params={{ username: rating.user.username }}
-                                className="hover:opacity-80 transition-opacity"
+                                className="transition-opacity hover:opacity-80"
                               >
-                                <p className="font-medium hover:text-foreground/80">
+                                <p className="hover:text-foreground/80 font-medium">
                                   {computeUserDisplayName(rating.user)}
                                 </p>
                               </Link>
@@ -590,13 +607,19 @@ function VibePage() {
           </div>
         </div>
       </div>
-      
+
       {/* Auth Prompt Dialog */}
       <AuthPromptDialog
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}
-        title={authDialogType === 'react' ? 'sign in to react' : 'sign in to rate'}
-        description={authDialogType === 'react' ? 'you must sign in to react to vibes' : 'you must sign in to rate vibes'}
+        title={
+          authDialogType === 'react' ? 'sign in to react' : 'sign in to rate'
+        }
+        description={
+          authDialogType === 'react'
+            ? 'you must sign in to react to vibes'
+            : 'you must sign in to rate vibes'
+        }
       />
     </div>
   );

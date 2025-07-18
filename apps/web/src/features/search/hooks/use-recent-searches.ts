@@ -26,7 +26,7 @@ export function useRecentSearches() {
 
     setRecentSearches((current) => {
       // Remove duplicates and add new term at the beginning
-      const filtered = current.filter(s => s.term !== term);
+      const filtered = current.filter((s) => s.term !== term);
       const newSearches: SearchSuggestion[] = [
         {
           term,
@@ -62,8 +62,8 @@ export function useRecentSearches() {
   // Remove a specific search term
   const removeRecentSearch = useCallback((term: string) => {
     setRecentSearches((current) => {
-      const filtered = current.filter(s => s.term !== term);
-      
+      const filtered = current.filter((s) => s.term !== term);
+
       try {
         localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(filtered));
       } catch (error) {

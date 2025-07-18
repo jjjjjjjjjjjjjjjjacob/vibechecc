@@ -14,25 +14,27 @@ export function TagFilter({ selected, available, onChange }: TagFilterProps) {
     if (checked) {
       onChange([...selected, tag]);
     } else {
-      onChange(selected.filter(t => t !== tag));
+      onChange(selected.filter((t) => t !== tag));
     }
   };
 
   return (
     <div>
-      <h4 className="font-medium mb-3">Tags</h4>
+      <h4 className="mb-3 font-medium">Tags</h4>
       <ScrollArea className="h-[200px] pr-4">
         <div className="space-y-2">
-          {available.map(tag => (
+          {available.map((tag) => (
             <div key={tag} className="flex items-center space-x-2">
               <Checkbox
                 id={`tag-${tag}`}
                 checked={selected.includes(tag)}
-                onCheckedChange={(checked) => handleTagToggle(tag, checked as boolean)}
+                onCheckedChange={(checked) =>
+                  handleTagToggle(tag, checked as boolean)
+                }
               />
               <Label
                 htmlFor={`tag-${tag}`}
-                className="flex-1 cursor-pointer flex items-center justify-between"
+                className="flex flex-1 cursor-pointer items-center justify-between"
               >
                 <span>{tag}</span>
                 <Badge variant="secondary" className="ml-2 text-xs">

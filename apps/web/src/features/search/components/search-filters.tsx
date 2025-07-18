@@ -1,7 +1,19 @@
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Filter } from 'lucide-react';
 import { TagFilterEnhanced } from './filters/tag-filter-enhanced';
 import { RatingSlider } from './filters/rating-slider';
@@ -18,11 +30,11 @@ interface SearchFiltersProps {
   showActiveFilters?: boolean;
 }
 
-export function SearchFilters({ 
-  filters, 
-  onChange, 
+export function SearchFilters({
+  filters,
+  onChange,
   availableTags = [],
-  showActiveFilters = true 
+  showActiveFilters = true,
 }: SearchFiltersProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const hasActiveFilters = !!(
@@ -41,23 +53,26 @@ export function SearchFilters({
   };
 
   // Mock available tags if none provided
-  const tags = availableTags.length > 0 ? availableTags : [
-    { name: 'wholesome', count: 45 },
-    { name: 'funny', count: 38 },
-    { name: 'cringe', count: 27 },
-    { name: 'embarrassing', count: 23 },
-    { name: 'awkward', count: 19 },
-    { name: 'relatable', count: 42 },
-    { name: 'mood', count: 31 },
-    { name: 'fail', count: 15 },
-    { name: 'win', count: 22 },
-    { name: 'random', count: 18 },
-  ];
+  const tags =
+    availableTags.length > 0
+      ? availableTags
+      : [
+          { name: 'wholesome', count: 45 },
+          { name: 'funny', count: 38 },
+          { name: 'cringe', count: 27 },
+          { name: 'embarrassing', count: 23 },
+          { name: 'awkward', count: 19 },
+          { name: 'relatable', count: 42 },
+          { name: 'mood', count: 31 },
+          { name: 'fail', count: 15 },
+          { name: 'win', count: 22 },
+          { name: 'random', count: 18 },
+        ];
 
   const filterContent = (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-lg">Filters</h3>
+        <h3 className="text-lg font-semibold">Filters</h3>
         {hasActiveFilters && (
           <Button
             variant="ghost"
@@ -73,7 +88,7 @@ export function SearchFilters({
       <Separator />
 
       <TagFilterEnhanced
-        selected={filters.tags || []}
+        selected={filters.tags ?? []}
         available={tags}
         onChange={(tags) => onChange({ ...filters, tags })}
       />
@@ -83,11 +98,13 @@ export function SearchFilters({
       <RatingSlider
         min={filters.minRating}
         max={filters.maxRating}
-        onChange={(range) => onChange({ 
-          ...filters, 
-          minRating: range?.min, 
-          maxRating: range?.max 
-        })}
+        onChange={(range) =>
+          onChange({
+            ...filters,
+            minRating: range?.min,
+            maxRating: range?.max,
+          })
+        }
       />
 
       <Separator />
@@ -100,7 +117,7 @@ export function SearchFilters({
       <Separator />
 
       <div>
-        <h4 className="font-medium mb-3">Sort By</h4>
+        <h4 className="mb-3 font-medium">Sort By</h4>
         <Select
           value={filters.sort || 'relevance'}
           onValueChange={handleSortChange}
@@ -119,7 +136,7 @@ export function SearchFilters({
       </div>
 
       <div className="pt-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {hasActiveFilters ? 'Filters applied' : 'No filters applied'}
         </p>
       </div>
@@ -143,8 +160,8 @@ export function SearchFilters({
               <Filter className="h-4 w-4" />
               Filters
               {hasActiveFilters && (
-                <span className="ml-1 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-xs">
-                  {Object.keys(filters).filter(k => k !== 'query').length}
+                <span className="bg-primary text-primary-foreground ml-1 rounded-full px-2 py-0.5 text-xs">
+                  {Object.keys(filters).filter((k) => k !== 'query').length}
                 </span>
               )}
             </Button>
@@ -153,9 +170,7 @@ export function SearchFilters({
             <SheetHeader>
               <SheetTitle>Search Filters</SheetTitle>
             </SheetHeader>
-            <div className="mt-6">
-              {filterContent}
-            </div>
+            <div className="mt-6">{filterContent}</div>
           </SheetContent>
         </Sheet>
       </>

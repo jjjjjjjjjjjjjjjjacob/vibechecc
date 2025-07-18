@@ -20,7 +20,11 @@ interface MobileFilterDrawerProps {
   availableTags?: string[];
 }
 
-export function MobileFilterDrawer({ filters, onChange, availableTags }: MobileFilterDrawerProps) {
+export function MobileFilterDrawer({
+  filters,
+  onChange,
+  availableTags,
+}: MobileFilterDrawerProps) {
   const activeFilterCount = [
     filters.tags?.length || 0,
     filters.minRating ? 1 : 0,
@@ -48,7 +52,7 @@ export function MobileFilterDrawer({ filters, onChange, availableTags }: MobileF
             Narrow down your search results by applying filters
           </DrawerDescription>
         </DrawerHeader>
-        <div className="px-4 pb-4 max-h-[60vh] overflow-y-auto">
+        <div className="max-h-[60vh] overflow-y-auto px-4 pb-4">
           <SearchFilters
             filters={filters}
             onChange={onChange}

@@ -27,7 +27,7 @@ function Home() {
     useTopRatedVibes(10);
 
   // Get vibes for the most popular tags (top 6 tags)
-  const popularTags = allTags?.slice(0, 6) || [];
+  const popularTags = allTags?.slice(0, 6) ?? [];
 
   if (vibesLoading) {
     return <HomepageSkeleton />;
@@ -43,8 +43,8 @@ function Home() {
     );
   }
 
-  const vibes = vibesData?.vibes || [];
-  
+  const vibes = vibesData?.vibes ?? [];
+
   const safeVibes = vibes.filter((vibe) => {
     // Now we have full vibe data with createdBy info
     return true;
@@ -82,11 +82,7 @@ function Home() {
       </section>
 
       {/* Featured Vibes */}
-      <VibeCategoryRow
-        title="featured vibes"
-        vibes={featuredVibes}
-        priority
-      />
+      <VibeCategoryRow title="featured vibes" vibes={featuredVibes} priority />
 
       {/* Top Rated Vibes */}
       {topRatedLoading ? (
@@ -94,18 +90,12 @@ function Home() {
       ) : (
         topRatedVibes &&
         topRatedVibes.length > 0 && (
-          <VibeCategoryRow
-            title="top rated"
-            vibes={topRatedVibes}
-          />
+          <VibeCategoryRow title="top rated" vibes={topRatedVibes} />
         )
       )}
 
       {/* Recent Vibes */}
-      <VibeCategoryRow
-        title="trending now"
-        vibes={recentVibes}
-      />
+      <VibeCategoryRow title="trending now" vibes={recentVibes} />
 
       {/* Tag-based Categories */}
       {!tagsLoading &&

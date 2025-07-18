@@ -68,37 +68,41 @@ export const getSearchPerformanceMetrics = query({
 
     const metrics = await ctx.db
       .query('searchMetrics')
-      .withIndex('by_timestamp', (q) => 
+      .withIndex('by_timestamp', (q) =>
         q.gte('timestamp', start).lte('timestamp', end)
       )
       .collect();
 
     // Calculate aggregated metrics
-    const searches = metrics.filter(m => m.type === 'search');
-    const clicks = metrics.filter(m => m.type === 'click');
-    const errors = metrics.filter(m => m.type === 'error');
+    const searches = metrics.filter((m) => m.type === 'search');
+    const clicks = metrics.filter((m) => m.type === 'click');
+    const errors = metrics.filter((m) => m.type === 'error');
 
-    const avgResponseTime = searches.length > 0
-      ? searches.reduce((sum, s) => sum + (s.responseTime || 0), 0) / searches.length
-      : 0;
+    const avgResponseTime =
+      searches.length > 0
+        ? searches.reduce((sum, s) => sum + (s.responseTime || 0), 0) /
+          searches.length
+        : 0;
 
-    const avgResultCount = searches.length > 0
-      ? searches.reduce((sum, s) => sum + (s.resultCount || 0), 0) / searches.length
-      : 0;
+    const avgResultCount =
+      searches.length > 0
+        ? searches.reduce((sum, s) => sum + (s.resultCount || 0), 0) /
+          searches.length
+        : 0;
 
-    const clickThroughRate = searches.length > 0
-      ? (clicks.length / searches.length) * 100
-      : 0;
+    const clickThroughRate =
+      searches.length > 0 ? (clicks.length / searches.length) * 100 : 0;
 
-    const errorRate = searches.length > 0
-      ? (errors.length / searches.length) * 100
-      : 0;
+    const errorRate =
+      searches.length > 0 ? (errors.length / searches.length) * 100 : 0;
 
     // Response time distribution
     const responseTimeRanges = {
-      fast: searches.filter(s => (s.responseTime || 0) < 100).length,
-      medium: searches.filter(s => (s.responseTime || 0) >= 100 && (s.responseTime || 0) < 200).length,
-      slow: searches.filter(s => (s.responseTime || 0) >= 200).length,
+      fast: searches.filter((s) => (s.responseTime || 0) < 100).length,
+      medium: searches.filter(
+        (s) => (s.responseTime || 0) >= 100 && (s.responseTime || 0) < 200
+      ).length,
+      slow: searches.filter((s) => (s.responseTime || 0) >= 200).length,
     };
 
     return {
@@ -134,17 +138,20 @@ export const getPopularSearchTerms = query({
 
     const metrics = await ctx.db
       .query('searchMetrics')
-      .withIndex('by_timestamp', (q) => 
+      .withIndex('by_timestamp', (q) =>
         q.gte('timestamp', start).lte('timestamp', end)
       )
       .filter((q) => q.eq(q.field('type'), 'search'))
       .collect();
 
     // Group by search term
-    const termMap = new Map<string, {
-      searches: typeof metrics;
-      clicks: number;
-    }>();
+    const termMap = new Map<
+      string,
+      {
+        searches: typeof metrics;
+        clicks: number;
+      }
+    >();
 
     for (const metric of metrics) {
       const term = metric.query.toLowerCase().trim();
@@ -157,7 +164,7 @@ export const getPopularSearchTerms = query({
     // Get click data for CTR calculation
     const clickMetrics = await ctx.db
       .query('searchMetrics')
-      .withIndex('by_timestamp', (q) => 
+      .withIndex('by_timestamp', (q) =>
         q.gte('timestamp', start).lte('timestamp', end)
       )
       .filter((q) => q.eq(q.field('type'), 'click'))
@@ -172,13 +179,18 @@ export const getPopularSearchTerms = query({
 
     // Calculate aggregates
     const aggregates: SearchAggregate[] = [];
-    
+
     for (const [term, data] of termMap.entries()) {
       const searches = data.searches;
-      const avgResultCount = searches.reduce((sum, s) => sum + (s.resultCount || 0), 0) / searches.length;
-      const avgResponseTime = searches.reduce((sum, s) => sum + (s.responseTime || 0), 0) / searches.length;
-      const clickThroughRate = searches.length > 0 ? (data.clicks / searches.length) * 100 : 0;
-      const lastSearched = Math.max(...searches.map(s => s.timestamp));
+      const avgResultCount =
+        searches.reduce((sum, s) => sum + (s.resultCount || 0), 0) /
+        searches.length;
+      const avgResponseTime =
+        searches.reduce((sum, s) => sum + (s.responseTime || 0), 0) /
+        searches.length;
+      const clickThroughRate =
+        searches.length > 0 ? (data.clicks / searches.length) * 100 : 0;
+      const lastSearched = Math.max(...searches.map((s) => s.timestamp));
 
       aggregates.push({
         term,
@@ -215,31 +227,32 @@ export const getSearchMetricsForQuery = query({
 
     const metrics = await ctx.db
       .query('searchMetrics')
-      .withIndex('by_timestamp', (q) => 
+      .withIndex('by_timestamp', (q) =>
         q.gte('timestamp', start).lte('timestamp', end)
       )
-      .filter((q) => 
-        q.eq(q.field('query').toLowerCase(), normalizedQuery)
-      )
+      .filter((q) => q.eq(q.field('query').toLowerCase(), normalizedQuery))
       .collect();
 
-    const searches = metrics.filter(m => m.type === 'search');
-    const clicks = metrics.filter(m => m.type === 'click');
-    const errors = metrics.filter(m => m.type === 'error');
+    const searches = metrics.filter((m) => m.type === 'search');
+    const clicks = metrics.filter((m) => m.type === 'click');
+    const errors = metrics.filter((m) => m.type === 'error');
 
     // Time series data (daily buckets)
-    const dailyBuckets = new Map<string, {
-      searches: number;
-      clicks: number;
-      errors: number;
-    }>();
+    const dailyBuckets = new Map<
+      string,
+      {
+        searches: number;
+        clicks: number;
+        errors: number;
+      }
+    >();
 
     for (const metric of metrics) {
       const date = new Date(metric.timestamp).toISOString().split('T')[0];
       if (!dailyBuckets.has(date)) {
         dailyBuckets.set(date, { searches: 0, clicks: 0, errors: 0 });
       }
-      
+
       const bucket = dailyBuckets.get(date)!;
       if (metric.type === 'search') bucket.searches++;
       else if (metric.type === 'click') bucket.clicks++;
@@ -252,27 +265,33 @@ export const getSearchMetricsForQuery = query({
 
     // Click position analysis
     const clickPositions = clicks
-      .filter(c => c.clickPosition !== undefined)
-      .map(c => c.clickPosition!);
-    
-    const avgClickPosition = clickPositions.length > 0
-      ? clickPositions.reduce((sum, pos) => sum + pos, 0) / clickPositions.length
-      : null;
+      .filter((c) => c.clickPosition !== undefined)
+      .map((c) => c.clickPosition!);
+
+    const avgClickPosition =
+      clickPositions.length > 0
+        ? clickPositions.reduce((sum, pos) => sum + pos, 0) /
+          clickPositions.length
+        : null;
 
     return {
       query: args.query,
       totalSearches: searches.length,
       totalClicks: clicks.length,
       totalErrors: errors.length,
-      clickThroughRate: searches.length > 0 ? (clicks.length / searches.length) * 100 : 0,
+      clickThroughRate:
+        searches.length > 0 ? (clicks.length / searches.length) * 100 : 0,
       avgClickPosition,
       timeSeries,
-      clickedResultTypes: clicks.reduce((acc, c) => {
-        if (c.clickedResultType) {
-          acc[c.clickedResultType] = (acc[c.clickedResultType] || 0) + 1;
-        }
-        return acc;
-      }, {} as Record<string, number>),
+      clickedResultTypes: clicks.reduce(
+        (acc, c) => {
+          if (c.clickedResultType) {
+            acc[c.clickedResultType] = (acc[c.clickedResultType] || 0) + 1;
+          }
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
     };
   },
 });
@@ -296,10 +315,10 @@ export const getFailedSearches = query({
 
     const metrics = await ctx.db
       .query('searchMetrics')
-      .withIndex('by_timestamp', (q) => 
+      .withIndex('by_timestamp', (q) =>
         q.gte('timestamp', start).lte('timestamp', end)
       )
-      .filter((q) => 
+      .filter((q) =>
         q.or(
           q.eq(q.field('type'), 'error'),
           q.and(
@@ -311,11 +330,14 @@ export const getFailedSearches = query({
       .collect();
 
     // Group by query
-    const failedQueries = new Map<string, {
-      count: number;
-      lastFailed: number;
-      errors: string[];
-    }>();
+    const failedQueries = new Map<
+      string,
+      {
+        count: number;
+        lastFailed: number;
+        errors: string[];
+      }
+    >();
 
     for (const metric of metrics) {
       const query = metric.query.toLowerCase().trim();
@@ -360,14 +382,17 @@ export const trackSearchClick = internalMutation({
     userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.scheduleInternal(internal.analytics.search_metrics.recordSearchMetric, {
-      type: 'click',
-      query: args.query,
-      userId: args.userId,
-      clickedResultId: args.resultId,
-      clickedResultType: args.resultType,
-      clickPosition: args.position,
-    });
+    await ctx.scheduleInternal(
+      internal.analytics.search_metrics.recordSearchMetric,
+      {
+        type: 'click',
+        query: args.query,
+        userId: args.userId,
+        clickedResultId: args.resultId,
+        clickedResultType: args.resultType,
+        clickPosition: args.position,
+      }
+    );
   },
 });
 
@@ -379,11 +404,14 @@ export const trackSearchError = internalMutation({
     userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.scheduleInternal(internal.analytics.search_metrics.recordSearchMetric, {
-      type: 'error',
-      query: args.query,
-      userId: args.userId,
-      error: args.error,
-    });
+    await ctx.scheduleInternal(
+      internal.analytics.search_metrics.recordSearchMetric,
+      {
+        type: 'error',
+        query: args.query,
+        userId: args.userId,
+        error: args.error,
+      }
+    );
   },
 });

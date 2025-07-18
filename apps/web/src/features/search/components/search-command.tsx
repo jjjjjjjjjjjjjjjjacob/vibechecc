@@ -16,6 +16,10 @@ import { SearchSuggestions } from './search-suggestions';
 import { useSearchSuggestions } from '../hooks/use-search';
 import { useNavigate } from '@tanstack/react-router';
 
+// Constants to avoid rollup issues with empty array literals
+const EMPTY_ARRAY: never[] = [];
+const EMPTY_STRING_ARRAY: string[] = [];
+
 interface SearchCommandProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,49 +44,58 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
     }
   };
 
-  const hasResults = data && (
-    (data.vibes && data.vibes.length > 0) ||
-    (data.users && data.users.length > 0) ||
-    (data.tags && data.tags.length > 0) ||
-    (data.actions && data.actions.length > 0)
-  );
+  const hasResults =
+    data &&
+    ((data.vibes && data.vibes.length > 0) ||
+      (data.users && data.users.length > 0) ||
+      (data.tags && data.tags.length > 0) ||
+      (data.actions && data.actions.length > 0));
 
   // Extract recent searches from the suggestions data when query is empty
-  const recentSearches = (!query && data && 'recentSearches' in data) ? data.recentSearches : [];
-  const trendingSearchTerms = (!query && data && 'trendingSearches' in data) ? data.trendingSearches : [];
-  const popularTags = (!query && data && 'popularTags' in data) ? data.popularTags : [];
-  
+  const recentSearches =
+    !query && data && 'recentSearches' in data ? data.recentSearches : EMPTY_STRING_ARRAY;
+  const trendingSearchTerms =
+    !query && data && 'trendingSearches' in data ? data.trendingSearches : EMPTY_STRING_ARRAY;
+  const popularTags =
+    !query && data && 'popularTags' in data ? data.popularTags : EMPTY_STRING_ARRAY;
+
   // Convert trending searches to SearchSuggestion format (use from data instead of separate query)
-  const formattedTrendingSearches = trendingSearchTerms?.map(term => ({
-    term,
-    type: 'trending' as const,
-  })) || [];
-  
+  const formattedTrendingSearches =
+    trendingSearchTerms?.map((term) => ({
+      term,
+      type: 'trending' as const,
+    })) ?? EMPTY_ARRAY;
+
   // Convert recent searches to SearchSuggestion format
-  const formattedRecentSearches = recentSearches.map(term => ({
+  const formattedRecentSearches = recentSearches.map((term) => ({
     term,
     type: 'recent' as const,
   }));
-  
+
   // Convert popular tags to SearchSuggestion format
-  const formattedPopularTags = popularTags.map(tag => ({
+  const formattedPopularTags = popularTags.map((tag) => ({
     term: tag,
     type: 'tag' as const,
   }));
 
   // Check if there are any suggestions or results to show
-  const hasContent = !query || hasResults || formattedRecentSearches.length > 0 || formattedTrendingSearches.length > 0 || formattedPopularTags.length > 0;
+  const hasContent =
+    !query ||
+    hasResults ||
+    formattedRecentSearches.length > 0 ||
+    formattedTrendingSearches.length > 0 ||
+    formattedPopularTags.length > 0;
 
   return (
-    <CommandDialog 
-      open={open} 
+    <CommandDialog
+      open={open}
       onOpenChange={onOpenChange}
       title="Search"
       description="Search for vibes, users, or tags"
     >
       <Command>
-        <CommandInput 
-          placeholder="Search vibes, users, or tags..." 
+        <CommandInput
+          placeholder="Search vibes, users, or tags..."
           value={query}
           onValueChange={setQuery}
           showBorder={hasContent}
@@ -96,64 +109,66 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
               onSelect={handleSuggestionSelect}
             />
           )}
-          
+
           {query && !hasResults && !isLoading && (
             <CommandEmpty>No results found for "{query}"</CommandEmpty>
           )}
-          
+
           {query && hasResults && (
             <>
               {data.vibes && data.vibes.length > 0 && (
                 <CommandGroup heading="Vibes">
                   {data.vibes.map((vibe) => (
-                    <VibeResult 
-                      key={vibe.id} 
-                      result={vibe} 
+                    <VibeResult
+                      key={vibe.id}
+                      result={vibe}
                       onSelect={handleSelect}
                     />
                   ))}
                 </CommandGroup>
               )}
-              
+
               {data.users && data.users.length > 0 && (
                 <>
                   {data.vibes && data.vibes.length > 0 && <CommandSeparator />}
                   <CommandGroup heading="Users">
                     {data.users.map((user) => (
-                      <UserResult 
-                        key={user.id} 
-                        result={user} 
+                      <UserResult
+                        key={user.id}
+                        result={user}
                         onSelect={handleSelect}
                       />
                     ))}
                   </CommandGroup>
                 </>
               )}
-              
+
               {data.tags && data.tags.length > 0 && (
                 <>
-                  {(data.vibes && data.vibes.length > 0) || 
-                   (data.users && data.users.length > 0) && <CommandSeparator />}
+                  {(data.vibes && data.vibes.length > 0) ||
+                    (data.users && data.users.length > 0 && (
+                      <CommandSeparator />
+                    ))}
                   <CommandGroup heading="Tags">
                     {data.tags.map((tag) => (
-                      <TagResult 
-                        key={tag.id} 
-                        result={tag} 
+                      <TagResult
+                        key={tag.id}
+                        result={tag}
                         onSelect={handleSelect}
                       />
                     ))}
                   </CommandGroup>
                 </>
               )}
-              
+
               {data.actions && data.actions.length > 0 && (
                 <>
                   <CommandSeparator />
                   <CommandGroup heading="Actions">
                     {data.actions.map((action) => (
-                      <ActionResult 
-                        key={action.id} 
-                        result={action} 
+                      <ActionResult
+                        key={action.id}
+                        result={action}
                         query={query}
                         onSelect={handleSelect}
                       />
@@ -161,7 +176,7 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
                   </CommandGroup>
                 </>
               )}
-              
+
               {query.length > 2 && (
                 <>
                   <CommandSeparator />

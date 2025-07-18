@@ -80,4 +80,3 @@ export function useSearchSuggestions(query: string) {
     error,
   };
 }
-

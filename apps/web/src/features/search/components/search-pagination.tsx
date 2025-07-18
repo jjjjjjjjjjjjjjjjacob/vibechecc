@@ -7,9 +7,12 @@ interface SearchPaginationProps {
   totalPages: number;
 }
 
-export function SearchPagination({ currentPage, totalPages }: SearchPaginationProps) {
+export function SearchPagination({
+  currentPage,
+  totalPages,
+}: SearchPaginationProps) {
   const navigate = useNavigate();
-  
+
   const goToPage = (page: number) => {
     navigate({
       search: (prev) => ({
@@ -17,7 +20,7 @@ export function SearchPagination({ currentPage, totalPages }: SearchPaginationPr
         page,
       }),
     });
-    
+
     // Scroll to top when changing pages
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -31,7 +34,7 @@ export function SearchPagination({ currentPage, totalPages }: SearchPaginationPr
     const maxVisible = 5;
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     const end = Math.min(totalPages, start + maxVisible - 1);
-    
+
     if (end - start + 1 < maxVisible) {
       start = Math.max(1, end - maxVisible + 1);
     }
@@ -43,12 +46,12 @@ export function SearchPagination({ currentPage, totalPages }: SearchPaginationPr
           variant="outline"
           size="sm"
           onClick={() => goToPage(1)}
-          className="w-10 h-10"
+          className="h-10 w-10"
         >
           1
         </Button>
       );
-      
+
       if (start > 2) {
         pages.push(
           <span key="dots-start" className="px-2 py-1">
@@ -65,7 +68,7 @@ export function SearchPagination({ currentPage, totalPages }: SearchPaginationPr
           variant={i === currentPage ? 'default' : 'outline'}
           size="sm"
           onClick={() => goToPage(i)}
-          className="w-10 h-10"
+          className="h-10 w-10"
           disabled={i === currentPage}
         >
           {i}
@@ -81,14 +84,14 @@ export function SearchPagination({ currentPage, totalPages }: SearchPaginationPr
           </span>
         );
       }
-      
+
       pages.push(
         <Button
           key={totalPages}
           variant="outline"
           size="sm"
           onClick={() => goToPage(totalPages)}
-          className="w-10 h-10"
+          className="h-10 w-10"
         >
           {totalPages}
         </Button>
@@ -99,7 +102,7 @@ export function SearchPagination({ currentPage, totalPages }: SearchPaginationPr
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
+    <div className="mt-8 flex items-center justify-center gap-2">
       <Button
         variant="outline"
         size="sm"
@@ -110,11 +113,9 @@ export function SearchPagination({ currentPage, totalPages }: SearchPaginationPr
         <ChevronLeft className="h-4 w-4" />
         Previous
       </Button>
-      
-      <div className="flex items-center gap-1">
-        {renderPageNumbers()}
-      </div>
-      
+
+      <div className="flex items-center gap-1">{renderPageNumbers()}</div>
+
       <Button
         variant="outline"
         size="sm"

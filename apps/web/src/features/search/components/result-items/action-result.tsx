@@ -42,14 +42,14 @@ export function ActionResult({ result, query, onSelect }: ActionResultProps) {
       onSelect={handleSelect}
       className="flex items-center gap-3 py-2"
     >
-      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
-        <Icon className="h-4 w-4 text-primary" />
+      <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-md">
+        <Icon className="text-primary h-4 w-4" />
       </div>
-      
+
       <div className="flex-1">
         <div className="font-medium">{result.title}</div>
         {result.subtitle && (
-          <div className="text-sm text-muted-foreground">{result.subtitle}</div>
+          <div className="text-muted-foreground text-sm">{result.subtitle}</div>
         )}
       </div>
     </CommandItem>

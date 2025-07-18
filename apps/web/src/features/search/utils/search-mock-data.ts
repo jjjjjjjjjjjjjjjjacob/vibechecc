@@ -1,10 +1,10 @@
-import type { 
-  SearchResponse, 
-  VibeSearchResult, 
-  UserSearchResult, 
+import type {
+  SearchResponse,
+  VibeSearchResult,
+  UserSearchResult,
   TagSearchResult,
   ActionSearchResult,
-  SearchSuggestion
+  SearchSuggestion,
 } from '@vibechecc/types';
 
 export const mockVibeResults: VibeSearchResult[] = [
@@ -13,8 +13,10 @@ export const mockVibeResults: VibeSearchResult[] = [
     type: 'vibe',
     title: 'Just got promoted at work!',
     subtitle: 'Career milestone',
-    description: 'After 3 years of hard work, finally got that senior position. Feeling amazing!',
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=300&fit=crop',
+    description:
+      'After 3 years of hard work, finally got that senior position. Feeling amazing!',
+    image:
+      'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=300&fit=crop',
     rating: 4.8,
     ratingCount: 234,
     tags: ['career', 'success', 'work'],
@@ -30,8 +32,10 @@ export const mockVibeResults: VibeSearchResult[] = [
     type: 'vibe',
     title: 'Perfect Sunday morning coffee',
     subtitle: 'Weekend vibes',
-    description: 'Found this amazing local coffee shop with the best espresso in town',
-    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop',
+    description:
+      'Found this amazing local coffee shop with the best espresso in town',
+    image:
+      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop',
     rating: 4.5,
     ratingCount: 189,
     tags: ['coffee', 'weekend', 'relaxing'],
@@ -47,8 +51,10 @@ export const mockVibeResults: VibeSearchResult[] = [
     type: 'vibe',
     title: 'Sunset hike was breathtaking',
     subtitle: 'Adventure time',
-    description: 'Climbed to the peak just in time for golden hour. The view was absolutely worth it!',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
+    description:
+      'Climbed to the peak just in time for golden hour. The view was absolutely worth it!',
+    image:
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
     rating: 4.9,
     ratingCount: 312,
     tags: ['nature', 'hiking', 'adventure'],
@@ -64,8 +70,10 @@ export const mockVibeResults: VibeSearchResult[] = [
     type: 'vibe',
     title: 'Learning piano is harder than expected',
     subtitle: 'Music journey',
-    description: 'Week 3 of piano lessons and my fingers still feel like sausages',
-    image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=400&h=300&fit=crop',
+    description:
+      'Week 3 of piano lessons and my fingers still feel like sausages',
+    image:
+      'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=400&h=300&fit=crop',
     rating: 4.2,
     ratingCount: 145,
     tags: ['music', 'learning', 'challenge'],
@@ -79,10 +87,12 @@ export const mockVibeResults: VibeSearchResult[] = [
   {
     id: '5',
     type: 'vibe',
-    title: 'Best pizza I\'ve ever had!',
+    title: "Best pizza I've ever had!",
     subtitle: 'Foodie discovery',
-    description: 'This little Italian place downtown makes magic happen with dough and cheese',
-    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',
+    description:
+      'This little Italian place downtown makes magic happen with dough and cheese',
+    image:
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',
     rating: 4.7,
     ratingCount: 267,
     tags: ['food', 'pizza', 'restaurant'],
@@ -246,38 +256,57 @@ export const mockTrendingSearches: SearchSuggestion[] = [
 
 export function getMockSearchResults(query: string): SearchResponse {
   const lowercaseQuery = query.toLowerCase();
-  
+
   const filteredVibes = query
-    ? mockVibeResults.filter(vibe =>
-        vibe.title.toLowerCase().includes(lowercaseQuery) ||
-        vibe.description.toLowerCase().includes(lowercaseQuery) ||
-        vibe.tags?.some((tag: string) => tag.toLowerCase().includes(lowercaseQuery))
-      ).slice(0, 5)
-    : [];
+    ? mockVibeResults
+        .filter(
+          (vibe) =>
+            vibe.title.toLowerCase().includes(lowercaseQuery) ||
+            vibe.description.toLowerCase().includes(lowercaseQuery) ||
+            vibe.tags?.some((tag: string) =>
+              tag.toLowerCase().includes(lowercaseQuery)
+            )
+        )
+        .slice(0, 5)
+    : Array(0);
 
   const filteredUsers = query
-    ? mockUserResults.filter(user =>
-        user.username.toLowerCase().includes(lowercaseQuery) ||
-        user.title.toLowerCase().includes(lowercaseQuery)
-      ).slice(0, 3)
+    ? mockUserResults
+        .filter(
+          (user) =>
+            user.username.toLowerCase().includes(lowercaseQuery) ||
+            user.title.toLowerCase().includes(lowercaseQuery)
+        )
+        .slice(0, 3)
     : [];
 
   const filteredTags = query
-    ? mockTagResults.filter(tag =>
-        tag.title.toLowerCase().includes(lowercaseQuery)
-      ).slice(0, 5)
+    ? mockTagResults
+        .filter((tag) => tag.title.toLowerCase().includes(lowercaseQuery))
+        .slice(0, 5)
     : [];
 
-  const filteredActions = query.length > 2
-    ? mockActionResults.filter(action =>
-        action.title.toLowerCase().includes(lowercaseQuery) ||
-        action.action.toLowerCase().includes(lowercaseQuery)
-      )
-    : [];
+  const filteredActions =
+    query.length > 2
+      ? mockActionResults.filter(
+          (action) =>
+            action.title.toLowerCase().includes(lowercaseQuery) ||
+            action.action.toLowerCase().includes(lowercaseQuery)
+        )
+      : [];
 
   return {
-    results: [...filteredVibes, ...filteredUsers, ...filteredTags, ...filteredActions],
-    totalCount: filteredVibes.length + filteredUsers.length + filteredTags.length + filteredActions.length,
+    results: [
+      ...filteredVibes,
+      ...filteredUsers,
+      ...filteredTags,
+      ...filteredActions,
+    ],
+    totalCount:
+      filteredVibes.length +
+      filteredUsers.length +
+      filteredTags.length +
+      filteredActions.length,
     hasMore: false,
   };
 }
@@ -289,11 +318,19 @@ export function getMockSearchSuggestions(query: string): {
   actions: ActionSearchResult[];
 } {
   const results = getMockSearchResults(query);
-  
-  const vibes = results.results.filter((r: any): r is VibeSearchResult => r.type === 'vibe').slice(0, 5);
-  const users = results.results.filter((r: any): r is UserSearchResult => r.type === 'user').slice(0, 3);
-  const tags = results.results.filter((r: any): r is TagSearchResult => r.type === 'tag').slice(0, 5);
-  const actions = results.results.filter((r: any): r is ActionSearchResult => r.type === 'action');
+
+  const vibes = results.results
+    .filter((r: any): r is VibeSearchResult => r.type === 'vibe')
+    .slice(0, 5);
+  const users = results.results
+    .filter((r: any): r is UserSearchResult => r.type === 'user')
+    .slice(0, 3);
+  const tags = results.results
+    .filter((r: any): r is TagSearchResult => r.type === 'tag')
+    .slice(0, 5);
+  const actions = results.results.filter(
+    (r: any): r is ActionSearchResult => r.type === 'action'
+  );
 
   return { vibes, users, tags, actions };
 }

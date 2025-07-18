@@ -23,13 +23,13 @@ export function TagResult({ result, onSelect }: TagResultProps) {
       onSelect={handleSelect}
       className="flex items-center gap-3 py-2"
     >
-      <Hash className="h-4 w-4 text-muted-foreground" />
-      
+      <Hash className="text-muted-foreground h-4 w-4" />
+
       <div className="flex-1">
         <span className="font-medium">{result.title}</span>
       </div>
-      
-      <span className="text-sm text-muted-foreground">{result.subtitle}</span>
+
+      <span className="text-muted-foreground text-sm">{result.subtitle}</span>
     </CommandItem>
   );
 }

@@ -12,11 +12,16 @@ interface SearchEmptyStateProps {
   onClearFilters?: () => void;
 }
 
-export function SearchEmptyState({ query, hasFilters, onClearFilters }: SearchEmptyStateProps) {
+export function SearchEmptyState({
+  query,
+  hasFilters,
+  onClearFilters,
+}: SearchEmptyStateProps) {
   const navigate = useNavigate();
-  const { data: trendingSearches, isLoading: trendingLoading } = useTrendingSearches(6);
+  const { data: trendingSearches, isLoading: trendingLoading } =
+    useTrendingSearches(6);
   const { searches: recentSearches } = useRecentSearches();
-  
+
   const suggestions = [
     'Try searching for different keywords',
     'Check your spelling',
@@ -32,28 +37,28 @@ export function SearchEmptyState({ query, hasFilters, onClearFilters }: SearchEm
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4">
-      <div className="rounded-full bg-muted p-4 mb-4">
-        <Search className="h-8 w-8 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center px-4 py-12">
+      <div className="bg-muted mb-4 rounded-full p-4">
+        <Search className="text-muted-foreground h-8 w-8" />
       </div>
-      
-      <h2 className="text-2xl font-semibold mb-2">
+
+      <h2 className="mb-2 text-2xl font-semibold">
         {query ? `No results for "${query}"` : 'No results found'}
       </h2>
-      <p className="text-muted-foreground text-center max-w-md mb-8">
-        {query 
+      <p className="text-muted-foreground mb-8 max-w-md text-center">
+        {query
           ? "We couldn't find any matches for your search."
-          : "Start searching to discover amazing vibes!"}
+          : 'Start searching to discover amazing vibes!'}
       </p>
 
       {/* Suggestions for improving search */}
       {query && (
-        <Card className="p-4 w-full max-w-md mb-6 bg-muted/50">
-          <div className="flex items-center gap-2 mb-3">
+        <Card className="bg-muted/50 mb-6 w-full max-w-md p-4">
+          <div className="mb-3 flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-yellow-500" />
-            <span className="font-medium text-sm">Search tips</span>
+            <span className="text-sm font-medium">Search tips</span>
           </div>
-          <ul className="space-y-1 text-sm text-muted-foreground">
+          <ul className="text-muted-foreground space-y-1 text-sm">
             {suggestions.map((tip, i) => (
               <li key={i}>• {tip}</li>
             ))}
@@ -70,15 +75,15 @@ export function SearchEmptyState({ query, hasFilters, onClearFilters }: SearchEm
           )}
         </Card>
       )}
-      
+
       {/* Recent searches */}
       {recentSearches.length > 0 && (
-        <Card className="p-6 w-full max-w-md mb-4">
-          <div className="flex items-center gap-2 mb-4">
+        <Card className="mb-4 w-full max-w-md p-6">
+          <div className="mb-4 flex items-center gap-2">
             <Clock className="h-5 w-5" />
             <h3 className="font-semibold">Recent searches</h3>
           </div>
-          
+
           <div className="flex flex-wrap gap-2">
             {recentSearches.slice(0, 5).map((term) => (
               <Button
@@ -94,14 +99,14 @@ export function SearchEmptyState({ query, hasFilters, onClearFilters }: SearchEm
           </div>
         </Card>
       )}
-      
+
       {/* Trending searches */}
-      <Card className="p-6 w-full max-w-md">
-        <div className="flex items-center gap-2 mb-4">
+      <Card className="w-full max-w-md p-6">
+        <div className="mb-4 flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
           <h3 className="font-semibold">Trending searches</h3>
         </div>
-        
+
         {trendingLoading ? (
           <div className="flex flex-wrap gap-2">
             {[...Array(6)].map((_, i) => (
@@ -110,7 +115,7 @@ export function SearchEmptyState({ query, hasFilters, onClearFilters }: SearchEm
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {(trendingSearches || []).map((search) => (
+            {(trendingSearches ?? []).map((search) => (
               <Button
                 key={search.term}
                 variant="secondary"
@@ -119,7 +124,7 @@ export function SearchEmptyState({ query, hasFilters, onClearFilters }: SearchEm
                 className="capitalize"
               >
                 {search.term}
-                <span className="ml-1 text-xs text-muted-foreground">
+                <span className="text-muted-foreground ml-1 text-xs">
                   ({search.count})
                 </span>
               </Button>
@@ -127,9 +132,9 @@ export function SearchEmptyState({ query, hasFilters, onClearFilters }: SearchEm
           </div>
         )}
       </Card>
-      
+
       <div className="mt-8 text-center">
-        <p className="text-sm text-muted-foreground mb-3">
+        <p className="text-muted-foreground mb-3 text-sm">
           Can't find what you're looking for?
         </p>
         <Button

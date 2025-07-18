@@ -94,7 +94,7 @@ export function Header() {
           >
             <Search className="h-4 w-4" />
             <span className="hidden sm:inline-flex">Search</span>
-            <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:inline-flex">
+            <kbd className="bg-muted pointer-events-none hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:inline-flex">
               <span className="text-xs">⌘</span>K
             </kbd>
           </Button>

@@ -8,15 +8,16 @@ interface SearchErrorProps {
 }
 
 export function SearchError({ error, onRetry }: SearchErrorProps) {
-  const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+  const errorMessage =
+    error instanceof Error ? error.message : 'An unexpected error occurred';
 
   return (
-    <Alert variant="destructive" className="max-w-2xl mx-auto">
+    <Alert variant="destructive" className="mx-auto max-w-2xl">
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Search Error</AlertTitle>
       <AlertDescription className="space-y-2">
         <p>We encountered an error while searching:</p>
-        <p className="text-sm font-mono bg-destructive/10 p-2 rounded">
+        <p className="bg-destructive/10 rounded p-2 font-mono text-sm">
           {errorMessage}
         </p>
         {onRetry && (

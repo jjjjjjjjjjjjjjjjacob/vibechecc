@@ -16,7 +16,7 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
     if (!syncWithUrl) return defaultFilters;
 
     const filters: Partial<SearchFilters> = {};
-    
+
     // Query
     const q = searchParams.get('q');
     if (q) {
@@ -57,14 +57,21 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
 
     // Sort
     const sort = searchParams.get('sort') as SearchFilters['sort'];
-    if (sort && ['relevance', 'rating_desc', 'rating_asc', 'recent', 'oldest'].includes(sort)) {
+    if (
+      sort &&
+      ['relevance', 'rating_desc', 'rating_asc', 'recent', 'oldest'].includes(
+        sort
+      )
+    ) {
       filters.sort = sort;
     }
 
     // Types
     const types = searchParams.get('types');
     if (types) {
-      filters.types = types.split(',').filter(Boolean) as SearchFilters['types'];
+      filters.types = types
+        .split(',')
+        .filter(Boolean) as SearchFilters['types'];
     }
 
     // Limit
@@ -77,65 +84,71 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
   }, [searchParams, defaultFilters, syncWithUrl]);
 
   // Update URL with filters
-  const updateFilters = useCallback((newFilters: Partial<SearchFilters>) => {
-    if (!syncWithUrl) return;
+  const updateFilters = useCallback(
+    (newFilters: Partial<SearchFilters>) => {
+      if (!syncWithUrl) return;
 
-    const params = new URLSearchParams();
+      const params = new URLSearchParams();
 
-    // Query
-    if (newFilters.query) {
-      params.set('q', newFilters.query);
-    }
+      // Query
+      if (newFilters.query) {
+        params.set('q', newFilters.query);
+      }
 
-    // Tags
-    if (newFilters.tags && newFilters.tags.length > 0) {
-      params.set('tags', newFilters.tags.join(','));
-    }
+      // Tags
+      if (newFilters.tags && newFilters.tags.length > 0) {
+        params.set('tags', newFilters.tags.join(','));
+      }
 
-    // Rating
-    if (newFilters.minRating !== undefined) {
-      params.set('minRating', newFilters.minRating.toString());
-    }
-    if (newFilters.maxRating !== undefined) {
-      params.set('maxRating', newFilters.maxRating.toString());
-    }
+      // Rating
+      if (newFilters.minRating !== undefined) {
+        params.set('minRating', newFilters.minRating.toString());
+      }
+      if (newFilters.maxRating !== undefined) {
+        params.set('maxRating', newFilters.maxRating.toString());
+      }
 
-    // Date range
-    if (newFilters.dateRange) {
-      params.set('from', newFilters.dateRange.start);
-      params.set('to', newFilters.dateRange.end);
-    }
+      // Date range
+      if (newFilters.dateRange) {
+        params.set('from', newFilters.dateRange.start);
+        params.set('to', newFilters.dateRange.end);
+      }
 
-    // Creators
-    if (newFilters.creators && newFilters.creators.length > 0) {
-      params.set('creators', newFilters.creators.join(','));
-    }
+      // Creators
+      if (newFilters.creators && newFilters.creators.length > 0) {
+        params.set('creators', newFilters.creators.join(','));
+      }
 
-    // Sort
-    if (newFilters.sort && newFilters.sort !== 'relevance') {
-      params.set('sort', newFilters.sort);
-    }
+      // Sort
+      if (newFilters.sort && newFilters.sort !== 'relevance') {
+        params.set('sort', newFilters.sort);
+      }
 
-    // Types
-    if (newFilters.types && newFilters.types.length > 0) {
-      params.set('types', newFilters.types.join(','));
-    }
+      // Types
+      if (newFilters.types && newFilters.types.length > 0) {
+        params.set('types', newFilters.types.join(','));
+      }
 
-    // Limit
-    if (newFilters.limit && newFilters.limit !== 20) {
-      params.set('limit', newFilters.limit.toString());
-    }
+      // Limit
+      if (newFilters.limit && newFilters.limit !== 20) {
+        params.set('limit', newFilters.limit.toString());
+      }
 
-    // Update URL
-    setSearchParams(params);
-  }, [setSearchParams, syncWithUrl]);
+      // Update URL
+      setSearchParams(params);
+    },
+    [setSearchParams, syncWithUrl]
+  );
 
   // Clear specific filter
-  const clearFilter = useCallback((filterKey: keyof SearchFilters) => {
-    const newFilters = { ...filtersFromUrl };
-    delete newFilters[filterKey];
-    updateFilters(newFilters);
-  }, [filtersFromUrl, updateFilters]);
+  const clearFilter = useCallback(
+    (filterKey: keyof SearchFilters) => {
+      const newFilters = { ...filtersFromUrl };
+      delete newFilters[filterKey];
+      updateFilters(newFilters);
+    },
+    [filtersFromUrl, updateFilters]
+  );
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
@@ -143,20 +156,20 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
   }, [filtersFromUrl, updateFilters]);
 
   // Toggle array filter (for tags, creators, types)
-  const toggleArrayFilter = useCallback((
-    filterKey: 'tags' | 'creators' | 'types',
-    value: string
-  ) => {
-    const currentValues = filtersFromUrl[filterKey] || [];
-    const newValues = currentValues.includes(value)
-      ? currentValues.filter(v => v !== value)
-      : [...currentValues, value];
-    
-    updateFilters({
-      ...filtersFromUrl,
-      [filterKey]: newValues.length > 0 ? newValues : undefined,
-    });
-  }, [filtersFromUrl, updateFilters]);
+  const toggleArrayFilter = useCallback(
+    (filterKey: 'tags' | 'creators' | 'types', value: string) => {
+      const currentValues = filtersFromUrl[filterKey] ?? [];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter((v) => v !== value)
+        : [...currentValues, value];
+
+      updateFilters({
+        ...filtersFromUrl,
+        [filterKey]: newValues.length > 0 ? newValues : undefined,
+      });
+    },
+    [filtersFromUrl, updateFilters]
+  );
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {

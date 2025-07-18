@@ -38,25 +38,32 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
       token: null,
     };
   }
-  
+
   try {
     // Use getAuth with options to handle SSR properly
     const authResult = await getAuth(request, {
       secretKey: process.env.CLERK_SECRET_KEY,
     });
-    
+
     // Check if we got a Response object (handshake redirect)
-    if (authResult && typeof authResult === 'object' && 'status' in authResult && 'headers' in authResult) {
+    if (
+      authResult &&
+      typeof authResult === 'object' &&
+      'status' in authResult &&
+      'headers' in authResult
+    ) {
       // This is a Response object for handshake, skip auth during SSR
-      console.debug('Clerk handshake redirect detected during SSR, skipping auth');
+      console.debug(
+        'Clerk handshake redirect detected during SSR, skipping auth'
+      );
       return {
         userId: null,
         token: null,
       };
     }
-    
+
     const auth = authResult;
-    
+
     // If no userId, return empty auth state
     if (!auth?.userId) {
       return {
@@ -64,7 +71,7 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
         token: null,
       };
     }
-    
+
     // Only try to get token if we have a userId
     let token = null;
     try {
@@ -80,19 +87,24 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
     };
   } catch (error) {
     // Check if the error is a Response object (Clerk handshake redirect)
-    if (error && typeof error === 'object' && 'status' in error && 'headers' in error) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'status' in error &&
+      'headers' in error
+    ) {
       console.debug('Clerk handshake redirect during SSR');
       return {
         userId: null,
         token: null,
       };
     }
-    
+
     // Log other errors for debugging
     if (error instanceof Error) {
       console.debug('Auth error during SSR:', error.message);
     }
-    
+
     // During SSR, authentication errors are expected
     return {
       userId: null,

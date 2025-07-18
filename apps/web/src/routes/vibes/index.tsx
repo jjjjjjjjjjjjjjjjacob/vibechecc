@@ -43,7 +43,7 @@ function AllVibes() {
         </p>
       </div>
 
-      <VibeGrid vibes={vibesData?.vibes || []} />
+      <VibeGrid vibes={vibesData?.vibes ?? []} />
     </div>
   );
 }

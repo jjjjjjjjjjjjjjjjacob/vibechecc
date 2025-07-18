@@ -69,8 +69,8 @@ function CommandInput({
     <div
       data-slot="command-input-wrapper"
       className={cn(
-        "flex h-9 items-center gap-2 px-3",
-        showBorder && "border-b"
+        'flex h-9 items-center gap-2 px-3',
+        showBorder && 'border-b'
       )}
     >
       <SearchIcon className="size-4 shrink-0 opacity-50" />

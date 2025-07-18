@@ -26,7 +26,7 @@ export function SearchSuggestions({
               onSelect={() => onSelect(search.term)}
               className="flex items-center gap-2"
             >
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Clock className="text-muted-foreground h-4 w-4" />
               <span>{search.term}</span>
             </CommandItem>
           ))}
@@ -42,7 +42,7 @@ export function SearchSuggestions({
               onSelect={() => onSelect(search.term)}
               className="flex items-center gap-2"
             >
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <TrendingUp className="text-muted-foreground h-4 w-4" />
               <span>{search.term}</span>
             </CommandItem>
           ))}
@@ -58,7 +58,7 @@ export function SearchSuggestions({
               onSelect={() => onSelect(tag.term)}
               className="flex items-center gap-2"
             >
-              <Hash className="h-4 w-4 text-muted-foreground" />
+              <Hash className="text-muted-foreground h-4 w-4" />
               <span>{tag.term}</span>
             </CommandItem>
           ))}
@@ -71,7 +71,7 @@ export function SearchSuggestions({
           onSelect={() => onSelect('/vibes')}
           className="flex items-center gap-2"
         >
-          <Search className="h-4 w-4 text-muted-foreground" />
+          <Search className="text-muted-foreground h-4 w-4" />
           <span>Browse all vibes</span>
         </CommandItem>
       </CommandGroup>

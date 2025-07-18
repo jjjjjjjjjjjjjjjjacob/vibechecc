@@ -175,7 +175,7 @@ Run `bun run dev` to start:
 
 ## Package Management
 
-- **Use Bun**: Always use `bun` instead of `npm` or `yarn`
+- **Use Bun**: Always use `bun` instead of `npm`, `yarn`, or `npx`. Use `bunx` for package execution.
 - **Workspaces**: Configured for monorepo structure
 - **Dependencies**: Add to appropriate workspace (root, app, or package)
 

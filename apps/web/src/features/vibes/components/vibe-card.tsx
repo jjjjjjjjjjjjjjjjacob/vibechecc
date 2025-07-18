@@ -27,7 +27,7 @@ interface VibeCardProps {
 export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
   const [imageError, setImageError] = useState(false);
   const [reactions, setReactions] = useState<EmojiReaction[]>(
-    vibe.reactions || []
+    vibe.reactions ?? []
   );
   const [userRating, setUserRating] = useState(0);
   const { user } = useUser();
@@ -56,7 +56,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
       vibe.description
         ?.toLowerCase()
         .split(/\W+/)
-        .filter((word) => word.length > 2) || [];
+        .filter((word) => word.length > 2) ?? [];
 
     keywords.push(...titleWords, ...descriptionWords);
 
@@ -102,7 +102,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
   // Handle quick rating
   const handleRating = async (rating: number) => {
     if (preview) return;
-    
+
     if (!user?.id) {
       toast.error('you must sign in to rate vibes', {
         duration: 2000,
@@ -137,7 +137,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
   // Handle emoji reactions
   const handleReact = (emoji: string) => {
     if (preview) return;
-    
+
     if (!user?.id) {
       toast.error('you must sign in to react to vibes', {
         duration: 2000,
@@ -256,7 +256,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                   <Link
                     to="/users/$username"
                     params={{ username: vibe.createdBy.username }}
-                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                    className="flex items-center gap-2 transition-opacity hover:opacity-80"
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
@@ -271,7 +271,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                         {getUserInitials(vibe.createdBy)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-muted-foreground text-xs hover:text-foreground">
+                    <span className="text-muted-foreground hover:text-foreground text-xs">
                       {computeUserDisplayName(vibe.createdBy)}
                     </span>
                   </Link>
@@ -288,7 +288,9 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-muted-foreground text-xs">
-                      {vibe.createdBy ? computeUserDisplayName(vibe.createdBy) : 'Unknown User'}
+                      {vibe.createdBy
+                        ? computeUserDisplayName(vibe.createdBy)
+                        : 'Unknown User'}
                     </span>
                   </>
                 )}
@@ -413,7 +415,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                   <Link
                     to="/users/$username"
                     params={{ username: vibe.createdBy.username }}
-                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                    className="flex items-center gap-2 transition-opacity hover:opacity-80"
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
@@ -428,7 +430,7 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                         {getUserInitials(vibe.createdBy)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-muted-foreground text-xs hover:text-foreground">
+                    <span className="text-muted-foreground hover:text-foreground text-xs">
                       {computeUserDisplayName(vibe.createdBy)}
                     </span>
                   </Link>
@@ -445,7 +447,9 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-muted-foreground text-xs">
-                      {vibe.createdBy ? computeUserDisplayName(vibe.createdBy) : 'Unknown User'}
+                      {vibe.createdBy
+                        ? computeUserDisplayName(vibe.createdBy)
+                        : 'Unknown User'}
                     </span>
                   </>
                 )}

@@ -11,7 +11,12 @@ interface SearchResultsGridProps {
   onRetry?: () => void;
 }
 
-export function SearchResultsGrid({ results, loading, error, onRetry }: SearchResultsGridProps) {
+export function SearchResultsGrid({
+  results,
+  loading,
+  error,
+  onRetry,
+}: SearchResultsGridProps) {
   if (error) {
     return <SearchError error={error} onRetry={onRetry} />;
   }
@@ -25,7 +30,7 @@ export function SearchResultsGrid({ results, loading, error, onRetry }: SearchRe
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {results.map((result) => (
         <SearchResultCard key={result.id} result={result} />
       ))}

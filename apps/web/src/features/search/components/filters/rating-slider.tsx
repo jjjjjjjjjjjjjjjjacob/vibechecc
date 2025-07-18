@@ -11,21 +11,21 @@ interface RatingSliderProps {
   className?: string;
 }
 
-export function RatingSlider({ 
-  min = 0, 
-  max = 5, 
+export function RatingSlider({
+  min = 0,
+  max = 5,
   onChange,
-  className 
+  className,
 }: RatingSliderProps) {
   const [range, setRange] = useState<[number, number]>([min || 0, max || 5]);
-  
+
   useEffect(() => {
     setRange([min || 0, max || 5]);
   }, [min, max]);
 
   const handleRangeChange = (value: number[]) => {
     setRange([value[0], value[1]]);
-    
+
     // Only call onChange if range is different from default
     if (value[0] === 0 && value[1] === 5) {
       onChange(undefined);
@@ -52,8 +52,8 @@ export function RatingSlider({
           <Star
             key={i}
             className={`h-3 w-3 ${
-              i < rating 
-                ? 'fill-yellow-500 text-yellow-500' 
+              i < rating
+                ? 'fill-yellow-500 text-yellow-500'
                 : 'fill-muted text-muted-foreground'
             }`}
           />
@@ -64,14 +64,14 @@ export function RatingSlider({
 
   return (
     <div className={className}>
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <h4 className="font-medium">Rating Range</h4>
         {isFiltered && (
           <Button
             variant="ghost"
             size="sm"
             onClick={handleReset}
-            className="h-auto py-1 px-2 text-xs"
+            className="h-auto px-2 py-1 text-xs"
           >
             Reset
           </Button>
@@ -79,18 +79,22 @@ export function RatingSlider({
       </div>
 
       {/* Current range display */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="text-sm">
           <div className="flex items-center gap-2">
             {renderStars(range[0])}
-            <span className="text-muted-foreground">({range[0].toFixed(1)})</span>
+            <span className="text-muted-foreground">
+              ({range[0].toFixed(1)})
+            </span>
           </div>
         </div>
-        <span className="text-sm text-muted-foreground">to</span>
+        <span className="text-muted-foreground text-sm">to</span>
         <div className="text-sm">
           <div className="flex items-center gap-2">
             {renderStars(range[1])}
-            <span className="text-muted-foreground">({range[1].toFixed(1)})</span>
+            <span className="text-muted-foreground">
+              ({range[1].toFixed(1)})
+            </span>
           </div>
         </div>
       </div>
@@ -108,31 +112,31 @@ export function RatingSlider({
       </div>
 
       {/* Preset buttons */}
-      <div className="flex flex-wrap gap-2 mt-4">
+      <div className="mt-4 flex flex-wrap gap-2">
         <Badge
           variant="outline"
-          className="cursor-pointer hover:bg-accent"
+          className="hover:bg-accent cursor-pointer"
           onClick={() => handleRangeChange([4, 5])}
         >
           4+ stars
         </Badge>
         <Badge
           variant="outline"
-          className="cursor-pointer hover:bg-accent"
+          className="hover:bg-accent cursor-pointer"
           onClick={() => handleRangeChange([3, 5])}
         >
           3+ stars
         </Badge>
         <Badge
           variant="outline"
-          className="cursor-pointer hover:bg-accent"
+          className="hover:bg-accent cursor-pointer"
           onClick={() => handleRangeChange([0, 2])}
         >
           Low rated
         </Badge>
         <Badge
           variant="outline"
-          className="cursor-pointer hover:bg-accent"
+          className="hover:bg-accent cursor-pointer"
           onClick={() => handleRangeChange([2, 4])}
         >
           Mid range
@@ -140,11 +144,10 @@ export function RatingSlider({
       </div>
 
       {/* Summary */}
-      <p className="text-xs text-muted-foreground mt-3">
-        {isFiltered 
+      <p className="text-muted-foreground mt-3 text-xs">
+        {isFiltered
           ? `Showing vibes rated ${range[0].toFixed(1)} - ${range[1].toFixed(1)} stars`
-          : 'All ratings'
-        }
+          : 'All ratings'}
       </p>
     </div>
   );

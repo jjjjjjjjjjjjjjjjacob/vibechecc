@@ -1,5 +1,9 @@
 import { fuzzyScore } from './fuzzy_search';
-import type { VibeSearchResult, UserSearchResult, TagSearchResult } from '@vibechecc/types';
+import type {
+  VibeSearchResult,
+  UserSearchResult,
+  TagSearchResult,
+} from '@vibechecc/types';
 
 /**
  * Advanced relevance scoring system for search results
@@ -47,39 +51,40 @@ export function scoreVibe(
   const w = { ...DEFAULT_WEIGHTS, ...weights };
   const normalizedQuery = query.toLowerCase().trim();
   let score = 0;
-  
+
   // Title matching
   const titleScore = fuzzyScore(vibe.title, normalizedQuery);
   score += (titleScore / 100) * w.titleMatch;
-  
+
   // Description matching
   const descScore = fuzzyScore(vibe.description, normalizedQuery);
   score += (descScore / 100) * w.descriptionMatch;
-  
+
   // Tag matching
   if (vibe.tags && vibe.tags.length > 0) {
-    const tagScores = vibe.tags.map(tag => fuzzyScore(tag, normalizedQuery));
+    const tagScores = vibe.tags.map((tag) => fuzzyScore(tag, normalizedQuery));
     const maxTagScore = Math.max(...tagScores);
     score += (maxTagScore / 100) * w.tagMatch;
   }
-  
+
   // Popularity boost (based on rating count)
   if (vibe.ratingCount) {
     const popularityScore = Math.min(vibe.ratingCount / 50, 1); // Normalize to 0-1
     score += popularityScore * w.popularity;
   }
-  
+
   // Rating boost
   if (vibe.rating) {
     const ratingScore = vibe.rating / 5; // Normalize to 0-1
     score += ratingScore * w.rating;
   }
-  
+
   // Recency boost
-  const ageInDays = (Date.now() - new Date(vibe.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+  const ageInDays =
+    (Date.now() - new Date(vibe.createdAt).getTime()) / (1000 * 60 * 60 * 24);
   const recencyScore = Math.max(0, 1 - ageInDays / 365); // Decay over a year
   score += recencyScore * w.recency;
-  
+
   return score;
 }
 
@@ -99,36 +104,36 @@ export function scoreUser(
   const w = { ...DEFAULT_WEIGHTS, ...weights };
   const normalizedQuery = query.toLowerCase().trim();
   let score = 0;
-  
+
   // Username matching (highest priority)
   if (user.username) {
     const usernameScore = fuzzyScore(user.username, normalizedQuery);
     score += (usernameScore / 100) * w.usernameMatch;
-    
+
     // Exact username match bonus
     if (user.username.toLowerCase() === normalizedQuery) {
       score += w.exactMatch;
     }
   }
-  
+
   // Full name matching
   if (user.fullName) {
     const nameScore = fuzzyScore(user.fullName, normalizedQuery);
     score += (nameScore / 100) * w.titleMatch;
   }
-  
+
   // Bio matching
   if (user.bio) {
     const bioScore = fuzzyScore(user.bio, normalizedQuery);
     score += (bioScore / 100) * w.descriptionMatch * 0.5; // Lower weight for bio
   }
-  
+
   // Activity boost
   if (user.vibeCount) {
     const activityScore = Math.min(user.vibeCount / 20, 1); // Normalize to 0-1
     score += activityScore * w.popularity;
   }
-  
+
   return score;
 }
 
@@ -146,20 +151,20 @@ export function scoreTag(
   const w = { ...DEFAULT_WEIGHTS, ...weights };
   const normalizedQuery = query.toLowerCase().trim();
   let score = 0;
-  
+
   // Tag name matching
   const tagScore = fuzzyScore(tag.name, normalizedQuery);
   score += (tagScore / 100) * w.tagMatch;
-  
+
   // Exact match bonus
   if (tag.name.toLowerCase() === normalizedQuery) {
     score += w.exactMatch;
   }
-  
+
   // Popularity boost based on usage count
   const popularityScore = Math.min(tag.count / 100, 1); // Normalize to 0-1
   score += popularityScore * w.popularity;
-  
+
   return score;
 }
 
@@ -170,9 +175,9 @@ export function rerankResults<T extends { score?: number }>(
   results: T[],
   query: string
 ): T[] {
-  const rescoredResults = results.map(result => {
+  const rescoredResults = results.map((result) => {
     let newScore = result.score || 0;
-    
+
     // Apply type-specific scoring
     if ('type' in result) {
       switch (result.type) {
@@ -216,10 +221,10 @@ export function rerankResults<T extends { score?: number }>(
         }
       }
     }
-    
+
     return { ...result, score: newScore };
   });
-  
+
   // Sort by score descending
   return rescoredResults.sort((a, b) => (b.score || 0) - (a.score || 0));
 }

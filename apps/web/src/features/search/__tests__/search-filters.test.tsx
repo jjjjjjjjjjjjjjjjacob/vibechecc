@@ -30,7 +30,9 @@ vi.mock('../components/rating-filter', () => ({
 vi.mock('../components/date-range-filter', () => ({
   DateRangeFilter: ({ value, onChange }: any) => (
     <div data-testid="date-range-filter">
-      <button onClick={() => onChange({ start: '2024-01-01', end: '2024-12-31' })}>
+      <button
+        onClick={() => onChange({ start: '2024-01-01', end: '2024-12-31' })}
+      >
         Set Date Range ({value ? 'Set' : 'Not set'})
       </button>
     </div>
@@ -174,7 +176,9 @@ describe('SearchFilters', () => {
       ];
 
       testCases.forEach((filters) => {
-        const { unmount } = render(<SearchFilters filters={filters} onChange={vi.fn()} />);
+        const { unmount } = render(
+          <SearchFilters filters={filters} onChange={vi.fn()} />
+        );
         expect(screen.getByText('Clear all')).toBeInTheDocument();
         unmount();
       });
@@ -195,13 +199,17 @@ describe('SearchFilters', () => {
 
     it('considers sort filter as active only when not default', () => {
       // Default sort should not show as active
-      render(<SearchFilters filters={{ sort: 'relevance' }} onChange={vi.fn()} />);
+      render(
+        <SearchFilters filters={{ sort: 'relevance' }} onChange={vi.fn()} />
+      );
       expect(screen.getByText('No filters applied')).toBeInTheDocument();
 
       cleanup();
 
       // Non-default sort should show as active
-      render(<SearchFilters filters={{ sort: 'rating_desc' }} onChange={vi.fn()} />);
+      render(
+        <SearchFilters filters={{ sort: 'rating_desc' }} onChange={vi.fn()} />
+      );
       expect(screen.getByText('Filters applied')).toBeInTheDocument();
     });
   });
@@ -218,9 +226,9 @@ describe('SearchFilters', () => {
     it('uses provided available tags', () => {
       const customTags = ['custom1', 'custom2', 'custom3'];
       render(
-        <SearchFilters 
-          filters={{}} 
-          onChange={vi.fn()} 
+        <SearchFilters
+          filters={{}}
+          onChange={vi.fn()}
           availableTags={customTags}
         />
       );

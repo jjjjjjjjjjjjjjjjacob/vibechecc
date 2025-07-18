@@ -11,7 +11,12 @@ import type {
   SearchSortOption,
 } from '@vibechecc/types';
 import { fuzzyMatch, fuzzyScore } from './search/fuzzy_search';
-import { scoreVibe, scoreUser, scoreTag, rerankResults } from './search/search_scorer';
+import {
+  scoreVibe,
+  scoreUser,
+  scoreTag,
+  rerankResults,
+} from './search/search_scorer';
 import { parseSearchQuery, matchesParsedQuery } from './search/search_utils';
 
 // Main search function
@@ -60,22 +65,32 @@ export const searchAll = query({
 
     // Parse the query for advanced operators
     const parsedQuery = parseSearchQuery(searchQuery);
-    
+
     // Merge parsed filters with provided filters
     const mergedFilters = {
       ...filters,
       tags: [...(filters?.tags || []), ...parsedQuery.tags],
       minRating: filters?.minRating || parsedQuery.filters.minRating,
       maxRating: filters?.maxRating || parsedQuery.filters.maxRating,
-      dateRange: filters?.dateRange || (parsedQuery.filters.dateAfter || parsedQuery.filters.dateBefore ? {
-        start: parsedQuery.filters.dateAfter || '1970-01-01',
-        end: parsedQuery.filters.dateBefore || new Date().toISOString().split('T')[0],
-      } : undefined),
-      creators: filters?.creators || (parsedQuery.filters.user ? [parsedQuery.filters.user] : undefined),
+      dateRange:
+        filters?.dateRange ||
+        (parsedQuery.filters.dateAfter || parsedQuery.filters.dateBefore
+          ? {
+              start: parsedQuery.filters.dateAfter || '1970-01-01',
+              end:
+                parsedQuery.filters.dateBefore ||
+                new Date().toISOString().split('T')[0],
+            }
+          : undefined),
+      creators:
+        filters?.creators ||
+        (parsedQuery.filters.user ? [parsedQuery.filters.user] : undefined),
     };
-    
+
     // Build search text from parsed query
-    const searchText = [...parsedQuery.terms, ...parsedQuery.exactPhrases].join(' ').toLowerCase();
+    const searchText = [...parsedQuery.terms, ...parsedQuery.exactPhrases]
+      .join(' ')
+      .toLowerCase();
 
     // Search vibes
     if (!includeTypes || includeTypes.includes('vibe')) {
@@ -86,17 +101,21 @@ export const searchAll = query({
         // Check if vibe matches using fuzzy search
         const titleMatch = fuzzyMatch(vibe.title, searchText);
         const descriptionMatch = fuzzyMatch(vibe.description, searchText);
-        const tagMatch = vibe.tags?.some(tag => fuzzyMatch(tag, searchText)) || false;
-        
+        const tagMatch =
+          vibe.tags?.some((tag) => fuzzyMatch(tag, searchText)) || false;
+
         // Check for excluded terms
-        const hasExcludedTerm = parsedQuery.excludedTerms.some(term => 
-          vibe.title.toLowerCase().includes(term.toLowerCase()) ||
-          vibe.description.toLowerCase().includes(term.toLowerCase()) ||
-          vibe.tags?.some(tag => tag.toLowerCase().includes(term.toLowerCase()))
+        const hasExcludedTerm = parsedQuery.excludedTerms.some(
+          (term) =>
+            vibe.title.toLowerCase().includes(term.toLowerCase()) ||
+            vibe.description.toLowerCase().includes(term.toLowerCase()) ||
+            vibe.tags?.some((tag) =>
+              tag.toLowerCase().includes(term.toLowerCase())
+            )
         );
-        
+
         if (hasExcludedTerm) continue;
-        
+
         if (titleMatch || descriptionMatch || tagMatch) {
           // Apply filters
           let passesFilters = true;
@@ -105,7 +124,8 @@ export const searchAll = query({
           if (mergedFilters.tags && mergedFilters.tags.length > 0) {
             passesFilters =
               passesFilters &&
-              (vibe.tags?.some(tag => mergedFilters.tags!.includes(tag)) ?? false);
+              (vibe.tags?.some((tag) => mergedFilters.tags!.includes(tag)) ??
+                false);
           }
 
           // Date range filter
@@ -120,14 +140,15 @@ export const searchAll = query({
           // Creator filter
           if (mergedFilters.creators && mergedFilters.creators.length > 0) {
             passesFilters =
-              passesFilters && mergedFilters.creators.includes(vibe.createdById);
+              passesFilters &&
+              mergedFilters.creators.includes(vibe.createdById);
           }
 
           if (passesFilters) {
             // Get creator info
             const creator = await ctx.db
               .query('users')
-              .withIndex('byExternalId', q =>
+              .withIndex('byExternalId', (q) =>
                 q.eq('externalId', vibe.createdById)
               )
               .first();
@@ -135,7 +156,7 @@ export const searchAll = query({
             // Get average rating
             const ratings = await ctx.db
               .query('ratings')
-              .withIndex('vibe', q => q.eq('vibeId', vibe.id))
+              .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
               .collect();
 
             const avgRating =
@@ -145,23 +166,28 @@ export const searchAll = query({
 
             // Apply rating filter
             if (mergedFilters.minRating && avgRating !== undefined) {
-              passesFilters = passesFilters && avgRating >= mergedFilters.minRating;
+              passesFilters =
+                passesFilters && avgRating >= mergedFilters.minRating;
             }
             if (mergedFilters.maxRating && avgRating !== undefined) {
-              passesFilters = passesFilters && avgRating <= mergedFilters.maxRating;
+              passesFilters =
+                passesFilters && avgRating <= mergedFilters.maxRating;
             }
 
             if (passesFilters) {
               // Calculate advanced relevance score
-              const score = scoreVibe({
-                title: vibe.title,
-                description: vibe.description,
-                tags: vibe.tags,
-                createdAt: vibe.createdAt,
-                rating: avgRating,
-                ratingCount: ratings.length,
-              }, searchText);
-              
+              const score = scoreVibe(
+                {
+                  title: vibe.title,
+                  description: vibe.description,
+                  tags: vibe.tags,
+                  createdAt: vibe.createdAt,
+                  rating: avgRating,
+                  ratingCount: ratings.length,
+                },
+                searchText
+              );
+
               const vibeResult: VibeSearchResult = {
                 id: vibe.id,
                 type: 'vibe',
@@ -195,44 +221,50 @@ export const searchAll = query({
 
       for (const user of allUsers) {
         const username = user.username || '';
-        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        const fullName =
+          `${user.first_name || ''} ${user.last_name || ''}`.trim();
         const bio = user.bio || '';
 
         // Check fuzzy matching
         const usernameMatch = fuzzyMatch(username, searchText);
         const nameMatch = fuzzyMatch(fullName, searchText);
         const bioMatch = fuzzyMatch(bio, searchText);
-        
+
         // Check for excluded terms
-        const hasExcludedTerm = parsedQuery.excludedTerms.some(term => 
-          username.toLowerCase().includes(term.toLowerCase()) ||
-          fullName.toLowerCase().includes(term.toLowerCase()) ||
-          bio.toLowerCase().includes(term.toLowerCase())
+        const hasExcludedTerm = parsedQuery.excludedTerms.some(
+          (term) =>
+            username.toLowerCase().includes(term.toLowerCase()) ||
+            fullName.toLowerCase().includes(term.toLowerCase()) ||
+            bio.toLowerCase().includes(term.toLowerCase())
         );
-        
+
         if (hasExcludedTerm) continue;
 
         if (usernameMatch || nameMatch || bioMatch) {
           // Apply creator filter if specified
-          if (parsedQuery.filters.user && username.toLowerCase() !== parsedQuery.filters.user.toLowerCase()) {
+          if (
+            parsedQuery.filters.user &&
+            username.toLowerCase() !== parsedQuery.filters.user.toLowerCase()
+          ) {
             continue;
           }
           // Get vibe count
           const userVibes = await ctx.db
             .query('vibes')
-            .withIndex('createdBy', q =>
-              q.eq('createdById', user.externalId)
-            )
+            .withIndex('createdBy', (q) => q.eq('createdById', user.externalId))
             .collect();
 
           // Calculate advanced relevance score
-          const score = scoreUser({
-            username,
-            fullName,
-            bio,
-            vibeCount: userVibes.length,
-          }, searchText);
-          
+          const score = scoreUser(
+            {
+              username,
+              fullName,
+              bio,
+              vibeCount: userVibes.length,
+            },
+            searchText
+          );
+
           const userResult: UserSearchResult = {
             id: user.externalId,
             type: 'user',
@@ -251,13 +283,11 @@ export const searchAll = query({
     // Search tags
     if (!includeTypes || includeTypes.includes('tag')) {
       // Limit for performance - tags are aggregated from vibes
-      const vibesWithTags = await ctx.db
-        .query('vibes')
-        .take(500);
+      const vibesWithTags = await ctx.db.query('vibes').take(500);
 
       const tagCounts = new Map<string, number>();
-      vibesWithTags.forEach(vibe => {
-        vibe.tags?.forEach(tag => {
+      vibesWithTags.forEach((vibe) => {
+        vibe.tags?.forEach((tag) => {
           tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
         });
       });
@@ -265,21 +295,24 @@ export const searchAll = query({
       tagCounts.forEach((count, tag) => {
         // Check fuzzy matching
         const tagMatch = fuzzyMatch(tag, searchText);
-        
+
         // Check for excluded terms
-        const hasExcludedTerm = parsedQuery.excludedTerms.some(term => 
+        const hasExcludedTerm = parsedQuery.excludedTerms.some((term) =>
           tag.toLowerCase().includes(term.toLowerCase())
         );
-        
+
         if (hasExcludedTerm) return;
-        
+
         if (tagMatch) {
           // Calculate advanced relevance score
-          const score = scoreTag({
-            name: tag,
-            count,
-          }, searchText);
-          
+          const score = scoreTag(
+            {
+              name: tag,
+              count,
+            },
+            searchText
+          );
+
           const tagResult: TagSearchResult = {
             id: tag,
             type: 'tag',
@@ -294,7 +327,7 @@ export const searchAll = query({
     }
 
     // Sort results
-    let sortedResults = [...results];
+    const sortedResults = [...results];
     const sortOption = mergedFilters.sort || 'relevance';
 
     switch (sortOption) {
@@ -334,7 +367,8 @@ export const searchAll = query({
       results: paginatedResults,
       totalCount: sortedResults.length,
       hasMore: endIndex < sortedResults.length,
-      nextCursor: endIndex < sortedResults.length ? String(endIndex) : undefined,
+      nextCursor:
+        endIndex < sortedResults.length ? String(endIndex) : undefined,
     } as SearchResponse;
   },
 });
@@ -361,19 +395,17 @@ export const getSearchSuggestions = query({
       // Return recent searches and trending items when query is empty
       const currentUser = await ctx.auth.getUserIdentity();
       let recentSearches: string[] = [];
-      
+
       if (currentUser) {
         const recentSearchHistory = await ctx.db
           .query('searchHistory')
-          .withIndex('byUser', q =>
-            q.eq('userId', currentUser.subject)
-          )
+          .withIndex('byUser', (q) => q.eq('userId', currentUser.subject))
           .order('desc')
           .take(5);
 
-        recentSearches = recentSearchHistory.map(search => search.query);
+        recentSearches = recentSearchHistory.map((search) => search.query);
       }
-      
+
       // Get trending searches
       const trendingSearches = await ctx.db
         .query('trendingSearches')
@@ -384,12 +416,12 @@ export const getSearchSuggestions = query({
       // Get popular tags as fallback suggestions
       const allVibes = await ctx.db.query('vibes').take(100);
       const tagCounts = new Map<string, number>();
-      allVibes.forEach(vibe => {
-        vibe.tags?.forEach(tag => {
+      allVibes.forEach((vibe) => {
+        vibe.tags?.forEach((tag) => {
           tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
         });
       });
-      
+
       const popularTags = Array.from(tagCounts.entries())
         .sort((a, b) => b[1] - a[1])
         .slice(0, 8)
@@ -397,7 +429,7 @@ export const getSearchSuggestions = query({
 
       return {
         recentSearches,
-        trendingSearches: trendingSearches.map(t => t.term),
+        trendingSearches: trendingSearches.map((t) => t.term),
         popularTags,
         vibes: [],
         users: [],
@@ -407,32 +439,38 @@ export const getSearchSuggestions = query({
 
     // Implement quick search for suggestions with fuzzy matching
     const parsedQuery = parseSearchQuery(searchQuery);
-    const searchText = [...parsedQuery.terms, ...parsedQuery.exactPhrases].join(' ').toLowerCase();
-    
+    const searchText = [...parsedQuery.terms, ...parsedQuery.exactPhrases]
+      .join(' ')
+      .toLowerCase();
+
     // Search vibes (limit 5)
     const vibes = await ctx.db.query('vibes').take(20);
     for (const vibe of vibes) {
       if (results.vibes.length >= 5) break;
-      
-      const matches = fuzzyMatch(vibe.title, searchText) ||
-                     fuzzyMatch(vibe.description, searchText) ||
-                     vibe.tags?.some(tag => fuzzyMatch(tag, searchText));
-      
+
+      const matches =
+        fuzzyMatch(vibe.title, searchText) ||
+        fuzzyMatch(vibe.description, searchText) ||
+        vibe.tags?.some((tag) => fuzzyMatch(tag, searchText));
+
       if (matches) {
         const creator = await ctx.db
           .query('users')
-          .withIndex('byExternalId', q => q.eq('externalId', vibe.createdById))
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', vibe.createdById)
+          )
           .first();
-          
+
         const ratings = await ctx.db
           .query('ratings')
-          .withIndex('vibe', q => q.eq('vibeId', vibe.id))
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
           .collect();
-          
-        const avgRating = ratings.length > 0
-          ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
-          : undefined;
-          
+
+        const avgRating =
+          ratings.length > 0
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            : undefined;
+
         results.vibes.push({
           id: vibe.id,
           type: 'vibe',
@@ -443,30 +481,35 @@ export const getSearchSuggestions = query({
           rating: avgRating,
           ratingCount: ratings.length,
           tags: vibe.tags,
-          createdBy: creator ? {
-            id: creator.externalId,
-            name: creator.username || 'Unknown',
-            avatar: creator.image_url,
-          } : undefined,
+          createdBy: creator
+            ? {
+                id: creator.externalId,
+                name: creator.username || 'Unknown',
+                avatar: creator.image_url,
+              }
+            : undefined,
         });
       }
     }
-    
+
     // Search users (limit 3)
     const users = await ctx.db.query('users').take(15);
     for (const user of users) {
       if (results.users.length >= 3) break;
-      
+
       const username = user.username || '';
-      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-      
-      if (fuzzyMatch(username, searchText) ||
-          fuzzyMatch(fullName, searchText)) {
+      const fullName =
+        `${user.first_name || ''} ${user.last_name || ''}`.trim();
+
+      if (
+        fuzzyMatch(username, searchText) ||
+        fuzzyMatch(fullName, searchText)
+      ) {
         const userVibes = await ctx.db
           .query('vibes')
-          .withIndex('createdBy', q => q.eq('createdById', user.externalId))
+          .withIndex('createdBy', (q) => q.eq('createdById', user.externalId))
           .collect();
-          
+
         results.users.push({
           id: user.externalId,
           type: 'user',
@@ -478,18 +521,18 @@ export const getSearchSuggestions = query({
         });
       }
     }
-    
+
     // Search tags (limit 5)
     const vibesWithTags = await ctx.db.query('vibes').collect();
     const tagCounts = new Map<string, number>();
-    vibesWithTags.forEach(vibe => {
-      vibe.tags?.forEach(tag => {
+    vibesWithTags.forEach((vibe) => {
+      vibe.tags?.forEach((tag) => {
         if (fuzzyMatch(tag, searchText) && results.tags.length < 5) {
           tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
         }
       });
     });
-    
+
     tagCounts.forEach((count, tag) => {
       if (results.tags.length < 5) {
         results.tags.push({
@@ -518,7 +561,7 @@ export const getTrendingSearches = query({
       .order('desc')
       .take(limit);
 
-    return trending.map(item => ({
+    return trending.map((item) => ({
       term: item.term,
       count: item.count,
       category: item.category,
@@ -554,7 +597,7 @@ export const trackSearch = mutation({
     const normalizedQuery = query.toLowerCase().trim();
     const existing = await ctx.db
       .query('trendingSearches')
-      .withIndex('byTerm', q => q.eq('term', normalizedQuery))
+      .withIndex('byTerm', (q) => q.eq('term', normalizedQuery))
       .first();
 
     if (existing) {

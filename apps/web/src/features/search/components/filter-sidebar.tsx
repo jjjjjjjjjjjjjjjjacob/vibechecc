@@ -9,7 +9,12 @@ interface FilterSidebarProps {
   className?: string;
 }
 
-export function FilterSidebar({ filters, onChange, availableTags, className }: FilterSidebarProps) {
+export function FilterSidebar({
+  filters,
+  onChange,
+  availableTags,
+  className,
+}: FilterSidebarProps) {
   return (
     <Card className={className}>
       <div className="p-6">

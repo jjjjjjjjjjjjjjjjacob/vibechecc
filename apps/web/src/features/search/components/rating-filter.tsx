@@ -18,20 +18,23 @@ export function RatingFilter({ value, onChange }: RatingFilterProps) {
 
   return (
     <div>
-      <h4 className="font-medium mb-3">Minimum Rating</h4>
+      <h4 className="mb-3 font-medium">Minimum Rating</h4>
       <RadioGroup
         value={value?.toString() || '0'}
         onValueChange={(val) => onChange(val === '0' ? undefined : Number(val))}
       >
         {ratings.map((rating) => (
-          <div key={rating.value} className="flex items-center space-x-2 mb-2">
-            <RadioGroupItem value={rating.value.toString()} id={`rating-${rating.value}`} />
+          <div key={rating.value} className="mb-2 flex items-center space-x-2">
+            <RadioGroupItem
+              value={rating.value.toString()}
+              id={`rating-${rating.value}`}
+            />
             <Label
               htmlFor={`rating-${rating.value}`}
-              className="flex items-center cursor-pointer"
+              className="flex cursor-pointer items-center"
             >
               {rating.value > 0 && (
-                <div className="flex items-center mr-2">
+                <div className="mr-2 flex items-center">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}

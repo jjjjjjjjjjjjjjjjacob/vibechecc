@@ -1,7 +1,13 @@
 /// <reference lib="dom" />
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { SearchResponse } from '@vibechecc/types';
 
@@ -112,7 +118,9 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      expect(screen.getByPlaceholderText('Search vibes, users, or tags...')).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('Search vibes, users, or tags...')
+      ).toBeInTheDocument();
     });
 
     it('shows search suggestions when no query is entered', () => {
@@ -153,8 +161,10 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'test' } });
 
       await waitFor(() => {
@@ -186,8 +196,10 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'user' } });
 
       await waitFor(() => {
@@ -216,8 +228,10 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'fun' } });
 
       await waitFor(() => {
@@ -228,10 +242,40 @@ describe('SearchCommand', () => {
 
     it('displays all result types together', async () => {
       const mockData: SearchResponse = {
-        vibes: [{ id: '1', content: 'Test vibe', userId: 'user1', username: 'user1', avgRating: 4, userAvgRating: 4, totalRatings: 1, tags: [], createdAt: '2024-01-01' }],
-        users: [{ id: 'user1', username: 'testuser', displayName: 'Test', avgRating: 4, totalVibes: 1, avatarUrl: null }],
+        vibes: [
+          {
+            id: '1',
+            content: 'Test vibe',
+            userId: 'user1',
+            username: 'user1',
+            avgRating: 4,
+            userAvgRating: 4,
+            totalRatings: 1,
+            tags: [],
+            createdAt: '2024-01-01',
+          },
+        ],
+        users: [
+          {
+            id: 'user1',
+            username: 'testuser',
+            displayName: 'Test',
+            avgRating: 4,
+            totalVibes: 1,
+            avatarUrl: null,
+          },
+        ],
         tags: [{ id: 'tag1', name: 'test', count: 5 }],
-        actions: [{ id: 'action1', type: 'action', title: 'Create new vibe', subtitle: 'Share your experience', action: 'create', icon: 'plus' }],
+        actions: [
+          {
+            id: 'action1',
+            type: 'action',
+            title: 'Create new vibe',
+            subtitle: 'Share your experience',
+            action: 'create',
+            icon: 'plus',
+          },
+        ],
       };
 
       mockUseSearchSuggestions.mockReturnValue({
@@ -240,8 +284,10 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'test' } });
 
       await waitFor(() => {
@@ -266,12 +312,16 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'nonexistent' } });
 
       await waitFor(() => {
-        expect(screen.getByText('No results found for "nonexistent"')).toBeInTheDocument();
+        expect(
+          screen.getByText('No results found for "nonexistent"')
+        ).toBeInTheDocument();
       });
     });
 
@@ -282,8 +332,10 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'test' } });
 
       expect(screen.queryByText(/No results found/)).not.toBeInTheDocument();
@@ -298,8 +350,10 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'test query' } });
 
       expect(input).toHaveValue('test query');
@@ -308,7 +362,19 @@ describe('SearchCommand', () => {
     it('closes dialog when result is selected', async () => {
       const onOpenChange = vi.fn();
       const mockData: SearchResponse = {
-        vibes: [{ id: '1', content: 'Test vibe', userId: 'user1', username: 'user1', avgRating: 4, userAvgRating: 4, totalRatings: 1, tags: [], createdAt: '2024-01-01' }],
+        vibes: [
+          {
+            id: '1',
+            content: 'Test vibe',
+            userId: 'user1',
+            username: 'user1',
+            avgRating: 4,
+            userAvgRating: 4,
+            totalRatings: 1,
+            tags: [],
+            createdAt: '2024-01-01',
+          },
+        ],
         users: [],
         tags: [],
         actions: [],
@@ -320,8 +386,10 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand({ onOpenChange });
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'test' } });
 
       await waitFor(() => {
@@ -346,12 +414,16 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'long search query' } });
 
       await waitFor(() => {
-        const searchAllAction = screen.getByText('Search for "long search query"');
+        const searchAllAction = screen.getByText(
+          'Search for "long search query"'
+        );
         expect(searchAllAction).toBeInTheDocument();
         fireEvent.click(searchAllAction);
       });
@@ -371,11 +443,13 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
+
       const recentSearchButton = screen.getByText('Recent Search');
       fireEvent.click(recentSearchButton);
 
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       expect(input).toHaveValue('recent search');
     });
 
@@ -387,7 +461,7 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand({ onOpenChange });
-      
+
       const exploreButton = screen.getByText('Navigate to Explore');
       fireEvent.click(exploreButton);
 
@@ -404,8 +478,10 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
       fireEvent.change(input, { target: { value: 'test' } });
 
       expect(screen.queryByText('Vibes')).not.toBeInTheDocument();
@@ -426,9 +502,11 @@ describe('SearchCommand', () => {
       });
 
       renderSearchCommand();
-      
-      const input = screen.getByPlaceholderText('Search vibes, users, or tags...');
-      
+
+      const input = screen.getByPlaceholderText(
+        'Search vibes, users, or tags...'
+      );
+
       // Test with short query
       fireEvent.change(input, { target: { value: 'ab' } });
       await waitFor(() => {

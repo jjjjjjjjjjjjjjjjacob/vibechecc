@@ -9,10 +9,10 @@ interface ActiveFiltersBarProps {
   className?: string;
 }
 
-export function ActiveFiltersBar({ 
-  filters, 
+export function ActiveFiltersBar({
+  filters,
   onChange,
-  className 
+  className,
 }: ActiveFiltersBarProps) {
   const activeFilters: Array<{
     type: string;
@@ -22,14 +22,17 @@ export function ActiveFiltersBar({
   }> = [];
 
   // Tags
-  filters.tags?.forEach(tag => {
+  filters.tags?.forEach((tag) => {
     activeFilters.push({
       type: 'tag',
       label: tag,
       icon: Tag,
       onRemove: () => {
-        const newTags = filters.tags?.filter(t => t !== tag) || [];
-        onChange({ ...filters, tags: newTags.length > 0 ? newTags : undefined });
+        const newTags = filters.tags?.filter((t) => t !== tag) ?? [];
+        onChange({
+          ...filters,
+          tags: newTags.length > 0 ? newTags : undefined,
+        });
       },
     });
   });
@@ -44,7 +47,7 @@ export function ActiveFiltersBar({
     } else if (filters.maxRating !== undefined) {
       label = `Up to ${filters.maxRating} stars`;
     }
-    
+
     activeFilters.push({
       type: 'rating',
       label,
@@ -58,17 +61,18 @@ export function ActiveFiltersBar({
   // Date range
   if (filters.dateRange) {
     const formatDate = (date: string) => {
-      return new Date(date).toLocaleDateString('en-US', { 
-        month: 'short', 
+      return new Date(date).toLocaleDateString('en-US', {
+        month: 'short',
         day: 'numeric',
-        year: 'numeric'
+        year: 'numeric',
       });
     };
-    
-    const label = filters.dateRange.start === filters.dateRange.end
-      ? formatDate(filters.dateRange.start)
-      : `${formatDate(filters.dateRange.start)} - ${formatDate(filters.dateRange.end)}`;
-    
+
+    const label =
+      filters.dateRange.start === filters.dateRange.end
+        ? formatDate(filters.dateRange.start)
+        : `${formatDate(filters.dateRange.start)} - ${formatDate(filters.dateRange.end)}`;
+
     activeFilters.push({
       type: 'date',
       label,
@@ -87,7 +91,7 @@ export function ActiveFiltersBar({
       recent: 'Most recent',
       oldest: 'Oldest first',
     };
-    
+
     activeFilters.push({
       type: 'sort',
       label: sortLabels[filters.sort] || filters.sort,
@@ -108,18 +112,18 @@ export function ActiveFiltersBar({
 
   return (
     <div className={className}>
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm font-medium text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-muted-foreground text-sm font-medium">
           Active filters:
         </span>
-        
+
         {activeFilters.map((filter, index) => {
           const Icon = filter.icon;
           return (
             <Badge
               key={`${filter.type}-${filter.label}-${index}`}
               variant="secondary"
-              className="gap-1.5 pr-1 hover:bg-secondary/80 transition-colors"
+              className="hover:bg-secondary/80 gap-1.5 pr-1 transition-colors"
             >
               <Icon className="h-3 w-3" />
               <span>{filter.label}</span>
@@ -134,7 +138,7 @@ export function ActiveFiltersBar({
             </Badge>
           );
         })}
-        
+
         <Button
           variant="ghost"
           size="sm"
@@ -144,9 +148,10 @@ export function ActiveFiltersBar({
           Clear all
         </Button>
       </div>
-      
-      <div className="text-xs text-muted-foreground mt-2">
-        {activeFilters.length} filter{activeFilters.length !== 1 ? 's' : ''} applied
+
+      <div className="text-muted-foreground mt-2 text-xs">
+        {activeFilters.length} filter{activeFilters.length !== 1 ? 's' : ''}{' '}
+        applied
       </div>
     </div>
   );

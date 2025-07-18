@@ -18,7 +18,7 @@ describe('Search Functions', () => {
   describe('searchAll', () => {
     it('returns empty results for empty query', async () => {
       const t = setup();
-      
+
       const result = await t.query(api.search.searchAll, {
         query: '',
         limit: 10,
@@ -35,7 +35,7 @@ describe('Search Functions', () => {
 
     it('searches vibes by content', async () => {
       const t = setup();
-      
+
       // Create test user
       const userId = await t.mutation(api.users.createUser, {
         username: 'testuser',
@@ -66,7 +66,7 @@ describe('Search Functions', () => {
 
     it('searches users by username', async () => {
       const t = setup();
-      
+
       // Create test users
       await t.mutation(api.users.createUser, {
         username: 'alice123',
@@ -90,7 +90,7 @@ describe('Search Functions', () => {
 
     it('searches tags', async () => {
       const t = setup();
-      
+
       // Create vibes with tags
       await t.mutation(api.vibes.createVibe, {
         content: 'Content 1',
@@ -120,7 +120,7 @@ describe('Search Functions', () => {
 
     it('handles fuzzy matching for typos', async () => {
       const t = setup();
-      
+
       // Create test data
       await t.mutation(api.vibes.createVibe, {
         content: 'amazing experience at the restaurant',
@@ -139,7 +139,7 @@ describe('Search Functions', () => {
 
     it('applies filters correctly', async () => {
       const t = setup();
-      
+
       // Create vibes with different ratings
       const vibe1 = await t.mutation(api.vibes.createVibe, {
         content: 'Great vibe',
@@ -177,7 +177,7 @@ describe('Search Functions', () => {
 
     it('respects search operators', async () => {
       const t = setup();
-      
+
       // Create test vibes
       await t.mutation(api.vibes.createVibe, {
         content: 'I love coding in TypeScript',
@@ -209,7 +209,7 @@ describe('Search Functions', () => {
 
     it('sorts results by relevance', async () => {
       const t = setup();
-      
+
       // Create vibes with different relevance
       await t.mutation(api.vibes.createVibe, {
         content: 'Python Python Python', // High relevance for "python"
@@ -239,7 +239,7 @@ describe('Search Functions', () => {
 
     it('handles special characters in search', async () => {
       const t = setup();
-      
+
       // Create vibes with special characters
       await t.mutation(api.vibes.createVibe, {
         content: 'C++ is a great language!',
@@ -272,7 +272,7 @@ describe('Search Functions', () => {
 
     it('limits results correctly', async () => {
       const t = setup();
-      
+
       // Create many vibes
       for (let i = 0; i < 10; i++) {
         await t.mutation(api.vibes.createVibe, {
@@ -293,7 +293,7 @@ describe('Search Functions', () => {
 
     it('includes action suggestions', async () => {
       const t = setup();
-      
+
       // Search for "create"
       const result = await t.query(api.search.searchAll, {
         query: 'create',
@@ -310,7 +310,7 @@ describe('Search Functions', () => {
   describe('getSearchSuggestions', () => {
     it('returns suggestions for partial queries', async () => {
       const t = setup();
-      
+
       // Create test data
       await t.mutation(api.vibes.createVibe, {
         content: 'Amazing sunset photography',
@@ -333,7 +333,7 @@ describe('Search Functions', () => {
 
     it('returns recent searches when query is empty', async () => {
       const t = setup();
-      
+
       // Track some searches
       await t.mutation(api.search.trackSearch, {
         query: 'sunset',
@@ -359,7 +359,7 @@ describe('Search Functions', () => {
   describe('getTrendingSearches', () => {
     it('returns most popular search terms', async () => {
       const t = setup();
-      
+
       // Track searches with different frequencies
       for (let i = 0; i < 10; i++) {
         await t.mutation(api.search.trackSearch, {
@@ -396,7 +396,7 @@ describe('Search Functions', () => {
   describe('trackSearch', () => {
     it('tracks search queries and results', async () => {
       const t = setup();
-      
+
       // Track a search
       await t.mutation(api.search.trackSearch, {
         query: 'test search',
@@ -408,14 +408,14 @@ describe('Search Functions', () => {
         limit: 10,
       });
 
-      const tracked = trending.find(t => t.term === 'test search');
+      const tracked = trending.find((t) => t.term === 'test search');
       expect(tracked).toBeDefined();
       expect(tracked?.count).toBe(1);
     });
 
     it('increments count for repeated searches', async () => {
       const t = setup();
-      
+
       // Track same search multiple times
       await t.mutation(api.search.trackSearch, {
         query: 'repeated',
@@ -432,7 +432,7 @@ describe('Search Functions', () => {
         limit: 10,
       });
 
-      const tracked = trending.find(t => t.term === 'repeated');
+      const tracked = trending.find((t) => t.term === 'repeated');
       expect(tracked?.count).toBe(2);
     });
   });
@@ -440,7 +440,7 @@ describe('Search Functions', () => {
   describe('Performance', () => {
     it('handles large datasets efficiently', async () => {
       const t = setup();
-      
+
       // Create many vibes
       for (let i = 0; i < 100; i++) {
         await t.mutation(api.vibes.createVibe, {

@@ -1,6 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useUserByUsername, useUserVibes, useUserRatings, useUserReceivedRatings } from '@/queries';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  useUserByUsername,
+  useUserVibes,
+  useUserRatings,
+  useUserReceivedRatings,
+} from '@/queries';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,7 +19,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VibeGrid } from '@/components/vibe-grid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
-import { CalendarDays, MapPin, Link as LinkIcon, Twitter, Instagram, Globe, Star, MessageCircle } from 'lucide-react';
+import {
+  CalendarDays,
+  MapPin,
+  Link as LinkIcon,
+  Twitter,
+  Instagram,
+  Globe,
+  Star,
+  MessageCircle,
+} from 'lucide-react';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,
@@ -16,10 +36,19 @@ export const Route = createFileRoute('/users/$username')({
 
 function UserProfile() {
   const { username } = Route.useParams();
-  const { data: user, isLoading: userLoading, error: userError } = useUserByUsername(username);
-  const { data: userVibes, isLoading: vibesLoading } = useUserVibes(user?.externalId || '');
-  const { data: userRatings, isLoading: ratingsLoading } = useUserRatings(user?.externalId || '');
-  const { data: receivedRatings, isLoading: receivedRatingsLoading } = useUserReceivedRatings(user?.externalId || '');
+  const {
+    data: user,
+    isLoading: userLoading,
+    error: userError,
+  } = useUserByUsername(username);
+  const { data: userVibes, isLoading: vibesLoading } = useUserVibes(
+    user?.externalId || ''
+  );
+  const { data: userRatings, isLoading: ratingsLoading } = useUserRatings(
+    user?.externalId || ''
+  );
+  const { data: receivedRatings, isLoading: receivedRatingsLoading } =
+    useUserReceivedRatings(user?.externalId || '');
 
   if (userLoading) {
     return <UserProfileSkeleton />;
@@ -30,7 +59,7 @@ function UserProfile() {
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardContent className="p-8 text-center">
-            <h1 className="text-2xl font-bold mb-2">User not found</h1>
+            <h1 className="mb-2 text-2xl font-bold">User not found</h1>
             <p className="text-muted-foreground">
               The user @{username} could not be found.
             </p>
@@ -40,26 +69,36 @@ function UserProfile() {
     );
   }
 
-  const displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || 'User';
-  const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown';
+  const displayName =
+    `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
+    user.username ||
+    'User';
+  const joinDate = user.created_at
+    ? new Date(user.created_at).toLocaleDateString()
+    : 'Unknown';
   const vibeCount = userVibes?.length || 0;
   const givenRatingsCount = userRatings?.length || 0;
   const receivedRatingsCount = receivedRatings?.length || 0;
-  const averageReceivedRating = receivedRatings?.length > 0 
-    ? receivedRatings.reduce((sum, rating) => sum + rating.rating, 0) / receivedRatings.length 
-    : 0;
+  const averageReceivedRating =
+    receivedRatings?.length > 0
+      ? receivedRatings.reduce((sum, rating) => sum + rating.rating, 0) /
+        receivedRatings.length
+      : 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         {/* Profile Header */}
         <Card className="mb-8">
           <CardContent className="p-8">
-            <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col gap-8 md:flex-row">
               {/* Profile Picture */}
               <div className="flex-shrink-0">
                 <Avatar className="h-32 w-32">
-                  <AvatarImage src={user.image_url || user.profile_image_url} alt={displayName} />
+                  <AvatarImage
+                    src={user.image_url || user.profile_image_url}
+                    alt={displayName}
+                  />
                   <AvatarFallback className="text-4xl">
                     {displayName.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -70,13 +109,13 @@ function UserProfile() {
               <div className="flex-1 space-y-4">
                 <div>
                   <h1 className="text-3xl font-bold">{displayName}</h1>
-                  <p className="text-xl text-muted-foreground">@{user.username}</p>
+                  <p className="text-muted-foreground text-xl">
+                    @{user.username}
+                  </p>
                 </div>
 
                 {/* Bio */}
-                {user.bio && (
-                  <p className="text-lg">{user.bio}</p>
-                )}
+                {user.bio && <p className="text-lg">{user.bio}</p>}
 
                 {/* Stats */}
                 <div className="flex gap-6 text-sm">
@@ -91,8 +130,12 @@ function UserProfile() {
                   {averageReceivedRating > 0 && (
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold">{averageReceivedRating.toFixed(1)}</span>
-                      <span className="text-muted-foreground">({receivedRatingsCount} reviews)</span>
+                      <span className="font-semibold">
+                        {averageReceivedRating.toFixed(1)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        ({receivedRatingsCount} reviews)
+                      </span>
                     </div>
                   )}
                 </div>
@@ -102,21 +145,33 @@ function UserProfile() {
                   <div className="flex gap-3">
                     {user.socials.twitter && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={`https://twitter.com/${user.socials.twitter}`} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={`https://twitter.com/${user.socials.twitter}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <Twitter className="h-4 w-4" />
                         </a>
                       </Button>
                     )}
                     {user.socials.instagram && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={`https://instagram.com/${user.socials.instagram}`} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={`https://instagram.com/${user.socials.instagram}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <Instagram className="h-4 w-4" />
                         </a>
                       </Button>
                     )}
                     {user.socials.website && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={user.socials.website} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={user.socials.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <Globe className="h-4 w-4" />
                         </a>
                       </Button>
@@ -151,7 +206,7 @@ function UserProfile() {
                 ) : userVibes && userVibes.length > 0 ? (
                   <VibeGrid vibes={userVibes} />
                 ) : (
-                  <div className="text-center py-8">
+                  <div className="py-8 text-center">
                     <p className="text-muted-foreground">
                       {user.username} hasn't created any vibes yet.
                     </p>
@@ -168,7 +223,8 @@ function UserProfile() {
                 <CardHeader>
                   <CardTitle>Reviews Given</CardTitle>
                   <CardDescription>
-                    {givenRatingsCount} {givenRatingsCount === 1 ? 'review' : 'reviews'} given
+                    {givenRatingsCount}{' '}
+                    {givenRatingsCount === 1 ? 'review' : 'reviews'} given
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -187,41 +243,48 @@ function UserProfile() {
                   ) : userRatings && userRatings.length > 0 ? (
                     <div className="space-y-4">
                       {userRatings.slice(0, 5).map((rating) => (
-                        <div key={rating._id} className="flex items-start gap-3">
-                          <img 
-                            src={rating.vibe.image} 
+                        <div
+                          key={rating._id}
+                          className="flex items-start gap-3"
+                        >
+                          <img
+                            src={rating.vibe.image}
                             alt={rating.vibe.title}
                             className="h-12 w-12 rounded object-cover"
                           />
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-medium text-sm">{rating.vibe.title}</h4>
+                            <div className="mb-1 flex items-center gap-2">
+                              <h4 className="text-sm font-medium">
+                                {rating.vibe.title}
+                              </h4>
                               <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
-                                  <Star 
-                                    key={i} 
-                                    className={`h-3 w-3 ${i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+                                  <Star
+                                    key={i}
+                                    className={`h-3 w-3 ${i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                                   />
                                 ))}
                               </div>
                             </div>
                             {rating.review && (
-                              <p className="text-sm text-muted-foreground">{rating.review}</p>
+                              <p className="text-muted-foreground text-sm">
+                                {rating.review}
+                              </p>
                             )}
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-muted-foreground mt-1 text-xs">
                               {new Date(rating.date).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
                       ))}
                       {userRatings.length > 5 && (
-                        <p className="text-sm text-muted-foreground text-center">
+                        <p className="text-muted-foreground text-center text-sm">
                           and {userRatings.length - 5} more...
                         </p>
                       )}
                     </div>
                   ) : (
-                    <div className="text-center py-8">
+                    <div className="py-8 text-center">
                       <p className="text-muted-foreground">
                         {user.username} hasn't given any reviews yet.
                       </p>
@@ -235,7 +298,8 @@ function UserProfile() {
                 <CardHeader>
                   <CardTitle>Reviews Received</CardTitle>
                   <CardDescription>
-                    {receivedRatingsCount} {receivedRatingsCount === 1 ? 'review' : 'reviews'} received
+                    {receivedRatingsCount}{' '}
+                    {receivedRatingsCount === 1 ? 'review' : 'reviews'} received
                     {averageReceivedRating > 0 && (
                       <span className="ml-2 inline-flex items-center gap-1">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -260,7 +324,10 @@ function UserProfile() {
                   ) : receivedRatings && receivedRatings.length > 0 ? (
                     <div className="space-y-4">
                       {receivedRatings.slice(0, 5).map((rating) => (
-                        <div key={rating._id} className="flex items-start gap-3">
+                        <div
+                          key={rating._id}
+                          className="flex items-start gap-3"
+                        >
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={rating.rater?.image_url} />
                             <AvatarFallback>
@@ -268,39 +335,41 @@ function UserProfile() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm">
+                            <div className="mb-1 flex items-center gap-2">
+                              <span className="text-sm font-medium">
                                 {rating.rater?.username || 'Unknown'}
                               </span>
                               <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
-                                  <Star 
-                                    key={i} 
-                                    className={`h-3 w-3 ${i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+                                  <Star
+                                    key={i}
+                                    className={`h-3 w-3 ${i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                                   />
                                 ))}
                               </div>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-1">
+                            <p className="text-muted-foreground mb-1 text-sm">
                               on "{rating.vibe.title}"
                             </p>
                             {rating.review && (
-                              <p className="text-sm text-muted-foreground">{rating.review}</p>
+                              <p className="text-muted-foreground text-sm">
+                                {rating.review}
+                              </p>
                             )}
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-muted-foreground mt-1 text-xs">
                               {new Date(rating.date).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
                       ))}
                       {receivedRatings.length > 5 && (
-                        <p className="text-sm text-muted-foreground text-center">
+                        <p className="text-muted-foreground text-center text-sm">
                           and {receivedRatings.length - 5} more...
                         </p>
                       )}
                     </div>
                   ) : (
-                    <div className="text-center py-8">
+                    <div className="py-8 text-center">
                       <p className="text-muted-foreground">
                         {user.username} hasn't received any reviews yet.
                       </p>
@@ -320,7 +389,7 @@ function UserProfile() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
+                <div className="py-8 text-center">
                   <p className="text-muted-foreground">
                     Activity feed coming soon...
                   </p>
@@ -337,14 +406,14 @@ function UserProfile() {
               <CardContent className="space-y-6">
                 {user.bio && (
                   <div>
-                    <h3 className="font-semibold mb-2">Bio</h3>
+                    <h3 className="mb-2 font-semibold">Bio</h3>
                     <p className="text-muted-foreground">{user.bio}</p>
                   </div>
                 )}
-                
+
                 {user.interests && user.interests.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-2">Interests</h3>
+                    <h3 className="mb-2 font-semibold">Interests</h3>
                     <div className="flex flex-wrap gap-2">
                       {user.interests.map((interest) => (
                         <Badge key={interest} variant="secondary">
@@ -356,34 +425,44 @@ function UserProfile() {
                 )}
 
                 <div>
-                  <h3 className="font-semibold mb-2">Stats</h3>
+                  <h3 className="mb-2 font-semibold">Stats</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-2xl font-bold">{vibeCount}</p>
-                      <p className="text-sm text-muted-foreground">Vibes Created</p>
+                      <p className="text-muted-foreground text-sm">
+                        Vibes Created
+                      </p>
                     </div>
                     <div>
                       <p className="text-2xl font-bold">{givenRatingsCount}</p>
-                      <p className="text-sm text-muted-foreground">Reviews Given</p>
+                      <p className="text-muted-foreground text-sm">
+                        Reviews Given
+                      </p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{receivedRatingsCount}</p>
-                      <p className="text-sm text-muted-foreground">Reviews Received</p>
+                      <p className="text-2xl font-bold">
+                        {receivedRatingsCount}
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        Reviews Received
+                      </p>
                     </div>
                     {averageReceivedRating > 0 && (
                       <div>
-                        <p className="text-2xl font-bold flex items-center gap-1">
+                        <p className="flex items-center gap-1 text-2xl font-bold">
                           <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
                           {averageReceivedRating.toFixed(1)}
                         </p>
-                        <p className="text-sm text-muted-foreground">Average Rating</p>
+                        <p className="text-muted-foreground text-sm">
+                          Average Rating
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Member Since</h3>
+                  <h3 className="mb-2 font-semibold">Member Since</h3>
                   <p className="text-muted-foreground">{joinDate}</p>
                 </div>
               </CardContent>
@@ -398,17 +477,17 @@ function UserProfile() {
 function UserProfileSkeleton() {
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         <Card className="mb-8">
           <CardContent className="p-8">
-            <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col gap-8 md:flex-row">
               <div className="flex-shrink-0">
                 <Skeleton className="h-32 w-32 rounded-full" />
               </div>
               <div className="flex-1 space-y-4">
                 <div>
                   <Skeleton className="h-8 w-48" />
-                  <Skeleton className="h-6 w-32 mt-2" />
+                  <Skeleton className="mt-2 h-6 w-32" />
                 </div>
                 <Skeleton className="h-4 w-96" />
                 <div className="flex gap-6">

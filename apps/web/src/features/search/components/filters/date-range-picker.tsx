@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { Calendar, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Calendar,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -9,7 +14,13 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
-import { format, subDays, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
+import {
+  format,
+  subDays,
+  startOfWeek,
+  startOfMonth,
+  startOfYear,
+} from 'date-fns';
 
 interface DateRangePickerProps {
   value?: { start: string; end: string };
@@ -17,10 +28,10 @@ interface DateRangePickerProps {
   className?: string;
 }
 
-export function DateRangePicker({ 
-  value, 
+export function DateRangePicker({
+  value,
   onChange,
-  className 
+  className,
 }: DateRangePickerProps) {
   const [selectedPreset, setSelectedPreset] = useState<string>('all');
   const [isOpen, setIsOpen] = useState(false);
@@ -37,7 +48,9 @@ export function DateRangePicker({
     { value: 'last90', label: 'Last 90 days', icon: Calendar },
   ];
 
-  const getDateRangeFromPreset = (preset: string): { start: string; end: string } | undefined => {
+  const getDateRangeFromPreset = (
+    preset: string
+  ): { start: string; end: string } | undefined => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const todayString = format(today, 'yyyy-MM-dd');
@@ -95,14 +108,14 @@ export function DateRangePicker({
 
   const formatDateRange = () => {
     if (!value) return 'All time';
-    
+
     const start = new Date(value.start);
     const end = new Date(value.end);
-    
+
     if (value.start === value.end) {
       return format(start, 'MMM d, yyyy');
     }
-    
+
     // Same year
     if (start.getFullYear() === end.getFullYear()) {
       // Same month
@@ -111,7 +124,7 @@ export function DateRangePicker({
       }
       return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
     }
-    
+
     return `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`;
   };
 
@@ -119,14 +132,14 @@ export function DateRangePicker({
 
   return (
     <div className={className}>
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <h4 className="font-medium">Date Posted</h4>
         {isFiltered && (
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="h-auto py-1 px-2 text-xs"
+            className="h-auto px-2 py-1 text-xs"
           >
             Clear
           </Button>
@@ -143,12 +156,17 @@ export function DateRangePicker({
           const Icon = preset.icon;
           return (
             <div key={preset.value} className="flex items-center space-x-2">
-              <RadioGroupItem value={preset.value} id={`date-${preset.value}`} />
+              <RadioGroupItem
+                value={preset.value}
+                id={`date-${preset.value}`}
+              />
               <Label
                 htmlFor={`date-${preset.value}`}
-                className="flex cursor-pointer items-center flex-1"
+                className="flex flex-1 cursor-pointer items-center"
               >
-                {Icon && <Icon className="mr-2 h-3 w-3 text-muted-foreground" />}
+                {Icon && (
+                  <Icon className="text-muted-foreground mr-2 h-3 w-3" />
+                )}
                 <span>{preset.label}</span>
               </Label>
             </div>
@@ -176,14 +194,16 @@ export function DateRangePicker({
           </PopoverTrigger>
           <PopoverContent className="w-auto p-4" align="start">
             <div className="space-y-3">
-              <h5 className="font-medium text-sm">Quick ranges</h5>
+              <h5 className="text-sm font-medium">Quick ranges</h5>
               <div className="grid gap-2">
                 {presets.slice(5).map((preset) => {
                   const Icon = preset.icon;
                   return (
                     <Button
                       key={preset.value}
-                      variant={selectedPreset === preset.value ? "secondary" : "ghost"}
+                      variant={
+                        selectedPreset === preset.value ? 'secondary' : 'ghost'
+                      }
                       size="sm"
                       className="justify-start"
                       onClick={() => {
@@ -197,9 +217,9 @@ export function DateRangePicker({
                   );
                 })}
               </div>
-              
+
               <div className="border-t pt-3">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Custom date range picker coming soon
                 </p>
               </div>
@@ -209,11 +229,10 @@ export function DateRangePicker({
       </div>
 
       {/* Summary */}
-      <p className="text-xs text-muted-foreground mt-3">
-        {isFiltered 
+      <p className="text-muted-foreground mt-3 text-xs">
+        {isFiltered
           ? `Showing vibes from ${formatDateRange()}`
-          : 'Showing vibes from all time'
-        }
+          : 'Showing vibes from all time'}
       </p>
     </div>
   );

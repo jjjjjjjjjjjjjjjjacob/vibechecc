@@ -27,13 +27,13 @@ export function UserResult({ result, onSelect }: UserResultProps) {
         <AvatarImage src={result.image} />
         <AvatarFallback>{result.title?.[0] || '?'}</AvatarFallback>
       </Avatar>
-      
+
       <div className="flex-1">
         <div className="font-medium">{result.title}</div>
-        <div className="text-sm text-muted-foreground">{result.subtitle}</div>
+        <div className="text-muted-foreground text-sm">{result.subtitle}</div>
       </div>
-      
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+
+      <div className="text-muted-foreground flex items-center gap-3 text-xs">
         {result.vibeCount !== undefined && (
           <div className="flex items-center gap-1">
             <Sparkles className="h-3 w-3" />

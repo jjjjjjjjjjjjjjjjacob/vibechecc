@@ -13,10 +13,15 @@ interface UseSearchResultsParams {
   cursor?: string;
 }
 
-export function useSearchResults({ query, filters, limit = 20, cursor }: UseSearchResultsParams) {
+export function useSearchResults({
+  query,
+  filters,
+  limit = 20,
+  cursor,
+}: UseSearchResultsParams) {
   const debouncedQuery = useDebouncedValue(query, 300);
   const { user } = useUser();
-  
+
   // Use Convex query for search
   const searchQuery = useQuery({
     ...convexQuery(api.search.searchAll, {
@@ -36,7 +41,7 @@ export function useSearchResults({ query, filters, limit = 20, cursor }: UseSear
   // Track search when debounced query changes (only for non-empty queries and authenticated users)
   useEffect(() => {
     if (debouncedQuery.trim() && searchQuery.data && user?.id) {
-      trackSearchMutation.mutate({ 
+      trackSearchMutation.mutate({
         query: debouncedQuery,
         resultCount: searchQuery.data.totalCount || 0,
       });

@@ -6,7 +6,10 @@ interface SearchLoadingProps {
   type?: 'grid' | 'list';
 }
 
-export function SearchLoading({ itemCount = 6, type = 'grid' }: SearchLoadingProps) {
+export function SearchLoading({
+  itemCount = 6,
+  type = 'grid',
+}: SearchLoadingProps) {
   if (type === 'list') {
     return (
       <div className="space-y-2">
@@ -26,11 +29,11 @@ export function SearchLoading({ itemCount = 6, type = 'grid' }: SearchLoadingPro
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: itemCount }).map((_, i) => (
         <Card key={i} className="overflow-hidden">
           <Skeleton className="aspect-[4/3] w-full" />
-          <div className="p-4 space-y-2">
+          <div className="space-y-2 p-4">
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-4 w-3/4" />
             <div className="flex items-center gap-2 pt-2">

@@ -9,7 +9,12 @@ const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
 export const searchCacheOptions = {
   // Main search query options
-  searchAll: (query: string, filters?: SearchFilters, limit = 20, cursor?: string) =>
+  searchAll: (
+    query: string,
+    filters?: SearchFilters,
+    limit = 20,
+    cursor?: string
+  ) =>
     queryOptions({
       ...convexQuery(api.search.searchAll, {
         query,
@@ -58,16 +63,12 @@ export const searchPrefetch = {
 
   // Prefetch suggestions
   async prefetchSuggestions(queryClient: any, query: string) {
-    return queryClient.prefetchQuery(
-      searchCacheOptions.suggestions(query)
-    );
+    return queryClient.prefetchQuery(searchCacheOptions.suggestions(query));
   },
 
   // Prefetch trending searches
   async prefetchTrending(queryClient: any) {
-    return queryClient.prefetchQuery(
-      searchCacheOptions.trending()
-    );
+    return queryClient.prefetchQuery(searchCacheOptions.trending());
   },
 };
 

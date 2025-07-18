@@ -20,7 +20,7 @@ export function useSearchShortcuts({
         e.preventDefault();
         onOpen();
       }
-      
+
       // Close with Escape
       if (e.key === 'Escape' && onClose) {
         e.preventDefault();
@@ -29,7 +29,7 @@ export function useSearchShortcuts({
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
