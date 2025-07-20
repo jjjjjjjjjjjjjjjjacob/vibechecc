@@ -52,6 +52,6 @@
     }
   },
   "tui": {
-    "autoExit": 0
+    "enabled": true
   }
 }

@@ -15,7 +15,6 @@ import { ActionResult } from './result-items/action-result';
 import { SearchSuggestions } from './search-suggestions';
 import { useSearchSuggestions } from '../hooks/use-search';
 import { useNavigate } from '@tanstack/react-router';
-import type { ActionSearchResult } from '@vibechecc/types';
 
 interface SearchCommandProps {
   open: boolean;
@@ -62,28 +61,31 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
     !query && data && 'popularTags' in data ? data.popularTags : undefined;
 
   // Convert trending searches to SearchSuggestion format (use from data instead of separate query)
-  const formattedTrendingSearches = trendingSearchTerms
-    ? trendingSearchTerms.map((term) => ({
-        term,
-        type: 'trending' as const,
-      }))
-    : undefined;
+  const formattedTrendingSearches =
+    trendingSearchTerms && Array.isArray(trendingSearchTerms)
+      ? trendingSearchTerms.map((term: string) => ({
+          term,
+          type: 'trending' as const,
+        }))
+      : undefined;
 
   // Convert recent searches to SearchSuggestion format
-  const formattedRecentSearches = recentSearches
-    ? recentSearches.map((term) => ({
-        term,
-        type: 'recent' as const,
-      }))
-    : undefined;
+  const formattedRecentSearches =
+    recentSearches && Array.isArray(recentSearches)
+      ? recentSearches.map((term: string) => ({
+          term,
+          type: 'recent' as const,
+        }))
+      : undefined;
 
   // Convert popular tags to SearchSuggestion format
-  const formattedPopularTags = popularTags
-    ? popularTags.map((tag) => ({
-        term: tag,
-        type: 'tag' as const,
-      }))
-    : undefined;
+  const formattedPopularTags =
+    popularTags && Array.isArray(popularTags)
+      ? popularTags.map((tag: string) => ({
+          term: tag,
+          type: 'recommended' as const,
+        }))
+      : undefined;
 
   // Check if there are any suggestions or results to show
   const hasContent =
@@ -168,25 +170,24 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
                 </>
               )}
 
-              {'actions' in data &&
-                data.actions &&
-                (data.actions as any).length > 0 && (
-                  <>
+              {data.actions && data.actions.length > 0 && (
+                <>
+                  {((data.vibes && data.vibes.length > 0) ||
+                    (data.users && data.users.length > 0) ||
+                    (data.tags && data.tags.length > 0)) && (
                     <CommandSeparator />
-                    <CommandGroup heading="Actions">
-                      {(data.actions as ActionSearchResult[]).map(
-                        (action: ActionSearchResult) => (
-                          <ActionResult
-                            key={action.id}
-                            result={action}
-                            query={query}
-                            onSelect={handleSelect}
-                          />
-                        )
-                      )}
-                    </CommandGroup>
-                  </>
-                )}
+                  )}
+                  <CommandGroup heading="Actions">
+                    {data.actions.map((action) => (
+                      <ActionResult
+                        key={action.id}
+                        result={action}
+                        onSelect={handleSelect}
+                      />
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
             </>
           )}
 
@@ -194,21 +195,18 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
             <>
               {(hasResults || isLoading) && <CommandSeparator />}
               <CommandGroup heading="Search for">
-                <ActionResult
-                  result={{
-                    id: 'search-all',
-                    type: 'action',
-                    title: `Search for "${query}"`,
-                    subtitle: 'View all results',
-                    action: 'search',
-                    icon: 'search',
-                  }}
-                  query={query}
-                  onSelect={() => {
+                <button
+                  className="hover:bg-accent hover:text-accent-foreground data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50"
+                  onClick={() => {
                     navigate({ to: '/search', search: { q: query } });
                     handleSelect();
                   }}
-                />
+                >
+                  <span className="flex-1">Search for "{query}"</span>
+                  <span className="text-muted-foreground ml-auto text-xs tracking-widest">
+                    View all results
+                  </span>
+                </button>
               </CommandGroup>
             </>
           )}

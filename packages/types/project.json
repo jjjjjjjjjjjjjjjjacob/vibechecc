@@ -7,7 +7,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsup src/index.ts --format cjs,esm && bunx tsc --project tsconfig.build.json --emitDeclarationOnly",
+        "command": "bun run build",
         "cwd": "packages/types"
       }
     },

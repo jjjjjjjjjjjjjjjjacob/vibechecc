@@ -529,10 +529,12 @@ export const getSearchSuggestions = query({
       vibes: VibeSearchResult[];
       users: UserSearchResult[];
       tags: TagSearchResult[];
+      actions: ActionSearchResult[];
     } = {
       vibes: [],
       users: [],
       tags: [],
+      actions: [],
     };
 
     if (!searchQuery.trim()) {
@@ -578,6 +580,7 @@ export const getSearchSuggestions = query({
         vibes: [],
         users: [],
         tags: [],
+        actions: [],
       };
     }
 
@@ -689,6 +692,60 @@ export const getSearchSuggestions = query({
         });
       }
     });
+
+    // Add action suggestions (limit 3)
+    const lowerQuery = searchQuery.toLowerCase();
+
+    // Check for "create" related queries
+    if (
+      results.actions.length < 3 &&
+      (lowerQuery.includes('create') ||
+        lowerQuery.includes('new') ||
+        lowerQuery.includes('add'))
+    ) {
+      results.actions.push({
+        id: 'create-vibe',
+        type: 'action',
+        title: 'Create a new vibe',
+        subtitle: 'Share your experience with the community',
+        action: 'create',
+        icon: 'plus',
+      });
+    }
+
+    // Check for "profile" related queries
+    if (
+      results.actions.length < 3 &&
+      (lowerQuery.includes('profile') ||
+        lowerQuery.includes('my') ||
+        lowerQuery.includes('account'))
+    ) {
+      results.actions.push({
+        id: 'view-profile',
+        type: 'action',
+        title: 'View your profile',
+        subtitle: 'See your vibes and stats',
+        action: 'profile',
+        icon: 'user',
+      });
+    }
+
+    // Check for "settings" related queries
+    if (
+      results.actions.length < 3 &&
+      (lowerQuery.includes('setting') ||
+        lowerQuery.includes('preference') ||
+        lowerQuery.includes('config'))
+    ) {
+      results.actions.push({
+        id: 'open-settings',
+        type: 'action',
+        title: 'Open settings',
+        subtitle: 'Manage your account preferences',
+        action: 'settings',
+        icon: 'settings',
+      });
+    }
 
     return results;
   },
