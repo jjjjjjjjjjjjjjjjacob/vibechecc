@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import {
-  SearchFilters,
   SearchResultsGrid,
   SearchPagination,
 } from '@/features/search/components';
@@ -33,11 +32,11 @@ function SearchResultsPage() {
   const { data, isLoading, isError, error } = useSearchResults({
     query: q || '',
     filters,
-    page,
   });
 
+  const navigate = Route.useNavigate();
+
   const updateFilters = (newFilters: typeof filters) => {
-    const navigate = Route.useNavigate();
     navigate({
       search: (prev) => ({
         ...prev,
@@ -100,7 +99,13 @@ function SearchResultsPage() {
               <select
                 value={sort}
                 onChange={(e) =>
-                  updateFilters({ ...filters, sort: e.target.value as any })
+                  updateFilters({
+                    ...filters,
+                    sort: e.target.value as
+                      | 'relevance'
+                      | 'rating_desc'
+                      | 'recent',
+                  })
                 }
                 className="rounded-md border px-3 py-1 text-sm"
               >
@@ -111,18 +116,32 @@ function SearchResultsPage() {
             </div>
 
             <SearchResultsGrid
-              results={data?.results}
+              results={
+                data
+                  ? [
+                      ...(data.vibes || []),
+                      ...(data.users || []),
+                      ...(data.tags || []),
+                      ...(data.actions || []),
+                    ]
+                  : undefined
+              }
               loading={isLoading}
               error={isError ? error : undefined}
               onRetry={() => window.location.reload()}
             />
 
-            {!isLoading && data?.results && data.results.length > 0 && (
-              <SearchPagination
-                currentPage={page || 1}
-                totalPages={totalPages}
-              />
-            )}
+            {!isLoading &&
+              data &&
+              ((data.vibes && data.vibes.length > 0) ||
+                (data.users && data.users.length > 0) ||
+                (data.tags && data.tags.length > 0) ||
+                (data.actions && data.actions.length > 0)) && (
+                <SearchPagination
+                  currentPage={page || 1}
+                  totalPages={totalPages}
+                />
+              )}
           </main>
         </div>
       </div>

@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm && tsc --project tsconfig.build.json --emitDeclarationOnly",
+    "build": "rm -rf dist && tsup && bunx tsc src/index.ts src/search.ts --declaration --outDir dist --rootDir src",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "clean": "rm -rf dist"
   },

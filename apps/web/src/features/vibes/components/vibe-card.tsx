@@ -7,7 +7,7 @@ import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { useState } from 'react';
 import { EmojiReactions } from '@/components/emoji-reaction';
-import { useUser, SignInButton } from '@clerk/tanstack-react-start';
+import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
 import { useAddRatingMutation } from '@/queries';
 import toast from 'react-hot-toast';

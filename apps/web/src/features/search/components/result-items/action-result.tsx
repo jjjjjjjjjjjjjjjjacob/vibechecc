@@ -9,7 +9,7 @@ interface ActionResultProps {
   onSelect?: () => void;
 }
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, React.ComponentType> = {
   plus: Plus,
   user: User,
   settings: Settings,
@@ -17,7 +17,7 @@ const iconMap: Record<string, any> = {
   search: Search,
 };
 
-export function ActionResult({ result, query, onSelect }: ActionResultProps) {
+export function ActionResult({ result, onSelect }: ActionResultProps) {
   const navigate = useNavigate();
 
   const handleSelect = () => {
@@ -29,7 +29,7 @@ export function ActionResult({ result, query, onSelect }: ActionResultProps) {
         navigate({ to: '/profile' });
         break;
       default:
-        console.log('Unknown action:', result.action);
+      // Unknown action
     }
     onSelect?.();
   };

@@ -120,17 +120,17 @@ const _user = schema.tables.users.validator;
 const vibe = schema.tables.vibes.validator;
 const rating = schema.tables.ratings.validator;
 const reaction = schema.tables.reactions.validator;
-const searchHistory = schema.tables.searchHistory.validator;
-const trendingSearches = schema.tables.trendingSearches.validator;
-const searchMetrics = schema.tables.searchMetrics.validator;
+const _searchHistory = schema.tables.searchHistory.validator;
+const _trendingSearches = schema.tables.trendingSearches.validator;
+const _searchMetrics = schema.tables.searchMetrics.validator;
 
 export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
 export type Rating = Infer<typeof rating>;
 export type Reaction = Infer<typeof reaction>;
-export type SearchHistory = Infer<typeof searchHistory>;
-export type TrendingSearches = Infer<typeof trendingSearches>;
-export type SearchMetrics = Infer<typeof searchMetrics>;
+export type SearchHistory = Infer<typeof _searchHistory>;
+export type TrendingSearches = Infer<typeof _trendingSearches>;
+export type SearchMetrics = Infer<typeof _searchMetrics>;
 
 export const createVibeSchema = v.object({
   title: vibe.fields.title,

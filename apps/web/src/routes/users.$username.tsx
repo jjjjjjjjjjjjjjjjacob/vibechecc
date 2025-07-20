@@ -19,16 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VibeGrid } from '@/components/vibe-grid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
-import {
-  CalendarDays,
-  MapPin,
-  Link as LinkIcon,
-  Twitter,
-  Instagram,
-  Globe,
-  Star,
-  MessageCircle,
-} from 'lucide-react';
+import { CalendarDays, Twitter, Instagram, Globe, Star } from 'lucide-react';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,
@@ -80,7 +71,7 @@ function UserProfile() {
   const givenRatingsCount = userRatings?.length || 0;
   const receivedRatingsCount = receivedRatings?.length || 0;
   const averageReceivedRating =
-    receivedRatings?.length > 0
+    receivedRatings && receivedRatings.length > 0
       ? receivedRatings.reduce((sum, rating) => sum + rating.rating, 0) /
         receivedRatings.length
       : 0;
@@ -244,35 +235,37 @@ function UserProfile() {
                     <div className="space-y-4">
                       {userRatings.slice(0, 5).map((rating) => (
                         <div
-                          key={rating._id}
+                          key={rating?._id || Math.random()}
                           className="flex items-start gap-3"
                         >
                           <img
-                            src={rating.vibe.image}
-                            alt={rating.vibe.title}
+                            src={rating?.vibe?.image || ''}
+                            alt={rating?.vibe?.title || ''}
                             className="h-12 w-12 rounded object-cover"
                           />
                           <div className="flex-1">
                             <div className="mb-1 flex items-center gap-2">
                               <h4 className="text-sm font-medium">
-                                {rating.vibe.title}
+                                {rating?.vibe?.title || 'Unknown'}
                               </h4>
                               <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-3 w-3 ${i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                    className={`h-3 w-3 ${rating?.rating && i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                                   />
                                 ))}
                               </div>
                             </div>
-                            {rating.review && (
+                            {rating?.review && (
                               <p className="text-muted-foreground text-sm">
                                 {rating.review}
                               </p>
                             )}
                             <p className="text-muted-foreground mt-1 text-xs">
-                              {new Date(rating.date).toLocaleDateString()}
+                              {rating?.date
+                                ? new Date(rating.date).toLocaleDateString()
+                                : ''}
                             </p>
                           </div>
                         </div>
@@ -325,7 +318,7 @@ function UserProfile() {
                     <div className="space-y-4">
                       {receivedRatings.slice(0, 5).map((rating) => (
                         <div
-                          key={rating._id}
+                          key={rating?._id || Math.random()}
                           className="flex items-start gap-3"
                         >
                           <Avatar className="h-8 w-8">
@@ -343,7 +336,7 @@ function UserProfile() {
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-3 w-3 ${i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                    className={`h-3 w-3 ${rating?.rating && i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                                   />
                                 ))}
                               </div>
@@ -351,13 +344,15 @@ function UserProfile() {
                             <p className="text-muted-foreground mb-1 text-sm">
                               on "{rating.vibe.title}"
                             </p>
-                            {rating.review && (
+                            {rating?.review && (
                               <p className="text-muted-foreground text-sm">
                                 {rating.review}
                               </p>
                             )}
                             <p className="text-muted-foreground mt-1 text-xs">
-                              {new Date(rating.date).toLocaleDateString()}
+                              {rating?.date
+                                ? new Date(rating.date).toLocaleDateString()
+                                : ''}
                             </p>
                           </div>
                         </div>

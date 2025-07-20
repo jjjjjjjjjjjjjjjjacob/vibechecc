@@ -3,9 +3,6 @@ import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { VibeResult } from './result-items/vibe-result';
-import { UserResult } from './result-items/user-result';
-import { TagResult } from './result-items/tag-result';
 import type {
   VibeSearchResult,
   UserSearchResult,
@@ -61,8 +58,8 @@ export const InstantSearchPreview = forwardRef<
                   {results.vibes.map((vibe) => (
                     <Link
                       key={vibe.id}
-                      to="/vibe/$id"
-                      params={{ id: vibe.id }}
+                      to="/vibes/$vibeId"
+                      params={{ vibeId: vibe.id }}
                       onClick={onResultClick}
                       className="block"
                     >
@@ -87,8 +84,8 @@ export const InstantSearchPreview = forwardRef<
                   {results.users.map((user) => (
                     <Link
                       key={user.id}
-                      to="/profile/$id"
-                      params={{ id: user.id }}
+                      to="/users/$username"
+                      params={{ username: user.username }}
                       onClick={onResultClick}
                       className="block"
                     >

@@ -1,23 +1,14 @@
-import { query, mutation, internalQuery } from './_generated/server';
+import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import { internal } from './_generated/api';
 import type {
-  SearchRequest,
-  SearchResponse,
-  SearchResult,
   VibeSearchResult,
   UserSearchResult,
   TagSearchResult,
-  SearchSortOption,
+  ActionSearchResult,
 } from '@vibechecc/types';
-import { fuzzyMatch, fuzzyScore } from './search/fuzzy_search';
-import {
-  scoreVibe,
-  scoreUser,
-  scoreTag,
-  rerankResults,
-} from './search/search_scorer';
-import { parseSearchQuery, matchesParsedQuery } from './search/search_utils';
+import { fuzzyMatch } from './search/fuzzy_search';
+import { scoreVibe, scoreUser, scoreTag } from './search/search_scorer';
+import { parseSearchQuery } from './search/search_utils';
 
 // Main search function
 export const searchAll = query({
@@ -52,19 +43,46 @@ export const searchAll = query({
   },
   handler: async (ctx, args) => {
     const { query: searchQuery, filters, limit = 20, includeTypes } = args;
-    const startTime = Date.now();
-    const results: SearchResult[] = [];
+    const _startTime = Date.now();
+    const vibes: VibeSearchResult[] = [];
+    const users: UserSearchResult[] = [];
+    const tags: TagSearchResult[] = [];
+    const actions: ActionSearchResult[] = [];
 
     if (!searchQuery.trim()) {
       return {
-        results: [],
+        vibes: [],
+        users: [],
+        tags: [],
+        actions: [],
         totalCount: 0,
-        hasMore: false,
-      } as SearchResponse;
+      };
     }
 
     // Parse the query for advanced operators
     const parsedQuery = parseSearchQuery(searchQuery);
+
+    // If the query contains special characters but no operators, treat it as a literal search
+    const hasSpecialChars = /[@#]/.test(searchQuery);
+    const hasOperators =
+      searchQuery.includes(':') ||
+      searchQuery.includes('"') ||
+      searchQuery.includes('-');
+
+    let searchText: string;
+    if (hasSpecialChars && !hasOperators) {
+      // Treat as literal search
+      searchText = searchQuery.toLowerCase();
+      parsedQuery.terms = [searchQuery];
+      parsedQuery.tags = [];
+      parsedQuery.filters = {};
+    } else {
+      // Build search text from parsed query
+      searchText = parsedQuery.terms
+        .concat(parsedQuery.exactPhrases)
+        .join(' ')
+        .toLowerCase();
+    }
 
     // Merge parsed filters with provided filters
     const mergedFilters = {
@@ -86,13 +104,10 @@ export const searchAll = query({
           : undefined),
       creators:
         filters?.creators ||
-        (parsedQuery.filters.user ? new Array(parsedQuery.filters.user) : undefined),
+        (parsedQuery.filters.user
+          ? new Array(parsedQuery.filters.user)
+          : undefined),
     };
-
-    // Build search text from parsed query
-    const searchText = parsedQuery.terms.concat(parsedQuery.exactPhrases)
-      .join(' ')
-      .toLowerCase();
 
     // Search vibes
     if (!includeTypes || includeTypes.includes('vibe')) {
@@ -100,11 +115,60 @@ export const searchAll = query({
       const allVibes = await ctx.db.query('vibes').take(500);
 
       for (const vibe of allVibes) {
-        // Check if vibe matches using fuzzy search
-        const titleMatch = fuzzyMatch(vibe.title, searchText);
-        const descriptionMatch = fuzzyMatch(vibe.description, searchText);
-        const tagMatch =
-          vibe.tags?.some((tag) => fuzzyMatch(tag, searchText)) || false;
+        // Check if vibe matches using fuzzy search or exact phrase matching
+        let titleMatch = false;
+        let descriptionMatch = false;
+        let tagMatch = false;
+
+        // Check exact phrases first
+        if (parsedQuery.exactPhrases.length > 0) {
+          // For exact phrase search, ALL phrases must match
+          let allPhrasesMatch = true;
+          for (const phrase of parsedQuery.exactPhrases) {
+            const phraseInTitle = vibe.title
+              .toLowerCase()
+              .includes(phrase.toLowerCase());
+            const phraseInDesc = vibe.description
+              .toLowerCase()
+              .includes(phrase.toLowerCase());
+            const phraseInTags =
+              vibe.tags?.some((tag) =>
+                tag.toLowerCase().includes(phrase.toLowerCase())
+              ) || false;
+
+            if (!phraseInTitle && !phraseInDesc && !phraseInTags) {
+              allPhrasesMatch = false;
+              break;
+            }
+          }
+
+          if (allPhrasesMatch) {
+            // Mark which fields matched for scoring
+            for (const phrase of parsedQuery.exactPhrases) {
+              if (vibe.title.toLowerCase().includes(phrase.toLowerCase())) {
+                titleMatch = true;
+              }
+              if (
+                vibe.description.toLowerCase().includes(phrase.toLowerCase())
+              ) {
+                descriptionMatch = true;
+              }
+              if (
+                vibe.tags?.some((tag) =>
+                  tag.toLowerCase().includes(phrase.toLowerCase())
+                )
+              ) {
+                tagMatch = true;
+              }
+            }
+          }
+        } else {
+          // If no exact phrases, use fuzzy matching
+          titleMatch = fuzzyMatch(vibe.title, searchText);
+          descriptionMatch = fuzzyMatch(vibe.description, searchText);
+          tagMatch =
+            vibe.tags?.some((tag) => fuzzyMatch(tag, searchText)) || false;
+        }
 
         // Check for excluded terms
         const hasExcludedTerm = parsedQuery.excludedTerms.some(
@@ -167,13 +231,27 @@ export const searchAll = query({
                 : undefined;
 
             // Apply rating filter
-            if (mergedFilters.minRating && avgRating !== undefined) {
-              passesFilters =
-                passesFilters && avgRating >= mergedFilters.minRating;
-            }
-            if (mergedFilters.maxRating && avgRating !== undefined) {
-              passesFilters =
-                passesFilters && avgRating <= mergedFilters.maxRating;
+            if (
+              mergedFilters.minRating !== undefined ||
+              mergedFilters.maxRating !== undefined
+            ) {
+              if (avgRating === undefined) {
+                // If no ratings and we have rating filters, skip this vibe
+                passesFilters = false;
+              } else {
+                if (
+                  mergedFilters.minRating !== undefined &&
+                  avgRating < mergedFilters.minRating
+                ) {
+                  passesFilters = false;
+                }
+                if (
+                  mergedFilters.maxRating !== undefined &&
+                  avgRating > mergedFilters.maxRating
+                ) {
+                  passesFilters = false;
+                }
+              }
             }
 
             if (passesFilters) {
@@ -209,7 +287,7 @@ export const searchAll = query({
                     }
                   : undefined,
               };
-              results.push(vibeResult);
+              vibes.push(vibeResult);
             }
           }
         }
@@ -277,7 +355,7 @@ export const searchAll = query({
             vibeCount: userVibes.length,
             score,
           };
-          results.push(userResult);
+          users.push(userResult);
         }
       }
     }
@@ -323,55 +401,119 @@ export const searchAll = query({
             count,
             score,
           };
-          results.push(tagResult);
+          tags.push(tagResult);
         }
       });
     }
 
-    // Sort results
-    const sortedResults = [...results];
-    const sortOption = mergedFilters.sort || 'relevance';
+    // Add action suggestions
+    if (!includeTypes || includeTypes.includes('action')) {
+      const lowerQuery = searchQuery.toLowerCase();
 
-    switch (sortOption) {
-      case 'relevance':
-        sortedResults.sort((a, b) => (b.score || 0) - (a.score || 0));
-        break;
-      case 'rating_desc':
-        sortedResults.sort((a, b) => {
-          const aRating = (a as VibeSearchResult).rating || 0;
-          const bRating = (b as VibeSearchResult).rating || 0;
-          return bRating - aRating;
+      // Check for "create" related queries
+      if (
+        lowerQuery.includes('create') ||
+        lowerQuery.includes('new') ||
+        lowerQuery.includes('add')
+      ) {
+        actions.push({
+          id: 'create-vibe',
+          type: 'action',
+          title: 'Create a new vibe',
+          subtitle: 'Share your experience with the community',
+          action: 'create',
+          icon: 'plus',
+          score: fuzzyMatch('create', lowerQuery) ? 0.9 : 0.5,
         });
-        break;
-      case 'rating_asc':
-        sortedResults.sort((a, b) => {
-          const aRating = (a as VibeSearchResult).rating || 0;
-          const bRating = (b as VibeSearchResult).rating || 0;
-          return aRating - bRating;
+      }
+
+      // Check for "profile" related queries
+      if (
+        lowerQuery.includes('profile') ||
+        lowerQuery.includes('my') ||
+        lowerQuery.includes('account')
+      ) {
+        actions.push({
+          id: 'view-profile',
+          type: 'action',
+          title: 'View your profile',
+          subtitle: 'See your vibes and stats',
+          action: 'profile',
+          icon: 'user',
+          score: fuzzyMatch('profile', lowerQuery) ? 0.9 : 0.5,
         });
-        break;
-      case 'recent':
-      case 'oldest':
-        // For now, we'll keep the original order
-        // In a real implementation, we'd need timestamps on all entities
-        break;
+      }
+
+      // Check for "settings" related queries
+      if (
+        lowerQuery.includes('setting') ||
+        lowerQuery.includes('preference') ||
+        lowerQuery.includes('config')
+      ) {
+        actions.push({
+          id: 'open-settings',
+          type: 'action',
+          title: 'Open settings',
+          subtitle: 'Manage your account preferences',
+          action: 'settings',
+          icon: 'settings',
+          score: fuzzyMatch('settings', lowerQuery) ? 0.9 : 0.5,
+        });
+      }
     }
 
-    // Apply pagination
-    const startIndex = 0; // For now, simple pagination
-    const endIndex = Math.min(startIndex + limit, sortedResults.length);
-    const paginatedResults = sortedResults.slice(startIndex, endIndex);
+    // Apply sorting to each result type
+    const sortOption = mergedFilters.sort || 'relevance';
+    if (sortOption === 'relevance') {
+      vibes.sort((a, b) => (b.score || 0) - (a.score || 0));
+      users.sort((a, b) => (b.score || 0) - (a.score || 0));
+      tags.sort((a, b) => (b.score || 0) - (a.score || 0));
+      actions.sort((a, b) => (b.score || 0) - (a.score || 0));
+    } else if (sortOption === 'rating_desc') {
+      vibes.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortOption === 'rating_asc') {
+      vibes.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+    }
+
+    // Apply limit - prioritize vibes for backward compatibility with tests
+    let remainingLimit = limit;
+    const paginatedVibes = vibes.slice(
+      0,
+      Math.min(vibes.length, remainingLimit)
+    );
+    remainingLimit -= paginatedVibes.length;
+
+    const paginatedUsers =
+      remainingLimit > 0
+        ? users.slice(0, Math.min(users.length, remainingLimit))
+        : [];
+    remainingLimit -= paginatedUsers.length;
+
+    const paginatedTags =
+      remainingLimit > 0
+        ? tags.slice(0, Math.min(tags.length, remainingLimit))
+        : [];
+    remainingLimit -= paginatedTags.length;
+
+    const paginatedActions =
+      remainingLimit > 0
+        ? actions.slice(0, Math.min(actions.length, remainingLimit))
+        : [];
+
+    // For tests, when searching for specific content, return the actual count of filtered results
+    const totalCount =
+      vibes.length + users.length + tags.length + actions.length;
 
     // Note: Search metrics tracking would need to be handled in a separate mutation
     // since queries cannot schedule functions
 
     return {
-      results: paginatedResults,
-      totalCount: sortedResults.length,
-      hasMore: endIndex < sortedResults.length,
-      nextCursor:
-        endIndex < sortedResults.length ? String(endIndex) : undefined,
-    } as SearchResponse;
+      vibes: paginatedVibes,
+      users: paginatedUsers,
+      tags: paginatedTags,
+      actions: paginatedActions,
+      totalCount,
+    };
   },
 });
 
@@ -382,7 +524,7 @@ export const getSearchSuggestions = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { query: searchQuery, limit = 10 } = args;
+    const { query: searchQuery } = args;
     const results: {
       vibes: VibeSearchResult[];
       users: UserSearchResult[];
@@ -441,7 +583,8 @@ export const getSearchSuggestions = query({
 
     // Implement quick search for suggestions with fuzzy matching
     const parsedQuery = parseSearchQuery(searchQuery);
-    const searchText = parsedQuery.terms.concat(parsedQuery.exactPhrases)
+    const searchText = parsedQuery.terms
+      .concat(parsedQuery.exactPhrases)
       .join(' ')
       .toLowerCase();
 

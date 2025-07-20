@@ -36,7 +36,7 @@ describe('SearchResultsGrid', () => {
       render(<SearchResultsGrid loading={true} />);
 
       const skeletons = screen.getAllByTestId('skeleton');
-      expect(skeletons).toHaveLength(27); // 9 cards * 3 skeletons each
+      expect(skeletons).toHaveLength(45); // 9 cards * 5 skeletons each (image + title + subtitle + avatar + username)
       expect(skeletons[0]).toHaveClass('aspect-[4/3]');
     });
 
@@ -133,7 +133,7 @@ describe('SearchResultsGrid', () => {
       render(<SearchResultsGrid results={[]} loading={true} />);
 
       expect(screen.queryByTestId('empty-state')).not.toBeInTheDocument();
-      expect(screen.getAllByTestId('skeleton')).toHaveLength(27);
+      expect(screen.getAllByTestId('skeleton')).toHaveLength(45); // 9 cards * 5 skeletons each
     });
 
     it('handles single result correctly', () => {

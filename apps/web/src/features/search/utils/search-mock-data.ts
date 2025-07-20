@@ -296,18 +296,15 @@ export function getMockSearchResults(query: string): SearchResponse {
       : [];
 
   return {
-    results: [
-      ...filteredVibes,
-      ...filteredUsers,
-      ...filteredTags,
-      ...filteredActions,
-    ],
+    vibes: filteredVibes,
+    users: filteredUsers,
+    tags: filteredTags,
+    actions: filteredActions,
     totalCount:
       filteredVibes.length +
       filteredUsers.length +
       filteredTags.length +
       filteredActions.length,
-    hasMore: false,
   };
 }
 
@@ -319,18 +316,10 @@ export function getMockSearchSuggestions(query: string): {
 } {
   const results = getMockSearchResults(query);
 
-  const vibes = results.results
-    .filter((r: any): r is VibeSearchResult => r.type === 'vibe')
-    .slice(0, 5);
-  const users = results.results
-    .filter((r: any): r is UserSearchResult => r.type === 'user')
-    .slice(0, 3);
-  const tags = results.results
-    .filter((r: any): r is TagSearchResult => r.type === 'tag')
-    .slice(0, 5);
-  const actions = results.results.filter(
-    (r: any): r is ActionSearchResult => r.type === 'action'
-  );
+  const vibes = results.vibes.slice(0, 5);
+  const users = results.users.slice(0, 3);
+  const tags = results.tags.slice(0, 5);
+  const actions = results.actions;
 
   return { vibes, users, tags, actions };
 }

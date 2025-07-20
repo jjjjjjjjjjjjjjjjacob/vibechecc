@@ -30,10 +30,11 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
     switch (preset) {
       case 'today':
         return { from: today, to: now };
-      case 'week':
+      case 'week': {
         const weekStart = new Date(today);
         weekStart.setDate(today.getDate() - today.getDay());
         return { from: weekStart, to: now };
+      }
       case 'month':
         return {
           from: new Date(now.getFullYear(), now.getMonth(), 1),

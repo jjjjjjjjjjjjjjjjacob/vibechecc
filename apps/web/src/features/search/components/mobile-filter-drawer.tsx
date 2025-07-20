@@ -56,7 +56,10 @@ export function MobileFilterDrawer({
           <SearchFilters
             filters={filters}
             onChange={onChange}
-            availableTags={availableTags}
+            availableTags={availableTags?.map((tag) => ({
+              name: tag,
+              count: 0,
+            }))}
           />
         </div>
         <DrawerFooter>

@@ -20,7 +20,7 @@ export function SearchEmptyState({
   const navigate = useNavigate();
   const { data: trendingSearches, isLoading: trendingLoading } =
     useTrendingSearches(6);
-  const { searches: recentSearches } = useRecentSearches();
+  const { recentSearches } = useRecentSearches();
 
   const suggestions = [
     'Try searching for different keywords',
@@ -85,15 +85,15 @@ export function SearchEmptyState({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {recentSearches.slice(0, 5).map((term) => (
+            {recentSearches.slice(0, 5).map((search) => (
               <Button
-                key={term}
+                key={search.term}
                 variant="ghost"
                 size="sm"
-                onClick={() => handleSearch(term)}
+                onClick={() => handleSearch(search.term)}
                 className="text-muted-foreground hover:text-foreground"
               >
-                {term}
+                {search.term}
               </Button>
             ))}
           </div>

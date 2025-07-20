@@ -45,10 +45,10 @@ export interface ActionSearchResult extends BaseSearchResult {
   icon?: string;
 }
 
-export type SearchResult = 
-  | VibeSearchResult 
-  | UserSearchResult 
-  | TagSearchResult 
+export type SearchResult =
+  | VibeSearchResult
+  | UserSearchResult
+  | TagSearchResult
   | ActionSearchResult;
 
 // Search filters
@@ -58,17 +58,17 @@ export interface SearchFilters {
   maxRating?: number;
   dateRange?: {
     start: string; // ISO date string
-    end: string;   // ISO date string
+    end: string; // ISO date string
   };
   creators?: string[]; // User IDs
   sort?: SearchSortOption;
 }
 
-export type SearchSortOption = 
-  | 'relevance' 
-  | 'rating_desc' 
-  | 'rating_asc' 
-  | 'recent' 
+export type SearchSortOption =
+  | 'relevance'
+  | 'rating_desc'
+  | 'rating_asc'
+  | 'recent'
   | 'oldest';
 
 // Search request/response
@@ -81,11 +81,21 @@ export interface SearchRequest {
 }
 
 export interface SearchResponse {
-  results: SearchResult[];
+  vibes: VibeSearchResult[];
+  users: UserSearchResult[];
+  tags: TagSearchResult[];
+  actions: ActionSearchResult[];
   totalCount: number;
-  hasMore: boolean;
-  nextCursor?: string;
-  suggestions?: string[]; // Related search suggestions
+}
+
+export interface SearchSuggestionsResponse {
+  vibes: VibeSearchResult[];
+  users: UserSearchResult[];
+  tags: TagSearchResult[];
+  actions?: ActionSearchResult[];
+  recentSearches?: string[];
+  trendingSearches?: string[];
+  popularTags?: string[];
 }
 
 // Search suggestions (for command palette)

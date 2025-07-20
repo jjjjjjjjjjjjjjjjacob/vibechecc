@@ -39,7 +39,9 @@
     "@nx/workspace": "^21.2.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/bun": "^1.2.15",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
@@ -47,6 +49,7 @@
     "eslint-plugin-prettier": "^5.5.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "happy-dom": "^18.0.1",
     "jsdom": "^26.1.0",
     "nx": "^21.2.2",
     "prettier": "^3.5.3",
@@ -56,6 +59,6 @@
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.2",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.4"
+    "vitest": "^3.2.4"
   }
 }

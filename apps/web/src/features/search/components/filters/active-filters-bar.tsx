@@ -22,13 +22,13 @@ export function ActiveFiltersBar({
   }> = [];
 
   // Tags
-  filters.tags?.forEach((tag) => {
+  filters.tags?.forEach((tag: string) => {
     activeFilters.push({
       type: 'tag',
       label: tag,
       icon: Tag,
       onRemove: () => {
-        const newTags = filters.tags?.filter((t) => t !== tag) ?? [];
+        const newTags = filters.tags?.filter((t: string) => t !== tag) ?? [];
         onChange({
           ...filters,
           tags: newTags.length > 0 ? newTags : undefined,

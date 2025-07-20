@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from '@tanstack/react-router';
+import { Route } from '@/routes/search';
 
 interface SearchPaginationProps {
   currentPage: number;
@@ -11,7 +11,7 @@ export function SearchPagination({
   currentPage,
   totalPages,
 }: SearchPaginationProps) {
-  const navigate = useNavigate();
+  const navigate = Route.useNavigate();
 
   const goToPage = (page: number) => {
     navigate({

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { useSearchParams } from '@tanstack/react-router';
+import { useCallback, useMemo } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import type { SearchFilters } from '@vibechecc/types';
 
 interface UseFilterStateOptions {
@@ -9,7 +9,8 @@ interface UseFilterStateOptions {
 
 export function useFilterState(options: UseFilterStateOptions = {}) {
   const { defaultFilters = {}, syncWithUrl = true } = options;
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const search = useSearch({ from: '/search' }) as Record<string, any>;
 
   // Parse filters from URL
   const filtersFromUrl = useMemo((): Partial<SearchFilters> => {
@@ -18,20 +19,20 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
     const filters: Partial<SearchFilters> = {};
 
     // Query
-    const q = searchParams.get('q');
+    const q = search.q;
     if (q) {
-      filters.query = q;
+      (filters as any).query = q;
     }
 
     // Tags
-    const tags = searchParams.get('tags');
+    const tags = search.tags;
     if (tags) {
-      filters.tags = tags.split(',').filter(Boolean);
+      filters.tags = Array.isArray(tags) ? tags : [tags];
     }
 
     // Rating
-    const minRating = searchParams.get('minRating');
-    const maxRating = searchParams.get('maxRating');
+    const minRating = search.minRating;
+    const maxRating = search.maxRating;
     if (minRating) {
       filters.minRating = parseFloat(minRating);
     }
@@ -40,8 +41,8 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
     }
 
     // Date range
-    const dateFrom = searchParams.get('from');
-    const dateTo = searchParams.get('to');
+    const dateFrom = search.from;
+    const dateTo = search.to;
     if (dateFrom || dateTo) {
       filters.dateRange = {
         start: dateFrom || new Date(0).toISOString().split('T')[0],
@@ -50,13 +51,13 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
     }
 
     // Creators
-    const creators = searchParams.get('creators');
+    const creators = search.creators;
     if (creators) {
-      filters.creators = creators.split(',').filter(Boolean);
+      filters.creators = Array.isArray(creators) ? creators : [creators];
     }
 
     // Sort
-    const sort = searchParams.get('sort') as SearchFilters['sort'];
+    const sort = search.sort as SearchFilters['sort'];
     if (
       sort &&
       ['relevance', 'rating_desc', 'rating_asc', 'recent', 'oldest'].includes(
@@ -67,77 +68,76 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
     }
 
     // Types
-    const types = searchParams.get('types');
+    const types = search.types;
     if (types) {
-      filters.types = types
-        .split(',')
-        .filter(Boolean) as SearchFilters['types'];
+      (filters as any).types = Array.isArray(types) ? types : [types];
     }
 
     // Limit
-    const limit = searchParams.get('limit');
+    const limit = search.limit;
     if (limit) {
-      filters.limit = parseInt(limit, 10);
+      (filters as any).limit =
+        typeof limit === 'string' ? parseInt(limit, 10) : limit;
     }
 
     return { ...defaultFilters, ...filters };
-  }, [searchParams, defaultFilters, syncWithUrl]);
+  }, [search, defaultFilters, syncWithUrl]);
 
   // Update URL with filters
   const updateFilters = useCallback(
     (newFilters: Partial<SearchFilters>) => {
       if (!syncWithUrl) return;
 
-      const params = new URLSearchParams();
+      const params: Record<string, any> = {};
 
       // Query
-      if (newFilters.query) {
-        params.set('q', newFilters.query);
+      if ((newFilters as any).query) {
+        params.q = (newFilters as any).query;
       }
 
       // Tags
       if (newFilters.tags && newFilters.tags.length > 0) {
-        params.set('tags', newFilters.tags.join(','));
+        params.tags = newFilters.tags;
       }
 
       // Rating
       if (newFilters.minRating !== undefined) {
-        params.set('minRating', newFilters.minRating.toString());
+        params.minRating = newFilters.minRating;
       }
       if (newFilters.maxRating !== undefined) {
-        params.set('maxRating', newFilters.maxRating.toString());
+        params.maxRating = newFilters.maxRating;
       }
 
       // Date range
       if (newFilters.dateRange) {
-        params.set('from', newFilters.dateRange.start);
-        params.set('to', newFilters.dateRange.end);
+        params.from = newFilters.dateRange.start;
+        params.to = newFilters.dateRange.end;
       }
 
       // Creators
       if (newFilters.creators && newFilters.creators.length > 0) {
-        params.set('creators', newFilters.creators.join(','));
+        params.creators = newFilters.creators;
       }
 
       // Sort
       if (newFilters.sort && newFilters.sort !== 'relevance') {
-        params.set('sort', newFilters.sort);
+        params.sort = newFilters.sort;
       }
 
       // Types
-      if (newFilters.types && newFilters.types.length > 0) {
-        params.set('types', newFilters.types.join(','));
+      if ((newFilters as any).types && (newFilters as any).types.length > 0) {
+        params.types = (newFilters as any).types;
       }
 
       // Limit
-      if (newFilters.limit && newFilters.limit !== 20) {
-        params.set('limit', newFilters.limit.toString());
+      if ((newFilters as any).limit && (newFilters as any).limit !== 20) {
+        params.limit = (newFilters as any).limit;
       }
 
       // Update URL
-      setSearchParams(params);
+      navigate({ to: '/search', search: params });
     },
-    [setSearchParams, syncWithUrl]
+    [navigate, syncWithUrl]
   );
 
   // Clear specific filter
@@ -152,12 +152,12 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
-    updateFilters({ query: filtersFromUrl.query }); // Keep query if present
+    updateFilters({}); // Clear all filters
   }, [filtersFromUrl, updateFilters]);
 
   // Toggle array filter (for tags, creators, types)
   const toggleArrayFilter = useCallback(
-    (filterKey: 'tags' | 'creators' | 'types', value: string) => {
+    (filterKey: 'tags' | 'creators', value: string) => {
       const currentValues = filtersFromUrl[filterKey] ?? [];
       const newValues = currentValues.includes(value)
         ? currentValues.filter((v) => v !== value)
@@ -179,8 +179,7 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
       filtersFromUrl.maxRating !== undefined ||
       filtersFromUrl.dateRange ||
       filtersFromUrl.creators?.length ||
-      (filtersFromUrl.sort && filtersFromUrl.sort !== 'relevance') ||
-      filtersFromUrl.types?.length
+      (filtersFromUrl.sort && filtersFromUrl.sort !== 'relevance')
     );
   }, [filtersFromUrl]);
 

@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query';
+import { queryOptions, type QueryClient } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
 import { api } from '@vibechecc/convex';
 import type { SearchFilters } from '@vibechecc/types';
@@ -52,7 +52,7 @@ export const searchCacheOptions = {
 export const searchPrefetch = {
   // Prefetch search results
   async prefetchSearch(
-    queryClient: any,
+    queryClient: QueryClient,
     query: string,
     filters?: SearchFilters
   ) {
@@ -62,12 +62,12 @@ export const searchPrefetch = {
   },
 
   // Prefetch suggestions
-  async prefetchSuggestions(queryClient: any, query: string) {
+  async prefetchSuggestions(queryClient: QueryClient, query: string) {
     return queryClient.prefetchQuery(searchCacheOptions.suggestions(query));
   },
 
   // Prefetch trending searches
-  async prefetchTrending(queryClient: any) {
+  async prefetchTrending(queryClient: QueryClient) {
     return queryClient.prefetchQuery(searchCacheOptions.trending());
   },
 };
@@ -75,19 +75,19 @@ export const searchPrefetch = {
 // Cache invalidation helpers
 export const searchCacheInvalidation = {
   // Invalidate all search-related caches
-  invalidateAll(queryClient: any) {
+  invalidateAll(queryClient: QueryClient) {
     queryClient.invalidateQueries({ queryKey: ['search'] });
   },
 
   // Invalidate specific search query
-  invalidateSearch(queryClient: any, query: string) {
+  invalidateSearch(queryClient: QueryClient, query: string) {
     queryClient.invalidateQueries({
       queryKey: ['search', 'searchAll', { query }],
     });
   },
 
   // Invalidate trending searches
-  invalidateTrending(queryClient: any) {
+  invalidateTrending(queryClient: QueryClient) {
     queryClient.invalidateQueries({
       queryKey: ['search', 'getTrendingSearches'],
     });

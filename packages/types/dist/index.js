@@ -16,3 +16,4 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.ts
 var index_exports = {};
 module.exports = __toCommonJS(index_exports);
+//# sourceMappingURL=index.js.map

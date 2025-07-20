@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
 import { api } from '@vibechecc/convex';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
-import type { SearchResponse } from '@vibechecc/types';
 
 interface UseInstantSearchOptions {
   debounceMs?: number;

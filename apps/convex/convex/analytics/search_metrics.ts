@@ -1,4 +1,4 @@
-import { internalMutation, internalQuery, query } from '../_generated/server';
+import { internalMutation, query } from '../_generated/server';
 import { v } from 'convex/values';
 import { internal } from '../_generated/api';
 
@@ -15,7 +15,7 @@ export type SearchMetric = {
   clickPosition?: number;
   responseTime?: number;
   error?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 };
 
 export type SearchAggregate = {
@@ -190,7 +190,7 @@ export const getPopularSearchTerms = query({
         searches.length;
       const clickThroughRate =
         searches.length > 0 ? (data.clicks / searches.length) * 100 : 0;
-      const lastSearched = Math.max.apply(Math, searches.map((s) => s.timestamp));
+      const lastSearched = Math.max(...searches.map((s) => s.timestamp));
 
       aggregates.push({
         term,
@@ -230,7 +230,7 @@ export const getSearchMetricsForQuery = query({
       .withIndex('by_timestamp', (q) =>
         q.gte('timestamp', start).lte('timestamp', end)
       )
-      .filter((q) => q.eq(q.field('query').toLowerCase(), normalizedQuery))
+      .filter((q) => q.eq(q.field('query'), normalizedQuery))
       .collect();
 
     const searches = metrics.filter((m) => m.type === 'search');
@@ -382,7 +382,8 @@ export const trackSearchClick = internalMutation({
     userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.scheduleInternal(
+    await ctx.scheduler.runAfter(
+      0,
       internal.analytics.search_metrics.recordSearchMetric,
       {
         type: 'click',
@@ -404,7 +405,8 @@ export const trackSearchError = internalMutation({
     userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.scheduleInternal(
+    await ctx.scheduler.runAfter(
+      0,
       internal.analytics.search_metrics.recordSearchMetric,
       {
         type: 'error',

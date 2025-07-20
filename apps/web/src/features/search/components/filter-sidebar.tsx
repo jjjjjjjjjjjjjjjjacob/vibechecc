@@ -5,7 +5,7 @@ import type { SearchFilters as SearchFiltersType } from '@vibechecc/types';
 interface FilterSidebarProps {
   filters: Partial<SearchFiltersType>;
   onChange: (filters: Partial<SearchFiltersType>) => void;
-  availableTags?: string[];
+  availableTags?: Array<{ name: string; count: number }>;
   className?: string;
 }
 

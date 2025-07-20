@@ -19,7 +19,6 @@ import { TagFilterEnhanced } from './filters/tag-filter-enhanced';
 import { RatingSlider } from './filters/rating-slider';
 import { DateRangePicker } from './filters/date-range-picker';
 import { ActiveFiltersBar } from './filters/active-filters-bar';
-import { useFilterState } from '../hooks/use-filter-state';
 import type { SearchFilters as SearchFiltersType } from '@vibechecc/types';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
@@ -41,7 +40,7 @@ export function SearchFilters({
     filters.tags?.length ||
     filters.minRating ||
     filters.dateRange ||
-    filters.sort !== 'relevance'
+    (filters.sort && filters.sort !== 'relevance')
   );
 
   const handleClearAll = () => {

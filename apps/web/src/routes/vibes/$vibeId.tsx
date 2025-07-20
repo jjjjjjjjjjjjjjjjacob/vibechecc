@@ -18,17 +18,13 @@ import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
 const EMPTY_ARRAY: never[] = [];
 import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
+import type { EmojiReaction } from '@vibechecc/types';
 import {
   computeUserDisplayName,
   getUserAvatarUrl,
   getUserInitials,
 } from '@/utils/user-utils';
-import {
-  useUser,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-} from '@clerk/tanstack-react-start';
+import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import toast from 'react-hot-toast';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
 import { EmojiReactions } from '@/components/emoji-reaction';
@@ -44,7 +40,7 @@ function VibePage() {
   const allVibes = allVibesData?.vibes ?? [];
   const [rating, setRating] = React.useState(0);
   const [review, setReview] = React.useState('');
-  const { user: _user, isSignedIn } = useUser();
+  const { user: _user } = useUser();
   const addRatingMutation = useAddRatingMutation();
   const reactToVibeMutation = useReactToVibeMutation();
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
@@ -52,7 +48,7 @@ function VibePage() {
     'react'
   );
   const [userQuickRating, setUserQuickRating] = React.useState(0);
-  const [reactions, setReactions] = React.useState<any[]>([]);
+  const [reactions, setReactions] = React.useState<EmojiReaction[]>([]);
 
   // Initialize reactions when vibe data loads
   React.useEffect(() => {

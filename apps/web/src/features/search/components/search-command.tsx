@@ -15,7 +15,7 @@ import { ActionResult } from './result-items/action-result';
 import { SearchSuggestions } from './search-suggestions';
 import { useSearchSuggestions } from '../hooks/use-search';
 import { useNavigate } from '@tanstack/react-router';
-
+import type { ActionSearchResult } from '@vibechecc/types';
 
 interface SearchCommandProps {
   open: boolean;
@@ -24,7 +24,7 @@ interface SearchCommandProps {
 
 export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
   const [query, setQuery] = useState('');
-  const { data, isLoading, isError } = useSearchSuggestions(query);
+  const { data, isLoading } = useSearchSuggestions(query);
   const navigate = useNavigate();
 
   const handleSelect = () => {
@@ -34,7 +34,7 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
 
   const handleSuggestionSelect = (term: string) => {
     if (term.startsWith('/')) {
-      navigate({ to: term as any });
+      navigate({ to: term as '/vibes' });
       handleSelect();
     } else {
       setQuery(term);
@@ -43,6 +43,7 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
 
   const hasResults =
     data &&
+    'vibes' in data &&
     ((data.vibes && data.vibes.length > 0) ||
       (data.users && data.users.length > 0) ||
       (data.tags && data.tags.length > 0) ||
@@ -50,9 +51,13 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
 
   // Extract recent searches from the suggestions data when query is empty
   const recentSearches =
-    !query && data && 'recentSearches' in data ? data.recentSearches : undefined;
+    !query && data && 'recentSearches' in data
+      ? data.recentSearches
+      : undefined;
   const trendingSearchTerms =
-    !query && data && 'trendingSearches' in data ? data.trendingSearches : undefined;
+    !query && data && 'trendingSearches' in data
+      ? data.trendingSearches
+      : undefined;
   const popularTags =
     !query && data && 'popularTags' in data ? data.popularTags : undefined;
 
@@ -116,7 +121,7 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
             <CommandEmpty>No results found for "{query}"</CommandEmpty>
           )}
 
-          {query && hasResults && (
+          {query && hasResults && data && 'vibes' in data && (
             <>
               {data.vibes && data.vibes.length > 0 && (
                 <CommandGroup heading="Vibes">
@@ -163,44 +168,48 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
                 </>
               )}
 
-              {data.actions && data.actions.length > 0 && (
-                <>
-                  <CommandSeparator />
-                  <CommandGroup heading="Actions">
-                    {data.actions.map((action) => (
-                      <ActionResult
-                        key={action.id}
-                        result={action}
-                        query={query}
-                        onSelect={handleSelect}
-                      />
-                    ))}
-                  </CommandGroup>
-                </>
-              )}
+              {'actions' in data &&
+                data.actions &&
+                (data.actions as any).length > 0 && (
+                  <>
+                    <CommandSeparator />
+                    <CommandGroup heading="Actions">
+                      {(data.actions as ActionSearchResult[]).map(
+                        (action: ActionSearchResult) => (
+                          <ActionResult
+                            key={action.id}
+                            result={action}
+                            query={query}
+                            onSelect={handleSelect}
+                          />
+                        )
+                      )}
+                    </CommandGroup>
+                  </>
+                )}
+            </>
+          )}
 
-              {query.length > 2 && (
-                <>
-                  <CommandSeparator />
-                  <CommandGroup heading="Search for">
-                    <ActionResult
-                      result={{
-                        id: 'search-all',
-                        type: 'action',
-                        title: `Search for "${query}"`,
-                        subtitle: 'View all results',
-                        action: 'search',
-                        icon: 'search',
-                      }}
-                      query={query}
-                      onSelect={() => {
-                        navigate({ to: '/search', search: { q: query } });
-                        handleSelect();
-                      }}
-                    />
-                  </CommandGroup>
-                </>
-              )}
+          {query && query.length > 2 && (
+            <>
+              {(hasResults || isLoading) && <CommandSeparator />}
+              <CommandGroup heading="Search for">
+                <ActionResult
+                  result={{
+                    id: 'search-all',
+                    type: 'action',
+                    title: `Search for "${query}"`,
+                    subtitle: 'View all results',
+                    action: 'search',
+                    icon: 'search',
+                  }}
+                  query={query}
+                  onSelect={() => {
+                    navigate({ to: '/search', search: { q: query } });
+                    handleSelect();
+                  }}
+                />
+              </CommandGroup>
             </>
           )}
         </CommandList>

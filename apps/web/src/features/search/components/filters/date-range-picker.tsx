@@ -1,10 +1,5 @@
 import { useState } from 'react';
-import {
-  Calendar,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { Calendar, CalendarDays, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,

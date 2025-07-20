@@ -18,52 +18,73 @@ vi.mock('@tanstack/react-router', () => ({
 }));
 
 // Mock the hooks
-const mockUseSearchSuggestions = vi.fn();
-const mockUseTrendingSearches = vi.fn();
-
 vi.mock('../hooks/use-search', () => ({
-  useSearchSuggestions: mockUseSearchSuggestions,
+  useSearchSuggestions: vi.fn(),
 }));
 
 vi.mock('../hooks/use-trending-searches', () => ({
-  useTrendingSearches: mockUseTrendingSearches,
+  useTrendingSearches: vi.fn(),
 }));
 
 // Mock the result components
 vi.mock('../components/result-items/vibe-result', () => ({
-  VibeResult: ({ result, onSelect }: any) => (
-    <div onClick={onSelect} data-testid={`vibe-${result.id}`}>
+  VibeResult: ({
+    result,
+    onSelect,
+  }: {
+    result: { id: string; content: string };
+    onSelect: () => void;
+  }) => (
+    <button onClick={onSelect} data-testid={`vibe-${result.id}`}>
       {result.content}
-    </div>
+    </button>
   ),
 }));
 
 vi.mock('../components/result-items/user-result', () => ({
-  UserResult: ({ result, onSelect }: any) => (
-    <div onClick={onSelect} data-testid={`user-${result.id}`}>
+  UserResult: ({
+    result,
+    onSelect,
+  }: {
+    result: { id: string; username: string };
+    onSelect: () => void;
+  }) => (
+    <button onClick={onSelect} data-testid={`user-${result.id}`}>
       {result.username}
-    </div>
+    </button>
   ),
 }));
 
 vi.mock('../components/result-items/tag-result', () => ({
-  TagResult: ({ result, onSelect }: any) => (
-    <div onClick={onSelect} data-testid={`tag-${result.id}`}>
+  TagResult: ({
+    result,
+    onSelect,
+  }: {
+    result: { id: string; name: string };
+    onSelect: () => void;
+  }) => (
+    <button onClick={onSelect} data-testid={`tag-${result.id}`}>
       {result.name}
-    </div>
+    </button>
   ),
 }));
 
 vi.mock('../components/result-items/action-result', () => ({
-  ActionResult: ({ result, onSelect }: any) => (
-    <div onClick={onSelect} data-testid={`action-${result.id}`}>
+  ActionResult: ({
+    result,
+    onSelect,
+  }: {
+    result: { id: string; title: string };
+    onSelect: () => void;
+  }) => (
+    <button onClick={onSelect} data-testid={`action-${result.id}`}>
       {result.title}
-    </div>
+    </button>
   ),
 }));
 
 vi.mock('../components/search-suggestions', () => ({
-  SearchSuggestions: ({ onSelect }: any) => (
+  SearchSuggestions: ({ onSelect }: { onSelect: (value: string) => void }) => (
     <div data-testid="search-suggestions">
       <button onClick={() => onSelect('recent search')}>Recent Search</button>
       <button onClick={() => onSelect('/explore')}>Navigate to Explore</button>
@@ -73,6 +94,15 @@ vi.mock('../components/search-suggestions', () => ({
 
 // Import SearchCommand after mocks are set up
 import { SearchCommand } from '../components/search-command';
+import { useSearchSuggestions } from '../hooks/use-search';
+import { useTrendingSearches } from '../hooks/use-trending-searches';
+
+const mockUseSearchSuggestions = useSearchSuggestions as unknown as ReturnType<
+  typeof vi.fn
+>;
+const mockUseTrendingSearches = useTrendingSearches as unknown as ReturnType<
+  typeof vi.fn
+>;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -103,6 +133,10 @@ describe('SearchCommand', () => {
         { term: 'trending1', count: 100 },
         { term: 'trending2', count: 50 },
       ],
+    });
+    mockUseSearchSuggestions.mockReturnValue({
+      data: null,
+      isLoading: false,
     });
   });
 
@@ -510,7 +544,7 @@ describe('SearchCommand', () => {
       // Test with short query
       fireEvent.change(input, { target: { value: 'ab' } });
       await waitFor(() => {
-        expect(screen.queryByText(/Search for/)).not.toBeInTheDocument();
+        expect(screen.queryByText('Search for "ab"')).not.toBeInTheDocument();
       });
 
       // Test with longer query

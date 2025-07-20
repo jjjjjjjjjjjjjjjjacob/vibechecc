@@ -39,7 +39,7 @@
       "cache": true
     },
     "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "inputs": ["default", "^production", "{workspaceRoot}/vitest.config.ts"],
       "cache": true
     },
     "lint": {

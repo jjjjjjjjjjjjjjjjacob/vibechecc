@@ -53,7 +53,8 @@ export const clearAll = internalMutation({
 export const seed = action({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: async (ctx: any): Promise<any> => {
-    // console.log('Starting complete seeding process...');
+    // eslint-disable-next-line no-console
+    console.log('Starting complete seeding process...');
 
     try {
       // Sample users updated for new schema
@@ -91,7 +92,8 @@ export const seed = action({
       ];
 
       // Create users
-      // console.log('Creating users...');
+      // eslint-disable-next-line no-console
+      console.log('Creating users...');
       for (const user of users) {
         await ctx.runMutation(api.users.create, {
           externalId: user.externalId,
@@ -145,7 +147,8 @@ export const seed = action({
       ];
 
       // Create vibes
-      // console.log('Creating vibes...');
+      // eslint-disable-next-line no-console
+      console.log('Creating vibes...');
       for (const vibe of vibes) {
         await ctx.runMutation(internal.vibes.createForSeed, {
           title: vibe.title,
@@ -157,7 +160,8 @@ export const seed = action({
       }
 
       // Get the created vibes to map their actual IDs
-      // console.log('Mapping vibe IDs...');
+      // eslint-disable-next-line no-console
+      console.log('Mapping vibe IDs...');
       const createdVibes = await ctx.runQuery(api.vibes.getAllSimple);
       const vibeMap: Record<string, string> = {};
 
@@ -172,9 +176,10 @@ export const seed = action({
         const sampleVibeId = titleMap[createdVibe.title];
         if (sampleVibeId) {
           vibeMap[sampleVibeId] = createdVibe.id;
-          // console.log(
-          //   `Mapped: ${sampleVibeId} -> ${createdVibe.id} (${createdVibe.title})`
-          // );
+          // eslint-disable-next-line no-console
+          console.log(
+            `Mapped: ${sampleVibeId} -> ${createdVibe.id} (${createdVibe.title})`
+          );
         }
       }
 
@@ -298,7 +303,8 @@ export const seed = action({
       ];
 
       // Create ratings using the mapped vibe IDs
-      // console.log('Creating ratings...');
+      // eslint-disable-next-line no-console
+      console.log('Creating ratings...');
       for (const rating of ratings) {
         const actualVibeId = vibeMap[rating.vibeId];
         if (actualVibeId) {
@@ -372,7 +378,8 @@ export const seed = action({
       ];
 
       // Create reactions using the mapped vibe IDs
-      // console.log('Creating reactions...');
+      // eslint-disable-next-line no-console
+      console.log('Creating reactions...');
       for (const reaction of reactions) {
         const actualVibeId = vibeMap[reaction.vibeId];
         if (actualVibeId) {
@@ -419,6 +426,7 @@ export const seedEnhanced = action({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: async (ctx: any): Promise<any> => {
     try {
+      // eslint-disable-next-line no-console
       console.log('Starting enhanced seeding process with 30+ users...');
 
       // 30 diverse users with varied profiles
@@ -677,6 +685,7 @@ export const seedEnhanced = action({
       ];
 
       // Create all users
+      // eslint-disable-next-line no-console
       console.log('Creating 30 diverse users...');
       for (const user of users) {
         await ctx.runMutation(internal.users.createForSeed, {
@@ -848,6 +857,7 @@ export const seedEnhanced = action({
       ];
 
       // Create all vibes
+      // eslint-disable-next-line no-console
       console.log('Creating 20 diverse vibes...');
       for (const vibe of vibes) {
         await ctx.runMutation(internal.vibes.createForSeed, {
@@ -862,6 +872,7 @@ export const seedEnhanced = action({
       const createdVibes = await ctx.runQuery(api.vibes.getAllSimple);
 
       // Generate extensive ratings and reviews
+      // eslint-disable-next-line no-console
       console.log('Creating ratings and reviews...');
       const userIds = users.map((u) => u.externalId);
 
@@ -917,6 +928,7 @@ export const seedEnhanced = action({
       }
 
       // Generate emoji reactions
+      // eslint-disable-next-line no-console
       console.log('Creating emoji reactions...');
       const emojis = [
         '😂',
@@ -982,6 +994,7 @@ export const seedEnhanced = action({
         },
       };
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error in enhanced seeding:', error);
       return {
         success: false,

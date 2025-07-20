@@ -45,7 +45,7 @@ function Home() {
 
   const vibes = vibesData?.vibes ?? [];
 
-  const safeVibes = vibes.filter((vibe) => {
+  const safeVibes = vibes.filter(() => {
     // Now we have full vibe data with createdBy info
     return true;
   });

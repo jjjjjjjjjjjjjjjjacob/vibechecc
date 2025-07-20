@@ -53,9 +53,7 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
       'headers' in authResult
     ) {
       // This is a Response object for handshake, skip auth during SSR
-      console.debug(
-        'Clerk handshake redirect detected during SSR, skipping auth'
-      );
+      // Clerk handshake redirect detected during SSR, skipping auth
       return {
         userId: null,
         token: null,
@@ -76,9 +74,9 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
     let token = null;
     try {
       token = await auth.getToken({ template: 'convex' });
-    } catch (tokenError) {
+    } catch {
       // Token generation might fail during SSR
-      console.debug('Convex token generation skipped during SSR');
+      // Convex token generation skipped during SSR
     }
 
     return {
@@ -93,7 +91,7 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
       'status' in error &&
       'headers' in error
     ) {
-      console.debug('Clerk handshake redirect during SSR');
+      // Clerk handshake redirect during SSR
       return {
         userId: null,
         token: null,
@@ -102,7 +100,7 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
 
     // Log other errors for debugging
     if (error instanceof Error) {
-      console.debug('Auth error during SSR:', error.message);
+      // Auth error during SSR
     }
 
     // During SSR, authentication errors are expected
@@ -175,8 +173,8 @@ export const Route = createRootRouteWithContext<{
         userId,
         token,
       };
-    } catch (error) {
-      console.error('Error in beforeLoad:', error);
+    } catch {
+      // Error in beforeLoad
       // Return empty auth state on error
       return {
         userId: null,

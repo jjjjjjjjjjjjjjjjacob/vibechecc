@@ -7,8 +7,18 @@ import { SearchFilters } from '../components/search-filters';
 import type { SearchFilters as SearchFiltersType } from '@vibechecc/types';
 
 // Mock child components
-vi.mock('../components/tag-filter', () => ({
-  TagFilter: ({ selected, onChange }: any) => (
+vi.mock('../components/filters/active-filters-bar', () => ({
+  ActiveFiltersBar: () => null,
+}));
+
+vi.mock('../components/filters/tag-filter-enhanced', () => ({
+  TagFilterEnhanced: ({
+    selected,
+    onChange,
+  }: {
+    selected: string[];
+    onChange: (tags: string[]) => void;
+  }) => (
     <div data-testid="tag-filter">
       <button onClick={() => onChange(['funny', 'wholesome'])}>
         Add Tags ({selected.length} selected)
@@ -17,18 +27,31 @@ vi.mock('../components/tag-filter', () => ({
   ),
 }));
 
-vi.mock('../components/rating-filter', () => ({
-  RatingFilter: ({ value, onChange }: any) => (
+vi.mock('../components/filters/rating-slider', () => ({
+  RatingSlider: ({
+    min,
+    onChange,
+  }: {
+    min: number | undefined;
+    max?: number | undefined;
+    onChange: (range: { min?: number; max?: number }) => void;
+  }) => (
     <div data-testid="rating-filter">
-      <button onClick={() => onChange(4)}>
-        Set Rating ({value || 0} stars)
+      <button onClick={() => onChange({ min: 4 })}>
+        Set Rating ({min || 0} stars)
       </button>
     </div>
   ),
 }));
 
-vi.mock('../components/date-range-filter', () => ({
-  DateRangeFilter: ({ value, onChange }: any) => (
+vi.mock('../components/filters/date-range-picker', () => ({
+  DateRangePicker: ({
+    value,
+    onChange,
+  }: {
+    value: { start: string; end: string } | undefined;
+    onChange: (range: { start: string; end: string }) => void;
+  }) => (
     <div data-testid="date-range-filter">
       <button
         onClick={() => onChange({ start: '2024-01-01', end: '2024-12-31' })}
@@ -79,9 +102,9 @@ describe('SearchFilters', () => {
 
       render(<SearchFilters filters={filters} onChange={vi.fn()} />);
 
-      expect(screen.getByText('(2 selected)')).toBeInTheDocument();
-      expect(screen.getByText('(4 stars)')).toBeInTheDocument();
-      expect(screen.getByText('(Set)')).toBeInTheDocument();
+      expect(screen.getByText('Add Tags (2 selected)')).toBeInTheDocument();
+      expect(screen.getByText('Set Rating (4 stars)')).toBeInTheDocument();
+      expect(screen.getByText('Set Date Range (Set)')).toBeInTheDocument();
       expect(screen.getByText('Highest Rated')).toBeInTheDocument();
     });
 
@@ -266,9 +289,9 @@ describe('SearchFilters', () => {
 
       render(<SearchFilters filters={filters} onChange={vi.fn()} />);
 
-      expect(screen.getByText('(0 selected)')).toBeInTheDocument();
-      expect(screen.getByText('(0 stars)')).toBeInTheDocument();
-      expect(screen.getByText('(Not set)')).toBeInTheDocument();
+      expect(screen.getByText('Add Tags (0 selected)')).toBeInTheDocument();
+      expect(screen.getByText('Set Rating (0 stars)')).toBeInTheDocument();
+      expect(screen.getByText('Set Date Range (Not set)')).toBeInTheDocument();
       expect(screen.getByText('Most Relevant')).toBeInTheDocument();
     });
   });

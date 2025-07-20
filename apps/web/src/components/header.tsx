@@ -1,7 +1,6 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../utils/tailwind-utils';
 import { ThemeToggle } from './theme-toggle';
@@ -17,7 +16,6 @@ import { useSearchShortcuts } from '../features/search/hooks/use-search-shortcut
 
 export function Header() {
   const { resolvedTheme } = useTheme();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
 

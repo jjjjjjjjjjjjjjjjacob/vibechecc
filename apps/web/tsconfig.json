@@ -21,6 +21,7 @@
     "dist",
     ".output",
     "**/*.test.ts",
-    "**/*.test.tsx"
+    "**/*.test.tsx",
+    "vite.config.ts"
   ]
 }

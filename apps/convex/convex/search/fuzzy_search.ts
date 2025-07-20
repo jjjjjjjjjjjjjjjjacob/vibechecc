@@ -68,7 +68,7 @@ export function similarityRatio(str1: string, str2: string): number {
 export function fuzzyMatch(
   text: string,
   query: string,
-  threshold = 0.7
+  threshold = 0.8
 ): boolean {
   const normalizedText = text.toLowerCase();
   const normalizedQuery = query.toLowerCase();

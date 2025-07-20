@@ -60,6 +60,24 @@ export function scoreVibe(
   const descScore = fuzzyScore(vibe.description, normalizedQuery);
   score += (descScore / 100) * w.descriptionMatch;
 
+  // Bonus for multiple occurrences of the query term
+  // Escape special regex characters
+  const escapedQuery = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const titleOccurrences = (
+    vibe.title.toLowerCase().match(new RegExp(escapedQuery, 'g')) || []
+  ).length;
+  const descOccurrences = (
+    vibe.description.toLowerCase().match(new RegExp(escapedQuery, 'g')) || []
+  ).length;
+
+  // Each additional occurrence adds bonus points
+  if (titleOccurrences > 1) {
+    score += (titleOccurrences - 1) * 10; // 10 points per extra occurrence in title
+  }
+  if (descOccurrences > 1) {
+    score += (descOccurrences - 1) * 5; // 5 points per extra occurrence in description
+  }
+
   // Tag matching
   if (vibe.tags && vibe.tags.length > 0) {
     const tagScores = vibe.tags.map((tag) => fuzzyScore(tag, normalizedQuery));
@@ -182,7 +200,7 @@ export function rerankResults<T extends { score?: number }>(
     if ('type' in result) {
       switch (result.type) {
         case 'vibe': {
-          const vibeResult = result as VibeSearchResult;
+          const vibeResult = result as unknown as VibeSearchResult;
           newScore = scoreVibe(
             {
               title: vibeResult.title,
@@ -197,7 +215,7 @@ export function rerankResults<T extends { score?: number }>(
           break;
         }
         case 'user': {
-          const userResult = result as UserSearchResult;
+          const userResult = result as unknown as UserSearchResult;
           newScore = scoreUser(
             {
               username: userResult.username,
@@ -209,7 +227,7 @@ export function rerankResults<T extends { score?: number }>(
           break;
         }
         case 'tag': {
-          const tagResult = result as TagSearchResult;
+          const tagResult = result as unknown as TagSearchResult;
           newScore = scoreTag(
             {
               name: tagResult.title,

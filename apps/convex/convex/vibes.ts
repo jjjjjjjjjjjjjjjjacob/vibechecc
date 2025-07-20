@@ -253,7 +253,9 @@ export const getUserReactedVibes = query({
       .collect();
 
     // Get unique vibe IDs that the user has reacted to
-    const reactedVibeIds = Array.from(new Set(userReactions.map((r) => r.vibeId)));
+    const reactedVibeIds = Array.from(
+      new Set(userReactions.map((r) => r.vibeId))
+    );
 
     // Get the vibes for those IDs
     const vibes = await Promise.all(

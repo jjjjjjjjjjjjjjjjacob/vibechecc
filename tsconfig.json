@@ -6,7 +6,7 @@
       "path": "./apps/web"
     },
     {
-      "path": "./apps/backend"
+      "path": "./apps/convex"
     },
     {
       "path": "./packages/types"

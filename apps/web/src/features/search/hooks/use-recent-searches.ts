@@ -15,8 +15,8 @@ export function useRecentSearches() {
         const parsed = JSON.parse(stored);
         setRecentSearches(parsed);
       }
-    } catch (error) {
-      console.error('Error loading recent searches:', error);
+    } catch {
+      // Error loading recent searches
     }
   }, []);
 
@@ -30,7 +30,7 @@ export function useRecentSearches() {
       const newSearches: SearchSuggestion[] = [
         {
           term,
-          type: 'recent',
+          type: 'recent' as const,
           metadata: {
             lastUsed: new Date().toISOString(),
           },
@@ -41,8 +41,8 @@ export function useRecentSearches() {
       // Save to localStorage
       try {
         localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(newSearches));
-      } catch (error) {
-        console.error('Error saving recent searches:', error);
+      } catch {
+        // Error saving recent searches
       }
 
       return newSearches;
@@ -54,8 +54,8 @@ export function useRecentSearches() {
     setRecentSearches([]);
     try {
       localStorage.removeItem(RECENT_SEARCHES_KEY);
-    } catch (error) {
-      console.error('Error clearing recent searches:', error);
+    } catch {
+      // Error clearing recent searches
     }
   }, []);
 
@@ -66,8 +66,8 @@ export function useRecentSearches() {
 
       try {
         localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(filtered));
-      } catch (error) {
-        console.error('Error updating recent searches:', error);
+      } catch {
+        // Error updating recent searches
       }
 
       return filtered;
