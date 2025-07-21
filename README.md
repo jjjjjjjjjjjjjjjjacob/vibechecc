@@ -16,9 +16,8 @@ This project is an Nx-powered monorepo, enabling code sharing between multiple f
 ```
 vibechecc/
 ├── apps/
-│   ├── frontend/
-│   │   └── browser/      # React web application (TanStack Start)
-│   └── backend/          # Convex backend (real-time DB, auth, webhooks)
+│   ├── web/              # React web application (TanStack Start)
+│   └── convex/           # Convex backend (real-time DB, auth, webhooks)
 ├── packages/
 │   ├── types/            # @vibechecc/types - Shared TypeScript interfaces
 │   └── utils/            # @vibechecc/utils - Shared utility functions
@@ -29,8 +28,8 @@ vibechecc/
 └── ...
 ```
 
-- **Frontend details:** See [`apps/frontend/browser/README.md`](./apps/frontend/browser/README.md)
-- **Backend details:** See [`apps/backend/README.md`](./apps/backend/README.md)
+- **Frontend details:** See [`apps/web/README.md`](./apps/web/README.md)
+- **Backend details:** See [`apps/convex/README.md`](./apps/convex/README.md)
 - **Infrastructure:** See [`terraform/README.md`](./terraform/README.md)
 
 ---
@@ -38,6 +37,7 @@ vibechecc/
 ## Tech Stack
 
 ### Frontend
+
 - [TanStack Start](https://tanstack.com/start) (React framework)
 - [shadcn/ui](https://ui.shadcn.com/) (UI components)
 - [Tailwind CSS v4](https://tailwindcss.com/)
@@ -47,16 +47,19 @@ vibechecc/
 - [Framer Motion](https://framer.com/motion/) (animations)
 
 ### Backend
+
 - [Convex](https://convex.dev/) (real-time DB, serverless functions)
 - [Clerk](https://clerk.com/) (authentication)
 
 ### Infrastructure
+
 - [Cloudflare Workers](https://workers.cloudflare.com/) (frontend hosting)
 - [Cloudflare R2](https://developers.cloudflare.com/r2/) (state storage)
 - [Terraform](https://www.terraform.io/) (infra as code)
 - [ngrok](https://ngrok.com/) (webhook tunneling)
 
 ### Development Tools
+
 - [Bun](https://bun.sh/) (runtime, package manager)
 - [Vinxi](https://vinxi.vercel.app/) (build system)
 - [Vitest](https://vitest.dev/) (testing)
@@ -70,6 +73,7 @@ vibechecc/
 ## Getting Started
 
 ### Prerequisites
+
 - [Bun](https://bun.sh/)
 - [Git](https://git-scm.com/)
 - [ngrok](https://ngrok.com/download)
@@ -77,6 +81,7 @@ vibechecc/
 - A code editor (e.g., [VS Code](https://code.visualstudio.com/))
 
 ### Installation
+
 ```bash
 git clone https://github.com/your-username/vibechecc.git
 cd vibechecc
@@ -84,6 +89,7 @@ bun install
 ```
 
 ### Environment Variables
+
 1. Copy the example file:
    ```bash
    cp .env.local.example .env.local
@@ -94,13 +100,16 @@ bun install
    - `NGROK_AUTHTOKEN`
 
 ### Running Locally
+
 ```bash
 bun run dev
 ```
+
 - Starts Convex backend, seeds DB, launches frontend (http://localhost:3030), and ngrok tunnel.
-- See [apps/frontend/browser/README.md](./apps/frontend/browser/README.md) and [apps/backend/README.md](./apps/backend/README.md) for app-specific dev info.
+- See [apps/web/README.md](./apps/web/README.md) and [apps/convex/README.md](./apps/convex/README.md) for app-specific dev info.
 
 ### Troubleshooting
+
 - Clerk webhooks: Ensure ngrok is running and webhook URL is set in Clerk dashboard.
 - Convex errors: Check Convex CLI output and env vars.
 - Bun issues: Upgrade Bun, clear node_modules, reinstall.
@@ -111,25 +120,27 @@ bun run dev
 
 All scripts are run from the root with Bun:
 
-| Command                | Description                        |
-| ---------------------- | ---------------------------------- |
-| `bun run dev`          | Start full dev environment         |
-| `bun run dev:frontend` | Start frontend only                |
-| `bun run dev:backend`  | Start backend only                 |
-| `bun run build`        | Build all projects                 |
-| `bun run test`         | Run all tests                      |
-| `bun run typecheck`    | Type check all projects            |
-| `bun run lint`         | Lint all projects                  |
-| `bun run seed`         | Seed database with sample data     |
+| Command                | Description                    |
+| ---------------------- | ------------------------------ |
+| `bun run dev`          | Start full dev environment     |
+| `bun run dev:frontend` | Start frontend only            |
+| `bun run dev:backend`  | Start backend only             |
+| `bun run build`        | Build all projects             |
+| `bun run test`         | Run all tests                  |
+| `bun run typecheck`    | Type check all projects        |
+| `bun run lint`         | Lint all projects              |
+| `bun run seed`         | Seed database with sample data |
 
 #### Nx Usage
+
 - List projects: `bun nx show projects`
 - Project details: `bun nx show project <project>`
-- Run task: `bun nx <task> <project>` (e.g., `bun nx build @vibechecc/frontend-browser`)
+- Run task: `bun nx <task> <project>` (e.g., `bun nx build @vibechecc/web`)
 - Run for all: `bun nx run-many --target=<task>`
 - Clear cache: `bun nx reset`
 
 #### Adding New Apps
+
 - Add a new app in `apps/` (see Nx docs for generators)
 - Add to `package.json` workspaces and `nx.json` if needed
 - See [Import Patterns](#import-patterns) for shared code usage
@@ -173,40 +184,51 @@ All scripts are run from the root with Bun:
 To manage infrastructure locally, you must configure environment variables for Terraform and the backend state bucket. This is automated using [direnv](https://direnv.net/) and a `.envrc` file in the `terraform/` directory.
 
 #### 1. Install direnv (if not already)
+
 ```bash
 brew install direnv # macOS
 # or see https://direnv.net/docs/installation.html for other OS
 ```
 
 #### 2. Allow the .envrc
+
 ```bash
 cd terraform
 # Review the .envrc file, then allow it:
 direnv allow
 ```
+
 This will export all required variables for Terraform, including Cloudflare and R2 credentials.
 
 #### 3. Generate backend.tfvars
+
 Before running `terraform init`, generate the backend config:
+
 ```bash
 chmod +x generate-backend-config.sh
 ./generate-backend-config.sh
 ```
+
 This creates `backend.tfvars` with the correct R2 bucket and credentials for remote state.
 
 #### 4. Select/Create a Workspace
+
 Terraform uses workspaces to isolate environments:
+
 - `production` → main site
 - `development` → dev site
 - `pr-<number>` → ephemeral/PR preview
 
 To select or create a workspace:
+
 ```bash
 terraform workspace select <workspace> || terraform workspace new <workspace>
 ```
+
 For ephemeral/PR environments, set `TF_VAR_environment=ephemeral` and `TF_VAR_pr_number=<pr_number>` in your `.envrc`.
 
 #### 5. Usual Terraform Workflow
+
 ```bash
 terraform init -backend-config=backend.tfvars
 terraform plan
@@ -218,8 +240,9 @@ terraform apply
 ## Import Patterns
 
 ### From Browser App
+
 ```typescript
-import { api } from '@vibechecc/backend';
+import { api } from '@vibechecc/convex';
 import type { User, Vibe, Rating } from '@vibechecc/types';
 import { computeUserDisplayName, getUserAvatarUrl } from '@vibechecc/utils';
 import { seo } from '@vibechecc/utils';
@@ -227,6 +250,7 @@ import { cn } from '@vibechecc/utils/tailwind';
 ```
 
 ### From Backend Package
+
 ```typescript
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
@@ -235,6 +259,7 @@ import { computeUserDisplayName } from '@vibechecc/utils';
 ```
 
 ### From Shared Packages
+
 ```typescript
 // @vibechecc/types
 export interface User { id: string; name: string; email: string; }

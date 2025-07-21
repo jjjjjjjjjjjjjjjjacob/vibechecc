@@ -3,10 +3,10 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/frontend/browser"
+      "path": "./apps/web"
     },
     {
-      "path": "./apps/backend"
+      "path": "./apps/convex"
     },
     {
       "path": "./packages/types"
@@ -30,13 +30,14 @@
     "baseUrl": ".",
     "noEmit": true,
     "paths": {
-      "@vibechecc/backend": ["./apps/backend"],
-      "@vibechecc/backend/*": ["./apps/backend/*"],
-      "@vibechecc/frontend-browser": ["./apps/frontend/browser"],
+      "@vibechecc/convex": ["./apps/convex"],
+      "@vibechecc/convex/*": ["./apps/convex/*"],
       "@vibechecc/types": ["./packages/types/src"],
       "@vibechecc/types/*": ["./packages/types/src/*"],
       "@vibechecc/utils": ["./packages/utils/src"],
-      "@vibechecc/utils/*": ["./packages/utils/src/*"]
+      "@vibechecc/utils/*": ["./packages/utils/src/*"],
+      "@vibechecc/web": ["./apps/web"],
+      "@vibechecc/web/*": ["./apps/web/*"]
     }
   },
   "exclude": ["vitest.setup.ts", "node_modules", "dist", ".output"]

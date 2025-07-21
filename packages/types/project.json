@@ -7,7 +7,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsup src/index.ts --format cjs,esm --dts",
+        "command": "bun run build",
         "cwd": "packages/types"
       }
     },

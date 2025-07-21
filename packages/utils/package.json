@@ -11,27 +11,28 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
-    "./tailwind": {
-      "types": "./dist/tailwind.d.ts",
-      "import": "./dist/tailwind.mjs",
-      "require": "./dist/tailwind.js"
+    "./constants": {
+      "types": "./dist/constants/index.d.ts",
+      "import": "./dist/constants/index.mjs",
+      "require": "./dist/constants/index.js"
+    },
+    "./format": {
+      "types": "./dist/format/index.d.ts",
+      "import": "./dist/format/index.mjs",
+      "require": "./dist/format/index.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/tailwind.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/tailwind.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/constants/index.ts src/format/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/constants/index.ts src/format/index.ts --format cjs,esm --dts --watch",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
     "tsup": "^8.0.1",
     "typescript": "^5.7.2"
-  },
-  "peerDependencies": {
-    "clsx": "*",
-    "tailwind-merge": "*"
   },
   "publishConfig": {
     "access": "restricted"

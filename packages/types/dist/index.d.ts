@@ -1,4 +1,5 @@
-interface User {
+export * from './search';
+export interface User {
     externalId: string;
     username?: string;
     first_name?: string;
@@ -15,18 +16,18 @@ interface User {
     onboardingCompleted?: boolean;
     interests?: string[];
 }
-interface Rating {
+export interface Rating {
     user: User | null;
     rating: number;
     review?: string;
     date: string;
 }
-interface EmojiReaction {
+export interface EmojiReaction {
     emoji: string;
     count: number;
     users: string[];
 }
-interface Vibe {
+export interface Vibe {
     id: string;
     title: string;
     description: string;
@@ -37,5 +38,3 @@ interface Vibe {
     tags?: string[];
     reactions?: EmojiReaction[];
 }
-
-export type { EmojiReaction, Rating, User, Vibe };
