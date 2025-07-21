@@ -208,7 +208,7 @@ jobs:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: bunx convex dev --configure=existing --project ${{ secrets.CONVEX_PROJECT_SLUG }} --dev-deployment cloud --once
 
-      # Set Convex environment variables for backend (now in apps/backend)
+      # Set Convex environment variables for backend (now in apps/convex)
       - name: Set Environment Variables
         working-directory: apps/convex
         env:
@@ -220,7 +220,7 @@ jobs:
 
       # Build and deploy Convex backend
       - name: Build Convex Backend
-        run: bun nx build @vibechecc/backend
+        run: bun nx build @vibechecc/convex
 
       - name: Deploy Convex
         working-directory: apps/convex
