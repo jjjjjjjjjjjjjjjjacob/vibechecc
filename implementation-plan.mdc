@@ -1,242 +1,174 @@
-# Search Implementation Plan for vibechecc
+# Implementation Plan: Enhanced Rating & Review System
 
-## Executive Summary
-This plan divides the remaining search implementation work among **3 agents** working in parallel to complete a comprehensive, production-ready search system.
+## Overview
+Transform the rating and review system to be more like Letterboxd/Beli/Goodreads, where:
+- Users are prompted to submit a review with each rating
+- Emoji reactions can be used as ratings (e.g., 3 😳 out of 5)
+- Clicking on a rating opens a popover for rating/reviewing
+- Clicking on a reaction opens a popover for emoji-rating
+- Vibes display their most-interacted emoji reaction as the primary visual
+- Expanded view shows top emoji ratings
 
-## Already Completed ✅
-1. **Backend Infrastructure**: Schema, search functions, trending, analytics
-2. **Command Palette**: Component, keyboard shortcuts, categorized results
-3. **Search Results Page**: Grid layout, pagination, TripAdvisor-style cards
-4. **Basic Filters**: Components created, header integration done
+## Phase 1: Database Schema Updates
+### Tasks:
+- [ ] **1.1 Update Ratings Table Schema**
+  - [ ] Add `emojiRating` field (optional) to store emoji-based ratings
+  - [ ] Add `emojiScale` field to store the scale (e.g., 5 for "out of 5")
+  - [ ] Add `tags` field (array) to store associated tags for the rating
+  - [ ] Create migration script for existing data
 
-## Remaining Work - 3 Active Agents
+- [ ] **1.2 Create Emoji Rating Metadata Table**
+  - [ ] Create new table `emojiRatingMetadata`
+  - [ ] Fields: `emoji`, `tags` (array), `category`, `sentiment`
+  - [ ] Populate with common rating emojis and their associated tags
 
----
+- [ ] **1.3 Update Reactions Table**
+  - [ ] Add `ratingValue` field (optional number 1-5)
+  - [ ] Add `isRating` boolean to distinguish rating reactions from regular reactions
+  - [ ] Create indexes for efficient emoji rating queries
 
-## Agent 1: Integration & Real-time Search ✅ COMPLETED
+## Phase 2: Backend Functions
+### Tasks:
+- [ ] **2.1 Rating Mutations**
+  - [ ] Update `createOrUpdateRating` to accept emoji ratings
+  - [ ] Add validation for emoji rating scales
+  - [ ] Ensure review is prompted/required with new ratings
+  - [ ] Add tag association logic based on emoji metadata
 
-### Objective
-Connect frontend to backend and implement real-time search features.
+- [ ] **2.2 New Query Functions**
+  - [ ] Create `getTopEmojiRatings` to fetch most-used emoji ratings for a vibe
+  - [ ] Create `getMostInteractedEmoji` to determine primary emoji display
+  - [ ] Update `getVibeStats` to include emoji rating statistics
+  - [ ] Create `getEmojiRatingMetadata` for tag lookups
 
-### Completed Work
-1. **Frontend-Backend Integration**
-   - ✅ Created debouncing hook for optimal performance
-   - ✅ Replaced all mock data with Convex queries
-   - ✅ Implemented search tracking for analytics
-   - ✅ Added comprehensive error handling
+- [ ] **2.3 Analytics Functions**
+  - [ ] Add emoji rating aggregation logic
+  - [ ] Calculate emoji rating averages (e.g., 3.5 😳 out of 5)
+  - [ ] Track emoji rating trends
 
-2. **Real-time Features**  
-   - ✅ Created instant search preview component
-   - ✅ Implemented search-as-you-type with debouncing
-   - ✅ Added recent searches with localStorage
-   - ✅ Built search caching service for performance
+## Phase 3: Frontend Components
+### Tasks:
+- [ ] **3.1 Rating Popover Component**
+  - [ ] Create `RatingPopover` component that opens on rating click
+  - [ ] Include star rating selector
+  - [ ] Make review textarea required (with character minimum)
+  - [ ] Add emoji rating option toggle
+  - [ ] Show existing rating/review if updating
+  - [ ] Implement proper form validation
 
-### Key Files Created/Modified
-- `/apps/web/src/hooks/use-debounced-value.ts` - Debouncing utility
-- `/apps/web/src/features/search/hooks/use-search.ts` - Updated with Convex
-- `/apps/web/src/features/search/hooks/use-search-results.ts` - Full Convex integration
-- `/apps/web/src/features/search/hooks/use-instant-search.ts` - Instant search functionality
-- `/apps/web/src/features/search/hooks/use-recent-searches.ts` - Local search history
-- `/apps/web/src/features/search/components/instant-search-preview.tsx` - Preview overlay
-- `/apps/web/src/features/search/services/search-cache.ts` - Caching layer
-- `/apps/web/src/features/search/components/search-error.tsx` - Error handling
-- `/apps/web/src/features/search/components/search-loading.tsx` - Loading states
+- [ ] **3.2 Emoji Rating Component**
+  - [ ] Create `EmojiRatingPopover` component
+  - [ ] Allow selecting an emoji and rating scale (1-5)
+  - [ ] Visual representation of emoji rating (e.g., 3 😳 2 ⭕)
+  - [ ] Show associated tags for selected emoji
+  - [ ] Add review textarea (required)
 
-### Primary Tasks
-1. **Frontend-Backend Integration**
-   - Replace all mock data with Convex queries
-   - Implement 300ms debouncing
-   - Add comprehensive error handling
-   - Track search events
+- [ ] **3.3 Update Existing Components**
+  - [ ] Modify `StarRating` to open popover instead of direct rating
+  - [ ] Update `EmojiReaction` to support rating mode
+  - [ ] Create `EmojiRatingDisplay` component for showing emoji ratings
 
-2. **Real-time Features**
-   - Instant search preview overlay
-   - Search-as-you-type functionality
-   - Recent searches (localStorage)
-   - Prefetch on hover
+## Phase 4: Visual Updates
+### Tasks:
+- [ ] **4.1 Vibe Card Updates**
+  - [ ] Replace or supplement star rating with most-interacted emoji
+  - [ ] Show emoji rating average (e.g., "3.5 😳")
+  - [ ] Add expand button to see top emoji ratings
+  - [ ] Maintain backward compatibility with star ratings
 
-### Key Files
+- [ ] **4.2 Vibe Detail Page Updates**
+  - [ ] Show primary emoji rating prominently
+  - [ ] Display top 5 emoji ratings with counts
+  - [ ] Update review cards to show emoji ratings
+  - [ ] Add emoji rating filter for reviews
+
+- [ ] **4.3 Rating Visualization**
+  - [ ] Create component for displaying emoji scales (filled/unfilled emojis)
+  - [ ] Add animations for emoji rating interactions
+  - [ ] Implement hover states showing rating details
+
+## Phase 5: User Experience Enhancements
+### Tasks:
+- [ ] **5.1 Rating Flow**
+  - [ ] Implement rating → review prompt flow
+  - [ ] Add "Quick Rate" vs "Rate & Review" options
+  - [ ] Show rating history in user profile
+  - [ ] Add rating reminders for viewed vibes
+
+- [ ] **5.2 Discovery Features**
+  - [ ] Add emoji-based vibe discovery
+  - [ ] Create "Vibes rated 5 😱" type collections
+  - [ ] Implement tag-based recommendations from emoji ratings
+
+- [ ] **5.3 Social Features**
+  - [ ] Show friends' emoji ratings
+  - [ ] Add emoji rating trends/statistics
+  - [ ] Create emoji rating leaderboards
+
+## Phase 6: Testing & Migration
+### Tasks:
+- [ ] **6.1 Unit Tests**
+  - [ ] Test emoji rating validation logic
+  - [ ] Test popover components
+  - [ ] Test rating aggregation functions
+  - [ ] Test tag association logic
+
+- [ ] **6.2 Integration Tests**
+  - [ ] Test full rating flow with popovers
+  - [ ] Test emoji rating submission and display
+  - [ ] Test migration of existing ratings
+  - [ ] Test backward compatibility
+
+- [ ] **6.3 Data Migration**
+  - [ ] Create migration script for existing ratings
+  - [ ] Backfill emoji metadata for common reactions
+  - [ ] Update existing reaction data structure
+  - [ ] Verify data integrity post-migration
+
+## Technical Considerations
+
+### Component Architecture
 ```
-apps/web/src/
-├── hooks/
-│   └── use-debounced-value.ts (new)
-├── features/search/
-│   ├── hooks/
-│   │   ├── use-search.ts (update)
-│   │   ├── use-search-suggestions.ts (update)
-│   │   ├── use-search-results.ts (update)
-│   │   ├── use-instant-search.ts (new)
-│   │   └── use-recent-searches.ts (new)
-│   ├── components/
-│   │   └── instant-search-preview.tsx (new)
-│   └── services/
-│       └── search-cache.ts (new)
-```
+RatingPopover
+├── StarRatingSelector
+├── EmojiRatingToggle
+├── ReviewTextarea (required)
+└── SubmitButton
 
-### Implementation Checklist
-- [x] Create debouncing hook
-- [x] Replace mock data in all hooks
-- [x] Add Convex query integration
-- [x] Implement search caching
-- [x] Create instant preview overlay
-- [x] Track search events
-- [x] Store recent searches
-- [x] Add prefetch on hover
-- [x] Add error boundaries
-
----
-
-## Agent 2: Advanced Search & Filters ✅ COMPLETED
-
-### Objective
-Enhance search with fuzzy matching and create fully interactive filters.
-
-### Completed Work
-1. **Backend Enhancements**
-   - ✅ Implemented fuzzy matching with Levenshtein distance algorithm
-   - ✅ Created advanced relevance scoring system with weighted factors
-   - ✅ Added search operators support (quotes, minus, #tags, @user, rating:, date:)
-   - ✅ Optimized queries with limits for performance
-
-2. **Filter Components**
-   - ✅ Built enhanced tag filter with search and autocomplete
-   - ✅ Created rating range slider with presets
-   - ✅ Implemented date range picker with quick presets
-   - ✅ Built active filters bar showing applied filters
-   - ✅ Added URL state synchronization for shareable searches
-   - ✅ Implemented mobile-responsive filter drawer
-
-### Key Files Created/Modified
-- `/apps/convex/convex/search/fuzzy-search.ts` - Fuzzy matching algorithms
-- `/apps/convex/convex/search/search-scorer.ts` - Advanced scoring system
-- `/apps/convex/convex/search/search-utils.ts` - Query parsing and operators
-- `/apps/convex/convex/search.ts` - Updated main search with new features
-- `/apps/web/src/features/search/components/filters/` - All new filter components
-- `/apps/web/src/features/search/hooks/use-filter-state.ts` - URL sync hook
-
-### Primary Tasks
-1. **Backend Enhancements**
-   - Fuzzy matching (typo tolerance)
-   - Advanced relevance scoring
-   - Search operators (quotes, minus)
-   - Performance optimizations
-
-2. **Interactive Filters**
-   - Enhanced filter components
-   - URL state synchronization
-   - Mobile-optimized drawer
-   - Filter presets
-
-### Key Files
-```
-apps/convex/convex/
-├── search/
-│   ├── fuzzy-search.ts (new)
-│   ├── search-scorer.ts (new)
-│   └── search-utils.ts (new)
-└── search.ts (enhance)
-
-apps/web/src/features/search/
-├── components/filters/
-│   ├── tag-filter-enhanced.tsx (new)
-│   ├── rating-slider.tsx (new)
-│   ├── date-range-picker.tsx (new)
-│   └── active-filters-bar.tsx (new)
-├── hooks/
-│   └── use-filter-state.ts (new)
-└── components/
-    └── search-filters.tsx (enhance)
+EmojiRatingPopover
+├── EmojiPicker
+├── RatingScaleSelector (1-5)
+├── TagDisplay
+├── ReviewTextarea (required)
+└── SubmitButton
 ```
 
-### Implementation Checklist
-- [x] Implement Levenshtein distance
-- [x] Create relevance scoring
-- [x] Add search operators
-- [x] Optimize query performance
-- [x] Build tag filter with search
-- [x] Create rating slider
-- [x] Add date picker with presets
-- [x] Implement filter state management
-- [x] Sync with URL parameters
-- [x] Add mobile drawer
+### State Management
+- Use TanStack Query for rating data
+- Optimistic updates for better UX
+- Local state for popover forms
+- Global state for user's ratings cache
 
----
+### Performance
+- Lazy load emoji metadata
+- Cache most-interacted emojis
+- Debounce rating updates
+- Use virtual scrolling for emoji lists
 
-## Agent 3: Testing & Polish
+### Accessibility
+- Keyboard navigation for popovers
+- Screen reader support for emoji ratings
+- Alternative text for emoji displays
+- Focus management in popovers
 
-### Objective
-Comprehensive testing, basic analytics, and UX polish.
+## Success Metrics
+- Increase in review submissions per rating
+- Adoption rate of emoji ratings
+- User engagement with rating popovers
+- Performance impact (should be minimal)
 
-### Completed Work
-1. **Testing Suite**
-   - ✅ Created component tests for search-command, search-results-grid, search-filters
-   - ✅ Created backend tests for search functions with edge cases
-   - ✅ Set up test infrastructure with proper mocking
-
-2. **Analytics & Metrics**
-   - ✅ Implemented comprehensive search metrics tracking system
-   - ✅ Created analytics queries for popular searches, performance, and failures
-   - ✅ Integrated metrics tracking into main search function
-   - ✅ Added searchMetrics table to schema
-
-3. **UX Polish**
-   - ✅ Enhanced loading states with SearchLoading component
-   - ✅ Created SearchError component for error handling
-   - ✅ Improved empty states with trending/recent searches
-
-### Key Files Created/Modified
-- `/apps/web/src/features/search/__tests__/` - All component tests
-- `/apps/convex/convex/__tests__/search.test.ts` - Backend search tests
-- `/apps/convex/convex/analytics/search-metrics.ts` - Comprehensive metrics system
-- `/apps/web/src/features/search/components/search-loading.tsx` - Loading states
-- `/apps/web/src/features/search/components/search-error.tsx` - Error handling
-- `/apps/web/src/features/search/components/search-empty-state.tsx` - Enhanced empty state
-
-### Implementation Checklist
-- [x] Write component tests
-- [ ] Create integration tests
-- [x] Test backend functions
-- [ ] Add performance benchmarks
-- [x] Implement search analytics
-- [x] Track popular terms
-- [x] Monitor performance
-- [x] Polish loading states
-- [x] Improve empty states
-- [ ] Ensure accessibility
-- [ ] Optimize bundle size
-
----
-
-## Coordination & Guidelines
-
-### Shared Dependencies
-- **Types**: `@vibechecc/types` for all TypeScript interfaces
-- **API**: `api.search.*` namespace for backend functions
-- **Components**: Reuse existing shadcn/ui components
-
-### Working Order
-1. All agents can work in parallel
-2. Agent 1 should prioritize hook updates (others may need them)
-3. Agent 2 can start with either backend or frontend
-4. Agent 3 can begin testing existing components
-
-### Quality Standards
-- Run `bun run quality` before marking complete
-- Ensure mobile responsiveness
-- Test edge cases (special chars, long queries)
-- Verify < 200ms response time
-- Check keyboard accessibility
-
-### Success Metrics
-- [ ] Fuzzy search handles typos gracefully
-- [ ] Filters work smoothly on mobile
-- [ ] All tests pass with > 80% coverage
-- [ ] Search responds in < 200ms
-- [ ] URLs are shareable with filters
-- [ ] Analytics provide usage insights
-
-### Communication
-- Update this plan as you complete tasks
-- Note any API changes that affect other agents
-- Test integration points between agent work
-- Document any blockers or dependencies
+## Rollout Strategy
+1. Feature flag for new rating system
+2. A/B test with subset of users
+3. Gradual rollout monitoring metrics
+4. Full release with migration
