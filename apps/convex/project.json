@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/convex",
+  "inputs": ["@vibechecc/types"],
   "targets": {
     "dev": {
       "executor": "nx:run-commands",

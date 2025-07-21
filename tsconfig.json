@@ -32,12 +32,12 @@
     "paths": {
       "@vibechecc/convex": ["./apps/convex"],
       "@vibechecc/convex/*": ["./apps/convex/*"],
-      "@vibechecc/web": ["./apps/web"],
-      "@vibechecc/web/*": ["./apps/web/*"],
       "@vibechecc/types": ["./packages/types/src"],
       "@vibechecc/types/*": ["./packages/types/src/*"],
       "@vibechecc/utils": ["./packages/utils/src"],
-      "@vibechecc/utils/*": ["./packages/utils/src/*"]
+      "@vibechecc/utils/*": ["./packages/utils/src/*"],
+      "@vibechecc/web": ["./apps/web"],
+      "@vibechecc/web/*": ["./apps/web/*"]
     }
   },
   "exclude": ["vitest.setup.ts", "node_modules", "dist", ".output"]

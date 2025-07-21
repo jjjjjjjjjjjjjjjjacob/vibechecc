@@ -3,6 +3,7 @@
 ## Agent 1: Integration & Real-time Search
 
 **Prompt:**
+
 ```
 You are Agent 1. Please execute your role in the implementation-plan.mdc for the vibechecc project.
 
@@ -31,6 +32,7 @@ Test your changes with `bun run dev` and ensure the command palette (Cmd+K) work
 ## Agent 2: Advanced Search & Filters
 
 **Prompt:**
+
 ```
 You are Agent 2. Please execute your role in the implementation-plan.mdc for the vibechecc project.
 
@@ -60,6 +62,7 @@ Ensure search handles typos, special characters, and filters update URLs for sha
 ## Agent 3: Testing & Polish
 
 **Prompt:**
+
 ```
 You are Agent 3. Please execute your role in the implementation-plan.mdc for the vibechecc project.
 
@@ -94,6 +97,7 @@ Run `bun run quality` to verify all checks pass. Update the implementation plan 
 ## Quick Reference for All Agents
 
 ### Starting Instructions
+
 1. Read `/implementation-plan.mdc` for your complete scope
 2. Check existing code before creating new files
 3. Follow established patterns in the codebase
@@ -101,6 +105,7 @@ Run `bun run quality` to verify all checks pass. Update the implementation plan 
 5. Run `bun run quality` before marking complete
 
 ### Coordination
+
 - All agents can work in parallel
 - Agent 1 should prioritize hook updates first
 - Update the implementation plan as you progress
@@ -108,6 +113,7 @@ Run `bun run quality` to verify all checks pass. Update the implementation plan 
 - If you need new types, add to `packages/types/src/search.ts`
 
 ### Success Criteria
+
 - Search works end-to-end with real data
 - Fuzzy matching handles typos gracefully
 - Filters are fully interactive and mobile-friendly

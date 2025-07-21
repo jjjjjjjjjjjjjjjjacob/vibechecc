@@ -6,6 +6,7 @@ import {
   HeadContent,
   Scripts,
   useRouteContext,
+  useNavigate,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { createServerFn } from '@tanstack/react-start';
@@ -41,9 +42,7 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
 
   try {
     // Use getAuth with options to handle SSR properly
-    const authResult = await getAuth(request, {
-      secretKey: process.env.CLERK_SECRET_KEY,
-    });
+    const authResult = await getAuth(request);
 
     // Check if we got a Response object (handshake redirect)
     if (
@@ -62,8 +61,13 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
 
     const auth = authResult;
 
-    // If no userId, return empty auth state
-    if (!auth?.userId) {
+    // Check if auth is valid and has userId
+    if (
+      !auth ||
+      typeof auth !== 'object' ||
+      !('userId' in auth) ||
+      !auth.userId
+    ) {
       return {
         userId: null,
         token: null,
@@ -73,14 +77,16 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
     // Only try to get token if we have a userId
     let token = null;
     try {
-      token = await auth.getToken({ template: 'convex' });
+      if ('getToken' in auth && typeof auth.getToken === 'function') {
+        token = await auth.getToken({ template: 'convex' });
+      }
     } catch {
       // Token generation might fail during SSR
       // Convex token generation skipped during SSR
     }
 
     return {
-      userId: auth.userId,
+      userId: auth.userId as string,
       token,
     };
   } catch (error) {
@@ -196,6 +202,8 @@ export const Route = createRootRouteWithContext<{
 });
 
 function ClerkProviderWrapper({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+
   return (
     <ClerkProvider
       publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
@@ -207,8 +215,8 @@ function ClerkProviderWrapper({ children }: { children: React.ReactNode }) {
           footerActionLink: 'text-primary hover:text-primary/90',
         },
       }}
-      clerkJSVersion="5"
-      isSatellite={false}
+      routerPush={(to) => navigate({ to })}
+      routerReplace={(to) => navigate({ to, replace: true })}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       afterSignInUrl="/"
