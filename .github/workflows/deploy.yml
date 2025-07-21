@@ -270,7 +270,7 @@ jobs:
           VITE_POSTHOG_API_HOST: https://us.i.posthog.com
           VITE_POSTHOG_PROJECT_ID: ${{ secrets.VITE_POSTHOG_PROJECT_ID }}
           VITE_POSTHOG_REGION: 'US Cloud'
-        run: bun nx build @vibechecc/frontend-browser
+        run: bun nx build @vibechecc/web
 
       - name: Add Environment to Wrangler Config
         if: inputs.environment == 'ephemeral'
