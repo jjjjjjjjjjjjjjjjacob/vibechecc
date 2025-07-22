@@ -60,5 +60,8 @@
     "vite": "^7.0.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "framer-motion": "^12.23.6"
   }
 }

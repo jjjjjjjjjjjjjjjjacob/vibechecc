@@ -1,0 +1,75 @@
+# Emoji Rating Implementation Learnings
+
+## Context
+Implemented an enhanced rating & review system similar to Letterboxd/Beli/Goodreads where users can rate vibes with emojis and are prompted to write reviews.
+
+## Key Components Created/Modified
+
+### Frontend Components
+1. **EmojiRatingDisplay** (`apps/web/src/components/emoji-rating-display.tsx`)
+   - Displays emoji ratings with visual scale (filled/unfilled emojis)
+   - Supports compact and expanded modes
+   - Shows partial fills for decimal ratings
+   - Already existed and was enhanced
+
+2. **RatingPopover** (`apps/web/src/components/rating-popover.tsx`)
+   - Traditional star rating with required review (50 char min)
+   - Option to include emoji rating
+   - Form validation and error handling
+
+3. **EmojiRatingPopover** (`apps/web/src/components/emoji-rating-popover.tsx`)
+   - Emoji picker with 1-5 scale visualization
+   - Shows emoji metadata and tags
+   - Required review with character counter
+
+### Backend Functions (Already Implemented)
+- `api.emojiRatings.createOrUpdateEmojiRating`
+- `api.emojiRatings.getMostInteractedEmoji`
+- `api.emojiRatings.getTopEmojiRatings`
+- `api.emojiRatings.getAllEmojiMetadata`
+
+### Integration Points
+1. **Vibe Card** - Shows most-interacted emoji with expandable top ratings
+2. **Vibe Detail Page** - Displays emoji ratings prominently with quick rate option
+3. **User Profile** - Shows emoji ratings in review history
+
+## Testing Approach
+- Unit tests using Vitest + @testing-library/react
+- Mock UI components from shadcn/ui in tests
+- Test form validation, error states, and successful submissions
+- Use `getAllByText` for emojis that appear multiple times
+
+## Helpful Patterns
+
+### Emoji Rating Queries
+```typescript
+const { data: topEmojiRatings } = useTopEmojiRatings(vibeId, 5);
+const { data: mostInteractedEmoji } = useMostInteractedEmoji(vibeId);
+```
+
+### Form Validation Pattern
+```typescript
+if (review.length < 50) {
+  setError('Review must be at least 50 characters');
+  return;
+}
+```
+
+### Emoji Scale Rendering
+```typescript
+const filled = Math.floor(rating.value);
+const hasPartial = rating.value % 1 !== 0;
+const unfilled = 5 - Math.ceil(rating.value);
+```
+
+## Future Considerations
+1. **Discovery Features** (Phase 5.2) - Could add emoji-based filtering and search
+2. **Social Features** (Phase 5.3) - Show friends' emoji ratings, trending emojis
+3. **Migration** (Phase 6.3) - Need to handle existing ratings without emoji data
+
+## When This Would Be Helpful
+- Adding new rating-related features
+- Implementing emoji-based discovery/filtering
+- Creating similar popover-based rating systems
+- Writing tests for components with emoji content
+- Extending the rating system with new functionality

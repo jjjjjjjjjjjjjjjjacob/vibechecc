@@ -11,6 +11,7 @@ import { CreateVibeButton } from '@/components/create-vibe-button';
 import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import { HomepageSkeleton } from '@/components/ui/homepage-skeleton';
 import { VibeCategoryRowSkeleton } from '@/components/ui/vibe-category-row-skeleton';
+import { EmojiTrends } from '@/components/emoji-trends';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -63,8 +64,8 @@ function Home() {
               discover and share vibes
             </h1>
             <p className="mb-6 text-lg opacity-90 md:text-xl">
-              welcome to vibechecc, where you can discover, share, and rate
-              vibes from around the world.
+              welcome to <strong>vibechecc</strong>, where you can discover,
+              share, and rate vibes from around the world
             </p>
             <SignedIn>
               <CreateVibeButton
@@ -74,15 +75,38 @@ function Home() {
             </SignedIn>
             <SignedOut>
               <p className="text-lg opacity-75">
-                sign in to start creating and sharing your own vibes!
+                sign in to start creating and sharing your own vibes
               </p>
             </SignedOut>
           </div>
         </div>
       </section>
 
-      {/* Featured Vibes */}
-      <VibeCategoryRow title="featured vibes" vibes={featuredVibes} priority />
+      {/* Emoji Trends - Show on larger screens */}
+      <div className="mb-8 hidden lg:block">
+        <div className="grid grid-cols-4 gap-8">
+          <div className="col-span-3">
+            {/* Featured Vibes */}
+            <VibeCategoryRow
+              title="featured vibes"
+              vibes={featuredVibes}
+              priority
+            />
+          </div>
+          <div className="col-span-1">
+            <EmojiTrends />
+          </div>
+        </div>
+      </div>
+
+      {/* Featured Vibes - Show on mobile */}
+      <div className="lg:hidden">
+        <VibeCategoryRow
+          title="featured vibes"
+          vibes={featuredVibes}
+          priority
+        />
+      </div>
 
       {/* Top Rated Vibes */}
       {topRatedLoading ? (

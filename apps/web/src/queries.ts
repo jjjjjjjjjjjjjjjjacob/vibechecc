@@ -81,6 +81,18 @@ export function useAddRatingMutation() {
   });
 }
 
+// Mutation to create/update emoji rating
+export function useCreateEmojiRatingMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: useConvexMutation(api.emojiRatings.createOrUpdateEmojiRating),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vibes'] });
+      queryClient.invalidateQueries({ queryKey: ['emojiRatings'] });
+    },
+  });
+}
+
 // Mutation to react to a vibe
 export function useReactToVibeMutation() {
   const queryClient = useQueryClient();
@@ -220,6 +232,62 @@ export function useEnsureUserExistsMutation() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['onboarding'] });
     },
+  });
+}
+
+// Query to get top emoji ratings for a vibe
+export function useTopEmojiRatings(vibeId: string, limit?: number) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getTopEmojiRatings, { vibeId, limit }),
+    enabled: !!vibeId,
+  });
+}
+
+// Query to get most interacted emoji for a vibe
+export function useMostInteractedEmoji(vibeId: string) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getMostInteractedEmoji, { vibeId }),
+    enabled: !!vibeId,
+  });
+}
+
+// Query to get all emoji metadata
+export function useEmojiMetadata() {
+  return useQuery(convexQuery(api.emojiRatings.getAllEmojiMetadata, {}));
+}
+
+// Query to get emoji rating stats for a vibe
+export function useEmojiRatingStats(vibeId: string) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getEmojiRatingStats, { vibeId }),
+    enabled: !!vibeId,
+  });
+}
+
+// Query to get top-rated vibes by emoji
+export function useTopRatedEmojiVibes(
+  emoji: string,
+  minValue: number,
+  limit?: number
+) {
+  return useQuery({
+    ...convexQuery(api.vibes.getTopRatedByEmoji, { emoji, minValue, limit }),
+    enabled: !!emoji,
+  });
+}
+
+// Query to get user's emoji rating statistics
+export function useUserEmojiStats(userId: string) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getUserEmojiStats, { userId }),
+    enabled: !!userId,
+  });
+}
+
+// Query to get trending emoji ratings
+export function useTrendingEmojiRatings(days: number = 7) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getTrendingEmojis, { days }),
   });
 }
 

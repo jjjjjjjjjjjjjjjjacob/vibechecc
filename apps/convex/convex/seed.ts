@@ -25,6 +25,12 @@ export const clearAll = internalMutation({
       await ctx.db.delete(rating._id);
     }
 
+    // Delete all emoji ratings
+    const allEmojiRatings = await ctx.db.query('emojiRatings').collect();
+    for (const emojiRating of allEmojiRatings) {
+      await ctx.db.delete(emojiRating._id);
+    }
+
     // Delete all reactions
     const allReactions = await ctx.db.query('reactions').collect();
     for (const reaction of allReactions) {
@@ -41,6 +47,14 @@ export const clearAll = internalMutation({
     const allUsers = await ctx.db.query('users').collect();
     for (const user of allUsers) {
       await ctx.db.delete(user._id);
+    }
+
+    // Delete all emoji metadata
+    const allEmojiMetadata = await ctx.db
+      .query('emojiRatingMetadata')
+      .collect();
+    for (const metadata of allEmojiMetadata) {
+      await ctx.db.delete(metadata._id);
     }
 
     return {
@@ -90,6 +104,11 @@ export const seed = action({
           created_at: new Date('2023-03-30T00:00:00Z').getTime(),
         },
       ];
+
+      // Seed emoji metadata first
+      // eslint-disable-next-line no-console
+      console.log('Seeding emoji metadata...');
+      await ctx.runMutation(internal.seed.emojiMetadata.seedEmojiMetadata);
 
       // Create users
       // eslint-disable-next-line no-console
@@ -183,7 +202,7 @@ export const seed = action({
         }
       }
 
-      // Sample ratings data
+      // Sample ratings data - ALL ratings must have reviews now
       const ratings = [
         // Ratings for vibe-1
         {
@@ -193,6 +212,8 @@ export const seed = action({
           review:
             "Too real. The anxiety of trying to seem experienced while having no clue what you're doing is a universal experience.",
           date: '2023-05-13T09:15:00Z',
+          emoji: '😳',
+          emojiValue: 4,
         },
         {
           vibeId: 'vibe-1',
@@ -201,12 +222,17 @@ export const seed = action({
           review:
             'The perfect mix of excitement and absolute terror. Been there, regretted that.',
           date: '2023-05-14T16:42:00Z',
+          emoji: '😱',
+          emojiValue: 5,
         },
         {
           vibeId: 'vibe-1',
           userId: 'user-4',
           rating: 3,
+          review: 'This is why I always overshare to avoid any confusion. Better to be honest than caught in a lie!',
           date: '2023-05-15T11:30:00Z',
+          emoji: '🤔',
+          emojiValue: 3,
         },
         {
           vibeId: 'vibe-1',
@@ -215,6 +241,8 @@ export const seed = action({
           review:
             'The mental gymnastics required for this situation deserve an Olympic medal.',
           date: '2023-05-16T20:18:00Z',
+          emoji: '💯',
+          emojiValue: 5,
         },
 
         // Ratings for vibe-2
@@ -225,6 +253,8 @@ export const seed = action({
           review:
             'Absolutely terrifying. Had this happen at an airport once and I still have nightmares.',
           date: '2023-06-04T10:22:00Z',
+          emoji: '😱',
+          emojiValue: 2,
         },
         {
           vibeId: 'vibe-2',
@@ -232,12 +262,17 @@ export const seed = action({
           rating: 1,
           review: 'Pure horror movie material. -10/10 would not recommend.',
           date: '2023-06-05T14:37:00Z',
+          emoji: '😨',
+          emojiValue: 1,
         },
         {
           vibeId: 'vibe-2',
           userId: 'user-4',
           rating: 2,
+          review: 'My biggest fear realized. I always carry a phone flashlight now because of experiences like this.',
           date: '2023-06-06T09:15:00Z',
+          emoji: '🔦',
+          emojiValue: 2,
         },
 
         // Ratings for vibe-3
@@ -248,6 +283,8 @@ export const seed = action({
           review:
             "One of life's purest joys. Better than finding money on the street because it's technically already yours.",
           date: '2023-04-23T15:42:00Z',
+          emoji: '🤑',
+          emojiValue: 5,
         },
         {
           vibeId: 'vibe-3',
@@ -256,12 +293,17 @@ export const seed = action({
           review:
             "The universe's way of saying 'here's a little treat for making it through another day'.",
           date: '2023-04-24T09:18:00Z',
+          emoji: '🎉',
+          emojiValue: 5,
         },
         {
           vibeId: 'vibe-3',
           userId: 'user-3',
           rating: 4,
+          review: 'This feeling never gets old! Just found $10 in my winter coat pocket last week.',
           date: '2023-04-25T12:33:00Z',
+          emoji: '💰',
+          emojiValue: 4,
         },
         {
           vibeId: 'vibe-3',
@@ -269,6 +311,8 @@ export const seed = action({
           rating: 5,
           review: 'Better than any lottery win. The perfect surprise.',
           date: '2023-04-26T17:55:00Z',
+          emoji: '💸',
+          emojiValue: 5,
         },
 
         // Ratings for vibe-4
@@ -278,12 +322,17 @@ export const seed = action({
           rating: 2,
           review: 'The longest 30 seconds of your life. Every. Single. Time.',
           date: '2023-07-15T14:22:00Z',
+          emoji: '😬',
+          emojiValue: 2,
         },
         {
           vibeId: 'vibe-4',
           userId: 'user-2',
           rating: 3,
+          review: 'Why do elevators move so slowly when you are with your boss? Physics cannot explain this phenomenon.',
           date: '2023-07-16T10:37:00Z',
+          emoji: '⏱️',
+          emojiValue: 3,
         },
         {
           vibeId: 'vibe-4',
@@ -292,6 +341,8 @@ export const seed = action({
           review:
             "I've started taking the stairs up 8 flights just to avoid this exact situation.",
           date: '2023-07-17T16:15:00Z',
+          emoji: '🏃',
+          emojiValue: 1,
         },
         {
           vibeId: 'vibe-4',
@@ -299,12 +350,14 @@ export const seed = action({
           rating: 2,
           review: 'The way time slows down should be studied by physicists.',
           date: '2023-07-18T11:48:00Z',
+          emoji: '🙈',
+          emojiValue: 2,
         },
       ];
 
       // Create ratings using the mapped vibe IDs
       // eslint-disable-next-line no-console
-      console.log('Creating ratings...');
+      console.log('Creating ratings with emoji ratings...');
       for (const rating of ratings) {
         const actualVibeId = vibeMap[rating.vibeId];
         if (actualVibeId) {
@@ -313,7 +366,20 @@ export const seed = action({
             userId: rating.userId,
             rating: rating.rating,
             review: rating.review,
+            emoji: rating.emoji,
+            emojiValue: rating.emojiValue,
           });
+
+          // Also create emoji rating in emojiRatings table if emoji is provided
+          if (rating.emoji && rating.emojiValue) {
+            await ctx.runMutation(internal.seed.createEmojiRatingForSeed, {
+              vibeId: actualVibeId,
+              userId: rating.userId,
+              emoji: rating.emoji,
+              value: rating.emojiValue,
+              createdAt: rating.date,
+            });
+          }
         } else {
           // eslint-disable-next-line no-console
           console.warn(`Could not find vibe ID for: ${rating.vibeId}`);
@@ -405,6 +471,7 @@ export const seed = action({
           details: {
             ratingsWithReviews: ratings.filter((r) => r.review).length,
             ratingsWithoutReviews: ratings.filter((r) => !r.review).length,
+            ratingsWithEmojiRatings: ratings.filter((r) => r.emoji && r.emojiValue).length,
             uniqueEmojisUsed: Array.from(new Set(reactions.map((r) => r.emoji)))
               .length,
           },
@@ -684,6 +751,11 @@ export const seedEnhanced = action({
         },
       ];
 
+      // Seed emoji metadata first
+      // eslint-disable-next-line no-console
+      console.log('Seeding emoji metadata...');
+      await ctx.runMutation(internal.seed.emojiMetadata.seedEmojiMetadata);
+
       // Create all users
       // eslint-disable-next-line no-console
       console.log('Creating 30 diverse users...');
@@ -888,42 +960,85 @@ export const seedEnhanced = action({
           if (userId === vibe.createdById) continue;
 
           const rating = Math.floor(Math.random() * 5) + 1; // 1-5 stars
-          let review = undefined;
+          
+          // ALL ratings must have reviews now
+          const reviewOptions = [
+            'So relatable it hurts',
+            'This happened to me last week!',
+            'I feel personally attacked',
+            'Why is this so accurate?',
+            'The secondhand embarrassment is real',
+            "I'm literally dying at this",
+            'Too real, too real',
+            "I've never related to anything more",
+            'This is my entire personality',
+            'I feel seen',
+            'This is art',
+            "I can't even",
+            'This is peak comedy',
+            'Not me doing this yesterday',
+            'Why did you call me out like this?',
+            'This is sending me',
+            'The accuracy is uncanny',
+            "I'm crying laughing",
+            'This is exactly what I needed today',
+            'This is comedy gold',
+            'The universe called me out with this one',
+            'I need therapy after reading this',
+            'This lives rent-free in my head now',
+            'Why is this literally me though',
+            'Feeling very attacked right now',
+            'This is the content I signed up for',
+            'My soul just left my body',
+            'This is why I have trust issues',
+            'Not me having flashbacks',
+            'I came here to have a good time and honestly I feel so attacked',
+          ];
+          const review = reviewOptions[Math.floor(Math.random() * reviewOptions.length)];
 
-          // 50% chance of including a review
-          if (Math.random() < 0.5) {
-            const reviewOptions = [
-              'So relatable it hurts',
-              'This happened to me last week!',
-              'I feel personally attacked',
-              'Why is this so accurate?',
-              'The secondhand embarrassment is real',
-              "I'm literally dying at this",
-              'Too real, too real',
-              "I've never related to anything more",
-              'This is my entire personality',
-              'I feel seen',
-              'This is art',
-              "I can't even",
-              'This is peak comedy',
-              'Not me doing this yesterday',
-              'Why did you call me out like this?',
-              'This is sending me',
-              'The accuracy is uncanny',
-              "I'm crying laughing",
-              'This is exactly what I needed today',
-              'This is comedy gold',
-            ];
-            review =
-              reviewOptions[Math.floor(Math.random() * reviewOptions.length)];
-          }
+          // ALL ratings must have emoji ratings now
+          const emojiOptions = [
+            { emoji: '😍', minRating: 4 },
+            { emoji: '🔥', minRating: 4 },
+            { emoji: '😱', minRating: 1 },
+            { emoji: '💯', minRating: 4 },
+            { emoji: '😂', minRating: 3 },
+            { emoji: '🤩', minRating: 4 },
+            { emoji: '😭', minRating: 1 },
+            { emoji: '🥺', minRating: 2 },
+            { emoji: '🤔', minRating: 2 },
+            { emoji: '😳', minRating: 2 },
+            { emoji: '😬', minRating: 1 },
+            { emoji: '🙈', minRating: 1 },
+            { emoji: '💀', minRating: 3 },
+            { emoji: '🤡', minRating: 2 },
+          ];
+          
+          // Pick emoji based on rating
+          const validEmojis = emojiOptions.filter(opt => rating >= opt.minRating);
+          const selected = validEmojis[Math.floor(Math.random() * validEmojis.length)];
+          const emoji = selected.emoji;
+          const emojiValue = Math.min(rating, 5); // Match star rating but cap at 5
 
           await ctx.runMutation(internal.vibes.addRatingForSeed, {
             vibeId: vibe.id,
             userId: userId,
             rating: rating,
             review: review,
+            emoji: emoji,
+            emojiValue: emojiValue,
           });
+
+          // Also create emoji rating in emojiRatings table if emoji is provided
+          if (emoji && emojiValue) {
+            await ctx.runMutation(internal.seed.createEmojiRatingForSeed, {
+              vibeId: vibe.id,
+              userId: userId,
+              emoji: emoji,
+              value: emojiValue,
+              createdAt: new Date().toISOString(),
+            });
+          }
         }
       }
 
@@ -1001,5 +1116,49 @@ export const seedEnhanced = action({
         message: `Error creating enhanced seed database: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
+  },
+});
+
+
+// Internal mutation to create emoji ratings for seed
+export const createEmojiRatingForSeed = internalMutation({
+  args: {
+    vibeId: v.string(),
+    userId: v.string(),
+    emoji: v.string(),
+    value: v.number(),
+    createdAt: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Check if emoji rating already exists
+    const existingEmojiRating = await ctx.db
+      .query("emojiRatings")
+      .withIndex("byUserVibeEmoji", (q) =>
+        q
+          .eq("userId", args.userId)
+          .eq("vibeId", args.vibeId)
+          .eq("emoji", args.emoji)
+      )
+      .first();
+
+    if (existingEmojiRating) {
+      return existingEmojiRating;
+    }
+
+    // Get emoji metadata for tags
+    const emojiMetadata = await ctx.db
+      .query("emojiRatingMetadata")
+      .withIndex("byEmoji", (q) => q.eq("emoji", args.emoji))
+      .first();
+
+    // Create emoji rating
+    return await ctx.db.insert("emojiRatings", {
+      userId: args.userId,
+      vibeId: args.vibeId,
+      emoji: args.emoji,
+      value: args.value,
+      createdAt: args.createdAt || new Date().toISOString(),
+      tags: emojiMetadata?.tags || [],
+    });
   },
 });

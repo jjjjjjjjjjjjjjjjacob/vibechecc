@@ -62,6 +62,10 @@ export interface SearchFilters {
   };
   creators?: string[]; // User IDs
   sort?: SearchSortOption;
+  emojiRatings?: {
+    emojis?: string[]; // Filter by specific emojis
+    minValue?: number; // Min emoji rating value (1-5)
+  };
 }
 
 export type SearchSortOption =

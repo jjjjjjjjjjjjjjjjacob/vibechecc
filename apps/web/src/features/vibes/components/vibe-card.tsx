@@ -2,14 +2,17 @@ import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { StarRating } from '@/components/star-rating';
 import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
-import { useState } from 'react';
 import { EmojiReactions } from '@/components/emoji-reaction';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
-import { useAddRatingMutation } from '@/queries';
+import {
+  useTopEmojiRatings,
+  useMostInteractedEmoji,
+  useCreateEmojiRatingMutation,
+  useEmojiMetadata,
+} from '@/queries';
 import toast from 'react-hot-toast';
 import {
   computeUserDisplayName,
@@ -17,31 +20,79 @@ import {
   getUserInitials,
 } from '@/utils/user-utils';
 import type { Vibe, EmojiReaction } from '@/types';
+import {
+  EmojiRatingDisplay,
+  TopEmojiRatings,
+  getMostInteractedEmojiRating,
+} from '@/components/emoji-rating-display';
+import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
+import { ChevronDown } from 'lucide-react';
+import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
+import { AllEmojiRatingsPopover } from '@/components/all-emoji-ratings-popover';
 
 interface VibeCardProps {
   vibe: Vibe;
   compact?: boolean;
-  preview?: boolean;
 }
 
-export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
-  const [imageError, setImageError] = useState(false);
-  const [reactions, setReactions] = useState<EmojiReaction[]>(
-    vibe.reactions ?? []
-  );
-  const [userRating, setUserRating] = useState(0);
+export function VibeCard({ vibe, compact }: VibeCardProps) {
+  const [imageError, setImageError] = React.useState(false);
+  const reactions = vibe.reactions ?? [];
+  const [showAllRatingsPopover, setShowAllRatingsPopover] =
+    React.useState(false);
+  const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
+    string | null
+  >(null);
+  const [showEmojiRatingPopover, setShowEmojiRatingPopover] =
+    React.useState(false);
+  const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const { user } = useUser();
   const { trackEvents } = usePostHog();
-  const addRatingMutation = useAddRatingMutation();
+  const createEmojiRatingMutation = useCreateEmojiRatingMutation();
+  const { data: emojiMetadataArray } = useEmojiMetadata();
 
-  // Calculate average rating with null-safe check
-  const averageRating =
-    vibe.ratings && vibe.ratings.length > 0
-      ? vibe.ratings.reduce((sum, r) => sum + r.rating, 0) / vibe.ratings.length
-      : 0;
+  // Fetch emoji rating data
+  const { data: topEmojiRatings } = useTopEmojiRatings(vibe.id, 5);
+  const { data: mostInteractedEmojiData } = useMostInteractedEmoji(vibe.id);
 
   // Determine if we should use a placeholder
   const usePlaceholder = !vibe.image || imageError;
+
+  // Transform backend emoji ratings to display format
+  const emojiRatings = React.useMemo(() => {
+    if (!topEmojiRatings || topEmojiRatings.length === 0) {
+      // Fallback to reactions if no emoji ratings exist
+      return reactions
+        .filter((r) => r.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+        .map((reaction) => ({
+          emoji: reaction.emoji,
+          value: 3, // Default value for reactions
+          count: reaction.count,
+        }));
+    }
+
+    return topEmojiRatings.map((rating) => ({
+      emoji: rating.emoji,
+      value: rating.averageValue,
+      count: rating.count,
+      tags: rating.tags,
+    }));
+  }, [topEmojiRatings, reactions]);
+
+  // Use backend data for most interacted emoji, fallback to reactions
+  const mostInteractedEmoji = React.useMemo(() => {
+    if (mostInteractedEmojiData && mostInteractedEmojiData.averageValue) {
+      return {
+        emoji: mostInteractedEmojiData.emoji,
+        value: mostInteractedEmojiData.averageValue,
+        count: mostInteractedEmojiData.count,
+      };
+    }
+    // Fallback to reaction-based calculation
+    return getMostInteractedEmojiRating(reactions);
+  }, [mostInteractedEmojiData, reactions]);
 
   // Extract context keywords from vibe for emoji suggestions
   const contextKeywords = React.useMemo(() => {
@@ -99,150 +150,120 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
     return [...new Set(keywords)]; // Remove duplicates
   }, [vibe.title, vibe.description]);
 
-  // Handle quick rating
-  const handleRating = async (rating: number) => {
-    if (preview) return;
+  // Convert emoji metadata array to record for easier lookup
+  const emojiMetadataRecord = React.useMemo(() => {
+    if (!emojiMetadataArray) return {};
+    return emojiMetadataArray.reduce(
+      (acc, metadata) => {
+        acc[metadata.emoji] = metadata;
+        return acc;
+      },
+      {} as Record<string, (typeof emojiMetadataArray)[0]>
+    );
+  }, [emojiMetadataArray]);
 
-    if (!user?.id) {
-      toast.error('you must sign in to rate vibes', {
-        duration: 2000,
-        icon: '🔒',
+  // Handle emoji rating submission
+  const handleEmojiRating = async (data: {
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+  }) => {
+    try {
+      await createEmojiRatingMutation.mutateAsync({
+        vibeId: vibe.id,
+        emoji: data.emoji,
+        emojiValue: data.value,
+        review: data.review,
+        rating: data.value, // Use emoji value as star rating
       });
+
+      toast.success(
+        `vibe rated ${data.value} ${data.emoji}! review submitted.`,
+        {
+          duration: 3000,
+          icon: data.emoji,
+        }
+      );
+    } catch (error) {
+      throw error; // Re-throw to let popover handle error state
+    }
+  };
+
+  const handleEmojiRatingClick = (emoji: string) => {
+    if (!user?.id) {
+      setShowAuthDialog(true);
       return;
     }
-
-    setUserRating(rating);
-
-    try {
-      await addRatingMutation.mutateAsync({
-        vibeId: vibe.id,
-        rating,
-      });
-
-      toast.success(`quick rated ${rating} circle${rating === 1 ? '' : 's'}!`, {
-        duration: 2000,
-        icon: '⚡',
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to submit rating:', error);
-      toast.error('failed to rate vibe. please try again.', {
-        duration: 2000,
-        icon: '❌',
-      });
-      setUserRating(0); // Reset on error
-    }
+    setSelectedEmojiForRating(emoji);
+    setShowEmojiRatingPopover(true);
   };
 
   // Handle emoji reactions
   const handleReact = (emoji: string) => {
-    if (preview) return;
-
     if (!user?.id) {
-      toast.error('you must sign in to react to vibes', {
-        duration: 2000,
-        icon: '🔒',
-      });
+      setShowAuthDialog(true);
       return;
     }
 
-    // Track the reaction event
-    trackEvents.vibeReacted(vibe.id, emoji);
-
-    // Find if this emoji already exists in reactions
-    const existingReactionIndex = reactions.findIndex((r) => r.emoji === emoji);
-
-    if (existingReactionIndex >= 0) {
-      // Check if user already reacted with this emoji
-      const existingReaction = reactions[existingReactionIndex];
-      const userIndex = existingReaction.users.indexOf(user.id);
-
-      if (userIndex >= 0) {
-        // User already reacted, remove their reaction
-        const updatedReaction = {
-          ...existingReaction,
-          count: Math.max(0, existingReaction.count - 1),
-          users: existingReaction.users.filter((id) => id !== user.id),
-        };
-
-        // If no users left, remove the reaction entirely
-        if (updatedReaction.users.length === 0) {
-          setReactions(reactions.filter((r) => r.emoji !== emoji));
-        } else {
-          const newReactions = [...reactions];
-          newReactions[existingReactionIndex] = updatedReaction;
-          setReactions(newReactions);
-        }
-      } else {
-        // User hasn't reacted with this emoji yet, add their reaction
-        const updatedReaction = {
-          ...existingReaction,
-          count: existingReaction.count + 1,
-          users: [...existingReaction.users, user.id],
-        };
-
-        const newReactions = [...reactions];
-        newReactions[existingReactionIndex] = updatedReaction;
-        setReactions(newReactions);
-      }
-    } else {
-      // This emoji doesn't exist in reactions yet, add it
-      setReactions([
-        ...reactions,
-        {
-          emoji,
-          count: 1,
-          users: [user.id],
-        },
-      ]);
-    }
+    // Instead of just adding a reaction, open the rating popover with the emoji pre-selected
+    handleEmojiRatingClick(emoji);
   };
 
   return (
-    <Card
-      className={cn(
-        'overflow-hidden transition-all duration-200 hover:shadow-md',
-        !compact && 'h-full'
-      )}
-    >
-      {preview ? (
+    <>
+      <Card
+        className={cn(
+          'overflow-hidden transition-all duration-200 hover:shadow-md',
+          !compact && 'h-full'
+        )}
+      >
         <div className="block h-full">
-          <div className="relative">
-            <div
-              className={cn(
-                'relative overflow-hidden',
-                compact ? 'aspect-[4/3]' : 'aspect-video'
-              )}
-            >
-              {usePlaceholder ? (
-                <SimpleVibePlaceholder title={vibe.title} />
-              ) : (
-                <img
-                  src={vibe.image}
-                  alt={vibe.title}
-                  className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                  onError={() => setImageError(true)}
-                />
-              )}
+          <Link
+            to="/vibes/$vibeId"
+            params={{ vibeId: vibe.id }}
+            onClick={() => {
+              // Track vibe view when clicked
+              trackEvents.vibeViewed(vibe.id);
+            }}
+          >
+            <div className="relative">
+              <div
+                className={cn(
+                  'relative overflow-hidden',
+                  compact ? 'aspect-[4/3]' : 'aspect-video'
+                )}
+              >
+                {usePlaceholder ? (
+                  <SimpleVibePlaceholder title={vibe.title} />
+                ) : (
+                  <img
+                    src={vibe.image}
+                    alt={vibe.title}
+                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                    onError={() => setImageError(true)}
+                  />
+                )}
+              </div>
             </div>
-          </div>
 
-          <CardContent className={cn('p-4', compact && 'p-3')}>
-            <h3
-              className={cn(
-                'line-clamp-1 font-bold',
-                compact ? 'text-base' : 'text-lg'
+            <CardContent className={cn('p-4', compact && 'p-3')}>
+              <h3
+                className={cn(
+                  'line-clamp-1 font-bold',
+                  compact ? 'text-base' : 'text-lg'
+                )}
+              >
+                {vibe.title}
+              </h3>
+
+              {!compact && (
+                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
+                  {vibe.description}
+                </p>
               )}
-            >
-              {vibe.title}
-            </h3>
-
-            {!compact && (
-              <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                {vibe.description}
-              </p>
-            )}
-          </CardContent>
+            </CardContent>
+          </Link>
 
           <CardFooter
             className={cn(
@@ -250,62 +271,48 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
               compact && 'p-3 pt-0'
             )}
           >
-            <div className="flex w-full items-center justify-between">
-              <div className="flex items-center gap-2">
-                {vibe.createdBy && vibe.createdBy.username ? (
-                  <Link
-                    to="/users/$username"
-                    params={{ username: vibe.createdBy.username }}
-                    className="flex items-center gap-2 transition-opacity hover:opacity-80"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage
-                        src={getUserAvatarUrl(vibe.createdBy)}
-                        alt={computeUserDisplayName(vibe.createdBy)}
-                        className="object-cover"
-                      />
-                      <AvatarFallback>
-                        {getUserInitials(vibe.createdBy)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-muted-foreground hover:text-foreground text-xs">
-                      {computeUserDisplayName(vibe.createdBy)}
-                    </span>
-                  </Link>
-                ) : (
-                  <>
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage
-                        src={getUserAvatarUrl(vibe.createdBy)}
-                        alt={computeUserDisplayName(vibe.createdBy)}
-                        className="object-cover"
-                      />
-                      <AvatarFallback>
-                        {getUserInitials(vibe.createdBy)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-muted-foreground text-xs">
-                      {vibe.createdBy
-                        ? computeUserDisplayName(vibe.createdBy)
-                        : 'Unknown User'}
-                    </span>
-                  </>
-                )}
-              </div>
+            <div className="flex w-full flex-col items-center justify-between gap-2">
+              {mostInteractedEmoji && (
+                <div className="flex items-end gap-1">
+                  <EmojiRatingDisplay
+                    rating={mostInteractedEmoji}
+                    mode="compact"
+                    showScale={true}
+                    onEmojiClick={handleEmojiRatingClick}
+                  />
+                  {emojiRatings.length > 1 && (
+                    <AllEmojiRatingsPopover
+                      emojiRatings={emojiRatings}
+                      onEmojiClick={handleEmojiRatingClick}
+                      open={showAllRatingsPopover}
+                      onOpenChange={setShowAllRatingsPopover}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setShowAllRatingsPopover(true);
+                        }}
+                        className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 text-xs transition-colors"
+                      >
+                        <ChevronDown className="h-3 w-3" />
+                        <span>{emojiRatings.length - 1} more</span>
+                      </button>
+                    </AllEmojiRatingsPopover>
+                  )}
+                </div>
+              )}
 
-              <div className="flex items-center gap-1">
+              {reactions.length > 0 && (
                 <div
+                  className="w-full"
                   onClick={(e) => {
-                    if (!preview) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
+                    // Prevent navigation when clicking reactions
+                    e.preventDefault();
+                    e.stopPropagation();
                   }}
                   onKeyDown={(e) => {
-                    if (!preview && (e.key === 'Enter' || e.key === ' ')) {
+                    if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       e.stopPropagation();
                     }
@@ -313,209 +320,97 @@ export function VibeCard({ vibe, compact, preview }: VibeCardProps) {
                   role="button"
                   tabIndex={0}
                 >
-                  <StarRating
-                    value={userRating || averageRating}
-                    onChange={!preview ? handleRating : undefined}
-                    readOnly={preview}
-                    size="sm"
-                  />
+                  <div className="flex items-center gap-2">
+                    {vibe.createdBy && vibe.createdBy.username ? (
+                      <Link
+                        to="/users/$username"
+                        params={{ username: vibe.createdBy.username }}
+                        className="flex items-center gap-2 transition-opacity hover:opacity-80"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage
+                            src={getUserAvatarUrl(vibe.createdBy)}
+                            alt={computeUserDisplayName(vibe.createdBy)}
+                            className="object-cover"
+                          />
+                          <AvatarFallback>
+                            {getUserInitials(vibe.createdBy)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-muted-foreground hover:text-foreground text-xs">
+                          {computeUserDisplayName(vibe.createdBy)}
+                        </span>
+                      </Link>
+                    ) : (
+                      <>
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage
+                            src={getUserAvatarUrl(vibe.createdBy)}
+                            alt={computeUserDisplayName(vibe.createdBy)}
+                            className="object-cover"
+                          />
+                          <AvatarFallback>
+                            {getUserInitials(vibe.createdBy)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-muted-foreground text-xs">
+                          {vibe.createdBy
+                            ? computeUserDisplayName(vibe.createdBy)
+                            : 'Unknown User'}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <span className="text-xs font-medium">
-                  {averageRating > 0 ? averageRating.toFixed(1) : '-'}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  ({vibe.ratings?.length || 0})
-                </span>
-              </div>
+              )}
+              <EmojiReactions
+                reactions={reactions}
+                onReact={handleReact}
+                showAddButton={true}
+                contextKeywords={contextKeywords}
+              />
             </div>
-
-            {reactions.length > 0 && (
-              <div
-                className="w-full"
-                onClick={(e) => {
-                  // Prevent navigation when clicking reactions
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-              >
-                <EmojiReactions
-                  reactions={reactions}
-                  onReact={handleReact}
-                  showAddButton={!preview}
-                  contextKeywords={contextKeywords}
-                />
-              </div>
-            )}
           </CardFooter>
         </div>
-      ) : (
-        <Link
-          to="/vibes/$vibeId"
-          params={{ vibeId: vibe.id }}
-          className="block h-full"
-          onClick={() => {
-            // Track vibe view when clicked
-            trackEvents.vibeViewed(vibe.id);
+      </Card>
+
+      {/* Hidden Emoji Rating Popover for clicking on emoji reactions */}
+      <div className="pointer-events-none">
+        <EmojiRatingPopover
+          onSubmit={handleEmojiRating}
+          isSubmitting={createEmojiRatingMutation.isPending}
+          vibeTitle={vibe.title}
+          emojiMetadata={emojiMetadataRecord}
+          preSelectedEmoji={selectedEmojiForRating || undefined}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedEmojiForRating(null);
+            }
           }}
         >
-          <div className="relative">
-            <div
-              className={cn(
-                'relative overflow-hidden',
-                compact ? 'aspect-[4/3]' : 'aspect-video'
-              )}
-            >
-              {usePlaceholder ? (
-                <SimpleVibePlaceholder title={vibe.title} />
-              ) : (
-                <img
-                  src={vibe.image}
-                  alt={vibe.title}
-                  className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                  onError={() => setImageError(true)}
-                />
-              )}
-            </div>
-          </div>
+          <button
+            ref={(el) => {
+              if (el && showEmojiRatingPopover && selectedEmojiForRating) {
+                el.click();
+                setShowEmojiRatingPopover(false);
+              }
+            }}
+            className="sr-only"
+            aria-hidden="true"
+          />
+        </EmojiRatingPopover>
+      </div>
 
-          <CardContent className={cn('p-4', compact && 'p-3')}>
-            <h3
-              className={cn(
-                'line-clamp-1 font-bold',
-                compact ? 'text-base' : 'text-lg'
-              )}
-            >
-              {vibe.title}
-            </h3>
-
-            {!compact && (
-              <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                {vibe.description}
-              </p>
-            )}
-          </CardContent>
-
-          <CardFooter
-            className={cn(
-              'flex flex-col items-start gap-2 p-4 pt-0',
-              compact && 'p-3 pt-0'
-            )}
-          >
-            <div className="flex w-full items-center justify-between">
-              <div className="flex items-center gap-2">
-                {vibe.createdBy && vibe.createdBy.username ? (
-                  <Link
-                    to="/users/$username"
-                    params={{ username: vibe.createdBy.username }}
-                    className="flex items-center gap-2 transition-opacity hover:opacity-80"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage
-                        src={getUserAvatarUrl(vibe.createdBy)}
-                        alt={computeUserDisplayName(vibe.createdBy)}
-                        className="object-cover"
-                      />
-                      <AvatarFallback>
-                        {getUserInitials(vibe.createdBy)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-muted-foreground hover:text-foreground text-xs">
-                      {computeUserDisplayName(vibe.createdBy)}
-                    </span>
-                  </Link>
-                ) : (
-                  <>
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage
-                        src={getUserAvatarUrl(vibe.createdBy)}
-                        alt={computeUserDisplayName(vibe.createdBy)}
-                        className="object-cover"
-                      />
-                      <AvatarFallback>
-                        {getUserInitials(vibe.createdBy)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-muted-foreground text-xs">
-                      {vibe.createdBy
-                        ? computeUserDisplayName(vibe.createdBy)
-                        : 'Unknown User'}
-                    </span>
-                  </>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1">
-                <div
-                  onClick={(e) => {
-                    if (!preview) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (!preview && (e.key === 'Enter' || e.key === ' ')) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <StarRating
-                    value={userRating || averageRating}
-                    onChange={!preview ? handleRating : undefined}
-                    readOnly={preview}
-                    size="sm"
-                  />
-                </div>
-                <span className="text-xs font-medium">
-                  {averageRating > 0 ? averageRating.toFixed(1) : '-'}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  ({vibe.ratings?.length || 0})
-                </span>
-              </div>
-            </div>
-
-            {reactions.length > 0 && (
-              <div
-                className="w-full"
-                onClick={(e) => {
-                  // Prevent navigation when clicking reactions
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-              >
-                <EmojiReactions
-                  reactions={reactions}
-                  onReact={handleReact}
-                  showAddButton={!preview}
-                  contextKeywords={contextKeywords}
-                />
-              </div>
-            )}
-          </CardFooter>
-        </Link>
-      )}
-    </Card>
+      {/* Auth Prompt Dialog */}
+      <AuthPromptDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        title="sign in to rate vibes"
+        description="join vibechecc to share your reactions and ratings with the community"
+      />
+    </>
   );
 }

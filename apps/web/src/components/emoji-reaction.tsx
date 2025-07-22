@@ -20,6 +20,8 @@ interface EmojiReactionProps {
   onReact?: (emoji: string) => void;
   className?: string;
   showAddButton?: boolean;
+  ratingMode?: boolean; // When true, clicking opens emoji rating popover
+  onRatingOpen?: (emoji: string) => void; // Callback to open rating popover with emoji
 }
 
 export function EmojiReaction({
@@ -27,6 +29,8 @@ export function EmojiReaction({
   onReact,
   className,
   showAddButton: _showAddButton = false,
+  ratingMode = false,
+  onRatingOpen,
 }: EmojiReactionProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const { user } = useUser();
@@ -34,6 +38,13 @@ export function EmojiReaction({
   const hasReacted = user?.id ? reaction.users.includes(user.id) : false;
 
   const handleReact = () => {
+    // In rating mode, open the rating popover with this emoji
+    if (ratingMode && onRatingOpen) {
+      onRatingOpen(reaction.emoji);
+      return;
+    }
+
+    // Normal reaction mode
     if (onReact) {
       onReact(reaction.emoji);
     }
@@ -80,6 +91,8 @@ interface EmojiReactionsProps {
   className?: string;
   showAddButton?: boolean;
   contextKeywords?: string[];
+  ratingMode?: boolean; // When true, reactions open rating popovers
+  onRatingOpen?: (emoji: string) => void; // Callback to open rating popover
 }
 
 interface HorizontalEmojiPickerProps {
@@ -556,6 +569,8 @@ export function EmojiReactions({
   className,
   showAddButton = true,
   contextKeywords = [],
+  ratingMode = false,
+  onRatingOpen,
 }: EmojiReactionsProps) {
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
 
@@ -576,31 +591,24 @@ export function EmojiReactions({
           key={reaction.emoji}
           reaction={reaction}
           onReact={onReact}
+          ratingMode={ratingMode}
+          onRatingOpen={onRatingOpen}
         />
       ))}
 
       {showAddButton && (
         <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
           <PopoverTrigger asChild>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '9999px',
-                padding: '0.25rem',
-                fontSize: '0.875rem',
-                backgroundColor: 'var(--muted)',
-                transition: 'all 150ms',
-                cursor: 'pointer',
-              }}
-              className="hover:scale-105 active:scale-95"
-              role="button"
-              tabIndex={0}
+            <button
+              className={cn(
+                'inline-flex items-center justify-center rounded-full p-1',
+                'bg-muted hover:bg-muted/80 text-sm',
+                'transition-all hover:scale-105 active:scale-95'
+              )}
               aria-label="Add reaction"
             >
               <PlusCircle className="h-4 w-4" />
-            </div>
+            </button>
           </PopoverTrigger>
 
           <HorizontalEmojiPicker

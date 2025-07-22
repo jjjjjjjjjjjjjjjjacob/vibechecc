@@ -3,15 +3,16 @@ import * as React from 'react';
 import {
   useVibe,
   useAddRatingMutation,
-  useReactToVibeMutation,
   useVibesPaginated,
+  useCreateEmojiRatingMutation,
+  useEmojiMetadata,
+  useTopEmojiRatings,
+  useMostInteractedEmoji,
 } from '@/queries';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { StarRating } from '@/components/star-rating';
 import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
 
 // Constants to avoid rollup issues with empty array literals
@@ -28,6 +29,14 @@ import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import toast from 'react-hot-toast';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
 import { EmojiReactions } from '@/components/emoji-reaction';
+import {
+  EmojiRatingDisplay,
+  TopEmojiRatings,
+  getMostInteractedEmojiRating,
+} from '@/components/emoji-rating-display';
+import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
+import { EmojiRatingSelector } from '@/components/emoji-rating-selector';
+import { Star } from 'lucide-react';
 
 export const Route = createFileRoute('/vibes/$vibeId')({
   component: VibePage,
@@ -38,17 +47,22 @@ function VibePage() {
   const { data: vibe, isLoading, error } = useVibe(vibeId);
   const { data: allVibesData } = useVibesPaginated(50);
   const allVibes = allVibesData?.vibes ?? [];
+  const { data: emojiMetadataArray } = useEmojiMetadata();
   const [rating, setRating] = React.useState(0);
   const [review, setReview] = React.useState('');
   const { user: _user } = useUser();
   const addRatingMutation = useAddRatingMutation();
-  const reactToVibeMutation = useReactToVibeMutation();
+  const createEmojiRatingMutation = useCreateEmojiRatingMutation();
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const [authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
     'react'
   );
-  const [userQuickRating, setUserQuickRating] = React.useState(0);
   const [reactions, setReactions] = React.useState<EmojiReaction[]>([]);
+  const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
+    string | null
+  >(null);
+  const [showEmojiRatingPopover, setShowEmojiRatingPopover] =
+    React.useState(false);
 
   // Initialize reactions when vibe data loads
   React.useEffect(() => {
@@ -56,6 +70,58 @@ function VibePage() {
       setReactions(vibe.reactions);
     }
   }, [vibe?.reactions]);
+
+  // Fetch real emoji rating data
+  const { data: topEmojiRatings } = useTopEmojiRatings(vibeId, 5);
+  const { data: mostInteractedEmojiData } = useMostInteractedEmoji(vibeId);
+
+  // Transform backend emoji ratings to display format
+  const emojiRatings = React.useMemo(() => {
+    if (!topEmojiRatings || topEmojiRatings.length === 0) {
+      // Fallback to reactions if no emoji ratings exist
+      return reactions
+        .filter((r) => r.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+        .map((reaction) => ({
+          emoji: reaction.emoji,
+          value: reaction.averageValue ?? 3, // Default value for reactions
+          count: reaction.count,
+        }));
+    }
+
+    return topEmojiRatings.map((rating) => ({
+      emoji: rating.emoji,
+      value: rating.averageValue,
+      count: rating.count,
+      tags: rating.tags,
+    }));
+  }, [topEmojiRatings, reactions]);
+
+  // Use backend data for most interacted emoji, fallback to reactions
+  const mostInteractedEmoji = React.useMemo(() => {
+    if (mostInteractedEmojiData && mostInteractedEmojiData.averageValue) {
+      return {
+        emoji: mostInteractedEmojiData.emoji,
+        value: mostInteractedEmojiData.averageValue,
+        count: mostInteractedEmojiData.count,
+      };
+    }
+    // Fallback to reaction-based calculation
+    return getMostInteractedEmojiRating(reactions);
+  }, [mostInteractedEmojiData, reactions]);
+
+  // Convert emoji metadata array to record for easier lookup
+  const emojiMetadataRecord = React.useMemo(() => {
+    if (!emojiMetadataArray) return {};
+    return emojiMetadataArray.reduce(
+      (acc, metadata) => {
+        acc[metadata.emoji] = metadata;
+        return acc;
+      },
+      {} as Record<string, (typeof emojiMetadataArray)[0]>
+    );
+  }, [emojiMetadataArray]);
 
   // Extract context keywords from vibe for emoji suggestions
   const _contextKeywords = React.useMemo(() => {
@@ -209,105 +275,90 @@ function VibePage() {
     }
   };
 
-  // Handle quick rating from main display
-  const handleQuickRating = async (rating: number) => {
+  // Handle rating with popover (includes emoji option)
+  const handleRatingWithPopover = async (data: {
+    rating: number;
+    review: string;
+    useEmojiRating?: boolean;
+  }) => {
+    try {
+      await addRatingMutation.mutateAsync({
+        vibeId: vibe.id,
+        rating: data.rating,
+        review: data.review || undefined,
+      });
+
+      // Show success toast
+      toast.success(
+        `vibe rated ${data.rating} circle${data.rating === 1 ? '' : 's'}! review submitted.`,
+        {
+          duration: 3000,
+          icon: '✨',
+        }
+      );
+
+      // If user wants to add emoji rating, open emoji popover
+      if (data.useEmojiRating) {
+        // This will be handled by showing the emoji rating popover
+        toast('Select an emoji to add emoji rating', {
+          duration: 2000,
+          icon: '👆',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to submit rating:', error);
+      throw error; // Re-throw to let popover handle error state
+    }
+  };
+
+  // Handle emoji rating submission
+  const handleEmojiRating = async (data: {
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+  }) => {
+    try {
+      await createEmojiRatingMutation.mutateAsync({
+        vibeId: vibe.id,
+        emoji: data.emoji,
+        emojiValue: data.value,
+        review: data.review,
+        rating: data.value, // Use emoji value as star rating
+      });
+
+      toast.success(
+        `vibe rated ${data.value} ${data.emoji}! review submitted.`,
+        {
+          duration: 3000,
+          icon: data.emoji,
+        }
+      );
+    } catch (error) {
+      console.error('Failed to submit emoji rating:', error);
+      throw error; // Re-throw to let popover handle error state
+    }
+  };
+
+  const handleEmojiRatingClick = (emoji: string) => {
+    if (!_user?.id) {
+      setAuthDialogType('rate');
+      setShowAuthDialog(true);
+      return;
+    }
+    setSelectedEmojiForRating(emoji);
+    setShowEmojiRatingPopover(true);
+  };
+
+  const handleReact = async (emoji: string) => {
     if (!_user?.id) {
       setAuthDialogType('rate');
       setShowAuthDialog(true);
       return;
     }
 
-    setUserQuickRating(rating);
-
-    try {
-      await addRatingMutation.mutateAsync({
-        vibeId: vibe.id,
-        rating,
-      });
-
-      toast.success(`quick rated ${rating} circle${rating === 1 ? '' : 's'}!`, {
-        duration: 2000,
-        icon: '⚡',
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to submit rating:', error);
-      toast.error('failed to rate vibe. please try again.', {
-        duration: 2000,
-        icon: '❌',
-      });
-      setUserQuickRating(0); // Reset on error
-    }
-  };
-
-  const handleReact = async (emoji: string) => {
-    if (!_user?.id) {
-      setAuthDialogType('react');
-      setShowAuthDialog(true);
-      return;
-    }
-
-    try {
-      await reactToVibeMutation.mutateAsync({
-        vibeId: vibe.id,
-        emoji,
-      });
-
-      // Update local state optimistically
-      const existingReactionIndex = reactions.findIndex(
-        (r) => r.emoji === emoji
-      );
-
-      if (existingReactionIndex >= 0) {
-        // Check if user already reacted with this emoji
-        const existingReaction = reactions[existingReactionIndex];
-        const userIndex = existingReaction.users.indexOf(_user.id);
-
-        if (userIndex >= 0) {
-          // User already reacted, remove their reaction
-          const updatedReaction = {
-            ...existingReaction,
-            count: Math.max(0, existingReaction.count - 1),
-            users: existingReaction.users.filter(
-              (id: string) => id !== _user.id
-            ),
-          };
-
-          // If no users left, remove the reaction entirely
-          if (updatedReaction.users.length === 0) {
-            setReactions(reactions.filter((r) => r.emoji !== emoji));
-          } else {
-            const newReactions = [...reactions];
-            newReactions[existingReactionIndex] = updatedReaction;
-            setReactions(newReactions);
-          }
-        } else {
-          // User hasn't reacted with this emoji yet, add their reaction
-          const updatedReaction = {
-            ...existingReaction,
-            count: existingReaction.count + 1,
-            users: [...existingReaction.users, _user.id],
-          };
-
-          const newReactions = [...reactions];
-          newReactions[existingReactionIndex] = updatedReaction;
-          setReactions(newReactions);
-        }
-      } else {
-        // This emoji doesn't exist in reactions yet, add it
-        setReactions([
-          ...reactions,
-          {
-            emoji,
-            count: 1,
-            users: [_user.id],
-          },
-        ]);
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to react:', error);
-    }
+    // Instead of just adding a reaction, open the rating popover with the emoji pre-selected
+    handleEmojiRatingClick(emoji);
   };
 
   return (
@@ -346,7 +397,7 @@ function VibePage() {
                       variant="secondary"
                       className="hover:bg-secondary/80 cursor-pointer text-xs transition-colors"
                     >
-                      {tag}
+                      {tag.toLowerCase()}
                     </Badge>
                   </Link>
                 ))}
@@ -354,24 +405,32 @@ function VibePage() {
             </div>
           )}
 
-          {/* Title */}
-          <h1 className="mb-6 text-4xl font-bold lowercase">{vibe.title}</h1>
-
-          {/* Rating */}
-          <div className="mb-4 flex items-center gap-2">
-            <StarRating
-              value={userQuickRating || averageRating}
-              onChange={handleQuickRating}
-              size="lg"
-            />
-            <span className="text-lg font-medium">
-              {averageRating > 0 ? averageRating.toFixed(1) : '-'}
-            </span>
-            <span className="text-muted-foreground text-sm">
-              ({vibe.ratings.length} rating
-              {vibe.ratings.length !== 1 ? 's' : ''})
-            </span>
+          {/* Title with Emoji Rating */}
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <h1 className="text-4xl font-bold lowercase">{vibe.title}</h1>
+            {mostInteractedEmoji && (
+              <EmojiRatingDisplay
+                rating={mostInteractedEmoji}
+                mode="expanded"
+                showScale={true}
+              />
+            )}
           </div>
+
+          {/* Top Emoji Ratings */}
+          {emojiRatings.length > 0 && (
+            <div className="bg-secondary/20 mb-6 rounded-lg p-4">
+              <h3 className="text-muted-foreground mb-3 text-sm font-medium">
+                top emoji ratings
+              </h3>
+              <TopEmojiRatings
+                emojiRatings={emojiRatings}
+                expanded={true}
+                className="space-y-1"
+                onEmojiClick={handleEmojiRatingClick}
+              />
+            </div>
+          )}
 
           {/* Creator Info */}
           <div className="mb-6 flex items-center">
@@ -429,75 +488,44 @@ function VibePage() {
             {vibe.description}
           </p>
 
-          {/* Rate This Vibe */}
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <h2 className="mb-4 text-xl font-bold lowercase">
-                rate this vibe
-              </h2>
-              <SignedIn>
-                <form onSubmit={handleSubmitRating} className="space-y-4">
-                  <div>
-                    <StarRating value={rating} onChange={setRating} size="lg" />
-                  </div>
+          {/* Rate & Review This Vibe */}
+          <div className="mb-6">
+            <SignedIn>
+              <EmojiRatingSelector
+                topEmojis={emojiRatings}
+                onSubmit={handleEmojiRating}
+                isSubmitting={createEmojiRatingMutation.isPending}
+                vibeTitle={vibe.title}
+                emojiMetadata={emojiMetadataRecord}
+              />
+            </SignedIn>
 
-                  <Textarea
-                    value={review}
-                    onChange={(e) => setReview(e.target.value)}
-                    placeholder="write your review (optional)"
-                    rows={4}
-                  />
-
-                  <Button
-                    type="submit"
-                    disabled={rating === 0 || addRatingMutation.isPending}
-                  >
-                    {addRatingMutation.isPending
-                      ? 'submitting...'
-                      : 'submit rating'}
-                  </Button>
-                </form>
-              </SignedIn>
-              <SignedOut>
-                <div className="space-y-4">
-                  <div>
-                    <StarRating
-                      value={0}
-                      onChange={() => {
-                        setAuthDialogType('rate');
-                        setShowAuthDialog(true);
-                      }}
-                      size="lg"
-                    />
-                  </div>
-
-                  <Textarea
-                    placeholder="write your review (optional)"
-                    rows={4}
-                    onFocus={() => {
-                      setAuthDialogType('rate');
-                      setShowAuthDialog(true);
-                    }}
-                  />
-
-                  <Button
-                    onClick={() => {
-                      setAuthDialogType('rate');
-                      setShowAuthDialog(true);
-                    }}
-                  >
-                    submit rating
-                  </Button>
-                </div>
-              </SignedOut>
-            </CardContent>
-          </Card>
+            <SignedOut>
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold lowercase">
+                  rate & review this vibe
+                </h3>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => {
+                    setAuthDialogType('rate');
+                    setShowAuthDialog(true);
+                  }}
+                >
+                  <span className="mr-2 text-2xl">❓</span>
+                  sign in to rate with an emoji
+                </Button>
+              </div>
+            </SignedOut>
+          </div>
 
           {/* Reviews */}
-          {vibe.ratings.length > 0 && (
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
+              {vibe.ratings.filter((r: any) => r.review).length > 0 ? (
                 <div className="space-y-4">
                   {vibe.ratings
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -558,11 +586,13 @@ function VibePage() {
                               </p>
                             )}
                             <div className="flex items-center gap-2">
-                              <StarRating
-                                value={rating.rating}
-                                readOnly
-                                size="sm"
-                              />
+                              {rating.emojiRating && (
+                                <EmojiRatingDisplay
+                                  rating={rating.emojiRating}
+                                  mode="compact"
+                                  showScale={false}
+                                />
+                              )}
                               <span className="text-muted-foreground text-sm">
                                 {new Date(rating.date).toLocaleDateString()}
                               </span>
@@ -577,9 +607,18 @@ function VibePage() {
                       </div>
                     ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <div className="py-8 text-center">
+                  <p className="text-muted-foreground mb-4">
+                    No written reviews yet
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    Be the first to review this vibe!
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Similar Vibes Sidebar */}
@@ -608,15 +647,36 @@ function VibePage() {
       <AuthPromptDialog
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}
-        title={
-          authDialogType === 'react' ? 'sign in to react' : 'sign in to rate'
-        }
-        description={
-          authDialogType === 'react'
-            ? 'you must sign in to react to vibes'
-            : 'you must sign in to rate vibes'
-        }
+        title="sign in to rate"
+        description="you must sign in to rate and review vibes"
       />
+
+      {/* Hidden Emoji Rating Popover for clicking on top ratings */}
+      <div className="pointer-events-none fixed top-0 left-0">
+        <EmojiRatingPopover
+          onSubmit={handleEmojiRating}
+          isSubmitting={createEmojiRatingMutation.isPending}
+          vibeTitle={vibe.title}
+          emojiMetadata={emojiMetadataRecord}
+          preSelectedEmoji={selectedEmojiForRating || undefined}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedEmojiForRating(null);
+            }
+          }}
+        >
+          <button
+            ref={(el) => {
+              if (el && showEmojiRatingPopover && selectedEmojiForRating) {
+                el.click();
+                setShowEmojiRatingPopover(false);
+              }
+            }}
+            className="sr-only"
+            aria-hidden="true"
+          />
+        </EmojiRatingPopover>
+      </div>
     </div>
   );
 }

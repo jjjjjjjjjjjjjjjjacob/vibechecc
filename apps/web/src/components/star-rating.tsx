@@ -9,6 +9,8 @@ interface StarRatingProps {
   onChange?: (value: number) => void;
   readOnly?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  popoverMode?: boolean; // When true, clicking opens popover instead of direct rating
+  onPopoverOpen?: () => void; // Callback when popover should open
 }
 
 export function StarRating({
@@ -16,6 +18,8 @@ export function StarRating({
   onChange,
   readOnly = false,
   size = 'md',
+  popoverMode = false,
+  onPopoverOpen,
 }: StarRatingProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -29,6 +33,14 @@ export function StarRating({
 
   const handleClick = (rating: number) => {
     if (readOnly) return;
+
+    // In popover mode, open the popover instead of directly rating
+    if (popoverMode && onPopoverOpen) {
+      onPopoverOpen();
+      return;
+    }
+
+    // Direct rating mode
     onChange?.(rating);
 
     // Show toast when rating is changed

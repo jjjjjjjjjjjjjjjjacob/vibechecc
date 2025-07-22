@@ -55,6 +55,17 @@ export function Header() {
                   : 'text-foreground/60'
               )}
             >
+              home
+            </Link>
+            <Link
+              to="/discover"
+              className={cn(
+                'hover:text-foreground/80 lowercase transition-colors',
+                location.pathname === '/discover'
+                  ? 'text-foreground font-medium'
+                  : 'text-foreground/60'
+              )}
+            >
               discover
             </Link>
             <SignedIn>
@@ -131,6 +142,16 @@ export function Header() {
               className={cn(
                 'hover:text-foreground/80 rounded-md p-2 lowercase transition-colors',
                 location.pathname === '/' ? 'bg-muted font-medium' : ''
+              )}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              home
+            </Link>
+            <Link
+              to="/discover"
+              className={cn(
+                'hover:text-foreground/80 rounded-md p-2 lowercase transition-colors',
+                location.pathname === '/discover' ? 'bg-muted font-medium' : ''
               )}
               onClick={() => setIsMobileMenuOpen(false)}
             >

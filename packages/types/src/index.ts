@@ -34,17 +34,34 @@ export interface User {
   interests?: string[];
 }
 
+export interface EmojiRating {
+  emoji: string;
+  value: number; // 1-5
+  tags?: string[];
+}
+
 export interface Rating {
   user: User | null;
   rating: number;
   review?: string;
   date: string;
+  emojiRating?: EmojiRating; // New field for emoji-based ratings
+  tags?: string[]; // Associated tags from emoji metadata
 }
 
 export interface EmojiReaction {
   emoji: string;
   count: number;
   users: string[]; // Array of user IDs who reacted with this emoji
+  ratingValue?: number; // If this reaction is used as a rating
+  isRating?: boolean; // True if this is a rating reaction
+}
+
+export interface EmojiRatingMetadata {
+  emoji: string;
+  tags: string[];
+  category: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
 }
 
 export interface Vibe {

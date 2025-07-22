@@ -116,7 +116,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50 cursor-default;
   }
   body {
     @apply bg-background text-foreground;
@@ -124,6 +124,17 @@
 }
 
 @layer utilities {
+  *::-webkit-scrollbar {
+    @apply w-2 bg-transparent;
+  }
+  *::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }

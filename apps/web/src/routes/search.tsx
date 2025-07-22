@@ -8,6 +8,12 @@ import { useSearchResults } from '@/features/search/hooks/use-search-results';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { useEmojiMetadata } from '@/queries';
+import { Star } from 'lucide-react';
+import { EmojiRatingFilter } from '@/components/emoji-rating-filter';
 
 const searchParamsSchema = z.object({
   q: z.string().optional(),
@@ -18,6 +24,8 @@ const searchParamsSchema = z.object({
     .optional()
     .default('relevance'),
   page: z.number().optional().default(1),
+  emojiFilter: z.array(z.string()).optional(),
+  emojiMinValue: z.number().min(1).max(5).optional(),
 });
 
 export const Route = createFileRoute('/search')({
@@ -26,8 +34,17 @@ export const Route = createFileRoute('/search')({
 });
 
 function SearchResultsPage() {
-  const { q, tags, rating, sort, page } = Route.useSearch();
-  const filters = { tags, minRating: rating, sort };
+  const { q, tags, rating, sort, page, emojiFilter, emojiMinValue } =
+    Route.useSearch();
+  const filters = {
+    tags,
+    minRating: rating,
+    sort,
+    emojiRatings:
+      (emojiFilter && emojiFilter.length > 0) || emojiMinValue
+        ? { emojis: emojiFilter, minValue: emojiMinValue }
+        : undefined,
+  };
 
   const { data, isLoading, isError, error } = useSearchResults({
     query: q || '',
@@ -65,25 +82,119 @@ function SearchResultsPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-          {/* Filter sidebar - placeholder for Agent 4 */}
+          {/* Filter sidebar */}
           <aside className="lg:col-span-1">
             <Card className="sticky top-4 p-4">
               <h2 className="mb-4 font-semibold">Filter Results</h2>
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {/* Star Rating Filter */}
                 <div>
-                  <p className="text-muted-foreground mb-2 text-sm">Tags</p>
-                  {isLoading ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
+                  <Label className="mb-2 block text-sm font-medium">
+                    Minimum Rating
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((value) => (
+                        <Button
+                          key={value}
+                          variant={
+                            rating && rating >= value ? 'default' : 'ghost'
+                          }
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => {
+                            navigate({
+                              search: (prev) => ({
+                                ...prev,
+                                rating: rating === value ? undefined : value,
+                                page: 1,
+                              }),
+                            });
+                          }}
+                        >
+                          <Star
+                            className={`h-4 w-4 ${
+                              rating && rating >= value ? 'fill-current' : ''
+                            }`}
+                          />
+                        </Button>
+                      ))}
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">
-                      Filters coming soon...
-                    </p>
-                  )}
+                    {rating && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          navigate({
+                            search: (prev) => ({
+                              ...prev,
+                              rating: undefined,
+                              page: 1,
+                            }),
+                          });
+                        }}
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
                 </div>
+
+                {/* Emoji Rating Filter */}
+                <div>
+                  <Label className="mb-2 block text-sm font-medium">
+                    Emoji Ratings
+                  </Label>
+                  <EmojiRatingFilter
+                    selectedEmojis={emojiFilter || []}
+                    minValue={emojiMinValue}
+                    onEmojiToggle={(emoji) => {
+                      const current = emojiFilter || [];
+                      const updated = current.includes(emoji)
+                        ? current.filter((e) => e !== emoji)
+                        : [...current, emoji];
+
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          emojiFilter: updated.length > 0 ? updated : undefined,
+                          page: 1,
+                        }),
+                      });
+                    }}
+                    onMinValueChange={(value) => {
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          emojiMinValue: value,
+                          page: 1,
+                        }),
+                      });
+                    }}
+                  />
+                </div>
+
+                {/* Clear All Filters */}
+                {(rating ||
+                  (emojiFilter && emojiFilter.length > 0) ||
+                  emojiMinValue) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      navigate({
+                        search: {
+                          q,
+                          sort,
+                          page: 1,
+                        },
+                      });
+                    }}
+                  >
+                    Clear All Filters
+                  </Button>
+                )}
               </div>
             </Card>
           </aside>

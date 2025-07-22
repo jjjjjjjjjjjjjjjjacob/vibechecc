@@ -62,19 +62,46 @@ const schema = defineSchema({
     rating: v.number(),
     review: v.optional(v.string()),
     date: v.string(),
+    // New fields for emoji ratings
+    emojiRating: v.optional(
+      v.object({
+        emoji: v.string(),
+        value: v.number(), // 1-5 scale
+      })
+    ),
+    tags: v.optional(v.array(v.string())), // Associated tags from emoji metadata
   })
     .index('vibe', ['vibeId'])
     .index('user', ['userId'])
-    .index('vibeAndUser', ['vibeId', 'userId']),
+    .index('vibeAndUser', ['vibeId', 'userId'])
+    .index('vibeAndEmoji', ['vibeId', 'emojiRating.emoji']), // New index for emoji queries
 
   reactions: defineTable({
     vibeId: v.string(),
     emoji: v.string(),
     userId: v.string(),
+    // New fields for emoji ratings
+    ratingValue: v.optional(v.number()), // 1-5 if this is a rating reaction
+    isRating: v.optional(v.boolean()), // true if this reaction is used as a rating
   })
     .index('vibe', ['vibeId'])
     .index('vibeAndEmoji', ['vibeId', 'emoji'])
-    .index('userAndVibe', ['userId', 'vibeId']),
+    .index('userAndVibe', ['userId', 'vibeId'])
+    .index('ratingReactions', ['isRating', 'vibeId']), // New index for rating reactions
+
+  emojiRatingMetadata: defineTable({
+    emoji: v.string(),
+    tags: v.array(v.string()),
+    category: v.string(), // e.g., "emotion", "reaction", "assessment"
+    sentiment: v.union(
+      v.literal('positive'),
+      v.literal('negative'),
+      v.literal('neutral')
+    ),
+  })
+    .index('byEmoji', ['emoji'])
+    .index('byCategory', ['category'])
+    .index('byTag', ['tags']), // For tag-based queries
 
   searchHistory: defineTable({
     userId: v.string(),
@@ -120,6 +147,7 @@ const _user = schema.tables.users.validator;
 const vibe = schema.tables.vibes.validator;
 const rating = schema.tables.ratings.validator;
 const reaction = schema.tables.reactions.validator;
+const emojiRatingMetadata = schema.tables.emojiRatingMetadata.validator;
 const _searchHistory = schema.tables.searchHistory.validator;
 const _trendingSearches = schema.tables.trendingSearches.validator;
 const _searchMetrics = schema.tables.searchMetrics.validator;
@@ -128,6 +156,7 @@ export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
 export type Rating = Infer<typeof rating>;
 export type Reaction = Infer<typeof reaction>;
+export type EmojiRatingMetadata = Infer<typeof emojiRatingMetadata>;
 export type SearchHistory = Infer<typeof _searchHistory>;
 export type TrendingSearches = Infer<typeof _trendingSearches>;
 export type SearchMetrics = Infer<typeof _searchMetrics>;
@@ -145,10 +174,14 @@ export const createRatingSchema = v.object({
   userId: rating.fields.userId,
   rating: rating.fields.rating,
   review: v.optional(rating.fields.review),
+  emojiRating: v.optional(rating.fields.emojiRating),
+  tags: v.optional(rating.fields.tags),
 });
 
 export const reactToVibeSchema = v.object({
   vibeId: reaction.fields.vibeId,
   emoji: reaction.fields.emoji,
   userId: reaction.fields.userId,
+  ratingValue: v.optional(reaction.fields.ratingValue),
+  isRating: v.optional(reaction.fields.isRating),
 });
