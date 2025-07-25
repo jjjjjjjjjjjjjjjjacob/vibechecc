@@ -7,7 +7,7 @@ import {
 import { ConvexReactClient } from 'convex/react';
 import { ConvexQueryClient } from '@convex-dev/react-query';
 import { routerWithQueryClient } from '@tanstack/react-router-with-query';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 import { routeTree } from './routeTree.gen';
 import { DefaultCatchBoundary } from './components/default-catch-boundary';
 import { NotFound } from './components/not-found';

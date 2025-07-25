@@ -6,6 +6,7 @@ import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
+import { PlusCircle } from 'lucide-react';
 import {
   useTopEmojiRatings,
   useMostInteractedEmoji,
@@ -13,7 +14,7 @@ import {
   useEmojiMetadata,
   useQuickReactMutation,
 } from '@/queries';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 import {
   computeUserDisplayName,
   getUserAvatarUrl,
@@ -23,6 +24,7 @@ import type { Vibe } from '@/types';
 import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
 import { EmojiRatingDisplayPopover } from '@/components/emoji-rating-display-popover';
+import { EmojiRatingCycleDisplay } from '@/components/emoji-rating-cycle-display';
 import { EmojiReactions } from '@/components/emoji-reaction';
 
 interface VibeCardProps {
@@ -290,27 +292,44 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
               compact && 'p-3 pt-0'
             )}
           >
-            {/* Most Interacted Emoji Rating Display */}
-            {mostInteractedEmoji && (
-              <div className="w-full">
+            {/* Emoji Rating Display - Show cycling display if no ratings yet */}
+            <div className="w-full">
+              {mostInteractedEmoji ? (
                 <EmojiRatingDisplayPopover
                   rating={mostInteractedEmoji}
                   allRatings={emojiRatings}
                   onEmojiClick={handleEmojiRatingClick}
                   vibeId={vibe.id}
                 />
-              </div>
-            )}
+              ) : (
+                <EmojiRatingCycleDisplay
+                  onSubmit={handleEmojiRating}
+                  isSubmitting={createEmojiRatingMutation.isPending}
+                  vibeTitle={vibe.title}
+                  emojiMetadata={emojiMetadataRecord}
+                />
+              )}
+            </div>
 
-            {/* Emoji Reactions */}
+            {/* Emoji Reactions or "Be the first to rate" CTA */}
             <div className="w-full">
-              <EmojiReactions
-                reactions={emojiReactions}
-                onReact={handleQuickReact}
-                showAddButton={true}
-                ratingMode={true}
-                onRatingOpen={handleEmojiRatingClick}
-              />
+              {emojiReactions.length > 0 ? (
+                <EmojiReactions
+                  reactions={emojiReactions}
+                  onReact={handleQuickReact}
+                  showAddButton={true}
+                  ratingMode={true}
+                  onRatingOpen={handleEmojiRatingClick}
+                />
+              ) : (
+                <button
+                  onClick={() => handleEmojiRatingClick('')}
+                  className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs font-medium transition-colors"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  be the first to rate
+                </button>
+              )}
             </div>
           </CardFooter>
         </div>

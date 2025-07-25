@@ -72,19 +72,16 @@ export const search = query({
     pageSize: v.optional(v.number()),
   },
   handler: async (ctx, { searchTerm, category, page = 0, pageSize = 50 }) => {
-    // Get all emojis
-    const allEmojis = category
-      ? await ctx.db
-          .query('emojis')
-          .withIndex('byCategory', (q) => q.eq('category', category))
-          .collect()
-      : await ctx.db.query('emojis').collect();
+    // Get all emojis or by category
+    let allEmojis;
 
-    // Filter by search term if provided
-    let filteredEmojis = allEmojis;
     if (searchTerm) {
+      // For search, get all emojis for filtering
+      allEmojis = await ctx.db.query('emojis').collect();
+
+      // Filter by search term
       const searchLower = searchTerm.toLowerCase();
-      filteredEmojis = allEmojis.filter((emoji) => {
+      allEmojis = allEmojis.filter((emoji) => {
         const searchableText = [
           emoji.name,
           ...emoji.keywords,
@@ -94,19 +91,28 @@ export const search = query({
           .toLowerCase();
         return searchableText.includes(searchLower);
       });
+    } else if (category) {
+      // For category browsing, use index
+      allEmojis = await ctx.db
+        .query('emojis')
+        .withIndex('byCategory', (q) => q.eq('category', category))
+        .collect();
+    } else {
+      // For general browsing, get all emojis
+      allEmojis = await ctx.db.query('emojis').collect();
     }
 
     // Paginate results
     const start = page * pageSize;
     const end = start + pageSize;
-    const paginatedEmojis = filteredEmojis.slice(start, end);
+    const paginatedEmojis = allEmojis.slice(start, end);
 
     return {
       emojis: paginatedEmojis,
-      totalCount: filteredEmojis.length,
+      totalCount: allEmojis.length,
       page,
       pageSize,
-      hasMore: end < filteredEmojis.length,
+      hasMore: end < allEmojis.length,
     };
   },
 });
@@ -117,7 +123,7 @@ export const getByEmojis = query({
     emojis: v.array(v.string()),
   },
   handler: async (ctx, { emojis }) => {
-    const results: Record<string, Emoji> = {};
+    const results: Array<Emoji> = [];
 
     for (const emoji of emojis) {
       const emojiData = await ctx.db
@@ -126,7 +132,7 @@ export const getByEmojis = query({
         .first();
 
       if (emojiData) {
-        results[emoji] = emojiData;
+        results.push(emojiData);
       }
     }
 
@@ -152,7 +158,9 @@ export const getPopular = query({
       '🥺',
       '😭',
       '💀',
-      '🙈',
+      '👀',
+      '❤️',
+      '✨',
     ];
 
     const results = [];
@@ -180,3 +188,12 @@ export const getCategories = query({
     return Array.from(categories).sort();
   },
 });
+
+// Default export for test-setup
+export default {
+  importBatch,
+  search,
+  getByEmojis,
+  getPopular,
+  getCategories,
+};

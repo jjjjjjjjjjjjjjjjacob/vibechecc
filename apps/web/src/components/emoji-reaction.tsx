@@ -334,8 +334,9 @@ function HorizontalEmojiPicker({
         onSearchChange={setSearchValue}
         onSelect={handleEmojiClick}
         className="h-full border-0"
-        maxHeight="h-80"
-        pageSize={100}
+        maxHeight="h-[340px]"
+        pageSize={200}
+        showCategories={true}
       />
 
       {/* Chevron up in bottom right corner when full picker is shown */}
@@ -355,7 +356,7 @@ function HorizontalEmojiPicker({
     <PopoverContent
       className={cn(
         'h-14 w-80 overflow-hidden p-3 transition-[height]',
-        showFullPicker && 'h-96 p-0',
+        showFullPicker && 'h-[400px] w-[352px] p-0',
         (showSearchResults || isSearchExpanded) &&
           !showFullPicker &&
           'h-24 pb-6'

@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const activityEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const activityEmojis = [
   // Sports - Ball sports
   {
     emoji: '⚽',
@@ -1108,4 +1108,4 @@ export const activityEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#DC143C',
     tags: ['matryoshka', 'russian', 'dolls'],
   },
-];
+] as const satisfies readonly Omit<Emoji, 'sentiment'>[];

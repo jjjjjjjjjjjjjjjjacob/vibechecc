@@ -13,7 +13,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import * as React from 'react';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from '@/components/ui/sonner';
 import type { QueryClient } from '@tanstack/react-query';
 import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
 import { NotFound } from '@/components/not-found';
@@ -251,7 +251,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               <Header />
               <LoadingIndicator />
 
-              <main className="flex-1">{children}</main>
+              <main className="mb-4 flex-1">{children}</main>
 
               <footer className="bg-background border-t py-6">
                 <div className="container mx-auto px-4">

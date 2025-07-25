@@ -143,6 +143,19 @@ const schema = defineSchema({
     .index('by_timestamp', ['timestamp'])
     .index('by_user', ['userId', 'timestamp'])
     .index('by_query', ['query', 'timestamp']),
+
+  // Tags table to track all unique tags
+  tags: defineTable({
+    name: v.string(), // The tag name (lowercase, normalized)
+    count: v.number(), // Number of vibes using this tag
+    createdAt: v.number(), // Timestamp when first created
+    lastUsed: v.number(), // Timestamp when last used
+  })
+    .index('byName', ['name'])
+    .index('byCount', ['count'])
+    .searchIndex('search', {
+      searchField: 'name',
+    }),
 });
 export default schema;
 

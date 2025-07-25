@@ -3,6 +3,7 @@
 ## Component Development
 
 ### Emoji Rating System Implementation
+
 **When to reference**: Building interactive rating/feedback components
 
 - Use framer-motion for smooth animations (already a dependency)
@@ -12,6 +13,7 @@
 - Use `showScale` prop to toggle between simple display and full 5-emoji scale
 
 **Code pattern**:
+
 ```tsx
 // Compact display mode
 <div className="flex items-center gap-1">
@@ -29,6 +31,7 @@
 ```
 
 ### Circular Button Design
+
 **When to reference**: Creating emoji reactions or similar UI elements
 
 - Use fixed dimensions (48x48px) for consistency
@@ -37,6 +40,7 @@
 - Include hover scale effects for interactivity
 
 ### Accordion Implementation
+
 **When to reference**: Displaying expandable lists with more than 3 items
 
 - Use shadcn/ui Accordion component from `@/components/ui/accordion`
@@ -45,13 +49,18 @@
 - Add CSS animations for smooth expand/collapse:
   ```css
   @keyframes accordion-down {
-    from { height: 0; }
-    to { height: var(--radix-accordion-content-height); }
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
   }
   ```
 - Keep accordion trigger text small and subtle (`text-xs text-muted-foreground`)
 
 ### Popover Integration
+
 **When to reference**: Building interactive overlays
 
 - Use radix-ui popover (via shadcn/ui)
@@ -62,6 +71,7 @@
 ## State Management
 
 ### Real-time Updates with Convex
+
 **When to reference**: Implementing features that need live updates
 
 - Use hooks from `src/queries.ts` for consistency
@@ -70,6 +80,7 @@
 - Optimistic updates handled by Convex mutations
 
 ### Form State
+
 **When to reference**: Building forms with complex validation
 
 - Use React Hook Form for form management
@@ -80,6 +91,7 @@
 ## Testing Patterns
 
 ### Component Testing
+
 **When to reference**: Writing tests for UI components
 
 - Always include `/// <reference lib="dom" />` at the top
@@ -90,6 +102,7 @@
 ## Performance Optimizations
 
 ### Image Loading
+
 **When to reference**: Displaying user avatars or emoji
 
 - Use native lazy loading for images
@@ -98,6 +111,7 @@
 - Cache emoji data in a central store
 
 ### List Rendering
+
 **When to reference**: Displaying large lists of items
 
 - Implement virtualization for lists > 50 items
@@ -108,6 +122,7 @@
 ## Common Gotchas
 
 ### TanStack Router
+
 **When to reference**: Adding new routes
 
 - File-based routing in `src/routes/`
@@ -116,6 +131,7 @@
 - Route components must be default exports
 
 ### Tailwind CSS v4
+
 **When to reference**: Styling components
 
 - Import styles via `@import` in CSS files
@@ -124,6 +140,7 @@
 - No need for `tailwind.config.js`
 
 ### Workspace Imports
+
 **When to reference**: Importing from shared packages
 
 - Use `@vibechecc/types` for shared TypeScript types
@@ -132,9 +149,11 @@
 - Never use relative imports across workspace boundaries
 
 ## React Query with Convex Integration
+
 **When to reference**: Using `convexQuery` with `useQuery`
 
 ### Correct Usage Pattern
+
 - Always spread the convexQuery result into useQuery options object
 - The convexQuery helper returns a configuration object, not a direct query function
 

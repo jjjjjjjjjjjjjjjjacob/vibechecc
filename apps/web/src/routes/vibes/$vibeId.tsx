@@ -25,11 +25,12 @@ import {
   getUserInitials,
 } from '@/utils/user-utils';
 import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
 import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
 import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
 import { EmojiRatingSelector } from '@/components/emoji-rating-selector';
+import { EmojiRatingCycleDisplay } from '@/components/emoji-rating-cycle-display';
 import {
   Accordion,
   AccordionContent,
@@ -396,18 +397,27 @@ function VibePage() {
           <div className="mb-6 flex items-start justify-between gap-4">
             <div className="flex-1">
               <h1 className="text-4xl font-bold lowercase">{vibe.title}</h1>
-              {mostInteractedEmoji && (
+              {mostInteractedEmoji ? (
                 <EmojiRatingDisplay
                   rating={mostInteractedEmoji}
                   showScale={true}
                   onEmojiClick={handleEmojiRatingClick}
                 />
+              ) : (
+                <div className="mt-2">
+                  <EmojiRatingCycleDisplay
+                    onSubmit={handleEmojiRating}
+                    isSubmitting={createEmojiRatingMutation.isPending}
+                    vibeTitle={vibe.title}
+                    emojiMetadata={emojiMetadataRecord}
+                  />
+                </div>
               )}
             </div>
           </div>
 
           {/* Top Emoji Ratings */}
-          {emojiRatings.length > 0 && (
+          {emojiRatings.length > 0 ? (
             <div className="bg-secondary/20 mb-6 rounded-lg p-4">
               <h3 className="text-muted-foreground mb-3 text-sm font-medium">
                 top ratings
@@ -446,6 +456,30 @@ function VibePage() {
                   </Accordion>
                 )}
               </div>
+            </div>
+          ) : (
+            <div className="bg-secondary/20 mb-6 rounded-lg p-4 text-center">
+              <p className="text-muted-foreground mb-2 text-sm">
+                no ratings yet
+              </p>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  if (!_user?.id) {
+                    setAuthDialogType('rate');
+                    setShowAuthDialog(true);
+                  } else {
+                    // Scroll to rating selector or open emoji picker
+                    const ratingSection = document.querySelector(
+                      '[data-rating-selector]'
+                    );
+                    ratingSection?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                be the first to rate
+              </Button>
             </div>
           )}
 
@@ -496,7 +530,7 @@ function VibePage() {
           </p>
 
           {/* Rate & Review This Vibe */}
-          <div className="mb-6">
+          <div className="mb-6" data-rating-selector>
             <SignedIn>
               <EmojiRatingSelector
                 topEmojis={emojiRatings}

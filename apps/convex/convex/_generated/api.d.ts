@@ -34,6 +34,8 @@ import type * as seed_emojis_smileys from "../seed/emojis/smileys.js";
 import type * as seed_emojis_symbols from "../seed/emojis/symbols.js";
 import type * as seed_emojis_travel from "../seed/emojis/travel.js";
 import type * as seed from "../seed.js";
+import type * as tags from "../tags.js";
+import type * as test_setup from "../test-setup.js";
 import type * as users from "../users.js";
 import type * as vibes from "../vibes.js";
 
@@ -67,6 +69,8 @@ declare const fullApi: ApiFromModules<{
   "seed/emojis/symbols": typeof seed_emojis_symbols;
   "seed/emojis/travel": typeof seed_emojis_travel;
   seed: typeof seed;
+  tags: typeof tags;
+  "test-setup": typeof test_setup;
   users: typeof users;
   vibes: typeof vibes;
 }>;

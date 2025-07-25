@@ -2,7 +2,7 @@ import { Circle } from 'lucide-react';
 import { cn } from '../utils/tailwind-utils';
 import { useTheme } from './theme-provider';
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 
 interface StarRatingProps {
   value: number;

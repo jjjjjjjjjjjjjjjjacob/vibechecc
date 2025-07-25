@@ -227,12 +227,12 @@ describe('Search Functions', () => {
 
       // Get the actual vibe objects to access the custom id field
       const vibe1 = await t.run(async (ctx) => {
-        const vibe = (await ctx.db.get(vibe1Id)) as any;
+        const vibe = (await ctx.db.get(vibe1Id)) as { id?: string } | null;
         return vibe?.id as string;
       });
 
       const vibe2 = await t.run(async (ctx) => {
-        const vibe = (await ctx.db.get(vibe2Id)) as any;
+        const vibe = (await ctx.db.get(vibe2Id)) as { id?: string } | null;
         return vibe?.id as string;
       });
 

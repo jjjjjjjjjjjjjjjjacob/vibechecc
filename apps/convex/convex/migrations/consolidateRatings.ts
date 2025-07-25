@@ -5,7 +5,19 @@ import { internal } from '../_generated/api';
 // Main migration action
 export const consolidateRatings = internalAction({
   args: {},
-  handler: async (ctx): Promise<any> => {
+  handler: async (
+    ctx
+  ): Promise<{
+    success: boolean;
+    message: string;
+    duplicateRatingsRemoved?: number;
+    legacyRatingsProcessed?: number;
+    stats?: {
+      emojisImported: number;
+      ratingsUpdated: number;
+      ratingsWithoutEmojisFixed: number;
+    };
+  }> => {
     // eslint-disable-next-line no-console
     console.log('Starting rating consolidation migration...');
 
@@ -112,7 +124,17 @@ export const migrateRatings = internalMutation({
 
     for (const rating of allRatings) {
       // Handle old format with nested emojiRating field
-      const ratingData = rating as any;
+      const ratingData = rating as unknown as {
+        emoji?: string;
+        value?: number;
+        createdAt?: number;
+        date?: number;
+        rating?: number;
+        userId?: string;
+        review?: string;
+        tags?: string[];
+        emojiRating?: { emoji?: string; value?: number };
+      };
 
       // Skip if already has emoji (but still check for other issues)
       if (
@@ -133,13 +155,12 @@ export const migrateRatings = internalMutation({
 
       // Check if has emojiRating field (old format)
       if (ratingData.emojiRating) {
-        emoji = ratingData.emojiRating.emoji;
-        value = ratingData.emojiRating.value;
+        emoji = ratingData.emojiRating.emoji || '😊';
+        value = ratingData.emojiRating.value || 3;
       } else if (ratingData.emoji && ratingData.emoji !== '') {
         // Already has emoji field
         emoji = ratingData.emoji;
-        value =
-          ratingData.value || ratingData.emojiValue || ratingData.rating || 3;
+        value = ratingData.value || 3;
       } else {
         // Convert star rating to emoji or use default
         const starRating = Math.round(
@@ -154,13 +175,17 @@ export const migrateRatings = internalMutation({
 
       // Insert new document with correct schema
       await ctx.db.insert('ratings', {
-        vibeId: ratingData.vibeId,
-        userId: ratingData.userId,
+        vibeId: (ratingData as any).vibeId || '',
+        userId: ratingData.userId || '',
         emoji,
         value,
         review: ratingData.review || `Rated ${value} out of 5`,
         createdAt:
-          ratingData.date || ratingData.createdAt || new Date().toISOString(),
+          typeof ratingData.date === 'number'
+            ? new Date(ratingData.date).toISOString()
+            : typeof ratingData.createdAt === 'number'
+              ? new Date(ratingData.createdAt).toISOString()
+              : new Date().toISOString(),
         tags: ratingData.tags,
       });
 
@@ -223,7 +248,7 @@ export const ensureAllRatingsHaveEmojis = internalMutation({
     let updatedCount = 0;
 
     for (const rating of ratingsWithoutEmojis) {
-      const ratingData = rating as any;
+      const ratingData = rating as { value?: number; rating?: number };
       const value = Math.round(ratingData.value || ratingData.rating || 3);
       const emoji = valueToEmoji[value] || valueToEmoji[3];
 

@@ -120,18 +120,18 @@ bun run dev
 
 All scripts are run from the root with Bun:
 
-| Command                | Description                    |
-| ---------------------- | ------------------------------ |
-| `bun run dev`          | Start full dev environment     |
-| `bun run dev:frontend` | Start frontend only            |
-| `bun run dev:backend`  | Start backend only             |
-| `bun run build`        | Build all projects             |
-| `bun run test`         | Run all tests                  |
-| `bun run typecheck`    | Type check all projects        |
-| `bun run lint`         | Lint all projects              |
-| `bun run seed`         | Seed database with basic data  |
-| `bun run seed:enhanced`| Seed database with comprehensive data |
-| `bun run seed:clear`   | Clear all database content     |
+| Command                 | Description                           |
+| ----------------------- | ------------------------------------- |
+| `bun run dev`           | Start full dev environment            |
+| `bun run dev:frontend`  | Start frontend only                   |
+| `bun run dev:backend`   | Start backend only                    |
+| `bun run build`         | Build all projects                    |
+| `bun run test`          | Run all tests                         |
+| `bun run typecheck`     | Type check all projects               |
+| `bun run lint`          | Lint all projects                     |
+| `bun run seed`          | Seed database with basic data         |
+| `bun run seed:enhanced` | Seed database with comprehensive data |
+| `bun run seed:clear`    | Clear all database content            |
 
 #### Nx Usage
 
@@ -290,18 +290,21 @@ export function cn(...classes: string[]): string { ... }
 The application now includes a comprehensive emoji rating system that enhances user engagement:
 
 #### Emoji Reactions UI
+
 - **Circular buttons**: Changed from pill-shaped to perfect circles (48x48px) for better visual consistency
 - **Theme-aware styling**: Using secondary colors with hover states for better UX
 - **Interactive behavior**: Clicking emoji reactions opens the rating popover with that emoji pre-selected
 - **Review requirement**: All ratings now require written reviews to encourage meaningful feedback
 
 #### Emoji Rating Display
+
 - **Compact mode**: Shows emoji with rating value and count in vibe cards
 - **Expanded mode**: Shows emoji with "out of 5" text, scale visualization, and tags
 - **Smooth animations**: Using framer-motion for hover effects and transitions
 - **Partial ratings support**: Visual representation of partial ratings (e.g., 3.5 out of 5)
 
 #### Integration Points
+
 - **VIbeCard Component**: Displays emoji ratings when reactions exist, falls back to stars
 - **Vibe Detail Page**: Prominent emoji rating display with "Top Emoji Ratings" section
 - **Review Cards**: Show emoji ratings alongside traditional star ratings
@@ -310,16 +313,19 @@ The application now includes a comprehensive emoji rating system that enhances u
 ## Testing
 
 ### Unit Testing
+
 - Frontend: Vitest + React Testing Library for component tests
 - Backend: convex-test for Convex function testing
 - Run all tests: `bun run test`
 - Run specific project: `bun nx test <project>`
 
 ### E2E Testing
+
 - No E2E framework currently configured
 - Manual testing via local development environment
 
 ### Test Coverage
+
 - Component tests for UI elements
 - Function tests for backend logic
 - Integration tests for critical workflows

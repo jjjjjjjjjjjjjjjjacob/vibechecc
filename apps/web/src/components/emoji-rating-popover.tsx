@@ -225,7 +225,10 @@ export function EmojiRatingPopover({
                 searchValue={searchValue}
                 onSearchChange={setSearchValue}
                 onSelect={handleEmojiSelect}
-                showCategories={false}
+                showCategories={true}
+                maxHeight="h-[340px]"
+                pageSize={200}
+                className="border-0"
               />
               <div className="text-muted-foreground flex items-center gap-1 text-xs">
                 <Info className="h-3 w-3" />

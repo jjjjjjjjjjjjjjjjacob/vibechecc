@@ -1,5 +1,6 @@
 import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
+import { api } from './_generated/api';
 
 // Simple get all vibes (for backwards compatibility)
 export const getAllSimple = query({
@@ -86,7 +87,7 @@ export const getById = query({
 
     const creator = await ctx.db
       .query('users')
-      .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
+      .withIndex('byExternalId', (q) => q.eq('externalId', vibe.createdById))
       .first();
 
     const ratings = await ctx.db
@@ -98,7 +99,7 @@ export const getById = query({
       ratings.map(async (rating) => {
         const user = await ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('externalId'), rating.userId))
+          .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
           .first();
         return {
           user,
@@ -242,11 +243,31 @@ export const create = mutation({
       throw new Error('You must be logged in to create a vibe');
     }
 
+    // Ensure user exists in our database
+    const user = await ctx.db
+      .query('users')
+      .withIndex('byExternalId', (q) => q.eq('externalId', identity.subject))
+      .first();
+
+    // If user doesn't exist, create them with basic info from Clerk
+    if (!user) {
+      await ctx.db.insert('users', {
+        externalId: identity.subject,
+        username: identity.nickname || undefined,
+        first_name: identity.givenName || undefined,
+        last_name: identity.familyName || undefined,
+        image_url: identity.pictureUrl || undefined,
+        profile_image_url: identity.pictureUrl || undefined,
+        created_at: Date.now(),
+        updated_at: Date.now(),
+      });
+    }
+
     // Generate a unique ID for the vibe
     const id = Math.random().toString(36).substring(2, 15);
     const now = new Date().toISOString();
 
-    return await ctx.db.insert('vibes', {
+    const vibeId = await ctx.db.insert('vibes', {
       id,
       title: args.title,
       description: args.description,
@@ -255,6 +276,16 @@ export const create = mutation({
       createdAt: now,
       tags: args.tags ?? [],
     });
+
+    // Update tag usage counts
+    if (args.tags && args.tags.length > 0) {
+      await ctx.scheduler.runAfter(0, api.tags.updateTagUsage, {
+        tags: args.tags,
+        increment: true,
+      });
+    }
+
+    return vibeId;
   },
 });
 

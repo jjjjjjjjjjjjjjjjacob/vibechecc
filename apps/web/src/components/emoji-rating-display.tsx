@@ -146,7 +146,17 @@ export function TopEmojiRatings({
     ...convexQuery(api.emojis.getByEmojis, { emojis }),
     enabled: emojis.length > 0,
   });
-  const emojiData = emojiDataQuery.data;
+  // Convert array to map for easy lookup
+  const emojiDataMap = React.useMemo(() => {
+    const emojiDataArray = emojiDataQuery.data || [];
+    const map: Record<string, { color?: string }> = {};
+    if (Array.isArray(emojiDataArray)) {
+      emojiDataArray.forEach((data) => {
+        map[data.emoji] = data;
+      });
+    }
+    return map;
+  }, [emojiDataQuery.data]);
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -161,7 +171,7 @@ export function TopEmojiRatings({
             rating={rating}
             showScale={expanded}
             onEmojiClick={onEmojiClick}
-            emojiColor={emojiData?.[rating.emoji]?.color}
+            emojiColor={emojiDataMap[rating.emoji]?.color}
           />
         </div>
       ))}

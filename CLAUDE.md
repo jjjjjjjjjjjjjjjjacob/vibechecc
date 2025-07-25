@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## IMPORTANT: AI Assistant Rules
 
 **ALWAYS check `.agent/` directory FIRST before starting any work:**
+
 - `.agent/rules.md` - Project-specific rules that OVERRIDE default behavior
 - `.agent/docs/*-learnings.md` - Workspace-specific insights and patterns
 
@@ -84,11 +85,11 @@ bun nx reset                            # Clear Nx cache
 ### Naming Conventions
 
 #### TypeScript/JavaScript
+
 - **camelCase** for:
   - Variable names: `const userName = 'John'`
   - Function names (non-components): `function getUserData() {}`
   - Object properties: `{ firstName: 'John', lastName: 'Doe' }`
-  
 - **PascalCase** for:
   - React components: `function UserProfile() {}`
   - Classes: `class UserService {}`
@@ -248,6 +249,7 @@ Run `bun run quality` before submitting PRs to ensure all checks pass.
 ## Recent Features
 
 ### Emoji Rating System
+
 - **Emoji Reactions**: Circular buttons with hover states and animations
 - **Emoji Ratings**: 1-5 scale ratings with required review text
 - **Visual Display**: Compact and expanded modes with framer-motion animations
@@ -255,6 +257,7 @@ Run `bun run quality` before submitting PRs to ensure all checks pass.
 - **Database Schema**: Separate `emojiRatings` table with proper indexes
 
 ### Search System
+
 - **Advanced Filters**: Date range, rating range, tags, and user filters
 - **Instant Search**: Real-time search with debouncing
 - **Search History**: Recent and trending searches
@@ -263,12 +266,14 @@ Run `bun run quality` before submitting PRs to ensure all checks pass.
 ## AI Assistant Guidelines
 
 ### REQUIRED Reading Before Starting Work
+
 1. **`.agent/rules.md`** - Contains MANDATORY rules that override all default AI behavior
 2. **`.agent/docs/web-learnings.md`** - Frontend development patterns and gotchas
 3. **`.agent/docs/convex-learnings.md`** - Backend development patterns and best practices
 4. **`.agent/docs/*-learnings.md`** - Task-specific learnings for various features
 
 ### Workflow Requirements
+
 - **Use TodoWrite**: Track ALL multi-step tasks with the todo system
 - **Update Learnings**: Document insights in `.agent/docs/` after completing tasks
 - **Follow Patterns**: NEVER introduce new patterns without explicit permission

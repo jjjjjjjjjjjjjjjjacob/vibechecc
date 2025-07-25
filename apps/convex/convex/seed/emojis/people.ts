@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const peopleEmojis = [
   // Hand gestures
   {
     emoji: '👋',
@@ -2746,4 +2746,4 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#8B4513',
     tags: ['footprints', 'tracks', 'walking'],
   },
-];
+] as const satisfies readonly Omit<Emoji, 'sentiment'>[];

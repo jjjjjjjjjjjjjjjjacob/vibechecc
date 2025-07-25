@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AvatarPicker } from '@/features/onboarding/components/avatar-picker';
 import { useUser } from '@clerk/tanstack-react-start';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 
 interface OnboardingProfileStepProps {
   onNext: () => void;

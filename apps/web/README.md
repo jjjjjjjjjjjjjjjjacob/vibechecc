@@ -73,6 +73,7 @@ Frontend tests use [Vitest](https://vitest.dev/) and [React Testing Library](htt
 The frontend includes a comprehensive emoji rating system:
 
 #### Components
+
 - **`emoji-rating-display.tsx`**: Displays emoji ratings with animations and hover effects
 - **`emoji-rating-popover.tsx`**: Interactive popover for creating emoji ratings
 - **`emoji-reaction.tsx`**: Circular emoji reaction buttons with hover states
@@ -81,6 +82,7 @@ The frontend includes a comprehensive emoji rating system:
 - **`top-emoji-ratings-accordion.tsx`**: Expandable list of emoji ratings
 
 #### Features
+
 - Smooth spring animations using framer-motion
 - Theme-aware styling with Tailwind CSS
 - Backward compatibility with star ratings

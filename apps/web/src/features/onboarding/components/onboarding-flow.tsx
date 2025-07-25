@@ -11,7 +11,7 @@ import {
   useCompleteOnboardingMutation,
 } from '@/queries';
 import { useUser } from '@clerk/tanstack-react-start';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 
 export function OnboardingFlow() {
   const navigate = useNavigate();

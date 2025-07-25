@@ -245,6 +245,7 @@ CLERK_WEBHOOK_SIGNING_SECRET=whsec_your_webhook_secret
 The seed scripts provide multiple options for populating test data:
 
 ### Basic Seed (`seed:seed`)
+
 - **5 Users**: Diverse user profiles with different interests
 - **4 Vibes**: Various life experiences and situations
 - **20 Ratings**: User ratings with required comments
@@ -252,6 +253,7 @@ The seed scripts provide multiple options for populating test data:
 - **Emoji Ratings**: Each rating now includes emoji-based ratings
 
 ### Enhanced Seed (`seed:enhancedSeed`)
+
 - **30 Users**: Comprehensive user base
 - **20 Vibes**: Wide variety of content
 - **100+ Ratings**: Extensive rating coverage
@@ -259,6 +261,7 @@ The seed scripts provide multiple options for populating test data:
 - **Emoji Metadata**: Pre-populated emoji categories and tags
 
 ### Clear Database (`seed:clearDatabase`)
+
 - Removes all data from all tables
 - Useful for clean slate testing
 

@@ -117,9 +117,18 @@ export const seed = action({
       // eslint-disable-next-line no-console
       console.log(`Created ${ratingResult.count} ratings`);
 
-      // Step 6: Create search data
+      // Step 6: Create tags from vibes
       // eslint-disable-next-line no-console
-      console.log('Step 6: Creating search data...');
+      console.log('Step 6: Creating tags...');
+      const tagResult = (await ctx.runMutation(internal.seed.seedTags)) as {
+        count: number;
+      };
+      // eslint-disable-next-line no-console
+      console.log(`Created ${tagResult.count} tags`);
+
+      // Step 7: Create search data
+      // eslint-disable-next-line no-console
+      console.log('Step 7: Creating search data...');
       const searchResult = (await ctx.runMutation(
         internal.seed.seedSearchData
       )) as { searchHistory: number; trending: number };
@@ -128,9 +137,9 @@ export const seed = action({
         `Created ${searchResult.searchHistory} search history items and ${searchResult.trending} trending searches`
       );
 
-      // Step 7: Create search metrics
+      // Step 8: Create search metrics
       // eslint-disable-next-line no-console
-      console.log('Step 7: Creating search metrics...');
+      console.log('Step 8: Creating search metrics...');
       const metricsResult = (await ctx.runMutation(
         internal.seed.seedSearchMetrics
       )) as { count: number };
@@ -147,6 +156,8 @@ export const seed = action({
       console.log(`✅ Vibes: ${vibeResult.count}`);
       // eslint-disable-next-line no-console
       console.log(`✅ Ratings: ${ratingResult.count}`);
+      // eslint-disable-next-line no-console
+      console.log(`✅ Tags: ${tagResult.count}`);
       // eslint-disable-next-line no-console
       console.log(`✅ Search History: ${searchResult.searchHistory}`);
       // eslint-disable-next-line no-console
@@ -174,6 +185,7 @@ export const clearAllData = internalMutation({
       'searchHistory',
       'trendingSearches',
       'searchMetrics',
+      'tags',
       'migrations',
     ] as const;
 
@@ -556,7 +568,7 @@ export const seedVibes = internalMutation({
         title: template.title,
         description: template.description,
         tags: template.tags,
-        createdById: randomUser._id,
+        createdById: randomUser.externalId,
         createdAt: new Date(
           Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)
         ).toISOString(),
@@ -565,7 +577,7 @@ export const seedVibes = internalMutation({
       createdVibes.push({
         id: vibeId,
         ...template,
-        createdById: randomUser._id,
+        createdById: randomUser.externalId,
       });
     }
 
@@ -624,7 +636,7 @@ export const seedRatings = internalMutation({
       // Create 3-8 ratings per vibe
       const ratingCount = Math.floor(Math.random() * 6) + 3;
       const raters = [...users]
-        .filter((user) => user._id !== vibe.createdById)
+        .filter((user) => user.externalId !== vibe.createdById)
         .sort(() => 0.5 - Math.random())
         .slice(0, ratingCount);
 
@@ -637,7 +649,7 @@ export const seedRatings = internalMutation({
 
         await ctx.db.insert('ratings', {
           vibeId: vibe.id,
-          userId: rater._id,
+          userId: rater.externalId,
           emoji: emoji,
           value: value,
           review: review,
@@ -651,6 +663,41 @@ export const seedRatings = internalMutation({
     }
 
     return { count: totalRatings };
+  },
+});
+
+// Seed tags mutation - creates tags from all vibes
+export const seedTags = internalMutation({
+  handler: async (ctx) => {
+    const vibes = await ctx.db.query('vibes').collect();
+
+    // Collect all unique tags from vibes
+    const tagCounts = new Map<string, number>();
+
+    for (const vibe of vibes) {
+      if (vibe.tags && vibe.tags.length > 0) {
+        for (const tag of vibe.tags) {
+          const normalizedTag = tag.toLowerCase().trim();
+          tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
+        }
+      }
+    }
+
+    // Create tag entries in the database
+    const now = Date.now();
+    let createdCount = 0;
+
+    for (const [tagName, count] of tagCounts.entries()) {
+      await ctx.db.insert('tags', {
+        name: tagName,
+        count: count,
+        createdAt: now - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000), // Random time in last 30 days
+        lastUsed: now - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000), // Random time in last 7 days
+      });
+      createdCount++;
+    }
+
+    return { count: createdCount };
   },
 });
 
@@ -712,7 +759,7 @@ export const seedSearchData = internalMutation({
 
       for (const query of userSearches) {
         await ctx.db.insert('searchHistory', {
-          userId: user._id,
+          userId: user.externalId,
           query: query,
           timestamp:
             Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000),
@@ -768,7 +815,7 @@ export const seedSearchMetrics = internalMutation({
         timestamp,
         type,
         query,
-        userId: user?._id,
+        userId: user?.externalId,
       };
 
       if (type === 'search') {

@@ -114,7 +114,7 @@ async function getTopEmojiRatingsInternal(
     { count: number; totalValue: number; tags: Set<string> }
   >();
 
-  for (const rating of ratings) {
+  for (const rating of ratings as any[]) {
     const stats = emojiStats.get(rating.emoji) || {
       count: 0,
       totalValue: 0,
@@ -200,12 +200,12 @@ export const getEmojiRatingStats = query({
     const ratings = await ctx.db
       .query('ratings')
       .withIndex('vibe', (q: any) => q.eq('vibeId', args.vibeId))
-      .filter((q) => q.neq(q.field('emoji'), undefined))
+      .filter((q: any) => q.neq(q.field('emoji'), undefined))
       .collect();
 
     const emojiGroups = new Map<string, number[]>();
 
-    for (const rating of ratings) {
+    for (const rating of ratings as any[]) {
       const values = emojiGroups.get(rating.emoji) || [];
       values.push(rating.value);
       emojiGroups.set(rating.emoji, values);
@@ -376,3 +376,16 @@ export const getTrendingEmojis = query({
     return trends;
   },
 });
+
+// Default export for test-setup
+export default {
+  getEmojiMetadata,
+  getAllEmojiMetadata,
+  getEmojiByCategory,
+  createOrUpdateEmojiRating,
+  getTopEmojiRatings,
+  getMostInteractedEmoji,
+  getEmojiRatingStats,
+  getUserEmojiStats,
+  getTrendingEmojis,
+};

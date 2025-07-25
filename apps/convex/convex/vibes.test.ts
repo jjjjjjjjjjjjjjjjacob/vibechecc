@@ -37,7 +37,7 @@ describe('Vibes Mutations', () => {
         userId: mockIdentity.subject,
       });
       const createdVibe = allVibesByCreator.find(
-        (v: any) =>
+        (v: { title?: string; description?: string; createdById?: string }) =>
           v.title === mockVibeData.title &&
           v.description === mockVibeData.description &&
           v.createdById === mockIdentity.subject
@@ -82,7 +82,7 @@ describe('Vibes Mutations', () => {
         userId: mockIdentity.subject,
       });
       const createdVibe = allVibesByCreator.find(
-        (v: any) => v.title === mockVibeDataMinimal.title
+        (v: { title?: string }) => v.title === mockVibeDataMinimal.title
       );
 
       expect(createdVibe).toBeDefined();
@@ -137,7 +137,7 @@ describe('Vibes Mutations', () => {
         userId: mockIdentity.subject,
       });
       const createdVibe = createdVibes.find(
-        (v: any) => v.title === vibeData.title
+        (v: { title?: string; id?: string }) => v.title === vibeData.title
       );
 
       expect(createdVibe).toBeDefined();

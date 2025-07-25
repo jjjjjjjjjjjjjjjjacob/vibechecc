@@ -23,18 +23,21 @@ These rules override default AI behavior when working on this codebase.
 ## Development Workflow
 
 ### Before Making Changes
+
 1. Read relevant README files in affected directories
 2. Check `.agent/docs/*-learnings.md` for workspace-specific insights
 3. Understand existing patterns by examining neighboring code
 4. Use the TodoWrite tool for any multi-step tasks
 
 ### During Development
+
 1. Mark todos as in_progress before starting work
 2. Only have one todo in_progress at a time
 3. Complete current tasks before starting new ones
 4. Update task status in real-time
 
 ### After Completing Tasks
+
 1. Mark todos as completed immediately
 2. Update relevant learnings in `.agent/docs/`
 3. Run quality checks (`bun run quality`)
@@ -45,16 +48,17 @@ These rules override default AI behavior when working on this codebase.
 ### Naming Conventions
 
 #### File Names
+
 - **kebab-case** for all file names: `user-profile.tsx`, `search-utils.ts`, `vibe-card.tsx`
 - Test files: `[name].test.ts` or `[name].test.tsx`
 - NO underscores, NO camelCase in file names
 
 #### TypeScript/JavaScript
+
 - **camelCase** for:
   - Variable names: `const userName = 'John'`
   - Function names (non-components): `function getUserData() {}`
   - Object properties: `{ firstName: 'John', lastName: 'Doe' }`
-  
 - **PascalCase** for:
   - React components: `function UserProfile() {}`
   - Classes: `class UserService {}`
@@ -66,6 +70,7 @@ These rules override default AI behavior when working on this codebase.
   - Environment variables: `process.env.DATABASE_URL`
 
 ### UI Design Style
+
 - **Lowercase text** throughout the UI (buttons, labels, headers)
   - Button: "save changes" NOT "Save Changes"
   - Headers: "user profile" NOT "User Profile"
@@ -73,32 +78,36 @@ These rules override default AI behavior when working on this codebase.
 - Exception: Proper nouns and user-generated content maintain their casing
 
 ### Import Rules
+
 - **shadcn/ui components** can ONLY be imported in `apps/web/` directory
   - Reason: Only `apps/web/components.json` exists
   - Example: `import { Button } from '@/components/ui/button'`
   - NEVER attempt to use shadcn imports in other workspaces
 
 ### General
+
 - NO COMMENTS unless explicitly requested
 - Prefer existing utility functions over creating new ones
 - Match indentation of surrounding code (2 spaces for TS/JS/JSON)
 
 ### Frontend (apps/web)
+
 - Use shadcn/ui components when available
 - Follow TanStack Start routing conventions
 - Place feature-specific code in `src/features/`
 - Use Convex hooks from `src/queries.ts`
 - Component structure:
+
   ```typescript
   // Imports first
   import { useState } from 'react'
   import { Button } from '@/components/ui/button'
-  
+
   // Types/interfaces
   interface UserCardProps {
     user: User
   }
-  
+
   // Component definition
   export function UserCard({ user }: UserCardProps) {
     return <div>...</div>
@@ -106,21 +115,23 @@ These rules override default AI behavior when working on this codebase.
   ```
 
 ### Backend (apps/convex)
+
 - Prefer indexes over filters for queries
 - Include proper authentication checks
 - Follow Convex function naming patterns
 - Keep functions focused and single-purpose
 - Function organization:
+
   ```typescript
   // Queries
   export const getUser = query({...})
-  
+
   // Mutations
   export const updateUser = mutation({...})
-  
+
   // Actions
   export const syncUser = action({...})
-  
+
   // Internal mutations
   export const internalUpdateUser = internalMutation({...})
   ```

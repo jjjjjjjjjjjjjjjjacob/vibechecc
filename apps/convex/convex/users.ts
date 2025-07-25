@@ -17,7 +17,7 @@ async function userByExternalId(
 ) {
   return await ctx.db
     .query('users')
-    .filter((q) => q.eq(q.field('externalId'), externalId))
+    .withIndex('byExternalId', (q) => q.eq('externalId', externalId))
     .first();
 }
 

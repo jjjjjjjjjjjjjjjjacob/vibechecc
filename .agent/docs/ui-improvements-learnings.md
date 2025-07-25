@@ -3,6 +3,7 @@
 ## Recent Component Updates
 
 ### EmojiRatingDisplay Simplification
+
 **When to reference**: Working with rating display components
 **Date**: 2024-01
 
@@ -12,6 +13,7 @@
 - Simplifies component API and reduces code complexity
 
 **Migration pattern**:
+
 ```tsx
 // Before
 <EmojiRatingDisplay rating={rating} mode="compact" showScale={true} />
@@ -21,6 +23,7 @@
 ```
 
 ### Accordion for Long Lists
+
 **When to reference**: Displaying more than 3 items in a list
 **Date**: 2024-01
 
@@ -29,24 +32,36 @@
 - Provides better UX for long lists without overwhelming the UI
 
 **Implementation pattern**:
-```tsx
-{/* First 3 items always visible */}
-{items.slice(0, 3).map(item => <Item key={item.id} />)}
 
-{/* Accordion for remaining items */}
-{items.length > 3 && (
-  <Accordion type="single" collapsible>
-    <AccordionItem value="more">
-      <AccordionTrigger>{items.length - 3} more</AccordionTrigger>
-      <AccordionContent>
-        {items.slice(3).map(item => <Item key={item.id} />)}
-      </AccordionContent>
-    </AccordionItem>
-  </Accordion>
-)}
+```tsx
+{
+  /* First 3 items always visible */
+}
+{
+  items.slice(0, 3).map((item) => <Item key={item.id} />);
+}
+
+{
+  /* Accordion for remaining items */
+}
+{
+  items.length > 3 && (
+    <Accordion type="single" collapsible>
+      <AccordionItem value="more">
+        <AccordionTrigger>{items.length - 3} more</AccordionTrigger>
+        <AccordionContent>
+          {items.slice(3).map((item) => (
+            <Item key={item.id} />
+          ))}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}
 ```
 
 ### CSS Animation Requirements
+
 **When to reference**: Using Radix UI accordion components
 
 - Must include accordion animations in CSS for smooth transitions
@@ -54,13 +69,21 @@
 
 ```css
 @keyframes accordion-down {
-  from { height: 0; }
-  to { height: var(--radix-accordion-content-height); }
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
 }
 
 @keyframes accordion-up {
-  from { height: var(--radix-accordion-content-height); }
-  to { height: 0; }
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
 }
 
 .animate-accordion-down {
@@ -75,6 +98,7 @@
 ## Testing Considerations
 
 ### Component Prop Changes
+
 **When to reference**: Updating tests after component API changes
 
 - Remove references to deprecated props in tests
@@ -84,6 +108,7 @@
 ## Code Quality
 
 ### Simplification Benefits
+
 - Reduced component complexity
 - Cleaner API surface
 - Easier to maintain and test
