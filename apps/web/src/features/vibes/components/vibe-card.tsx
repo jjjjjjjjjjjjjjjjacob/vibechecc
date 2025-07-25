@@ -372,7 +372,7 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
                 />
               </div>
             )}
-            
+
             {/* Emoji Reactions */}
             <div className="w-full">
               <EmojiReactions

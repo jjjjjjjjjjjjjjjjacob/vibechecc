@@ -99,7 +99,7 @@ export function EmojiSearchCommand({
       <CommandList className={maxHeight}>
         <ScrollArea ref={scrollAreaRef} onScroll={handleScroll}>
           <CommandEmpty>no emojis found.</CommandEmpty>
-          
+
           {!searchValue && popularData.length > 0 && (
             <CommandGroup heading="popular">
               <div className="grid grid-cols-6 gap-2 p-2">
@@ -142,7 +142,8 @@ export function EmojiSearchCommand({
             </CommandGroup>
           )}
 
-          {showCategories && groupedEmojis && 
+          {showCategories &&
+            groupedEmojis &&
             Object.entries(groupedEmojis).map(([category, emojis]) => (
               <CommandGroup key={category} heading={category}>
                 <div className="grid grid-cols-6 gap-2 p-2">
@@ -162,8 +163,7 @@ export function EmojiSearchCommand({
                   ))}
                 </div>
               </CommandGroup>
-            ))
-          }
+            ))}
         </ScrollArea>
       </CommandList>
     </Command>

@@ -1,6 +1,10 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import { getEmojiColor, getEmojiSentiment, getEmojiTags } from './lib/emojiColors';
+import {
+  getEmojiColor,
+  getEmojiSentiment,
+  getEmojiTags,
+} from './lib/emojiColors';
 
 // Import emoji batch (public endpoint for seeding)
 export const importBatch = mutation({
@@ -32,9 +36,13 @@ export const importBatch = mutation({
           emojiData.keywords,
           emojiData.category
         );
-        
+
         const sentiment = getEmojiSentiment(emojiData.name, emojiData.keywords);
-        const tags = getEmojiTags(emojiData.name, emojiData.keywords, emojiData.category);
+        const tags = getEmojiTags(
+          emojiData.name,
+          emojiData.keywords,
+          emojiData.category
+        );
 
         await ctx.db.insert('emojis', {
           emoji: emojiData.emoji,
@@ -135,15 +143,26 @@ export const getPopular = query({
   handler: async (ctx, { limit = 20 }) => {
     // For now, return a curated list of popular emojis
     // In the future, this could be based on usage statistics
-    const popularEmojis = ['🔥', '😍', '💯', '😂', '🤩', '😎', '🥺', '😭', '💀', '🙈'];
-    
+    const popularEmojis = [
+      '🔥',
+      '😍',
+      '💯',
+      '😂',
+      '🤩',
+      '😎',
+      '🥺',
+      '😭',
+      '💀',
+      '🙈',
+    ];
+
     const results = [];
     for (const emoji of popularEmojis) {
       const emojiData = await ctx.db
         .query('emojis')
         .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
         .first();
-      
+
       if (emojiData) {
         results.push(emojiData);
       }

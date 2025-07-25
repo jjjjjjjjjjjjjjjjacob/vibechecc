@@ -71,4 +71,3 @@ export function EmojiRatingDisplayPopover({
     </Popover>
   );
 }
-

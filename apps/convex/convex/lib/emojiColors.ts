@@ -250,4 +250,3 @@ export function getEmojiTags(
 
   return Array.from(tags);
 }
-

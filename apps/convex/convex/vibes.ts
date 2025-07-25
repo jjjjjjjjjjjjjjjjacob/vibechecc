@@ -176,9 +176,7 @@ export const getUserRatedVibes = query({
       .collect();
 
     // Get unique vibe IDs that the user has rated
-    const ratedVibeIds = Array.from(
-      new Set(userRatings.map((r) => r.vibeId))
-    );
+    const ratedVibeIds = Array.from(new Set(userRatings.map((r) => r.vibeId)));
 
     // Get the vibes for those IDs
     const vibes = await Promise.all(
@@ -440,7 +438,9 @@ export const quickReact = mutation({
 
     if (existingRating) {
       // User already rated, can't quick react
-      throw new Error('You have already rated this vibe. Update your existing rating instead.');
+      throw new Error(
+        'You have already rated this vibe. Update your existing rating instead.'
+      );
     }
 
     // Determine default value based on emoji sentiment
@@ -807,7 +807,7 @@ export const getTopRatedByEmoji = query({
     // Get ratings with the specified emoji
     const emojiRatings = await ctx.db
       .query('ratings')
-      .filter((q) => 
+      .filter((q) =>
         q.and(
           q.eq(q.field('emoji'), args.emoji),
           q.gte(q.field('value'), args.minValue)
@@ -892,4 +892,3 @@ export const getTopRatedByEmoji = query({
     return vibes.filter((v) => v !== null);
   },
 });
-

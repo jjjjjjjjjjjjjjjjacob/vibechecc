@@ -138,14 +138,14 @@ export function RatingPopover({
               </TabsList>
               <TabsContent value="simple" className="space-y-2">
                 <div className="flex items-center gap-4">
-                  <StarRating 
-                    value={rating} 
-                    onChange={(value) => setRating(Math.round(value))} 
-                    size="lg" 
+                  <StarRating
+                    value={rating}
+                    onChange={(value) => setRating(Math.round(value))}
+                    size="lg"
                   />
                   <span className="text-muted-foreground text-sm">
                     {rating > 0
-                      ? rating % 1 === 0 
+                      ? rating % 1 === 0
                         ? `${rating} circle${rating === 1 ? '' : 's'}`
                         : `${rating.toFixed(1)} circles`
                       : 'Select rating'}

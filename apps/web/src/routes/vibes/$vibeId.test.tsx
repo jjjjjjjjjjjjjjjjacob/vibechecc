@@ -289,5 +289,4 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
       ).toBeInTheDocument();
     });
   });
-
 });

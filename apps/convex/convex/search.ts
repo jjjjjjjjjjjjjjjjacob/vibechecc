@@ -263,20 +263,21 @@ export const searchAll = query({
             // Apply emoji rating filter
             if (mergedFilters.emojiRatings && passesFilters) {
               const { emojis, minValue } = mergedFilters.emojiRatings;
-              
+
               if (emojis && emojis.length > 0) {
                 // Get emoji ratings for this vibe
                 const emojiRatings = await ctx.db
                   .query('emojiRatings')
                   .withIndex('byVibe', (q) => q.eq('vibeId', vibe.id))
                   .collect();
-                
+
                 // Check if vibe has any of the specified emojis
-                const hasMatchingEmoji = emojiRatings.some(er => 
-                  emojis.includes(er.emoji) &&
-                  (minValue === undefined || er.value >= minValue)
+                const hasMatchingEmoji = emojiRatings.some(
+                  (er) =>
+                    emojis.includes(er.emoji) &&
+                    (minValue === undefined || er.value >= minValue)
                 );
-                
+
                 if (!hasMatchingEmoji) {
                   passesFilters = false;
                 }
@@ -286,9 +287,11 @@ export const searchAll = query({
                   .query('emojiRatings')
                   .withIndex('byVibe', (q) => q.eq('vibeId', vibe.id))
                   .collect();
-                
-                const hasHighRating = emojiRatings.some(er => er.value >= minValue);
-                
+
+                const hasHighRating = emojiRatings.some(
+                  (er) => er.value >= minValue
+                );
+
                 if (!hasHighRating) {
                   passesFilters = false;
                 }

@@ -1109,4 +1109,3 @@ export const activityEmojis: Omit<Emoji, 'sentiment'>[] = [
     tags: ['matryoshka', 'russian', 'dolls'],
   },
 ];
-

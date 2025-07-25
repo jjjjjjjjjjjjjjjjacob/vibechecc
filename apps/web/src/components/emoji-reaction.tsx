@@ -132,7 +132,6 @@ function HorizontalEmojiPicker({
   const popularData = popularEmojis?.data || [];
   const searchData = searchResults?.data || { emojis: [] };
 
-
   // Get suggested emojis from popular ones
   const suggestedEmojis = React.useMemo(() => {
     return popularData.slice(0, 6);
@@ -209,8 +208,6 @@ function HorizontalEmojiPicker({
       setShowSearchResults(false);
     }
   }, [open]);
-
-
 
   const horizontalPicker = (
     <div className="space-y-0">

@@ -106,7 +106,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['call-me', 'shaka', 'chill'],
   },
-  
+
   // Pointing hands
   {
     emoji: '👈',
@@ -156,7 +156,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['one', 'pointing', 'up'],
   },
-  
+
   // Thumbs
   {
     emoji: '👍',
@@ -174,7 +174,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['disapproval', 'dislike', 'no'],
   },
-  
+
   // Fists and clapping
   {
     emoji: '👊',
@@ -240,7 +240,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['prayer', 'thanks', 'please'],
   },
-  
+
   // Writing hands
   {
     emoji: '✍️',
@@ -250,7 +250,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['writing', 'signing', 'pen'],
   },
-  
+
   // Body parts
   {
     emoji: '💅',
@@ -268,7 +268,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['selfie', 'photo', 'camera'],
   },
-  
+
   // Muscles
   {
     emoji: '💪',
@@ -278,7 +278,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['strength', 'muscle', 'power'],
   },
-  
+
   // Legs and feet
   {
     emoji: '🦵',
@@ -296,7 +296,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['foot', 'step', 'walk'],
   },
-  
+
   // Ears and sensory
   {
     emoji: '👂',
@@ -322,7 +322,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['nose', 'smell', 'scent'],
   },
-  
+
   // Internal organs
   {
     emoji: '🧠',
@@ -364,7 +364,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#F5F5F5',
     tags: ['bone', 'skeleton', 'anatomy'],
   },
-  
+
   // Eyes
   {
     emoji: '👀',
@@ -382,7 +382,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#4169E1',
     tags: ['eye', 'seeing', 'watching'],
   },
-  
+
   // Mouth
   {
     emoji: '👅',
@@ -400,7 +400,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#DC143C',
     tags: ['lips', 'kiss', 'mouth'],
   },
-  
+
   // People
   {
     emoji: '👶',
@@ -610,7 +610,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#D3D3D3',
     tags: ['elderly', 'grandmother', 'old'],
   },
-  
+
   // Gestures
   {
     emoji: '🙍',
@@ -852,7 +852,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#DDA0DD',
     tags: ['shrug', 'woman', 'confused'],
   },
-  
+
   // Professions
   {
     emoji: '🧑‍⚕️',
@@ -1486,7 +1486,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FDBCB4',
     tags: ['feeding', 'baby', 'parent'],
   },
-  
+
   // Fantasy characters
   {
     emoji: '👼',
@@ -1736,7 +1736,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#556B2F',
     tags: ['zombie', 'woman', 'undead'],
   },
-  
+
   // Activities
   {
     emoji: '💆',
@@ -2050,7 +2050,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#696969',
     tags: ['climbing', 'woman', 'sport'],
   },
-  
+
   // Sports people
   {
     emoji: '🤺',
@@ -2396,7 +2396,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FFD700',
     tags: ['juggling', 'woman', 'circus'],
   },
-  
+
   // Yoga and meditation
   {
     emoji: '🧘',
@@ -2422,7 +2422,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#DDA0DD',
     tags: ['yoga', 'woman', 'meditation'],
   },
-  
+
   // Couple and family
   {
     emoji: '👫',
@@ -2704,7 +2704,7 @@ export const peopleEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FFD700',
     tags: ['family', 'mother', 'daughters'],
   },
-  
+
   // Speech bubble
   {
     emoji: '🗣️',

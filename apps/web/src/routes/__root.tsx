@@ -238,10 +238,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={cn('font-sans')}
-    >
+    <html lang="en" className={cn('font-sans')}>
       <head>
         <HeadContent />
       </head>

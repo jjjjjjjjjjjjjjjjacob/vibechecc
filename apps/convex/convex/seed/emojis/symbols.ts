@@ -2255,4 +2255,3 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     tags: ['eject', 'remove', 'button'],
   },
 ];
-

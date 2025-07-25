@@ -113,7 +113,11 @@ export function EmojiRatingScale({
                 ? 'font-noto bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text whitespace-pre text-transparent transition-all group-active/rating-display:brightness-150'
                 : 'font-noto-color whitespace-pre'
             )}
-            style={preset === 'color' && emojiColor ? { color: emojiColor } : undefined}
+            style={
+              preset === 'color' && emojiColor
+                ? { color: emojiColor }
+                : undefined
+            }
           >
             {[...Array(5)].map((_, i) => (
               <span key={`filled-${i}`}>{emoji}</span>

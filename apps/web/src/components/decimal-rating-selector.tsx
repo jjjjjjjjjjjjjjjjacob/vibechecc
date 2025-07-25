@@ -52,10 +52,8 @@ export function DecimalRatingSelector({
 
   return (
     <div className={cn('space-y-3', className)}>
-      {label && (
-        <Label className="text-sm font-medium">{label}</Label>
-      )}
-      
+      {label && <Label className="text-sm font-medium">{label}</Label>}
+
       {showStars && (
         <div className="flex justify-center">
           <StarRating
@@ -79,7 +77,7 @@ export function DecimalRatingSelector({
             step={step}
             className="w-full"
           />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+          <div className="text-muted-foreground mt-1 flex justify-between text-xs">
             <span>{min}</span>
             <span>{max}</span>
           </div>
@@ -98,7 +96,7 @@ export function DecimalRatingSelector({
             step={step}
             className="w-20 text-center"
           />
-          <span className="text-sm text-muted-foreground">out of {max}</span>
+          <span className="text-muted-foreground text-sm">out of {max}</span>
         </div>
       )}
     </div>

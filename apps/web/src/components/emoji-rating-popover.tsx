@@ -59,12 +59,15 @@ export function EmojiRatingPopover({
 }: EmojiRatingPopoverProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
-  const setOpen = React.useCallback((newOpen: boolean) => {
-    if (controlledOpen === undefined) {
-      setUncontrolledOpen(newOpen);
-    }
-    onOpenChange?.(newOpen);
-  }, [controlledOpen, onOpenChange]);
+  const setOpen = React.useCallback(
+    (newOpen: boolean) => {
+      if (controlledOpen === undefined) {
+        setUncontrolledOpen(newOpen);
+      }
+      onOpenChange?.(newOpen);
+    },
+    [controlledOpen, onOpenChange]
+  );
   const [selectedEmoji, setSelectedEmoji] = React.useState(
     preSelectedEmoji || existingRating?.emoji || ''
   );

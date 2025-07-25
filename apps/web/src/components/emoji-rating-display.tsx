@@ -125,7 +125,7 @@ export function TopEmojiRatings({
   const displayRatings = expanded ? emojiRatings : emojiRatings.slice(0, 3);
 
   // Fetch emoji metadata for colors
-  const emojis = displayRatings.map(r => r.emoji);
+  const emojis = displayRatings.map((r) => r.emoji);
   const emojiDataQuery = useQuery(
     convexQuery(api.emojis.getByEmojis, { emojis }),
     { enabled: emojis.length > 0 }
@@ -183,4 +183,3 @@ export function TopEmojiRatings({
     </div>
   );
 }
-

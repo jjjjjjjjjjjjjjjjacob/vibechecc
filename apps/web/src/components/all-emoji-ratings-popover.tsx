@@ -39,7 +39,7 @@ export function AllEmojiRatingsPopover({
   vibeId,
 }: AllEmojiRatingsPopoverProps) {
   const isExtraLarge = useMediaQuery('(min-width: 1280px)');
-  
+
   const content = (
     <>
       <ScrollArea className="max-h-[300px] overflow-y-auto p-4">
@@ -52,8 +52,8 @@ export function AllEmojiRatingsPopover({
       {vibeId && (
         <div className="border-t p-4">
           <Link to="/vibes/$vibeId" params={{ vibeId }}>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full justify-between"
               onClick={() => onOpenChange?.(false)}
             >
@@ -65,7 +65,7 @@ export function AllEmojiRatingsPopover({
       )}
     </>
   );
-  
+
   if (isExtraLarge) {
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
@@ -88,7 +88,7 @@ export function AllEmojiRatingsPopover({
       </Popover>
     );
   }
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -101,4 +101,3 @@ export function AllEmojiRatingsPopover({
     </Dialog>
   );
 }
-

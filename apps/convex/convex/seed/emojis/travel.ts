@@ -1721,4 +1721,3 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     tags: ['comet', 'space', 'shooting'],
   },
 ];
-

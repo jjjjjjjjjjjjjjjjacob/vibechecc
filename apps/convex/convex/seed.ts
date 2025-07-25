@@ -29,23 +29,42 @@ const allEmojis = [
 // Helper function to determine sentiment based on emoji characteristics
 function getSentiment(emoji: Omit<Emoji, 'sentiment'>): Emoji['sentiment'] {
   const { name, keywords, tags } = emoji;
-  const text = `${name} ${keywords.join(' ')} ${(tags || []).join(' ')}`.toLowerCase();
-  
+  const text =
+    `${name} ${keywords.join(' ')} ${(tags || []).join(' ')}`.toLowerCase();
+
   // Positive indicators
-  if (text.includes('smile') || text.includes('happy') || text.includes('joy') || 
-      text.includes('love') || text.includes('heart') || text.includes('star') ||
-      text.includes('celebrate') || text.includes('party') || text.includes('win') ||
-      text.includes('success') || text.includes('thumbs up') || text.includes('good')) {
+  if (
+    text.includes('smile') ||
+    text.includes('happy') ||
+    text.includes('joy') ||
+    text.includes('love') ||
+    text.includes('heart') ||
+    text.includes('star') ||
+    text.includes('celebrate') ||
+    text.includes('party') ||
+    text.includes('win') ||
+    text.includes('success') ||
+    text.includes('thumbs up') ||
+    text.includes('good')
+  ) {
     return 'positive';
   }
-  
+
   // Negative indicators
-  if (text.includes('sad') || text.includes('cry') || text.includes('angry') || 
-      text.includes('fear') || text.includes('sick') || text.includes('dead') ||
-      text.includes('thumbs down') || text.includes('bad') || text.includes('hate')) {
+  if (
+    text.includes('sad') ||
+    text.includes('cry') ||
+    text.includes('angry') ||
+    text.includes('fear') ||
+    text.includes('sick') ||
+    text.includes('dead') ||
+    text.includes('thumbs down') ||
+    text.includes('bad') ||
+    text.includes('hate')
+  ) {
     return 'negative';
   }
-  
+
   // Default to neutral
   return 'neutral';
 }
@@ -67,15 +86,15 @@ export const seed = action({
 
       // Step 3: Create users (20 for good development data)
       console.log('Step 3: Creating users...');
-      const userResult = await ctx.runMutation(internal.seed.seedUsers, { 
-        count: 20 
+      const userResult = await ctx.runMutation(internal.seed.seedUsers, {
+        count: 20,
       });
       console.log(`Created ${userResult.count} users`);
 
       // Step 4: Create vibes (25 for variety)
       console.log('Step 4: Creating vibes...');
-      const vibeResult = await ctx.runMutation(internal.seed.seedVibes, { 
-        count: 25 
+      const vibeResult = await ctx.runMutation(internal.seed.seedVibes, {
+        count: 25,
       });
       console.log(`Created ${vibeResult.count} vibes`);
 
@@ -93,7 +112,9 @@ export const seed = action({
 
       // Step 7: Create search metrics
       console.log('Step 7: Creating search metrics...');
-      const metricsResult = await ctx.runMutation(internal.seed.seedSearchMetrics);
+      const metricsResult = await ctx.runMutation(
+        internal.seed.seedSearchMetrics
+      );
       console.log(`Created ${metricsResult.count} search metrics`);
 
       return {
@@ -144,18 +165,18 @@ export const clearAllData = internalMutation({
 export const seedEmojis = internalMutation({
   handler: async (ctx) => {
     let count = 0;
-    
+
     for (const emojiData of allEmojis) {
       // Add sentiment to the emoji data
       const completeEmoji: Emoji = {
         ...emojiData,
         sentiment: getSentiment(emojiData),
       };
-      
+
       await ctx.db.insert('emojis', completeEmoji);
       count++;
     }
-    
+
     return { count };
   },
 });
@@ -322,8 +343,10 @@ export const seedUsers = internalMutation({
         onboardingCompleted: true,
         created_at: Date.now(),
         updated_at: Date.now(),
-        last_sign_in_at: Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000),
-        last_active_at: Date.now() - Math.floor(Math.random() * 24 * 60 * 60 * 1000),
+        last_sign_in_at:
+          Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000),
+        last_active_at:
+          Date.now() - Math.floor(Math.random() * 24 * 60 * 60 * 1000),
       });
 
       createdUsers.push({ id: userId, ...profile });
@@ -337,102 +360,122 @@ export const seedUsers = internalMutation({
 const vibeTemplates = [
   {
     title: 'just discovered the perfect coffee shop',
-    description: 'hidden gem downtown with amazing espresso and the coziest reading nook. they have plants everywhere and play lo-fi hip hop. already planning my next visit',
+    description:
+      'hidden gem downtown with amazing espresso and the coziest reading nook. they have plants everywhere and play lo-fi hip hop. already planning my next visit',
     tags: ['coffee', 'cozy', 'discovery', 'relaxation'],
   },
   {
     title: 'finally finished that project',
-    description: 'after weeks of late nights and countless revisions, its done. feeling that mix of exhaustion and pure satisfaction. time to celebrate',
+    description:
+      'after weeks of late nights and countless revisions, its done. feeling that mix of exhaustion and pure satisfaction. time to celebrate',
     tags: ['achievement', 'work', 'relief', 'success'],
   },
   {
     title: 'unexpected rain during my run',
-    description: 'started as a disaster but ended up being the most refreshing experience. sometimes the best moments are unplanned',
+    description:
+      'started as a disaster but ended up being the most refreshing experience. sometimes the best moments are unplanned',
     tags: ['running', 'rain', 'spontaneous', 'exercise'],
   },
   {
     title: 'cooking dinner for friends',
-    description: 'trying a new recipe and hoping it turns out edible. kitchen smells amazing though. fingers crossed',
+    description:
+      'trying a new recipe and hoping it turns out edible. kitchen smells amazing though. fingers crossed',
     tags: ['cooking', 'friends', 'food', 'social'],
   },
   {
     title: 'sunday morning farmers market',
-    description: 'fresh flowers, local honey, and the best strawberries ive ever tasted. love supporting local vendors',
+    description:
+      'fresh flowers, local honey, and the best strawberries ive ever tasted. love supporting local vendors',
     tags: ['farmers market', 'local', 'food', 'weekend'],
   },
   {
     title: 'learning a new skill is humbling',
-    description: 'started pottery classes and everything i make looks like abstract art. but hey, its therapeutic',
+    description:
+      'started pottery classes and everything i make looks like abstract art. but hey, its therapeutic',
     tags: ['learning', 'pottery', 'creative', 'growth'],
   },
   {
     title: 'apartment hunting adventures',
-    description: 'saw 5 places today. one had a bathtub in the kitchen. another had no windows. the search continues',
+    description:
+      'saw 5 places today. one had a bathtub in the kitchen. another had no windows. the search continues',
     tags: ['apartment', 'adulting', 'city life', 'frustration'],
   },
   {
     title: 'reconnected with an old friend',
-    description: 'grabbed lunch and talked for hours like no time had passed. some friendships really do pick up right where they left off',
+    description:
+      'grabbed lunch and talked for hours like no time had passed. some friendships really do pick up right where they left off',
     tags: ['friendship', 'nostalgia', 'connection', 'social'],
   },
   {
     title: 'first day at the new job',
-    description: 'everyone seems nice, got lost twice trying to find the bathroom, and already have impostor syndrome. typical first day vibes',
+    description:
+      'everyone seems nice, got lost twice trying to find the bathroom, and already have impostor syndrome. typical first day vibes',
     tags: ['work', 'new job', 'nervous', 'career'],
   },
   {
     title: 'tried meditation for the first time',
-    description: 'spent 10 minutes thinking about my grocery list. apparently thats normal. going to keep at it',
+    description:
+      'spent 10 minutes thinking about my grocery list. apparently thats normal. going to keep at it',
     tags: ['meditation', 'wellness', 'mindfulness', 'self-care'],
   },
   {
     title: 'plant parent struggles',
-    description: 'my succulent is dying and its supposed to be impossible to kill. starting to question my nurturing abilities',
+    description:
+      'my succulent is dying and its supposed to be impossible to kill. starting to question my nurturing abilities',
     tags: ['plants', 'home', 'struggle', 'humor'],
   },
   {
     title: 'concert last night was incredible',
-    description: 'ears still ringing but soul is full. live music hits different. already looking for the next show',
+    description:
+      'ears still ringing but soul is full. live music hits different. already looking for the next show',
     tags: ['music', 'concert', 'nightlife', 'entertainment'],
   },
   {
     title: 'working from a cafe today',
-    description: 'change of scenery doing wonders for productivity. plus the background noise is oddly focusing',
+    description:
+      'change of scenery doing wonders for productivity. plus the background noise is oddly focusing',
     tags: ['remote work', 'cafe', 'productivity', 'work'],
   },
   {
     title: 'started reading again',
-    description: 'forgot how much i missed getting lost in a good book. already on chapter 5 and cant put it down',
+    description:
+      'forgot how much i missed getting lost in a good book. already on chapter 5 and cant put it down',
     tags: ['reading', 'books', 'hobby', 'relaxation'],
   },
   {
     title: 'weekend road trip vibes',
-    description: 'no destination in mind, just good music and open roads. sometimes the journey really is the destination',
+    description:
+      'no destination in mind, just good music and open roads. sometimes the journey really is the destination',
     tags: ['travel', 'road trip', 'adventure', 'spontaneous'],
   },
   {
     title: 'trying to adult but failing',
-    description: 'ate cereal for dinner three nights in a row. at least im consistent',
+    description:
+      'ate cereal for dinner three nights in a row. at least im consistent',
     tags: ['adulting', 'food', 'humor', 'relatable'],
   },
   {
     title: 'neighborhood cat adopted me',
-    description: 'shows up every morning for pets and treats. guess im a cat person now',
+    description:
+      'shows up every morning for pets and treats. guess im a cat person now',
     tags: ['cats', 'pets', 'cute', 'daily life'],
   },
   {
     title: 'cleaned my entire apartment',
-    description: 'found things i forgot i owned. feeling like a whole new person in this organized space',
+    description:
+      'found things i forgot i owned. feeling like a whole new person in this organized space',
     tags: ['cleaning', 'organization', 'home', 'productivity'],
   },
   {
     title: 'sunset from my balcony tonight',
-    description: 'sky looked like a painting. moments like these make city living worth it',
+    description:
+      'sky looked like a painting. moments like these make city living worth it',
     tags: ['sunset', 'nature', 'beauty', 'mindfulness'],
   },
   {
     title: 'group project flashbacks',
-    description: 'why do i always end up doing 90% of the work. some things never change',
+    description:
+      'why do i always end up doing 90% of the work. some things never change',
     tags: ['work', 'teamwork', 'frustration', 'relatable'],
   },
   {
@@ -442,12 +485,14 @@ const vibeTemplates = [
   },
   {
     title: 'meal prep sunday',
-    description: 'future me will thank current me. or get bored of chicken and rice by wednesday',
+    description:
+      'future me will thank current me. or get bored of chicken and rice by wednesday',
     tags: ['meal prep', 'healthy', 'planning', 'food'],
   },
   {
     title: 'vintage shopping finds',
-    description: 'scored the perfect denim jacket for $15. thrift stores are treasure troves',
+    description:
+      'scored the perfect denim jacket for $15. thrift stores are treasure troves',
     tags: ['shopping', 'vintage', 'fashion', 'deals'],
   },
   {
@@ -457,7 +502,8 @@ const vibeTemplates = [
   },
   {
     title: 'late night thoughts',
-    description: 'why did i say that awkward thing 5 years ago. brain please let me sleep',
+    description:
+      'why did i say that awkward thing 5 years ago. brain please let me sleep',
     tags: ['anxiety', 'night', 'overthinking', 'relatable'],
   },
 ];
@@ -477,17 +523,23 @@ export const seedVibes = internalMutation({
     for (const template of vibesToCreate) {
       const randomUser = users[Math.floor(Math.random() * users.length)];
       const vibeId = nanoid();
-      
+
       await ctx.db.insert('vibes', {
         id: vibeId,
         title: template.title,
         description: template.description,
         tags: template.tags,
         createdById: randomUser._id,
-        createdAt: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString(),
+        createdAt: new Date(
+          Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)
+        ).toISOString(),
       });
 
-      createdVibes.push({ id: vibeId, ...template, createdById: randomUser._id });
+      createdVibes.push({
+        id: vibeId,
+        ...template,
+        createdById: randomUser._id,
+      });
     }
 
     return { count: createdVibes.length, vibes: createdVibes };
@@ -499,7 +551,7 @@ export const seedRatings = internalMutation({
   handler: async (ctx) => {
     const users = await ctx.db.query('users').collect();
     const vibes = await ctx.db.query('vibes').collect();
-    
+
     if (users.length === 0 || vibes.length === 0) {
       throw new Error('No users or vibes found. Please seed them first.');
     }
@@ -527,21 +579,34 @@ export const seedRatings = internalMutation({
       'vibing with this heavy',
     ];
 
-    const ratingEmojis = ['😊', '😂', '❤️', '🔥', '✨', '💯', '🙌', '👏', '💪', '🎯'];
+    const ratingEmojis = [
+      '😊',
+      '😂',
+      '❤️',
+      '🔥',
+      '✨',
+      '💯',
+      '🙌',
+      '👏',
+      '💪',
+      '🎯',
+    ];
     let totalRatings = 0;
 
     for (const vibe of vibes) {
       // Create 3-8 ratings per vibe
       const ratingCount = Math.floor(Math.random() * 6) + 3;
       const raters = [...users]
-        .filter(user => user._id !== vibe.createdById)
+        .filter((user) => user._id !== vibe.createdById)
         .sort(() => 0.5 - Math.random())
         .slice(0, ratingCount);
 
       for (const rater of raters) {
-        const emoji = ratingEmojis[Math.floor(Math.random() * ratingEmojis.length)];
+        const emoji =
+          ratingEmojis[Math.floor(Math.random() * ratingEmojis.length)];
         const value = Math.floor(Math.random() * 2) + 4; // 4-5 stars mostly
-        const review = reviewTemplates[Math.floor(Math.random() * reviewTemplates.length)];
+        const review =
+          reviewTemplates[Math.floor(Math.random() * reviewTemplates.length)];
 
         await ctx.db.insert('ratings', {
           vibeId: vibe.id,
@@ -549,9 +614,11 @@ export const seedRatings = internalMutation({
           emoji: emoji,
           value: value,
           review: review,
-          createdAt: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString(),
+          createdAt: new Date(
+            Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+          ).toISOString(),
         });
-        
+
         totalRatings++;
       }
     }
@@ -585,7 +652,8 @@ export const seedSearchData = internalMutation({
     for (const trending of trendingTerms) {
       await ctx.db.insert('trendingSearches', {
         ...trending,
-        lastUpdated: Date.now() - Math.floor(Math.random() * 24 * 60 * 60 * 1000),
+        lastUpdated:
+          Date.now() - Math.floor(Math.random() * 24 * 60 * 60 * 1000),
       });
     }
 
@@ -604,27 +672,32 @@ export const seedSearchData = internalMutation({
     ];
 
     const users = await ctx.db.query('users').collect();
-    const activeUsers = [...users].sort(() => 0.5 - Math.random()).slice(0, Math.min(10, users.length));
+    const activeUsers = [...users]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, Math.min(10, users.length));
     let searchHistoryCount = 0;
 
     for (const user of activeUsers) {
       const userSearchCount = Math.floor(Math.random() * 5) + 1;
-      const userSearches = [...searchQueries].sort(() => 0.5 - Math.random()).slice(0, userSearchCount);
+      const userSearches = [...searchQueries]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, userSearchCount);
 
       for (const query of userSearches) {
         await ctx.db.insert('searchHistory', {
           userId: user._id,
           query: query,
-          timestamp: Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000),
+          timestamp:
+            Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000),
           resultCount: Math.floor(Math.random() * 20) + 5,
         });
         searchHistoryCount++;
       }
     }
 
-    return { 
-      trending: trendingTerms.length, 
-      searchHistory: searchHistoryCount 
+    return {
+      trending: trendingTerms.length,
+      searchHistory: searchHistoryCount,
     };
   },
 });
@@ -634,30 +707,32 @@ export const seedSearchMetrics = internalMutation({
   handler: async (ctx) => {
     const users = await ctx.db.query('users').collect();
     const vibes = await ctx.db.query('vibes').collect();
-    
+
     let metricsCount = 0;
     const searchQueries = ['coffee', 'work', 'weekend', 'food', 'fitness'];
-    
+
     // Create 50 search metrics
     for (let i = 0; i < 50; i++) {
-      const query = searchQueries[Math.floor(Math.random() * searchQueries.length)];
+      const query =
+        searchQueries[Math.floor(Math.random() * searchQueries.length)];
       const user = users[Math.floor(Math.random() * users.length)];
-      const timestamp = Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000);
-      
+      const timestamp =
+        Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000);
+
       // 80% search, 15% click, 5% error
       const rand = Math.random();
       let type: 'search' | 'click' | 'error';
       if (rand < 0.8) type = 'search';
       else if (rand < 0.95) type = 'click';
       else type = 'error';
-      
+
       const metric: any = {
         timestamp,
         type,
         query,
         userId: user?._id,
       };
-      
+
       if (type === 'search') {
         metric.resultCount = Math.floor(Math.random() * 20) + 1;
         metric.responseTime = Math.floor(Math.random() * 500) + 100;
@@ -669,11 +744,11 @@ export const seedSearchMetrics = internalMutation({
       } else {
         metric.error = 'Search timeout';
       }
-      
+
       await ctx.db.insert('searchMetrics', metric);
       metricsCount++;
     }
-    
+
     return { count: metricsCount };
   },
 });

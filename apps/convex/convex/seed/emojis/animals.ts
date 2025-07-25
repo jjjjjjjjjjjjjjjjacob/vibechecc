@@ -961,4 +961,3 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     tags: ['paws', 'animal', 'tracks'],
   },
 ];
-

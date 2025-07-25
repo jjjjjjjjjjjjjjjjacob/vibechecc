@@ -18,7 +18,7 @@ async function importEmojis() {
 
   try {
     const result = await client.action(api.seed.importEmojis, {
-      emojis: EMOJI_DATABASE.map(emoji => ({
+      emojis: EMOJI_DATABASE.map((emoji) => ({
         emoji: emoji.emoji,
         name: emoji.name,
         keywords: emoji.keywords,

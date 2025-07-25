@@ -54,7 +54,7 @@ export function StarRating({
       const x = event.clientX - rect.left;
       const width = rect.width;
       const percentage = x / width;
-      
+
       // Calculate decimal rating based on click position
       const rawRating = rating - 1 + percentage;
       // Round to nearest step
@@ -68,11 +68,15 @@ export function StarRating({
 
     // Show toast when rating is changed
     if (!readOnly && onChange) {
-      const displayRating = finalRating % 1 === 0 ? finalRating.toString() : finalRating.toFixed(1);
-      toast.success(`rated ${displayRating} circle${finalRating === 1 ? '' : 's'}!`, {
-        duration: 2000,
-        icon: '🎯',
-      });
+      const displayRating =
+        finalRating % 1 === 0 ? finalRating.toString() : finalRating.toFixed(1);
+      toast.success(
+        `rated ${displayRating} circle${finalRating === 1 ? '' : 's'}!`,
+        {
+          duration: 2000,
+          icon: '🎯',
+        }
+      );
     }
   };
 
@@ -120,7 +124,10 @@ export function StarRating({
       onMouseLeave={handleMouseLeave}
     >
       {circles.map((circle, index) => {
-        const fillPercentage = Math.min(100, Math.max(0, (displayValue - (circle - 1)) * 100));
+        const fillPercentage = Math.min(
+          100,
+          Math.max(0, (displayValue - (circle - 1)) * 100)
+        );
         const isFilled = fillPercentage >= 100;
         const isPartiallyFilled = fillPercentage > 0 && fillPercentage < 100;
         const isHovering = hoverValue > 0 && circle <= hoverValue;
@@ -132,7 +139,7 @@ export function StarRating({
             onClick={(e) => handleClick(circle, allowDecimals ? e : undefined)}
             onMouseEnter={() => handleMouseEnter(circle)}
             className={cn(
-              'relative text-muted-foreground transition-colors',
+              'text-muted-foreground relative transition-colors',
               !readOnly && hoverColor,
               readOnly ? 'cursor-default' : 'cursor-pointer',
               (isFilled || isHovering) && activeColor
@@ -170,12 +177,14 @@ export function StarRating({
         );
       })}
       {showValue && (
-        <span className={cn(
-          'ml-1 text-muted-foreground',
-          size === 'sm' && 'text-xs',
-          size === 'md' && 'text-sm',
-          size === 'lg' && 'text-base'
-        )}>
+        <span
+          className={cn(
+            'text-muted-foreground ml-1',
+            size === 'sm' && 'text-xs',
+            size === 'md' && 'text-sm',
+            size === 'lg' && 'text-base'
+          )}
+        >
           {value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)}
         </span>
       )}

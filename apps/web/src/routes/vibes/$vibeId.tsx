@@ -69,7 +69,6 @@ function VibePage() {
   const [showEmojiRatingPopover, setShowEmojiRatingPopover] =
     React.useState(false);
 
-
   // Fetch real emoji rating data
   const { data: topEmojiRatings } = useTopEmojiRatings(vibeId, 5);
   const { data: mostInteractedEmojiData } = useMostInteractedEmoji(vibeId);
@@ -346,7 +345,6 @@ function VibePage() {
     setShowEmojiRatingPopover(true);
   };
 
-
   return (
     <div className="container mx-auto">
       <div className="grid w-full grid-cols-3 gap-8 transition-all duration-300">
@@ -488,7 +486,6 @@ function VibePage() {
               </>
             )}
           </div>
-
 
           {/* Description */}
           <p className="text-muted-foreground mb-8 leading-relaxed">

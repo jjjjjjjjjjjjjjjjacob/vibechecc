@@ -1,10 +1,7 @@
 /// <reference lib="dom" />
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import {
-  EmojiRatingDisplay,
-  TopEmojiRatings,
-} from './emoji-rating-display';
+import { EmojiRatingDisplay, TopEmojiRatings } from './emoji-rating-display';
 import type { EmojiRating } from '@vibechecc/types';
 
 describe('EmojiRatingDisplay', () => {
@@ -24,9 +21,7 @@ describe('EmojiRatingDisplay', () => {
   });
 
   it('renders with scale when showScale is true', () => {
-    render(
-      <EmojiRatingDisplay rating={mockRating} showScale={true} />
-    );
+    render(<EmojiRatingDisplay rating={mockRating} showScale={true} />);
 
     expect(screen.getByText('3.5')).toBeInTheDocument();
     expect(screen.getByText('10 ratings')).toBeInTheDocument();
@@ -35,7 +30,6 @@ describe('EmojiRatingDisplay', () => {
     const emojis = screen.getAllByText('😍');
     expect(emojis.length).toBeGreaterThan(3); // At least 4 emojis (3 filled + 1 partial + unfilled)
   });
-
 
   it('handles rating without count', () => {
     const ratingWithoutCount: EmojiRating = {
@@ -57,12 +51,7 @@ describe('EmojiRatingDisplay', () => {
       count: 5,
     };
 
-    render(
-      <EmojiRatingDisplay
-        rating={wholeRating}
-        showScale={true}
-      />
-    );
+    render(<EmojiRatingDisplay rating={wholeRating} showScale={true} />);
 
     // Should render exactly 4 filled and 1 unfilled emoji
     const emojis = screen.getAllByText('⭐');
@@ -150,4 +139,3 @@ describe('TopEmojiRatings', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });
-

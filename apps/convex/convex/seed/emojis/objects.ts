@@ -1921,4 +1921,3 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     tags: ['cd', 'dvd', 'disk'],
   },
 ];
-

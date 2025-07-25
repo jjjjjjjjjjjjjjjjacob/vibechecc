@@ -146,7 +146,7 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FF6347',
     tags: ['fruit', 'vegetable', 'tomato'],
   },
-  
+
   // Vegetables
   {
     emoji: '🍆',
@@ -260,7 +260,7 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FF8C00',
     tags: ['sweet-potato', 'roasted', 'yam'],
   },
-  
+
   // Prepared foods
   {
     emoji: '🥐',
@@ -494,7 +494,7 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#DC143C',
     tags: ['canned', 'preserved', 'soup'],
   },
-  
+
   // Asian foods
   {
     emoji: '🍱',
@@ -624,7 +624,7 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#F5F5F5',
     tags: ['takeout', 'chinese', 'box'],
   },
-  
+
   // Sweets
   {
     emoji: '🦀',
@@ -666,7 +666,7 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#D3D3D3',
     tags: ['oyster', 'seafood', 'shellfish'],
   },
-  
+
   // Desserts and sweets
   {
     emoji: '🍦',
@@ -772,7 +772,7 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#F0E68C',
     tags: ['custard', 'pudding', 'dessert'],
   },
-  
+
   // Beverages
   {
     emoji: '☕',
@@ -910,7 +910,7 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#87CEEB',
     tags: ['ice', 'cube', 'cold'],
   },
-  
+
   // Utensils
   {
     emoji: '🥢',

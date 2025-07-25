@@ -11,7 +11,10 @@ import type { UserJSON } from '@clerk/backend';
 import { internal } from './_generated/api';
 
 // Helper function to get user by externalId
-async function userByExternalId(ctx: QueryCtx | MutationCtx, externalId: string) {
+async function userByExternalId(
+  ctx: QueryCtx | MutationCtx,
+  externalId: string
+) {
   return await ctx.db
     .query('users')
     .filter((q) => q.eq(q.field('externalId'), externalId))
@@ -42,7 +45,7 @@ export async function getCurrentUserOrCreate(ctx: MutationCtx) {
   if (!identity) {
     throw new Error('User not authenticated');
   }
-  
+
   let user = await userByExternalId(ctx, identity.subject);
   if (!user) {
     const userId = await ctx.db.insert('users', {
@@ -57,12 +60,15 @@ export async function getCurrentUserOrCreate(ctx: MutationCtx) {
     });
     user = await ctx.db.get(userId);
   }
-  
+
   return user;
 }
 
 // Helper function to create user if not exists (internal)
-async function createUserIfNotExistsInternal(ctx: MutationCtx, externalId: string) {
+async function createUserIfNotExistsInternal(
+  ctx: MutationCtx,
+  externalId: string
+) {
   let user = await userByExternalId(ctx, externalId);
   if (!user) {
     const userId = await ctx.db.insert('users', {

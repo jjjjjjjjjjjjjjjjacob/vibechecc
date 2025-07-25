@@ -33,7 +33,9 @@ export function TopEmojiRatingsAccordion({
     <div className={cn('space-y-2', className)}>
       <div className="space-y-2">
         <div className="space-y-1.5 pb-1">
-          <h3 className="text-sm font-medium text-muted-foreground">top ratings</h3>
+          <h3 className="text-muted-foreground text-sm font-medium">
+            top ratings
+          </h3>
         </div>
         <AnimatePresence mode="popLayout">
           {topRatings.map((rating, index) => (
@@ -57,7 +59,7 @@ export function TopEmojiRatingsAccordion({
       {remainingRatings.length > 0 && (
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="more-ratings" className="border-none">
-            <AccordionTrigger className="py-2 text-xs text-muted-foreground hover:text-foreground hover:no-underline">
+            <AccordionTrigger className="text-muted-foreground hover:text-foreground py-2 text-xs hover:no-underline">
               <div className="flex items-center gap-1">
                 <ChevronDown className="h-3 w-3" />
                 <span>{remainingRatings.length} more</span>
@@ -87,11 +89,11 @@ export function TopEmojiRatingsAccordion({
         </Accordion>
       )}
       {vibeId && (
-        <div className="mt-3 pt-3 border-t">
+        <div className="mt-3 border-t pt-3">
           <Link to="/vibes/$vibeId" params={{ vibeId }}>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-between h-8 text-xs"
+            <Button
+              variant="ghost"
+              className="h-8 w-full justify-between text-xs"
             >
               <span>go to vibe</span>
               <ArrowRight className="h-3 w-3" />

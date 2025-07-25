@@ -297,7 +297,9 @@ export const getTrendingEmojis = query({
     // Get all ratings from the last N days
     const recentRatings = await ctx.db
       .query('ratings')
-      .withIndex('byCreatedAt', (q) => q.gte('createdAt', daysAgo.toISOString()))
+      .withIndex('byCreatedAt', (q) =>
+        q.gte('createdAt', daysAgo.toISOString())
+      )
       .collect();
 
     // Get all emoji ratings from the previous N days (for comparison)
@@ -306,9 +308,11 @@ export const getTrendingEmojis = query({
     );
     const allPreviousRatings = await ctx.db
       .query('ratings')
-      .withIndex('byCreatedAt', (q) => q.gte('createdAt', previousPeriodStart.toISOString()))
+      .withIndex('byCreatedAt', (q) =>
+        q.gte('createdAt', previousPeriodStart.toISOString())
+      )
       .collect();
-    
+
     // Filter to only include ratings from the previous period
     const previousRatings = allPreviousRatings.filter(
       (r) => r.createdAt < daysAgo.toISOString()

@@ -916,4 +916,3 @@ export function getEmojiSentiment(
   if (negativeEmojis.includes(emoji)) return 'negative';
   return 'neutral';
 }
-
