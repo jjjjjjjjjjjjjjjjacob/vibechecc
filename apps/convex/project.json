@@ -21,7 +21,8 @@
       "options": {
         "command": "convex codegen",
         "cwd": "{projectRoot}"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "deploy": {
       "executor": "nx:run-commands",
@@ -61,7 +62,8 @@
       "options": {
         "command": "tsc --noEmit",
         "cwd": "{projectRoot}"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "lint": {
       "executor": "@nx/eslint:lint"

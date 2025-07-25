@@ -18,7 +18,7 @@
         "command": "bun run build",
         "cwd": "{projectRoot}"
       },
-      "dependsOn": ["convex:build"]
+      "dependsOn": ["^build", "convex:build"]
     },
     "start": {
       "executor": "nx:run-commands",
@@ -54,7 +54,8 @@
       "options": {
         "command": "bun tsc --noEmit --project tsconfig.json",
         "cwd": "{projectRoot}"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "deploy": {
       "executor": "nx:run-commands",
