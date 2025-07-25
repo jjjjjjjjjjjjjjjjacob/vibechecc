@@ -159,7 +159,7 @@ describe('emoji ratings', () => {
   });
 
   describe('getMostInteractedEmoji', () => {
-    test('should prioritize emoji ratings over reactions', async () => {
+    test('should return emoji ratings with highest count', async () => {
       const t = convexTest(schema);
 
       const vibeId = 'test-vibe-123';
@@ -174,19 +174,20 @@ describe('emoji ratings', () => {
           emojiRating: { emoji: '😍', value: 5 },
         });
 
-        // Add more reactions but of different emoji
-        await ctx.db.insert('reactions', {
+        await ctx.db.insert('ratings', {
           vibeId,
           userId: 'user2',
-          emoji: '👍',
-          isRating: false,
+          rating: 5,
+          date: new Date().toISOString(),
+          emojiRating: { emoji: '😍', value: 4 },
         });
 
-        await ctx.db.insert('reactions', {
+        await ctx.db.insert('ratings', {
           vibeId,
           userId: 'user3',
-          emoji: '👍',
-          isRating: false,
+          rating: 4,
+          date: new Date().toISOString(),
+          emojiRating: { emoji: '🤯', value: 4 },
         });
 
         const mostInteracted = await api.emojiRatings.getMostInteractedEmoji(
@@ -195,46 +196,23 @@ describe('emoji ratings', () => {
         );
 
         expect(mostInteracted?.emoji).toBe('😍');
-        expect(mostInteracted?.type).toBe('rating');
+        expect(mostInteracted?.averageValue).toBe(4.5);
+        expect(mostInteracted?.count).toBe(2);
       });
     });
 
-    test('should fall back to reactions when no emoji ratings', async () => {
+    test('should return null when no emoji ratings exist', async () => {
       const t = convexTest(schema);
 
       const vibeId = 'test-vibe-123';
 
       await t.run(async (ctx) => {
-        // Add only reactions
-        await ctx.db.insert('reactions', {
-          vibeId,
-          userId: 'user1',
-          emoji: '👍',
-          isRating: false,
-        });
-
-        await ctx.db.insert('reactions', {
-          vibeId,
-          userId: 'user2',
-          emoji: '👍',
-          isRating: false,
-        });
-
-        await ctx.db.insert('reactions', {
-          vibeId,
-          userId: 'user3',
-          emoji: '🔥',
-          isRating: false,
-        });
-
         const mostInteracted = await api.emojiRatings.getMostInteractedEmoji(
           ctx,
           { vibeId }
         );
 
-        expect(mostInteracted?.emoji).toBe('👍');
-        expect(mostInteracted?.type).toBe('reaction');
-        expect(mostInteracted?.count).toBe(2);
+        expect(mostInteracted).toBeNull();
       });
     });
   });

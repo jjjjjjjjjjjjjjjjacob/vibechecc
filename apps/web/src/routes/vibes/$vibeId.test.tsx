@@ -28,7 +28,6 @@ const mockVibe = {
   createdAt: new Date().toISOString(),
   tags: ['test', 'integration'],
   ratings: [],
-  reactions: [],
   createdBy: {
     externalId: 'creator-1',
     username: 'testuser',
@@ -64,9 +63,6 @@ vi.mock('@/queries', () => ({
   useAddRatingMutation: () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,
-  }),
-  useReactToVibeMutation: () => ({
-    mutateAsync: vi.fn().mockResolvedValue({}),
   }),
   useCreateEmojiRatingMutation: () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
@@ -294,39 +290,4 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     });
   });
 
-  it('handles emoji reaction toggle', async () => {
-    const { useReactToVibeMutation } = await import('@/queries');
-    const mockMutate = vi.fn().mockResolvedValue({ added: true });
-    (useReactToVibeMutation as any).mockReturnValue({
-      mutateAsync: mockMutate,
-    });
-
-    renderWithRouter(<VibePage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Test Vibe')).toBeInTheDocument();
-    });
-
-    // Find and click the emoji reactions add button
-    const addReactionButton = screen.getByRole('button', {
-      name: /add reaction/i,
-    });
-    await user.click(addReactionButton);
-
-    // Select an emoji from the picker
-    await waitFor(() => {
-      const heartEmoji = screen.getByText('❤️');
-      expect(heartEmoji).toBeInTheDocument();
-    });
-
-    const heartButton = screen.getByText('❤️').closest('button');
-    if (heartButton) await user.click(heartButton);
-
-    await waitFor(() => {
-      expect(mockMutate).toHaveBeenCalledWith({
-        vibeId: 'test-vibe-1',
-        emoji: '❤️',
-      });
-    });
-  });
 });

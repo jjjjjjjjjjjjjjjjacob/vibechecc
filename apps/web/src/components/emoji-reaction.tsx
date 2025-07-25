@@ -4,16 +4,11 @@ import { PlusCircle, Search, ChevronDown, X } from 'lucide-react';
 import { useUser } from '@clerk/tanstack-react-start';
 import type { EmojiReaction as EmojiReactionType } from '../types';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-} from './ui/command';
+import { EmojiSearchCommand } from './emoji-search-command';
 import { ScrollArea } from './ui/scroll-area';
-import { EMOJI_DATABASE, type EmojiData } from '../lib/emoji-database';
+import { api } from '@vibechecc/convex';
+import { convexQuery } from '@convex-dev/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 interface EmojiReactionProps {
   reaction: EmojiReactionType;
@@ -68,7 +63,9 @@ export function EmojiReaction({
       }}
       tabIndex={0}
     >
-      <span className="text-base font-medium">{reaction.emoji}</span>
+      <span className="font-noto-color text-base font-medium">
+        {reaction.emoji}
+      </span>
 
       {isHovered && (
         <span
@@ -116,103 +113,44 @@ function HorizontalEmojiPicker({
   const [showSearchResults, setShowSearchResults] = React.useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Calculate relevance score for context-aware suggestions
-  const calculateRelevanceScore = React.useCallback(
-    (emojiData: EmojiData): number => {
-      if (contextKeywords.length === 0) return 0;
+  // Get popular emojis from database
+  const popularEmojis = useQuery({
+    ...convexQuery(api.emojis.getPopular, { limit: 8 }),
+    enabled: open,
+  });
 
-      let score = 0;
-      const allKeywords = [emojiData.name, ...emojiData.keywords].map((k) =>
-        k.toLowerCase()
-      );
+  // Search emojis from database
+  const searchResults = useQuery({
+    ...convexQuery(api.emojis.search, {
+      searchTerm: searchValue || undefined,
+      pageSize: 6,
+    }),
+    enabled: open && !!searchValue,
+  });
 
-      contextKeywords.forEach((contextKeyword) => {
-        const contextLower = contextKeyword.toLowerCase();
-        allKeywords.forEach((keyword) => {
-          if (
-            keyword.includes(contextLower) ||
-            contextLower.includes(keyword)
-          ) {
-            score += keyword === contextLower ? 10 : 5;
-          }
-        });
-      });
+  // Provide fallbacks
+  const popularData = popularEmojis?.data || [];
+  const searchData = searchResults?.data || { emojis: [] };
 
-      return score;
-    },
-    [contextKeywords]
-  );
 
-  // Get suggested emojis (top relevant + popular ones)
+  // Get suggested emojis from popular ones
   const suggestedEmojis = React.useMemo(() => {
-    const withScores = EMOJI_DATABASE.map((emoji) => ({
-      ...emoji,
-      relevanceScore: calculateRelevanceScore(emoji),
-    }));
+    return popularData.slice(0, 6);
+  }, [popularData]);
 
-    // Get context-relevant emojis first
-    const contextRelevant = withScores
-      .filter((e) => e.relevanceScore > 0)
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, 8);
-
-    // If we don't have enough context-relevant emojis, add popular ones
-    if (contextRelevant.length < 8) {
-      const popularEmojis = ['😊', '👍', '❤️', '😍', '🎉', '👏', '🔥', '💯'];
-      const additionalEmojis = EMOJI_DATABASE.filter(
-        (e) =>
-          popularEmojis.includes(e.emoji) &&
-          !contextRelevant.find((cr) => cr.emoji === e.emoji)
-      ).slice(0, 8 - contextRelevant.length);
-
-      return [...contextRelevant, ...additionalEmojis];
-    }
-
-    return contextRelevant.slice(0, 8);
-  }, [calculateRelevanceScore]);
-
-  // Filter emojis based on search
-  const searchResults = React.useMemo(() => {
-    if (!searchValue.trim()) return [];
-
-    const searchLower = searchValue.toLowerCase();
-    return EMOJI_DATABASE.filter((emojiData) => {
-      const searchableText = [emojiData.name, ...emojiData.keywords]
-        .join(' ')
-        .toLowerCase();
-      return searchableText.includes(searchLower);
-    }).slice(0, 6); // Show only first row of results
-  }, [searchValue]);
+  // Get emojis from search results
+  const searchEmojis = React.useMemo(() => {
+    return searchData.emojis || [];
+  }, [searchData]);
 
   // Filter and sort all emojis for full picker
   const allEmojis = React.useMemo(() => {
-    let filtered = EMOJI_DATABASE;
-
-    // Filter by search if there's a search value
+    // For now, just return search results or popular emojis
     if (searchValue.trim()) {
-      const searchLower = searchValue.toLowerCase();
-      filtered = EMOJI_DATABASE.filter((emojiData) => {
-        const searchableText = [emojiData.name, ...emojiData.keywords]
-          .join(' ')
-          .toLowerCase();
-        return searchableText.includes(searchLower);
-      });
+      return searchData.emojis || [];
     }
-
-    // Calculate relevance scores and sort
-    const withScores = filtered.map((emoji) => ({
-      ...emoji,
-      relevanceScore: calculateRelevanceScore(emoji),
-    }));
-
-    // Sort by relevance score (descending), then by category
-    return withScores.sort((a, b) => {
-      if (a.relevanceScore !== b.relevanceScore) {
-        return b.relevanceScore - a.relevanceScore;
-      }
-      return a.category.localeCompare(b.category);
-    });
-  }, [searchValue, calculateRelevanceScore]);
+    return popularData || [];
+  }, [searchValue, searchData.emojis, popularData]);
 
   // Group emojis by category for full picker
   const groupedEmojis = React.useMemo(() => {
@@ -272,22 +210,7 @@ function HorizontalEmojiPicker({
     }
   }, [open]);
 
-  // Get quick suggestions (top relevant emojis)
-  const quickSuggestions = allEmojis
-    .filter((e) => e.relevanceScore > 0)
-    .slice(0, 6);
 
-  const categoryOrder = [
-    'smileys',
-    'people',
-    'animals',
-    'food',
-    'activities',
-    'travel',
-    'objects',
-    'symbols',
-    'flags',
-  ];
 
   const horizontalPicker = (
     <div className="space-y-0">
@@ -344,7 +267,7 @@ function HorizontalEmojiPicker({
                 key={emojiData.emoji}
                 onClick={() => handleEmojiClick(emojiData.emoji)}
                 className={cn(
-                  'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
+                  'hover:bg-muted font-noto-color flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
                   'animate-in fade-in zoom-in duration-150'
                 )}
                 style={{
@@ -375,7 +298,7 @@ function HorizontalEmojiPicker({
               key={emojiData.emoji}
               onClick={() => handleEmojiClick(emojiData.emoji)}
               className={cn(
-                'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
+                'hover:bg-muted font-noto-color flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
                 'animate-in fade-in zoom-in duration-150'
               )}
               style={{
@@ -402,22 +325,23 @@ function HorizontalEmojiPicker({
               'animate-in slide-in-from-left-8 fade-in delay-200 duration-300'
             )}
           >
-            {searchResults.length > 0 ? (
+            {searchEmojis.length > 0 ? (
               <div className="grid grid-cols-8 gap-1">
-                {searchResults.map((emojiData, index) => (
+                {searchEmojis.map((emojiData, index) => (
                   <button
                     key={emojiData.emoji}
                     onClick={() => handleEmojiClick(emojiData.emoji)}
                     className={cn(
-                      'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
+                      'hover:bg-muted font-noto-color flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
                       'animate-in fade-in zoom-in duration-150'
                     )}
                     style={{
                       animationDelay: `${300 + index * 30}ms`,
+                      color: emojiData.color,
                     }}
                     title={emojiData.name}
                   >
-                    {emojiData.emoji}
+                    <span className="font-noto-color">{emojiData.emoji}</span>
                   </button>
                 ))}
               </div>
@@ -434,103 +358,14 @@ function HorizontalEmojiPicker({
 
   const fullPicker = (
     <div className="relative h-full w-full">
-      <Command className="h-full">
-        <CommandInput
-          placeholder="Search emojis..."
-          value={searchValue}
-          onValueChange={setSearchValue}
-        />
-
-        <CommandList asChild>
-          <ScrollArea className="h-80">
-            <div className="p-2">
-              <CommandEmpty>No emojis found.</CommandEmpty>
-
-              {/* Quick suggestions based on context  */}
-              {quickSuggestions.length > 0 && (
-                <CommandGroup heading="Suggested">
-                  <div className="grid grid-cols-8 gap-1 py-2">
-                    {quickSuggestions.map((emojiData) => (
-                      <CommandItem
-                        key={`suggested-${emojiData.emoji}`}
-                        value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
-                        onSelect={() => handleEmojiClick(emojiData.emoji)}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
-                      >
-                        {emojiData.emoji}
-                      </CommandItem>
-                    ))}
-                  </div>
-                </CommandGroup>
-              )}
-
-              {/* Grouped emojis by category */}
-              {categoryOrder.map((category) => {
-                const categoryEmojis = groupedEmojis[category];
-                if (!categoryEmojis || categoryEmojis.length === 0) return null;
-
-                return (
-                  <CommandGroup
-                    key={category}
-                    heading={
-                      category.charAt(0).toUpperCase() + category.slice(1)
-                    }
-                  >
-                    <div className="animate-in fade-in grid grid-cols-8 gap-1 py-2 duration-300">
-                      {categoryEmojis.map((emojiData, index) => (
-                        <CommandItem
-                          key={`${category}-${emojiData.emoji}`}
-                          value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
-                          onSelect={() => handleEmojiClick(emojiData.emoji)}
-                          className="animate-in fade-in zoom-in flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg duration-150"
-                          title={emojiData.name}
-                          style={{
-                            animationDelay: `${index * 30}ms`,
-                          }}
-                        >
-                          {emojiData.emoji}
-                        </CommandItem>
-                      ))}
-                    </div>
-                  </CommandGroup>
-                );
-              })}
-
-              {/* Show remaining categories that aren't in the priority order */}
-              {Object.keys(groupedEmojis)
-                .filter((category) => !categoryOrder.includes(category))
-                .map((category) => {
-                  const categoryEmojis = groupedEmojis[category];
-                  if (!categoryEmojis || categoryEmojis.length === 0)
-                    return null;
-
-                  return (
-                    <CommandGroup
-                      key={category}
-                      heading={
-                        category.charAt(0).toUpperCase() + category.slice(1)
-                      }
-                    >
-                      <div className="grid grid-cols-8 gap-1 py-2">
-                        {categoryEmojis.map((emojiData) => (
-                          <CommandItem
-                            key={`${category}-${emojiData.emoji}`}
-                            value={`${emojiData.name} ${emojiData.keywords.join(' ')}`}
-                            onSelect={() => handleEmojiClick(emojiData.emoji)}
-                            className="flex h-8 w-8 cursor-pointer items-center justify-center p-0 text-lg"
-                            title={emojiData.name}
-                          >
-                            {emojiData.emoji}
-                          </CommandItem>
-                        ))}
-                      </div>
-                    </CommandGroup>
-                  );
-                })}
-            </div>
-          </ScrollArea>
-        </CommandList>
-      </Command>
+      <EmojiSearchCommand
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        onSelect={handleEmojiClick}
+        className="h-full border-0"
+        maxHeight="h-80"
+        pageSize={100}
+      />
 
       {/* Chevron up in bottom right corner when full picker is shown */}
       <button
@@ -606,6 +441,7 @@ export function EmojiReactions({
                 'transition-all hover:scale-105 active:scale-95'
               )}
               aria-label="Add reaction"
+              title="Add your reaction"
             >
               <PlusCircle className="h-4 w-4" />
             </button>

@@ -70,6 +70,16 @@ convex/
 - `emoji`: Emoji character (😂, 😭, 💯, etc.)
 - Timestamps: `created_at`, `updated_at`
 
+#### EmojiRatings
+
+- `vibe_id`: Reference to Vibes table
+- `user_id`: Reference to Users table
+- `emoji`: Emoji character used for rating
+- `rating`: Number (1-5, supports decimals)
+- `comment`: Required review text
+- `tags`: Optional array of descriptive tags
+- Timestamps: `created_at`, `updated_at`
+
 ## Function Types
 
 ### Queries (Read-only)
@@ -94,6 +104,8 @@ Queries are reactive and automatically update the frontend when data changes.
 - `getVibeRatings(vibeId)` - Get all ratings for a vibe
 - `getVibeReactions(vibeId)` - Get all reactions for a vibe
 - `getUserRating(vibeId, userId)` - Get specific user's rating
+- `getEmojiRatings(vibeId)` - Get emoji ratings with aggregated stats
+- `getUserEmojiRating(vibeId, userId)` - Get specific user's emoji rating
 
 ### Mutations (Write operations)
 
@@ -117,6 +129,9 @@ Mutations modify database state and trigger reactive updates.
 - `removeRating(vibeId)` - Remove user's rating
 - `addReaction(vibeId, emoji)` - Add/toggle emoji reaction
 - `removeReaction(vibeId, emoji)` - Remove emoji reaction
+- `addEmojiRating(vibeId, emoji, rating, comment, tags)` - Add emoji-based rating
+- `updateEmojiRating(ratingId, updates)` - Update existing emoji rating
+- `removeEmojiRating(ratingId)` - Remove emoji rating
 
 ### Actions (External integrations)
 
@@ -227,12 +242,25 @@ CLERK_WEBHOOK_SIGNING_SECRET=whsec_your_webhook_secret
 
 ## Database Seeding
 
-The seed script (`seed.ts`) populates the database with sample data:
+The seed scripts provide multiple options for populating test data:
 
+### Basic Seed (`seed:seed`)
 - **5 Users**: Diverse user profiles with different interests
 - **4 Vibes**: Various life experiences and situations
-- **16 Ratings**: User ratings with detailed comments
-- **33 Reactions**: Emoji reactions from users
+- **20 Ratings**: User ratings with required comments
+- **40 Reactions**: Emoji reactions from users
+- **Emoji Ratings**: Each rating now includes emoji-based ratings
+
+### Enhanced Seed (`seed:enhancedSeed`)
+- **30 Users**: Comprehensive user base
+- **20 Vibes**: Wide variety of content
+- **100+ Ratings**: Extensive rating coverage
+- **200+ Reactions**: Large-scale testing
+- **Emoji Metadata**: Pre-populated emoji categories and tags
+
+### Clear Database (`seed:clearDatabase`)
+- Removes all data from all tables
+- Useful for clean slate testing
 
 Run seeding:
 

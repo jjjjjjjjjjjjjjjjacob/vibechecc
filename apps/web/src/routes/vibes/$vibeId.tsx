@@ -19,7 +19,6 @@ import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
 const EMPTY_ARRAY: never[] = [];
 import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
-import type { EmojiReaction } from '@vibechecc/types';
 import {
   computeUserDisplayName,
   getUserAvatarUrl,
@@ -28,15 +27,19 @@ import {
 import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import toast from 'react-hot-toast';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
-import { EmojiReactions } from '@/components/emoji-reaction';
 import {
   EmojiRatingDisplay,
   TopEmojiRatings,
-  getMostInteractedEmojiRating,
 } from '@/components/emoji-rating-display';
 import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
 import { EmojiRatingSelector } from '@/components/emoji-rating-selector';
 import { Star } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 export const Route = createFileRoute('/vibes/$vibeId')({
   component: VibePage,
@@ -57,19 +60,15 @@ function VibePage() {
   const [authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
     'react'
   );
-  const [reactions, setReactions] = React.useState<EmojiReaction[]>([]);
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
+  >(null);
+  const [preselectedRatingValue, setPreselectedRatingValue] = React.useState<
+    number | null
   >(null);
   const [showEmojiRatingPopover, setShowEmojiRatingPopover] =
     React.useState(false);
 
-  // Initialize reactions when vibe data loads
-  React.useEffect(() => {
-    if (vibe?.reactions) {
-      setReactions(vibe.reactions);
-    }
-  }, [vibe?.reactions]);
 
   // Fetch real emoji rating data
   const { data: topEmojiRatings } = useTopEmojiRatings(vibeId, 5);
@@ -78,16 +77,7 @@ function VibePage() {
   // Transform backend emoji ratings to display format
   const emojiRatings = React.useMemo(() => {
     if (!topEmojiRatings || topEmojiRatings.length === 0) {
-      // Fallback to reactions if no emoji ratings exist
-      return reactions
-        .filter((r) => r.count > 0)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5)
-        .map((reaction) => ({
-          emoji: reaction.emoji,
-          value: reaction.averageValue ?? 3, // Default value for reactions
-          count: reaction.count,
-        }));
+      return [];
     }
 
     return topEmojiRatings.map((rating) => ({
@@ -96,9 +86,9 @@ function VibePage() {
       count: rating.count,
       tags: rating.tags,
     }));
-  }, [topEmojiRatings, reactions]);
+  }, [topEmojiRatings]);
 
-  // Use backend data for most interacted emoji, fallback to reactions
+  // Use backend data for most interacted emoji
   const mostInteractedEmoji = React.useMemo(() => {
     if (mostInteractedEmojiData && mostInteractedEmojiData.averageValue) {
       return {
@@ -107,9 +97,8 @@ function VibePage() {
         count: mostInteractedEmojiData.count,
       };
     }
-    // Fallback to reaction-based calculation
-    return getMostInteractedEmojiRating(reactions);
-  }, [mostInteractedEmojiData, reactions]);
+    return null;
+  }, [mostInteractedEmojiData]);
 
   // Convert emoji metadata array to record for easier lookup
   const emojiMetadataRecord = React.useMemo(() => {
@@ -340,26 +329,23 @@ function VibePage() {
     }
   };
 
-  const handleEmojiRatingClick = (emoji: string) => {
+  const handleEmojiRatingClick = (emoji: string, value?: number) => {
     if (!_user?.id) {
       setAuthDialogType('rate');
       setShowAuthDialog(true);
       return;
     }
+
     setSelectedEmojiForRating(emoji);
+
+    // If a specific value was provided, store it for the popover
+    if (value !== undefined) {
+      setPreselectedRatingValue(value);
+    }
+
     setShowEmojiRatingPopover(true);
   };
 
-  const handleReact = async (emoji: string) => {
-    if (!_user?.id) {
-      setAuthDialogType('rate');
-      setShowAuthDialog(true);
-      return;
-    }
-
-    // Instead of just adding a reaction, open the rating popover with the emoji pre-selected
-    handleEmojiRatingClick(emoji);
-  };
 
   return (
     <div className="container mx-auto">
@@ -407,28 +393,58 @@ function VibePage() {
 
           {/* Title with Emoji Rating */}
           <div className="mb-6 flex items-start justify-between gap-4">
-            <h1 className="text-4xl font-bold lowercase">{vibe.title}</h1>
-            {mostInteractedEmoji && (
-              <EmojiRatingDisplay
-                rating={mostInteractedEmoji}
-                mode="expanded"
-                showScale={true}
-              />
-            )}
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold lowercase">{vibe.title}</h1>
+              {mostInteractedEmoji && (
+                <EmojiRatingDisplay
+                  rating={mostInteractedEmoji}
+                  showScale={true}
+                  onEmojiClick={handleEmojiRatingClick}
+                />
+              )}
+            </div>
           </div>
 
           {/* Top Emoji Ratings */}
           {emojiRatings.length > 0 && (
             <div className="bg-secondary/20 mb-6 rounded-lg p-4">
               <h3 className="text-muted-foreground mb-3 text-sm font-medium">
-                top emoji ratings
+                top ratings
               </h3>
-              <TopEmojiRatings
-                emojiRatings={emojiRatings}
-                expanded={true}
-                className="space-y-1"
-                onEmojiClick={handleEmojiRatingClick}
-              />
+              <div className="space-y-2">
+                {/* First 3 ratings always visible */}
+                {emojiRatings.slice(0, 3).map((rating, index) => (
+                  <div key={`${rating.emoji}-${index}`}>
+                    <EmojiRatingDisplay
+                      rating={rating}
+                      showScale={true}
+                      onEmojiClick={handleEmojiRatingClick}
+                    />
+                  </div>
+                ))}
+
+                {/* Accordion for remaining ratings */}
+                {emojiRatings.length > 3 && (
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="more-ratings" className="border-none">
+                      <AccordionTrigger className="text-muted-foreground hover:text-foreground py-2 text-xs transition-colors hover:no-underline">
+                        {emojiRatings.length - 3} more
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-2 pt-2">
+                        {emojiRatings.slice(3).map((rating, index) => (
+                          <div key={`${rating.emoji}-${index + 3}`}>
+                            <EmojiRatingDisplay
+                              rating={rating}
+                              showScale={true}
+                              onEmojiClick={handleEmojiRatingClick}
+                            />
+                          </div>
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+              </div>
             </div>
           )}
 
@@ -473,15 +489,6 @@ function VibePage() {
             )}
           </div>
 
-          {/* Reactions */}
-          <div className="mb-6">
-            <EmojiReactions
-              reactions={reactions}
-              onReact={handleReact}
-              showAddButton={true}
-              contextKeywords={_contextKeywords}
-            />
-          </div>
 
           {/* Description */}
           <p className="text-muted-foreground mb-8 leading-relaxed">
@@ -533,7 +540,8 @@ function VibePage() {
                     .sort(
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (a: any, b: any) =>
-                        new Date(b.date).getTime() - new Date(a.date).getTime()
+                        new Date(b.createdAt || b.date).getTime() -
+                        new Date(a.createdAt || a.date).getTime()
                     )
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .map((rating: any, index: number) => (
@@ -541,14 +549,14 @@ function VibePage() {
                         key={index}
                         className="border-b pb-4 last:border-b-0"
                       >
-                        <div className="mb-2 flex items-center">
+                        <div className="mb-3 flex items-start gap-3">
                           {rating.user && rating.user.username ? (
                             <Link
                               to="/users/$username"
                               params={{ username: rating.user.username }}
-                              className="flex items-center transition-opacity hover:opacity-80"
+                              className="flex-shrink-0 transition-opacity hover:opacity-80"
                             >
-                              <Avatar className="mr-2 h-8 w-8">
+                              <Avatar className="h-10 w-10">
                                 <AvatarImage
                                   src={getUserAvatarUrl(rating.user)}
                                   alt={computeUserDisplayName(rating.user)}
@@ -559,7 +567,7 @@ function VibePage() {
                               </Avatar>
                             </Link>
                           ) : (
-                            <Avatar className="mr-2 h-8 w-8">
+                            <Avatar className="h-10 w-10 flex-shrink-0">
                               <AvatarImage
                                 src={getUserAvatarUrl(rating.user)}
                                 alt={computeUserDisplayName(rating.user)}
@@ -570,32 +578,43 @@ function VibePage() {
                             </Avatar>
                           )}
                           <div className="flex-1">
-                            {rating.user && rating.user.username ? (
-                              <Link
-                                to="/users/$username"
-                                params={{ username: rating.user.username }}
-                                className="transition-opacity hover:opacity-80"
-                              >
-                                <p className="hover:text-foreground/80 font-medium">
-                                  {computeUserDisplayName(rating.user)}
+                            <div className="flex items-center justify-between gap-2">
+                              <div>
+                                {rating.user && rating.user.username ? (
+                                  <Link
+                                    to="/users/$username"
+                                    params={{ username: rating.user.username }}
+                                    className="transition-opacity hover:opacity-80"
+                                  >
+                                    <p className="hover:text-foreground/80 font-medium">
+                                      {computeUserDisplayName(rating.user)}
+                                    </p>
+                                  </Link>
+                                ) : (
+                                  <p className="font-medium">
+                                    {computeUserDisplayName(rating.user)}
+                                  </p>
+                                )}
+                                <p className="text-muted-foreground text-sm">
+                                  {new Date(
+                                    rating.createdAt ||
+                                      rating.date ||
+                                      Date.now()
+                                  ).toLocaleDateString()}
                                 </p>
-                              </Link>
-                            ) : (
-                              <p className="font-medium">
-                                {computeUserDisplayName(rating.user)}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2">
-                              {rating.emojiRating && (
+                              </div>
+                              {/* Show emoji rating on the right */}
+                              <div className="flex-shrink-0">
                                 <EmojiRatingDisplay
-                                  rating={rating.emojiRating}
-                                  mode="compact"
+                                  rating={{
+                                    emoji: rating.emoji || '😊', // Default emoji if somehow missing
+                                    value: rating.value || rating.rating || 3,
+                                    count: 1,
+                                  }}
                                   showScale={false}
+                                  className="text-lg"
                                 />
-                              )}
-                              <span className="text-muted-foreground text-sm">
-                                {new Date(rating.date).toLocaleDateString()}
-                              </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -651,32 +670,25 @@ function VibePage() {
         description="you must sign in to rate and review vibes"
       />
 
-      {/* Hidden Emoji Rating Popover for clicking on top ratings */}
-      <div className="pointer-events-none fixed top-0 left-0">
-        <EmojiRatingPopover
-          onSubmit={handleEmojiRating}
-          isSubmitting={createEmojiRatingMutation.isPending}
-          vibeTitle={vibe.title}
-          emojiMetadata={emojiMetadataRecord}
-          preSelectedEmoji={selectedEmojiForRating || undefined}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedEmojiForRating(null);
-            }
-          }}
-        >
-          <button
-            ref={(el) => {
-              if (el && showEmojiRatingPopover && selectedEmojiForRating) {
-                el.click();
-                setShowEmojiRatingPopover(false);
-              }
-            }}
-            className="sr-only"
-            aria-hidden="true"
-          />
-        </EmojiRatingPopover>
-      </div>
+      {/* Emoji Rating Popover for clicking on top ratings */}
+      <EmojiRatingPopover
+        open={showEmojiRatingPopover}
+        onSubmit={handleEmojiRating}
+        isSubmitting={createEmojiRatingMutation.isPending}
+        vibeTitle={vibe.title}
+        emojiMetadata={emojiMetadataRecord}
+        preSelectedEmoji={selectedEmojiForRating || undefined}
+        preSelectedValue={preselectedRatingValue || undefined}
+        onOpenChange={(open) => {
+          setShowEmojiRatingPopover(open);
+          if (!open) {
+            setSelectedEmojiForRating(null);
+            setPreselectedRatingValue(null);
+          }
+        }}
+      >
+        <div />
+      </EmojiRatingPopover>
     </div>
   );
 }

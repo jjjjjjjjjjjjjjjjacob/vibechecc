@@ -11,12 +11,16 @@ import { api } from '@vibechecc/convex';
 
 // Query to get all vibes (simple version for performance)
 export function useVibes() {
-  return useQuery(convexQuery(api.vibes.getAllSimple, {}));
+  return useQuery({
+    ...convexQuery(api.vibes.getAllSimple, {}),
+  });
 }
 
 // Query to get paginated vibes with full details
 export function useVibesPaginated(limit?: number, cursor?: string) {
-  return useQuery(convexQuery(api.vibes.getAll, { limit, cursor }));
+  return useQuery({
+    ...convexQuery(api.vibes.getAll, { limit, cursor }),
+  });
 }
 
 // Query to get a vibe by ID
@@ -93,20 +97,23 @@ export function useCreateEmojiRatingMutation() {
   });
 }
 
-// Mutation to react to a vibe
-export function useReactToVibeMutation() {
+// Mutation for quick react to a vibe
+export function useQuickReactMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: useConvexMutation(api.vibes.reactToVibe),
+    mutationFn: useConvexMutation(api.vibes.quickReact),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibes'] });
+      queryClient.invalidateQueries({ queryKey: ['emojiRatings'] });
     },
   });
 }
 
 // Query to get all users
 export function useUsers() {
-  return useQuery(convexQuery(api.users.getAll, {}));
+  return useQuery({
+    ...convexQuery(api.users.getAll, {}),
+  });
 }
 
 // Query to get user by ID
@@ -179,24 +186,32 @@ export function useVibesByTag(tag: string, limit?: number) {
 
 // Query to get all available tags
 export function useAllTags() {
-  return useQuery(convexQuery(api.vibes.getAllTags, {}));
+  return useQuery({
+    ...convexQuery(api.vibes.getAllTags, {}),
+  });
 }
 
 // Query to get top-rated vibes
 export function useTopRatedVibes(limit?: number) {
-  return useQuery(convexQuery(api.vibes.getTopRated, { limit }));
+  return useQuery({
+    ...convexQuery(api.vibes.getTopRated, { limit }),
+  });
 }
 
 // ONBOARDING QUERIES
 
 // Debug authentication (temporary)
 export function useDebugAuth() {
-  return useQuery(convexQuery(api.users.debugAuth, {}));
+  return useQuery({
+    ...convexQuery(api.users.debugAuth, {}),
+  });
 }
 
 // Query to get user onboarding status
 export function useOnboardingStatus() {
-  return useQuery(convexQuery(api.users.getOnboardingStatus, {}));
+  return useQuery({
+    ...convexQuery(api.users.getOnboardingStatus, {}),
+  });
 }
 
 // Action to update onboarding data (syncs with both Convex and Clerk)
@@ -253,7 +268,9 @@ export function useMostInteractedEmoji(vibeId: string) {
 
 // Query to get all emoji metadata
 export function useEmojiMetadata() {
-  return useQuery(convexQuery(api.emojiRatings.getAllEmojiMetadata, {}));
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getAllEmojiMetadata, {}),
+  });
 }
 
 // Query to get emoji rating stats for a vibe

@@ -47,8 +47,6 @@ export function StarRatingWithPopover({
   // Popover mode
   return (
     <RatingPopover
-      open={popoverOpen}
-      onOpenChange={setPopoverOpen}
       onSubmit={async (data) => {
         await onRatingSubmit(data);
         setPopoverOpen(false);

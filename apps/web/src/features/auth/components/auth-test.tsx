@@ -7,10 +7,12 @@ export function AuthTest() {
   const { user: clerkUser, isLoaded, isSignedIn } = useUser();
 
   // Test queries
-  const debugAuth = useQuery(convexQuery(api.users.debugAuth, {}));
-  const onboardingStatus = useQuery(
-    convexQuery(api.users.getOnboardingStatus, {})
-  );
+  const debugAuth = useQuery({
+    ...convexQuery(api.users.debugAuth, {}),
+  });
+  const onboardingStatus = useQuery({
+    ...convexQuery(api.users.getOnboardingStatus, {}),
+  });
 
   // Test mutation
   const ensureUserExists = useMutation({

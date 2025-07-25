@@ -6,7 +6,7 @@ export const getEmojiMetadata = query({
   args: { emoji: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query('emojiRatingMetadata')
+      .query('emojis')
       .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
       .first();
   },
@@ -16,7 +16,7 @@ export const getEmojiMetadata = query({
 export const getAllEmojiMetadata = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query('emojiRatingMetadata').collect();
+    return await ctx.db.query('emojis').collect();
   },
 });
 
@@ -25,7 +25,7 @@ export const getEmojiByCategory = query({
   args: { category: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query('emojiRatingMetadata')
+      .query('emojis')
       .withIndex('byCategory', (q) => q.eq('category', args.category))
       .collect();
   },
@@ -35,10 +35,9 @@ export const getEmojiByCategory = query({
 export const createOrUpdateEmojiRating = mutation({
   args: {
     vibeId: v.string(),
-    rating: v.number(), // Traditional 1-5 rating
-    review: v.optional(v.string()),
-    emoji: v.optional(v.string()),
-    emojiValue: v.optional(v.number()), // 1-5 scale for emoji
+    emoji: v.string(), // REQUIRED
+    value: v.number(), // 1-5 scale
+    review: v.string(), // REQUIRED
   },
   handler: async (ctx, args) => {
     // Check if user is authenticated
@@ -48,26 +47,21 @@ export const createOrUpdateEmojiRating = mutation({
     }
 
     // Validate rating values
-    if (args.rating < 1 || args.rating > 5) {
-      throw new Error('Rating must be between 1 and 5');
-    }
-    if (args.emojiValue && (args.emojiValue < 1 || args.emojiValue > 5)) {
-      throw new Error('Emoji rating value must be between 1 and 5');
+    if (args.value < 1 || args.value > 5) {
+      throw new Error('Rating value must be between 1 and 5');
     }
 
     const now = new Date().toISOString();
     let tags: string[] = [];
 
-    // If emoji rating is provided, get associated tags
-    if (args.emoji && args.emojiValue) {
-      const emojiMetadata = await ctx.db
-        .query('emojiRatingMetadata')
-        .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
-        .first();
+    // Get emoji metadata for tags
+    const emojiData = await ctx.db
+      .query('emojis')
+      .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
+      .first();
 
-      if (emojiMetadata) {
-        tags = emojiMetadata.tags;
-      }
+    if (emojiData && emojiData.tags) {
+      tags = emojiData.tags;
     }
 
     // Check if user already rated this vibe
@@ -79,14 +73,11 @@ export const createOrUpdateEmojiRating = mutation({
       .first();
 
     const ratingData = {
-      rating: args.rating,
+      emoji: args.emoji,
+      value: args.value,
       review: args.review,
-      date: now,
-      emojiRating:
-        args.emoji && args.emojiValue
-          ? { emoji: args.emoji, value: args.emojiValue }
-          : undefined,
       tags: tags.length > 0 ? tags : undefined,
+      updatedAt: now,
     };
 
     if (existingRating) {
@@ -97,6 +88,7 @@ export const createOrUpdateEmojiRating = mutation({
       return await ctx.db.insert('ratings', {
         vibeId: args.vibeId,
         userId: identity.subject,
+        createdAt: now,
         ...ratingData,
       });
     }
@@ -112,11 +104,10 @@ export const getTopEmojiRatings = query({
   handler: async (ctx, args) => {
     const limit = args.limit ?? 5;
 
-    // Get all ratings with emoji ratings for this vibe
-    const ratingsWithEmoji = await ctx.db
+    // Get all ratings for this vibe
+    const ratings = await ctx.db
       .query('ratings')
       .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
-      .filter((q) => q.neq(q.field('emojiRating'), undefined))
       .collect();
 
     // Count emoji occurrences and calculate average values
@@ -125,19 +116,16 @@ export const getTopEmojiRatings = query({
       { count: number; totalValue: number; averageValue: number }
     >();
 
-    for (const rating of ratingsWithEmoji) {
-      if (rating.emojiRating) {
-        const { emoji, value } = rating.emojiRating;
-        const current = emojiStats.get(emoji) || {
-          count: 0,
-          totalValue: 0,
-          averageValue: 0,
-        };
-        current.count += 1;
-        current.totalValue += value;
-        current.averageValue = current.totalValue / current.count;
-        emojiStats.set(emoji, current);
-      }
+    for (const rating of ratings) {
+      const current = emojiStats.get(rating.emoji) || {
+        count: 0,
+        totalValue: 0,
+        averageValue: 0,
+      };
+      current.count += 1;
+      current.totalValue += rating.value;
+      current.averageValue = current.totalValue / current.count;
+      emojiStats.set(rating.emoji, current);
     }
 
     // Convert to array and sort by count (most used)
@@ -154,7 +142,7 @@ export const getTopEmojiRatings = query({
     const withMetadata = await Promise.all(
       topEmojis.map(async (emojiStat) => {
         const metadata = await ctx.db
-          .query('emojiRatingMetadata')
+          .query('emojis')
           .withIndex('byEmoji', (q) => q.eq('emoji', emojiStat.emoji))
           .first();
 
@@ -190,38 +178,8 @@ export const getMostInteractedEmoji = query({
       };
     }
 
-    // If no emoji ratings, check regular reactions
-    const reactions = await ctx.db
-      .query('reactions')
-      .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
-      .filter((q) => q.neq(q.field('isRating'), true)) // Exclude rating reactions
-      .collect();
-
-    if (reactions.length === 0) {
-      return null;
-    }
-
-    // Count reactions by emoji
-    const reactionCounts = new Map<string, number>();
-    for (const reaction of reactions) {
-      const count = reactionCounts.get(reaction.emoji) || 0;
-      reactionCounts.set(reaction.emoji, count + 1);
-    }
-
-    // Find most used reaction
-    let mostUsed = { emoji: '', count: 0 };
-    for (const [emoji, count] of reactionCounts) {
-      if (count > mostUsed.count) {
-        mostUsed = { emoji, count };
-      }
-    }
-
-    return {
-      emoji: mostUsed.emoji,
-      type: 'reaction' as const,
-      count: mostUsed.count,
-      averageValue: null,
-    };
+    // No emoji ratings found
+    return null;
   },
 });
 
@@ -232,18 +190,15 @@ export const getEmojiRatingStats = query({
     const ratings = await ctx.db
       .query('ratings')
       .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
-      .filter((q) => q.neq(q.field('emojiRating'), undefined))
+      .filter((q) => q.neq(q.field('emoji'), undefined))
       .collect();
 
     const emojiGroups = new Map<string, number[]>();
 
     for (const rating of ratings) {
-      if (rating.emojiRating) {
-        const { emoji, value } = rating.emojiRating;
-        const values = emojiGroups.get(emoji) || [];
-        values.push(value);
-        emojiGroups.set(emoji, values);
-      }
+      const values = emojiGroups.get(rating.emoji) || [];
+      values.push(rating.value);
+      emojiGroups.set(rating.emoji, values);
     }
 
     const stats = Array.from(emojiGroups.entries()).map(([emoji, values]) => {
@@ -278,10 +233,10 @@ export const getEmojiRatingStats = query({
 export const getUserEmojiStats = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
-    // Get all emoji ratings by the user
-    const userEmojiRatings = await ctx.db
-      .query('emojiRatings')
-      .withIndex('byUser', (q) => q.eq('userId', args.userId))
+    // Get all ratings by the user
+    const userRatings = await ctx.db
+      .query('ratings')
+      .withIndex('user', (q) => q.eq('userId', args.userId))
       .collect();
 
     // Group by emoji and calculate stats
@@ -290,7 +245,7 @@ export const getUserEmojiStats = query({
       { count: number; totalValue: number; emojis: string[] }
     >();
 
-    for (const rating of userEmojiRatings) {
+    for (const rating of userRatings) {
       const existing = emojiStats.get(rating.emoji) || {
         count: 0,
         totalValue: 0,
@@ -310,8 +265,8 @@ export const getUserEmojiStats = query({
       }))
       .sort((a, b) => b.count - a.count);
 
-    // Get total emoji ratings count
-    const totalEmojiRatings = userEmojiRatings.length;
+    // Get total ratings count
+    const totalEmojiRatings = userRatings.length;
 
     // Get most used emoji
     const mostUsedEmoji = stats[0] || null;
@@ -339,25 +294,25 @@ export const getTrendingEmojis = query({
     const now = new Date();
     const daysAgo = new Date(now.getTime() - args.days * 24 * 60 * 60 * 1000);
 
-    // Get all emoji ratings from the last N days
+    // Get all ratings from the last N days
     const recentRatings = await ctx.db
-      .query('emojiRatings')
-      .filter((q) => q.gte(q.field('createdAt'), daysAgo.toISOString()))
+      .query('ratings')
+      .withIndex('byCreatedAt', (q) => q.gte('createdAt', daysAgo.toISOString()))
       .collect();
 
     // Get all emoji ratings from the previous N days (for comparison)
     const previousPeriodStart = new Date(
       daysAgo.getTime() - args.days * 24 * 60 * 60 * 1000
     );
-    const previousRatings = await ctx.db
-      .query('emojiRatings')
-      .filter((q) =>
-        q.and(
-          q.gte(q.field('createdAt'), previousPeriodStart.toISOString()),
-          q.lt(q.field('createdAt'), daysAgo.toISOString())
-        )
-      )
+    const allPreviousRatings = await ctx.db
+      .query('ratings')
+      .withIndex('byCreatedAt', (q) => q.gte('createdAt', previousPeriodStart.toISOString()))
       .collect();
+    
+    // Filter to only include ratings from the previous period
+    const previousRatings = allPreviousRatings.filter(
+      (r) => r.createdAt < daysAgo.toISOString()
+    );
 
     // Calculate stats for recent period
     const recentStats = new Map<

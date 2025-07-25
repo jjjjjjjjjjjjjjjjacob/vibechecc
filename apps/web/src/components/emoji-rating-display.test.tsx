@@ -4,9 +4,8 @@ import { render, screen } from '@testing-library/react';
 import {
   EmojiRatingDisplay,
   TopEmojiRatings,
-  getMostInteractedEmojiRating,
 } from './emoji-rating-display';
-import type { EmojiRating, EmojiReaction } from '@vibechecc/types';
+import type { EmojiRating } from '@vibechecc/types';
 
 describe('EmojiRatingDisplay', () => {
   const mockRating: EmojiRating = {
@@ -24,13 +23,12 @@ describe('EmojiRatingDisplay', () => {
     expect(screen.getByText('(10)')).toBeInTheDocument();
   });
 
-  it('renders compact mode with scale when showScale is true', () => {
+  it('renders with scale when showScale is true', () => {
     render(
-      <EmojiRatingDisplay rating={mockRating} mode="compact" showScale={true} />
+      <EmojiRatingDisplay rating={mockRating} showScale={true} />
     );
 
     expect(screen.getByText('3.5')).toBeInTheDocument();
-    expect(screen.getByText('out of 5')).toBeInTheDocument();
     expect(screen.getByText('10 ratings')).toBeInTheDocument();
 
     // Should render 3 filled emojis, 1 partial, and 1 unfilled
@@ -38,39 +36,6 @@ describe('EmojiRatingDisplay', () => {
     expect(emojis.length).toBeGreaterThan(3); // At least 4 emojis (3 filled + 1 partial + unfilled)
   });
 
-  it('renders expanded mode', () => {
-    render(<EmojiRatingDisplay rating={mockRating} mode="expanded" />);
-
-    expect(screen.getByText('😍')).toBeInTheDocument();
-    expect(screen.getByText('3.5')).toBeInTheDocument();
-    expect(screen.getByText('out of 5')).toBeInTheDocument();
-    expect(screen.getByText('10 ratings')).toBeInTheDocument();
-  });
-
-  it('renders expanded mode with scale', () => {
-    render(
-      <EmojiRatingDisplay
-        rating={mockRating}
-        mode="expanded"
-        showScale={true}
-      />
-    );
-
-    // Should show both the rating info and the scale
-    expect(screen.getByText('3.5')).toBeInTheDocument();
-    expect(screen.getByText('out of 5')).toBeInTheDocument();
-
-    // Multiple emoji instances for the scale
-    const emojis = screen.getAllByText('😍');
-    expect(emojis.length).toBeGreaterThan(1);
-  });
-
-  it('renders tags in expanded mode', () => {
-    render(<EmojiRatingDisplay rating={mockRating} mode="expanded" />);
-
-    expect(screen.getByText('love')).toBeInTheDocument();
-    expect(screen.getByText('amazing')).toBeInTheDocument();
-  });
 
   it('handles rating without count', () => {
     const ratingWithoutCount: EmojiRating = {
@@ -95,7 +60,6 @@ describe('EmojiRatingDisplay', () => {
     render(
       <EmojiRatingDisplay
         rating={wholeRating}
-        mode="compact"
         showScale={true}
       />
     );
@@ -187,38 +151,3 @@ describe('TopEmojiRatings', () => {
   });
 });
 
-describe('getMostInteractedEmojiRating', () => {
-  it('returns null for empty reactions', () => {
-    expect(getMostInteractedEmojiRating([])).toBeNull();
-    expect(getMostInteractedEmojiRating(null as any)).toBeNull();
-    expect(getMostInteractedEmojiRating(undefined as any)).toBeNull();
-  });
-
-  it('returns the most popular reaction as emoji rating', () => {
-    const reactions: EmojiReaction[] = [
-      { emoji: '😍', count: 10, users: [] },
-      { emoji: '🔥', count: 25, users: [] },
-      { emoji: '😱', count: 5, users: [] },
-    ];
-
-    const result = getMostInteractedEmojiRating(reactions);
-
-    expect(result).not.toBeNull();
-    expect(result?.emoji).toBe('🔥');
-    expect(result?.count).toBe(25);
-    expect(result?.value).toBeGreaterThan(0);
-    expect(result?.value).toBeLessThanOrEqual(5);
-  });
-
-  it('handles single reaction', () => {
-    const reactions: EmojiReaction[] = [
-      { emoji: '💯', count: 1, users: ['user1'] },
-    ];
-
-    const result = getMostInteractedEmojiRating(reactions);
-
-    expect(result).not.toBeNull();
-    expect(result?.emoji).toBe('💯');
-    expect(result?.count).toBe(1);
-  });
-});

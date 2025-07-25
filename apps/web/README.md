@@ -24,13 +24,16 @@ The frontend is a modern React application that provides a rich user experience 
 src/
 ├── components/         # Shared UI components
 │   ├── ui/             # Base components from shadcn/ui
+│   ├── emoji-*.tsx     # Emoji rating system components
 │   └── *.tsx           # Custom, reusable components
 ├── features/           # Feature-based modules
 │   ├── auth/           # Authentication components and hooks
 │   ├── onboarding/     # Onboarding flow components
+│   ├── search/         # Search functionality with filters
 │   └── vibes/          # Vibe-related components
 ├── hooks/              # Custom React hooks
 ├── lib/                # Utility functions and libraries
+│   └── emoji-database.ts # Emoji metadata and categories
 ├── queries.ts          # Centralized data fetching hooks for Convex
 ├── routes/             # Application routes defined with TanStack Router
 ├── styles/             # Global styles and Tailwind CSS configuration
@@ -62,3 +65,25 @@ Frontend tests use [Vitest](https://vitest.dev/) and [React Testing Library](htt
 
 - Test files are co-located with the code they test (e.g., `my-component.test.tsx`).
 - Run tests with `bun run test` from the repo root.
+
+## Key Components
+
+### Emoji Rating System
+
+The frontend includes a comprehensive emoji rating system:
+
+#### Components
+- **`emoji-rating-display.tsx`**: Displays emoji ratings with animations and hover effects
+- **`emoji-rating-popover.tsx`**: Interactive popover for creating emoji ratings
+- **`emoji-reaction.tsx`**: Circular emoji reaction buttons with hover states
+- **`emoji-rating-selector.tsx`**: Rating scale selector (1-5) with visual feedback
+- **`decimal-rating-selector.tsx`**: Precise rating input with decimal support
+- **`top-emoji-ratings-accordion.tsx`**: Expandable list of emoji ratings
+
+#### Features
+- Smooth spring animations using framer-motion
+- Theme-aware styling with Tailwind CSS
+- Backward compatibility with star ratings
+- Required review text for all ratings
+- Tag-based categorization
+- Responsive design for all screen sizes

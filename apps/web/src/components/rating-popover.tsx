@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { StarRating } from './star-rating';
+import { DecimalRatingSelector } from './decimal-rating-selector';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { cn } from '@/utils/tailwind-utils';
 import type { Rating } from '@vibechecc/types';
 import { Circle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 interface RatingPopoverProps {
   children: React.ReactNode;
@@ -18,6 +20,8 @@ interface RatingPopoverProps {
   }) => Promise<void>;
   isSubmitting?: boolean;
   vibeTitle?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function RatingPopover({
@@ -26,8 +30,13 @@ export function RatingPopover({
   onSubmit,
   isSubmitting = false,
   vibeTitle,
+  open,
+  onOpenChange,
 }: RatingPopoverProps) {
-  const [open, setOpen] = React.useState(false);
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = open !== undefined && onOpenChange !== undefined;
+  const actualOpen = isControlled ? open : internalOpen;
+  const actualSetOpen = isControlled ? onOpenChange : setInternalOpen;
   const [rating, setRating] = React.useState(currentRating?.rating || 0);
   const [review, setReview] = React.useState(currentRating?.review || '');
   const [useEmojiRating, setUseEmojiRating] = React.useState(false);
@@ -76,7 +85,7 @@ export function RatingPopover({
         review: review.trim(),
         useEmojiRating,
       });
-      setOpen(false);
+      actualSetOpen(false);
 
       // Reset form if creating new rating
       if (!currentRating) {
@@ -92,7 +101,7 @@ export function RatingPopover({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
+    actualSetOpen(newOpen);
     if (!newOpen) {
       // Reset error when closing
       setError(null);
@@ -100,7 +109,7 @@ export function RatingPopover({
   };
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
+    <Popover open={actualOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
         {children}
       </PopoverTrigger>
@@ -121,15 +130,39 @@ export function RatingPopover({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rating">Your Rating</Label>
-            <div className="flex items-center gap-4">
-              <StarRating value={rating} onChange={setRating} size="lg" />
-              <span className="text-muted-foreground text-sm">
-                {rating > 0
-                  ? `${rating} circle${rating === 1 ? '' : 's'}`
-                  : 'Select rating'}
-              </span>
-            </div>
+            <Label>Your Rating</Label>
+            <Tabs defaultValue="simple" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="simple">Simple</TabsTrigger>
+                <TabsTrigger value="precise">Precise</TabsTrigger>
+              </TabsList>
+              <TabsContent value="simple" className="space-y-2">
+                <div className="flex items-center gap-4">
+                  <StarRating 
+                    value={rating} 
+                    onChange={(value) => setRating(Math.round(value))} 
+                    size="lg" 
+                  />
+                  <span className="text-muted-foreground text-sm">
+                    {rating > 0
+                      ? rating % 1 === 0 
+                        ? `${rating} circle${rating === 1 ? '' : 's'}`
+                        : `${rating.toFixed(1)} circles`
+                      : 'Select rating'}
+                  </span>
+                </div>
+              </TabsContent>
+              <TabsContent value="precise" className="space-y-2">
+                <DecimalRatingSelector
+                  value={rating}
+                  onChange={setRating}
+                  showStars={true}
+                  showSlider={true}
+                  showInput={true}
+                  label=""
+                />
+              </TabsContent>
+            </Tabs>
           </div>
 
           <div className="space-y-2">
@@ -195,7 +228,7 @@ export function RatingPopover({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => actualSetOpen(false)}
               disabled={isSubmitting}
               className="flex-1"
             >

@@ -47,45 +47,18 @@ export const getAll = query({
               .first();
             return {
               user,
-              rating: rating.rating,
+              emoji: rating.emoji,
+              value: rating.value,
               review: rating.review,
-              date: rating.date,
+              createdAt: rating.createdAt,
             };
           })
-        );
-
-        // Limit reactions to avoid excessive reads
-        const reactions = await ctx.db
-          .query('reactions')
-          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(50); // Limit to 50 reactions
-
-        // Group reactions by emoji
-        const emojiReactions = reactions.reduce(
-          (acc, reaction) => {
-            const existingReaction = acc.find(
-              (r) => r.emoji === reaction.emoji
-            );
-            if (existingReaction) {
-              existingReaction.users.push(reaction.userId);
-              existingReaction.count++;
-            } else {
-              acc.push({
-                emoji: reaction.emoji,
-                count: 1,
-                users: [reaction.userId],
-              });
-            }
-            return acc;
-          },
-          [] as { emoji: string; count: number; users: string[] }[]
         );
 
         return {
           ...vibe,
           createdBy: creator,
           ratings: ratingDetails,
-          reactions: emojiReactions,
         };
       })
     );
@@ -129,42 +102,18 @@ export const getById = query({
           .first();
         return {
           user,
-          rating: rating.rating,
+          emoji: rating.emoji,
+          value: rating.value,
           review: rating.review,
-          date: rating.date,
+          createdAt: rating.createdAt,
         };
       })
-    );
-
-    const reactions = await ctx.db
-      .query('reactions')
-      .filter((q) => q.eq(q.field('vibeId'), vibe.id))
-      .collect();
-
-    // Group reactions by emoji
-    const emojiReactions = reactions.reduce(
-      (acc, reaction) => {
-        const existingReaction = acc.find((r) => r.emoji === reaction.emoji);
-        if (existingReaction) {
-          existingReaction.users.push(reaction.userId);
-          existingReaction.count++;
-        } else {
-          acc.push({
-            emoji: reaction.emoji,
-            count: 1,
-            users: [reaction.userId],
-          });
-        }
-        return acc;
-      },
-      [] as { emoji: string; count: number; users: string[] }[]
     );
 
     return {
       ...vibe,
       createdBy: creator,
       ratings: ratingDetails,
-      reactions: emojiReactions,
     };
   },
 });
@@ -198,63 +147,37 @@ export const getByUser = query({
               .first();
             return {
               user,
-              rating: rating.rating,
+              emoji: rating.emoji,
+              value: rating.value,
               review: rating.review,
-              date: rating.date,
+              createdAt: rating.createdAt,
             };
           })
-        );
-
-        const reactions = await ctx.db
-          .query('reactions')
-          .filter((q) => q.eq(q.field('vibeId'), vibe.id))
-          .collect();
-
-        // Group reactions by emoji
-        const emojiReactions = reactions.reduce(
-          (acc, reaction) => {
-            const existingReaction = acc.find(
-              (r) => r.emoji === reaction.emoji
-            );
-            if (existingReaction) {
-              existingReaction.users.push(reaction.userId);
-              existingReaction.count++;
-            } else {
-              acc.push({
-                emoji: reaction.emoji,
-                count: 1,
-                users: [reaction.userId],
-              });
-            }
-            return acc;
-          },
-          [] as { emoji: string; count: number; users: string[] }[]
         );
 
         return {
           ...vibe,
           createdBy: creator,
           ratings: ratingDetails,
-          reactions: emojiReactions,
         };
       })
     );
   },
 });
 
-// Get vibes that a user has reacted to
-export const getUserReactedVibes = query({
+// Get vibes that a user has rated
+export const getUserRatedVibes = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
-    // Get all reactions by the user
-    const userReactions = await ctx.db
-      .query('reactions')
-      .withIndex('userAndVibe', (q) => q.eq('userId', args.userId))
+    // Get all ratings by the user
+    const userRatings = await ctx.db
+      .query('ratings')
+      .withIndex('user', (q) => q.eq('userId', args.userId))
       .collect();
 
-    // Get unique vibe IDs that the user has reacted to
-    const reactedVibeIds = Array.from(
-      new Set(userReactions.map((r) => r.vibeId))
+    // Get unique vibe IDs that the user has rated
+    const ratedVibeIds = Array.from(
+      new Set(userRatings.map((r) => r.vibeId))
     );
 
     // Get the vibes for those IDs
@@ -285,44 +208,18 @@ export const getUserReactedVibes = query({
               .first();
             return {
               user,
-              rating: rating.rating,
+              emoji: rating.emoji,
+              value: rating.value,
               review: rating.review,
-              date: rating.date,
+              createdAt: rating.createdAt,
             };
           })
-        );
-
-        const reactions = await ctx.db
-          .query('reactions')
-          .filter((q) => q.eq(q.field('vibeId'), vibe.id))
-          .collect();
-
-        // Group reactions by emoji
-        const emojiReactions = reactions.reduce(
-          (acc, reaction) => {
-            const existingReaction = acc.find(
-              (r) => r.emoji === reaction.emoji
-            );
-            if (existingReaction) {
-              existingReaction.users.push(reaction.userId);
-              existingReaction.count++;
-            } else {
-              acc.push({
-                emoji: reaction.emoji,
-                count: 1,
-                users: [reaction.userId],
-              });
-            }
-            return acc;
-          },
-          [] as { emoji: string; count: number; users: string[] }[]
         );
 
         return {
           ...vibe,
           createdBy: creator,
           ratings: ratingDetails,
-          reactions: emojiReactions,
         };
       })
     );
@@ -455,10 +352,9 @@ export const getUserReceivedRatings = query({
 export const addRating = mutation({
   args: {
     vibeId: v.string(),
-    rating: v.number(),
-    review: v.optional(v.string()),
-    emoji: v.optional(v.string()),
-    emojiValue: v.optional(v.number()),
+    emoji: v.string(), // REQUIRED
+    value: v.number(), // REQUIRED (1-5)
+    review: v.string(), // REQUIRED
   },
   handler: async (ctx, args) => {
     // Check if user is authenticated
@@ -467,19 +363,27 @@ export const addRating = mutation({
       throw new Error('You must be logged in to rate a vibe');
     }
 
+    // Validate value
+    if (args.value < 1 || args.value > 5) {
+      throw new Error('Rating value must be between 1 and 5');
+    }
+
+    // Validate review
+    if (!args.review || args.review.trim().length === 0) {
+      throw new Error('Review is required');
+    }
+
     const now = new Date().toISOString();
     let tags: string[] = [];
 
-    // If emoji rating is provided, get associated tags
-    if (args.emoji && args.emojiValue) {
-      const emojiMetadata = await ctx.db
-        .query('emojiRatingMetadata')
-        .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
-        .first();
+    // Get emoji metadata for tags
+    const emojiData = await ctx.db
+      .query('emojis')
+      .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
+      .first();
 
-      if (emojiMetadata) {
-        tags = emojiMetadata.tags;
-      }
+    if (emojiData && emojiData.tags) {
+      tags = emojiData.tags;
     }
 
     // Check if user already rated this vibe
@@ -491,14 +395,11 @@ export const addRating = mutation({
       .first();
 
     const ratingData = {
-      rating: args.rating,
-      review: args.review,
-      date: now,
-      emojiRating:
-        args.emoji && args.emojiValue
-          ? { emoji: args.emoji, value: args.emojiValue }
-          : undefined,
+      emoji: args.emoji,
+      value: args.value,
+      review: args.review.trim(),
       tags: tags.length > 0 ? tags : undefined,
+      updatedAt: now,
     };
 
     if (existingRating) {
@@ -508,20 +409,19 @@ export const addRating = mutation({
       // Create a new rating
       return await ctx.db.insert('ratings', {
         vibeId: args.vibeId,
-        userId: identity.subject, // Use the authenticated user's ID from JWT
+        userId: identity.subject,
+        createdAt: now,
         ...ratingData,
       });
     }
   },
 });
 
-// React to a vibe with an emoji
-export const reactToVibe = mutation({
+// Quick react to a vibe (creates a rating with default review)
+export const quickReact = mutation({
   args: {
     vibeId: v.string(),
     emoji: v.string(),
-    ratingValue: v.optional(v.number()), // If provided, this is a rating reaction
-    isRating: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     // Check if user is authenticated
@@ -530,38 +430,41 @@ export const reactToVibe = mutation({
       throw new Error('You must be logged in to react to a vibe');
     }
 
-    // Validate rating value if provided
-    if (args.ratingValue && (args.ratingValue < 1 || args.ratingValue > 5)) {
-      throw new Error('Rating value must be between 1 and 5');
-    }
-
-    // Check if user already reacted with this emoji
-    const existingReaction = await ctx.db
-      .query('reactions')
-      .filter((q) =>
-        q.and(
-          q.eq(q.field('vibeId'), args.vibeId),
-          q.eq(q.field('userId'), identity.subject),
-          q.eq(q.field('emoji'), args.emoji)
-        )
+    // Check if user already has a rating for this vibe
+    const existingRating = await ctx.db
+      .query('ratings')
+      .withIndex('vibeAndUser', (q) =>
+        q.eq('vibeId', args.vibeId).eq('userId', identity.subject)
       )
       .first();
 
-    if (existingReaction) {
-      // Remove the reaction (toggle)
-      await ctx.db.delete(existingReaction._id);
-      return { added: false };
-    } else {
-      // Add the reaction
-      await ctx.db.insert('reactions', {
-        vibeId: args.vibeId,
-        emoji: args.emoji,
-        userId: identity.subject, // Use the authenticated user's ID from JWT
-        ratingValue: args.ratingValue,
-        isRating: args.isRating || args.ratingValue !== undefined,
-      });
-      return { added: true };
+    if (existingRating) {
+      // User already rated, can't quick react
+      throw new Error('You have already rated this vibe. Update your existing rating instead.');
     }
+
+    // Determine default value based on emoji sentiment
+    let defaultValue = 3;
+    const emojiData = await ctx.db
+      .query('emojis')
+      .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
+      .first();
+
+    if (emojiData && emojiData.sentiment) {
+      if (emojiData.sentiment === 'positive') defaultValue = 4;
+      else if (emojiData.sentiment === 'negative') defaultValue = 2;
+    }
+
+    // Create a quick rating
+    return await ctx.db.insert('ratings', {
+      vibeId: args.vibeId,
+      userId: identity.subject,
+      emoji: args.emoji,
+      value: defaultValue,
+      review: `Quick reaction: ${args.emoji}`,
+      createdAt: new Date().toISOString(),
+      tags: emojiData?.tags,
+    });
   },
 });
 
@@ -599,45 +502,18 @@ export const getByTag = query({
               .first();
             return {
               user,
-              rating: rating.rating,
+              emoji: rating.emoji,
+              value: rating.value,
               review: rating.review,
-              date: rating.date,
+              createdAt: rating.createdAt,
             };
           })
-        );
-
-        // Get limited reactions for performance
-        const reactions = await ctx.db
-          .query('reactions')
-          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(20);
-
-        // Group reactions by emoji
-        const emojiReactions = reactions.reduce(
-          (acc, reaction) => {
-            const existingReaction = acc.find(
-              (r) => r.emoji === reaction.emoji
-            );
-            if (existingReaction) {
-              existingReaction.users.push(reaction.userId);
-              existingReaction.count++;
-            } else {
-              acc.push({
-                emoji: reaction.emoji,
-                count: 1,
-                users: [reaction.userId],
-              });
-            }
-            return acc;
-          },
-          [] as { emoji: string; count: number; users: string[] }[]
         );
 
         return {
           ...vibe,
           createdBy: creator,
           ratings: ratingDetails,
-          reactions: emojiReactions,
         };
       })
     );
@@ -685,7 +561,7 @@ export const getTopRated = query({
 
         const averageRating =
           ratings.length > 0
-            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
             : 0;
 
         return {
@@ -722,43 +598,18 @@ export const getTopRated = query({
               .first();
             return {
               user,
-              rating: rating.rating,
+              emoji: rating.emoji,
+              value: rating.value,
               review: rating.review,
-              date: rating.date,
+              createdAt: rating.createdAt,
             };
           })
-        );
-
-        const reactions = await ctx.db
-          .query('reactions')
-          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(20);
-
-        const emojiReactions = reactions.reduce(
-          (acc, reaction) => {
-            const existingReaction = acc.find(
-              (r) => r.emoji === reaction.emoji
-            );
-            if (existingReaction) {
-              existingReaction.users.push(reaction.userId);
-              existingReaction.count++;
-            } else {
-              acc.push({
-                emoji: reaction.emoji,
-                count: 1,
-                users: [reaction.userId],
-              });
-            }
-            return acc;
-          },
-          [] as { emoji: string; count: number; users: string[] }[]
         );
 
         return {
           ...vibe,
           createdBy: creator,
           ratings: ratingDetails,
-          reactions: emojiReactions,
         };
       })
     );
@@ -787,6 +638,30 @@ export const getCurrentUser = query({
         // Add other fields as needed
       }
     );
+  },
+});
+
+// Ensure rating has emoji (internal helper)
+export const ensureRatingHasEmoji = internalMutation({
+  args: { ratingId: v.id('ratings') },
+  handler: async (ctx, { ratingId }) => {
+    const rating = await ctx.db.get(ratingId);
+    if (!rating) return;
+
+    // Default emoji mappings based on value
+    const valueToEmoji: Record<number, string> = {
+      5: '🔥', // 5 = fire
+      4: '😍', // 4 = heart eyes
+      3: '😊', // 3 = smile
+      2: '😕', // 2 = confused
+      1: '😬', // 1 = grimacing
+    };
+
+    if (!rating.emoji || rating.emoji === '') {
+      const value = Math.round(rating.value || 3);
+      const emoji = valueToEmoji[value] || valueToEmoji[3];
+      await ctx.db.patch(ratingId, { emoji });
+    }
   },
 });
 
@@ -821,26 +696,23 @@ export const createForSeed = internalMutation({
 export const addRatingForSeed = internalMutation({
   args: {
     vibeId: v.string(),
-    rating: v.number(),
-    review: v.optional(v.string()),
+    emoji: v.string(),
+    value: v.number(),
+    review: v.string(),
     userId: v.string(),
-    emoji: v.optional(v.string()),
-    emojiValue: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const now = new Date().toISOString();
     let tags: string[] = [];
 
-    // If emoji rating is provided, get associated tags
-    if (args.emoji && args.emojiValue) {
-      const emojiMetadata = await ctx.db
-        .query('emojiRatingMetadata')
-        .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
-        .first();
+    // Get emoji metadata for tags
+    const emojiData = await ctx.db
+      .query('emojis')
+      .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
+      .first();
 
-      if (emojiMetadata) {
-        tags = emojiMetadata.tags;
-      }
+    if (emojiData && emojiData.tags) {
+      tags = emojiData.tags;
     }
 
     // Check if user already rated this vibe
@@ -852,14 +724,11 @@ export const addRatingForSeed = internalMutation({
       .first();
 
     const ratingData = {
-      rating: args.rating,
+      emoji: args.emoji,
+      value: args.value,
       review: args.review,
-      date: now,
-      emojiRating:
-        args.emoji && args.emojiValue
-          ? { emoji: args.emoji, value: args.emojiValue }
-          : undefined,
       tags: tags.length > 0 ? tags : undefined,
+      updatedAt: now,
     };
 
     if (existingRating) {
@@ -870,12 +739,14 @@ export const addRatingForSeed = internalMutation({
       return await ctx.db.insert('ratings', {
         vibeId: args.vibeId,
         userId: args.userId,
+        createdAt: now,
         ...ratingData,
       });
     }
   },
 });
 
+// Deprecated: Use quickReact instead
 export const reactToVibeForSeed = internalMutation({
   args: {
     vibeId: v.string(),
@@ -883,28 +754,40 @@ export const reactToVibeForSeed = internalMutation({
     userId: v.string(),
   },
   handler: async (ctx, args) => {
-    // Check if user already reacted with this emoji
-    const existingReaction = await ctx.db
-      .query('reactions')
-      .filter((q) =>
-        q.and(
-          q.eq(q.field('vibeId'), args.vibeId),
-          q.eq(q.field('userId'), args.userId),
-          q.eq(q.field('emoji'), args.emoji)
-        )
+    // Convert to quick rating
+    const emojiData = await ctx.db
+      .query('emojis')
+      .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
+      .first();
+
+    let defaultValue = 3;
+    if (emojiData && emojiData.sentiment) {
+      if (emojiData.sentiment === 'positive') defaultValue = 4;
+      else if (emojiData.sentiment === 'negative') defaultValue = 2;
+    }
+
+    // Check if user already rated this vibe
+    const existingRating = await ctx.db
+      .query('ratings')
+      .withIndex('vibeAndUser', (q) =>
+        q.eq('vibeId', args.vibeId).eq('userId', args.userId)
       )
       .first();
 
-    if (existingReaction) {
-      // Remove the reaction (toggle)
-      await ctx.db.delete(existingReaction._id);
+    if (existingRating) {
+      // Remove the rating (toggle-like behavior)
+      await ctx.db.delete(existingRating._id);
       return { added: false };
     } else {
-      // Add the reaction
-      await ctx.db.insert('reactions', {
+      // Add quick rating
+      await ctx.db.insert('ratings', {
         vibeId: args.vibeId,
-        emoji: args.emoji,
         userId: args.userId,
+        emoji: args.emoji,
+        value: defaultValue,
+        review: `Quick reaction: ${args.emoji}`,
+        createdAt: new Date().toISOString(),
+        tags: emojiData?.tags,
       });
       return { added: true };
     }
@@ -920,27 +803,34 @@ export const getTopRatedByEmoji = query({
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 10;
-    
-    // Get emoji ratings for the specified emoji
+
+    // Get ratings with the specified emoji
     const emojiRatings = await ctx.db
-      .query('emojiRatings')
-      .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
-      .filter((q) => q.gte(q.field('value'), args.minValue))
+      .query('ratings')
+      .filter((q) => 
+        q.and(
+          q.eq(q.field('emoji'), args.emoji),
+          q.gte(q.field('value'), args.minValue)
+        )
+      )
       .take(limit * 2); // Take more to account for potential duplicates
 
     // Get unique vibe IDs
-    const vibeIds = [...new Set(emojiRatings.map(er => er.vibeId))].slice(0, limit);
-    
+    const vibeIds = [...new Set(emojiRatings.map((er) => er.vibeId))].slice(
+      0,
+      limit
+    );
+
     // Fetch vibes with their details
     const vibes = await Promise.all(
       vibeIds.map(async (vibeId) => {
         const vibe = await ctx.db
           .query('vibes')
-          .withIndex('byVibeId', (q) => q.eq('id', vibeId))
+          .filter((q) => q.eq(q.field('id'), vibeId))
           .first();
-        
+
         if (!vibe) return null;
-        
+
         const creator = await ctx.db
           .query('users')
           .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
@@ -954,44 +844,18 @@ export const getTopRatedByEmoji = query({
 
         const averageRating =
           ratings.length > 0
-            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
             : undefined;
 
         // Get emoji rating details for this vibe and emoji
-        const vibeEmojiRatings = emojiRatings.filter(er => er.vibeId === vibeId);
-        const avgEmojiValue = vibeEmojiRatings.length > 0
-          ? vibeEmojiRatings.reduce((sum, er) => sum + er.value, 0) / vibeEmojiRatings.length
-          : args.minValue;
-
-        // Get reactions
-        const reactions = await ctx.db
-          .query('reactions')
-          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(20);
-
-        const emojiReactions = reactions.reduce(
-          (acc, reaction) => {
-            const existingReaction = acc.find(
-              (r) => r.emoji === reaction.emoji
-            );
-            if (existingReaction) {
-              existingReaction.users.push(reaction.userId);
-              existingReaction.count++;
-              if (reaction.emoji === args.emoji && reaction.averageValue === undefined) {
-                existingReaction.averageValue = avgEmojiValue;
-              }
-            } else {
-              acc.push({
-                emoji: reaction.emoji,
-                count: 1,
-                users: [reaction.userId],
-                averageValue: reaction.emoji === args.emoji ? avgEmojiValue : reaction.averageValue,
-              });
-            }
-            return acc;
-          },
-          [] as { emoji: string; count: number; users: string[]; averageValue?: number }[]
+        const vibeEmojiRatings = emojiRatings.filter(
+          (er) => er.vibeId === vibeId
         );
+        const avgEmojiValue =
+          vibeEmojiRatings.length > 0
+            ? vibeEmojiRatings.reduce((sum, er) => sum + er.value, 0) /
+              vibeEmojiRatings.length
+            : args.minValue;
 
         // Get limited ratings for performance
         const ratingDetails = await Promise.all(
@@ -1002,10 +866,10 @@ export const getTopRatedByEmoji = query({
               .first();
             return {
               user,
-              rating: rating.rating,
+              emoji: rating.emoji,
+              value: rating.value,
               review: rating.review,
-              date: rating.date,
-              emojiRating: rating.emojiRating,
+              createdAt: rating.createdAt,
             };
           })
         );
@@ -1014,7 +878,6 @@ export const getTopRatedByEmoji = query({
           ...vibe,
           createdBy: creator,
           ratings: ratingDetails,
-          reactions: emojiReactions,
           averageRating,
           emojiRating: {
             emoji: args.emoji,
@@ -1024,9 +887,9 @@ export const getTopRatedByEmoji = query({
         };
       })
     );
-    
+
     // Filter out nulls and return
-    return vibes.filter(v => v !== null);
+    return vibes.filter((v) => v !== null);
   },
 });
-EOF < /dev/null
+

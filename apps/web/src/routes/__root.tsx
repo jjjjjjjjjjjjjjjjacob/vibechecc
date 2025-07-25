@@ -28,6 +28,7 @@ import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { ConvexQueryClient } from '@convex-dev/react-query';
+import { cn } from '@/utils';
 
 // Server function to fetch Clerk auth and get Convex token
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -157,11 +158,6 @@ export const Route = createRootRouteWithContext<{
       },
       { rel: 'manifest', href: '/site.webmanifest' },
       { rel: 'icon', href: '/favicon.ico' },
-      // Google Font for our app
-      {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-      },
     ],
   }),
   beforeLoad: async (ctx) => {
@@ -242,7 +238,10 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={cn('font-sans')}
+    >
       <head>
         <HeadContent />
       </head>

@@ -54,7 +54,9 @@ export function VibeCategoryRow({
   if (vibes.length === 0) return null;
 
   return (
-    <div className={cn('group mb-10', priority && 'mb-12')}>
+    <div
+      className={cn('group mb-10', priority && 'mb-12', 'overflow-x-hidden')}
+    >
       <div className="mb-6 flex items-center justify-between">
         <h2
           className={cn(

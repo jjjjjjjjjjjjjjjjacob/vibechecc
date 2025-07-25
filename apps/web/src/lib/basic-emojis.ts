@@ -1,0 +1,23 @@
+// Basic emojis for fallback when database is empty
+export const BASIC_EMOJIS = [
+  { emoji: '😀', name: 'grinning face', color: '#FFD700' },
+  { emoji: '😍', name: 'smiling face with heart-eyes', color: '#FF69B4' },
+  { emoji: '😂', name: 'face with tears of joy', color: '#00BFFF' },
+  { emoji: '😊', name: 'smiling face with smiling eyes', color: '#FF69B4' },
+  { emoji: '😎', name: 'smiling face with sunglasses', color: '#1E90FF' },
+  { emoji: '🤩', name: 'star-struck', color: '#FFD700' },
+  { emoji: '😭', name: 'loudly crying face', color: '#4169E1' },
+  { emoji: '😱', name: 'face screaming in fear', color: '#9370DB' },
+  { emoji: '😳', name: 'flushed face', color: '#FF69B4' },
+  { emoji: '🤔', name: 'thinking face', color: '#FFD700' },
+  { emoji: '🔥', name: 'fire', color: '#FF4500' },
+  { emoji: '💯', name: 'hundred points', color: '#FF0000' },
+  { emoji: '💰', name: 'money bag', color: '#228B22' },
+  { emoji: '🎉', name: 'party popper', color: '#FFD700' },
+  { emoji: '👍', name: 'thumbs up', color: '#FFD700' },
+  { emoji: '❤️', name: 'red heart', color: '#FF0000' },
+  { emoji: '✨', name: 'sparkles', color: '#FFD700' },
+  { emoji: '💀', name: 'skull', color: '#DCDCDC' },
+  { emoji: '🥺', name: 'pleading face', color: '#FF69B4' },
+  { emoji: '😬', name: 'grimacing face', color: '#FFD700' },
+];
