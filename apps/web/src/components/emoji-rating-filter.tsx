@@ -20,19 +20,16 @@ export function EmojiRatingFilter({
 }: EmojiRatingFilterProps) {
   const { data: emojiMetadataArray, isLoading } = useEmojiMetadata();
 
-  // Popular rating emojis to show if metadata is not loaded
-  const defaultEmojis = ['😍', '🔥', '😱', '💯', '😂', '🤩', '😭', '🥺'];
-
   // Get emojis from metadata or use defaults
   const availableEmojis = React.useMemo(() => {
+    // Popular rating emojis to show if metadata is not loaded
+    const defaultEmojis = ['😍', '🔥', '😱', '💯', '😂', '🤩', '😭', '🥺'];
+
     if (!emojiMetadataArray || emojiMetadataArray.length === 0) {
       return defaultEmojis;
     }
-    // Get up to 12 most popular emojis from metadata
-    return emojiMetadataArray
-      .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
-      .slice(0, 12)
-      .map((m) => m.emoji);
+    // Get up to 12 emojis from metadata
+    return emojiMetadataArray.slice(0, 12).map((m) => m.emoji);
   }, [emojiMetadataArray]);
 
   if (isLoading) {

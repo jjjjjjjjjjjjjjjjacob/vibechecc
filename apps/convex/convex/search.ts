@@ -233,7 +233,7 @@ export const searchAll = query({
 
             const avgRating =
               ratings.length > 0
-                ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+                ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
                 : undefined;
 
             // Apply rating filter
@@ -267,8 +267,8 @@ export const searchAll = query({
               if (emojis && emojis.length > 0) {
                 // Get emoji ratings for this vibe
                 const emojiRatings = await ctx.db
-                  .query('emojiRatings')
-                  .withIndex('byVibe', (q) => q.eq('vibeId', vibe.id))
+                  .query('ratings')
+                  .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
                   .collect();
 
                 // Check if vibe has any of the specified emojis
@@ -284,8 +284,8 @@ export const searchAll = query({
               } else if (minValue !== undefined) {
                 // Just check if any emoji rating meets the minimum value
                 const emojiRatings = await ctx.db
-                  .query('emojiRatings')
-                  .withIndex('byVibe', (q) => q.eq('vibeId', vibe.id))
+                  .query('ratings')
+                  .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
                   .collect();
 
                 const hasHighRating = emojiRatings.some(
@@ -660,7 +660,7 @@ export const getSearchSuggestions = query({
 
         const avgRating =
           ratings.length > 0
-            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
             : undefined;
 
         results.vibes.push({

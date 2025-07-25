@@ -1,5 +1,5 @@
 import { action, internalMutation } from './_generated/server';
-import { api, internal } from './_generated/api';
+import { internal } from './_generated/api';
 import { v } from 'convex/values';
 import { nanoid } from 'nanoid';
 
@@ -71,66 +71,92 @@ function getSentiment(emoji: Omit<Emoji, 'sentiment'>): Emoji['sentiment'] {
 
 // Main seed action - comprehensive development data
 export const seed = action({
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<void> => {
+    // eslint-disable-next-line no-console
     console.log('Starting seed process...');
 
     try {
       // Step 1: Clear all existing data
+      // eslint-disable-next-line no-console
       console.log('Step 1: Clearing existing data...');
       await ctx.runMutation(internal.seed.clearAllData);
 
       // Step 2: Seed emoji database
+      // eslint-disable-next-line no-console
       console.log('Step 2: Seeding emoji database...');
-      const emojiResult = await ctx.runMutation(internal.seed.seedEmojis);
+      const emojiResult = (await ctx.runMutation(internal.seed.seedEmojis)) as {
+        count: number;
+      };
+      // eslint-disable-next-line no-console
       console.log(`Seeded ${emojiResult.count} emojis`);
 
       // Step 3: Create users (20 for good development data)
+      // eslint-disable-next-line no-console
       console.log('Step 3: Creating users...');
-      const userResult = await ctx.runMutation(internal.seed.seedUsers, {
+      const userResult = (await ctx.runMutation(internal.seed.seedUsers, {
         count: 20,
-      });
+      })) as { count: number };
+      // eslint-disable-next-line no-console
       console.log(`Created ${userResult.count} users`);
 
       // Step 4: Create vibes (25 for variety)
+      // eslint-disable-next-line no-console
       console.log('Step 4: Creating vibes...');
-      const vibeResult = await ctx.runMutation(internal.seed.seedVibes, {
+      const vibeResult = (await ctx.runMutation(internal.seed.seedVibes, {
         count: 25,
-      });
+      })) as { count: number };
+      // eslint-disable-next-line no-console
       console.log(`Created ${vibeResult.count} vibes`);
 
       // Step 5: Create ratings
+      // eslint-disable-next-line no-console
       console.log('Step 5: Creating ratings...');
-      const ratingResult = await ctx.runMutation(internal.seed.seedRatings);
+      const ratingResult = (await ctx.runMutation(
+        internal.seed.seedRatings
+      )) as { count: number };
+      // eslint-disable-next-line no-console
       console.log(`Created ${ratingResult.count} ratings`);
 
       // Step 6: Create search data
+      // eslint-disable-next-line no-console
       console.log('Step 6: Creating search data...');
-      const searchResult = await ctx.runMutation(internal.seed.seedSearchData);
+      const searchResult = (await ctx.runMutation(
+        internal.seed.seedSearchData
+      )) as { searchHistory: number; trending: number };
+      // eslint-disable-next-line no-console
       console.log(
         `Created ${searchResult.searchHistory} search history items and ${searchResult.trending} trending searches`
       );
 
       // Step 7: Create search metrics
+      // eslint-disable-next-line no-console
       console.log('Step 7: Creating search metrics...');
-      const metricsResult = await ctx.runMutation(
+      const metricsResult = (await ctx.runMutation(
         internal.seed.seedSearchMetrics
-      );
+      )) as { count: number };
+      // eslint-disable-next-line no-console
       console.log(`Created ${metricsResult.count} search metrics`);
 
-      return {
-        success: true,
-        message: 'Seed completed successfully',
-        stats: {
-          emojis: emojiResult.count,
-          users: userResult.count,
-          vibes: vibeResult.count,
-          ratings: ratingResult.count,
-          searchHistory: searchResult.searchHistory,
-          trendingSearches: searchResult.trending,
-          searchMetrics: metricsResult.count,
-        },
-      };
+      // eslint-disable-next-line no-console
+      console.log('\n=== Seed Summary ===');
+      // eslint-disable-next-line no-console
+      console.log(`✅ Emojis: ${emojiResult.count}`);
+      // eslint-disable-next-line no-console
+      console.log(`✅ Users: ${userResult.count}`);
+      // eslint-disable-next-line no-console
+      console.log(`✅ Vibes: ${vibeResult.count}`);
+      // eslint-disable-next-line no-console
+      console.log(`✅ Ratings: ${ratingResult.count}`);
+      // eslint-disable-next-line no-console
+      console.log(`✅ Search History: ${searchResult.searchHistory}`);
+      // eslint-disable-next-line no-console
+      console.log(`✅ Trending Searches: ${searchResult.trending}`);
+      // eslint-disable-next-line no-console
+      console.log(`✅ Search Metrics: ${metricsResult.count}`);
+      // eslint-disable-next-line no-console
+      console.log('\nSeed completed successfully! 🎉');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Seed failed:', error);
       throw error;
     }
@@ -149,13 +175,14 @@ export const clearAllData = internalMutation({
       'trendingSearches',
       'searchMetrics',
       'migrations',
-    ];
+    ] as const;
 
     for (const table of tables) {
-      const items = await ctx.db.query(table as any).collect();
+      const items = await ctx.db.query(table).collect();
       for (const item of items) {
         await ctx.db.delete(item._id);
       }
+      // eslint-disable-next-line no-console
       console.log(`Cleared ${items.length} items from ${table}`);
     }
   },
@@ -726,7 +753,18 @@ export const seedSearchMetrics = internalMutation({
       else if (rand < 0.95) type = 'click';
       else type = 'error';
 
-      const metric: any = {
+      const metric: {
+        timestamp: number;
+        type: 'search' | 'click' | 'error';
+        query: string;
+        userId?: string;
+        resultCount?: number;
+        responseTime?: number;
+        clickedResultId?: string;
+        clickedResultType?: 'vibe' | 'user' | 'tag';
+        clickPosition?: number;
+        error?: string;
+      } = {
         timestamp,
         type,
         query,

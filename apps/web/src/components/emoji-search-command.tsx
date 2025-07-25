@@ -80,10 +80,14 @@ export function EmojiSearchCommand({
 
     const groups: Record<string, typeof emojisToShow> = {};
     emojisToShow.forEach((emoji) => {
-      if (!groups[emoji.category]) {
-        groups[emoji.category] = [];
+      const category =
+        'category' in emoji
+          ? (emoji as { category: string }).category
+          : 'other';
+      if (!groups[category]) {
+        groups[category] = [];
       }
-      groups[emoji.category].push(emoji);
+      groups[category].push(emoji);
     });
 
     return groups;

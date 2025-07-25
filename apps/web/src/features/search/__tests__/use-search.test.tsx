@@ -406,7 +406,7 @@ describe('useSearch', () => {
         () =>
           ({
             user: null,
-          }) as any
+          }) as ReturnType<typeof useUser>
       );
 
       vi.mocked(useQuery).mockReturnValue({

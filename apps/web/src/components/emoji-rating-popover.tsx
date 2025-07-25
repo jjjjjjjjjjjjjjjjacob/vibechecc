@@ -177,6 +177,7 @@ export function EmojiRatingPopover({
       setShowEmojiPicker(!preSelectedEmoji);
     } catch (error) {
       setError('Failed to submit rating. Please try again.');
+      // eslint-disable-next-line no-console
       console.error('Emoji rating submission error:', error);
     }
   };
@@ -311,8 +312,10 @@ export function EmojiRatingPopover({
 
                   <div className="font-[500]">
                     {selectedEmoji ? (
-                      <div
+                      <button
                         onMouseLeave={() => setRatingValue(selectedRatingValue)}
+                        className="w-full text-left focus:outline-none"
+                        type="button"
                       >
                         <EmojiRatingScale
                           emoji={selectedEmoji}
@@ -361,7 +364,7 @@ export function EmojiRatingPopover({
                           onMouseUp={() => setIsMouseDown(false)}
                           className="w-full drop-shadow-[0_2px_5px_var(--color-red-500)]"
                         />
-                      </div>
+                      </button>
                     ) : (
                       <div className="text-muted-foreground text-sm">
                         please select an emoji first

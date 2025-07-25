@@ -20,14 +20,8 @@ import {
   getUserInitials,
 } from '@/utils/user-utils';
 import type { Vibe } from '@/types';
-import {
-  EmojiRatingDisplay,
-  TopEmojiRatings,
-} from '@/components/emoji-rating-display';
 import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
-import { ChevronDown } from 'lucide-react';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
-import { AllEmojiRatingsPopover } from '@/components/all-emoji-ratings-popover';
 import { EmojiRatingDisplayPopover } from '@/components/emoji-rating-display-popover';
 import { EmojiReactions } from '@/components/emoji-reaction';
 
@@ -38,8 +32,6 @@ interface VibeCardProps {
 
 export function VibeCard({ vibe, compact }: VibeCardProps) {
   const [imageError, setImageError] = React.useState(false);
-  const [showAllRatingsPopover, setShowAllRatingsPopover] =
-    React.useState(false);
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
   >(null);
@@ -103,62 +95,6 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
     }));
   }, [topEmojiRatings]);
 
-  // Extract context keywords from vibe for emoji suggestions
-  const contextKeywords = React.useMemo(() => {
-    const keywords: string[] = [];
-
-    // Extract words from title and description
-    const titleWords = vibe.title
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((word) => word.length > 2);
-    const descriptionWords =
-      vibe.description
-        ?.toLowerCase()
-        .split(/\W+/)
-        .filter((word) => word.length > 2) ?? [];
-
-    keywords.push(...titleWords, ...descriptionWords);
-
-    // Add some context-based keywords based on common patterns
-    const title = vibe.title.toLowerCase();
-    const description = vibe.description?.toLowerCase() || '';
-
-    // Add contextual keywords based on content analysis
-    if (
-      title.includes('money') ||
-      title.includes('rich') ||
-      title.includes('expensive') ||
-      description.includes('money')
-    ) {
-      keywords.push('money', 'rich', 'expensive');
-    }
-    if (
-      title.includes('time') ||
-      title.includes('clock') ||
-      title.includes('fast') ||
-      description.includes('time')
-    ) {
-      keywords.push('time', 'fast', 'speed');
-    }
-    if (
-      title.includes('love') ||
-      title.includes('heart') ||
-      description.includes('love')
-    ) {
-      keywords.push('love', 'heart');
-    }
-    if (
-      title.includes('fire') ||
-      title.includes('hot') ||
-      description.includes('fire')
-    ) {
-      keywords.push('fire', 'hot', 'amazing');
-    }
-
-    return [...new Set(keywords)]; // Remove duplicates
-  }, [vibe.title, vibe.description]);
-
   // Convert emoji metadata array to record for easier lookup
   const emojiMetadataRecord = React.useMemo(() => {
     if (!emojiMetadataArray) return {};
@@ -178,25 +114,17 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
     review: string;
     tags?: string[];
   }) => {
-    try {
-      await createEmojiRatingMutation.mutateAsync({
-        vibeId: vibe.id,
-        emoji: data.emoji,
-        emojiValue: data.value,
-        review: data.review,
-        rating: data.value, // Use emoji value as star rating
-      });
+    await createEmojiRatingMutation.mutateAsync({
+      vibeId: vibe.id,
+      emoji: data.emoji,
+      value: data.value,
+      review: data.review,
+    });
 
-      toast.success(
-        `vibe rated ${data.value} ${data.emoji}! review submitted.`,
-        {
-          duration: 3000,
-          icon: data.emoji,
-        }
-      );
-    } catch (error) {
-      throw error; // Re-throw to let popover handle error state
-    }
+    toast.success(`vibe rated ${data.value} ${data.emoji}! review submitted.`, {
+      duration: 3000,
+      icon: data.emoji,
+    });
   };
 
   const handleEmojiRatingClick = (emojiData: string) => {
@@ -235,8 +163,8 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
         duration: 2000,
         icon: emoji,
       });
-    } catch (error: any) {
-      if (error.message?.includes('already rated')) {
+    } catch (error) {
+      if (error instanceof Error && error.message?.includes('already rated')) {
         // User already has a rating, open the rating popover
         setSelectedEmojiForRating(emoji);
         setShowEmojiRatingPopover(true);
@@ -262,6 +190,7 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
             className="absolute top-2 left-2 z-10"
             onMouseEnter={() => setIsAvatarHovered(true)}
             onMouseLeave={() => setIsAvatarHovered(false)}
+            role="group"
           >
             {vibe.createdBy.username ? (
               <Link
@@ -381,7 +310,6 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
                 showAddButton={true}
                 ratingMode={true}
                 onRatingOpen={handleEmojiRatingClick}
-                vibeId={vibe.id}
               />
             </div>
           </CardFooter>

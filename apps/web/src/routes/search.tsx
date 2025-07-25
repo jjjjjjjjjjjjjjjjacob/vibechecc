@@ -7,11 +7,8 @@ import {
 import { useSearchResults } from '@/features/search/hooks/use-search-results';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { useEmojiMetadata } from '@/queries';
 import { Star } from 'lucide-react';
 import { EmojiRatingFilter } from '@/components/emoji-rating-filter';
 

@@ -5,6 +5,7 @@ import {
   getEmojiSentiment,
   getEmojiTags,
 } from './lib/emojiColors';
+import type { Emoji } from './schema';
 
 // Import emoji batch (public endpoint for seeding)
 export const importBatch = mutation({
@@ -71,15 +72,13 @@ export const search = query({
     pageSize: v.optional(v.number()),
   },
   handler: async (ctx, { searchTerm, category, page = 0, pageSize = 50 }) => {
-    let query = ctx.db.query('emojis');
-
-    // Filter by category if provided
-    if (category) {
-      query = query.withIndex('byCategory', (q) => q.eq('category', category));
-    }
-
     // Get all emojis
-    const allEmojis = await query.collect();
+    const allEmojis = category
+      ? await ctx.db
+          .query('emojis')
+          .withIndex('byCategory', (q) => q.eq('category', category))
+          .collect()
+      : await ctx.db.query('emojis').collect();
 
     // Filter by search term if provided
     let filteredEmojis = allEmojis;
@@ -118,7 +117,7 @@ export const getByEmojis = query({
     emojis: v.array(v.string()),
   },
   handler: async (ctx, { emojis }) => {
-    const results: Record<string, any> = {};
+    const results: Record<string, Emoji> = {};
 
     for (const emoji of emojis) {
       const emojiData = await ctx.db

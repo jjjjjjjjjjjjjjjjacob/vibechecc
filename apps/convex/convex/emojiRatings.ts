@@ -95,6 +95,69 @@ export const createOrUpdateEmojiRating = mutation({
   },
 });
 
+// Helper function to get top emoji ratings
+async function getTopEmojiRatingsInternal(
+  ctx: any,
+  args: { vibeId: string; limit?: number }
+) {
+  const limit = args.limit ?? 5;
+
+  // Get all ratings for this vibe
+  const ratings = await ctx.db
+    .query('ratings')
+    .withIndex('vibe', (q: any) => q.eq('vibeId', args.vibeId))
+    .collect();
+
+  // Group by emoji and calculate stats
+  const emojiStats = new Map<
+    string,
+    { count: number; totalValue: number; tags: Set<string> }
+  >();
+
+  for (const rating of ratings) {
+    const stats = emojiStats.get(rating.emoji) || {
+      count: 0,
+      totalValue: 0,
+      tags: new Set<string>(),
+    };
+    stats.count++;
+    stats.totalValue += rating.value;
+    if (rating.tags) {
+      rating.tags.forEach((tag: string) => stats.tags.add(tag));
+    }
+    emojiStats.set(rating.emoji, stats);
+  }
+
+  // Convert to sorted array
+  const sortedEmojis = Array.from(emojiStats.entries())
+    .map(([emoji, stats]) => ({
+      emoji,
+      count: stats.count,
+      averageValue: stats.totalValue / stats.count,
+      tags: Array.from(stats.tags),
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+
+  // Get emoji metadata for additional info
+  const emojis = await Promise.all(
+    sortedEmojis.map(async (stat) => {
+      const emojiData = await ctx.db
+        .query('emojis')
+        .withIndex('byEmoji', (q: any) => q.eq('emoji', stat.emoji))
+        .first();
+
+      return {
+        ...stat,
+        category: emojiData?.category || 'unknown',
+        sentiment: emojiData?.sentiment || 'neutral',
+      };
+    })
+  );
+
+  return emojis;
+}
+
 // Get top emoji ratings for a vibe
 export const getTopEmojiRatings = query({
   args: {
@@ -102,60 +165,7 @@ export const getTopEmojiRatings = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const limit = args.limit ?? 5;
-
-    // Get all ratings for this vibe
-    const ratings = await ctx.db
-      .query('ratings')
-      .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
-      .collect();
-
-    // Count emoji occurrences and calculate average values
-    const emojiStats = new Map<
-      string,
-      { count: number; totalValue: number; averageValue: number }
-    >();
-
-    for (const rating of ratings) {
-      const current = emojiStats.get(rating.emoji) || {
-        count: 0,
-        totalValue: 0,
-        averageValue: 0,
-      };
-      current.count += 1;
-      current.totalValue += rating.value;
-      current.averageValue = current.totalValue / current.count;
-      emojiStats.set(rating.emoji, current);
-    }
-
-    // Convert to array and sort by count (most used)
-    const topEmojis = Array.from(emojiStats.entries())
-      .map(([emoji, stats]) => ({
-        emoji,
-        count: stats.count,
-        averageValue: stats.averageValue,
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit);
-
-    // Get metadata for each emoji
-    const withMetadata = await Promise.all(
-      topEmojis.map(async (emojiStat) => {
-        const metadata = await ctx.db
-          .query('emojis')
-          .withIndex('byEmoji', (q) => q.eq('emoji', emojiStat.emoji))
-          .first();
-
-        return {
-          ...emojiStat,
-          tags: metadata?.tags || [],
-          category: metadata?.category || 'unknown',
-          sentiment: metadata?.sentiment || 'neutral',
-        };
-      })
-    );
-
-    return withMetadata;
+    return getTopEmojiRatingsInternal(ctx, args);
   },
 });
 
@@ -164,7 +174,7 @@ export const getMostInteractedEmoji = query({
   args: { vibeId: v.string() },
   handler: async (ctx, args) => {
     // First, check emoji ratings
-    const topEmojiRatings = await getTopEmojiRatings(ctx, {
+    const topEmojiRatings = await getTopEmojiRatingsInternal(ctx, {
       vibeId: args.vibeId,
       limit: 1,
     });
@@ -189,7 +199,7 @@ export const getEmojiRatingStats = query({
   handler: async (ctx, args) => {
     const ratings = await ctx.db
       .query('ratings')
-      .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
+      .withIndex('vibe', (q: any) => q.eq('vibeId', args.vibeId))
       .filter((q) => q.neq(q.field('emoji'), undefined))
       .collect();
 

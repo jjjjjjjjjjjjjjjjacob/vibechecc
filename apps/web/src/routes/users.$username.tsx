@@ -42,7 +42,7 @@ function UserProfile() {
   );
   const { data: receivedRatings, isLoading: receivedRatingsLoading } =
     useUserReceivedRatings(user?.externalId || '');
-  const { data: emojiStats, isLoading: emojiStatsLoading } = useUserEmojiStats(
+  const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
     user?.externalId || ''
   );
 
@@ -77,7 +77,7 @@ function UserProfile() {
   const receivedRatingsCount = receivedRatings?.length || 0;
   const averageReceivedRating =
     receivedRatings && receivedRatings.length > 0
-      ? receivedRatings.reduce((sum, rating) => sum + rating.rating, 0) /
+      ? receivedRatings.reduce((sum, rating) => sum + (rating.value || 0), 0) /
         receivedRatings.length
       : 0;
 
@@ -253,10 +253,13 @@ function UserProfile() {
                               <h4 className="text-sm font-medium">
                                 {rating?.vibe?.title || 'Unknown'}
                               </h4>
-                              {rating?.emojiRating ? (
+                              {rating?.emoji ? (
                                 <EmojiRatingDisplay
-                                  rating={rating.emojiRating}
-                                  mode="compact"
+                                  rating={{
+                                    emoji: rating.emoji,
+                                    value: rating.value || 0,
+                                    count: 1,
+                                  }}
                                   showScale={false}
                                 />
                               ) : (
@@ -264,7 +267,7 @@ function UserProfile() {
                                   {[...Array(5)].map((_, i) => (
                                     <Star
                                       key={i}
-                                      className={`h-3 w-3 ${rating?.rating && i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                      className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                                     />
                                   ))}
                                 </div>
@@ -276,8 +279,10 @@ function UserProfile() {
                               </p>
                             )}
                             <p className="text-muted-foreground mt-1 text-xs">
-                              {rating?.date
-                                ? new Date(rating.date).toLocaleDateString()
+                              {rating?.createdAt
+                                ? new Date(
+                                    rating.createdAt
+                                  ).toLocaleDateString()
                                 : ''}
                             </p>
                           </div>
@@ -345,10 +350,13 @@ function UserProfile() {
                               <span className="text-sm font-medium">
                                 {rating.rater?.username || 'Unknown'}
                               </span>
-                              {rating?.emojiRating ? (
+                              {rating?.emoji ? (
                                 <EmojiRatingDisplay
-                                  rating={rating.emojiRating}
-                                  mode="compact"
+                                  rating={{
+                                    emoji: rating.emoji,
+                                    value: rating.value || 0,
+                                    count: 1,
+                                  }}
                                   showScale={false}
                                 />
                               ) : (
@@ -356,7 +364,7 @@ function UserProfile() {
                                   {[...Array(5)].map((_, i) => (
                                     <Star
                                       key={i}
-                                      className={`h-3 w-3 ${rating?.rating && i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                      className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                                     />
                                   ))}
                                 </div>
@@ -371,8 +379,10 @@ function UserProfile() {
                               </p>
                             )}
                             <p className="text-muted-foreground mt-1 text-xs">
-                              {rating?.date
-                                ? new Date(rating.date).toLocaleDateString()
+                              {rating?.createdAt
+                                ? new Date(
+                                    rating.createdAt
+                                  ).toLocaleDateString()
                                 : ''}
                             </p>
                           </div>

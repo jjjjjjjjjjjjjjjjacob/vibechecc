@@ -27,13 +27,9 @@ import {
 import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import toast from 'react-hot-toast';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
-import {
-  EmojiRatingDisplay,
-  TopEmojiRatings,
-} from '@/components/emoji-rating-display';
+import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
 import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
 import { EmojiRatingSelector } from '@/components/emoji-rating-selector';
-import { Star } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -49,15 +45,13 @@ function VibePage() {
   const { vibeId } = Route.useParams();
   const { data: vibe, isLoading, error } = useVibe(vibeId);
   const { data: allVibesData } = useVibesPaginated(50);
-  const allVibes = allVibesData?.vibes ?? [];
   const { data: emojiMetadataArray } = useEmojiMetadata();
-  const [rating, setRating] = React.useState(0);
   const [review, setReview] = React.useState('');
   const { user: _user } = useUser();
   const addRatingMutation = useAddRatingMutation();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
-  const [authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
+  const [_authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
     'react'
   );
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
@@ -104,7 +98,12 @@ function VibePage() {
     if (!emojiMetadataArray) return {};
     return emojiMetadataArray.reduce(
       (acc, metadata) => {
-        acc[metadata.emoji] = metadata;
+        acc[metadata.emoji] = {
+          ...metadata,
+          sentiment:
+            metadata.sentiment ||
+            ('neutral' as 'positive' | 'negative' | 'neutral'),
+        };
         return acc;
       },
       {} as Record<string, (typeof emojiMetadataArray)[0]>
@@ -176,6 +175,7 @@ function VibePage() {
 
   // Get similar vibes based on tags, creator, or fallback to recent vibes
   const similarVibes = React.useMemo(() => {
+    const allVibes = allVibesData?.vibes ?? [];
     if (!vibe || !allVibes) return [];
 
     // Filter out the current vibe
@@ -210,7 +210,7 @@ function VibePage() {
     }
 
     return similar.slice(0, 4); // Limit to 4 similar vibes
-  }, [vibe, allVibes]);
+  }, [vibe, allVibesData?.vibes]);
 
   if (isLoading) {
     return <VibeDetailSkeleton />;
@@ -226,28 +226,29 @@ function VibePage() {
     );
   }
 
-  const averageRating = vibe.ratings.length
-    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vibe.ratings.reduce((sum: number, r: any) => sum + r.rating, 0) /
+  const _averageRating = vibe.ratings.length
+    ? vibe.ratings.reduce((sum: number, r) => sum + (r.value || 0), 0) /
       vibe.ratings.length
     : 0;
 
-  const handleSubmitRating = async (e: React.FormEvent) => {
+  const _handleSubmitRating = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (rating === 0) return;
+    const rating = 3; // Default rating
+    const emoji = '⭐'; // Default emoji
 
     try {
       await addRatingMutation.mutateAsync({
         vibeId: vibe.id,
-        rating,
-        review: review.trim() || undefined,
+        value: rating,
+        emoji: emoji,
+        review: review.trim() || 'No review provided',
       });
       setReview('');
       // We don't reset rating to allow the user to see what they rated
 
       // Show success toast
       toast.success(
-        `vibe rated ${rating} circle${rating === 1 ? '' : 's'}! ${review.trim() ? 'review submitted.' : ''}`,
+        `vibe rated ${rating} stars! ${review.trim() ? 'review submitted.' : ''}`,
         {
           duration: 3000,
           icon: '✨',
@@ -264,7 +265,7 @@ function VibePage() {
   };
 
   // Handle rating with popover (includes emoji option)
-  const handleRatingWithPopover = async (data: {
+  const _handleRatingWithPopover = async (data: {
     rating: number;
     review: string;
     useEmojiRating?: boolean;
@@ -272,13 +273,14 @@ function VibePage() {
     try {
       await addRatingMutation.mutateAsync({
         vibeId: vibe.id,
-        rating: data.rating,
-        review: data.review || undefined,
+        value: data.rating,
+        emoji: '⭐', // Default star emoji
+        review: data.review || 'No review provided',
       });
 
       // Show success toast
       toast.success(
-        `vibe rated ${data.rating} circle${data.rating === 1 ? '' : 's'}! review submitted.`,
+        `vibe rated ${data.rating} star${data.rating === 1 ? '' : 's'}! review submitted.`,
         {
           duration: 3000,
           icon: '✨',
@@ -294,6 +296,7 @@ function VibePage() {
         });
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit rating:', error);
       throw error; // Re-throw to let popover handle error state
     }
@@ -310,9 +313,8 @@ function VibePage() {
       await createEmojiRatingMutation.mutateAsync({
         vibeId: vibe.id,
         emoji: data.emoji,
-        emojiValue: data.value,
+        value: data.value,
         review: data.review,
-        rating: data.value, // Use emoji value as star rating
       });
 
       toast.success(
@@ -323,6 +325,7 @@ function VibePage() {
         }
       );
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit emoji rating:', error);
       throw error; // Re-throw to let popover handle error state
     }
@@ -529,19 +532,18 @@ function VibePage() {
           <Card>
             <CardContent className="p-6">
               <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
-              {vibe.ratings.filter((r: any) => r.review).length > 0 ? (
+              {vibe.ratings.filter((r) => r.review).length > 0 ? (
                 <div className="space-y-4">
                   {vibe.ratings
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .filter((r: any) => r.review)
+
+                    .filter((r) => r.review)
                     .sort(
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (a: any, b: any) =>
-                        new Date(b.createdAt || b.date).getTime() -
-                        new Date(a.createdAt || a.date).getTime()
+                      (a, b) =>
+                        new Date(b.createdAt).getTime() -
+                        new Date(a.createdAt).getTime()
                     )
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .map((rating: any, index: number) => (
+
+                    .map((rating, index) => (
                       <div
                         key={index}
                         className="border-b pb-4 last:border-b-0"
@@ -594,9 +596,7 @@ function VibePage() {
                                 )}
                                 <p className="text-muted-foreground text-sm">
                                   {new Date(
-                                    rating.createdAt ||
-                                      rating.date ||
-                                      Date.now()
+                                    rating.createdAt || Date.now()
                                   ).toLocaleDateString()}
                                 </p>
                               </div>
@@ -605,7 +605,7 @@ function VibePage() {
                                 <EmojiRatingDisplay
                                   rating={{
                                     emoji: rating.emoji || '😊', // Default emoji if somehow missing
-                                    value: rating.value || rating.rating || 3,
+                                    value: rating.value || 3,
                                     count: 1,
                                   }}
                                   showScale={false}
@@ -644,8 +644,7 @@ function VibePage() {
               {similarVibes.map((similarVibe) => (
                 <VibeCard
                   key={similarVibe.id}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  vibe={similarVibe as any}
+                  vibe={similarVibe}
                   compact={true}
                 />
               ))}

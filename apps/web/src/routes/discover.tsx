@@ -64,12 +64,8 @@ function DiscoverPage() {
   const { data: emojiMetadata, isLoading: metadataLoading } =
     useEmojiMetadata();
 
-  // Get popular emojis from metadata
-  const popularEmojis =
-    emojiMetadata
-      ?.sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
-      .slice(0, 8)
-      .map((m) => m.emoji) || [];
+  // Get popular emojis from metadata (take first 8)
+  const popularEmojis = emojiMetadata?.slice(0, 8).map((m) => m.emoji) || [];
 
   return (
     <div className="container mx-auto px-4 py-8">

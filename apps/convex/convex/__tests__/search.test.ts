@@ -227,24 +227,28 @@ describe('Search Functions', () => {
 
       // Get the actual vibe objects to access the custom id field
       const vibe1 = await t.run(async (ctx) => {
-        const vibe = await ctx.db.get(vibe1Id);
-        return vibe?.id;
+        const vibe = (await ctx.db.get(vibe1Id)) as any;
+        return vibe?.id as string;
       });
 
       const vibe2 = await t.run(async (ctx) => {
-        const vibe = await ctx.db.get(vibe2Id);
-        return vibe?.id;
+        const vibe = (await ctx.db.get(vibe2Id)) as any;
+        return vibe?.id as string;
       });
 
       // Add ratings with authentication using the custom id
       await t.withIdentity(mockIdentity2).mutation(api.vibes.addRating, {
         vibeId: vibe1!,
-        rating: 5,
+        value: 5,
+        emoji: '🔥',
+        review: 'Great vibe!',
       });
 
       await t.withIdentity(mockIdentity2).mutation(api.vibes.addRating, {
         vibeId: vibe2!,
-        rating: 2,
+        value: 2,
+        emoji: '😕',
+        review: 'Just okay',
       });
 
       // Search with minRating filter
@@ -636,7 +640,10 @@ describe('Search Functions', () => {
         limit: 10,
       });
 
-      const tracked = trending.find((t) => t.term === 'test search');
+      const tracked = trending.find(
+        (t: { term: string; count: number; category?: string }) =>
+          t.term === 'test search'
+      );
       expect(tracked).toBeDefined();
       expect(tracked?.count).toBe(1);
     });
@@ -673,7 +680,10 @@ describe('Search Functions', () => {
         limit: 10,
       });
 
-      const tracked = trending.find((t) => t.term === 'repeated');
+      const tracked = trending.find(
+        (t: { term: string; count: number; category?: string }) =>
+          t.term === 'repeated'
+      );
       expect(tracked?.count).toBe(2);
     });
   });

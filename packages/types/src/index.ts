@@ -38,22 +38,25 @@ export interface EmojiRating {
   emoji: string;
   value: number; // 1-5
   tags?: string[];
+  count?: number; // For display purposes
 }
 
 export interface Rating {
   user: User | null;
-  rating: number;
-  review?: string;
-  date: string;
-  emojiRating?: EmojiRating; // New field for emoji-based ratings
-  tags?: string[]; // Associated tags from emoji metadata
+  value: number;
+  emoji: string;
+  review: string;
+  createdAt: string;
+  tags?: string[];
+  vibeId?: string;
+  userId?: string;
 }
 
 export interface EmojiRatingMetadata {
   emoji: string;
-  tags: string[];
+  tags?: string[];
   category: string;
-  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment?: 'positive' | 'negative' | 'neutral';
 }
 
 export interface Vibe {

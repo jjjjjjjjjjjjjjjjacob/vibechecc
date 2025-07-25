@@ -5,38 +5,46 @@ import { internal } from '../_generated/api';
 // Main migration action
 export const consolidateRatings = internalAction({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<any> => {
+    // eslint-disable-next-line no-console
     console.log('Starting rating consolidation migration...');
 
     try {
       // Check if migration already ran
-      const existingMigration = await ctx.runQuery(
+      const existingMigration = await ctx.runMutation(
         internal.migrations.consolidateRatings.checkMigration
       );
       if (existingMigration) {
+        // eslint-disable-next-line no-console
         console.log('Migration already completed');
         return { success: true, message: 'Migration already completed' };
       }
 
       // Step 1: Import emoji database
+      // eslint-disable-next-line no-console
       console.log('Step 1: Importing emoji database...');
       const emojiResult = await ctx.runMutation(
         internal.migrations.consolidateRatings.importEmojiDatabase
       );
+      // eslint-disable-next-line no-console
       console.log(`Imported ${emojiResult.count} emojis`);
 
       // Step 2: Migrate existing ratings
+      // eslint-disable-next-line no-console
       console.log('Step 2: Migrating existing ratings...');
-      const ratingResult = await ctx.runMutation(
+      const ratingResult = (await ctx.runMutation(
         internal.migrations.consolidateRatings.migrateRatings
-      );
+      )) as { count: number };
+      // eslint-disable-next-line no-console
       console.log(`Migrated ${ratingResult.count} ratings`);
 
       // Step 4: Ensure all ratings have emojis
+      // eslint-disable-next-line no-console
       console.log('Step 4: Ensuring all ratings have emojis...');
-      const ensureEmojisResult = await ctx.runMutation(
+      const ensureEmojisResult = (await ctx.runMutation(
         internal.migrations.consolidateRatings.ensureAllRatingsHaveEmojis
-      );
+      )) as { count: number; message: string };
+      // eslint-disable-next-line no-console
       console.log(ensureEmojisResult.message);
 
       // Step 5: Mark migration as complete
@@ -54,6 +62,7 @@ export const consolidateRatings = internalAction({
         },
       };
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Migration failed:', error);
       await ctx.runMutation(internal.migrations.consolidateRatings.markFailed, {
         error: error instanceof Error ? error.message : String(error),
@@ -78,7 +87,7 @@ export const checkMigration = internalMutation({
 // Import emoji database with colors
 export const importEmojiDatabase = internalMutation({
   args: {},
-  handler: async (ctx) => {
+  handler: async (_ctx) => {
     // Import will be handled by the enhanced seed function
     // This is a placeholder that will be called by the seed
     return { count: 0 };

@@ -42,7 +42,7 @@ export function useUserVibes(userId: string) {
 // Query to get vibes a user has reacted to
 export function useUserReactedVibes(userId: string) {
   return useQuery({
-    ...convexQuery(api.vibes.getUserReactedVibes, { userId }),
+    ...convexQuery(api.vibes.getUserRatedVibes, { userId }),
     enabled: !!userId,
   });
 }

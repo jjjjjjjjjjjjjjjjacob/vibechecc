@@ -223,7 +223,9 @@ describe('Users Functions', () => {
       expect(Array.isArray(allUsers)).toBe(true);
       expect(allUsers.length).toBeGreaterThan(0);
 
-      const testUser = allUsers.find((u) => u.externalId === 'test_user_all');
+      const testUser = allUsers.find(
+        (u: any) => u.externalId === 'test_user_all'
+      );
       expect(testUser).toBeDefined();
     });
 
@@ -390,7 +392,7 @@ describe('Users Functions', () => {
         userId: mockIdentity.subject,
       });
       const createdVibe = createdVibes.find(
-        (v) => v.title === 'Authenticated Test Vibe'
+        (v: any) => v.title === 'Authenticated Test Vibe'
       );
       expect(createdVibe).toBeDefined();
       expect(createdVibe?.createdById).toBe(mockIdentity.subject);

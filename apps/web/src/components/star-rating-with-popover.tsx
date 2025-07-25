@@ -30,8 +30,6 @@ export function StarRatingWithPopover({
   currentRating,
   enablePopover = true,
 }: StarRatingWithPopoverProps) {
-  const [popoverOpen, setPopoverOpen] = React.useState(false);
-
   // If popover is disabled or readOnly, use direct rating
   if (!enablePopover || readOnly) {
     return (
@@ -47,10 +45,7 @@ export function StarRatingWithPopover({
   // Popover mode
   return (
     <RatingPopover
-      onSubmit={async (data) => {
-        await onRatingSubmit(data);
-        setPopoverOpen(false);
-      }}
+      onSubmit={onRatingSubmit}
       isSubmitting={isSubmitting}
       vibeTitle={vibeTitle}
       currentRating={currentRating}
@@ -61,7 +56,6 @@ export function StarRatingWithPopover({
           readOnly={false}
           size={size}
           popoverMode={true}
-          onPopoverOpen={() => setPopoverOpen(true)}
         />
       </div>
     </RatingPopover>

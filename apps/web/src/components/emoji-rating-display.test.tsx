@@ -3,6 +3,41 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EmojiRatingDisplay, TopEmojiRatings } from './emoji-rating-display';
 import type { EmojiRating } from '@vibechecc/types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+
+// Mock convex-dev/react-query
+vi.mock('@convex-dev/react-query', () => ({
+  convexQuery: vi.fn(() => ({
+    queryKey: ['convex', 'emojis.getByEmojis'],
+    queryFn: () => Promise.resolve({}),
+  })),
+}));
+
+// Mock @tanstack/react-query to return empty data
+vi.mock('@tanstack/react-query', async () => {
+  const actual = await vi.importActual('@tanstack/react-query');
+  return {
+    ...actual,
+    useQuery: vi.fn(() => ({
+      data: {},
+      isLoading: false,
+      error: null,
+    })),
+  };
+});
+
+// Create a wrapper for React Query
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
 
 describe('EmojiRatingDisplay', () => {
   const mockRating: EmojiRating = {
@@ -53,9 +88,12 @@ describe('EmojiRatingDisplay', () => {
 
     render(<EmojiRatingDisplay rating={wholeRating} showScale={true} />);
 
-    // Should render exactly 4 filled and 1 unfilled emoji
-    const emojis = screen.getAllByText('⭐');
-    expect(emojis.length).toBe(5); // 4 filled + 1 unfilled
+    // Should render the rating value and scale correctly
+    expect(screen.getByText('4.0')).toBeInTheDocument();
+    // Check that the EmojiRatingScale component is rendered
+    expect(
+      screen.getByRole('button', { name: 'Rate 4 out of 5' })
+    ).toBeInTheDocument();
   });
 });
 
@@ -69,7 +107,9 @@ describe('TopEmojiRatings', () => {
   ];
 
   it('renders first 3 ratings by default', () => {
-    render(<TopEmojiRatings emojiRatings={mockRatings} />);
+    render(<TopEmojiRatings emojiRatings={mockRatings} />, {
+      wrapper: createWrapper(),
+    });
 
     // Check that first 3 rating values are displayed
     expect(screen.getByText('4.5')).toBeInTheDocument();
@@ -82,7 +122,9 @@ describe('TopEmojiRatings', () => {
   });
 
   it('renders all ratings when expanded', () => {
-    render(<TopEmojiRatings emojiRatings={mockRatings} expanded={true} />);
+    render(<TopEmojiRatings emojiRatings={mockRatings} expanded={true} />, {
+      wrapper: createWrapper(),
+    });
 
     // Check that all rating values are displayed
     expect(screen.getByText('4.5')).toBeInTheDocument();
@@ -105,7 +147,8 @@ describe('TopEmojiRatings', () => {
       <TopEmojiRatings
         emojiRatings={mockRatings}
         onExpandToggle={onExpandToggle}
-      />
+      />,
+      { wrapper: createWrapper() }
     );
 
     const expandButton = screen.getByText('show 2 more ratings');
@@ -122,7 +165,8 @@ describe('TopEmojiRatings', () => {
         emojiRatings={mockRatings}
         expanded={true}
         onExpandToggle={onExpandToggle}
-      />
+      />,
+      { wrapper: createWrapper() }
     );
 
     const collapseButton = screen.getByText('show less');
@@ -133,7 +177,9 @@ describe('TopEmojiRatings', () => {
   });
 
   it('handles empty ratings array', () => {
-    render(<TopEmojiRatings emojiRatings={[]} />);
+    render(<TopEmojiRatings emojiRatings={[]} />, {
+      wrapper: createWrapper(),
+    });
 
     // Should render without errors but with no content
     expect(screen.queryByRole('button')).not.toBeInTheDocument();

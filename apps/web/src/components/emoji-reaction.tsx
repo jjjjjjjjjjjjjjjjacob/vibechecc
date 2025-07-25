@@ -5,7 +5,6 @@ import { useUser } from '@clerk/tanstack-react-start';
 import type { EmojiReaction as EmojiReactionType } from '../types';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { EmojiSearchCommand } from './emoji-search-command';
-import { ScrollArea } from './ui/scroll-area';
 import { api } from '@vibechecc/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
@@ -103,7 +102,7 @@ interface HorizontalEmojiPickerProps {
 function HorizontalEmojiPicker({
   onEmojiSelect,
   onClose,
-  contextKeywords = [],
+  contextKeywords: _contextKeywords = [],
   open,
   onOpenChange: _onOpenChange,
 }: HorizontalEmojiPickerProps) {
@@ -128,42 +127,17 @@ function HorizontalEmojiPicker({
     enabled: open && !!searchValue,
   });
 
-  // Provide fallbacks
-  const popularData = popularEmojis?.data || [];
-  const searchData = searchResults?.data || { emojis: [] };
-
   // Get suggested emojis from popular ones
   const suggestedEmojis = React.useMemo(() => {
+    const popularData = popularEmojis?.data || [];
     return popularData.slice(0, 6);
-  }, [popularData]);
+  }, [popularEmojis?.data]);
 
   // Get emojis from search results
   const searchEmojis = React.useMemo(() => {
+    const searchData = searchResults?.data || { emojis: [] };
     return searchData.emojis || [];
-  }, [searchData]);
-
-  // Filter and sort all emojis for full picker
-  const allEmojis = React.useMemo(() => {
-    // For now, just return search results or popular emojis
-    if (searchValue.trim()) {
-      return searchData.emojis || [];
-    }
-    return popularData || [];
-  }, [searchValue, searchData.emojis, popularData]);
-
-  // Group emojis by category for full picker
-  const groupedEmojis = React.useMemo(() => {
-    const groups: Record<string, typeof allEmojis> = {};
-
-    allEmojis.forEach((emoji) => {
-      if (!groups[emoji.category]) {
-        groups[emoji.category] = [];
-      }
-      groups[emoji.category].push(emoji);
-    });
-
-    return groups;
-  }, [allEmojis]);
+  }, [searchResults?.data]);
 
   const handleEmojiClick = (emoji: string) => {
     onEmojiSelect(emoji);

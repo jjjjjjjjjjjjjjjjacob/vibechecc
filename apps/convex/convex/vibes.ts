@@ -180,7 +180,7 @@ export const getUserRatedVibes = query({
 
     // Get the vibes for those IDs
     const vibes = await Promise.all(
-      reactedVibeIds.map(async (vibeId) => {
+      ratedVibeIds.map(async (vibeId) => {
         const vibe = await ctx.db
           .query('vibes')
           .filter((q) => q.eq(q.field('id'), vibeId))

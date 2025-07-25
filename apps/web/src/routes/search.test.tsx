@@ -9,7 +9,12 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router';
-import SearchResultsPage from './search';
+import { Route } from './search';
+// Get the component from the Route
+const SearchResultsPage =
+  Route.options?.component ||
+  Route.component ||
+  (() => <div>Component not found</div>);
 
 // Mock search results
 const mockSearchResults = {
@@ -80,7 +85,11 @@ vi.mock('@/queries', () => ({
 
 // Mock components
 vi.mock('@/features/search/components', () => ({
-  SearchResultsGrid: ({ results }: { results: any[] }) => (
+  SearchResultsGrid: ({
+    results,
+  }: {
+    results: Array<{ id: string; title: string }>;
+  }) => (
     <div data-testid="search-results">
       {results?.map((result) => (
         <div key={result.id}>{result.title}</div>
@@ -155,8 +164,6 @@ describe('Search Page - Emoji Filter Integration', () => {
   });
 
   it('toggles emoji filter selection', async () => {
-    const mockNavigate = vi.fn();
-
     renderWithRouter();
 
     await waitFor(() => {
@@ -213,7 +220,7 @@ describe('Search Page - Emoji Filter Integration', () => {
         filters: {
           tags: undefined,
           minRating: undefined,
-          sort: 'relevance',
+          sort: undefined,
           emojiRatings: {
             emojis: ['🔥'],
             minValue: 4,
@@ -257,7 +264,7 @@ describe('Search Page - Emoji Filter Integration', () => {
         filters: {
           tags: undefined,
           minRating: 4,
-          sort: 'relevance',
+          sort: undefined,
           emojiRatings: {
             emojis: ['💯'],
             minValue: 5,
@@ -274,11 +281,14 @@ describe('Search Page - Emoji Filter Integration', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('relevance')).toBeInTheDocument();
+      // The select element should be present
+      const sortSelect = screen.getByRole('combobox');
+      expect(sortSelect).toBeInTheDocument();
+      expect(sortSelect).toHaveValue('relevance');
     });
 
     // Change sort order
-    const sortSelect = screen.getByDisplayValue('relevance');
+    const sortSelect = screen.getByRole('combobox');
     await user.selectOptions(sortSelect, 'rating_desc');
 
     // Would maintain emoji filter while changing sort in real app

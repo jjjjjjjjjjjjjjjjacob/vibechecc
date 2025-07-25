@@ -101,6 +101,15 @@ export function EmojiRatingScale({
         onMouseDown={onMouseDown ? handleMouseDown : undefined}
         onMouseUp={onMouseUp ? handleMouseUpLocal : undefined}
         onClick={onClick ? handleClick : undefined}
+        onKeyDown={(e) => {
+          if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            handleClick(e as unknown as React.MouseEvent<HTMLDivElement>);
+          }
+        }}
+        role="button"
+        tabIndex={onClick || onChange ? 0 : -1}
+        aria-label={`Rate ${value} out of 5 with ${emoji}`}
       >
         <div
           className="absolute inset-0 flex overflow-hidden"

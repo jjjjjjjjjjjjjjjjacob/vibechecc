@@ -4,11 +4,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import VibecheccLogo from '/logo.svg?url';
 import { Button } from '@/components/ui/button';
 import { Sparkles, LogIn } from 'lucide-react';
 
@@ -40,13 +38,13 @@ export function AuthPromptDialog({
         </DialogHeader>
         <div className="mt-6 space-y-4">
           <div className="space-y-3">
-            <SignInButton mode="modal" className="w-full">
+            <SignInButton mode="modal">
               <Button className="h-12 w-full bg-gradient-to-r from-violet-600 to-pink-600 text-base font-semibold text-white transition-all hover:scale-[1.02] hover:from-violet-700 hover:to-pink-700 hover:shadow-lg hover:shadow-violet-500/25">
                 <LogIn className="mr-2 h-5 w-5" />
                 sign in to vibechecc
               </Button>
             </SignInButton>
-            <SignUpButton mode="modal" className="w-full">
+            <SignUpButton mode="modal">
               <Button
                 variant="outline"
                 className="h-12 w-full border-2 border-violet-200 bg-white/50 text-base font-semibold backdrop-blur-sm transition-all hover:scale-[1.02] hover:border-violet-300 hover:bg-gradient-to-r hover:from-violet-50 hover:to-pink-50"

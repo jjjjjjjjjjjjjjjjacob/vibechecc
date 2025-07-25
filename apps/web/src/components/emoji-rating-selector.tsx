@@ -159,12 +159,17 @@ export function EmojiRatingSelector({
                         <span className="text-muted-foreground text-xs">
                           out of 5
                         </span>
-                        {currentEmojiData.count > 0 && (
-                          <span className="text-muted-foreground text-xs">
-                            ({currentEmojiData.count} rating
-                            {currentEmojiData.count !== 1 ? 's' : ''})
-                          </span>
-                        )}
+                        {currentEmojiData.count &&
+                          currentEmojiData.count > 0 && (
+                            <span className="text-muted-foreground text-xs">
+                              ({currentEmojiData.count} rating
+                              {currentEmojiData.count &&
+                              currentEmojiData.count !== 1
+                                ? 's'
+                                : ''}
+                              )
+                            </span>
+                          )}
                       </div>
                       <div className="flex items-center gap-0.5">
                         {[...Array(5)].map((_, i) => (

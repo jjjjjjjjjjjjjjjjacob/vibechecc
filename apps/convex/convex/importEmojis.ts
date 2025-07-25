@@ -288,25 +288,30 @@ const BASIC_EMOJIS = [
 ];
 
 export const importBasicEmojis = action({
-  handler: async (ctx) => {
+  handler: async (
+    ctx
+  ): Promise<{ success: boolean; count?: number; message: string }> => {
+    // eslint-disable-next-line no-console
     console.log(`Importing ${BASIC_EMOJIS.length} basic emojis...`);
 
     try {
-      const result = await ctx.runMutation(api.emojis.importBatch, {
+      const result = (await ctx.runMutation(api.emojis.importBatch, {
         emojis: BASIC_EMOJIS,
-      });
+      })) as { count: number };
 
+      // eslint-disable-next-line no-console
       console.log(`Import complete! Imported ${result.count} new emojis`);
       return {
         success: true,
-        imported: result.count,
+        count: result.count,
         message: `Successfully imported ${result.count} emojis`,
       };
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error importing emojis:', error);
       return {
         success: false,
-        imported: 0,
+        count: 0,
         message: `Error importing emojis: ${error instanceof Error ? error.message : String(error)}`,
       };
     }

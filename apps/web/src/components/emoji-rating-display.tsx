@@ -26,12 +26,7 @@ export function EmojiRatingDisplay({
   emojiColor,
 }: EmojiRatingDisplayProps) {
   const [isHovered, setIsHovered] = React.useState(false);
-  const [isMounted, setIsMounted] = React.useState(false);
   const [localValue, setLocalValue] = React.useState(rating.value);
-
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   React.useEffect(() => {
     setLocalValue(rating.value);
@@ -46,6 +41,8 @@ export function EmojiRatingDisplay({
       className={cn('inline-flex w-full items-center gap-2', className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      role="group"
+      aria-label="Rating display"
     >
       {showScale ? (
         // Show the scale when requested
@@ -58,7 +55,17 @@ export function EmojiRatingDisplay({
               e.stopPropagation();
               handleScaleClick(localValue);
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                handleScaleClick(localValue);
+              }
+            }}
             onMouseLeave={() => setLocalValue(rating.value)}
+            role="button"
+            tabIndex={0}
+            aria-label={`Rate ${localValue} out of 5`}
           >
             <EmojiRatingScale
               emoji={rating.emoji}
@@ -83,6 +90,15 @@ export function EmojiRatingDisplay({
           onClick={() => {
             onEmojiClick?.(rating.emoji, rating.value);
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onEmojiClick?.(rating.emoji, rating.value);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`${rating.emoji} rating ${rating.value} out of 5`}
         >
           <span
             className="data-[hover=true]:animate-wiggle text-base transition-transform duration-500"
@@ -126,10 +142,10 @@ export function TopEmojiRatings({
 
   // Fetch emoji metadata for colors
   const emojis = displayRatings.map((r) => r.emoji);
-  const emojiDataQuery = useQuery(
-    convexQuery(api.emojis.getByEmojis, { emojis }),
-    { enabled: emojis.length > 0 }
-  );
+  const emojiDataQuery = useQuery({
+    ...convexQuery(api.emojis.getByEmojis, { emojis }),
+    enabled: emojis.length > 0,
+  });
   const emojiData = emojiDataQuery.data;
 
   return (

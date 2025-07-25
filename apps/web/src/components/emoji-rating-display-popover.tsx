@@ -6,8 +6,9 @@ import {
 } from '@/components/ui/popover';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
-import { EmojiRatingDisplay, type EmojiRating } from './emoji-rating-display';
+import { EmojiRatingDisplay } from './emoji-rating-display';
 import { TopEmojiRatingsAccordion } from './top-emoji-ratings-accordion';
+import type { EmojiRating } from '@/types';
 
 interface EmojiRatingDisplayPopoverProps {
   rating: EmojiRating;
@@ -34,7 +35,6 @@ export function EmojiRatingDisplayPopover({
         >
           <EmojiRatingDisplay
             rating={rating}
-            mode="compact"
             showScale={true}
             onEmojiClick={onEmojiClick}
           />

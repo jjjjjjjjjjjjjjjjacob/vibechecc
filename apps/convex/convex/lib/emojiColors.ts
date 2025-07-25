@@ -15,7 +15,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 // Emotion/sentiment-based colors
-const SENTIMENT_COLORS = {
+const _SENTIMENT_COLORS = {
   positive: {
     default: '#10B981', // Green
     love: '#EC4899', // Pink

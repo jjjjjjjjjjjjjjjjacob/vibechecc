@@ -37,7 +37,7 @@ export function RatingPopover({
   const isControlled = open !== undefined && onOpenChange !== undefined;
   const actualOpen = isControlled ? open : internalOpen;
   const actualSetOpen = isControlled ? onOpenChange : setInternalOpen;
-  const [rating, setRating] = React.useState(currentRating?.rating || 0);
+  const [rating, setRating] = React.useState(currentRating?.value || 0);
   const [review, setReview] = React.useState(currentRating?.review || '');
   const [useEmojiRating, setUseEmojiRating] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -47,7 +47,7 @@ export function RatingPopover({
 
   React.useEffect(() => {
     if (currentRating) {
-      setRating(currentRating.rating);
+      setRating(currentRating.value);
       setReview(currentRating.review || '');
       setCharacterCount(currentRating.review?.length || 0);
     }
@@ -96,6 +96,7 @@ export function RatingPopover({
       }
     } catch (error) {
       setError('Failed to submit rating. Please try again.');
+      // eslint-disable-next-line no-console
       console.error('Rating submission error:', error);
     }
   };

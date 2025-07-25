@@ -37,7 +37,7 @@ describe('Vibes Mutations', () => {
         userId: mockIdentity.subject,
       });
       const createdVibe = allVibesByCreator.find(
-        (v) =>
+        (v: any) =>
           v.title === mockVibeData.title &&
           v.description === mockVibeData.description &&
           v.createdById === mockIdentity.subject
@@ -82,7 +82,7 @@ describe('Vibes Mutations', () => {
         userId: mockIdentity.subject,
       });
       const createdVibe = allVibesByCreator.find(
-        (v) => v.title === mockVibeDataMinimal.title
+        (v: any) => v.title === mockVibeDataMinimal.title
       );
 
       expect(createdVibe).toBeDefined();
@@ -136,7 +136,9 @@ describe('Vibes Mutations', () => {
       const createdVibes = await t.query(api.vibes.getByUser, {
         userId: mockIdentity.subject,
       });
-      const createdVibe = createdVibes.find((v) => v.title === vibeData.title);
+      const createdVibe = createdVibes.find(
+        (v: any) => v.title === vibeData.title
+      );
 
       expect(createdVibe).toBeDefined();
 
@@ -144,7 +146,8 @@ describe('Vibes Mutations', () => {
         // Now rate the vibe using the real mutation with authentication
         const ratingData = {
           vibeId: createdVibe.id,
-          rating: 5,
+          emoji: '😍',
+          value: 5,
           review: 'Great vibe!',
         };
 
@@ -161,7 +164,8 @@ describe('Vibes Mutations', () => {
 
       const ratingData = {
         vibeId: 'some-vibe-id',
-        rating: 5,
+        emoji: '😍',
+        value: 5,
         review: 'Great vibe!',
       };
 
