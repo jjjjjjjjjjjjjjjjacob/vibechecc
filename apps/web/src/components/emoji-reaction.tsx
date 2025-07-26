@@ -5,6 +5,7 @@ import { useUser } from '@clerk/tanstack-react-start';
 import type { EmojiReaction as EmojiReactionType } from '../types';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { EmojiSearchCommand } from './emoji-search-command';
+import { EmojiRatingPopover } from './emoji-rating-popover';
 import { api } from '@vibechecc/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
@@ -15,7 +16,14 @@ interface EmojiReactionProps {
   className?: string;
   showAddButton?: boolean;
   ratingMode?: boolean; // When true, clicking opens emoji rating popover
-  onRatingOpen?: (emoji: string) => void; // Callback to open rating popover with emoji
+  onRatingSubmit?: (data: {
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+  }) => Promise<void>;
+  vibeTitle?: string;
+  vibeId?: string;
 }
 
 export function EmojiReaction({
@@ -24,17 +32,20 @@ export function EmojiReaction({
   className,
   showAddButton: _showAddButton = false,
   ratingMode = false,
-  onRatingOpen,
+  onRatingSubmit,
+  vibeTitle,
+  vibeId: _vibeId,
 }: EmojiReactionProps) {
   const [isHovered, setIsHovered] = React.useState(false);
+  const [isRatingPopoverOpen, setIsRatingPopoverOpen] = React.useState(false);
   const { user } = useUser();
 
   const hasReacted = user?.id ? reaction.users.includes(user.id) : false;
 
   const handleReact = () => {
     // In rating mode, open the rating popover with this emoji
-    if (ratingMode && onRatingOpen) {
-      onRatingOpen(reaction.emoji);
+    if (ratingMode && onRatingSubmit) {
+      setIsRatingPopoverOpen(true);
       return;
     }
 
@@ -44,7 +55,19 @@ export function EmojiReaction({
     }
   };
 
-  return (
+  const handleRatingSubmit = async (data: {
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+  }) => {
+    if (onRatingSubmit) {
+      await onRatingSubmit(data);
+      setIsRatingPopoverOpen(false);
+    }
+  };
+
+  const buttonContent = (
     <button
       className={cn(
         'relative inline-flex items-center justify-center rounded-full px-2 py-1 text-sm transition-all hover:scale-105 active:scale-95',
@@ -79,6 +102,23 @@ export function EmojiReaction({
       )}
     </button>
   );
+
+  // In rating mode, wrap with EmojiRatingPopover
+  if (ratingMode && onRatingSubmit) {
+    return (
+      <EmojiRatingPopover
+        open={isRatingPopoverOpen}
+        onOpenChange={setIsRatingPopoverOpen}
+        onSubmit={handleRatingSubmit}
+        vibeTitle={vibeTitle}
+        preSelectedEmoji={reaction.emoji}
+      >
+        {buttonContent}
+      </EmojiRatingPopover>
+    );
+  }
+
+  return buttonContent;
 }
 
 interface EmojiReactionsProps {
@@ -88,7 +128,14 @@ interface EmojiReactionsProps {
   showAddButton?: boolean;
   contextKeywords?: string[];
   ratingMode?: boolean; // When true, reactions open rating popovers
-  onRatingOpen?: (emoji: string) => void; // Callback to open rating popover
+  onRatingSubmit?: (data: {
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+  }) => Promise<void>;
+  vibeTitle?: string;
+  vibeId?: string;
 }
 
 interface HorizontalEmojiPickerProps {
@@ -97,6 +144,15 @@ interface HorizontalEmojiPickerProps {
   contextKeywords?: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  ratingMode?: boolean;
+  onRatingSubmit?: (data: {
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+  }) => Promise<void>;
+  vibeTitle?: string;
+  vibeId?: string;
 }
 
 function HorizontalEmojiPicker({
@@ -105,11 +161,19 @@ function HorizontalEmojiPicker({
   contextKeywords: _contextKeywords = [],
   open,
   onOpenChange: _onOpenChange,
+  ratingMode = false,
+  onRatingSubmit,
+  vibeTitle,
+  vibeId: _vibeId,
 }: HorizontalEmojiPickerProps) {
   const [searchValue, setSearchValue] = React.useState('');
   const [isSearchExpanded, setIsSearchExpanded] = React.useState(false);
   const [showFullPicker, setShowFullPicker] = React.useState(false);
   const [showSearchResults, setShowSearchResults] = React.useState(false);
+  const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
+    string | null
+  >(null);
+  const [isRatingPopoverOpen, setIsRatingPopoverOpen] = React.useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   // Get popular emojis from database
@@ -140,8 +204,30 @@ function HorizontalEmojiPicker({
   }, [searchResults?.data]);
 
   const handleEmojiClick = (emoji: string) => {
-    onEmojiSelect(emoji);
-    onClose();
+    if (ratingMode && onRatingSubmit) {
+      // In rating mode, open rating popover instead of quick reaction
+      setSelectedEmojiForRating(emoji);
+      setIsRatingPopoverOpen(true);
+      // Don't close the picker yet - let the rating popover handle it
+    } else {
+      // Normal reaction mode
+      onEmojiSelect(emoji);
+      onClose();
+    }
+  };
+
+  const handleRatingSubmit = async (data: {
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+  }) => {
+    if (onRatingSubmit) {
+      await onRatingSubmit(data);
+      setIsRatingPopoverOpen(false);
+      setSelectedEmojiForRating(null);
+      onClose(); // Close the emoji picker after rating is submitted
+    }
   };
 
   const handleSearchClick = () => {
@@ -352,7 +438,7 @@ function HorizontalEmojiPicker({
     </div>
   );
 
-  return (
+  const pickerContent = (
     <PopoverContent
       className={cn(
         'h-14 w-80 overflow-hidden p-3 transition-[height]',
@@ -368,6 +454,26 @@ function HorizontalEmojiPicker({
       {showFullPicker ? fullPicker : horizontalPicker}
     </PopoverContent>
   );
+
+  // If in rating mode and an emoji is selected for rating, wrap with rating popover
+  if (ratingMode && selectedEmojiForRating && onRatingSubmit) {
+    return (
+      <>
+        {pickerContent}
+        <EmojiRatingPopover
+          open={isRatingPopoverOpen}
+          onOpenChange={setIsRatingPopoverOpen}
+          onSubmit={handleRatingSubmit}
+          vibeTitle={vibeTitle}
+          preSelectedEmoji={selectedEmojiForRating}
+        >
+          <div style={{ display: 'none' }} />
+        </EmojiRatingPopover>
+      </>
+    );
+  }
+
+  return pickerContent;
 }
 
 export function EmojiReactions({
@@ -377,12 +483,16 @@ export function EmojiReactions({
   showAddButton = true,
   contextKeywords = [],
   ratingMode = false,
-  onRatingOpen,
+  onRatingSubmit,
+  vibeTitle,
+  vibeId,
 }: EmojiReactionsProps) {
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
 
   const handleAddEmoji = (emoji: string) => {
-    if (onReact) {
+    // This should only be called in non-rating mode now
+    // In rating mode, the HorizontalEmojiPicker handles the emoji selection directly
+    if (onReact && !ratingMode) {
       onReact(emoji);
     }
   };
@@ -399,7 +509,9 @@ export function EmojiReactions({
           reaction={reaction}
           onReact={onReact}
           ratingMode={ratingMode}
-          onRatingOpen={onRatingOpen}
+          onRatingSubmit={onRatingSubmit}
+          vibeTitle={vibeTitle}
+          vibeId={vibeId}
         />
       ))}
 
@@ -425,6 +537,10 @@ export function EmojiReactions({
             contextKeywords={contextKeywords}
             open={showEmojiPicker}
             onOpenChange={setShowEmojiPicker}
+            ratingMode={ratingMode}
+            onRatingSubmit={onRatingSubmit}
+            vibeTitle={vibeTitle}
+            vibeId={vibeId}
           />
         </Popover>
       )}

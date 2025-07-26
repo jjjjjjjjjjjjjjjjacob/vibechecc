@@ -44,7 +44,7 @@ const createWrapper = () => {
 
 describe('EmojiReaction', () => {
   const mockOnReact = vi.fn();
-  const mockOnRatingOpen = vi.fn();
+  const mockOnRatingSubmit = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -106,22 +106,24 @@ describe('EmojiReaction', () => {
 
     fireEvent.click(screen.getByRole('button'));
     expect(mockOnReact).toHaveBeenCalledWith('🔥');
-    expect(mockOnRatingOpen).not.toHaveBeenCalled();
+    expect(mockOnRatingSubmit).not.toHaveBeenCalled();
   });
 
-  it('calls onRatingOpen when clicked in rating mode', () => {
+  it('opens rating popover when clicked in rating mode', () => {
     render(
       <EmojiReaction
         reaction={baseReaction}
         onReact={mockOnReact}
         ratingMode={true}
-        onRatingOpen={mockOnRatingOpen}
+        onRatingSubmit={mockOnRatingSubmit}
+        vibeTitle="Test Vibe"
       />,
       { wrapper: createWrapper() }
     );
 
     fireEvent.click(screen.getByRole('button'));
-    expect(mockOnRatingOpen).toHaveBeenCalledWith('🔥');
+    // The rating popover should open (we can check by looking for the dialog)
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(mockOnReact).not.toHaveBeenCalled();
   });
 
@@ -148,7 +150,7 @@ describe('EmojiReaction', () => {
 
 describe('EmojiReactions', () => {
   const mockOnReact = vi.fn();
-  const mockOnRatingOpen = vi.fn();
+  const mockOnRatingSubmit = vi.fn();
 
   const reactions: EmojiReactionType[] = [
     { emoji: '🔥', count: 5, users: ['user1', 'user2'] },
@@ -222,12 +224,13 @@ describe('EmojiReactions', () => {
     });
   });
 
-  it('calls onReact when emoji is selected from picker', async () => {
+  it('calls onReact when emoji is selected from picker in normal mode', async () => {
     render(
       <EmojiReactions
         reactions={reactions}
         onReact={mockOnReact}
         showAddButton={true}
+        ratingMode={false}
       />,
       { wrapper: createWrapper() }
     );
@@ -265,6 +268,59 @@ describe('EmojiReactions', () => {
       const emojiText =
         firstEmojiButton.querySelector('.font-noto-color')?.textContent;
       expect(mockOnReact).toHaveBeenCalledWith(emojiText);
+    } else {
+      // If no emoji button found, fail the test
+      expect(firstEmojiButton).toBeTruthy();
+    }
+  });
+
+  it('opens rating popover when emoji is selected from picker in rating mode', async () => {
+    render(
+      <EmojiReactions
+        reactions={reactions}
+        onReact={mockOnReact}
+        showAddButton={true}
+        ratingMode={true}
+        onRatingSubmit={mockOnRatingSubmit}
+        vibeTitle="Test Vibe"
+      />,
+      { wrapper: createWrapper() }
+    );
+
+    // Open picker
+    fireEvent.click(screen.getByLabelText('Add reaction'));
+
+    // Wait for picker to open
+    await waitFor(() => {
+      const picker = document.querySelector('[data-slot="popover-content"]');
+      expect(picker).toBeInTheDocument();
+    });
+
+    // The picker starts in horizontal mode - we need to click the chevron to get full picker
+    const showFullPickerButton = screen.getByLabelText(
+      'Show full emoji picker'
+    );
+    fireEvent.click(showFullPickerButton);
+
+    // Wait for the full picker to load with emojis
+    await waitFor(() => {
+      const picker = document.querySelector('[data-slot="popover-content"]');
+      const emojiButtons = picker?.querySelectorAll('[cmdk-item]');
+      expect(emojiButtons?.length).toBeGreaterThan(0);
+    });
+
+    // Click the first emoji from the picker
+    const picker = document.querySelector('[data-slot="popover-content"]');
+    const firstEmojiButton = picker?.querySelector('[cmdk-item]');
+
+    if (firstEmojiButton) {
+      fireEvent.click(firstEmojiButton);
+
+      // Should open rating popover instead of calling onReact
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+      expect(mockOnReact).not.toHaveBeenCalled();
     } else {
       // If no emoji button found, fail the test
       expect(firstEmojiButton).toBeTruthy();
@@ -323,7 +379,8 @@ describe('EmojiReactions', () => {
         reactions={reactions}
         onReact={mockOnReact}
         ratingMode={true}
-        onRatingOpen={mockOnRatingOpen}
+        onRatingSubmit={mockOnRatingSubmit}
+        vibeTitle="Test Vibe"
       />,
       { wrapper: createWrapper() }
     );
@@ -331,8 +388,8 @@ describe('EmojiReactions', () => {
     // Click on a reaction
     fireEvent.click(screen.getByText('🔥').closest('button')!);
 
-    // Should call onRatingOpen, not onReact
-    expect(mockOnRatingOpen).toHaveBeenCalledWith('🔥');
+    // Should open rating popover, not call onReact
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(mockOnReact).not.toHaveBeenCalled();
   });
 

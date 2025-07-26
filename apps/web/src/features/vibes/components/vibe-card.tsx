@@ -319,7 +319,9 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
                   onReact={handleQuickReact}
                   showAddButton={true}
                   ratingMode={true}
-                  onRatingOpen={handleEmojiRatingClick}
+                  onRatingSubmit={handleEmojiRating}
+                  vibeTitle={vibe.title}
+                  vibeId={vibe.id}
                 />
               ) : (
                 <button
