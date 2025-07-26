@@ -64,7 +64,7 @@ function Home() {
               discover and share vibes
             </h1>
             <p className="mb-6 text-lg opacity-90 md:text-xl">
-              welcome to <strong>vibechecc</strong>, where you can discover,
+              welcome to <strong>viberater</strong>, where you can discover,
               share, and rate vibes from around the world
             </p>
             <SignedIn>
