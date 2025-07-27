@@ -31,7 +31,7 @@ resource "cloudflare_workers_script" "frontend" {
   }
 }
 
-# The route that triggers the worker (e.g., viberater.app/*)
+# The route that triggers the worker (e.g., viberater.vip/*)
 resource "cloudflare_workers_route" "frontend" {
   zone_id     = var.cloudflare_zone_id
   pattern     = "${var.cloudflare_worker_hostname}/*"

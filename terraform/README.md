@@ -22,9 +22,9 @@ Infrastructure is managed by Terraform and deployed to Cloudflare. Key resources
 
 ## Environments
 
-- `production`: viberater.app
-- `development`: dev.viberater.app
-- `ephemeral`: pr-{number}.viberater.app (PR previews)
+- `production`: viberater.vip
+- `development`: dev.viberater.vip
+- `ephemeral`: pr-{number}.viberater.vip (PR previews)
 
 ---
 
