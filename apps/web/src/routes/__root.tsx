@@ -13,7 +13,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import * as React from 'react';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from '@/components/ui/sonner';
 import type { QueryClient } from '@tanstack/react-query';
 import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
 import { NotFound } from '@/components/not-found';
@@ -28,6 +28,7 @@ import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { ConvexQueryClient } from '@convex-dev/react-query';
+import { cn } from '@/utils';
 
 // Server function to fetch Clerk auth and get Convex token
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -132,8 +133,8 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       ...seo({
-        title: 'vibechecc | share and discover vibes',
-        description: `vibechecc is a platform for sharing and discovering vibes. rate, react, and share your favorite vibes with the world.`,
+        title: 'viberater | share and discover vibes',
+        description: `viberater is a platform for sharing and discovering vibes. rate, react, and share your favorite vibes with the world.`,
       }),
     ],
     links: [
@@ -157,11 +158,6 @@ export const Route = createRootRouteWithContext<{
       },
       { rel: 'manifest', href: '/site.webmanifest' },
       { rel: 'icon', href: '/favicon.ico' },
-      // Google Font for our app
-      {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-      },
     ],
   }),
   beforeLoad: async (ctx) => {
@@ -242,7 +238,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn('font-sans')}>
       <head>
         <HeadContent />
       </head>
@@ -255,12 +251,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               <Header />
               <LoadingIndicator />
 
-              <main className="flex-1">{children}</main>
+              <main className="mb-4 flex-1">{children}</main>
 
               <footer className="bg-background border-t py-6">
                 <div className="container mx-auto px-4">
                   <p className="text-muted-foreground text-center text-sm">
-                    © {new Date().getFullYear()} vibechecc. all rights
+                    © {new Date().getFullYear()} viberater. all rights
                     reserved.
                   </p>
                 </div>

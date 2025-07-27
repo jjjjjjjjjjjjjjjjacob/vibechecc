@@ -1,11 +1,63 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* Geist Font Definitions */
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('/fonts/GeistSans-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Emoji';
+  src: url('/fonts/NotoEmoji-VariableFont_wght.ttf');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Color Emoji';
+  src: url('/fonts/NotoColorEmoji-Regular.ttf');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Doto';
+  src: url('/fonts/Doto-VariableFont_ROND,wght.ttf');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* Global themes */
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
+  --font-family-sans:
+    'Geist Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Emoji',
+    'Noto Color Emoji', sans-serif;
+  --font-family-mono:
+    'Geist Mono', 'Inter Mono', 'SF Mono', Monaco, 'Cascadia Code',
+    'Roboto Mono', Menlo, Consolas, 'Courier New', monospace;
+  --font-geist: 'Geist Sans';
+  --font-geist-mono: 'Geist Mono';
+  --font-doto: 'Doto';
+  --font-noto: 'Noto Emoji';
+  --font-noto-color: 'Noto Color Emoji';
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
@@ -116,14 +168,41 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50 cursor-default;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
 @layer utilities {
+  .font-sans {
+    font-family: var(--font-family-sans);
+  }
+
+  .font-mono {
+    font-family: var(--font-family-mono);
+  }
+
+  .font-geist {
+    font-family: var(--font-geist);
+  }
+
+  .font-geist-mono {
+    font-family: var(--font-geist-mono);
+  }
+
+  *::-webkit-scrollbar {
+    @apply w-2 bg-transparent;
+  }
+  *::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -141,6 +220,128 @@
   .bg-noise-pattern {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+}
+
+/* Accordion animations */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* Wiggle animation for emojis */
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+/* Shimmy animation for rating */
+@keyframes shimmy {
+  0% {
+    transform: translateX(0) scale(1.05);
+  }
+  25% {
+    transform: translateX(-2px) scale(1.05);
+  }
+  75% {
+    transform: translateX(2px) scale(1.05);
+  }
+  100% {
+    transform: translateX(0) scale(1.05);
+  }
+}
+
+/* Pulse scale animation for rating selection */
+@keyframes pulse-scale {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Number pop animation */
+@keyframes number-pop {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Fade in down animation for CTA */
+@keyframes fade-in-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+}
+
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 0.5s ease-in-out;
+}
+
+.animate-number-pop {
+  animation: number-pop 0.5s ease-out;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.3s ease-out;
 }
 
 .container {

@@ -11,7 +11,7 @@ import {
   useCompleteOnboardingMutation,
 } from '@/queries';
 import { useUser } from '@clerk/tanstack-react-start';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 
 export function OnboardingFlow() {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ export function OnboardingFlow() {
   const handleSkip = async () => {
     try {
       await completeOnboardingMutation.mutateAsync({});
-      toast.success('Welcome to vibechecc!');
+      toast.success('Welcome to viberater!');
       navigate({ to: '/' });
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -135,7 +135,7 @@ export function OnboardingFlow() {
       // Execute all updates in parallel
       await Promise.all(promises);
 
-      toast.success('Welcome to vibechecc! 🎉');
+      toast.success('Welcome to viberater! 🎉');
       navigate({ to: '/' });
     } catch (error) {
       // eslint-disable-next-line no-console

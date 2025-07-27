@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
+import { TagInput } from '@/components/tag-input';
+import { cn } from '@/utils/tailwind-utils';
+import { Circle, Sparkles } from 'lucide-react';
+import '@/styles/create-vibe.css';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -38,39 +41,10 @@ function CreateVibe() {
   const { trackEvents } = usePostHog();
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [image, setImage] = React.useState('');
   const [tags, setTags] = React.useState<string[]>([]);
-  const [tagInput, setTagInput] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState('');
   const createVibeMutation = useCreateVibeMutation();
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          setImage(e.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
-        setTagInput('');
-      }
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +66,6 @@ function CreateVibe() {
       const result = await createVibeMutation.mutateAsync({
         title: title.trim(),
         description: description.trim(),
-        image: image || undefined,
         tags: tags.length > 0 ? tags : undefined,
       });
 
@@ -112,178 +85,143 @@ function CreateVibe() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mx-auto max-w-2xl">
-        <h1 className="mb-6 text-3xl font-bold lowercase">create a new vibe</h1>
-
-        {error && (
-          <div className="bg-destructive/10 border-destructive/20 text-destructive mb-4 rounded-lg border px-4 py-3">
-            <p>{error}</p>
+    <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
+      <div className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="mx-auto max-w-2xl">
+          {/* Header with gradient text */}
+          <div className="mb-6 text-center">
+            <h1 className="animate-gradient-text bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md drop-shadow-purple-500/50 sm:text-4xl">
+              create a new vibe
+            </h1>
+            <p className="text-muted-foreground mt-2 text-sm">
+              share your moment bc why not
+            </p>
           </div>
-        )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="lowercase">vibe details</CardTitle>
-          </CardHeader>
-          <CardContent>
+          {error && (
+            <div className="bg-destructive/10 border-destructive/20 text-destructive mb-6 rounded-xl border px-4 py-3 backdrop-blur">
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Main form card with backdrop blur */}
+          <div className="bg-background/90 animate-in fade-in-0 slide-in-from-bottom-4 rounded-2xl border-none p-6 shadow-2xl backdrop-blur duration-500 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">title *</Label>
+              {/* Title Section */}
+              <div className="space-y-3">
+                <Label htmlFor="title" className="text-base font-medium">
+                  vibe title
+                  <span className="text-muted-foreground ml-1 font-normal">
+                    (required)
+                  </span>
+                </Label>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="give your vibe a catchy title"
+                  className={cn(
+                    'input-glow h-11 border-2 bg-transparent text-base transition-all sm:h-12',
+                    'focus:border-purple-500 focus:ring-purple-500/20',
+                    title && 'border-purple-500/50'
+                  )}
                   required
                 />
+                <p className="text-muted-foreground text-xs">
+                  make it memorable and lowercase
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">description *</Label>
+              {/* Description Section */}
+              <div className="space-y-3">
+                <Label htmlFor="description" className="text-base font-medium">
+                  tell the story
+                  <span className="text-muted-foreground ml-1 font-normal">
+                    (required)
+                  </span>
+                </Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="describe your vibe in detail"
-                  rows={6}
+                  placeholder="describe your vibe in detail..."
+                  rows={5}
+                  className={cn(
+                    'textarea-glow resize-none border-2 bg-transparent text-base transition-all',
+                    'focus:border-pink-500 focus:ring-pink-500/20',
+                    description && 'border-pink-500/50'
+                  )}
                   required
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image">image</Label>
-                <div className="flex items-center space-x-4">
-                  <label className="border-input hover:border-primary flex h-32 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors">
-                    <div className="space-y-1 text-center">
-                      <svg
-                        className="text-muted-foreground mx-auto h-12 w-12"
-                        stroke="currentColor"
-                        fill="none"
-                        viewBox="0 0 48 48"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <div className="text-muted-foreground text-sm">
-                        <span className="font-medium">click to upload</span> or
-                        drag and drop
-                      </div>
-                    </div>
-                    <input
-                      id="image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
-
-                  {image && (
-                    <div className="relative h-32 w-32 overflow-hidden rounded-lg">
-                      <img
-                        src={image}
-                        alt="Preview"
-                        className="h-full w-full object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => setImage('')}
-                        className="absolute top-1 right-1 h-6 w-6"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </Button>
-                    </div>
-                  )}
+                <div className="text-muted-foreground flex items-center justify-between text-xs">
+                  <span>be authentic, be you</span>
+                  <span>{description.length} characters</span>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="tags">tags</Label>
-                <div className="mb-2 flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <div
-                      key={tag}
-                      className="bg-primary/10 text-primary flex items-center rounded-full px-2 py-1 text-sm"
-                    >
-                      #{tag}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeTag(tag)}
-                        className="hover:bg-destructive/20 ml-1 h-4 w-4 p-0"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                <Input
-                  id="tags"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  placeholder="add tags (press enter to add)"
+              {/* Tags Section */}
+              <div className="space-y-3">
+                <Label htmlFor="tags" className="text-base font-medium">
+                  tag your vibe
+                  <span className="text-muted-foreground ml-1 font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <TagInput
+                  tags={tags}
+                  onTagsChange={setTags}
+                  placeholder="add tags to help others discover your vibe..."
                 />
-                <p className="text-muted-foreground text-sm">
-                  press enter to add a tag. tags help others discover your vibe.
+                <p className="text-muted-foreground text-xs">
+                  use tags to categorize your vibe
                 </p>
               </div>
 
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1"
-                >
-                  {isSubmitting ? 'creating vibe...' : 'create vibe'}
-                </Button>
+              {/* Action Buttons */}
+              <div className="flex gap-3 border-t pt-6">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => navigate({ to: '/' })}
                   disabled={isSubmitting}
+                  className="h-11 flex-1 transition-all hover:scale-105 sm:h-12"
                 >
                   cancel
                 </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    isSubmitting || !title.trim() || !description.trim()
+                  }
+                  className={cn(
+                    'h-11 flex-1 transition-all sm:h-12',
+                    'bg-gradient-to-r from-purple-600 to-pink-600',
+                    'hover:from-purple-700 hover:to-pink-700',
+                    'disabled:from-gray-600 disabled:to-gray-600',
+                    !isSubmitting && 'hover:scale-105'
+                  )}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Circle className="mr-2 h-4 w-4 animate-spin" />
+                      creating vibe...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      create vibe
+                    </>
+                  )}
+                </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Bottom hint */}
+          <p className="text-muted-foreground mt-6 text-center text-xs">
+            your vibe will be visible to everyone on viberater
+          </p>
+        </div>
       </div>
     </div>
   );

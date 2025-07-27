@@ -37,7 +37,7 @@ describe('Vibes Mutations', () => {
         userId: mockIdentity.subject,
       });
       const createdVibe = allVibesByCreator.find(
-        (v) =>
+        (v: { title?: string; description?: string; createdById?: string }) =>
           v.title === mockVibeData.title &&
           v.description === mockVibeData.description &&
           v.createdById === mockIdentity.subject
@@ -82,7 +82,7 @@ describe('Vibes Mutations', () => {
         userId: mockIdentity.subject,
       });
       const createdVibe = allVibesByCreator.find(
-        (v) => v.title === mockVibeDataMinimal.title
+        (v: { title?: string }) => v.title === mockVibeDataMinimal.title
       );
 
       expect(createdVibe).toBeDefined();
@@ -136,7 +136,9 @@ describe('Vibes Mutations', () => {
       const createdVibes = await t.query(api.vibes.getByUser, {
         userId: mockIdentity.subject,
       });
-      const createdVibe = createdVibes.find((v) => v.title === vibeData.title);
+      const createdVibe = createdVibes.find(
+        (v: { title?: string; id?: string }) => v.title === vibeData.title
+      );
 
       expect(createdVibe).toBeDefined();
 
@@ -144,7 +146,8 @@ describe('Vibes Mutations', () => {
         // Now rate the vibe using the real mutation with authentication
         const ratingData = {
           vibeId: createdVibe.id,
-          rating: 5,
+          emoji: '😍',
+          value: 5,
           review: 'Great vibe!',
         };
 
@@ -161,7 +164,8 @@ describe('Vibes Mutations', () => {
 
       const ratingData = {
         vibeId: 'some-vibe-id',
-        rating: 5,
+        emoji: '😍',
+        value: 5,
         review: 'Great vibe!',
       };
 
@@ -169,65 +173,6 @@ describe('Vibes Mutations', () => {
       await expect(t.mutation(api.vibes.addRating, ratingData)).rejects.toThrow(
         'You must be logged in to rate a vibe'
       );
-    });
-  });
-
-  describe('reactToVibe', () => {
-    it('should allow users to react to a vibe', async () => {
-      const t = convexTest(schema, modules);
-
-      // Mock an authenticated user
-      const mockIdentity = {
-        subject: 'user_test_id_101',
-        tokenIdentifier: 'test_token_101',
-        email: 'reaction@example.com',
-        givenName: 'Reaction',
-        familyName: 'User',
-      };
-
-      // First create a vibe to react to
-      const vibeData = {
-        title: 'Vibe to React To',
-        description: 'This vibe will get reactions.',
-      };
-
-      await t.withIdentity(mockIdentity).mutation(api.vibes.create, vibeData);
-
-      // Get the created vibe to get its custom ID
-      const createdVibes = await t.query(api.vibes.getByUser, {
-        userId: mockIdentity.subject,
-      });
-      const createdVibe = createdVibes.find((v) => v.title === vibeData.title);
-
-      expect(createdVibe).toBeDefined();
-
-      if (createdVibe) {
-        // Now react to the vibe using the real mutation with authentication
-        const reactionData = {
-          vibeId: createdVibe.id,
-          emoji: '😍',
-        };
-
-        const result = await t
-          .withIdentity(mockIdentity)
-          .mutation(api.vibes.reactToVibe, reactionData);
-
-        expect(result.added).toBe(true);
-      }
-    });
-
-    it('should throw an error when not authenticated', async () => {
-      const t = convexTest(schema, modules);
-
-      const reactionData = {
-        vibeId: 'some-vibe-id',
-        emoji: '😍',
-      };
-
-      // Try to react without authentication using the auth-required mutation
-      await expect(
-        t.mutation(api.vibes.reactToVibe, reactionData)
-      ).rejects.toThrow('You must be logged in to react to a vibe');
     });
   });
 });

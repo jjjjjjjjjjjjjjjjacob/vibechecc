@@ -1,7 +1,7 @@
 import { CommandItem } from '@/components/ui/command';
 import { Hash } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import type { TagSearchResult } from '@vibechecc/types';
+import type { TagSearchResult } from '@viberater/types';
 
 interface TagResultProps {
   result: TagSearchResult;

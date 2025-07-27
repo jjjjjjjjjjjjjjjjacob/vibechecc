@@ -5,7 +5,7 @@ import type {
   TagSearchResult,
   ActionSearchResult,
   SearchSuggestion,
-} from '@vibechecc/types';
+} from '@viberater/types';
 
 export const mockVibeResults: VibeSearchResult[] = [
   {

@@ -1,8 +1,8 @@
-# vibechecc Infrastructure
+# viberater Infrastructure
 
 > **Note:** For monorepo setup, scripts, and app details, see the [root README.md](../README.md).
 
-This directory contains the Terraform configuration for the vibechecc application.
+This directory contains the Terraform configuration for the viberater application.
 
 ## Overview
 
@@ -22,9 +22,9 @@ Infrastructure is managed by Terraform and deployed to Cloudflare. Key resources
 
 ## Environments
 
-- `production`: vibechecc.app
-- `development`: dev.vibechecc.app
-- `ephemeral`: pr-{number}.vibechecc.app (PR previews)
+- `production`: viberater.vip
+- `development`: dev.viberater.vip
+- `ephemeral`: pr-{number}.viberater.vip (PR previews)
 
 ---
 

@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X, Star, Calendar, Tag } from 'lucide-react';
-import type { SearchFilters } from '@vibechecc/types';
+import type { SearchFilters } from '@viberater/types';
 
 interface ActiveFiltersBarProps {
   filters: Partial<SearchFilters>;

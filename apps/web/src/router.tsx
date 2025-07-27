@@ -4,10 +4,10 @@ import {
   QueryClient,
   notifyManager,
 } from '@tanstack/react-query';
-import { ConvexProvider, ConvexReactClient } from 'convex/react';
+import { ConvexReactClient } from 'convex/react';
 import { ConvexQueryClient } from '@convex-dev/react-query';
 import { routerWithQueryClient } from '@tanstack/react-router-with-query';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 import { routeTree } from './routeTree.gen';
 import { DefaultCatchBoundary } from './components/default-catch-boundary';
 import { NotFound } from './components/not-found';
@@ -38,6 +38,7 @@ export function createRouter() {
       },
     }),
   });
+
   convexQueryClient.connect(queryClient);
 
   const router = routerWithQueryClient(
@@ -47,11 +48,6 @@ export function createRouter() {
       defaultErrorComponent: DefaultCatchBoundary,
       defaultNotFoundComponent: () => <NotFound />,
       context: { queryClient, convexClient, convexQueryClient },
-      Wrap: ({ children }: { children: React.ReactNode }) => (
-        <ConvexProvider client={convexQueryClient.convexClient}>
-          {children}
-        </ConvexProvider>
-      ),
       scrollRestoration: true,
     }),
     queryClient

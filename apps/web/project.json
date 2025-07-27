@@ -1,9 +1,9 @@
 {
-  "name": "@vibechecc/web",
+  "name": "@viberater/web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/web",
-  "inputs": ["@vibechecc/convex", "@vibechecc/types"],
+  "inputs": ["@viberater/convex", "@viberater/types"],
   "targets": {
     "dev": {
       "executor": "nx:run-commands",
@@ -18,7 +18,7 @@
         "command": "bun run build",
         "cwd": "{projectRoot}"
       },
-      "dependsOn": ["convex:build"]
+      "dependsOn": ["^build", "convex:build"]
     },
     "start": {
       "executor": "nx:run-commands",
@@ -54,7 +54,8 @@
       "options": {
         "command": "bun tsc --noEmit --project tsconfig.json",
         "cwd": "{projectRoot}"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "deploy": {
       "executor": "nx:run-commands",

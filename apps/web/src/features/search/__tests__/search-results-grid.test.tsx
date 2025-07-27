@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { SearchResultsGrid } from '../components/search-results-grid';
-import type { SearchResult } from '@vibechecc/types';
+import type { SearchResult } from '@viberater/types';
 
 // Mock the child components
 vi.mock('../components/search-result-card', () => ({
@@ -18,10 +18,20 @@ vi.mock('../components/search-empty-state', () => ({
   SearchEmptyState: () => <div data-testid="empty-state">No results found</div>,
 }));
 
-vi.mock('@/components/ui/skeleton', () => ({
-  Skeleton: ({ className }: { className?: string }) => (
-    <div data-testid="skeleton" className={className}>
-      Loading...
+vi.mock('../components/search-loading', () => ({
+  SearchLoading: ({ itemCount }: { itemCount?: number }) => (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: itemCount || 6 }).map((_, i) => (
+        <div key={i} data-testid="loading-card">
+          <div data-testid="skeleton" className="aspect-[4/3]">
+            Loading...
+          </div>
+          <div data-testid="skeleton">Loading...</div>
+          <div data-testid="skeleton">Loading...</div>
+          <div data-testid="skeleton">Loading...</div>
+          <div data-testid="skeleton">Loading...</div>
+        </div>
+      ))}
     </div>
   ),
 }));
@@ -35,9 +45,11 @@ describe('SearchResultsGrid', () => {
     it('displays loading skeletons when loading', () => {
       render(<SearchResultsGrid loading={true} />);
 
+      const loadingCards = screen.getAllByTestId('loading-card');
+      expect(loadingCards).toHaveLength(9); // SearchLoading renders 9 cards by default
+
       const skeletons = screen.getAllByTestId('skeleton');
-      expect(skeletons).toHaveLength(45); // 9 cards * 5 skeletons each (image + title + subtitle + avatar + username)
-      expect(skeletons[0]).toHaveClass('aspect-[4/3]');
+      expect(skeletons).toHaveLength(45); // 9 cards * 5 skeletons each
     });
 
     it('displays correct grid layout for loading state', () => {

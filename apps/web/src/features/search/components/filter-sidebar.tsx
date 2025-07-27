@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { SearchFilters } from './search-filters';
-import type { SearchFilters as SearchFiltersType } from '@vibechecc/types';
+import type { SearchFilters as SearchFiltersType } from '@viberater/types';
 
 interface FilterSidebarProps {
   filters: Partial<SearchFiltersType>;

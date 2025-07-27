@@ -59,22 +59,44 @@ const schema = defineSchema({
   ratings: defineTable({
     vibeId: v.string(),
     userId: v.string(),
-    rating: v.number(),
-    review: v.optional(v.string()),
-    date: v.string(),
+    emoji: v.string(), // REQUIRED - the emoji used
+    value: v.number(), // REQUIRED - 1-5 rating value
+    review: v.string(), // REQUIRED - text review
+    tags: v.optional(v.array(v.string())), // Associated tags from emoji metadata
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
   })
     .index('vibe', ['vibeId'])
     .index('user', ['userId'])
-    .index('vibeAndUser', ['vibeId', 'userId']),
-
-  reactions: defineTable({
-    vibeId: v.string(),
-    emoji: v.string(),
-    userId: v.string(),
-  })
-    .index('vibe', ['vibeId'])
+    .index('vibeAndUser', ['vibeId', 'userId'])
     .index('vibeAndEmoji', ['vibeId', 'emoji'])
-    .index('userAndVibe', ['userId', 'vibeId']),
+    .index('byCreatedAt', ['createdAt']),
+
+  // Emojis table to store all available emojis with metadata
+  emojis: defineTable({
+    emoji: v.string(),
+    name: v.string(),
+    keywords: v.array(v.string()),
+    category: v.string(),
+    color: v.string(), // Hex color for UI theming
+    tags: v.optional(v.array(v.string())),
+    sentiment: v.optional(
+      v.union(
+        v.literal('positive'),
+        v.literal('negative'),
+        v.literal('neutral')
+      )
+    ),
+  })
+    .index('byEmoji', ['emoji'])
+    .index('byCategory', ['category'])
+    .searchIndex('search', {
+      searchField: 'name',
+      filterFields: ['category', 'keywords'],
+    }),
+
+  // Deprecated - will be removed after migration
+  // emojiRatingMetadata table is being replaced by emojis table
 
   searchHistory: defineTable({
     userId: v.string(),
@@ -95,6 +117,14 @@ const schema = defineSchema({
     .index('byCount', ['count'])
     .index('byTerm', ['term']),
 
+  // Migration tracking table
+  migrations: defineTable({
+    name: v.string(),
+    completedAt: v.string(),
+    status: v.union(v.literal('completed'), v.literal('failed')),
+    error: v.optional(v.string()),
+  }).index('byName', ['name']),
+
   searchMetrics: defineTable({
     timestamp: v.number(),
     type: v.union(v.literal('search'), v.literal('click'), v.literal('error')),
@@ -113,13 +143,26 @@ const schema = defineSchema({
     .index('by_timestamp', ['timestamp'])
     .index('by_user', ['userId', 'timestamp'])
     .index('by_query', ['query', 'timestamp']),
+
+  // Tags table to track all unique tags
+  tags: defineTable({
+    name: v.string(), // The tag name (lowercase, normalized)
+    count: v.number(), // Number of vibes using this tag
+    createdAt: v.number(), // Timestamp when first created
+    lastUsed: v.number(), // Timestamp when last used
+  })
+    .index('byName', ['name'])
+    .index('byCount', ['count'])
+    .searchIndex('search', {
+      searchField: 'name',
+    }),
 });
 export default schema;
 
 const _user = schema.tables.users.validator;
 const vibe = schema.tables.vibes.validator;
 const rating = schema.tables.ratings.validator;
-const reaction = schema.tables.reactions.validator;
+const _emoji = schema.tables.emojis.validator;
 const _searchHistory = schema.tables.searchHistory.validator;
 const _trendingSearches = schema.tables.trendingSearches.validator;
 const _searchMetrics = schema.tables.searchMetrics.validator;
@@ -127,7 +170,7 @@ const _searchMetrics = schema.tables.searchMetrics.validator;
 export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
 export type Rating = Infer<typeof rating>;
-export type Reaction = Infer<typeof reaction>;
+export type Emoji = Infer<typeof _emoji>;
 export type SearchHistory = Infer<typeof _searchHistory>;
 export type TrendingSearches = Infer<typeof _trendingSearches>;
 export type SearchMetrics = Infer<typeof _searchMetrics>;
@@ -143,12 +186,11 @@ export const createVibeSchema = v.object({
 export const createRatingSchema = v.object({
   vibeId: rating.fields.vibeId,
   userId: rating.fields.userId,
-  rating: rating.fields.rating,
-  review: v.optional(rating.fields.review),
+  emoji: rating.fields.emoji,
+  value: rating.fields.value,
+  review: rating.fields.review,
+  tags: v.optional(rating.fields.tags),
 });
 
-export const reactToVibeSchema = v.object({
-  vibeId: reaction.fields.vibeId,
-  emoji: reaction.fields.emoji,
-  userId: reaction.fields.userId,
-});
+// Deprecated - reactions are now part of ratings
+// export const reactToVibeSchema = v.object({...})

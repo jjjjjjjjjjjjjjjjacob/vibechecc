@@ -41,7 +41,7 @@ export function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <Link to="/" className="flex items-center gap-2">
             <span className="bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-xl font-bold text-transparent">
-              vibechecc
+              viberater
             </span>
           </Link>
 
@@ -51,6 +51,17 @@ export function Header() {
               className={cn(
                 'hover:text-foreground/80 lowercase transition-colors',
                 location.pathname === '/'
+                  ? 'text-foreground font-medium'
+                  : 'text-foreground/60'
+              )}
+            >
+              home
+            </Link>
+            <Link
+              to="/discover"
+              className={cn(
+                'hover:text-foreground/80 lowercase transition-colors',
+                location.pathname === '/discover'
                   ? 'text-foreground font-medium'
                   : 'text-foreground/60'
               )}
@@ -131,6 +142,16 @@ export function Header() {
               className={cn(
                 'hover:text-foreground/80 rounded-md p-2 lowercase transition-colors',
                 location.pathname === '/' ? 'bg-muted font-medium' : ''
+              )}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              home
+            </Link>
+            <Link
+              to="/discover"
+              className={cn(
+                'hover:text-foreground/80 rounded-md p-2 lowercase transition-colors',
+                location.pathname === '/discover' ? 'bg-muted font-medium' : ''
               )}
               onClick={() => setIsMobileMenuOpen(false)}
             >

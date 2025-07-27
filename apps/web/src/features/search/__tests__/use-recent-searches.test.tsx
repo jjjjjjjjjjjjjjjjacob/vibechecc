@@ -54,7 +54,7 @@ describe('useRecentSearches', () => {
       const { result } = renderHook(() => useRecentSearches());
       expect(result.current.recentSearches).toEqual(storedSearches);
       expect(localStorageMock.getItem).toHaveBeenCalledWith(
-        'vibechecc:recent-searches'
+        'viberater:recent-searches'
       );
     });
 
@@ -153,7 +153,7 @@ describe('useRecentSearches', () => {
       });
 
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'vibechecc:recent-searches',
+        'viberater:recent-searches',
         expect.stringContaining('"term":"test search"')
       );
     });
@@ -198,7 +198,7 @@ describe('useRecentSearches', () => {
 
       expect(result.current.recentSearches).toEqual([]);
       expect(localStorageMock.removeItem).toHaveBeenCalledWith(
-        'vibechecc:recent-searches'
+        'viberater:recent-searches'
       );
     });
 
@@ -270,7 +270,7 @@ describe('useRecentSearches', () => {
       });
 
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'vibechecc:recent-searches',
+        'viberater:recent-searches',
         '[]'
       );
     });

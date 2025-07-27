@@ -10,6 +10,77 @@ import { v, Validator } from 'convex/values';
 import type { UserJSON } from '@clerk/backend';
 import { internal } from './_generated/api';
 
+// Helper function to get user by externalId
+async function userByExternalId(
+  ctx: QueryCtx | MutationCtx,
+  externalId: string
+) {
+  return await ctx.db
+    .query('users')
+    .withIndex('byExternalId', (q) => q.eq('externalId', externalId))
+    .first();
+}
+
+// Helper function to get current user
+export async function getCurrentUser(ctx: QueryCtx | MutationCtx) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    return null;
+  }
+  return await userByExternalId(ctx, identity.subject);
+}
+
+// Helper function to get current user or throw
+export async function getCurrentUserOrThrow(ctx: QueryCtx | MutationCtx) {
+  const user = await getCurrentUser(ctx);
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  return user;
+}
+
+// Helper function to get current user or create
+export async function getCurrentUserOrCreate(ctx: MutationCtx) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error('User not authenticated');
+  }
+
+  let user = await userByExternalId(ctx, identity.subject);
+  if (!user) {
+    const userId = await ctx.db.insert('users', {
+      externalId: identity.subject,
+      first_name: identity.givenName || undefined,
+      last_name: identity.familyName || undefined,
+      image_url: identity.pictureUrl || undefined,
+      profile_image_url: identity.pictureUrl || undefined,
+      username: identity.nickname || undefined,
+      created_at: Date.now(),
+      updated_at: Date.now(),
+    });
+    user = await ctx.db.get(userId);
+  }
+
+  return user;
+}
+
+// Helper function to create user if not exists (internal)
+async function createUserIfNotExistsInternal(
+  ctx: MutationCtx,
+  externalId: string
+) {
+  let user = await userByExternalId(ctx, externalId);
+  if (!user) {
+    const userId = await ctx.db.insert('users', {
+      externalId,
+      created_at: Date.now(),
+      updated_at: Date.now(),
+    });
+    user = await ctx.db.get(userId);
+  }
+  return user;
+}
+
 // Get all users
 export const getAll = query({
   handler: async (ctx) => {
@@ -41,7 +112,6 @@ export const getByUsername = query({
 export const current = query({
   args: {},
   handler: async (ctx) => {
-    // console.log('current called', await ctx.auth.getUserIdentity());
     return await getCurrentUser(ctx);
   },
 });
@@ -541,108 +611,6 @@ export const deleteFromClerk = internalMutation({
     }
   },
 });
-
-// HELPER FUNCTIONS
-
-// Get user by Clerk external ID using index
-async function userByExternalId(ctx: QueryCtx, externalId: string) {
-  return await ctx.db
-    .query('users')
-    .withIndex('byExternalId', (q) => q.eq('externalId', externalId))
-    .unique();
-}
-
-// Get current authenticated user from Clerk JWT
-export async function getCurrentUser(ctx: QueryCtx) {
-  // console.log('getCurrentUser called');
-  const identity = await ctx.auth.getUserIdentity();
-  // console.log('identity', identity);
-  if (identity === null) {
-    return null;
-  }
-  return await userByExternalId(ctx, identity.subject);
-}
-
-// Get current authenticated user, creating if doesn't exist
-export async function getCurrentUserOrCreate(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (identity === null) {
-    // console.log('No identity found - user not authenticated');
-    return null;
-  }
-
-  let user = await userByExternalId(ctx, identity.subject);
-
-  // If user doesn't exist in Convex yet, create them
-  if (user === null) {
-    // console.log(
-    //   `Creating new user in Convex for Clerk user: ${identity.subject}`
-    // );
-    const userAttributes = {
-      externalId: identity.subject,
-      // Set some defaults from JWT if available
-      first_name: identity.givenName || undefined,
-      last_name: identity.familyName || undefined,
-      image_url: identity.pictureUrl || undefined,
-      profile_image_url: identity.pictureUrl || undefined,
-      username: identity.nickname || undefined,
-      created_at: Date.now(),
-      updated_at: Date.now(),
-    };
-
-    // Check if this is a mutation context (can insert) or query context (cannot insert)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ('db' in ctx && 'insert' in (ctx as any).db) {
-      const userId = await (ctx as MutationCtx).db.insert(
-        'users',
-        userAttributes
-      );
-      user = await ctx.db.get(userId);
-      // console.log(`Created user with ID: ${userId}`);
-    } else {
-      // If we're in a query context, we can't create the user
-      // This should trigger the upsert from the webhook eventually
-      // console.log(
-      //   'Cannot create user in query context - user will be created via webhook'
-      // );
-      return null;
-    }
-  }
-
-  return user;
-}
-
-// Get current authenticated user or throw error
-export async function getCurrentUserOrThrow(ctx: QueryCtx) {
-  const userRecord = await getCurrentUser(ctx);
-  if (!userRecord) {
-    throw new Error("Can't get current user");
-  }
-  return userRecord;
-}
-
-// Helper function to create user if not exists (for internal mutations)
-async function createUserIfNotExistsInternal(
-  ctx: MutationCtx,
-  externalId: string
-) {
-  let user = await userByExternalId(ctx, externalId);
-
-  if (!user) {
-    // console.log(`Creating user for Clerk ID: ${externalId}`);
-    const userAttributes = {
-      externalId: externalId,
-      created_at: Date.now(),
-      updated_at: Date.now(),
-    };
-
-    const userId = await ctx.db.insert('users', userAttributes);
-    user = await ctx.db.get(userId);
-    // console.log(`Created user with ID: ${userId}`);
-  }
-
-  return user;
-}
 
 // Create user for seeding purposes (bypasses authentication)
 export const createForSeed = internalMutation({

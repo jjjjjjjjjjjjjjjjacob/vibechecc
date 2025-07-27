@@ -1,6 +1,6 @@
-# vibechecc
+# viberater
 
-vibechecc is a modern social application where users can:
+viberater is a modern social application where users can:
 
 - Share "vibes" (life experiences, thoughts, situations) with the community
 - Rate and react to other users' vibes with emojis and star ratings
@@ -14,13 +14,13 @@ vibechecc is a modern social application where users can:
 This project is an Nx-powered monorepo, enabling code sharing between multiple frontend applications and a Convex backend.
 
 ```
-vibechecc/
+viberater/
 ├── apps/
 │   ├── web/              # React web application (TanStack Start)
 │   └── convex/           # Convex backend (real-time DB, auth, webhooks)
 ├── packages/
-│   ├── types/            # @vibechecc/types - Shared TypeScript interfaces
-│   └── utils/            # @vibechecc/utils - Shared utility functions
+│   ├── types/            # @viberater/types - Shared TypeScript interfaces
+│   └── utils/            # @viberater/utils - Shared utility functions
 ├── terraform/            # Infrastructure as code (Cloudflare, Convex, etc.)
 ├── .github/              # GitHub Actions workflows
 ├── nx.json               # Nx workspace configuration
@@ -83,8 +83,8 @@ vibechecc/
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/vibechecc.git
-cd vibechecc
+git clone https://github.com/your-username/viberater.git
+cd viberater
 bun install
 ```
 
@@ -120,22 +120,24 @@ bun run dev
 
 All scripts are run from the root with Bun:
 
-| Command                | Description                    |
-| ---------------------- | ------------------------------ |
-| `bun run dev`          | Start full dev environment     |
-| `bun run dev:frontend` | Start frontend only            |
-| `bun run dev:backend`  | Start backend only             |
-| `bun run build`        | Build all projects             |
-| `bun run test`         | Run all tests                  |
-| `bun run typecheck`    | Type check all projects        |
-| `bun run lint`         | Lint all projects              |
-| `bun run seed`         | Seed database with sample data |
+| Command                 | Description                           |
+| ----------------------- | ------------------------------------- |
+| `bun run dev`           | Start full dev environment            |
+| `bun run dev:frontend`  | Start frontend only                   |
+| `bun run dev:backend`   | Start backend only                    |
+| `bun run build`         | Build all projects                    |
+| `bun run test`          | Run all tests                         |
+| `bun run typecheck`     | Type check all projects               |
+| `bun run lint`          | Lint all projects                     |
+| `bun run seed`          | Seed database with basic data         |
+| `bun run seed:enhanced` | Seed database with comprehensive data |
+| `bun run seed:clear`    | Clear all database content            |
 
 #### Nx Usage
 
 - List projects: `bun nx show projects`
 - Project details: `bun nx show project <project>`
-- Run task: `bun nx <task> <project>` (e.g., `bun nx build @vibechecc/web`)
+- Run task: `bun nx <task> <project>` (e.g., `bun nx build @viberater/web`)
 - Run for all: `bun nx run-many --target=<task>`
 - Clear cache: `bun nx reset`
 
@@ -242,11 +244,11 @@ terraform apply
 ### From Browser App
 
 ```typescript
-import { api } from '@vibechecc/convex';
-import type { User, Vibe, Rating } from '@vibechecc/types';
-import { computeUserDisplayName, getUserAvatarUrl } from '@vibechecc/utils';
-import { seo } from '@vibechecc/utils';
-import { cn } from '@vibechecc/utils/tailwind';
+import { api } from '@viberater/convex';
+import type { User, Vibe, Rating } from '@viberater/types';
+import { computeUserDisplayName, getUserAvatarUrl } from '@viberater/utils';
+import { seo } from '@viberater/utils';
+import { cn } from '@viberater/utils/tailwind';
 ```
 
 ### From Backend Package
@@ -254,18 +256,18 @@ import { cn } from '@vibechecc/utils/tailwind';
 ```typescript
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import type { User, Vibe, Rating } from '@vibechecc/types';
-import { computeUserDisplayName } from '@vibechecc/utils';
+import type { User, Vibe, Rating } from '@viberater/types';
+import { computeUserDisplayName } from '@viberater/utils';
 ```
 
 ### From Shared Packages
 
 ```typescript
-// @vibechecc/types
+// @viberater/types
 export interface User { id: string; name: string; email: string; }
-// @vibechecc/utils
+// @viberater/utils
 export function computeUserDisplayName(user: User): string { ... }
-// @vibechecc/utils/tailwind
+// @viberater/utils/tailwind
 export function cn(...classes: string[]): string { ... }
 ```
 
@@ -280,6 +282,53 @@ export function cn(...classes: string[]): string { ... }
 - See app/infra READMEs for deep dives
 
 ---
+
+## Recent Feature Updates
+
+### Emoji Rating System
+
+The application now includes a comprehensive emoji rating system that enhances user engagement:
+
+#### Emoji Reactions UI
+
+- **Circular buttons**: Changed from pill-shaped to perfect circles (48x48px) for better visual consistency
+- **Theme-aware styling**: Using secondary colors with hover states for better UX
+- **Interactive behavior**: Clicking emoji reactions opens the rating popover with that emoji pre-selected
+- **Review requirement**: All ratings now require written reviews to encourage meaningful feedback
+
+#### Emoji Rating Display
+
+- **Compact mode**: Shows emoji with rating value and count in vibe cards
+- **Expanded mode**: Shows emoji with "out of 5" text, scale visualization, and tags
+- **Smooth animations**: Using framer-motion for hover effects and transitions
+- **Partial ratings support**: Visual representation of partial ratings (e.g., 3.5 out of 5)
+
+#### Integration Points
+
+- **VIbeCard Component**: Displays emoji ratings when reactions exist, falls back to stars
+- **Vibe Detail Page**: Prominent emoji rating display with "Top Emoji Ratings" section
+- **Review Cards**: Show emoji ratings alongside traditional star ratings
+- **Backward Compatibility**: Maintains support for existing star rating system
+
+## Testing
+
+### Unit Testing
+
+- Frontend: Vitest + React Testing Library for component tests
+- Backend: convex-test for Convex function testing
+- Run all tests: `bun run test`
+- Run specific project: `bun nx test <project>`
+
+### E2E Testing
+
+- No E2E framework currently configured
+- Manual testing via local development environment
+
+### Test Coverage
+
+- Component tests for UI elements
+- Function tests for backend logic
+- Integration tests for critical workflows
 
 ## License
 

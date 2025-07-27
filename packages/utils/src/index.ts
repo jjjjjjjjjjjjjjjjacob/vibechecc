@@ -1,5 +1,5 @@
 /**
- * @vibechecc/utils - Shared utilities for the vibechecc workspace
+ * @viberater/utils - Shared utilities for the viberater workspace
  *
  * This package contains only truly shared utilities that are used
  * across multiple workspaces (frontend, backend, etc.).

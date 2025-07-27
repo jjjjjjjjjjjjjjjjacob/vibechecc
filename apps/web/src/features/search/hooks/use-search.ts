@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
-import { api } from '@vibechecc/convex';
-import type { SearchFilters } from '@vibechecc/types';
+import { api } from '@viberater/convex';
+import type { SearchFilters } from '@viberater/types';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUser } from '@clerk/tanstack-react-start';
 

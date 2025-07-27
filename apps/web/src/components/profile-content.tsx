@@ -18,7 +18,7 @@ import { useUser } from '@clerk/tanstack-react-start';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
 import { Sparkles } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 
 export function ProfileContent() {

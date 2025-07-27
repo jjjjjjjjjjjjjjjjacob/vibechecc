@@ -1,5 +1,5 @@
 ---
-description: Learnings from implementing the search feature in vibechecc
+description: Learnings from implementing the search feature in viberater
 tags: search, command-palette, frontend, backend, fuzzy-search, filters
 ---
 
@@ -8,13 +8,13 @@ tags: search, command-palette, frontend, backend, fuzzy-search, filters
 ## Agent 2: Advanced Search & Filters Learnings
 
 ### Context
-These learnings are from implementing advanced search features including fuzzy matching, filtering, and UI components for the vibechecc project.
+These learnings are from implementing advanced search features including fuzzy matching, filtering, and UI components for the viberater project.
 
 ## Key Insights
 
 ### 1. Type Definitions First
 - The search types in `packages/types/src/search.ts` provide a solid foundation
-- All components should import from `@vibechecc/types` for consistency
+- All components should import from `@viberater/types` for consistency
 - The types are already exported from the package index
 
 ### 2. Command Palette Integration
@@ -50,7 +50,7 @@ These learnings are from implementing advanced search features including fuzzy m
 - Check if UI components exist before trying to install them
 
 ### 3. Type Imports
-- Import types from `@vibechecc/types`, not relative paths
+- Import types from `@viberater/types`, not relative paths
 - The search types are already exported from the package
 - Use type imports when only importing types: `import type { ... }`
 

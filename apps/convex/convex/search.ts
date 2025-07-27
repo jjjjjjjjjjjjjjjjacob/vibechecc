@@ -5,7 +5,7 @@ import type {
   UserSearchResult,
   TagSearchResult,
   ActionSearchResult,
-} from '@vibechecc/types';
+} from '@viberater/types';
 import { fuzzyMatch } from './search/fuzzy_search';
 import { scoreVibe, scoreUser, scoreTag } from './search/search_scorer';
 import { parseSearchQuery } from './search/search_utils';
@@ -34,6 +34,12 @@ export const searchAll = query({
             v.literal('recent'),
             v.literal('oldest')
           )
+        ),
+        emojiRatings: v.optional(
+          v.object({
+            emojis: v.optional(v.array(v.string())),
+            minValue: v.optional(v.number()),
+          })
         ),
       })
     ),
@@ -227,7 +233,7 @@ export const searchAll = query({
 
             const avgRating =
               ratings.length > 0
-                ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+                ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
                 : undefined;
 
             // Apply rating filter
@@ -249,6 +255,44 @@ export const searchAll = query({
                   mergedFilters.maxRating !== undefined &&
                   avgRating > mergedFilters.maxRating
                 ) {
+                  passesFilters = false;
+                }
+              }
+            }
+
+            // Apply emoji rating filter
+            if (mergedFilters.emojiRatings && passesFilters) {
+              const { emojis, minValue } = mergedFilters.emojiRatings;
+
+              if (emojis && emojis.length > 0) {
+                // Get emoji ratings for this vibe
+                const emojiRatings = await ctx.db
+                  .query('ratings')
+                  .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+                  .collect();
+
+                // Check if vibe has any of the specified emojis
+                const hasMatchingEmoji = emojiRatings.some(
+                  (er) =>
+                    emojis.includes(er.emoji) &&
+                    (minValue === undefined || er.value >= minValue)
+                );
+
+                if (!hasMatchingEmoji) {
+                  passesFilters = false;
+                }
+              } else if (minValue !== undefined) {
+                // Just check if any emoji rating meets the minimum value
+                const emojiRatings = await ctx.db
+                  .query('ratings')
+                  .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+                  .collect();
+
+                const hasHighRating = emojiRatings.some(
+                  (er) => er.value >= minValue
+                );
+
+                if (!hasHighRating) {
                   passesFilters = false;
                 }
               }
@@ -616,7 +660,7 @@ export const getSearchSuggestions = query({
 
         const avgRating =
           ratings.length > 0
-            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
             : undefined;
 
         results.vibes.push({

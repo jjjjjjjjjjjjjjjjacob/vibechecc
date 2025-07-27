@@ -1,4 +1,4 @@
-// Core vibechecc types that can be shared across applications
+// Core viberater types that can be shared across applications
 
 // Re-export search types
 export * from './search';
@@ -34,17 +34,29 @@ export interface User {
   interests?: string[];
 }
 
-export interface Rating {
-  user: User | null;
-  rating: number;
-  review?: string;
-  date: string;
+export interface EmojiRating {
+  emoji: string;
+  value: number; // 1-5
+  tags?: string[];
+  count?: number; // For display purposes
 }
 
-export interface EmojiReaction {
+export interface Rating {
+  user: User | null;
+  value: number;
   emoji: string;
-  count: number;
-  users: string[]; // Array of user IDs who reacted with this emoji
+  review: string;
+  createdAt: string;
+  tags?: string[];
+  vibeId?: string;
+  userId?: string;
+}
+
+export interface EmojiRatingMetadata {
+  emoji: string;
+  tags?: string[];
+  category: string;
+  sentiment?: 'positive' | 'negative' | 'neutral';
 }
 
 export interface Vibe {
@@ -56,5 +68,4 @@ export interface Vibe {
   createdAt: string;
   ratings: Rating[];
   tags?: string[];
-  reactions?: EmojiReaction[]; // New field for emoji reactions
 }

@@ -4,6 +4,7 @@ import {
   useUserVibes,
   useUserRatings,
   useUserReceivedRatings,
+  useUserEmojiStats,
 } from '@/queries';
 import {
   Card,
@@ -20,6 +21,7 @@ import { VibeGrid } from '@/components/vibe-grid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
 import { CalendarDays, Twitter, Instagram, Globe, Star } from 'lucide-react';
+import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,
@@ -40,6 +42,9 @@ function UserProfile() {
   );
   const { data: receivedRatings, isLoading: receivedRatingsLoading } =
     useUserReceivedRatings(user?.externalId || '');
+  const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
+    user?.externalId || ''
+  );
 
   if (userLoading) {
     return <UserProfileSkeleton />;
@@ -72,7 +77,7 @@ function UserProfile() {
   const receivedRatingsCount = receivedRatings?.length || 0;
   const averageReceivedRating =
     receivedRatings && receivedRatings.length > 0
-      ? receivedRatings.reduce((sum, rating) => sum + rating.rating, 0) /
+      ? receivedRatings.reduce((sum, rating) => sum + (rating.value || 0), 0) /
         receivedRatings.length
       : 0;
 
@@ -248,14 +253,25 @@ function UserProfile() {
                               <h4 className="text-sm font-medium">
                                 {rating?.vibe?.title || 'Unknown'}
                               </h4>
-                              <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`h-3 w-3 ${rating?.rating && i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                  />
-                                ))}
-                              </div>
+                              {rating?.emoji ? (
+                                <EmojiRatingDisplay
+                                  rating={{
+                                    emoji: rating.emoji,
+                                    value: rating.value || 0,
+                                    count: 1,
+                                  }}
+                                  showScale={false}
+                                />
+                              ) : (
+                                <div className="flex items-center gap-1">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                    />
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             {rating?.review && (
                               <p className="text-muted-foreground text-sm">
@@ -263,8 +279,10 @@ function UserProfile() {
                               </p>
                             )}
                             <p className="text-muted-foreground mt-1 text-xs">
-                              {rating?.date
-                                ? new Date(rating.date).toLocaleDateString()
+                              {rating?.createdAt
+                                ? new Date(
+                                    rating.createdAt
+                                  ).toLocaleDateString()
                                 : ''}
                             </p>
                           </div>
@@ -332,14 +350,25 @@ function UserProfile() {
                               <span className="text-sm font-medium">
                                 {rating.rater?.username || 'Unknown'}
                               </span>
-                              <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`h-3 w-3 ${rating?.rating && i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                  />
-                                ))}
-                              </div>
+                              {rating?.emoji ? (
+                                <EmojiRatingDisplay
+                                  rating={{
+                                    emoji: rating.emoji,
+                                    value: rating.value || 0,
+                                    count: 1,
+                                  }}
+                                  showScale={false}
+                                />
+                              ) : (
+                                <div className="flex items-center gap-1">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                    />
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             <p className="text-muted-foreground mb-1 text-sm">
                               on "{rating.vibe.title}"
@@ -350,8 +379,10 @@ function UserProfile() {
                               </p>
                             )}
                             <p className="text-muted-foreground mt-1 text-xs">
-                              {rating?.date
-                                ? new Date(rating.date).toLocaleDateString()
+                              {rating?.createdAt
+                                ? new Date(
+                                    rating.createdAt
+                                  ).toLocaleDateString()
                                 : ''}
                             </p>
                           </div>
@@ -460,6 +491,87 @@ function UserProfile() {
                   <h3 className="mb-2 font-semibold">Member Since</h3>
                   <p className="text-muted-foreground">{joinDate}</p>
                 </div>
+
+                {emojiStats && emojiStats.totalEmojiRatings > 0 && (
+                  <div>
+                    <h3 className="mb-2 font-semibold">Emoji Rating Style</h3>
+                    <div className="space-y-4">
+                      {emojiStats.mostUsedEmoji && (
+                        <div>
+                          <p className="text-muted-foreground mb-2 text-sm">
+                            Most used emoji
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-3xl">
+                              {emojiStats.mostUsedEmoji.emoji}
+                            </span>
+                            <div>
+                              <p className="text-sm font-medium">
+                                Used {emojiStats.mostUsedEmoji.count} times
+                              </p>
+                              <p className="text-muted-foreground text-xs">
+                                Average:{' '}
+                                {emojiStats.mostUsedEmoji.averageValue.toFixed(
+                                  1
+                                )}{' '}
+                                out of 5
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {emojiStats.highestRatedEmoji &&
+                        emojiStats.highestRatedEmoji.emoji !==
+                          emojiStats.mostUsedEmoji?.emoji && (
+                          <div>
+                            <p className="text-muted-foreground mb-2 text-sm">
+                              Highest rated emoji
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-3xl">
+                                {emojiStats.highestRatedEmoji.emoji}
+                              </span>
+                              <div>
+                                <p className="text-sm font-medium">
+                                  Average:{' '}
+                                  {emojiStats.highestRatedEmoji.averageValue.toFixed(
+                                    1
+                                  )}{' '}
+                                  out of 5
+                                </p>
+                                <p className="text-muted-foreground text-xs">
+                                  Used {emojiStats.highestRatedEmoji.count}{' '}
+                                  times
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                      {emojiStats.topEmojis.length > 0 && (
+                        <div>
+                          <p className="text-muted-foreground mb-2 text-sm">
+                            Top emoji ratings
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {emojiStats.topEmojis.map((stat) => (
+                              <div
+                                key={stat.emoji}
+                                className="bg-secondary/50 flex items-center gap-1 rounded-full px-3 py-1"
+                              >
+                                <span className="text-lg">{stat.emoji}</span>
+                                <span className="text-muted-foreground text-xs">
+                                  {stat.count}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

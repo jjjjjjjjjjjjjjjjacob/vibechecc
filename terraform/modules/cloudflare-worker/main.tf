@@ -5,7 +5,7 @@
 # Deployment is handled via wrangler for proper bundling
 resource "cloudflare_workers_script" "frontend" {
   account_id  = var.cloudflare_account_id
-  script_name = "vibechecc-${var.prefix}-frontend"
+  script_name = "viberater-${var.prefix}-frontend"
 
   # Use a placeholder script for initial provisioning
   # Actual deployment is handled by wrangler
@@ -31,7 +31,7 @@ resource "cloudflare_workers_script" "frontend" {
   }
 }
 
-# The route that triggers the worker (e.g., vibechecc.app/*)
+# The route that triggers the worker (e.g., viberater.vip/*)
 resource "cloudflare_workers_route" "frontend" {
   zone_id     = var.cloudflare_zone_id
   pattern     = "${var.cloudflare_worker_hostname}/*"
@@ -47,7 +47,7 @@ resource "cloudflare_dns_record" "frontend_a" {
   content = "141.101.64.0"
   type    = "A"
   proxied = true
-  comment = "Managed by Terraform for vibechecc Worker"
+  comment = "Managed by Terraform for viberater Worker"
   ttl     = 1
 }
 
@@ -57,7 +57,7 @@ resource "cloudflare_dns_record" "frontend_aaaa" {
   type    = "AAAA"
   content = "2400:cb00::"
   proxied = true
-  comment = "Managed by Terraform for vibechecc Worker"
+  comment = "Managed by Terraform for viberater Worker"
   ttl     = 1
 }
 
@@ -69,6 +69,6 @@ resource "cloudflare_dns_record" "frontend_cname" {
   type    = "CNAME"
   content = var.cloudflare_zone
   proxied = true
-  comment = "Managed by Terraform for vibechecc Worker"
+  comment = "Managed by Terraform for viberater Worker"
   ttl     = 1
 }

@@ -21,7 +21,7 @@ import { getWebRequest } from '@tanstack/react-start/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
 import { Sparkles } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 
 // Server function to check authentication

@@ -3,7 +3,7 @@ import type {
   VibeSearchResult,
   UserSearchResult,
   TagSearchResult,
-} from '@vibechecc/types';
+} from '@viberater/types';
 
 /**
  * Advanced relevance scoring system for search results

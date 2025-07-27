@@ -2,9 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## IMPORTANT: AI Assistant Rules
+
+**ALWAYS check `.agent/` directory FIRST before starting any work:**
+
+- `.agent/rules.md` - Project-specific rules that OVERRIDE default behavior
+- `.agent/docs/*-learnings.md` - Workspace-specific insights and patterns
+
+These files contain critical information about how to work with this codebase effectively.
+
 ## Project Overview
 
-**vibechecc** is a modern social web application built as an Nx-powered monorepo. Users can share "vibes" (life experiences, thoughts, situations), rate and react to others' vibes, and discover trending content.
+**viberater** is a modern social web application built as an Nx-powered monorepo. Users can share "vibes" (life experiences, thoughts, situations), rate and react to others' vibes with emojis and stars, and discover trending content through advanced search and filtering.
 
 ## Architecture
 
@@ -12,17 +21,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `apps/web/` - React web app (TanStack Start)
 - `apps/convex/` - Convex real-time backend
-- `packages/types/` - Shared TypeScript interfaces (@vibechecc/types)
-- `packages/utils/` - Shared utility functions (@vibechecc/utils)
+- `packages/types/` - Shared TypeScript interfaces (@viberater/types)
+- `packages/utils/` - Shared utility functions (@viberater/utils)
 - `terraform/` - Infrastructure as code
 - `.github/workflows/` - CI/CD pipelines
+- `.agent/` - AI assistant documentation and learnings
 
 ### Tech Stack
 
-- **Frontend**: TanStack Start, shadcn/ui, Tailwind CSS v4, TanStack Query/Router
+- **Frontend**: TanStack Start, shadcn/ui, Tailwind CSS v4, TanStack Query/Router, Framer Motion
 - **Backend**: Convex (real-time DB + serverless functions), Clerk (auth)
-- **Infrastructure**: Cloudflare Workers, Terraform
-- **Development**: Bun, Nx, Vitest, TypeScript
+- **Infrastructure**: Cloudflare Workers, Terraform, ngrok (local webhooks)
+- **Development**: Bun, Nx, Vitest, TypeScript, ESLint, Prettier
 
 ## Development Commands
 
@@ -36,8 +46,7 @@ bun run build         # Build all projects
 bun run test          # Run all tests
 bun run typecheck     # Type check all projects
 bun run lint          # Lint all projects
-bun run seed          # Seed database with basic sample data (5 users, 4 vibes)
-bun run seed:enhanced # Seed database with comprehensive data (30 users, 20 vibes)
+bun run seed          # Seed database with development data (20 users, 25 vibes)
 bun run seed:clear    # Clear all database content
 ```
 
@@ -65,32 +74,66 @@ bun nx reset                            # Clear Nx cache
 - **Backend**: convex-test for Convex function testing
 - **Run single test**: `bun nx test <project> -- <test-file>`
 
-## Code Conventions
+## Code Conventions & Style Guide
 
 ### File Naming
 
-- Use `kebab-case` for file names (e.g., `user-profile.tsx`)
+- **ALWAYS use `kebab-case`** for file names (e.g., `user-profile.tsx`, `search-utils.ts`)
 - Test files: `[name].test.ts` or `[name].test.tsx`
+- NO underscores, NO camelCase in file names
+
+### Naming Conventions
+
+#### TypeScript/JavaScript
+
+- **camelCase** for:
+  - Variable names: `const userName = 'John'`
+  - Function names (non-components): `function getUserData() {}`
+  - Object properties: `{ firstName: 'John', lastName: 'Doe' }`
+- **PascalCase** for:
+  - React components: `function UserProfile() {}`
+  - Classes: `class UserService {}`
+  - Types/Interfaces: `type UserData = {}`, `interface UserProfile {}`
+  - Enums: `enum UserRole {}`
+
+- **UPPER_SNAKE_CASE** for:
+  - Constants: `const MAX_RETRIES = 3`
+  - Environment variables: `process.env.DATABASE_URL`
+
+### UI Design Style
+
+- **Lowercase text** throughout the UI (buttons, labels, headers)
+  - Button: "save changes" NOT "Save Changes"
+  - Headers: "user profile" NOT "User Profile"
+  - Labels: "email address" NOT "Email Address"
+- Exception: Proper nouns and user-generated content maintain their casing
+
+### Import Rules
+
+- **shadcn/ui components** can ONLY be imported in `apps/web/` directory
+  - Reason: Only `apps/web/components.json` exists
+  - Example: `import { Button } from '@/components/ui/button'`
+  - NEVER attempt to use shadcn imports in other workspaces
 
 ### Code Style
 
-- **Classes/Components/Types**: `PascalCase` (e.g., `UserProfile`)
-- **Variables/Functions**: `camelCase` (e.g., `isSignedIn`, `userProfileSignIn()`)
-- **Indentation**: 2 spaces for most files, 4 spaces for Python/Rust
+- **Indentation**: 2 spaces for TypeScript/JavaScript/JSON, 4 spaces for Python/Rust
+- **No comments** unless explicitly requested
+- Prefer existing utility functions over creating new ones
 
 ### Import Patterns
 
 ```typescript
 // From web app
-import { api } from '@vibechecc/convex';
-import type { User, Vibe, Rating } from '@vibechecc/types';
-import { computeUserDisplayName, getUserAvatarUrl } from '@vibechecc/utils';
+import { api } from '@viberater/convex';
+import type { User, Vibe, Rating } from '@viberater/types';
+import { computeUserDisplayName, getUserAvatarUrl } from '@viberater/utils';
 import { cn } from '@/utils/tailwind-utils';
 
 // From backend
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import type { User } from '@vibechecc/types';
+import type { User } from '@viberater/types';
 ```
 
 ## Convex Backend Development
@@ -202,3 +245,36 @@ Run `bun run dev` to start:
 - **No Linter Fixes**: Don't fix linter errors unless explicitly requested
 
 Run `bun run quality` before submitting PRs to ensure all checks pass.
+
+## Recent Features
+
+### Emoji Rating System
+
+- **Emoji Reactions**: Circular buttons with hover states and animations
+- **Emoji Ratings**: 1-5 scale ratings with required review text
+- **Visual Display**: Compact and expanded modes with framer-motion animations
+- **Backward Compatibility**: Falls back to star ratings when no emoji ratings exist
+- **Database Schema**: Separate `emojiRatings` table with proper indexes
+
+### Search System
+
+- **Advanced Filters**: Date range, rating range, tags, and user filters
+- **Instant Search**: Real-time search with debouncing
+- **Search History**: Recent and trending searches
+- **Mobile Optimized**: Responsive filter drawer for mobile devices
+
+## AI Assistant Guidelines
+
+### REQUIRED Reading Before Starting Work
+
+1. **`.agent/rules.md`** - Contains MANDATORY rules that override all default AI behavior
+2. **`.agent/docs/web-learnings.md`** - Frontend development patterns and gotchas
+3. **`.agent/docs/convex-learnings.md`** - Backend development patterns and best practices
+4. **`.agent/docs/*-learnings.md`** - Task-specific learnings for various features
+
+### Workflow Requirements
+
+- **Use TodoWrite**: Track ALL multi-step tasks with the todo system
+- **Update Learnings**: Document insights in `.agent/docs/` after completing tasks
+- **Follow Patterns**: NEVER introduce new patterns without explicit permission
+- **Check First**: Always check existing code patterns before implementing

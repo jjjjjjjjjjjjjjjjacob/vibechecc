@@ -1,7 +1,7 @@
 import { queryOptions, type QueryClient } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
-import { api } from '@vibechecc/convex';
-import type { SearchFilters } from '@vibechecc/types';
+import { api } from '@viberater/convex';
+import type { SearchFilters } from '@viberater/types';
 
 // Cache time constants (in milliseconds)
 const CACHE_TIME = 15 * 60 * 1000; // 15 minutes

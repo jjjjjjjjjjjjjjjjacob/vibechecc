@@ -1,9 +1,9 @@
 {
-  "name": "@vibechecc/convex",
+  "name": "@viberater/convex",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/convex",
-  "inputs": ["@vibechecc/types"],
+  "inputs": ["@viberater/types"],
   "targets": {
     "dev": {
       "executor": "nx:run-commands",
@@ -21,7 +21,8 @@
       "options": {
         "command": "convex codegen",
         "cwd": "{projectRoot}"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "deploy": {
       "executor": "nx:run-commands",
@@ -61,7 +62,8 @@
       "options": {
         "command": "tsc --noEmit",
         "cwd": "{projectRoot}"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "lint": {
       "executor": "@nx/eslint:lint"

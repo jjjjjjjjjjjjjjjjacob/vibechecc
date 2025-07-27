@@ -43,7 +43,7 @@ vi.mock('@convex-dev/react-query', () => ({
   useConvexMutation: vi.fn(() => vi.fn()),
 }));
 
-vi.mock('@vibechecc/convex', () => ({
+vi.mock('@viberater/convex', () => ({
   api: {
     search: {
       searchAll: 'search.searchAll',
@@ -406,7 +406,7 @@ describe('useSearch', () => {
         () =>
           ({
             user: null,
-          }) as any
+          }) as ReturnType<typeof useUser>
       );
 
       vi.mocked(useQuery).mockReturnValue({

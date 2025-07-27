@@ -1,5 +1,5 @@
 {
-  "name": "vibechecc",
+  "name": "viberater",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -8,14 +8,14 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "nx run-many --target=dev --parallel=true --projects=@vibechecc/web,@vibechecc/convex",
-    "dev:frontend": "nx dev @vibechecc/web",
-    "dev:backend": "nx dev @vibechecc/convex",
+    "dev": "nx run-many --target=dev --parallel=true --projects=@viberater/web,@viberater/convex",
+    "dev:frontend": "nx dev @viberater/web",
+    "dev:backend": "nx dev @viberater/convex",
     "dev:webhooks": "bunx svix listen https://127.0.0.1:3210/webhooks/clerk",
     "seed": "bunx convex run seed:seed",
     "seed:clear": "bunx convex run seed:clear",
-    "build": "nx run-many --target=build --parallel=true --projects=@vibechecc/web,@vibechecc/convex,@vibechecc/types",
-    "test": "nx run-many --parallel=true --target=test --projects=@vibechecc/web,@vibechecc/convex",
+    "build": "nx run-many --target=build --parallel=true --projects=@viberater/web,@viberater/convex,@viberater/types",
+    "test": "nx run-many --parallel=true --target=test --projects=@viberater/web,@viberater/convex",
     "test:watch": "nx run browser:test:watch",
     "lint": "nx run-many --target=lint",
     "format": "prettier --write .",
@@ -27,7 +27,7 @@
     "quality:fix": "bun run typecheck && bun run lint:fix && bun run format",
     "deploy": "bun run build && bun run wrangler:deploy",
     "cf-typegen": "wrangler types --env-interface Env",
-    "clean": "nx run-many --target=clean --parallel=true --projects=@vibechecc/web,@vibechecc/convex,@vibechecc/types"
+    "clean": "nx run-many --target=clean --parallel=true --projects=@viberater/web,@viberater/convex,@viberater/types"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
@@ -60,5 +60,9 @@
     "vite": "^7.0.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "framer-motion": "^12.23.6",
+    "geist": "^1.4.2"
   }
 }

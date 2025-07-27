@@ -1,6 +1,6 @@
 import { CommandGroup, CommandItem } from '@/components/ui/command';
 import { Clock, TrendingUp, Search, Hash } from 'lucide-react';
-import type { SearchSuggestion } from '@vibechecc/types';
+import type { SearchSuggestion } from '@viberater/types';
 
 interface SearchSuggestionsProps {
   recentSearches?: SearchSuggestion[];

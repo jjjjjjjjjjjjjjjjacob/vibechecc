@@ -1,6 +1,13 @@
 import { useCallback, useMemo } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import type { SearchFilters } from '@vibechecc/types';
+import type { SearchFilters, SearchResultType } from '@viberater/types';
+
+// Extended filters that include both SearchFilters and SearchRequest properties
+interface ExtendedFilters extends SearchFilters {
+  query?: string;
+  types?: SearchResultType[];
+  limit?: number;
+}
 
 interface UseFilterStateOptions {
   defaultFilters?: Partial<SearchFilters>;
@@ -10,18 +17,32 @@ interface UseFilterStateOptions {
 export function useFilterState(options: UseFilterStateOptions = {}) {
   const { defaultFilters = {}, syncWithUrl = true } = options;
   const navigate = useNavigate();
-  const search = useSearch({ from: '/search' }) as Record<string, any>;
+  const search = useSearch({ from: '/search' }) as {
+    q?: string;
+    tags?: string[];
+    minRating?: string;
+    maxRating?: string;
+    dateStart?: string;
+    dateEnd?: string;
+    sort?: string;
+    page?: string;
+    from?: string;
+    to?: string;
+    creators?: string | string[];
+    types?: string | string[];
+    limit?: string | number;
+  };
 
   // Parse filters from URL
-  const filtersFromUrl = useMemo((): Partial<SearchFilters> => {
+  const filtersFromUrl = useMemo((): Partial<ExtendedFilters> => {
     if (!syncWithUrl) return defaultFilters;
 
-    const filters: Partial<SearchFilters> = {};
+    const filters: Partial<ExtendedFilters> = {};
 
     // Query
     const q = search.q;
     if (q) {
-      (filters as any).query = q;
+      filters.query = q;
     }
 
     // Tags
@@ -70,14 +91,15 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
     // Types
     const types = search.types;
     if (types) {
-      (filters as any).types = Array.isArray(types) ? types : [types];
+      filters.types = (
+        Array.isArray(types) ? types : [types]
+      ) as SearchResultType[];
     }
 
     // Limit
     const limit = search.limit;
     if (limit) {
-      (filters as any).limit =
-        typeof limit === 'string' ? parseInt(limit, 10) : limit;
+      filters.limit = typeof limit === 'string' ? parseInt(limit, 10) : limit;
     }
 
     return { ...defaultFilters, ...filters };
@@ -85,14 +107,14 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
 
   // Update URL with filters
   const updateFilters = useCallback(
-    (newFilters: Partial<SearchFilters>) => {
+    (newFilters: Partial<ExtendedFilters>) => {
       if (!syncWithUrl) return;
 
-      const params: Record<string, any> = {};
+      const params: Record<string, string | string[] | number> = {};
 
       // Query
-      if ((newFilters as any).query) {
-        params.q = (newFilters as any).query;
+      if (newFilters.query) {
+        params.q = newFilters.query;
       }
 
       // Tags
@@ -125,13 +147,13 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
       }
 
       // Types
-      if ((newFilters as any).types && (newFilters as any).types.length > 0) {
-        params.types = (newFilters as any).types;
+      if (newFilters.types && newFilters.types.length > 0) {
+        params.types = newFilters.types;
       }
 
       // Limit
-      if ((newFilters as any).limit && (newFilters as any).limit !== 20) {
-        params.limit = (newFilters as any).limit;
+      if (newFilters.limit && newFilters.limit !== 20) {
+        params.limit = newFilters.limit;
       }
 
       // Update URL
@@ -153,7 +175,7 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
   // Clear all filters
   const clearAllFilters = useCallback(() => {
     updateFilters({}); // Clear all filters
-  }, [filtersFromUrl, updateFilters]);
+  }, [updateFilters]);
 
   // Toggle array filter (for tags, creators, types)
   const toggleArrayFilter = useCallback(
