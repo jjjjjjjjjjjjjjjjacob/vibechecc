@@ -117,8 +117,8 @@ export const searchAll = query({
 
     // Search vibes
     if (!includeTypes || includeTypes.includes('vibe')) {
-      // Limit initial query for performance
-      const allVibes = await ctx.db.query('vibes').take(500);
+      // Get all vibes for comprehensive search
+      const allVibes = await ctx.db.query('vibes').collect();
 
       for (const vibe of allVibes) {
         // Check if vibe matches using fuzzy search or exact phrase matching
@@ -340,8 +340,8 @@ export const searchAll = query({
 
     // Search users
     if (!includeTypes || includeTypes.includes('user')) {
-      // Limit initial query for performance
-      const allUsers = await ctx.db.query('users').take(200);
+      // Get all users for comprehensive search
+      const allUsers = await ctx.db.query('users').collect();
 
       for (const user of allUsers) {
         const username = user.username || '';
@@ -406,8 +406,8 @@ export const searchAll = query({
 
     // Search tags
     if (!includeTypes || includeTypes.includes('tag')) {
-      // Limit for performance - tags are aggregated from vibes
-      const vibesWithTags = await ctx.db.query('vibes').take(500);
+      // Get all vibes to aggregate tags comprehensively
+      const vibesWithTags = await ctx.db.query('vibes').collect();
 
       const tagCounts = new Map<string, number>();
       vibesWithTags.forEach((vibe) => {
@@ -604,7 +604,7 @@ export const getSearchSuggestions = query({
         .take(5);
 
       // Get popular tags as fallback suggestions
-      const allVibes = await ctx.db.query('vibes').take(100);
+      const allVibes = await ctx.db.query('vibes').collect();
       const tagCounts = new Map<string, number>();
       allVibes.forEach((vibe) => {
         vibe.tags?.forEach((tag) => {
@@ -635,8 +635,8 @@ export const getSearchSuggestions = query({
       .join(' ')
       .toLowerCase();
 
-    // Search vibes (limit 5)
-    const vibes = await ctx.db.query('vibes').take(20);
+    // Search vibes (will limit results to 5 after filtering)
+    const vibes = await ctx.db.query('vibes').collect();
     for (const vibe of vibes) {
       if (results.vibes.length >= 5) break;
 
@@ -684,8 +684,8 @@ export const getSearchSuggestions = query({
       }
     }
 
-    // Search users (limit 3)
-    const users = await ctx.db.query('users').take(15);
+    // Search users (will limit results to 3 after filtering)
+    const users = await ctx.db.query('users').collect();
     for (const user of users) {
       if (results.users.length >= 3) break;
 
