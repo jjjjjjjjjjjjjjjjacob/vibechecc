@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
-import { api } from '@vibechecc/convex';
+import { api } from '@viberater/convex';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
 interface UseInstantSearchOptions {

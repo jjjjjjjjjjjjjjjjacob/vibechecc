@@ -176,7 +176,7 @@ export function OnboardingProfileStep({
                     className="border-2 focus:border-pink-400"
                   />
                   <p className="text-muted-foreground text-xs">
-                    This is how others will find and identify you on vibechecc
+                    This is how others will find and identify you on viberater
                   </p>
                 </div>
 

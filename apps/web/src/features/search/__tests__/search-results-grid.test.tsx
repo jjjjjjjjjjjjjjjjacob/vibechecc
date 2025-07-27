@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { SearchResultsGrid } from '../components/search-results-grid';
-import type { SearchResult } from '@vibechecc/types';
+import type { SearchResult } from '@viberater/types';
 
 // Mock the child components
 vi.mock('../components/search-result-card', () => ({

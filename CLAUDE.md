@@ -13,7 +13,7 @@ These files contain critical information about how to work with this codebase ef
 
 ## Project Overview
 
-**vibechecc** is a modern social web application built as an Nx-powered monorepo. Users can share "vibes" (life experiences, thoughts, situations), rate and react to others' vibes with emojis and stars, and discover trending content through advanced search and filtering.
+**viberater** is a modern social web application built as an Nx-powered monorepo. Users can share "vibes" (life experiences, thoughts, situations), rate and react to others' vibes with emojis and stars, and discover trending content through advanced search and filtering.
 
 ## Architecture
 
@@ -21,8 +21,8 @@ These files contain critical information about how to work with this codebase ef
 
 - `apps/web/` - React web app (TanStack Start)
 - `apps/convex/` - Convex real-time backend
-- `packages/types/` - Shared TypeScript interfaces (@vibechecc/types)
-- `packages/utils/` - Shared utility functions (@vibechecc/utils)
+- `packages/types/` - Shared TypeScript interfaces (@viberater/types)
+- `packages/utils/` - Shared utility functions (@viberater/utils)
 - `terraform/` - Infrastructure as code
 - `.github/workflows/` - CI/CD pipelines
 - `.agent/` - AI assistant documentation and learnings
@@ -125,15 +125,15 @@ bun nx reset                            # Clear Nx cache
 
 ```typescript
 // From web app
-import { api } from '@vibechecc/convex';
-import type { User, Vibe, Rating } from '@vibechecc/types';
-import { computeUserDisplayName, getUserAvatarUrl } from '@vibechecc/utils';
+import { api } from '@viberater/convex';
+import type { User, Vibe, Rating } from '@viberater/types';
+import { computeUserDisplayName, getUserAvatarUrl } from '@viberater/utils';
 import { cn } from '@/utils/tailwind-utils';
 
 // From backend
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import type { User } from '@vibechecc/types';
+import type { User } from '@viberater/types';
 ```
 
 ## Convex Backend Development

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { StarRating } from './star-rating';
 import { RatingPopover } from './rating-popover';
-import type { Rating } from '@vibechecc/types';
+import type { Rating } from '@viberater/types';
 
 interface StarRatingWithPopoverProps {
   value: number;

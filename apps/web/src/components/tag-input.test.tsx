@@ -18,7 +18,7 @@ vi.mock('@convex-dev/react-query', () => ({
   convexQuery: () => ({}),
 }));
 
-vi.mock('@vibechecc/convex', () => ({
+vi.mock('@viberater/convex', () => ({
   api: {
     tags: {
       search: vi.fn(),

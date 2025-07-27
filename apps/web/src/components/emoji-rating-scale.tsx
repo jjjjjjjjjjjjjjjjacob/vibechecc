@@ -13,6 +13,7 @@ interface EmojiRatingScaleProps {
   onMouseDown?: () => void;
   onMouseUp?: () => void;
   emojiColor?: string;
+  mobileSlider?: boolean;
 }
 
 export function EmojiRatingScale({
@@ -27,6 +28,7 @@ export function EmojiRatingScale({
   onMouseDown,
   onMouseUp,
   emojiColor,
+  mobileSlider = false,
 }: EmojiRatingScaleProps) {
   const [hoverValue, setHoverValue] = React.useState<number | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -39,21 +41,39 @@ export function EmojiRatingScale({
     lg: 'text-4xl gap-1',
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
+  const calculateValueFromPosition = (clientX: number) => {
+    if (!containerRef.current) return null;
 
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const x = clientX - rect.left;
     const width = rect.width;
 
-    // Calculate rating value based on mouse position
     const rawValue = (x / width) * 5;
     const clampedValue = Math.max(0.1, Math.min(5, rawValue));
-    const roundedValue = Math.round(clampedValue * 10) / 10;
+    return Math.round(clampedValue * 10) / 10;
+  };
 
-    setHoverValue(roundedValue);
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const value = calculateValueFromPosition(e.clientX);
+    if (value === null) return;
+
+    setHoverValue(value);
     if (onChange) {
-      onChange(roundedValue);
+      onChange(value);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    const value = calculateValueFromPosition(touch.clientX);
+    if (value === null) return;
+
+    setHoverValue(value);
+    if (onChange) {
+      onChange(value);
     }
   };
 
@@ -65,18 +85,26 @@ export function EmojiRatingScale({
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current || !onClick) return;
+    if (!onClick) return;
+    const value = calculateValueFromPosition(e.clientX);
+    if (value !== null) {
+      onClick(value);
+    }
+  };
 
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const width = rect.width;
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!onClick) return;
+    const touch = e.changedTouches[0];
+    if (!touch) return;
 
-    // Calculate rating value based on mouse position
-    const rawValue = (x / width) * 5;
-    const clampedValue = Math.max(0.1, Math.min(5, rawValue));
-    const roundedValue = Math.round(clampedValue * 10) / 10;
-
-    onClick(roundedValue);
+    const value = calculateValueFromPosition(touch.clientX);
+    if (value !== null) {
+      onClick(value);
+    }
+    setHoverValue(null);
+    if (onMouseUp) {
+      onMouseUp();
+    }
   };
 
   const handleMouseDown = () => {
@@ -101,6 +129,8 @@ export function EmojiRatingScale({
         onMouseDown={onMouseDown ? handleMouseDown : undefined}
         onMouseUp={onMouseUp ? handleMouseUpLocal : undefined}
         onClick={onClick ? handleClick : undefined}
+        onTouchMove={onChange ? handleTouchMove : undefined}
+        onTouchEnd={onClick ? handleTouchEnd : undefined}
         onKeyDown={(e) => {
           if (onClick && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
@@ -141,6 +171,44 @@ export function EmojiRatingScale({
             <span key={`unfilled-${i}`}>{emoji}</span>
           ))}
         </div>
+        {mobileSlider && (onChange || onClick) && (
+          <input
+            type="range"
+            min="0.1"
+            max="5"
+            step="0.1"
+            value={displayValue}
+            onChange={(e) => {
+              const newValue = parseFloat(e.target.value);
+              setHoverValue(newValue);
+              if (onChange) {
+                onChange(newValue);
+              }
+            }}
+            onMouseUp={(e) => {
+              const newValue = parseFloat((e.target as HTMLInputElement).value);
+              if (onClick) {
+                onClick(newValue);
+              }
+              setHoverValue(null);
+              if (onMouseUp) {
+                onMouseUp();
+              }
+            }}
+            onTouchEnd={(e) => {
+              const newValue = parseFloat((e.target as HTMLInputElement).value);
+              if (onClick) {
+                onClick(newValue);
+              }
+              setHoverValue(null);
+              if (onMouseUp) {
+                onMouseUp();
+              }
+            }}
+            className="absolute inset-0 h-full w-full cursor-pointer touch-pan-x opacity-0"
+            aria-label={`Rate ${value} out of 5 with ${emoji}`}
+          />
+        )}
       </div>
       {showTooltip && hoverValue !== null && onChange && (
         <div className="bg-popover text-popover-foreground animate-in fade-in-0 slide-in-from-bottom-1 absolute -top-8 left-1/2 -translate-x-1/2 rounded px-2 py-1 text-xs font-medium shadow-md duration-100">

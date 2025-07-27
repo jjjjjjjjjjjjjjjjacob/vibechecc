@@ -6,7 +6,7 @@ import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { cn } from '@/utils/tailwind-utils';
-import type { Rating } from '@vibechecc/types';
+import type { Rating } from '@viberater/types';
 import { Circle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 

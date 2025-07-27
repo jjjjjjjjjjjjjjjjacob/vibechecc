@@ -82,7 +82,7 @@ export function OnboardingCompleteStep({
           You're All Set!
         </h1>
         <p className="text-muted-foreground text-xl">
-          Welcome to the vibechecc community! You're ready to start discovering
+          Welcome to the viberater community! You're ready to start discovering
           and sharing amazing vibes.
         </p>
       </motion.div>
@@ -138,7 +138,7 @@ export function OnboardingCompleteStep({
           size="lg"
           className="bg-gradient-to-r from-pink-500 to-orange-500 px-8 py-3 text-lg text-white hover:from-pink-600 hover:to-orange-600"
         >
-          {isLoading ? 'Finishing Setup...' : 'Start Exploring vibechecc!'}
+          {isLoading ? 'Finishing Setup...' : 'Start Exploring viberater!'}
         </Button>
 
         <p className="text-muted-foreground text-sm">

@@ -1,5 +1,5 @@
 /**
- * Search-related type definitions shared across the vibechecc platform
+ * Search-related type definitions shared across the viberater platform
  */
 
 // Search result types

@@ -1,8 +1,8 @@
-# vibechecc Frontend
+# viberater Frontend
 
 > **Note:** For monorepo setup, scripts, and infrastructure, see the [root README.md](../../README.md).
 
-This directory contains the source code for the vibechecc frontend application, built with the [TanStack Start](https://tanstack.com/start) framework.
+This directory contains the source code for the viberater frontend application, built with the [TanStack Start](https://tanstack.com/start) framework.
 
 ## Overview
 

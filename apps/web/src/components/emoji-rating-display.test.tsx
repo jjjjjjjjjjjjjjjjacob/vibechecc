@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EmojiRatingDisplay, TopEmojiRatings } from './emoji-rating-display';
-import type { EmojiRating } from '@vibechecc/types';
+import type { EmojiRating } from '@viberater/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 

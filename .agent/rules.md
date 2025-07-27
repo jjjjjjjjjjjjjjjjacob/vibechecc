@@ -1,4 +1,4 @@
-# AI Assistant Rules for vibechecc
+# AI Assistant Rules for viberater
 
 These rules override default AI behavior when working on this codebase.
 
@@ -16,7 +16,7 @@ These rules override default AI behavior when working on this codebase.
    - When unsure about a pattern, ask for clarification
 
 3. **Monorepo Awareness**
-   - Always use workspace imports (`@vibechecc/types`, `@vibechecc/utils`, etc.)
+   - Always use workspace imports (`@viberater/types`, `@viberater/utils`, etc.)
    - Run commands from the repository root
    - Use `bun` exclusively (never npm, yarn, or pnpm)
 

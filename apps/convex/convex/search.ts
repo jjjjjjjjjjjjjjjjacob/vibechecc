@@ -5,7 +5,7 @@ import type {
   UserSearchResult,
   TagSearchResult,
   ActionSearchResult,
-} from '@vibechecc/types';
+} from '@viberater/types';
 import { fuzzyMatch } from './search/fuzzy_search';
 import { scoreVibe, scoreUser, scoreTag } from './search/search_scorer';
 import { parseSearchQuery } from './search/search_utils';

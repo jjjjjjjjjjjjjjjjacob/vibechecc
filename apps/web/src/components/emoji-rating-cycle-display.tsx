@@ -2,7 +2,7 @@ import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/utils/tailwind-utils';
 import { EmojiRatingPopover } from './emoji-rating-popover';
-import type { EmojiRatingMetadata } from '@vibechecc/types';
+import type { EmojiRatingMetadata } from '@viberater/types';
 
 interface EmojiRatingCycleDisplayProps {
   onSubmit: (data: {

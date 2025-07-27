@@ -9,7 +9,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { SearchResponse } from '@vibechecc/types';
+import type { SearchResponse } from '@viberater/types';
 
 // Mock the router
 const mockNavigate = vi.fn();

@@ -8,7 +8,7 @@ import type {
   VibeSearchResult,
   UserSearchResult,
   TagSearchResult,
-} from '@vibechecc/types';
+} from '@viberater/types';
 
 interface SearchResultCardProps {
   result: SearchResult;

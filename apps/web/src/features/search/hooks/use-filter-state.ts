@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import type { SearchFilters, SearchResultType } from '@vibechecc/types';
+import type { SearchFilters, SearchResultType } from '@viberater/types';
 
 // Extended filters that include both SearchFilters and SearchRequest properties
 interface ExtendedFilters extends SearchFilters {

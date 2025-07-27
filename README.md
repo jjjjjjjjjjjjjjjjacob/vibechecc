@@ -1,6 +1,6 @@
-# vibechecc
+# viberater
 
-vibechecc is a modern social application where users can:
+viberater is a modern social application where users can:
 
 - Share "vibes" (life experiences, thoughts, situations) with the community
 - Rate and react to other users' vibes with emojis and star ratings
@@ -14,13 +14,13 @@ vibechecc is a modern social application where users can:
 This project is an Nx-powered monorepo, enabling code sharing between multiple frontend applications and a Convex backend.
 
 ```
-vibechecc/
+viberater/
 ├── apps/
 │   ├── web/              # React web application (TanStack Start)
 │   └── convex/           # Convex backend (real-time DB, auth, webhooks)
 ├── packages/
-│   ├── types/            # @vibechecc/types - Shared TypeScript interfaces
-│   └── utils/            # @vibechecc/utils - Shared utility functions
+│   ├── types/            # @viberater/types - Shared TypeScript interfaces
+│   └── utils/            # @viberater/utils - Shared utility functions
 ├── terraform/            # Infrastructure as code (Cloudflare, Convex, etc.)
 ├── .github/              # GitHub Actions workflows
 ├── nx.json               # Nx workspace configuration
@@ -83,8 +83,8 @@ vibechecc/
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/vibechecc.git
-cd vibechecc
+git clone https://github.com/your-username/viberater.git
+cd viberater
 bun install
 ```
 
@@ -137,7 +137,7 @@ All scripts are run from the root with Bun:
 
 - List projects: `bun nx show projects`
 - Project details: `bun nx show project <project>`
-- Run task: `bun nx <task> <project>` (e.g., `bun nx build @vibechecc/web`)
+- Run task: `bun nx <task> <project>` (e.g., `bun nx build @viberater/web`)
 - Run for all: `bun nx run-many --target=<task>`
 - Clear cache: `bun nx reset`
 
@@ -244,11 +244,11 @@ terraform apply
 ### From Browser App
 
 ```typescript
-import { api } from '@vibechecc/convex';
-import type { User, Vibe, Rating } from '@vibechecc/types';
-import { computeUserDisplayName, getUserAvatarUrl } from '@vibechecc/utils';
-import { seo } from '@vibechecc/utils';
-import { cn } from '@vibechecc/utils/tailwind';
+import { api } from '@viberater/convex';
+import type { User, Vibe, Rating } from '@viberater/types';
+import { computeUserDisplayName, getUserAvatarUrl } from '@viberater/utils';
+import { seo } from '@viberater/utils';
+import { cn } from '@viberater/utils/tailwind';
 ```
 
 ### From Backend Package
@@ -256,18 +256,18 @@ import { cn } from '@vibechecc/utils/tailwind';
 ```typescript
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import type { User, Vibe, Rating } from '@vibechecc/types';
-import { computeUserDisplayName } from '@vibechecc/utils';
+import type { User, Vibe, Rating } from '@viberater/types';
+import { computeUserDisplayName } from '@viberater/utils';
 ```
 
 ### From Shared Packages
 
 ```typescript
-// @vibechecc/types
+// @viberater/types
 export interface User { id: string; name: string; email: string; }
-// @vibechecc/utils
+// @viberater/utils
 export function computeUserDisplayName(user: User): string { ... }
-// @vibechecc/utils/tailwind
+// @viberater/utils/tailwind
 export function cn(...classes: string[]): string { ... }
 ```
 

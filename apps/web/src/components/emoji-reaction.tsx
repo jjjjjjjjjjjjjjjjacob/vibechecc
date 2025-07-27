@@ -6,7 +6,7 @@ import type { EmojiReaction as EmojiReactionType } from '../types';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { EmojiSearchCommand } from './emoji-search-command';
 import { EmojiRatingPopover } from './emoji-rating-popover';
-import { api } from '@vibechecc/convex';
+import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
 

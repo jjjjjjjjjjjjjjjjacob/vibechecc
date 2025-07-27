@@ -1,5 +1,5 @@
 /**
- * Shared limits and defaults used across the vibechecc platform
+ * Shared limits and defaults used across the viberater platform
  */
 
 // Pagination limits

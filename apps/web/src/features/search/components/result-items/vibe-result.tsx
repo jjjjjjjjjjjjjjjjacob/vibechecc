@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import type { VibeSearchResult } from '@vibechecc/types';
+import type { VibeSearchResult } from '@viberater/types';
 
 interface VibeResultProps {
   result: VibeSearchResult;

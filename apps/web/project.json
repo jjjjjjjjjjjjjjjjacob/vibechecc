@@ -1,9 +1,9 @@
 {
-  "name": "@vibechecc/web",
+  "name": "@viberater/web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/web",
-  "inputs": ["@vibechecc/convex", "@vibechecc/types"],
+  "inputs": ["@viberater/convex", "@viberater/types"],
   "targets": {
     "dev": {
       "executor": "nx:run-commands",

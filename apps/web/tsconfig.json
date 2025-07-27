@@ -6,8 +6,8 @@
     "jsxImportSource": "react",
     "paths": {
       "@/*": ["./src/*"],
-      "@vibechecc/convex": ["../convex"],
-      "@vibechecc/convex/*": ["../convex/*"]
+      "@viberater/convex": ["../convex"],
+      "@viberater/convex/*": ["../convex/*"]
     }
   },
   "include": [

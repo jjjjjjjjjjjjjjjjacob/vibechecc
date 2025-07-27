@@ -46,7 +46,7 @@ export function OnboardingLayout({
               </Button>
             )}
             <div>
-              <h1 className="text-foreground text-2xl font-bold">vibechecc</h1>
+              <h1 className="text-foreground text-2xl font-bold">viberater</h1>
               <p className="text-muted-foreground text-sm">
                 Step {currentStep} of {totalSteps}
               </p>

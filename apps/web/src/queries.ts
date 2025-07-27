@@ -4,10 +4,10 @@ import {
   useConvexMutation,
   useConvexAction,
 } from '@convex-dev/react-query';
-import { api } from '@vibechecc/convex';
+import { api } from '@viberater/convex';
 // import { useAuth } from '@clerk/tanstack-react-start';
 
-// vibechecc QUERIES
+// viberater QUERIES
 
 // Query to get all vibes (simple version for performance)
 export function useVibes() {

@@ -1,5 +1,5 @@
 {
-  "name": "@vibechecc/web",
+  "name": "@viberater/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -40,7 +40,7 @@
     "@tanstack/react-router-devtools": "^1.121.134",
     "@tanstack/react-router-with-query": "^1.121.134",
     "@tanstack/react-start": "^1.121.134",
-    "@vibechecc/convex": "workspace:^",
+    "@viberater/convex": "workspace:^",
     "@vitejs/plugin-react": "^4.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

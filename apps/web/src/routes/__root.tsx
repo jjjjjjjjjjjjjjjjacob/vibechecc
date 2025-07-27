@@ -133,8 +133,8 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       ...seo({
-        title: 'vibechecc | share and discover vibes',
-        description: `vibechecc is a platform for sharing and discovering vibes. rate, react, and share your favorite vibes with the world.`,
+        title: 'viberater | share and discover vibes',
+        description: `viberater is a platform for sharing and discovering vibes. rate, react, and share your favorite vibes with the world.`,
       }),
     ],
     links: [
@@ -256,7 +256,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               <footer className="bg-background border-t py-6">
                 <div className="container mx-auto px-4">
                   <p className="text-muted-foreground text-center text-sm">
-                    © {new Date().getFullYear()} vibechecc. all rights
+                    © {new Date().getFullYear()} viberater. all rights
                     reserved.
                   </p>
                 </div>

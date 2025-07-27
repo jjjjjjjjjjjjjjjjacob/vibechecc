@@ -371,7 +371,7 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         title="sign in to rate vibes"
-        description="join vibechecc to share your reactions and ratings with the community"
+        description="join viberater to share your reactions and ratings with the community"
       />
     </>
   );

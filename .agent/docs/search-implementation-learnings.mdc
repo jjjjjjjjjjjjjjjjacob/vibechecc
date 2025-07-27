@@ -112,10 +112,10 @@ When one agent's work depends on another:
 cd apps/web && bun vitest run
 
 # Run specific test file
-bun nx test @vibechecc/web -- path/to/test.tsx
+bun nx test @viberater/web -- path/to/test.tsx
 
 # Check test coverage
-bun nx test @vibechecc/web -- --coverage
+bun nx test @viberater/web -- --coverage
 
 # Run quality checks
 bun run quality

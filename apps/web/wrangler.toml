@@ -1,6 +1,6 @@
 # Top-level configuration
 "$schema" = "../../node_modules/wrangler/config-schema.json"
-name = "vibechecc"
+name = "viberater"
 main = "./.output/server/index.mjs"
 compatibility_date = "2025-07-01"
 compatibility_flags = [ "nodejs_compat" ]
@@ -14,10 +14,10 @@ enabled = true
 
 # Production Environment
 [env.production]
-name = "vibechecc-production-frontend"
+name = "viberater-production-frontend"
 # Secrets should be set via `npx wrangler secret put --env production`
 
 # Development Environment
 [env.development]
-name = "vibechecc-development-frontend"
+name = "viberater-development-frontend"
 # Secrets should be set via `npx wrangler secret put --env development`

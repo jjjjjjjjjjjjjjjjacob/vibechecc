@@ -109,20 +109,20 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json" | jq '.' > workers_output.json
 
-          # Extract A record ID for vibechecc.app
+          # Extract A record ID for viberater.app
           A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
 
-          # Extract AAAA record ID for vibechecc.app
+          # Extract AAAA record ID for viberater.app
           AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
 
-          # Extract CNAME record ID for vibechecc.app
+          # Extract CNAME record ID for viberater.app
           CNAME_RECORD_ID=$(jq -r '.result[] | select(.type == "CNAME" and .name == "$PREFIX") | .id' dns_output.json)
 
-          # Extract Worker script name for vibechecc-{prefix}-frontend
+          # Extract Worker script name for viberater-{prefix}-frontend
           if [ "${{ inputs.environment }}" = "ephemeral" ]; then
-            WORKER_SCRIPT_NAME="vibechecc-ephemeral-$PREFIX-frontend"
+            WORKER_SCRIPT_NAME="viberater-ephemeral-$PREFIX-frontend"
           else
-            WORKER_SCRIPT_NAME="vibechecc-${{ inputs.environment }}-frontend"
+            WORKER_SCRIPT_NAME="viberater-${{ inputs.environment }}-frontend"
           fi
           WORKER_SCRIPT_EXISTS=$(jq -r --arg script_name "$WORKER_SCRIPT_NAME" '.result[] | select(.id == $script_name) | .id' workers_output.json)
 
@@ -135,7 +135,7 @@ jobs:
           # Import A record if it exists
           if [ "$A_RECORD_ID" != "null" ] && [ -n "$A_RECORD_ID" ]; then
             echo "Importing A record with ID: $A_RECORD_ID"
-            terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_a ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
+            terraform import module.viberater_worker.cloudflare_dns_record.frontend_a ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
           else
             echo "No A record found to import"
           fi
@@ -143,7 +143,7 @@ jobs:
           # Import AAAA record if it exists
           if [ "$AAAA_RECORD_ID" != "null" ] && [ -n "$AAAA_RECORD_ID" ]; then
             echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
-            terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_aaaa ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
+            terraform import module.viberater_worker.cloudflare_dns_record.frontend_aaaa ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
           else
             echo "No AAAA record found to import"
           fi
@@ -152,7 +152,7 @@ jobs:
 
           if [ "$CNAME_RECORD_ID" != "null" ] && [ -n "$CNAME_RECORD_ID" ]; then
             echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
-            terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_cname ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
+            terraform import module.viberater_worker.cloudflare_dns_record.frontend_cname ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
           else
             echo "No CNAME record found to import"
           fi
@@ -160,7 +160,7 @@ jobs:
           # Import Worker script if it exists
           if [ "$WORKER_SCRIPT_EXISTS" != "null" ] && [ -n "$WORKER_SCRIPT_EXISTS" ]; then
             echo "Importing Worker script: $WORKER_SCRIPT_EXISTS"
-            terraform import module.vibechecc_worker.cloudflare_workers_script.frontend ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$WORKER_SCRIPT_EXISTS || true
+            terraform import module.viberater_worker.cloudflare_workers_script.frontend ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$WORKER_SCRIPT_EXISTS || true
           else
             echo "No Worker script found to import"
           fi
@@ -220,7 +220,7 @@ jobs:
 
       # Build and deploy Convex backend
       - name: Build Convex Backend
-        run: bun nx build @vibechecc/convex
+        run: bun nx build @viberater/convex
 
       - name: Deploy Convex
         working-directory: apps/convex
@@ -270,7 +270,7 @@ jobs:
           VITE_POSTHOG_API_HOST: https://us.i.posthog.com
           VITE_POSTHOG_PROJECT_ID: ${{ secrets.VITE_POSTHOG_PROJECT_ID }}
           VITE_POSTHOG_REGION: 'US Cloud'
-        run: bun nx build @vibechecc/web
+        run: bun nx build @viberater/web
 
       - name: Add Environment to Wrangler Config
         if: inputs.environment == 'ephemeral'
@@ -279,7 +279,7 @@ jobs:
           cat >> wrangler.toml << EOF
 
           [env.pr-${{ inputs.pr_number }}]
-          name = "vibechecc-pr-${{ inputs.pr_number }}-frontend"
+          name = "viberater-pr-${{ inputs.pr_number }}-frontend"
           EOF
 
       - name: Deploy to Cloudflare Workers
