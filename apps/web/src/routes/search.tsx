@@ -1,9 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
 import { z } from 'zod';
-import {
-  SearchResultsGrid,
-  SearchPagination,
-} from '@/features/search/components';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load search components for code splitting
+const SearchResultsGrid = lazy(() => 
+  import('@/features/search/components').then(m => ({ default: m.SearchResultsGrid }))
+);
+const SearchPagination = lazy(() => 
+  import('@/features/search/components').then(m => ({ default: m.SearchPagination }))
+);
+
+// Import non-heavy components normally
 import { useSearchResults } from '@/features/search/hooks/use-search-results';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +19,34 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Star } from 'lucide-react';
 import { EmojiRatingFilter } from '@/components/emoji-rating-filter';
+
+// Loading skeletons for code-split components
+function SearchResultsSkeleton() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Card key={i}>
+          <div className="p-4">
+            <Skeleton className="h-4 w-3/4 mb-2" />
+            <Skeleton className="h-3 w-1/2 mb-3" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function PaginationSkeleton() {
+  return (
+    <div className="flex justify-center gap-2 mt-6">
+      <Skeleton className="h-10 w-20" />
+      <Skeleton className="h-10 w-10" />
+      <Skeleton className="h-10 w-10" />
+      <Skeleton className="h-10 w-20" />
+    </div>
+  );
+}
 
 const searchParamsSchema = z.object({
   q: z.string().optional(),
@@ -223,21 +259,23 @@ function SearchResultsPage() {
               </select>
             </div>
 
-            <SearchResultsGrid
-              results={
-                data
-                  ? [
-                      ...(data.vibes || []),
-                      ...(data.users || []),
-                      ...(data.tags || []),
-                      ...(data.actions || []),
-                    ]
-                  : undefined
-              }
-              loading={isLoading}
-              error={isError ? error : undefined}
-              onRetry={() => window.location.reload()}
-            />
+            <Suspense fallback={<SearchResultsSkeleton />}>
+              <SearchResultsGrid
+                results={
+                  data
+                    ? [
+                        ...(data.vibes || []),
+                        ...(data.users || []),
+                        ...(data.tags || []),
+                        ...(data.actions || []),
+                      ]
+                    : undefined
+                }
+                loading={isLoading}
+                error={isError ? error : undefined}
+                onRetry={() => window.location.reload()}
+              />
+            </Suspense>
 
             {!isLoading &&
               data &&
@@ -245,10 +283,12 @@ function SearchResultsPage() {
                 (data.users && data.users.length > 0) ||
                 (data.tags && data.tags.length > 0) ||
                 (data.actions && data.actions.length > 0)) && (
-                <SearchPagination
-                  currentPage={page || 1}
-                  totalPages={totalPages}
-                />
+                <Suspense fallback={<PaginationSkeleton />}>
+                  <SearchPagination
+                    currentPage={page || 1}
+                    totalPages={totalPages}
+                  />
+                </Suspense>
               )}
           </main>
         </div>

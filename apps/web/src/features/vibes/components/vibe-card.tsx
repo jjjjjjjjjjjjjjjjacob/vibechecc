@@ -21,6 +21,7 @@ import {
   getUserInitials,
 } from '@/utils/user-utils';
 import type { Vibe } from '@/types';
+import type { RatingDisplayMode } from '@/components/vibe-category-row';
 import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
 import { EmojiRatingDisplayPopover } from '@/components/emoji-rating-display-popover';
@@ -30,9 +31,14 @@ import { EmojiReactions } from '@/components/emoji-reaction';
 interface VibeCardProps {
   vibe: Vibe;
   compact?: boolean;
+  ratingDisplayMode?: RatingDisplayMode;
 }
 
-export function VibeCard({ vibe, compact }: VibeCardProps) {
+export function VibeCard({
+  vibe,
+  compact,
+  ratingDisplayMode = 'most-rated',
+}: VibeCardProps) {
   const [imageError, setImageError] = React.useState(false);
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
@@ -71,9 +77,27 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
     }));
   }, [topEmojiRatings]);
 
-  // Use backend data for most interacted emoji
-  const mostInteractedEmoji = React.useMemo(() => {
-    if (mostInteractedEmojiData && mostInteractedEmojiData.averageValue) {
+  // Use backend data for primary emoji display based on rating mode
+  const primaryEmojiRating = React.useMemo(() => {
+    if (
+      ratingDisplayMode === 'top-rated' &&
+      topEmojiRatings &&
+      topEmojiRatings.length > 0
+    ) {
+      // Find the highest rated emoji (by average value)
+      const topRated = topEmojiRatings.reduce((max, current) =>
+        current.averageValue > max.averageValue ? current : max
+      );
+      return {
+        emoji: topRated.emoji,
+        value: topRated.averageValue,
+        count: topRated.count,
+      };
+    } else if (
+      mostInteractedEmojiData &&
+      mostInteractedEmojiData.averageValue
+    ) {
+      // Default to most-rated (most interactions)
       return {
         emoji: mostInteractedEmojiData.emoji,
         value: mostInteractedEmojiData.averageValue,
@@ -81,7 +105,7 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
       };
     }
     return null;
-  }, [mostInteractedEmojiData]);
+  }, [ratingDisplayMode, topEmojiRatings, mostInteractedEmojiData]);
 
   // Transform emoji ratings to reaction format for UI
   const emojiReactions = React.useMemo(() => {
@@ -294,9 +318,9 @@ export function VibeCard({ vibe, compact }: VibeCardProps) {
           >
             {/* Emoji Rating Display - Show cycling display if no ratings yet */}
             <div className="w-full">
-              {mostInteractedEmoji ? (
+              {primaryEmojiRating ? (
                 <EmojiRatingDisplayPopover
-                  rating={mostInteractedEmoji}
+                  rating={primaryEmojiRating}
                   allRatings={emojiRatings}
                   onEmojiClick={handleEmojiRatingClick}
                   vibeId={vibe.id}

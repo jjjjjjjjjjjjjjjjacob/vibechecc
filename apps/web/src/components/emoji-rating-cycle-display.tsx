@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/utils/tailwind-utils';
 import { EmojiRatingPopover } from './emoji-rating-popover';
 import type { EmojiRatingMetadata } from '@viberater/types';
@@ -39,18 +38,28 @@ export function EmojiRatingCycleDisplay({
 }: EmojiRatingCycleDisplayProps) {
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);
+  const [emojiTransition, setEmojiTransition] = React.useState<'in' | 'out' | 'idle'>('idle');
 
   const emojiOptions = DEFAULT_EMOJIS;
 
   // Get current emoji
   const currentEmoji = emojiOptions[currentEmojiIndex];
 
-  // Cycle through emojis
+  // Cycle through emojis with CSS transitions
   React.useEffect(() => {
     if (isHovered) return;
 
     const interval = setInterval(() => {
-      setCurrentEmojiIndex((prev) => (prev + 1) % emojiOptions.length);
+      setEmojiTransition('out');
+      
+      setTimeout(() => {
+        setCurrentEmojiIndex((prev) => (prev + 1) % emojiOptions.length);
+        setEmojiTransition('in');
+        
+        setTimeout(() => {
+          setEmojiTransition('idle');
+        }, 300);
+      }, 150);
     }, 2500);
 
     return () => clearInterval(interval);
@@ -66,47 +75,33 @@ export function EmojiRatingCycleDisplay({
         isHovered && currentEmoji !== '❓' ? currentEmoji : undefined
       }
     >
-      <motion.div
+      <div
         className={cn(
-          'bg-secondary/50 hover:bg-secondary inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 text-sm font-medium transition-all hover:scale-105 active:scale-95',
+          'bg-secondary/50 hover:bg-secondary inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 text-sm font-medium transition-all',
+          'hover:animate-scale-spring active:scale-95',
           className
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
       >
         <div className="relative flex h-5 w-5 items-center justify-center overflow-hidden">
-          <AnimatePresence mode="popLayout">
-            <motion.span
-              key={currentEmoji}
-              className="absolute text-base"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{
-                duration: 0.3,
-                ease: 'easeInOut',
-              }}
-            >
-              {currentEmoji}
-            </motion.span>
-          </AnimatePresence>
+          <span
+            key={currentEmoji}
+            className={cn(
+              'absolute text-base transition-all duration-300 ease-out',
+              emojiTransition === 'in' && 'animate-emoji-slide-in',
+              emojiTransition === 'out' && 'animate-emoji-slide-out',
+              emojiTransition === 'idle' && 'opacity-100 transform-none'
+            )}
+          >
+            {currentEmoji}
+          </span>
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={currentEmoji === '❓' ? 'rate' : 'click'}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="text-muted-foreground"
-          >
-            {currentEmoji === '❓' ? 'rate' : 'click to rate'}
-          </motion.span>
-        </AnimatePresence>
-      </motion.div>
+        <span className="text-muted-foreground text-xs transition-opacity duration-200">
+          {currentEmoji === '❓' ? 'rate' : 'click to rate'}
+        </span>
+      </div>
     </EmojiRatingPopover>
   );
 }

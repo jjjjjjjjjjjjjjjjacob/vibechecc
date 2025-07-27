@@ -22,6 +22,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
 import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
+import { OptimizedFontLoader } from '@/components/optimized-font-loader';
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
@@ -30,92 +31,21 @@ import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { ConvexQueryClient } from '@convex-dev/react-query';
 import { cn } from '@/utils';
 
-// Server function to fetch Clerk auth and get Convex token
+// Optimized server function with caching and mobile optimizations
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
   if (!request) {
-    // During SSR, if no request, return empty auth
     return {
       userId: null,
       token: null,
+      fromCache: false,
+      computeTime: 0
     };
   }
 
-  try {
-    // Use getAuth with options to handle SSR properly
-    const authResult = await getAuth(request);
-
-    // Check if we got a Response object (handshake redirect)
-    if (
-      authResult &&
-      typeof authResult === 'object' &&
-      'status' in authResult &&
-      'headers' in authResult
-    ) {
-      // This is a Response object for handshake, skip auth during SSR
-      // Clerk handshake redirect detected during SSR, skipping auth
-      return {
-        userId: null,
-        token: null,
-      };
-    }
-
-    const auth = authResult;
-
-    // Check if auth is valid and has userId
-    if (
-      !auth ||
-      typeof auth !== 'object' ||
-      !('userId' in auth) ||
-      !auth.userId
-    ) {
-      return {
-        userId: null,
-        token: null,
-      };
-    }
-
-    // Only try to get token if we have a userId
-    let token = null;
-    try {
-      if ('getToken' in auth && typeof auth.getToken === 'function') {
-        token = await auth.getToken({ template: 'convex' });
-      }
-    } catch {
-      // Token generation might fail during SSR
-      // Convex token generation skipped during SSR
-    }
-
-    return {
-      userId: auth.userId as string,
-      token,
-    };
-  } catch (error) {
-    // Check if the error is a Response object (Clerk handshake redirect)
-    if (
-      error &&
-      typeof error === 'object' &&
-      'status' in error &&
-      'headers' in error
-    ) {
-      // Clerk handshake redirect during SSR
-      return {
-        userId: null,
-        token: null,
-      };
-    }
-
-    // Log other errors for debugging
-    if (error instanceof Error) {
-      // Auth error during SSR
-    }
-
-    // During SSR, authentication errors are expected
-    return {
-      userId: null,
-      token: null,
-    };
-  }
+  // Use optimized auth with caching
+  const { getOptimizedAuth } = await import('@/lib/optimized-auth');
+  return await getOptimizedAuth(request);
 });
 
 export const Route = createRootRouteWithContext<{
@@ -246,6 +176,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <PostHogProvider>
           <ThemeProvider>
             <div className="flex min-h-screen flex-col">
+              <OptimizedFontLoader />
               <PostHogPageTracker />
               <ClerkPostHogIntegration />
               <Header />

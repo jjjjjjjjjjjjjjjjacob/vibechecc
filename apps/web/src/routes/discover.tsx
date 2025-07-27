@@ -1,10 +1,41 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useTopRatedEmojiVibes, useEmojiMetadata } from '@/queries';
-import { VibeGrid } from '@/components/vibe-grid';
+import { 
+  useTopRatedEmojiVibes, 
+  useVibesPaginated, 
+  useTopRatedVibes,
+  useTrendingEmojiRatings,
+  useAllTags,
+  useVibesByTag
+} from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from 'lucide-react';
+
+// Skeleton for lazy-loaded components
+function VibeCategoryRowSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2 overflow-x-auto pb-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="flex-shrink-0 w-64">
+            <div className="p-4">
+              <Skeleton className="h-4 w-3/4 mb-2" />
+              <Skeleton className="h-3 w-1/2 mb-3" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Lazy load heavy category component
+const VibeCategoryRow = lazy(() => 
+  import('@/components/vibe-category-row').then(m => ({ default: m.VibeCategoryRow }))
+);
 
 export const Route = createFileRoute('/discover')({
   component: DiscoverPage,
@@ -16,6 +47,7 @@ interface EmojiCollection {
   description: string;
   minValue: number;
   icon?: React.ReactNode;
+  ratingDisplayMode?: 'most-rated' | 'top-rated';
 }
 
 const FEATURED_COLLECTIONS: EmojiCollection[] = [
@@ -25,13 +57,7 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
     description: 'Vibes rated 5 🔥 - The hottest content',
     minValue: 5,
     icon: <Flame className="h-4 w-4" />,
-  },
-  {
-    emoji: '😍',
-    title: 'Love It',
-    description: 'Vibes rated 4+ 😍 - Crowd favorites',
-    minValue: 4,
-    icon: <TrendingUp className="h-4 w-4" />,
+    ratingDisplayMode: 'top-rated',
   },
   {
     emoji: '💯',
@@ -39,6 +65,14 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
     description: 'Vibes rated 5 💯 - Absolutely perfect',
     minValue: 5,
     icon: <Sparkles className="h-4 w-4" />,
+    ratingDisplayMode: 'top-rated',
+  },
+  {
+    emoji: '😍',
+    title: 'Love It',
+    description: 'Vibes rated 4+ 😍 - Crowd favorites',
+    minValue: 4,
+    icon: <TrendingUp className="h-4 w-4" />,
   },
   {
     emoji: '😱',
@@ -61,25 +95,23 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
 ];
 
 function DiscoverPage() {
-  const { data: emojiMetadata, isLoading: metadataLoading } =
-    useEmojiMetadata();
-
-  // Get popular emojis from metadata (take first 8)
-  const popularEmojis = emojiMetadata?.slice(0, 8).map((m) => m.emoji) || [];
-
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold">Discover Vibes by Emoji</h1>
+        <h1 className="mb-2 text-3xl font-bold lowercase">
+          discover vibes by emoji
+        </h1>
         <p className="text-muted-foreground">
-          Explore curated collections based on emoji ratings
+          explore curated collections based on emoji ratings
         </p>
       </div>
 
-      {/* Featured Collections */}
+      {/* Featured Collections Grid */}
       <section className="mb-12">
-        <h2 className="mb-6 text-2xl font-semibold">Featured Collections</h2>
+        <h2 className="mb-6 text-2xl font-semibold lowercase">
+          featured collections
+        </h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURED_COLLECTIONS.map((collection) => (
             <Link
@@ -98,7 +130,7 @@ function DiscoverPage() {
                     <div className="flex items-center gap-3">
                       <span className="text-4xl">{collection.emoji}</span>
                       <div>
-                        <CardTitle className="text-lg">
+                        <CardTitle className="text-lg lowercase">
                           {collection.title}
                         </CardTitle>
                         <p className="text-muted-foreground text-sm">
@@ -128,77 +160,32 @@ function DiscoverPage() {
         </div>
       </section>
 
-      {/* Popular Emoji Ratings */}
-      <section className="mb-12">
-        <h2 className="mb-6 text-2xl font-semibold">
-          Browse by Popular Emojis
-        </h2>
-        {metadataLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[...Array(8)].map((_, i) => (
-              <Skeleton key={i} className="h-20" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {popularEmojis.map((emoji) => (
-              <Link
-                key={emoji}
-                to="/search"
-                search={{
-                  emojiFilter: [emoji],
-                  sort: 'rating_desc',
-                }}
-              >
-                <Card className="hover:bg-secondary/50 flex h-20 items-center justify-center transition-colors">
-                  <span className="text-3xl">{emoji}</span>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
+      {/* Trending Section */}
+      <TrendingSection />
 
-      {/* Top Rated by Emoji */}
+      {/* Recent Arrivals Section */}
+      <RecentArrivalsSection />
+
+      {/* Community Favorites Section */}
+      <CommunityFavoritesSection />
+
+      {/* Popular Tags Section */}
+      <PopularTagsSection />
+
+      {/* Top Rated Collections with VibeCategoryRow */}
       <section>
-        <h2 className="mb-6 text-2xl font-semibold">Top Rated Vibes</h2>
-        <div className="space-y-8">
-          {FEATURED_COLLECTIONS.slice(0, 3).map((collection) => (
-            <div key={collection.emoji}>
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{collection.emoji}</span>
-                  <h3 className="text-lg font-medium">{collection.title}</h3>
-                  <Badge variant="secondary">
-                    {collection.minValue}+ rating
-                  </Badge>
-                </div>
-                <Link
-                  to="/search"
-                  search={{
-                    emojiFilter: [collection.emoji],
-                    emojiMinValue: collection.minValue,
-                    sort: 'rating_desc',
-                  }}
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                >
-                  View all →
-                </Link>
-              </div>
-              <TopRatedVibesPreview
-                emoji={collection.emoji}
-                minValue={collection.minValue}
-                limit={4}
-              />
-            </div>
-          ))}
-        </div>
+        {FEATURED_COLLECTIONS.slice(0, 4).map((collection) => (
+          <EmojiCollectionSection
+            key={collection.emoji}
+            collection={collection}
+          />
+        ))}
       </section>
     </div>
   );
 }
 
-// Component to show a preview of vibes for a collection
+// Component to show thumbnail previews of vibes for a collection
 function EmojiCollectionPreview({
   emoji,
   minValue,
@@ -206,44 +193,13 @@ function EmojiCollectionPreview({
   emoji: string;
   minValue: number;
 }) {
-  const { data, isLoading } = useTopRatedEmojiVibes(emoji, minValue, 3);
-
-  if (isLoading) {
-    return <Skeleton className="h-6 w-24" />;
-  }
-
-  const count = data?.length || 0;
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-muted-foreground text-sm">
-        {count > 0 ? `${count}+ vibes` : 'No vibes yet'}
-      </span>
-    </div>
-  );
-}
-
-// Component to show top-rated vibes preview
-function TopRatedVibesPreview({
-  emoji,
-  minValue,
-  limit = 4,
-}: {
-  emoji: string;
-  minValue: number;
-  limit?: number;
-}) {
-  const { data: vibes, isLoading } = useTopRatedEmojiVibes(
-    emoji,
-    minValue,
-    limit
-  );
+  const { data: vibes, isLoading } = useTopRatedEmojiVibes(emoji, minValue, 3);
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[...Array(limit)].map((_, i) => (
-          <Skeleton key={i} className="aspect-video" />
+      <div className="flex gap-1">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-8 w-8 rounded" />
         ))}
       </div>
     );
@@ -251,13 +207,221 @@ function TopRatedVibesPreview({
 
   if (!vibes || vibes.length === 0) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="flex h-32 items-center justify-center">
-          <p className="text-muted-foreground">No vibes found</p>
-        </CardContent>
-      </Card>
+      <span className="text-muted-foreground text-xs">
+        no vibes yet
+      </span>
     );
   }
 
-  return <VibeGrid vibes={vibes} />;
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-1">
+        {vibes.slice(0, 3).map((vibe, index) => (
+          <div
+            key={vibe.id}
+            className="h-8 w-8 overflow-hidden rounded border"
+            style={{ zIndex: 3 - index }}
+          >
+            {vibe.image ? (
+              <img
+                src={vibe.image}
+                alt={vibe.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="bg-muted flex h-full w-full items-center justify-center text-xs">
+                {vibe.title.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <span className="text-muted-foreground text-xs">
+        {vibes.length} vibe{vibes.length !== 1 ? 's' : ''}
+      </span>
+    </div>
+  );
+}
+
+// Component for emoji collection sections using VibeCategoryRow
+function EmojiCollectionSection({
+  collection,
+}: {
+  collection: EmojiCollection;
+}) {
+  const { data: vibes, isLoading } = useTopRatedEmojiVibes(
+    collection.emoji,
+    collection.minValue,
+    10
+  );
+
+  if (isLoading) {
+    return (
+      <div className="mb-8">
+        <div className="mb-4 flex items-center gap-2">
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-6 w-32" />
+        </div>
+        <div className="flex gap-4 overflow-hidden">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-64 w-64 flex-shrink-0" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!vibes || vibes.length === 0) {
+    return null;
+  }
+
+  const sectionTitle = `${collection.emoji} ${collection.title.toLowerCase()}`;
+
+  return (
+    <div className="relative">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="flex items-center gap-1">
+            {collection.minValue}+ rating
+          </Badge>
+        </div>
+        <Link
+          to="/search"
+          search={{
+            emojiFilter: [collection.emoji],
+            emojiMinValue: collection.minValue,
+            sort: 'rating_desc',
+          }}
+          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+        >
+          view all →
+        </Link>
+      </div>
+      <Suspense fallback={<VibeCategoryRowSkeleton />}>
+        <VibeCategoryRow
+          title={sectionTitle}
+          vibes={vibes}
+          ratingDisplayMode={collection.ratingDisplayMode || 'most-rated'}
+        />
+      </Suspense>
+    </div>
+  );
+}
+
+// Trending Section Component
+function TrendingSection() {
+  const { data: vibes, isLoading } = useVibesPaginated(12);
+
+  if (isLoading) {
+    return <VibeCategoryRowSkeleton />;
+  }
+
+  if (!vibes?.vibes || vibes.vibes.length === 0) {
+    return null;
+  }
+
+  // Get the most recent vibes as "trending"
+  const trendingVibes = vibes.vibes.slice(0, 10);
+
+  return (
+    <Suspense fallback={<VibeCategoryRowSkeleton />}>
+      <VibeCategoryRow
+        title="🔥 trending now"
+        vibes={trendingVibes}
+        priority
+        ratingDisplayMode="most-rated"
+      />
+    </Suspense>
+  );
+}
+
+// Recent Arrivals Section Component
+function RecentArrivalsSection() {
+  const { data: vibes, isLoading } = useVibesPaginated(10);
+
+  if (isLoading) {
+    return <VibeCategoryRowSkeleton />;
+  }
+
+  if (!vibes?.vibes || vibes.vibes.length === 0) {
+    return null;
+  }
+
+  const recentVibes = vibes.vibes.slice(0, 8);
+
+  return (
+    <Suspense fallback={<VibeCategoryRowSkeleton />}>
+      <VibeCategoryRow
+        title="✨ fresh arrivals"
+        vibes={recentVibes}
+        ratingDisplayMode="most-rated"
+      />
+    </Suspense>
+  );
+}
+
+// Community Favorites Section Component
+function CommunityFavoritesSection() {
+  const { data: topRatedVibes, isLoading } = useTopRatedVibes(10);
+
+  if (isLoading) {
+    return <VibeCategoryRowSkeleton />;
+  }
+
+  if (!topRatedVibes || topRatedVibes.length === 0) {
+    return null;
+  }
+
+  return (
+    <Suspense fallback={<VibeCategoryRowSkeleton />}>
+      <VibeCategoryRow
+        title="❤️ community favorites"
+        vibes={topRatedVibes}
+        ratingDisplayMode="top-rated"
+      />
+    </Suspense>
+  );
+}
+
+// Popular Tags Section Component
+function PopularTagsSection() {
+  const { data: allTags, isLoading: tagsLoading } = useAllTags();
+
+  if (tagsLoading) {
+    return <VibeCategoryRowSkeleton />;
+  }
+
+  if (!allTags || allTags.length === 0) {
+    return null;
+  }
+
+  // Get the most popular tag
+  const popularTag = allTags[0];
+
+  return <PopularTagVibes tag={popularTag.tag} />;
+}
+
+// Component for vibes from popular tags
+function PopularTagVibes({ tag }: { tag: string }) {
+  const { data: tagVibes, isLoading } = useVibesByTag(tag, 10);
+
+  if (isLoading) {
+    return <VibeCategoryRowSkeleton />;
+  }
+
+  if (!tagVibes || tagVibes.length < 3) {
+    return null;
+  }
+
+  const displayTitle = `#${tag}`;
+
+  return (
+    <Suspense fallback={<VibeCategoryRowSkeleton />}>
+      <VibeCategoryRow
+        title={displayTitle}
+        vibes={tagVibes}
+        ratingDisplayMode="most-rated"
+      />
+    </Suspense>
+  );
 }

@@ -6,16 +6,20 @@ import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { cn } from '@/utils/tailwind-utils';
 import type { Vibe } from '@/types';
 
+export type RatingDisplayMode = 'most-rated' | 'top-rated';
+
 interface VibeCategoryRowProps {
   title: string;
   vibes: Vibe[];
   priority?: boolean; // For prioritizing certain sections
+  ratingDisplayMode?: RatingDisplayMode; // How to display emoji ratings in cards
 }
 
 export function VibeCategoryRow({
   title,
   vibes,
   priority = false,
+  ratingDisplayMode = 'most-rated',
 }: VibeCategoryRowProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -116,7 +120,7 @@ export function VibeCategoryRow({
                   : 'w-[250px] md:w-[280px] lg:w-[300px]'
               )}
             >
-              <VibeCard vibe={vibe} />
+              <VibeCard vibe={vibe} ratingDisplayMode={ratingDisplayMode} />
             </div>
           ))}
 

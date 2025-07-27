@@ -26,6 +26,28 @@
   font-display: swap;
 }
 
+/* Core emoji subset - loads immediately (critical path) */
+@font-face {
+  font-family: 'Noto Color Emoji Core';
+  src: url('/fonts/noto-color-emoji-core.woff2') format('woff2'),
+       url('/fonts/noto-color-emoji-core.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+1F600-1F64F, U+1F300-1F5FF, U+1F680-1F6FF, U+1F1E0-1F1FF, U+2600-26FF, U+2700-27BF, U+FE00-FE0F, U+1F900-1F9FF;
+}
+
+/* Extended emoji subset - loads on-demand */
+@font-face {
+  font-family: 'Noto Color Emoji Extended';
+  src: url('/fonts/noto-color-emoji-extended.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+1F780-1F7FF, U+1F800-1F8FF, U+1FAA0-1FAFF, U+1FB00-1FBFF;
+}
+
+/* Fallback for unsupported emojis */
 @font-face {
   font-family: 'Noto Color Emoji';
   src: url('/fonts/NotoColorEmoji-Regular.ttf');
@@ -57,7 +79,7 @@
   --font-geist-mono: 'Geist Mono';
   --font-doto: 'Doto';
   --font-noto: 'Noto Emoji';
-  --font-noto-color: 'Noto Color Emoji';
+  --font-noto-color: 'Noto Color Emoji Core', 'Noto Color Emoji Extended', 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji';
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
@@ -320,6 +342,104 @@
   }
 }
 
+/* Smooth emoji transitions for rating selector */
+@keyframes emoji-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(30px) scale(0.8);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(15px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes emoji-slide-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(-15px) scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.8);
+  }
+}
+
+/* Rating scale animation */
+@keyframes rating-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(5px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Hover arrow slide */
+@keyframes arrow-slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(5px);
+  }
+}
+
+/* Mobile-optimized bounce (lighter) */
+@keyframes bounce-light {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40%, 43% {
+    transform: translateY(-5px);
+  }
+  70% {
+    transform: translateY(-2px);
+  }
+  90% {
+    transform: translateY(-1px);
+  }
+}
+
+/* Scale with spring effect */
+@keyframes scale-spring {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Stagger animation for lists */
+@keyframes stagger-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-accordion-down {
   animation: accordion-down 0.2s ease-out;
 }
@@ -342,6 +462,86 @@
 
 .animate-fade-in-down {
   animation: fade-in-down 0.3s ease-out;
+}
+
+.animate-emoji-slide-in {
+  animation: emoji-slide-in 0.3s ease-out;
+}
+
+.animate-emoji-slide-out {
+  animation: emoji-slide-out 0.3s ease-out;
+}
+
+.animate-rating-reveal {
+  animation: rating-reveal 0.4s ease-out;
+}
+
+.animate-arrow-slide {
+  animation: arrow-slide 0.2s ease-out;
+}
+
+.animate-bounce-light {
+  animation: bounce-light 1s ease-in-out;
+}
+
+.animate-scale-spring {
+  animation: scale-spring 0.2s ease-out;
+}
+
+.animate-stagger-fade-in {
+  animation: stagger-fade-in 0.4s ease-out;
+}
+
+/* Responsive animation controls */
+@media (prefers-reduced-motion: reduce) {
+  .animate-accordion-down,
+  .animate-accordion-up,
+  .animate-wiggle,
+  .animate-pulse-scale,
+  .animate-number-pop,
+  .animate-fade-in-down,
+  .animate-emoji-slide-in,
+  .animate-emoji-slide-out,
+  .animate-rating-reveal,
+  .animate-arrow-slide,
+  .animate-bounce-light,
+  .animate-scale-spring,
+  .animate-stagger-fade-in {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  /* Keep opacity transitions for accessibility */
+  .animate-fade-in-down {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Mobile-specific animation optimizations */
+@media (max-width: 768px) {
+  .animate-accordion-down,
+  .animate-accordion-up {
+    animation-duration: 0.15s; /* Faster on mobile */
+  }
+  
+  .animate-emoji-slide-in,
+  .animate-emoji-slide-out {
+    animation-duration: 0.2s; /* Shorter for mobile responsiveness */
+  }
+  
+  .animate-bounce-light {
+    animation-duration: 0.8s; /* Slightly faster bounce */
+  }
+}
+
+/* Connection-aware animations (slow networks) */
+@media (prefers-reduced-data: reduce) {
+  .animate-wiggle,
+  .animate-bounce-light,
+  .animate-scale-spring {
+    animation: none !important;
+  }
 }
 
 .container {

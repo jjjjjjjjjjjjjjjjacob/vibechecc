@@ -7,12 +7,16 @@
     "dev": "vite --port 3030 --config vite.config.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "build": "vite build --config vite.config.ts",
+    "build": "npm run fonts:subset && vite build --config vite.config.ts",
     "preview": "vite preview --config vite.config.ts",
     "typecheck": "tsc --noEmit",
     "wrangler:dev": "wrangler dev --port 3030",
     "wrangler:deploy": "wrangler deploy",
-    "clean": "rm -rf .turbo node_modules dist"
+    "clean": "rm -rf .turbo node_modules dist",
+    "fonts:subset": "node scripts/subset-fonts.js",
+    "fonts:check": "ls -lh public/fonts/",
+    "bundle:analyze": "node scripts/analyze-bundle.js",
+    "performance:summary": "node scripts/mobile-performance-summary.js"
   },
   "dependencies": {
     "@clerk/backend": "^2.0.0",
