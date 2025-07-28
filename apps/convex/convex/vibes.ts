@@ -576,15 +576,22 @@ export const getAllTags = query({
 
 // Get top-rated vibes
 export const getTopRated = query({
-  args: { limit: v.optional(v.number()) },
+  args: {
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 10;
 
-    // Get all vibes and calculate their average ratings
-    const vibes = await ctx.db.query('vibes').order('desc').take(50);
+    // Get vibes with pagination
+    const vibesQuery = ctx.db.query('vibes').order('desc');
+    const vibes = await vibesQuery.paginate({
+      cursor: args.cursor || null,
+      numItems: Math.min(limit * 3, 100), // Get more vibes to calculate ratings from
+    });
 
     const vibesWithRatings = await Promise.all(
-      vibes.map(async (vibe) => {
+      vibes.page.map(async (vibe) => {
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
@@ -609,7 +616,7 @@ export const getTopRated = query({
       .sort((a, b) => b.averageRating - a.averageRating)
       .slice(0, limit);
 
-    return await Promise.all(
+    const topRatedVibes = await Promise.all(
       topRated.map(async ({ vibe }) => {
         const creator = await ctx.db
           .query('users')
@@ -644,6 +651,12 @@ export const getTopRated = query({
         };
       })
     );
+
+    return {
+      vibes: topRatedVibes,
+      continueCursor: vibes.continueCursor,
+      isDone: vibes.isDone,
+    };
   },
 });
 

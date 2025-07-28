@@ -4,8 +4,14 @@
  */
 
 // Supported image formats in order of preference
-export const SUPPORTED_FORMATS = ['avif', 'webp', 'png', 'jpg', 'jpeg'] as const;
-export type ImageFormat = typeof SUPPORTED_FORMATS[number];
+export const SUPPORTED_FORMATS = [
+  'avif',
+  'webp',
+  'png',
+  'jpg',
+  'jpeg',
+] as const;
+export type ImageFormat = (typeof SUPPORTED_FORMATS)[number];
 
 export interface OptimizedImageProps {
   src: string;
@@ -32,9 +38,9 @@ export function generateOptimizedImageUrls(
     webp: `${baseUrl}.webp?w=${width}&q=${quality}`,
     png: `${baseUrl}.png?w=${width}&q=${quality}`,
     jpg: `${baseUrl}.jpg?w=${width}&q=${quality}`,
-    jpeg: `${baseUrl}.jpeg?w=${width}&q=${quality}`
+    jpeg: `${baseUrl}.jpeg?w=${width}&q=${quality}`,
   };
-  
+
   return formats;
 }
 
@@ -44,10 +50,10 @@ export function generateOptimizedImageUrls(
 export function generateResponsiveSizes(maxWidth: number): string {
   const breakpoints = [640, 768, 1024, 1280, 1536];
   const sizes = breakpoints
-    .filter(bp => bp <= maxWidth)
-    .map(bp => `(max-width: ${bp}px) ${Math.min(bp, maxWidth)}px`)
+    .filter((bp) => bp <= maxWidth)
+    .map((bp) => `(max-width: ${bp}px) ${Math.min(bp, maxWidth)}px`)
     .join(', ');
-  
+
   return sizes + `, ${maxWidth}px`;
 }
 
@@ -65,28 +71,38 @@ export function getConnectionInfo(): {
       isSlowConnection: false,
       isMobile: false,
       supportsWebP: false,
-      supportsAVIF: false
+      supportsAVIF: false,
     };
   }
-  
-  // @ts-ignore - Navigator.connection is experimental
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  const isSlowConnection = connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g';
-  const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
+
+  // Navigator.connection is experimental - use type assertion for compatibility
+  const connection =
+    (navigator as any).connection ||
+    (navigator as any).mozConnection ||
+    (navigator as any).webkitConnection;
+  const isSlowConnection =
+    connection?.effectiveType === '2g' ||
+    connection?.effectiveType === 'slow-2g';
+  const isMobile =
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
   // Feature detection for modern image formats
   const canvas = document.createElement('canvas');
   canvas.width = 1;
   canvas.height = 1;
-  
-  const supportsWebP = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
-  const supportsAVIF = canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0;
-  
+
+  const supportsWebP =
+    canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+  const supportsAVIF =
+    canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0;
+
   return {
     isSlowConnection,
     isMobile,
     supportsWebP,
-    supportsAVIF
+    supportsAVIF,
   };
 }
 
@@ -97,19 +113,19 @@ export function getOptimalImageFormat(): ImageFormat {
   if (typeof window === 'undefined') {
     return 'webp'; // Default for SSR
   }
-  
+
   const { isSlowConnection, supportsAVIF, supportsWebP } = getConnectionInfo();
-  
+
   // Use more compressed formats on slow connections
   if (isSlowConnection) {
     if (supportsAVIF) return 'avif';
     if (supportsWebP) return 'webp';
   }
-  
+
   // Best quality for fast connections
   if (supportsAVIF) return 'avif';
   if (supportsWebP) return 'webp';
-  
+
   return 'jpg';
 }
 
@@ -120,44 +136,46 @@ export function getOptimalImageQuality(): number {
   if (typeof window === 'undefined') {
     return 85; // Default for SSR
   }
-  
+
   const { isSlowConnection, isMobile } = getConnectionInfo();
-  
-  if (isSlowConnection) return 60;  // Lower quality for slow connections
-  if (isMobile) return 75;          // Medium quality for mobile
-  return 85;                        // High quality for desktop
+
+  if (isSlowConnection) return 60; // Lower quality for slow connections
+  if (isMobile) return 75; // Medium quality for mobile
+  return 85; // High quality for desktop
 }
 
 /**
  * Generate optimized cache headers for different asset types
  */
-export function getOptimizedCacheHeaders(assetType: 'image' | 'font' | 'script' | 'style'): Record<string, string> {
+export function getOptimizedCacheHeaders(
+  assetType: 'image' | 'font' | 'script' | 'style'
+): Record<string, string> {
   const baseHeaders = {
-    'Vary': 'Accept-Encoding',
+    Vary: 'Accept-Encoding',
   };
-  
+
   switch (assetType) {
     case 'image':
       return {
         ...baseHeaders,
         'Cache-Control': 'public, max-age=31536000, immutable', // 1 year
-        'Accept': 'image/avif,image/webp,image/*,*/*;q=0.8',
+        Accept: 'image/avif,image/webp,image/*,*/*;q=0.8',
       };
-      
+
     case 'font':
       return {
         ...baseHeaders,
         'Cache-Control': 'public, max-age=31536000, immutable', // 1 year
-        'Accept': 'font/woff2,font/woff,font/*,*/*;q=0.8',
+        Accept: 'font/woff2,font/woff,font/*,*/*;q=0.8',
       };
-      
+
     case 'script':
     case 'style':
       return {
         ...baseHeaders,
         'Cache-Control': 'public, max-age=86400', // 1 day (shorter for updates)
       };
-      
+
     default:
       return baseHeaders;
   }
@@ -168,19 +186,23 @@ export function getOptimizedCacheHeaders(assetType: 'image' | 'font' | 'script' 
  */
 export function preloadCriticalAssets() {
   if (typeof document === 'undefined') return;
-  
+
   const { isSlowConnection } = getConnectionInfo();
-  
+
   // Don't preload on slow connections to save bandwidth
   if (isSlowConnection) return;
-  
+
   const criticalAssets = [
     // Core fonts
-    { href: '/fonts/noto-color-emoji-core.woff2', as: 'font', type: 'font/woff2' },
+    {
+      href: '/fonts/noto-color-emoji-core.woff2',
+      as: 'font',
+      type: 'font/woff2',
+    },
     { href: '/fonts/GeistSans-Variable.woff2', as: 'font', type: 'font/woff2' },
   ];
-  
-  criticalAssets.forEach(asset => {
+
+  criticalAssets.forEach((asset) => {
     const link = document.createElement('link');
     link.rel = 'preload';
     link.href = asset.href;
@@ -201,12 +223,12 @@ export function createIntersectionObserver(
   if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
     return null;
   }
-  
+
   const defaultOptions: IntersectionObserverInit = {
     rootMargin: '50px 0px', // Start loading 50px before entering viewport
     threshold: 0.1,
-    ...options
+    ...options,
   };
-  
+
   return new IntersectionObserver(callback, defaultOptions);
 }

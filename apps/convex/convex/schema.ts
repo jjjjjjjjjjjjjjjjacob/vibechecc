@@ -33,6 +33,9 @@ const schema = defineSchema({
 
     // Profile customization fields
     bio: v.optional(v.string()), // User bio/description
+    themeColor: v.optional(v.string()), // User's selected theme color ID (defaults to 'pink') - legacy field
+    primaryColor: v.optional(v.string()), // Primary gradient color
+    secondaryColor: v.optional(v.string()), // Secondary gradient color
     socials: v.optional(
       v.object({
         twitter: v.optional(v.string()),

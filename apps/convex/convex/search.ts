@@ -5,6 +5,7 @@ import type {
   UserSearchResult,
   TagSearchResult,
   ActionSearchResult,
+  ReviewSearchResult,
 } from '@viberater/types';
 import { fuzzyMatch } from './search/fuzzy_search';
 import { scoreVibe, scoreUser, scoreTag } from './search/search_scorer';
@@ -31,8 +32,13 @@ export const searchAll = query({
             v.literal('relevance'),
             v.literal('rating_desc'),
             v.literal('rating_asc'),
+            v.literal('top_rated'),
+            v.literal('most_rated'),
             v.literal('recent'),
-            v.literal('oldest')
+            v.literal('oldest'),
+            v.literal('name'),
+            v.literal('creation_date'),
+            v.literal('interaction_time')
           )
         ),
         emojiRatings: v.optional(
@@ -44,23 +50,32 @@ export const searchAll = query({
       })
     ),
     limit: v.optional(v.number()),
+    page: v.optional(v.number()),
     cursor: v.optional(v.string()),
     includeTypes: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const { query: searchQuery, filters, limit = 20, includeTypes } = args;
+    const {
+      query: searchQuery,
+      filters,
+      limit = 20,
+      page = 1,
+      includeTypes,
+    } = args;
     const _startTime = Date.now();
     const vibes: VibeSearchResult[] = [];
     const users: UserSearchResult[] = [];
     const tags: TagSearchResult[] = [];
     const actions: ActionSearchResult[] = [];
+    const reviews: ReviewSearchResult[] = [];
 
-    if (!searchQuery.trim()) {
+    if (!searchQuery.trim() && !filters) {
       return {
         vibes: [],
         users: [],
         tags: [],
         actions: [],
+        reviews: [],
         totalCount: 0,
       };
     }
@@ -188,7 +203,7 @@ export const searchAll = query({
 
         if (hasExcludedTerm) continue;
 
-        if (titleMatch || descriptionMatch || tagMatch) {
+        if (titleMatch || descriptionMatch || tagMatch || !searchQuery.trim()) {
           // Apply filters
           let passesFilters = true;
 
@@ -364,7 +379,36 @@ export const searchAll = query({
 
         if (hasExcludedTerm) continue;
 
-        if (usernameMatch || nameMatch || bioMatch) {
+        let passesFilters = true;
+
+        // Apply emoji rating filter to users - find users who have reviewed vibes with specified emojis
+        if (mergedFilters.emojiRatings && passesFilters) {
+          const { emojis, minValue } = mergedFilters.emojiRatings;
+
+          if (emojis && emojis.length > 0) {
+            // Get all ratings by this user
+            const userRatings = await ctx.db
+              .query('ratings')
+              .withIndex('user', (q) => q.eq('userId', user.externalId))
+              .collect();
+
+            // Check if user has reviewed any vibe with the specified emojis
+            const hasMatchingEmojiReview = userRatings.some(
+              (rating) =>
+                emojis.includes(rating.emoji) &&
+                (minValue === undefined || rating.value >= minValue)
+            );
+
+            if (!hasMatchingEmojiReview) {
+              passesFilters = false;
+            }
+          }
+        }
+
+        if (
+          (usernameMatch || nameMatch || bioMatch || !searchQuery.trim()) &&
+          passesFilters
+        ) {
           // Apply creator filter if specified
           if (
             parsedQuery.filters.user &&
@@ -450,6 +494,92 @@ export const searchAll = query({
       });
     }
 
+    // Search reviews
+    if (!includeTypes || includeTypes.includes('review')) {
+      // Get all ratings (which contain reviews) for comprehensive search
+      const allRatings = await ctx.db.query('ratings').collect();
+
+      for (const rating of allRatings) {
+        if (!rating.review) continue; // Skip ratings without reviews
+
+        // Check fuzzy matching on review text
+        const reviewMatch = fuzzyMatch(rating.review, searchText);
+
+        // Check for excluded terms
+        const hasExcludedTerm = parsedQuery.excludedTerms.some((term) =>
+          rating.review.toLowerCase().includes(term.toLowerCase())
+        );
+
+        if (hasExcludedTerm) continue;
+
+        if (reviewMatch || !searchQuery.trim()) {
+          // Apply emoji rating filter to reviews
+          let passesFilters = true;
+
+          if (mergedFilters.emojiRatings && passesFilters) {
+            const { emojis, minValue } = mergedFilters.emojiRatings;
+
+            if (emojis && emojis.length > 0) {
+              // Check if this review's emoji matches the filter
+              const hasMatchingEmoji =
+                emojis.includes(rating.emoji) &&
+                (minValue === undefined || rating.value >= minValue);
+
+              if (!hasMatchingEmoji) {
+                passesFilters = false;
+              }
+            } else if (minValue !== undefined) {
+              // Just check if rating meets the minimum value
+              if (rating.value < minValue) {
+                passesFilters = false;
+              }
+            }
+          }
+
+          if (passesFilters) {
+            // Get the vibe this review belongs to
+            const vibe = await ctx.db
+              .query('vibes')
+              .filter((q) => q.eq(q.field('id'), rating.vibeId))
+              .first();
+            if (!vibe) continue;
+
+            // Get the reviewer info
+            const reviewer = await ctx.db
+              .query('users')
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
+              .first();
+
+            // Calculate relevance score based on review content
+            const score = fuzzyMatch(rating.review, searchText) ? 0.8 : 0.3;
+
+            const reviewResult: ReviewSearchResult = {
+              id: rating._id,
+              type: 'review',
+              title:
+                rating.review.length > 50
+                  ? rating.review.substring(0, 50) + '...'
+                  : rating.review,
+              subtitle: `${rating.emoji} ${rating.value}/5 on "${vibe.title || 'Unknown vibe'}"`,
+              reviewText: rating.review,
+              emoji: rating.emoji,
+              rating: rating.value,
+              vibeId: rating.vibeId,
+              vibeTitle: vibe.title || 'Unknown vibe',
+              reviewerId: rating.userId,
+              reviewerName: reviewer?.username || 'Unknown',
+              reviewerAvatar: reviewer?.image_url,
+              createdAt: rating._creationTime,
+              score,
+            };
+            reviews.push(reviewResult);
+          }
+        }
+      }
+    }
+
     // Add action suggestions
     if (!includeTypes || includeTypes.includes('action')) {
       const lowerQuery = searchQuery.toLowerCase();
@@ -513,40 +643,151 @@ export const searchAll = query({
       users.sort((a, b) => (b.score || 0) - (a.score || 0));
       tags.sort((a, b) => (b.score || 0) - (a.score || 0));
       actions.sort((a, b) => (b.score || 0) - (a.score || 0));
-    } else if (sortOption === 'rating_desc') {
+      reviews.sort((a, b) => (b.score || 0) - (a.score || 0));
+    } else if (sortOption === 'rating_desc' || sortOption === 'top_rated') {
       vibes.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      reviews.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     } else if (sortOption === 'rating_asc') {
       vibes.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+      reviews.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+    } else if (sortOption === 'most_rated') {
+      vibes.sort((a, b) => (b.ratingCount || 0) - (a.ratingCount || 0));
+    } else if (sortOption === 'name') {
+      vibes.sort((a, b) => a.title.localeCompare(b.title));
+      users.sort((a, b) => a.title.localeCompare(b.title));
+      tags.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortOption === 'recent' || sortOption === 'creation_date') {
+      // For now, keep default order since we don't have proper timestamps
+    } else if (sortOption === 'oldest') {
+      // For now, reverse the default order
+      vibes.reverse();
+      users.reverse();
+      tags.reverse();
     }
 
-    // Apply limit - prioritize vibes for backward compatibility with tests
-    let remainingLimit = limit;
-    const paginatedVibes = vibes.slice(
-      0,
-      Math.min(vibes.length, remainingLimit)
-    );
-    remainingLimit -= paginatedVibes.length;
+    // Apply pagination based on whether we're filtering by type
+    const offset = (page - 1) * limit;
+    let paginatedVibes: VibeSearchResult[];
+    let paginatedUsers: UserSearchResult[];
+    let paginatedTags: TagSearchResult[];
+    let paginatedActions: ActionSearchResult[];
+    let paginatedReviews: ReviewSearchResult[];
+    let totalCount: number;
 
-    const paginatedUsers =
-      remainingLimit > 0
-        ? users.slice(0, Math.min(users.length, remainingLimit))
-        : [];
-    remainingLimit -= paginatedUsers.length;
-
-    const paginatedTags =
-      remainingLimit > 0
-        ? tags.slice(0, Math.min(tags.length, remainingLimit))
-        : [];
-    remainingLimit -= paginatedTags.length;
-
-    const paginatedActions =
-      remainingLimit > 0
-        ? actions.slice(0, Math.min(actions.length, remainingLimit))
-        : [];
-
-    // For tests, when searching for specific content, return the actual count of filtered results
-    const totalCount =
-      vibes.length + users.length + tags.length + actions.length;
+    if (includeTypes && includeTypes.length === 1) {
+      // Single type filter - paginate within that type only
+      const singleType = includeTypes[0];
+      switch (singleType) {
+        case 'vibe':
+          totalCount = vibes.length;
+          paginatedVibes = vibes.slice(offset, offset + limit);
+          paginatedUsers = [];
+          paginatedTags = [];
+          paginatedActions = [];
+          paginatedReviews = [];
+          break;
+        case 'user':
+          totalCount = users.length;
+          paginatedVibes = [];
+          paginatedUsers = users.slice(offset, offset + limit);
+          paginatedTags = [];
+          paginatedActions = [];
+          paginatedReviews = [];
+          break;
+        case 'tag':
+          totalCount = tags.length;
+          paginatedVibes = [];
+          paginatedUsers = [];
+          paginatedTags = tags.slice(offset, offset + limit);
+          paginatedActions = [];
+          paginatedReviews = [];
+          break;
+        case 'action':
+          totalCount = actions.length;
+          paginatedVibes = [];
+          paginatedUsers = [];
+          paginatedTags = [];
+          paginatedActions = actions.slice(offset, offset + limit);
+          paginatedReviews = [];
+          break;
+        case 'review':
+          totalCount = reviews.length;
+          paginatedVibes = [];
+          paginatedUsers = [];
+          paginatedTags = [];
+          paginatedActions = [];
+          paginatedReviews = reviews.slice(offset, offset + limit);
+          break;
+        default:
+          // Fallback to combined pagination
+          totalCount =
+            vibes.length +
+            users.length +
+            tags.length +
+            actions.length +
+            reviews.length;
+          const allResults = [
+            ...vibes.map((item) => ({ ...item, resultType: 'vibe' as const })),
+            ...users.map((item) => ({ ...item, resultType: 'user' as const })),
+            ...tags.map((item) => ({ ...item, resultType: 'tag' as const })),
+            ...actions.map((item) => ({
+              ...item,
+              resultType: 'action' as const,
+            })),
+            ...reviews.map((item) => ({
+              ...item,
+              resultType: 'review' as const,
+            })),
+          ];
+          const paginatedResults = allResults.slice(offset, offset + limit);
+          paginatedVibes = paginatedResults
+            .filter((item) => item.resultType === 'vibe')
+            .map(({ resultType, ...item }) => item) as VibeSearchResult[];
+          paginatedUsers = paginatedResults
+            .filter((item) => item.resultType === 'user')
+            .map(({ resultType, ...item }) => item) as UserSearchResult[];
+          paginatedTags = paginatedResults
+            .filter((item) => item.resultType === 'tag')
+            .map(({ resultType, ...item }) => item) as TagSearchResult[];
+          paginatedActions = paginatedResults
+            .filter((item) => item.resultType === 'action')
+            .map(({ resultType, ...item }) => item) as ActionSearchResult[];
+          paginatedReviews = paginatedResults
+            .filter((item) => item.resultType === 'review')
+            .map(({ resultType, ...item }) => item) as ReviewSearchResult[];
+      }
+    } else {
+      // Multiple types or no filter - use combined pagination
+      totalCount =
+        vibes.length +
+        users.length +
+        tags.length +
+        actions.length +
+        reviews.length;
+      const allResults = [
+        ...vibes.map((item) => ({ ...item, resultType: 'vibe' as const })),
+        ...users.map((item) => ({ ...item, resultType: 'user' as const })),
+        ...tags.map((item) => ({ ...item, resultType: 'tag' as const })),
+        ...actions.map((item) => ({ ...item, resultType: 'action' as const })),
+        ...reviews.map((item) => ({ ...item, resultType: 'review' as const })),
+      ];
+      const paginatedResults = allResults.slice(offset, offset + limit);
+      paginatedVibes = paginatedResults
+        .filter((item) => item.resultType === 'vibe')
+        .map(({ resultType, ...item }) => item) as VibeSearchResult[];
+      paginatedUsers = paginatedResults
+        .filter((item) => item.resultType === 'user')
+        .map(({ resultType, ...item }) => item) as UserSearchResult[];
+      paginatedTags = paginatedResults
+        .filter((item) => item.resultType === 'tag')
+        .map(({ resultType, ...item }) => item) as TagSearchResult[];
+      paginatedActions = paginatedResults
+        .filter((item) => item.resultType === 'action')
+        .map(({ resultType, ...item }) => item) as ActionSearchResult[];
+      paginatedReviews = paginatedResults
+        .filter((item) => item.resultType === 'review')
+        .map(({ resultType, ...item }) => item) as ReviewSearchResult[];
+    }
 
     // Note: Search metrics tracking would need to be handled in a separate mutation
     // since queries cannot schedule functions
@@ -556,6 +797,7 @@ export const searchAll = query({
       users: paginatedUsers,
       tags: paginatedTags,
       actions: paginatedActions,
+      reviews: paginatedReviews,
       totalCount,
     };
   },
@@ -574,11 +816,13 @@ export const getSearchSuggestions = query({
       users: UserSearchResult[];
       tags: TagSearchResult[];
       actions: ActionSearchResult[];
+      reviews: ReviewSearchResult[];
     } = {
       vibes: [],
       users: [],
       tags: [],
       actions: [],
+      reviews: [],
     };
 
     if (!searchQuery.trim()) {
@@ -625,6 +869,7 @@ export const getSearchSuggestions = query({
         users: [],
         tags: [],
         actions: [],
+        reviews: [],
       };
     }
 

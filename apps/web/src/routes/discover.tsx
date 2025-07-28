@@ -1,17 +1,25 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
+import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  useTopRatedEmojiVibes, 
-  useVibesPaginated, 
+import {
+  useTopRatedEmojiVibes,
+  useVibesPaginated,
   useTopRatedVibes,
   useTrendingEmojiRatings,
   useAllTags,
-  useVibesByTag
+  useVibesByTag,
+  useCurrentUser,
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from 'lucide-react';
+import { cn } from '@/utils/tailwind-utils';
+import {
+  getThemeGradientClasses,
+  applyUserTheme,
+  DEFAULT_USER_THEME,
+} from '@/utils/theme-colors';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -19,10 +27,13 @@ function VibeCategoryRowSkeleton() {
     <div className="space-y-4">
       <div className="flex gap-2 overflow-x-auto pb-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="flex-shrink-0 w-64">
+          <Card
+            key={i}
+            className="bg-background/90 w-64 flex-shrink-0 border-none shadow-lg backdrop-blur"
+          >
             <div className="p-4">
-              <Skeleton className="h-4 w-3/4 mb-2" />
-              <Skeleton className="h-3 w-1/2 mb-3" />
+              <Skeleton className="mb-2 h-4 w-3/4" />
+              <Skeleton className="mb-3 h-3 w-1/2" />
               <Skeleton className="h-16 w-full" />
             </div>
           </Card>
@@ -33,8 +44,10 @@ function VibeCategoryRowSkeleton() {
 }
 
 // Lazy load heavy category component
-const VibeCategoryRow = lazy(() => 
-  import('@/components/vibe-category-row').then(m => ({ default: m.VibeCategoryRow }))
+const VibeCategoryRow = lazy(() =>
+  import('@/components/vibe-category-row').then((m) => ({
+    default: m.VibeCategoryRow,
+  }))
 );
 
 export const Route = createFileRoute('/discover')({
@@ -95,92 +108,117 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
 ];
 
 function DiscoverPage() {
+  // Get current user's theme
+  const { data: currentUser } = useCurrentUser();
+  const userTheme = currentUser?.theme || DEFAULT_USER_THEME;
+  const themeClasses = getThemeGradientClasses();
+
+  // Apply theme on mount and when user changes
+  React.useEffect(() => {
+    applyUserTheme(userTheme);
+  }, [userTheme]);
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold lowercase">
-          discover vibes by emoji
-        </h1>
-        <p className="text-muted-foreground">
-          explore curated collections based on emoji ratings
-        </p>
-      </div>
-
-      {/* Featured Collections Grid */}
-      <section className="mb-12">
-        <h2 className="mb-6 text-2xl font-semibold lowercase">
-          featured collections
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURED_COLLECTIONS.map((collection) => (
-            <Link
-              key={collection.emoji}
-              to="/search"
-              search={{
-                emojiFilter: [collection.emoji],
-                emojiMinValue: collection.minValue,
-                sort: 'rating_desc',
-              }}
-              className="transition-transform hover:scale-[1.02]"
-            >
-              <Card className="h-full hover:shadow-lg">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-4xl">{collection.emoji}</span>
-                      <div>
-                        <CardTitle className="text-lg lowercase">
-                          {collection.title}
-                        </CardTitle>
-                        <p className="text-muted-foreground text-sm">
-                          {collection.description}
-                        </p>
-                      </div>
-                    </div>
-                    {collection.icon && (
-                      <div className="text-muted-foreground">
-                        {collection.icon}
-                      </div>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <EmojiCollectionPreview
-                      emoji={collection.emoji}
-                      minValue={collection.minValue}
-                    />
-                    <ArrowRight className="text-muted-foreground h-5 w-5" />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+    <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1
+            className={cn(
+              'mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl',
+              themeClasses.text
+            )}
+          >
+            discover vibes by emoji
+          </h1>
+          <p className="text-muted-foreground drop-shadow-sm">
+            explore curated collections based on emoji ratings
+          </p>
         </div>
-      </section>
 
-      {/* Trending Section */}
-      <TrendingSection />
+        {/* Featured Collections Grid */}
+        <section className="mb-12">
+          <h2
+            className={cn(
+              'mb-6 text-2xl font-semibold lowercase',
+              themeClasses.text
+            )}
+          >
+            featured collections
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURED_COLLECTIONS.map((collection) => (
+              <Link
+                key={collection.emoji}
+                to="/search"
+                search={{
+                  emojiFilter: [collection.emoji],
+                  emojiMinValue: collection.minValue,
+                  sort: 'rating_desc',
+                  tab: 'vibes',
+                }}
+                className="transition-transform hover:scale-[1.02]"
+              >
+                <Card className="bg-background/90 h-full border-none shadow-lg backdrop-blur transition-all duration-300 hover:shadow-xl">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="font-noto-color text-4xl drop-shadow-[0_2px_5px_var(--color-slate-500)]">
+                          {collection.emoji}
+                        </span>
+                        <div>
+                          <CardTitle className="text-lg font-semibold lowercase">
+                            {collection.title}
+                          </CardTitle>
+                          <p className="text-muted-foreground text-sm">
+                            {collection.description}
+                          </p>
+                        </div>
+                      </div>
+                      {collection.icon && (
+                        <div className="text-muted-foreground">
+                          {collection.icon}
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <EmojiCollectionPreview
+                        emoji={collection.emoji}
+                        minValue={collection.minValue}
+                      />
+                      <ArrowRight className="text-muted-foreground h-5 w-5" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-      {/* Recent Arrivals Section */}
-      <RecentArrivalsSection />
+        {/* Trending Section */}
+        <TrendingSection />
 
-      {/* Community Favorites Section */}
-      <CommunityFavoritesSection />
+        {/* Recent Arrivals Section */}
+        <RecentArrivalsSection />
 
-      {/* Popular Tags Section */}
-      <PopularTagsSection />
+        {/* Community Favorites Section */}
+        <CommunityFavoritesSection />
 
-      {/* Top Rated Collections with VibeCategoryRow */}
-      <section>
-        {FEATURED_COLLECTIONS.slice(0, 4).map((collection) => (
-          <EmojiCollectionSection
-            key={collection.emoji}
-            collection={collection}
-          />
-        ))}
-      </section>
+        {/* Popular Tags Section */}
+        <PopularTagsSection />
+
+        {/* Top Rated Collections with VibeCategoryRow */}
+        <section>
+          {FEATURED_COLLECTIONS.slice(0, 4).map((collection) => (
+            <EmojiCollectionSection
+              key={collection.emoji}
+              collection={collection}
+            />
+          ))}
+        </section>
+      </div>
     </div>
   );
 }
@@ -206,11 +244,7 @@ function EmojiCollectionPreview({
   }
 
   if (!vibes || vibes.length === 0) {
-    return (
-      <span className="text-muted-foreground text-xs">
-        no vibes yet
-      </span>
-    );
+    return <span className="text-muted-foreground text-xs">no vibes yet</span>;
   }
 
   return (
@@ -249,6 +283,7 @@ function EmojiCollectionSection({
 }: {
   collection: EmojiCollection;
 }) {
+  const themeClasses = getThemeGradientClasses();
   const { data: vibes, isLoading } = useTopRatedEmojiVibes(
     collection.emoji,
     collection.minValue,
@@ -262,11 +297,7 @@ function EmojiCollectionSection({
           <Skeleton className="h-8 w-8 rounded" />
           <Skeleton className="h-6 w-32" />
         </div>
-        <div className="flex gap-4 overflow-hidden">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-64 w-64 flex-shrink-0" />
-          ))}
-        </div>
+        <VibeCategoryRowSkeleton />
       </div>
     );
   }
@@ -278,10 +309,14 @@ function EmojiCollectionSection({
   const sectionTitle = `${collection.emoji} ${collection.title.toLowerCase()}`;
 
   return (
-    <div className="relative">
+    <div className="relative mb-8">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="flex items-center gap-1">
+          <Badge
+            variant="secondary"
+            className="flex items-center gap-1 border-[hsl(var(--theme-primary))]/20 bg-[hsl(var(--theme-primary))]/10 text-[hsl(var(--theme-primary))]"
+          >
+            <span className="font-noto-color">{collection.emoji}</span>
             {collection.minValue}+ rating
           </Badge>
         </div>
@@ -291,8 +326,9 @@ function EmojiCollectionSection({
             emojiFilter: [collection.emoji],
             emojiMinValue: collection.minValue,
             sort: 'rating_desc',
+            tab: 'vibes',
           }}
-          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+          className="text-muted-foreground text-sm font-medium transition-colors hover:text-[hsl(var(--theme-primary))]"
         >
           view all →
         </Link>
@@ -326,7 +362,11 @@ function TrendingSection() {
   return (
     <Suspense fallback={<VibeCategoryRowSkeleton />}>
       <VibeCategoryRow
-        title="🔥 trending now"
+        title={
+          <p>
+            <span className="font-noto-color">🔥</span> trending now
+          </p>
+        }
         vibes={trendingVibes}
         priority
         ratingDisplayMode="most-rated"
@@ -352,7 +392,11 @@ function RecentArrivalsSection() {
   return (
     <Suspense fallback={<VibeCategoryRowSkeleton />}>
       <VibeCategoryRow
-        title="✨ fresh arrivals"
+        title={
+          <p>
+            <span className="font-noto-color">✨</span> fresh arrivals
+          </p>
+        }
         vibes={recentVibes}
         ratingDisplayMode="most-rated"
       />
@@ -368,15 +412,19 @@ function CommunityFavoritesSection() {
     return <VibeCategoryRowSkeleton />;
   }
 
-  if (!topRatedVibes || topRatedVibes.length === 0) {
+  if (!topRatedVibes?.vibes || topRatedVibes.vibes.length === 0) {
     return null;
   }
 
   return (
     <Suspense fallback={<VibeCategoryRowSkeleton />}>
       <VibeCategoryRow
-        title="❤️ community favorites"
-        vibes={topRatedVibes}
+        title={
+          <p>
+            <span className="font-noto-color">❤️</span> community favorites
+          </p>
+        }
+        vibes={topRatedVibes.vibes}
         ratingDisplayMode="top-rated"
       />
     </Suspense>

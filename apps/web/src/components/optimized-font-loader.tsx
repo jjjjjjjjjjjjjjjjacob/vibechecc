@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { loadFontsAdaptively, getConnectionSpeed } from '@/lib/font-optimization';
+import {
+  loadFontsAdaptively,
+  getConnectionSpeed,
+} from '@/lib/font-optimization';
 
 /**
  * Component to handle optimized font loading for mobile performance
@@ -14,7 +17,7 @@ export function OptimizedFontLoader() {
     if (process.env.NODE_ENV === 'development') {
       const speed = getConnectionSpeed();
       console.log(`📱 Font loading strategy: ${speed} connection detected`);
-      
+
       // Monitor font loading
       if ('fonts' in document) {
         document.fonts.ready.then(() => {
@@ -42,7 +45,9 @@ export function useExtendedEmojiSupport() {
 
     // Check if extended font is loaded
     document.fonts.ready.then(() => {
-      const hasExtended = document.fonts.check('1em "Noto Color Emoji Extended"');
+      const hasExtended = document.fonts.check(
+        '1em "Noto Color Emoji Extended"'
+      );
       setIsSupported(hasExtended);
     });
   }, []);

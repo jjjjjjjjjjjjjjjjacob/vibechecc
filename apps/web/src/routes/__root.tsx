@@ -39,7 +39,7 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
       userId: null,
       token: null,
       fromCache: false,
-      computeTime: 0
+      computeTime: 0,
     };
   }
 

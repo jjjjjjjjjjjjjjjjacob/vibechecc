@@ -15,6 +15,7 @@ interface EmojiRatingDisplayProps {
   onEmojiClick?: (emoji: string, value: number) => void;
   preset?: 'color' | 'gradient';
   emojiColor?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function EmojiRatingDisplay({
@@ -24,6 +25,7 @@ export function EmojiRatingDisplay({
   onEmojiClick,
   preset = 'color',
   emojiColor,
+  size = 'md',
 }: EmojiRatingDisplayProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [localValue, setLocalValue] = React.useState(rating.value);
@@ -70,7 +72,7 @@ export function EmojiRatingDisplay({
             <EmojiRatingScale
               emoji={rating.emoji}
               value={localValue}
-              size="sm"
+              size={size}
               preset={preset}
               showTooltip={true}
               onChange={setLocalValue}
@@ -124,6 +126,7 @@ interface TopEmojiRatingsProps {
   onExpandToggle?: () => void;
   onEmojiClick?: (emoji: string, value: number) => void;
   vibeId?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export { type EmojiRating };
@@ -135,6 +138,7 @@ export function TopEmojiRatings({
   onExpandToggle,
   onEmojiClick,
   vibeId,
+  size = 'md',
 }: TopEmojiRatingsProps) {
   const [showAllRatingsPopover, setShowAllRatingsPopover] =
     React.useState(false);
@@ -172,6 +176,7 @@ export function TopEmojiRatings({
             showScale={expanded}
             onEmojiClick={onEmojiClick}
             emojiColor={emojiDataMap[rating.emoji]?.color}
+            size={size}
           />
         </div>
       ))}

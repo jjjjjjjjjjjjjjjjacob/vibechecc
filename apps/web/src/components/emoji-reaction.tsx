@@ -502,25 +502,30 @@ export function EmojiReactions({
   };
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-1', className)}>
-      {reactions.map((reaction) => (
-        <EmojiReaction
-          key={reaction.emoji}
-          reaction={reaction}
-          onReact={onReact}
-          ratingMode={ratingMode}
-          onRatingSubmit={onRatingSubmit}
-          vibeTitle={vibeTitle}
-          vibeId={vibeId}
-        />
-      ))}
+    <div className={cn('flex w-full min-w-0 items-center gap-1', className)}>
+      {/* Container for emoji reactions that can be hidden when overflowing */}
+      <div className="scrollbar-hide flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+        {reactions.map((reaction) => (
+          <EmojiReaction
+            key={reaction.emoji}
+            reaction={reaction}
+            onReact={onReact}
+            ratingMode={ratingMode}
+            onRatingSubmit={onRatingSubmit}
+            vibeTitle={vibeTitle}
+            vibeId={vibeId}
+            className="flex-shrink-0"
+          />
+        ))}
+      </div>
 
+      {/* Plus button always visible at the end */}
       {showAddButton && (
         <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
           <PopoverTrigger asChild>
             <button
               className={cn(
-                'inline-flex items-center justify-center rounded-full p-1',
+                'inline-flex flex-shrink-0 items-center justify-center rounded-full p-1',
                 'bg-muted hover:bg-muted/80 text-sm',
                 'transition-all hover:scale-105 active:scale-95'
               )}

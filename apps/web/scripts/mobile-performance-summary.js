@@ -5,6 +5,8 @@
  * Shows the complete impact of all optimizations implemented
  */
 
+/* eslint-disable no-console */
+
 console.log('🚀 Mobile Performance Optimization Summary\n');
 
 const optimizations = [
@@ -16,21 +18,21 @@ const optimizations = [
       '25MB+ → 3-4MB fonts (90% reduction)',
       'Smart subsetting with core + extended emojis',
       'Connection-aware loading (2G vs LTE)',
-      'Progressive enhancement with fallbacks'
+      'Progressive enhancement with fallbacks',
     ],
-    mobileImpact: '30+ seconds → 4-6 seconds on 3G'
+    mobileImpact: '30+ seconds → 4-6 seconds on 3G',
   },
   {
     phase: 'Phase 2: Bundle Optimization',
-    status: '✅ Complete', 
+    status: '✅ Complete',
     impact: 'High',
     improvements: [
       'Enabled advanced treeshaking',
       'Route-based code splitting with Suspense',
       'Manual chunk splitting for vendor libraries',
-      'Lazy loading with skeleton states'
+      'Lazy loading with skeleton states',
     ],
-    mobileImpact: '1.6MB+ → <500KB initial bundle'
+    mobileImpact: '1.6MB+ → <500KB initial bundle',
   },
   {
     phase: 'Phase 3: Animation Migration',
@@ -40,9 +42,9 @@ const optimizations = [
       'Removed framer-motion dependency (~350KB)',
       'Migrated to CSS animations + tw-animate-css',
       'Added mobile-optimized timing',
-      'prefers-reduced-motion accessibility support'
+      'prefers-reduced-motion accessibility support',
     ],
-    mobileImpact: '350KB bundle reduction + better mobile performance'
+    mobileImpact: '350KB bundle reduction + better mobile performance',
   },
   {
     phase: 'Phase 4: Infrastructure Optimization',
@@ -52,18 +54,18 @@ const optimizations = [
       'SSR auth caching with mobile timeouts',
       'Asset optimization with WebP/AVIF support',
       'Connection-aware image loading',
-      'Optimized Cloudflare Worker configuration'
+      'Optimized Cloudflare Worker configuration',
     ],
-    mobileImpact: '50%+ faster SSR + optimized asset delivery'
-  }
+    mobileImpact: '50%+ faster SSR + optimized asset delivery',
+  },
 ];
 
-optimizations.forEach(opt => {
+optimizations.forEach((opt) => {
   console.log(`📋 ${opt.phase}`);
   console.log(`   Status: ${opt.status}`);
   console.log(`   Impact: ${opt.impact}`);
   console.log('   Improvements:');
-  opt.improvements.forEach(imp => console.log(`     • ${imp}`));
+  opt.improvements.forEach((imp) => console.log(`     • ${imp}`));
   console.log(`   📱 Mobile Impact: ${opt.mobileImpact}`);
   console.log('');
 });

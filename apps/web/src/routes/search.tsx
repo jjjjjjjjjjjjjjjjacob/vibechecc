@@ -1,24 +1,38 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
+import * as React from 'react';
 import { z } from 'zod';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load search components for code splitting
-const SearchResultsGrid = lazy(() => 
-  import('@/features/search/components').then(m => ({ default: m.SearchResultsGrid }))
+const SearchResultsGrid = lazy(() =>
+  import('@/features/search/components').then((m) => ({
+    default: m.SearchResultsGrid,
+  }))
 );
-const SearchPagination = lazy(() => 
-  import('@/features/search/components').then(m => ({ default: m.SearchPagination }))
+const SearchPagination = lazy(() =>
+  import('@/features/search/components').then((m) => ({
+    default: m.SearchPagination,
+  }))
 );
 
 // Import non-heavy components normally
 import { useSearchResults } from '@/features/search/hooks/use-search-results';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Star } from 'lucide-react';
-import { EmojiRatingFilter } from '@/components/emoji-rating-filter';
+import { EmojiSearchCommand } from '@/components/emoji-search-command';
+import { EmojiPillFilters } from '@/components/emoji-pill-filters';
+import { RatingRangeSlider } from '@/components/rating-range-slider';
+import { MasonryFeed } from '@/components/masonry-feed';
+import { MobileFilterSheet } from '@/features/search/components/mobile-filter-sheet';
+import { cn } from '@/utils/tailwind-utils';
+import { useCurrentUser } from '@/queries';
+import {
+  getThemeGradientClasses,
+  applyUserTheme,
+  DEFAULT_USER_THEME,
+} from '@/utils/theme-colors';
 
 // Loading skeletons for code-split components
 function SearchResultsSkeleton() {
@@ -27,8 +41,8 @@ function SearchResultsSkeleton() {
       {Array.from({ length: 6 }).map((_, i) => (
         <Card key={i}>
           <div className="p-4">
-            <Skeleton className="h-4 w-3/4 mb-2" />
-            <Skeleton className="h-3 w-1/2 mb-3" />
+            <Skeleton className="mb-2 h-4 w-3/4" />
+            <Skeleton className="mb-3 h-3 w-1/2" />
             <Skeleton className="h-20 w-full" />
           </div>
         </Card>
@@ -39,7 +53,7 @@ function SearchResultsSkeleton() {
 
 function PaginationSkeleton() {
   return (
-    <div className="flex justify-center gap-2 mt-6">
+    <div className="mt-6 flex justify-center gap-2">
       <Skeleton className="h-10 w-20" />
       <Skeleton className="h-10 w-10" />
       <Skeleton className="h-10 w-10" />
@@ -52,13 +66,28 @@ const searchParamsSchema = z.object({
   q: z.string().optional(),
   tags: z.array(z.string()).optional(),
   rating: z.number().optional(),
+  ratingMin: z.number().min(1).max(5).optional().default(1),
+  ratingMax: z.number().min(1).max(5).optional().default(5),
   sort: z
-    .enum(['relevance', 'rating_desc', 'recent'])
+    .enum([
+      'relevance',
+      'rating_desc',
+      'top_rated',
+      'most_rated',
+      'recent',
+      'name',
+      'creation_date',
+      'interaction_time',
+    ])
     .optional()
     .default('relevance'),
   page: z.number().optional().default(1),
   emojiFilter: z.array(z.string()).optional(),
   emojiMinValue: z.number().min(1).max(5).optional(),
+  tab: z
+    .enum(['all', 'vibes', 'users', 'tags', 'reviews'])
+    .optional()
+    .default('all'),
 });
 
 export const Route = createFileRoute('/search')({
@@ -67,11 +96,35 @@ export const Route = createFileRoute('/search')({
 });
 
 function SearchResultsPage() {
-  const { q, tags, rating, sort, page, emojiFilter, emojiMinValue } =
-    Route.useSearch();
+  const {
+    q,
+    tags,
+    rating,
+    ratingMin,
+    ratingMax,
+    sort,
+    page,
+    emojiFilter,
+    emojiMinValue,
+    tab,
+  } = Route.useSearch();
+  const [emojiSearchValue, setEmojiSearchValue] = React.useState('');
+
+  // Get current user's theme
+  const { data: currentUser } = useCurrentUser();
+  const userTheme = currentUser?.theme || DEFAULT_USER_THEME;
+  const themeClasses = getThemeGradientClasses();
+
+  // Apply theme on mount and when user changes
+  React.useEffect(() => {
+    applyUserTheme(userTheme);
+  }, [userTheme]);
+
   const filters = {
     tags,
-    minRating: rating,
+    minRating:
+      rating || (ratingMin !== 1 || ratingMax !== 5 ? ratingMin : undefined),
+    maxRating: ratingMax !== 5 ? ratingMax : undefined,
     sort,
     emojiRatings:
       (emojiFilter && emojiFilter.length > 0) || emojiMinValue
@@ -79,9 +132,28 @@ function SearchResultsPage() {
         : undefined,
   };
 
+  // Get include types based on active tab
+  const getIncludeTypes = (activeTab: string) => {
+    switch (activeTab) {
+      case 'vibes':
+        return ['vibe'];
+      case 'users':
+        return ['user'];
+      case 'tags':
+        return ['tag'];
+      case 'reviews':
+        return ['review'];
+      case 'all':
+      default:
+        return undefined; // Include all types
+    }
+  };
+
   const { data, isLoading, isError, error } = useSearchResults({
     query: q || '',
     filters,
+    page,
+    includeTypes: getIncludeTypes(tab),
   });
 
   const navigate = Route.useNavigate();
@@ -96,125 +168,196 @@ function SearchResultsPage() {
     });
   };
 
-  const totalPages = Math.ceil((data?.totalCount || 0) / 20);
+  // Since we're now filtering by includeTypes at the backend level,
+  // totalCount represents the actual count for the active tab
+  const activeTabCount = data?.totalCount || 0;
+  const totalPages = Math.ceil(activeTabCount / 20);
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
       <div className="container mx-auto px-4 py-8">
         {/* Search header */}
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold">
-            {q ? `Search results for "${q}"` : 'All Results'}
+        <div className="mb-8 text-center">
+          <h1
+            className={cn(
+              'mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl',
+              themeClasses.text
+            )}
+          >
+            {q ? `search results for "${q}"` : 'search results'}
           </h1>
           {data?.totalCount !== undefined && (
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground drop-shadow-sm">
               {data.totalCount} {data.totalCount === 1 ? 'result' : 'results'}{' '}
               found
             </p>
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-          {/* Filter sidebar */}
-          <aside className="lg:col-span-1">
-            <Card className="sticky top-4 p-4">
-              <h2 className="mb-4 font-semibold">Filter Results</h2>
+        <div
+          className={cn(
+            'grid grid-cols-1 gap-8',
+            // Show sidebar only when there are active filters or on large screens
+            (emojiFilter && emojiFilter.length > 0) ||
+              rating ||
+              ratingMin !== 1 ||
+              ratingMax !== 5 ||
+              emojiMinValue
+              ? 'lg:grid-cols-[320px_1fr]'
+              : 'lg:grid-cols-1'
+          )}
+        >
+          {/* Filter sidebar - show when filters are active or on large screens */}
+          <aside
+            className={cn(
+              'hidden',
+              // Show on tablet and up when there are filters, or always on desktop
+              (emojiFilter && emojiFilter.length > 0) ||
+                rating ||
+                ratingMin !== 1 ||
+                ratingMax !== 5 ||
+                emojiMinValue
+                ? 'md:block'
+                : 'lg:block'
+            )}
+          >
+            <Card className="bg-background/90 sticky top-4 border-none p-6 shadow-lg backdrop-blur">
+              <h2
+                className={cn(
+                  'mb-6 font-semibold lowercase',
+                  themeClasses.text
+                )}
+              >
+                filter results
+              </h2>
               <div className="space-y-6">
-                {/* Star Rating Filter */}
+                {/* Emoji Filter */}
                 <div>
-                  <Label className="mb-2 block text-sm font-medium">
-                    Minimum Rating
+                  <Label className="mb-3 block text-sm font-medium lowercase">
+                    filter by emoji
                   </Label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((value) => (
-                        <Button
-                          key={value}
-                          variant={
-                            rating && rating >= value ? 'default' : 'ghost'
-                          }
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          onClick={() => {
-                            navigate({
-                              search: (prev) => ({
-                                ...prev,
-                                rating: rating === value ? undefined : value,
-                                page: 1,
-                              }),
-                            });
-                          }}
-                        >
-                          <Star
-                            className={`h-4 w-4 ${
-                              rating && rating >= value ? 'fill-current' : ''
-                            }`}
-                          />
-                        </Button>
-                      ))}
-                    </div>
-                    {rating && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
+                  <div className="space-y-4">
+                    <EmojiSearchCommand
+                      searchValue={emojiSearchValue}
+                      onSearchChange={setEmojiSearchValue}
+                      onSelect={(emoji) => {
+                        const current = emojiFilter || [];
+                        const updated = current.includes(emoji)
+                          ? current.filter((e) => e !== emoji)
+                          : [...current, emoji];
+
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            emojiFilter:
+                              updated.length > 0 ? updated : undefined,
+                            page: 1,
+                          }),
+                        });
+                        setEmojiSearchValue(''); // Clear search after selection
+                      }}
+                      placeholder="search emojis..."
+                      maxHeight="h-40"
+                      showCategories={false}
+                      className="text-sm"
+                    />
+
+                    {/* Active Emoji Filters */}
+                    {emojiFilter && emojiFilter.length > 0 && (
+                      <EmojiPillFilters
+                        emojis={emojiFilter}
+                        onRemove={(emoji) => {
+                          const updated = emojiFilter.filter(
+                            (e) => e !== emoji
+                          );
                           navigate({
                             search: (prev) => ({
                               ...prev,
-                              rating: undefined,
+                              emojiFilter:
+                                updated.length > 0 ? updated : undefined,
                               page: 1,
                             }),
                           });
                         }}
-                      >
-                        Clear
-                      </Button>
+                        onClear={() => {
+                          navigate({
+                            search: (prev) => ({
+                              ...prev,
+                              emojiFilter: undefined,
+                              page: 1,
+                            }),
+                          });
+                        }}
+                        variant="compact"
+                      />
+                    )}
+
+                    {/* Minimum Rating Selector for Emojis */}
+                    {emojiFilter && emojiFilter.length > 0 && (
+                      <div className="space-y-3">
+                        <Label className="text-muted-foreground text-xs lowercase">
+                          minimum emoji rating: {emojiMinValue || 1}
+                        </Label>
+                        <div className="grid grid-cols-5 gap-2">
+                          {[1, 2, 3, 4, 5].map((value) => (
+                            <Button
+                              key={value}
+                              variant={
+                                emojiMinValue === value ? 'default' : 'outline'
+                              }
+                              size="sm"
+                              className="h-8 w-full p-0 text-xs"
+                              onClick={() => {
+                                navigate({
+                                  search: (prev) => ({
+                                    ...prev,
+                                    emojiMinValue: value,
+                                    page: 1,
+                                  }),
+                                });
+                              }}
+                            >
+                              {value}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Emoji Rating Filter */}
+                {/* General Rating Range Filter */}
                 <div>
-                  <Label className="mb-2 block text-sm font-medium">
-                    Emoji Ratings
-                  </Label>
-                  <EmojiRatingFilter
-                    selectedEmojis={emojiFilter || []}
-                    minValue={emojiMinValue}
-                    onEmojiToggle={(emoji) => {
-                      const current = emojiFilter || [];
-                      const updated = current.includes(emoji)
-                        ? current.filter((e) => e !== emoji)
-                        : [...current, emoji];
-
+                  <RatingRangeSlider
+                    value={[ratingMin, ratingMax]}
+                    onChange={([newMin, newMax]) => {
                       navigate({
                         search: (prev) => ({
                           ...prev,
-                          emojiFilter: updated.length > 0 ? updated : undefined,
+                          ratingMin: newMin !== 1 ? newMin : undefined,
+                          ratingMax: newMax !== 5 ? newMax : undefined,
                           page: 1,
                         }),
                       });
                     }}
-                    onMinValueChange={(value) => {
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          emojiMinValue: value,
-                          page: 1,
-                        }),
-                      });
-                    }}
+                    min={1}
+                    max={5}
+                    step={0.1}
+                    label="general rating range"
+                    variant="default"
                   />
                 </div>
 
-                {/* Clear All Filters */}
-                {(rating ||
-                  (emojiFilter && emojiFilter.length > 0) ||
-                  emojiMinValue) && (
+                {/* Clear All Filters - only show when filters are active */}
+                {((emojiFilter && emojiFilter.length > 0) ||
+                  rating ||
+                  ratingMin !== 1 ||
+                  ratingMax !== 5 ||
+                  (emojiMinValue && emojiMinValue > 1)) && (
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full"
+                    className={cn('w-full lowercase', themeClasses.button)}
                     onClick={() => {
                       navigate({
                         search: {
@@ -225,7 +368,7 @@ function SearchResultsPage() {
                       });
                     }}
                   >
-                    Clear All Filters
+                    clear all filters
                   </Button>
                 )}
               </div>
@@ -233,63 +376,191 @@ function SearchResultsPage() {
           </aside>
 
           {/* Results grid */}
-          <main className="lg:col-span-3">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex gap-2">
-                <Badge variant="secondary">VIBES</Badge>
-                <Badge variant="secondary">USERS</Badge>
-                <Badge variant="secondary">TAGS</Badge>
+          <main className="min-w-0">
+            <div className="mb-6 space-y-4">
+              {/* Mobile/Tablet Filter and Sort Controls */}
+              <div className="flex items-center justify-between lg:hidden">
+                <MobileFilterSheet
+                  emojiFilter={emojiFilter}
+                  emojiMinValue={emojiMinValue}
+                  rating={rating}
+                  ratingMin={ratingMin}
+                  ratingMax={ratingMax}
+                  onEmojiFilterChange={(emojis) => {
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        emojiFilter: emojis.length > 0 ? emojis : undefined,
+                        page: 1,
+                      }),
+                    });
+                  }}
+                  onEmojiMinValueChange={(value) => {
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        emojiMinValue: value,
+                        page: 1,
+                      }),
+                    });
+                  }}
+                  onRatingChange={(rating) => {
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        rating: rating,
+                        page: 1,
+                      }),
+                    });
+                  }}
+                  onRatingRangeChange={(min, max) => {
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        ratingMin: min !== 1 ? min : undefined,
+                        ratingMax: max !== 5 ? max : undefined,
+                        page: 1,
+                      }),
+                    });
+                  }}
+                  onClearFilters={() => {
+                    navigate({
+                      search: {
+                        q,
+                        sort,
+                        page: 1,
+                      },
+                    });
+                  }}
+                />
+
+                <select
+                  value={sort}
+                  onChange={(e) =>
+                    updateFilters({
+                      ...filters,
+                      sort: e.target.value as typeof sort,
+                    })
+                  }
+                  className="rounded-md border px-3 py-2 text-sm"
+                >
+                  <option value="relevance">most relevant</option>
+                  <option value="rating_desc">highest rated</option>
+                  <option value="top_rated">top rated</option>
+                  <option value="most_rated">most rated</option>
+                  <option value="recent">most recent</option>
+                  <option value="name">name (a-z)</option>
+                  <option value="creation_date">creation date</option>
+                  <option value="interaction_time">recent activity</option>
+                </select>
               </div>
-              <select
-                value={sort}
-                onChange={(e) =>
-                  updateFilters({
-                    ...filters,
-                    sort: e.target.value as
-                      | 'relevance'
-                      | 'rating_desc'
-                      | 'recent',
-                  })
-                }
-                className="rounded-md border px-3 py-1 text-sm"
-              >
-                <option value="relevance">Most Relevant</option>
-                <option value="rating_desc">Highest Rated</option>
-                <option value="recent">Most Recent</option>
-              </select>
+
+              {/* Tabs */}
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {(['all', 'vibes', 'users', 'tags', 'reviews'] as const).map(
+                  (tabName) => (
+                    <Button
+                      key={tabName}
+                      variant={tab === tabName ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            tab: tabName,
+                            page: 1,
+                          }),
+                        });
+                      }}
+                      className={cn(
+                        'whitespace-nowrap lowercase',
+                        tab === tabName
+                          ? cn(
+                              'border-none text-white shadow-lg',
+                              themeClasses.button
+                            )
+                          : 'bg-background/90 border-[hsl(var(--theme-primary))]/20 text-[hsl(var(--theme-primary))] hover:bg-[hsl(var(--theme-primary))]/10'
+                      )}
+                    >
+                      {tabName}
+                    </Button>
+                  )
+                )}
+              </div>
+
+              {/* Desktop Sort Options */}
+              <div className="hidden items-center justify-between lg:flex">
+                <Label className="text-sm font-medium">sort by:</Label>
+                <select
+                  value={sort}
+                  onChange={(e) =>
+                    updateFilters({
+                      ...filters,
+                      sort: e.target.value as typeof sort,
+                    })
+                  }
+                  className="rounded-md border px-3 py-1 text-sm"
+                >
+                  <option value="relevance">most relevant</option>
+                  <option value="rating_desc">highest rated</option>
+                  <option value="top_rated">top rated</option>
+                  <option value="most_rated">most rated</option>
+                  <option value="recent">most recent</option>
+                  <option value="name">name (a-z)</option>
+                  <option value="creation_date">creation date</option>
+                  <option value="interaction_time">recent activity</option>
+                </select>
+              </div>
             </div>
 
-            <Suspense fallback={<SearchResultsSkeleton />}>
-              <SearchResultsGrid
-                results={
-                  data
-                    ? [
-                        ...(data.vibes || []),
-                        ...(data.users || []),
-                        ...(data.tags || []),
-                        ...(data.actions || []),
-                      ]
-                    : undefined
-                }
-                loading={isLoading}
-                error={isError ? error : undefined}
-                onRetry={() => window.location.reload()}
-              />
-            </Suspense>
+            {tab === 'vibes' ? (
+              <Suspense fallback={<SearchResultsSkeleton />}>
+                <SearchResultsGrid
+                  results={data?.vibes || []}
+                  loading={isLoading}
+                  error={isError ? error : undefined}
+                  onRetry={() => window.location.reload()}
+                  queriedEmojis={emojiFilter}
+                />
+              </Suspense>
+            ) : (
+              <Suspense fallback={<SearchResultsSkeleton />}>
+                <SearchResultsGrid
+                  results={
+                    data
+                      ? tab === 'users'
+                        ? data.users || []
+                        : tab === 'tags'
+                          ? data.tags || []
+                          : tab === 'reviews'
+                            ? data.reviews || []
+                            : tab === 'all'
+                              ? [
+                                  ...(data.vibes || []),
+                                  ...(data.users || []),
+                                  ...(data.tags || []),
+                                  ...(data.actions || []),
+                                  ...(data.reviews || []),
+                                ]
+                              : []
+                      : undefined
+                  }
+                  loading={isLoading}
+                  error={isError ? error : undefined}
+                  onRetry={() => window.location.reload()}
+                  queriedEmojis={emojiFilter}
+                />
+              </Suspense>
+            )}
 
-            {!isLoading &&
-              data &&
-              ((data.vibes && data.vibes.length > 0) ||
-                (data.users && data.users.length > 0) ||
-                (data.tags && data.tags.length > 0) ||
-                (data.actions && data.actions.length > 0)) && (
-                <Suspense fallback={<PaginationSkeleton />}>
-                  <SearchPagination
-                    currentPage={page || 1}
-                    totalPages={totalPages}
-                  />
-                </Suspense>
-              )}
+            {!isLoading && data && activeTabCount > 0 && totalPages > 1 && (
+              <Suspense fallback={<PaginationSkeleton />}>
+                <SearchPagination
+                  currentPage={page || 1}
+                  totalPages={totalPages}
+                />
+              </Suspense>
+            )}
           </main>
         </div>
       </div>

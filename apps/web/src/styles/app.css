@@ -29,12 +29,15 @@
 /* Core emoji subset - loads immediately (critical path) */
 @font-face {
   font-family: 'Noto Color Emoji Core';
-  src: url('/fonts/noto-color-emoji-core.woff2') format('woff2'),
-       url('/fonts/noto-color-emoji-core.ttf') format('truetype');
+  src:
+    url('/fonts/noto-color-emoji-core.woff2') format('woff2'),
+    url('/fonts/noto-color-emoji-core.ttf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+1F600-1F64F, U+1F300-1F5FF, U+1F680-1F6FF, U+1F1E0-1F1FF, U+2600-26FF, U+2700-27BF, U+FE00-FE0F, U+1F900-1F9FF;
+  unicode-range:
+    U+1F600-1F64F, U+1F300-1F5FF, U+1F680-1F6FF, U+1F1E0-1F1FF, U+2600-26FF,
+    U+2700-27BF, U+FE00-FE0F, U+1F900-1F9FF;
 }
 
 /* Extended emoji subset - loads on-demand */
@@ -79,7 +82,9 @@
   --font-geist-mono: 'Geist Mono';
   --font-doto: 'Doto';
   --font-noto: 'Noto Emoji';
-  --font-noto-color: 'Noto Color Emoji Core', 'Noto Color Emoji Extended', 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-noto-color:
+    'Noto Color Emoji Core', 'Noto Color Emoji Extended', 'Noto Color Emoji',
+    'Apple Color Emoji', 'Segoe UI Emoji';
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
@@ -401,10 +406,15 @@
 
 /* Mobile-optimized bounce (lighter) */
 @keyframes bounce-light {
-  0%, 20%, 53%, 80%, 100% {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
     transform: translateY(0);
   }
-  40%, 43% {
+  40%,
+  43% {
     transform: translateY(-5px);
   }
   70% {
@@ -510,7 +520,7 @@
     animation: none !important;
     transition: none !important;
   }
-  
+
   /* Keep opacity transitions for accessibility */
   .animate-fade-in-down {
     opacity: 1 !important;
@@ -524,12 +534,12 @@
   .animate-accordion-up {
     animation-duration: 0.15s; /* Faster on mobile */
   }
-  
+
   .animate-emoji-slide-in,
   .animate-emoji-slide-out {
     animation-duration: 0.2s; /* Shorter for mobile responsiveness */
   }
-  
+
   .animate-bounce-light {
     animation-duration: 0.8s; /* Slightly faster bounce */
   }
@@ -785,3 +795,136 @@ h1[data-localization-key='userProfile.navbar.title'] {
 .cl-navbarMobileMenuButton {
   @apply text-foreground;
 }
+
+/* Theme color palette as CSS custom properties */
+:root {
+  /* Default theme colors (pink-orange gradient) */
+  --theme-primary: 330 81% 50%;    /* pink-600 (darker for better contrast) */
+  --theme-secondary: 25 95% 48%;   /* orange-600 (darker for better contrast) */
+  --theme-accent: 330 81% 50%;     /* pink-600 */
+  
+  /* All available theme colors (Tailwind HSL - optimized for contrast) */
+  --color-purple: 262 83% 48%;     /* purple-600 */
+  --color-pink: 330 81% 50%;       /* pink-600 */
+  --color-blue: 217 91% 50%;       /* blue-600 */
+  --color-emerald: 160 84% 35%;    /* emerald-700 */
+  --color-orange: 25 95% 48%;      /* orange-600 */
+  --color-red: 0 84% 50%;          /* red-600 */
+  --color-indigo: 239 84% 57%;     /* indigo-600 */
+  --color-teal: 173 80% 35%;       /* teal-700 */
+  --color-slate: 215 28% 25%;      /* slate-700 */
+  --color-amber: 45 93% 42%;       /* amber-600 */
+  --color-lime: 84 81% 39%;        /* lime-600 */
+  --color-cyan: 188 95% 32%;       /* cyan-700 */
+  --color-violet: 262 90% 65%;     /* violet-500 */
+  --color-fuchsia: 292 84% 51%;    /* fuchsia-600 */
+  --color-green: 142 76% 31%;      /* green-700 */
+  --color-yellow: 54 92% 50%;      /* yellow-500 */
+  
+  /* Accent colors (darker variants for better contrast) */
+  --accent-purple: 262 83% 48%;    /* purple-600 */
+  --accent-pink: 330 81% 50%;      /* pink-600 */
+  --accent-blue: 217 91% 50%;      /* blue-600 */
+  --accent-emerald: 160 84% 35%;   /* emerald-700 */
+  --accent-orange: 25 95% 48%;     /* orange-600 */
+  --accent-red: 0 84% 50%;         /* red-600 */
+  --accent-indigo: 239 84% 57%;    /* indigo-600 */
+  --accent-teal: 173 80% 35%;      /* teal-700 */
+  --accent-slate: 215 28% 25%;     /* slate-700 */
+  --accent-amber: 45 93% 42%;      /* amber-600 */
+  --accent-lime: 84 81% 39%;       /* lime-600 */
+  --accent-cyan: 188 95% 32%;      /* cyan-700 */
+  --accent-violet: 262 90% 65%;    /* violet-500 */
+  --accent-fuchsia: 292 84% 51%;   /* fuchsia-600 */
+  --accent-green: 142 76% 31%;     /* green-700 */
+  --accent-yellow: 54 92% 50%;     /* yellow-500 */
+}
+
+/* Dynamic theme application via CSS custom properties */
+[data-theme-primary="purple"] { --theme-primary: var(--color-purple); --theme-accent: var(--accent-purple); }
+[data-theme-primary="pink"] { --theme-primary: var(--color-pink); --theme-accent: var(--accent-pink); }
+[data-theme-primary="blue"] { --theme-primary: var(--color-blue); --theme-accent: var(--accent-blue); }
+[data-theme-primary="emerald"] { --theme-primary: var(--color-emerald); --theme-accent: var(--accent-emerald); }
+[data-theme-primary="orange"] { --theme-primary: var(--color-orange); --theme-accent: var(--accent-orange); }
+[data-theme-primary="red"] { --theme-primary: var(--color-red); --theme-accent: var(--accent-red); }
+[data-theme-primary="indigo"] { --theme-primary: var(--color-indigo); --theme-accent: var(--accent-indigo); }
+[data-theme-primary="teal"] { --theme-primary: var(--color-teal); --theme-accent: var(--accent-teal); }
+[data-theme-primary="slate"] { --theme-primary: var(--color-slate); --theme-accent: var(--accent-slate); }
+[data-theme-primary="amber"] { --theme-primary: var(--color-amber); --theme-accent: var(--accent-amber); }
+[data-theme-primary="lime"] { --theme-primary: var(--color-lime); --theme-accent: var(--accent-lime); }
+[data-theme-primary="cyan"] { --theme-primary: var(--color-cyan); --theme-accent: var(--accent-cyan); }
+[data-theme-primary="violet"] { --theme-primary: var(--color-violet); --theme-accent: var(--accent-violet); }
+[data-theme-primary="fuchsia"] { --theme-primary: var(--color-fuchsia); --theme-accent: var(--accent-fuchsia); }
+[data-theme-primary="green"] { --theme-primary: var(--color-green); --theme-accent: var(--accent-green); }
+[data-theme-primary="yellow"] { --theme-primary: var(--color-yellow); --theme-accent: var(--accent-yellow); }
+
+[data-theme-secondary="purple"] { --theme-secondary: var(--color-purple); }
+[data-theme-secondary="pink"] { --theme-secondary: var(--color-pink); }
+[data-theme-secondary="blue"] { --theme-secondary: var(--color-blue); }
+[data-theme-secondary="emerald"] { --theme-secondary: var(--color-emerald); }
+[data-theme-secondary="orange"] { --theme-secondary: var(--color-orange); }
+[data-theme-secondary="red"] { --theme-secondary: var(--color-red); }
+[data-theme-secondary="indigo"] { --theme-secondary: var(--color-indigo); }
+[data-theme-secondary="teal"] { --theme-secondary: var(--color-teal); }
+[data-theme-secondary="slate"] { --theme-secondary: var(--color-slate); }
+[data-theme-secondary="amber"] { --theme-secondary: var(--color-amber); }
+[data-theme-secondary="lime"] { --theme-secondary: var(--color-lime); }
+[data-theme-secondary="cyan"] { --theme-secondary: var(--color-cyan); }
+[data-theme-secondary="violet"] { --theme-secondary: var(--color-violet); }
+[data-theme-secondary="fuchsia"] { --theme-secondary: var(--color-fuchsia); }
+[data-theme-secondary="green"] { --theme-secondary: var(--color-green); }
+[data-theme-secondary="yellow"] { --theme-secondary: var(--color-yellow); }
+
+/* Theme-based component classes using CSS variables */
+.themed-gradient-text {
+  background: linear-gradient(135deg, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.themed-gradient-button {
+  background: linear-gradient(135deg, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+}
+
+.themed-card {
+  @apply bg-background/80;
+  border: 1px solid hsl(var(--theme-primary) / 0.2);
+}
+
+.themed-hero {
+  background: linear-gradient(135deg, 
+    hsl(var(--background)), 
+    hsl(var(--theme-primary) / 0.05), 
+    hsl(var(--background))
+  );
+}
+
+.themed-glow {
+  background-color: hsl(var(--theme-primary) / 0.2);
+}
+
+.themed-pills {
+  background: linear-gradient(135deg, 
+    hsl(var(--theme-primary) / 0.1), 
+    hsl(var(--theme-secondary) / 0.1)
+  );
+  border: 1px solid hsl(var(--theme-primary) / 0.3);
+}
+
+.themed-border {
+  border-color: hsl(var(--theme-primary) / 0.3);
+}
+
+.themed-accent {
+  color: hsl(var(--theme-accent));
+}
+
+.themed-avatar {
+  border: 3px solid hsl(var(--theme-primary) / 0.5);
+}
+
+.themed-avatar-ring {
+  border: 1px solid hsl(var(--theme-primary) / 0.4);
+}
+

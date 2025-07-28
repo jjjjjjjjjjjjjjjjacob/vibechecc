@@ -3,6 +3,32 @@ import { convexQuery } from '@convex-dev/react-query';
 import { api } from '@viberater/convex';
 import type { SearchFilters } from '@viberater/types';
 
+// Valid sort options for Convex search
+const VALID_CONVEX_SORT_OPTIONS = [
+  'relevance',
+  'rating_desc',
+  'rating_asc',
+  'recent',
+  'oldest',
+] as const;
+
+// Helper to filter SearchFilters to only include Convex-compatible options
+function filterForConvex(filters?: SearchFilters): typeof filters {
+  if (!filters) return filters;
+
+  const convexFilters = { ...filters };
+
+  // Filter out unsupported sort options
+  if (
+    convexFilters.sort &&
+    !VALID_CONVEX_SORT_OPTIONS.includes(convexFilters.sort as any)
+  ) {
+    delete convexFilters.sort;
+  }
+
+  return convexFilters as typeof filters;
+}
+
 // Cache time constants (in milliseconds)
 const CACHE_TIME = 15 * 60 * 1000; // 15 minutes
 const STALE_TIME = 5 * 60 * 1000; // 5 minutes
@@ -18,7 +44,7 @@ export const searchCacheOptions = {
     queryOptions({
       ...convexQuery(api.search.searchAll, {
         query,
-        filters,
+        filters: filterForConvex(filters),
         limit,
         cursor,
       }),

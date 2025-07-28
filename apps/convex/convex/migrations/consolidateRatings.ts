@@ -175,7 +175,7 @@ export const migrateRatings = internalMutation({
 
       // Insert new document with correct schema
       await ctx.db.insert('ratings', {
-        vibeId: (ratingData as any).vibeId || '',
+        vibeId: (ratingData as { vibeId?: string }).vibeId || '',
         userId: ratingData.userId || '',
         emoji,
         value,

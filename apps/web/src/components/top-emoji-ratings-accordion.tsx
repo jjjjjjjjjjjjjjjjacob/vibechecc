@@ -41,7 +41,7 @@ export function TopEmojiRatingsAccordion({
             key={`${rating.emoji}-${index}`}
             className="animate-fade-in-down opacity-0"
             style={{
-              animation: `fade-in-down 0.3s ease-out ${index * 0.05}s forwards`
+              animation: `fade-in-down 0.3s ease-out ${index * 0.05}s forwards`,
             }}
           >
             <EmojiRatingDisplay
@@ -66,9 +66,9 @@ export function TopEmojiRatingsAccordion({
               {remainingRatings.map((rating, index) => (
                 <div
                   key={`${rating.emoji}-${index}`}
-                  className="mb-2 animate-fade-in-down opacity-0"
+                  className="animate-fade-in-down mb-2 opacity-0"
                   style={{
-                    animation: `fade-in-down 0.3s ease-out ${index * 0.05}s forwards`
+                    animation: `fade-in-down 0.3s ease-out ${index * 0.05}s forwards`,
                   }}
                 >
                   <EmojiRatingDisplay

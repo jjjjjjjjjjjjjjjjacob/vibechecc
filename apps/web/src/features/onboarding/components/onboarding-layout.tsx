@@ -72,7 +72,7 @@ export function OnboardingLayout({
         {/* Content */}
         <div className="mx-auto max-w-2xl">
           {title && (
-            <div className="mb-6 text-center animate-fade-in-down">
+            <div className="animate-fade-in-down mb-6 text-center">
               <h2 className="text-foreground mb-2 text-3xl font-bold">
                 {title}
               </h2>
@@ -82,7 +82,7 @@ export function OnboardingLayout({
             </div>
           )}
 
-          <div 
+          <div
             className="animate-fade-in-down opacity-0"
             style={{ animation: 'fade-in-down 0.3s ease-out 0.1s forwards' }}
           >

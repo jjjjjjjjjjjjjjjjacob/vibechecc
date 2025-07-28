@@ -5,6 +5,8 @@
  * Reduces 25MB+ fonts to ~3-4MB by creating core and extended subsets
  */
 
+/* eslint-disable no-console */
+
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
@@ -93,13 +95,22 @@ async function main() {
 
   // Check if tools are available
   if (!checkFontTools()) {
-    process.exit(1);
+    console.log(
+      '⚠️  Font subsetting skipped - continuing build without optimized fonts'
+    );
+    console.log(
+      '💡 To enable font optimization, install: pip install fonttools[woff]'
+    );
+    process.exit(0);
   }
 
   // Check if original font exists
   if (!existsSync(ORIGINAL_FONT)) {
-    console.error(`❌ Original font not found: ${ORIGINAL_FONT}`);
-    process.exit(1);
+    console.log(`⚠️  Original font not found: ${ORIGINAL_FONT}`);
+    console.log(
+      '⚠️  Font subsetting skipped - continuing build without optimized fonts'
+    );
+    process.exit(0);
   }
 
   const originalSize = getFileSize(ORIGINAL_FONT);

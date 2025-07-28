@@ -38,7 +38,9 @@ export function EmojiRatingCycleDisplay({
 }: EmojiRatingCycleDisplayProps) {
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);
-  const [emojiTransition, setEmojiTransition] = React.useState<'in' | 'out' | 'idle'>('idle');
+  const [emojiTransition, setEmojiTransition] = React.useState<
+    'in' | 'out' | 'idle'
+  >('idle');
 
   const emojiOptions = DEFAULT_EMOJIS;
 
@@ -51,11 +53,11 @@ export function EmojiRatingCycleDisplay({
 
     const interval = setInterval(() => {
       setEmojiTransition('out');
-      
+
       setTimeout(() => {
         setCurrentEmojiIndex((prev) => (prev + 1) % emojiOptions.length);
         setEmojiTransition('in');
-        
+
         setTimeout(() => {
           setEmojiTransition('idle');
         }, 300);
@@ -91,7 +93,7 @@ export function EmojiRatingCycleDisplay({
               'absolute text-base transition-all duration-300 ease-out',
               emojiTransition === 'in' && 'animate-emoji-slide-in',
               emojiTransition === 'out' && 'animate-emoji-slide-out',
-              emojiTransition === 'idle' && 'opacity-100 transform-none'
+              emojiTransition === 'idle' && 'transform-none opacity-100'
             )}
           >
             {currentEmoji}

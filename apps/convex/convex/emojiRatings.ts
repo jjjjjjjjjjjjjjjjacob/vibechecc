@@ -1,5 +1,6 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
+import type { QueryCtx } from './_generated/server';
 
 // Get emoji metadata by emoji
 export const getEmojiMetadata = query({
@@ -97,7 +98,7 @@ export const createOrUpdateEmojiRating = mutation({
 
 // Helper function to get top emoji ratings
 async function getTopEmojiRatingsInternal(
-  ctx: any,
+  ctx: QueryCtx,
   args: { vibeId: string; limit?: number }
 ) {
   const limit = args.limit ?? 5;
@@ -105,7 +106,7 @@ async function getTopEmojiRatingsInternal(
   // Get all ratings for this vibe
   const ratings = await ctx.db
     .query('ratings')
-    .withIndex('vibe', (q: any) => q.eq('vibeId', args.vibeId))
+    .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
     .collect();
 
   // Group by emoji and calculate stats
@@ -144,7 +145,7 @@ async function getTopEmojiRatingsInternal(
     sortedEmojis.map(async (stat) => {
       const emojiData = await ctx.db
         .query('emojis')
-        .withIndex('byEmoji', (q: any) => q.eq('emoji', stat.emoji))
+        .withIndex('byEmoji', (q) => q.eq('emoji', stat.emoji))
         .first();
 
       return {
@@ -199,8 +200,8 @@ export const getEmojiRatingStats = query({
   handler: async (ctx, args) => {
     const ratings = await ctx.db
       .query('ratings')
-      .withIndex('vibe', (q: any) => q.eq('vibeId', args.vibeId))
-      .filter((q: any) => q.neq(q.field('emoji'), undefined))
+      .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
+      .filter((q) => q.neq(q.field('emoji'), undefined))
       .collect();
 
     const emojiGroups = new Map<string, number[]>();

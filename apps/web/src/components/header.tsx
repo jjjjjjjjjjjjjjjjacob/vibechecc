@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Button } from './ui/button';
 import { Search, Menu } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '../utils/tailwind-utils';
 import { ThemeToggle } from './theme-toggle';
 import {
@@ -13,11 +13,36 @@ import {
 import { useTheme } from './theme-provider';
 import { SearchCommand } from '../features/search/components/search-command';
 import { useSearchShortcuts } from '../features/search/hooks/use-search-shortcuts';
+import { useCurrentUser } from '../queries';
+import {
+  getThemeById,
+  injectUserThemeCSS,
+  getThemeGradientClasses,
+  DEFAULT_USER_THEME,
+  type UserTheme,
+} from '../utils/theme-colors';
 
 export function Header() {
   const { resolvedTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
+
+  // Get current user's theme
+  const { data: currentUser } = useCurrentUser();
+  const userTheme: UserTheme = {
+    primaryColor:
+      currentUser?.primaryColor ||
+      currentUser?.themeColor ||
+      DEFAULT_USER_THEME.primaryColor,
+    secondaryColor:
+      currentUser?.secondaryColor || DEFAULT_USER_THEME.secondaryColor,
+  };
+  const themeClasses = getThemeGradientClasses();
+
+  // Inject theme CSS when user theme changes
+  useEffect(() => {
+    injectUserThemeCSS(userTheme);
+  }, [userTheme]);
 
   // Set up keyboard shortcuts
   useSearchShortcuts({
@@ -40,7 +65,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="flex items-center gap-2 md:gap-4">
           <Link to="/" className="flex items-center gap-2">
-            <span className="bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-xl font-bold text-transparent">
+            <span className={`text-xl font-bold ${themeClasses.text}`}>
               viberater
             </span>
           </Link>

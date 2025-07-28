@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import * as React from 'react';
 import {
   useUserByUsername,
   useUserVibes,
@@ -17,11 +18,26 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { VibeGrid } from '@/components/vibe-grid';
+import { MasonryFeed } from '@/components/masonry-feed';
 import { Skeleton } from '@/components/ui/skeleton';
-import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
-import { CalendarDays, Twitter, Instagram, Globe, Star } from 'lucide-react';
+import {
+  CalendarDays,
+  Twitter,
+  Instagram,
+  Globe,
+  Star,
+  Heart,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react';
 import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
+import {
+  getThemeById,
+  getThemeGradientClasses,
+  injectUserThemeCSS,
+  DEFAULT_USER_THEME,
+  type UserTheme,
+} from '@/utils/theme-colors';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,
@@ -51,16 +67,27 @@ function UserProfile() {
   }
 
   if (userError || !user) {
+    // Use default theme for error state
+    const defaultThemeClasses = getThemeGradientClasses(DEFAULT_THEME);
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <h1 className="mb-2 text-2xl font-bold">User not found</h1>
-            <p className="text-muted-foreground">
-              The user @{username} could not be found.
-            </p>
-          </CardContent>
-        </Card>
+      <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/20">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex min-h-[60vh] items-center justify-center">
+            <Card
+              className={`${defaultThemeClasses.card} w-full max-w-md shadow-2xl backdrop-blur-md`}
+            >
+              <CardContent className="p-8 text-center">
+                <div className="mb-4 text-6xl opacity-50">🔍</div>
+                <h1 className="mb-3 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-2xl font-bold text-transparent lowercase">
+                  user not found
+                </h1>
+                <p className="text-muted-foreground/80">
+                  the user @{username} could not be found in our community
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -81,501 +108,683 @@ function UserProfile() {
         receivedRatings.length
       : 0;
 
+  // Get user's theme colors and inject CSS
+  const userTheme: UserTheme = {
+    primaryColor:
+      user.primaryColor || user.themeColor || DEFAULT_USER_THEME.primaryColor,
+    secondaryColor: user.secondaryColor || DEFAULT_USER_THEME.secondaryColor,
+  };
+  React.useEffect(() => {
+    injectUserThemeCSS(userTheme);
+  }, [userTheme]);
+  const themeClasses = getThemeGradientClasses();
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mx-auto max-w-4xl">
-        {/* Profile Header */}
-        <Card className="mb-8">
-          <CardContent className="p-8">
-            <div className="flex flex-col gap-8 md:flex-row">
-              {/* Profile Picture */}
-              <div className="flex-shrink-0">
-                <Avatar className="h-32 w-32">
-                  <AvatarImage
-                    src={user.image_url || user.profile_image_url}
-                    alt={displayName}
+    <div className={`min-h-screen ${themeClasses.hero}`}>
+      <div className="container mx-auto space-y-6 px-4 py-6">
+        <div className="mx-auto max-w-5xl">
+          {/* Hero Profile Section */}
+          <div
+            className={`relative overflow-hidden rounded-2xl ${themeClasses.card} p-6 shadow-xl backdrop-blur-md sm:p-8`}
+          >
+            <div
+              className={`absolute inset-0 ${themeClasses.background} opacity-20`}
+            />
+            <div className="relative z-10">
+              <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:gap-8 sm:text-left">
+                {/* Avatar */}
+                <div className="relative flex-shrink-0">
+                  <div
+                    className={`absolute -inset-3 ${themeClasses.glow} rounded-full opacity-60 blur-xl`}
                   />
-                  <AvatarFallback className="text-4xl">
-                    {displayName.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-
-              {/* Profile Info */}
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h1 className="text-3xl font-bold">{displayName}</h1>
-                  <p className="text-muted-foreground text-xl">
-                    @{user.username}
-                  </p>
+                  <div
+                    className={`relative ${themeClasses.pills} rounded-full p-1.5 ${themeClasses.avatarRing}`}
+                  >
+                    <Avatar
+                      className={`h-28 w-28 sm:h-32 sm:w-32 ${themeClasses.avatar}`}
+                    >
+                      <AvatarImage
+                        src={user.image_url || user.profile_image_url}
+                        alt={displayName}
+                        className="object-cover"
+                      />
+                      <AvatarFallback
+                        className={`${themeClasses.background} text-2xl font-bold text-white sm:text-3xl`}
+                      >
+                        {displayName.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                 </div>
 
-                {/* Bio */}
-                {user.bio && <p className="text-lg">{user.bio}</p>}
-
-                {/* Stats */}
-                <div className="flex gap-6 text-sm">
-                  <div className="flex items-center gap-1">
-                    <CalendarDays className="h-4 w-4" />
-                    <span>Joined {joinDate}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="font-semibold">{vibeCount}</span>
-                    <span className="text-muted-foreground">vibes</span>
-                  </div>
-                  {averageReceivedRating > 0 && (
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold">
-                        {averageReceivedRating.toFixed(1)}
-                      </span>
-                      <span className="text-muted-foreground">
-                        ({receivedRatingsCount} reviews)
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Social Links */}
-                {user.socials && (
-                  <div className="flex gap-3">
-                    {user.socials.twitter && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a
-                          href={`https://twitter.com/${user.socials.twitter}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Twitter className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {user.socials.instagram && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a
-                          href={`https://instagram.com/${user.socials.instagram}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Instagram className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {user.socials.website && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a
-                          href={user.socials.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Globe className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Content Tabs */}
-        <Tabs defaultValue="vibes" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="vibes">Vibes</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="vibes" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Created Vibes</CardTitle>
-                <CardDescription>
-                  {vibeCount} {vibeCount === 1 ? 'vibe' : 'vibes'} created
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {vibesLoading ? (
-                  <VibeGridSkeleton count={6} />
-                ) : userVibes && userVibes.length > 0 ? (
-                  <VibeGrid vibes={userVibes} />
-                ) : (
-                  <div className="py-8 text-center">
-                    <p className="text-muted-foreground">
-                      {user.username} hasn't created any vibes yet.
+                {/* Profile Info */}
+                <div className="flex-1 space-y-4">
+                  <div className="space-y-2">
+                    <h1 className="text-3xl font-bold text-white lowercase drop-shadow-lg sm:text-4xl">
+                      {displayName}
+                    </h1>
+                    <p className="text-lg font-medium text-white/70 drop-shadow-md sm:text-xl">
+                      @{user.username}
                     </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="reviews" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Reviews Given */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reviews Given</CardTitle>
-                  <CardDescription>
-                    {givenRatingsCount}{' '}
-                    {givenRatingsCount === 1 ? 'review' : 'reviews'} given
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {ratingsLoading ? (
-                    <div className="space-y-4">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="flex items-start gap-3">
-                          <Skeleton className="h-12 w-12 rounded" />
-                          <div className="flex-1 space-y-2">
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-3/4" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : userRatings && userRatings.length > 0 ? (
-                    <div className="space-y-4">
-                      {userRatings.slice(0, 5).map((rating) => (
-                        <div
-                          key={rating?._id || Math.random()}
-                          className="flex items-start gap-3"
-                        >
-                          <img
-                            src={rating?.vibe?.image || ''}
-                            alt={rating?.vibe?.title || ''}
-                            className="h-12 w-12 rounded object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="mb-1 flex items-center gap-2">
-                              <h4 className="text-sm font-medium">
-                                {rating?.vibe?.title || 'Unknown'}
-                              </h4>
-                              {rating?.emoji ? (
-                                <EmojiRatingDisplay
-                                  rating={{
-                                    emoji: rating.emoji,
-                                    value: rating.value || 0,
-                                    count: 1,
-                                  }}
-                                  showScale={false}
-                                />
-                              ) : (
-                                <div className="flex items-center gap-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            {rating?.review && (
-                              <p className="text-muted-foreground text-sm">
-                                {rating.review}
-                              </p>
-                            )}
-                            <p className="text-muted-foreground mt-1 text-xs">
-                              {rating?.createdAt
-                                ? new Date(
-                                    rating.createdAt
-                                  ).toLocaleDateString()
-                                : ''}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      {userRatings.length > 5 && (
-                        <p className="text-muted-foreground text-center text-sm">
-                          and {userRatings.length - 5} more...
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="py-8 text-center">
-                      <p className="text-muted-foreground">
-                        {user.username} hasn't given any reviews yet.
+                  {/* Bio */}
+                  {user.bio && (
+                    <div className="max-w-xl">
+                      <p className="text-sm leading-relaxed text-white/80 drop-shadow-sm sm:text-base">
+                        {user.bio}
                       </p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
 
-              {/* Reviews Received */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reviews Received</CardTitle>
-                  <CardDescription>
-                    {receivedRatingsCount}{' '}
-                    {receivedRatingsCount === 1 ? 'review' : 'reviews'} received
-                    {averageReceivedRating > 0 && (
-                      <span className="ml-2 inline-flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>{averageReceivedRating.toFixed(1)} average</span>
-                      </span>
-                    )}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {receivedRatingsLoading ? (
-                    <div className="space-y-4">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="flex items-start gap-3">
-                          <Skeleton className="h-8 w-8 rounded-full" />
-                          <div className="flex-1 space-y-2">
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-3/4" />
-                          </div>
-                        </div>
-                      ))}
+                  {/* Stats Pills */}
+                  <div className="flex flex-wrap gap-3">
+                    <div className="rounded-full border border-white/20 bg-white/15 px-3 py-1.5 backdrop-blur">
+                      <div className="flex items-center gap-2 text-white">
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        <span className="text-xs font-medium">
+                          joined {joinDate}
+                        </span>
+                      </div>
                     </div>
-                  ) : receivedRatings && receivedRatings.length > 0 ? (
-                    <div className="space-y-4">
-                      {receivedRatings.slice(0, 5).map((rating) => (
-                        <div
-                          key={rating?._id || Math.random()}
-                          className="flex items-start gap-3"
-                        >
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={rating.rater?.image_url} />
-                            <AvatarFallback>
-                              {rating.rater?.username?.[0] || '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="mb-1 flex items-center gap-2">
-                              <span className="text-sm font-medium">
-                                {rating.rater?.username || 'Unknown'}
-                              </span>
-                              {rating?.emoji ? (
-                                <EmojiRatingDisplay
-                                  rating={{
-                                    emoji: rating.emoji,
-                                    value: rating.value || 0,
-                                    count: 1,
-                                  }}
-                                  showScale={false}
-                                />
-                              ) : (
-                                <div className="flex items-center gap-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-muted-foreground mb-1 text-sm">
-                              on "{rating.vibe.title}"
-                            </p>
-                            {rating?.review && (
-                              <p className="text-muted-foreground text-sm">
-                                {rating.review}
-                              </p>
-                            )}
-                            <p className="text-muted-foreground mt-1 text-xs">
-                              {rating?.createdAt
-                                ? new Date(
-                                    rating.createdAt
-                                  ).toLocaleDateString()
-                                : ''}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      {receivedRatings.length > 5 && (
-                        <p className="text-muted-foreground text-center text-sm">
-                          and {receivedRatings.length - 5} more...
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="py-8 text-center">
-                      <p className="text-muted-foreground">
-                        {user.username} hasn't received any reviews yet.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="activity" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>
-                  Latest actions and interactions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="py-8 text-center">
-                  <p className="text-muted-foreground">
-                    Activity feed coming soon...
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="about" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>About {displayName}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {user.bio && (
-                  <div>
-                    <h3 className="mb-2 font-semibold">Bio</h3>
-                    <p className="text-muted-foreground">{user.bio}</p>
-                  </div>
-                )}
-
-                {user.interests && user.interests.length > 0 && (
-                  <div>
-                    <h3 className="mb-2 font-semibold">Interests</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {user.interests.map((interest) => (
-                        <Badge key={interest} variant="secondary">
-                          {interest}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Stats</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-2xl font-bold">{vibeCount}</p>
-                      <p className="text-muted-foreground text-sm">
-                        Vibes Created
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">{givenRatingsCount}</p>
-                      <p className="text-muted-foreground text-sm">
-                        Reviews Given
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {receivedRatingsCount}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        Reviews Received
-                      </p>
+                    <div className="rounded-full border border-white/20 bg-white/15 px-3 py-1.5 backdrop-blur">
+                      <div className="flex items-center gap-2 text-white">
+                        <Heart className="h-3.5 w-3.5" />
+                        <span className="text-xs font-bold">{vibeCount}</span>
+                        <span className="text-xs font-medium">vibes</span>
+                      </div>
                     </div>
                     {averageReceivedRating > 0 && (
-                      <div>
-                        <p className="flex items-center gap-1 text-2xl font-bold">
-                          <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-                          {averageReceivedRating.toFixed(1)}
-                        </p>
-                        <p className="text-muted-foreground text-sm">
-                          Average Rating
-                        </p>
+                      <div className="rounded-full border border-white/20 bg-white/15 px-3 py-1.5 backdrop-blur">
+                        <div className="flex items-center gap-2 text-white">
+                          <Star className="h-3.5 w-3.5 fill-yellow-300 text-yellow-300" />
+                          <span className="text-xs font-bold">
+                            {averageReceivedRating.toFixed(1)}
+                          </span>
+                          <span className="text-xs font-medium">
+                            ({receivedRatingsCount} reviews)
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
+
+                  {/* Social Links */}
+                  {user.socials && (
+                    <div className="flex gap-3">
+                      {user.socials.twitter && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="border-white/20 bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20"
+                        >
+                          <a
+                            href={`https://twitter.com/${user.socials.twitter}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Twitter className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                      {user.socials.instagram && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="border-white/20 bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20"
+                        >
+                          <a
+                            href={`https://instagram.com/${user.socials.instagram}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Instagram className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                      {user.socials.website && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="border-white/20 bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20"
+                        >
+                          <a
+                            href={user.socials.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Globe className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Modern Navigation */}
+          <Tabs defaultValue="vibes" className="w-full">
+            <div className="mt-12 mb-8 flex justify-center">
+              <TabsList className="bg-background/60 rounded-2xl border-0 p-1.5 shadow-2xl backdrop-blur-md">
+                <TabsTrigger
+                  value="vibes"
+                  className={`rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:${themeClasses.button} hover:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-lg`}
+                >
+                  <Heart className="mr-2 h-4 w-4" />
+                  vibes
+                </TabsTrigger>
+                <TabsTrigger
+                  value="reviews"
+                  className={`rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:${themeClasses.button} hover:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-lg`}
+                >
+                  <Star className="mr-2 h-4 w-4" />
+                  reviews
+                </TabsTrigger>
+                <TabsTrigger
+                  value="about"
+                  className={`rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:${themeClasses.button} hover:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-lg`}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  about
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Vibes Tab */}
+            <TabsContent value="vibes" className="mt-8 space-y-0">
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h2
+                    className={`mb-3 text-2xl font-bold ${themeClasses.text} lowercase`}
+                  >
+                    created vibes
+                  </h2>
+                  <p className="text-muted-foreground/80 text-base">
+                    {vibeCount}{' '}
+                    {vibeCount === 1 ? 'unique vibe' : 'unique vibes'} shared
+                    with the community
+                  </p>
                 </div>
 
                 <div>
-                  <h3 className="mb-2 font-semibold">Member Since</h3>
-                  <p className="text-muted-foreground">{joinDate}</p>
+                  <MasonryFeed
+                    vibes={userVibes || []}
+                    isLoading={vibesLoading}
+                    variant="category"
+                    ratingDisplayMode="most-rated"
+                    showLoadMoreTarget={false}
+                    emptyStateTitle="no vibes yet"
+                    emptyStateDescription={`${user.username} hasn't created any vibes yet. check back later for amazing content ✨`}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Reviews Tab */}
+            <TabsContent value="reviews" className="mt-8 space-y-0">
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h2
+                    className={`mb-3 text-2xl font-bold ${themeClasses.text} lowercase`}
+                  >
+                    review activity
+                  </h2>
+                  <p className="text-muted-foreground/80 text-base">
+                    community feedback and ratings
+                  </p>
                 </div>
 
-                {emojiStats && emojiStats.totalEmojiRatings > 0 && (
-                  <div>
-                    <h3 className="mb-2 font-semibold">Emoji Rating Style</h3>
-                    <div className="space-y-4">
-                      {emojiStats.mostUsedEmoji && (
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {/* Reviews Given */}
+                  <Card
+                    className={`${themeClasses.card} shadow-xl backdrop-blur-md`}
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`${themeClasses.button} rounded-lg p-2`}
+                        >
+                          <TrendingUp className="h-4 w-4 text-white" />
+                        </div>
                         <div>
-                          <p className="text-muted-foreground mb-2 text-sm">
-                            Most used emoji
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <span className="text-3xl">
-                              {emojiStats.mostUsedEmoji.emoji}
-                            </span>
-                            <div>
-                              <p className="text-sm font-medium">
-                                Used {emojiStats.mostUsedEmoji.count} times
-                              </p>
-                              <p className="text-muted-foreground text-xs">
-                                Average:{' '}
-                                {emojiStats.mostUsedEmoji.averageValue.toFixed(
-                                  1
-                                )}{' '}
-                                out of 5
-                              </p>
+                          <CardTitle
+                            className={`text-lg font-bold ${themeClasses.text} lowercase`}
+                          >
+                            reviews given
+                          </CardTitle>
+                          <CardDescription className="text-muted-foreground/80 text-sm">
+                            {givenRatingsCount} thoughtful{' '}
+                            {givenRatingsCount === 1 ? 'review' : 'reviews'}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {ratingsLoading ? (
+                        <div className="space-y-4">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                              <Skeleton className="h-12 w-12 rounded" />
+                              <div className="flex-1 space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-3/4" />
+                              </div>
                             </div>
-                          </div>
+                          ))}
+                        </div>
+                      ) : userRatings && userRatings.length > 0 ? (
+                        <div className="space-y-4">
+                          {userRatings.slice(0, 5).map((rating) => (
+                            <div
+                              key={rating?._id || Math.random()}
+                              className="rounded-lg border border-white/10 bg-white/5 p-4"
+                            >
+                              <div className="flex items-start gap-3">
+                                <img
+                                  src={rating?.vibe?.image || ''}
+                                  alt={rating?.vibe?.title || ''}
+                                  className="h-12 w-12 rounded-lg object-cover"
+                                />
+                                <div className="flex-1">
+                                  <div className="mb-1 flex items-center gap-2">
+                                    <h4 className="text-sm font-medium">
+                                      {rating?.vibe?.title || 'Unknown'}
+                                    </h4>
+                                    {rating?.emoji ? (
+                                      <EmojiRatingDisplay
+                                        rating={{
+                                          emoji: rating.emoji,
+                                          value: rating.value || 0,
+                                          count: 1,
+                                        }}
+                                        showScale={false}
+                                      />
+                                    ) : (
+                                      <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                          />
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {rating?.review && (
+                                    <p className="text-muted-foreground text-sm">
+                                      {rating.review}
+                                    </p>
+                                  )}
+                                  <p className="text-muted-foreground mt-1 text-xs">
+                                    {rating?.createdAt
+                                      ? new Date(
+                                          rating.createdAt
+                                        ).toLocaleDateString()
+                                      : ''}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          {userRatings.length > 5 && (
+                            <p className="text-muted-foreground text-center text-sm">
+                              and {userRatings.length - 5} more reviews...
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center">
+                          <div className="mb-4 text-4xl opacity-50">💭</div>
+                          <p className="text-muted-foreground/80">
+                            no reviews given yet
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Reviews Received */}
+                  <Card
+                    className={`${themeClasses.card} shadow-xl backdrop-blur-md`}
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`${themeClasses.button} rounded-lg p-2`}
+                        >
+                          <Star className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle
+                            className={`text-lg font-bold ${themeClasses.text} lowercase`}
+                          >
+                            reviews received
+                          </CardTitle>
+                          <CardDescription className="text-muted-foreground/80 text-sm">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span>
+                                {receivedRatingsCount} community{' '}
+                                {receivedRatingsCount === 1
+                                  ? 'review'
+                                  : 'reviews'}
+                              </span>
+                              {averageReceivedRating > 0 && (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-yellow-400/30 bg-yellow-400/20 px-2 py-1 text-xs font-medium">
+                                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                  <span className="text-yellow-600">
+                                    {averageReceivedRating.toFixed(1)} avg
+                                  </span>
+                                </span>
+                              )}
+                            </div>
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {receivedRatingsLoading ? (
+                        <div className="space-y-4">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                              <Skeleton className="h-8 w-8 rounded-full" />
+                              <div className="flex-1 space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-3/4" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : receivedRatings && receivedRatings.length > 0 ? (
+                        <div className="space-y-4">
+                          {receivedRatings.slice(0, 5).map((rating) => (
+                            <div
+                              key={rating?._id || Math.random()}
+                              className="rounded-lg border border-white/10 bg-white/5 p-4"
+                            >
+                              <div className="flex items-start gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={rating.rater?.image_url} />
+                                  <AvatarFallback>
+                                    {rating.rater?.username?.[0] || '?'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="mb-1 flex items-center gap-2">
+                                    <span className="text-sm font-medium">
+                                      {rating.rater?.username || 'Unknown'}
+                                    </span>
+                                    {rating?.emoji ? (
+                                      <EmojiRatingDisplay
+                                        rating={{
+                                          emoji: rating.emoji,
+                                          value: rating.value || 0,
+                                          count: 1,
+                                        }}
+                                        showScale={false}
+                                      />
+                                    ) : (
+                                      <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                          />
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <p className="text-muted-foreground mb-1 text-sm">
+                                    on "{rating.vibe.title}"
+                                  </p>
+                                  {rating?.review && (
+                                    <p className="text-muted-foreground text-sm">
+                                      {rating.review}
+                                    </p>
+                                  )}
+                                  <p className="text-muted-foreground mt-1 text-xs">
+                                    {rating?.createdAt
+                                      ? new Date(
+                                          rating.createdAt
+                                        ).toLocaleDateString()
+                                      : ''}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          {receivedRatings.length > 5 && (
+                            <p className="text-muted-foreground text-center text-sm">
+                              and {receivedRatings.length - 5} more reviews...
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center">
+                          <div className="mb-4 text-4xl opacity-50">⭐</div>
+                          <p className="text-muted-foreground/80">
+                            no reviews received yet
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* About Tab */}
+            <TabsContent value="about" className="mt-8 space-y-0">
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h2
+                    className={`mb-3 text-2xl font-bold ${themeClasses.text} lowercase`}
+                  >
+                    about {displayName.toLowerCase()}
+                  </h2>
+                  <p className="text-muted-foreground/80 text-base">
+                    community presence and personality insights
+                  </p>
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-3">
+                  {/* Profile Details */}
+                  <Card
+                    className={`${themeClasses.card} shadow-xl backdrop-blur-md`}
+                  >
+                    <CardContent className="space-y-6 p-6">
+                      {user.bio && (
+                        <div>
+                          <h3
+                            className={`mb-3 text-base font-semibold ${themeClasses.text} lowercase`}
+                          >
+                            bio
+                          </h3>
+                          <p className="text-muted-foreground leading-relaxed">
+                            {user.bio}
+                          </p>
                         </div>
                       )}
 
-                      {emojiStats.highestRatedEmoji &&
-                        emojiStats.highestRatedEmoji.emoji !==
-                          emojiStats.mostUsedEmoji?.emoji && (
-                          <div>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                              Highest rated emoji
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <span className="text-3xl">
-                                {emojiStats.highestRatedEmoji.emoji}
-                              </span>
-                              <div>
-                                <p className="text-sm font-medium">
-                                  Average:{' '}
-                                  {emojiStats.highestRatedEmoji.averageValue.toFixed(
-                                    1
-                                  )}{' '}
-                                  out of 5
-                                </p>
-                                <p className="text-muted-foreground text-xs">
-                                  Used {emojiStats.highestRatedEmoji.count}{' '}
-                                  times
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                      {emojiStats.topEmojis.length > 0 && (
+                      {user.interests && user.interests.length > 0 && (
                         <div>
-                          <p className="text-muted-foreground mb-2 text-sm">
-                            Top emoji ratings
-                          </p>
+                          <h3
+                            className={`mb-3 text-base font-semibold ${themeClasses.text} lowercase`}
+                          >
+                            interests
+                          </h3>
                           <div className="flex flex-wrap gap-2">
-                            {emojiStats.topEmojis.map((stat) => (
-                              <div
-                                key={stat.emoji}
-                                className="bg-secondary/50 flex items-center gap-1 rounded-full px-3 py-1"
+                            {user.interests.map((interest) => (
+                              <Badge
+                                key={interest}
+                                variant="secondary"
+                                className="themed-pills text-foreground"
                               >
-                                <span className="text-lg">{stat.emoji}</span>
-                                <span className="text-muted-foreground text-xs">
-                                  {stat.count}
-                                </span>
-                              </div>
+                                {interest}
+                              </Badge>
                             ))}
                           </div>
                         </div>
                       )}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+
+                      <div>
+                        <h3
+                          className={`mb-3 text-base font-semibold ${themeClasses.text} lowercase`}
+                        >
+                          member since
+                        </h3>
+                        <p className="text-muted-foreground">{joinDate}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Community Stats */}
+                  <Card
+                    className={`${themeClasses.card} shadow-xl backdrop-blur-md`}
+                  >
+                    <CardContent className="p-6">
+                      <h3
+                        className={`mb-4 text-base font-semibold ${themeClasses.text} lowercase`}
+                      >
+                        community impact
+                      </h3>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="text-center">
+                          <div
+                            className={`${themeClasses.pills} rounded-xl border border-white/10 p-3`}
+                          >
+                            <p
+                              className={`text-2xl font-bold ${themeClasses.text}`}
+                            >
+                              {vibeCount}
+                            </p>
+                            <p className="text-muted-foreground mt-1 text-sm lowercase">
+                              vibes created
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div
+                            className={`${themeClasses.pills} rounded-xl border border-white/10 p-3`}
+                          >
+                            <p
+                              className={`text-2xl font-bold ${themeClasses.text}`}
+                            >
+                              {givenRatingsCount}
+                            </p>
+                            <p className="text-muted-foreground mt-1 text-sm lowercase">
+                              reviews given
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div
+                            className={`${themeClasses.pills} rounded-xl border border-white/10 p-3`}
+                          >
+                            <p
+                              className={`text-2xl font-bold ${themeClasses.text}`}
+                            >
+                              {receivedRatingsCount}
+                            </p>
+                            <p className="text-muted-foreground mt-1 text-sm lowercase">
+                              reviews received
+                            </p>
+                          </div>
+                        </div>
+                        {averageReceivedRating > 0 && (
+                          <div className="text-center">
+                            <div
+                              className={`${themeClasses.pills} rounded-xl border border-white/10 p-3`}
+                            >
+                              <div className="flex items-center justify-center gap-1 text-2xl font-bold">
+                                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                                <span className={`${themeClasses.text}`}>
+                                  {averageReceivedRating.toFixed(1)}
+                                </span>
+                              </div>
+                              <p className="text-muted-foreground mt-1 text-sm lowercase">
+                                average rating
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Emoji Personality */}
+                  {emojiStats && emojiStats.totalEmojiRatings > 0 && (
+                    <Card
+                      className={`${themeClasses.card} shadow-xl backdrop-blur-md`}
+                    >
+                      <CardContent className="p-6">
+                        <h3
+                          className={`mb-4 text-base font-semibold ${themeClasses.text} lowercase`}
+                        >
+                          emoji personality
+                        </h3>
+                        <div className="space-y-4">
+                          {emojiStats.mostUsedEmoji && (
+                            <div className="text-center">
+                              <p className="text-muted-foreground mb-2 text-xs lowercase">
+                                signature emoji
+                              </p>
+                              <div
+                                className={`${themeClasses.pills} rounded-xl border border-white/10 p-4`}
+                              >
+                                <span className="mb-2 block text-3xl">
+                                  {emojiStats.mostUsedEmoji.emoji}
+                                </span>
+                                <p className="text-xs font-medium">
+                                  used {emojiStats.mostUsedEmoji.count} times
+                                </p>
+                                <p className="text-muted-foreground text-xs">
+                                  {emojiStats.mostUsedEmoji.averageValue.toFixed(
+                                    1
+                                  )}
+                                  /5 average
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {emojiStats.topEmojis.length > 0 && (
+                            <div>
+                              <p className="text-muted-foreground mb-2 text-center text-xs lowercase">
+                                emoji collection
+                              </p>
+                              <div className="flex flex-wrap justify-center gap-2">
+                                {emojiStats.topEmojis
+                                  .slice(0, 6)
+                                  .map((stat) => (
+                                    <div
+                                      key={stat.emoji}
+                                      className={`${themeClasses.pills} flex items-center gap-1 rounded-full border border-white/10 px-2 py-1`}
+                                    >
+                                      <span className="text-sm">
+                                        {stat.emoji}
+                                      </span>
+                                      <span className="text-muted-foreground text-xs font-medium">
+                                        {stat.count}
+                                      </span>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
@@ -583,32 +792,48 @@ function UserProfile() {
 
 function UserProfileSkeleton() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mx-auto max-w-4xl">
-        <Card className="mb-8">
-          <CardContent className="p-8">
-            <div className="flex flex-col gap-8 md:flex-row">
+    <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/20">
+      <div className="container mx-auto space-y-6 px-4 py-6">
+        <div className="mx-auto max-w-5xl">
+          {/* Hero Skeleton */}
+          <div className="bg-background/50 relative overflow-hidden rounded-2xl border border-white/10 p-6 backdrop-blur sm:p-8">
+            <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:gap-8 sm:text-left">
               <div className="flex-shrink-0">
-                <Skeleton className="h-32 w-32 rounded-full" />
+                <Skeleton className="h-28 w-28 rounded-full sm:h-32 sm:w-32" />
               </div>
               <div className="flex-1 space-y-4">
                 <div>
-                  <Skeleton className="h-8 w-48" />
-                  <Skeleton className="mt-2 h-6 w-32" />
+                  <Skeleton className="h-6 w-48 sm:h-8" />
+                  <Skeleton className="mt-2 h-4 w-32 sm:h-5" />
                 </div>
-                <Skeleton className="h-4 w-96" />
-                <div className="flex gap-6">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-3 w-full max-w-md" />
+                <div className="flex flex-wrap gap-3">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-28" />
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <div className="space-y-6">
-          <Skeleton className="h-10 w-full" />
-          <VibeGridSkeleton count={6} />
+          {/* Tabs Skeleton */}
+          <div className="flex justify-center">
+            <Skeleton className="h-10 w-64 rounded-xl" />
+          </div>
+
+          {/* Content Skeleton */}
+          <div className="space-y-4">
+            <div className="text-center">
+              <Skeleton className="mx-auto h-6 w-32" />
+              <Skeleton className="mx-auto mt-2 h-3 w-48" />
+            </div>
+            <MasonryFeed
+              vibes={[]}
+              isLoading={true}
+              variant="category"
+              showLoadMoreTarget={false}
+            />
+          </div>
         </div>
       </div>
     </div>

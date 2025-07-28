@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
@@ -28,17 +29,45 @@ import { EmojiRatingDisplayPopover } from '@/components/emoji-rating-display-pop
 import { EmojiRatingCycleDisplay } from '@/components/emoji-rating-cycle-display';
 import { EmojiReactions } from '@/components/emoji-reaction';
 
+type VibeCardVariant =
+  | 'default'
+  | 'compact'
+  | 'feed-grid'
+  | 'feed-masonry'
+  | 'feed-single';
+
 interface VibeCardProps {
   vibe: Vibe;
-  compact?: boolean;
+  variant?: VibeCardVariant;
   ratingDisplayMode?: RatingDisplayMode;
+  className?: string;
+  // Legacy props for backward compatibility
+  compact?: boolean;
+  layout?: 'masonry' | 'grid' | 'single';
 }
 
 export function VibeCard({
   vibe,
-  compact,
+  variant = 'default',
   ratingDisplayMode = 'most-rated',
+  className,
+  // Legacy prop support
+  compact,
+  layout,
 }: VibeCardProps) {
+  // Determine final variant based on new and legacy props
+  const finalVariant = React.useMemo(() => {
+    // If new variant prop is provided, use it
+    if (variant !== 'default') return variant;
+
+    // Handle legacy props
+    if (compact) return 'compact';
+    if (layout === 'masonry') return 'feed-masonry';
+    if (layout === 'grid') return 'feed-grid';
+    if (layout === 'single') return 'feed-single';
+
+    return 'default';
+  }, [variant, compact, layout]);
   const [imageError, setImageError] = React.useState(false);
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
@@ -56,12 +85,20 @@ export function VibeCard({
   const quickReactMutation = useQuickReactMutation();
   const { data: emojiMetadataArray } = useEmojiMetadata();
 
-  // Fetch emoji rating data
-  const { data: topEmojiRatings } = useTopEmojiRatings(vibe.id, 5);
-  const { data: mostInteractedEmojiData } = useMostInteractedEmoji(vibe.id);
+  // Fetch emoji rating data - get all unique emoji reactions for this vibe
+  const { data: topEmojiRatings, isLoading: isTopEmojiRatingsLoading } =
+    useTopEmojiRatings(vibe.id, 20);
+  const {
+    data: mostInteractedEmojiData,
+    isLoading: isMostInteractedEmojiLoading,
+  } = useMostInteractedEmoji(vibe.id);
 
   // Determine if we should use a placeholder
   const usePlaceholder = !vibe.image || imageError;
+
+  // Determine if ratings are loading
+  const isRatingsLoading =
+    isTopEmojiRatingsLoading || isMostInteractedEmojiLoading;
 
   // Transform backend emoji ratings to display format
   const emojiRatings = React.useMemo(() => {
@@ -113,13 +150,27 @@ export function VibeCard({
       return [];
     }
 
-    // Get top 3 emojis for reactions display
-    return topEmojiRatings.slice(0, 3).map((rating) => ({
+    // Determine max reactions based on variant
+    const maxReactions = (() => {
+      switch (finalVariant) {
+        case 'compact':
+          return 6;
+        case 'feed-masonry':
+        case 'feed-single':
+          return 12;
+        case 'feed-grid':
+          return 8;
+        default:
+          return 10;
+      }
+    })();
+
+    return topEmojiRatings.slice(0, maxReactions).map((rating) => ({
       emoji: rating.emoji,
       count: rating.count,
       users: [], // We don't track individual users in the new system
     }));
-  }, [topEmojiRatings]);
+  }, [topEmojiRatings, finalVariant]);
 
   // Convert emoji metadata array to record for easier lookup
   const emojiMetadataRecord = React.useMemo(() => {
@@ -202,12 +253,37 @@ export function VibeCard({
     }
   };
 
+  // Skeleton component for rating section
+  const RatingSkeleton = () => (
+    <div className="w-full space-y-3">
+      {/* Primary rating display skeleton */}
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </div>
+
+      {/* Emoji reactions skeleton */}
+      <div className="flex flex-wrap gap-1">
+        {Array.from({ length: finalVariant === 'compact' ? 4 : 6 }).map(
+          (_, i) => (
+            <Skeleton key={i} className="h-6 w-12 rounded-full" />
+          )
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <Card
         className={cn(
           'relative overflow-hidden transition-all duration-200 hover:shadow-md',
-          !compact && 'h-full'
+          'h-full',
+          finalVariant === 'feed-masonry' && 'break-inside-avoid',
+          className
         )}
       >
         {/* Avatar positioned absolutely in upper left corner */}
@@ -241,7 +317,9 @@ export function VibeCard({
                   <span
                     className={cn(
                       'bg-background/50 rounded-full px-2 py-1 text-xs font-medium shadow-md backdrop-blur-sm',
-                      'animate-in fade-in slide-in-from-left-2 duration-200'
+                      finalVariant.startsWith('feed-')
+                        ? 'animate-fade-in-down'
+                        : 'animate-in fade-in slide-in-from-left-2 duration-200'
                     )}
                   >
                     {computeUserDisplayName(vibe.createdBy)}
@@ -276,7 +354,31 @@ export function VibeCard({
               <div
                 className={cn(
                   'relative overflow-hidden',
-                  compact ? 'aspect-[4/3]' : 'aspect-video'
+                  // Dynamic aspect ratio based on variant and image presence
+                  usePlaceholder
+                    ? (() => {
+                        switch (finalVariant) {
+                          case 'feed-masonry':
+                            return 'aspect-[4/3]';
+                          case 'compact':
+                            return 'aspect-[4/3]';
+                          default:
+                            return 'aspect-video';
+                        }
+                      })()
+                    : (() => {
+                        switch (finalVariant) {
+                          case 'feed-single':
+                            return 'aspect-video';
+                          case 'feed-masonry':
+                          case 'feed-grid':
+                            return 'aspect-[3/4]';
+                          case 'compact':
+                            return 'aspect-[4/3]';
+                          default:
+                            return 'aspect-video';
+                        }
+                      })()
                 )}
               >
                 {usePlaceholder ? (
@@ -292,18 +394,47 @@ export function VibeCard({
               </div>
             </div>
 
-            <CardContent className={cn('p-4', compact && 'p-3')}>
+            <CardContent
+              className={cn('p-4', finalVariant === 'compact' && 'p-3')}
+            >
               <h3
                 className={cn(
-                  'line-clamp-1 font-bold',
-                  compact ? 'text-base' : 'text-lg'
+                  'leading-tight font-bold',
+                  (() => {
+                    switch (finalVariant) {
+                      case 'feed-masonry':
+                      case 'feed-single':
+                        return 'line-clamp-3 text-lg';
+                      case 'feed-grid':
+                        return 'line-clamp-2 text-base';
+                      case 'compact':
+                        return 'line-clamp-1 text-base';
+                      default:
+                        return 'line-clamp-1 text-lg';
+                    }
+                  })()
                 )}
               >
                 {vibe.title}
               </h3>
 
-              {!compact && (
-                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
+              {finalVariant !== 'compact' && (
+                <p
+                  className={cn(
+                    'text-muted-foreground mt-2 text-sm leading-relaxed',
+                    (() => {
+                      switch (finalVariant) {
+                        case 'feed-masonry':
+                        case 'feed-single':
+                          return 'line-clamp-5';
+                        case 'feed-grid':
+                          return 'line-clamp-3';
+                        default:
+                          return 'line-clamp-2';
+                      }
+                    })()
+                  )}
+                >
                   {vibe.description}
                 </p>
               )}
@@ -313,50 +444,58 @@ export function VibeCard({
           <CardFooter
             className={cn(
               'flex flex-col items-start gap-3 p-4 pt-0',
-              compact && 'p-3 pt-0'
+              finalVariant === 'compact' && 'p-3 pt-0'
             )}
           >
-            {/* Emoji Rating Display - Show cycling display if no ratings yet */}
-            <div className="w-full">
-              {primaryEmojiRating ? (
-                <EmojiRatingDisplayPopover
-                  rating={primaryEmojiRating}
-                  allRatings={emojiRatings}
-                  onEmojiClick={handleEmojiRatingClick}
-                  vibeId={vibe.id}
-                />
-              ) : (
-                <EmojiRatingCycleDisplay
-                  onSubmit={handleEmojiRating}
-                  isSubmitting={createEmojiRatingMutation.isPending}
-                  vibeTitle={vibe.title}
-                  emojiMetadata={emojiMetadataRecord}
-                />
-              )}
-            </div>
+            {/* Show skeleton while ratings are loading */}
+            {isRatingsLoading ? (
+              <RatingSkeleton />
+            ) : (
+              <>
+                {/* Emoji Rating Display - Show cycling display if no ratings yet */}
+                <div className="w-full">
+                  {primaryEmojiRating ? (
+                    <EmojiRatingDisplayPopover
+                      rating={primaryEmojiRating}
+                      allRatings={emojiRatings}
+                      onEmojiClick={handleEmojiRatingClick}
+                      vibeId={vibe.id}
+                    />
+                  ) : (
+                    <EmojiRatingCycleDisplay
+                      onSubmit={handleEmojiRating}
+                      isSubmitting={createEmojiRatingMutation.isPending}
+                      vibeTitle={vibe.title}
+                      emojiMetadata={emojiMetadataRecord}
+                    />
+                  )}
+                </div>
 
-            {/* Emoji Reactions or "Be the first to rate" CTA */}
-            <div className="w-full">
-              {emojiReactions.length > 0 ? (
-                <EmojiReactions
-                  reactions={emojiReactions}
-                  onReact={handleQuickReact}
-                  showAddButton={true}
-                  ratingMode={true}
-                  onRatingSubmit={handleEmojiRating}
-                  vibeTitle={vibe.title}
-                  vibeId={vibe.id}
-                />
-              ) : (
-                <button
-                  onClick={() => handleEmojiRatingClick('')}
-                  className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs font-medium transition-colors"
-                >
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  be the first to rate
-                </button>
-              )}
-            </div>
+                {/* Emoji Reactions or "Be the first to rate" CTA */}
+                <div className="w-full min-w-0 overflow-hidden">
+                  {emojiReactions.length > 0 ? (
+                    <EmojiReactions
+                      reactions={emojiReactions}
+                      onReact={handleQuickReact}
+                      showAddButton={true}
+                      ratingMode={true}
+                      onRatingSubmit={handleEmojiRating}
+                      vibeTitle={vibe.title}
+                      vibeId={vibe.id}
+                      className="min-w-0"
+                    />
+                  ) : (
+                    <button
+                      onClick={() => handleEmojiRatingClick('')}
+                      className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs font-medium transition-colors"
+                    >
+                      <PlusCircle className="h-3.5 w-3.5" />
+                      be the first to rate
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </CardFooter>
         </div>
       </Card>
@@ -399,4 +538,16 @@ export function VibeCard({
       />
     </>
   );
+}
+
+// Legacy export for backward compatibility
+export interface FeedVibeCardProps {
+  vibe: Vibe;
+  layout?: 'masonry' | 'grid' | 'single';
+  ratingDisplayMode?: RatingDisplayMode;
+  className?: string;
+}
+
+export function FeedVibeCard(props: FeedVibeCardProps) {
+  return <VibeCard {...props} />;
 }

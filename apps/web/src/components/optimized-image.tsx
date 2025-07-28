@@ -6,7 +6,7 @@ import {
   generateResponsiveSizes,
   getOptimalImageFormat,
   getOptimalImageQuality,
-  createIntersectionObserver
+  createIntersectionObserver,
 } from '@/lib/asset-optimization';
 
 /**
@@ -83,7 +83,7 @@ export function OptimizedImage({
   const shouldLoad = priority || isInView;
 
   return (
-    <div 
+    <div
       className={cn('relative overflow-hidden', className)}
       style={{ width, height }}
     >
@@ -91,7 +91,7 @@ export function OptimizedImage({
       <div
         ref={placeholderRef}
         className={cn(
-          'absolute inset-0 bg-muted transition-opacity duration-300',
+          'bg-muted absolute inset-0 transition-opacity duration-300',
           isLoaded ? 'opacity-0' : 'opacity-100'
         )}
         aria-hidden="true"
@@ -100,7 +100,7 @@ export function OptimizedImage({
         <div className="flex h-full w-full items-center justify-center">
           <div className="animate-pulse">
             <svg
-              className="h-8 w-8 text-muted-foreground/30"
+              className="text-muted-foreground/30 h-8 w-8"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -123,14 +123,14 @@ export function OptimizedImage({
             type="image/avif"
             sizes={responsiveSizes}
           />
-          
+
           {/* WebP source */}
           <source
             srcSet={optimizedUrls.webp}
             type="image/webp"
             sizes={responsiveSizes}
           />
-          
+
           {/* Fallback */}
           <img
             ref={imgRef}
@@ -153,10 +153,10 @@ export function OptimizedImage({
 
       {/* Error fallback */}
       {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted">
+        <div className="bg-muted absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <svg
-              className="mx-auto h-8 w-8 text-muted-foreground/50"
+              className="text-muted-foreground/50 mx-auto h-8 w-8"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -168,7 +168,7 @@ export function OptimizedImage({
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
-            <p className="mt-2 text-xs text-muted-foreground">Failed to load</p>
+            <p className="text-muted-foreground mt-2 text-xs">Failed to load</p>
           </div>
         </div>
       )}
@@ -196,14 +196,14 @@ export function OptimizedAvatar({
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
     lg: 'h-12 w-12',
-    xl: 'h-16 w-16'
+    xl: 'h-16 w-16',
   };
 
   const sizePixels = {
     sm: 32,
     md: 40,
     lg: 48,
-    xl: 64
+    xl: 64,
   };
 
   return (
@@ -212,11 +212,7 @@ export function OptimizedAvatar({
       alt={alt}
       width={sizePixels[size]}
       height={sizePixels[size]}
-      className={cn(
-        'rounded-full',
-        sizeClasses[size],
-        className
-      )}
+      className={cn('rounded-full', sizeClasses[size], className)}
       quality={70} // Lower quality for avatars
       {...props}
     />

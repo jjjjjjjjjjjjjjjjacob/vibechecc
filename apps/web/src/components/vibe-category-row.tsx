@@ -9,7 +9,7 @@ import type { Vibe } from '@/types';
 export type RatingDisplayMode = 'most-rated' | 'top-rated';
 
 interface VibeCategoryRowProps {
-  title: string;
+  title: string | React.ReactNode;
   vibes: Vibe[];
   priority?: boolean; // For prioritizing certain sections
   ratingDisplayMode?: RatingDisplayMode; // How to display emoji ratings in cards
@@ -55,7 +55,7 @@ export function VibeCategoryRow({
     checkScrollButtons();
   }, [vibes]);
 
-  if (vibes.length === 0) return null;
+  if (vibes?.length === 0 || !vibes) return null;
 
   return (
     <div
@@ -110,7 +110,7 @@ export function VibeCategoryRow({
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           onScroll={checkScrollButtons}
         >
-          {vibes.map((vibe, _index) => (
+          {vibes?.map((vibe, _index) => (
             <div
               key={vibe.id}
               className={cn(

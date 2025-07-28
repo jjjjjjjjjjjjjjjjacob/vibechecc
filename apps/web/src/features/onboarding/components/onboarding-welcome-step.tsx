@@ -31,7 +31,7 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
   return (
     <div className="space-y-8 text-center">
       {/* Hero Section */}
-      <div className="space-y-4 animate-fade-in-down">
+      <div className="animate-fade-in-down space-y-4">
         <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-orange-500">
           <Sparkles className="h-10 w-10 text-white" />
         </div>
@@ -45,8 +45,8 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
       </div>
 
       {/* Features Grid */}
-      <div 
-        className="grid gap-6 md:grid-cols-3 animate-fade-in-down opacity-0"
+      <div
+        className="animate-fade-in-down grid gap-6 opacity-0 md:grid-cols-3"
         style={{ animation: 'fade-in-down 0.5s ease-out 0.2s forwards' }}
       >
         {features.map((feature, index) => (
@@ -68,8 +68,8 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
       </div>
 
       {/* Call to Action */}
-      <div 
-        className="space-y-4 animate-fade-in-down opacity-0"
+      <div
+        className="animate-fade-in-down space-y-4 opacity-0"
         style={{ animation: 'fade-in-down 0.5s ease-out 0.4s forwards' }}
       >
         <p className="text-muted-foreground">

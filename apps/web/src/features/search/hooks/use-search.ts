@@ -6,6 +6,32 @@ import type { SearchFilters } from '@viberater/types';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUser } from '@clerk/tanstack-react-start';
 
+// Valid sort options for Convex search
+const VALID_CONVEX_SORT_OPTIONS = [
+  'relevance',
+  'rating_desc',
+  'rating_asc',
+  'recent',
+  'oldest',
+] as const;
+
+// Helper to filter SearchFilters to only include Convex-compatible options
+function filterForConvex(filters?: SearchFilters): typeof filters {
+  if (!filters) return filters;
+
+  const convexFilters = { ...filters };
+
+  // Filter out unsupported sort options
+  if (
+    convexFilters.sort &&
+    !VALID_CONVEX_SORT_OPTIONS.includes(convexFilters.sort as any)
+  ) {
+    delete convexFilters.sort;
+  }
+
+  return convexFilters as typeof filters;
+}
+
 interface UseSearchOptions {
   debounceMs?: number;
   limit?: number;
@@ -22,7 +48,7 @@ export function useSearch(options: UseSearchOptions = {}) {
   const searchQuery = useQuery({
     ...convexQuery(api.search.searchAll, {
       query: debouncedQuery,
-      filters,
+      filters: filterForConvex(filters),
       limit,
     }),
     enabled: debouncedQuery.trim().length > 0,

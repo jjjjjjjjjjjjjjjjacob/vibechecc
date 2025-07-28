@@ -17,9 +17,16 @@ export function useVibes() {
 }
 
 // Query to get paginated vibes with full details
-export function useVibesPaginated(limit?: number, cursor?: string) {
+export function useVibesPaginated(
+  limit?: number,
+  options?: { enabled?: boolean; cursor?: string }
+) {
   return useQuery({
-    ...convexQuery(api.vibes.getAll, { limit, cursor }),
+    ...convexQuery(api.vibes.getAll, {
+      limit,
+      cursor: options?.cursor,
+    }),
+    enabled: options?.enabled !== false,
   });
 }
 
@@ -192,9 +199,31 @@ export function useAllTags() {
 }
 
 // Query to get top-rated vibes
-export function useTopRatedVibes(limit?: number) {
+export function useTopRatedVibes(
+  limit?: number,
+  options?: { enabled?: boolean; cursor?: string }
+) {
   return useQuery({
-    ...convexQuery(api.vibes.getTopRated, { limit }),
+    ...convexQuery(api.vibes.getTopRated, {
+      limit,
+      cursor: options?.cursor,
+    }),
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Query to get personalized vibes for a user (based on their interactions)
+export function usePersonalizedVibes(
+  userId?: string,
+  options?: { enabled?: boolean; cursor?: string; limit?: number }
+) {
+  return useQuery({
+    // For now, fall back to top-rated vibes - this will be enhanced with a proper recommendation algorithm
+    ...convexQuery(api.vibes.getTopRated, {
+      limit: options?.limit || 20,
+      cursor: options?.cursor,
+    }),
+    enabled: options?.enabled !== false && !!userId,
   });
 }
 

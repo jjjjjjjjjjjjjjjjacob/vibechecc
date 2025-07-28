@@ -92,11 +92,11 @@ export function loadExtendedEmojiFont() {
 
 // Connection-aware loading
 export function getConnectionSpeed(): 'slow' | 'fast' {
-  // @ts-ignore - Navigator.connection is experimental
+  // Navigator.connection is experimental - use type assertion for compatibility
   const connection =
-    navigator.connection ||
-    navigator.mozConnection ||
-    navigator.webkitConnection;
+    (navigator as any).connection ||
+    (navigator as any).mozConnection ||
+    (navigator as any).webkitConnection;
 
   if (!connection) return 'fast';
 

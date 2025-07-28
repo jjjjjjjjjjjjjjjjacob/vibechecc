@@ -4,11 +4,11 @@
  */
 
 import { getAuth } from '@clerk/tanstack-react-start/server';
-import { 
-  generateAuthCacheKey, 
-  getCachedAuth, 
-  setCachedAuth, 
-  getAuthTimeout 
+import {
+  generateAuthCacheKey,
+  getCachedAuth,
+  setCachedAuth,
+  getAuthTimeout,
 } from './ssr-auth-cache';
 
 export interface OptimizedAuthResult {
@@ -21,32 +21,34 @@ export interface OptimizedAuthResult {
 /**
  * Get auth with caching and mobile optimization
  */
-export async function getOptimizedAuth(request: Request): Promise<OptimizedAuthResult> {
+export async function getOptimizedAuth(
+  request: Request
+): Promise<OptimizedAuthResult> {
   const startTime = Date.now();
-  
+
   // Try cache first
   const cacheKey = generateAuthCacheKey(request);
   const cached = getCachedAuth(cacheKey);
-  
+
   if (cached) {
     return {
       userId: cached.userId,
       token: cached.token,
       fromCache: true,
-      computeTime: Date.now() - startTime
+      computeTime: Date.now() - startTime,
     };
   }
-  
+
   // Get connection-aware timeout
   const timeout = getAuthTimeout(request);
-  
+
   try {
     // Race auth computation against timeout
     const authResult = await Promise.race([
       getAuthWithTimeout(request, timeout),
-      createTimeoutPromise(timeout)
+      createTimeoutPromise(timeout),
     ]);
-    
+
     if (authResult === 'TIMEOUT') {
       // Return null auth on timeout, cache briefly
       setCachedAuth(cacheKey, null, null);
@@ -54,28 +56,27 @@ export async function getOptimizedAuth(request: Request): Promise<OptimizedAuthR
         userId: null,
         token: null,
         fromCache: false,
-        computeTime: timeout
+        computeTime: timeout,
       };
     }
-    
+
     // Cache successful result
     setCachedAuth(cacheKey, authResult.userId, authResult.token);
-    
+
     return {
       ...authResult,
       fromCache: false,
-      computeTime: Date.now() - startTime
+      computeTime: Date.now() - startTime,
     };
-    
   } catch (error) {
     // Cache failed auth briefly to prevent repeated attempts
     setCachedAuth(cacheKey, null, null);
-    
+
     return {
       userId: null,
       token: null,
       fromCache: false,
-      computeTime: Date.now() - startTime
+      computeTime: Date.now() - startTime,
     };
   }
 }
@@ -84,12 +85,12 @@ export async function getOptimizedAuth(request: Request): Promise<OptimizedAuthR
  * Get auth with timeout
  */
 async function getAuthWithTimeout(
-  request: Request, 
+  request: Request,
   timeoutMs: number
 ): Promise<{ userId: string | null; token: string | null }> {
   try {
     const authResult = await getAuth(request);
-    
+
     // Handle Clerk redirect responses during SSR
     if (
       authResult &&
@@ -99,9 +100,9 @@ async function getAuthWithTimeout(
     ) {
       return { userId: null, token: null };
     }
-    
+
     const auth = authResult;
-    
+
     // Validate auth object
     if (
       !auth ||
@@ -111,7 +112,7 @@ async function getAuthWithTimeout(
     ) {
       return { userId: null, token: null };
     }
-    
+
     // Get token with timeout
     let token = null;
     try {
@@ -120,9 +121,9 @@ async function getAuthWithTimeout(
         const tokenTimeout = Math.min(timeoutMs * 0.7, 2000);
         token = await Promise.race([
           auth.getToken({ template: 'convex' }),
-          createTimeoutPromise(tokenTimeout, 'TOKEN_TIMEOUT')
+          createTimeoutPromise(tokenTimeout, 'TOKEN_TIMEOUT'),
         ]);
-        
+
         if (token === 'TOKEN_TIMEOUT') {
           token = null;
         }
@@ -131,12 +132,11 @@ async function getAuthWithTimeout(
       // Token generation failed, continue with null token
       token = null;
     }
-    
+
     return {
       userId: auth.userId as string,
-      token
+      token,
     };
-    
   } catch (error) {
     // Handle Clerk redirect errors
     if (
@@ -147,7 +147,7 @@ async function getAuthWithTimeout(
     ) {
       return { userId: null, token: null };
     }
-    
+
     throw error;
   }
 }
@@ -155,7 +155,10 @@ async function getAuthWithTimeout(
 /**
  * Create a timeout promise
  */
-function createTimeoutPromise(ms: number, value: any = 'TIMEOUT'): Promise<any> {
+function createTimeoutPromise(
+  ms: number,
+  value: any = 'TIMEOUT'
+): Promise<any> {
   return new Promise((resolve) => {
     setTimeout(() => resolve(value), ms);
   });
@@ -168,25 +171,25 @@ function createTimeoutPromise(ms: number, value: any = 'TIMEOUT'): Promise<any> 
 export function getNonBlockingAuth(request: Request): OptimizedAuthResult {
   const cacheKey = generateAuthCacheKey(request);
   const cached = getCachedAuth(cacheKey);
-  
+
   if (cached) {
     return {
       userId: cached.userId,
       token: cached.token,
       fromCache: true,
-      computeTime: 0
+      computeTime: 0,
     };
   }
-  
+
   // Start async auth computation without blocking
   getOptimizedAuth(request).catch(() => {
     // Silently handle errors for non-blocking auth
   });
-  
+
   return {
     userId: null,
     token: null,
     fromCache: false,
-    computeTime: 0
+    computeTime: 0,
   };
 }
