@@ -68,7 +68,7 @@ export async function getOptimizedAuth(
       fromCache: false,
       computeTime: Date.now() - startTime,
     };
-  } catch (error) {
+  } catch {
     // Cache failed auth briefly to prevent repeated attempts
     setCachedAuth(cacheKey, null, null);
 

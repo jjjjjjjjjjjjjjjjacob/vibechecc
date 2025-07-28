@@ -28,11 +28,6 @@ import { MasonryFeed } from '@/components/masonry-feed';
 import { MobileFilterSheet } from '@/features/search/components/mobile-filter-sheet';
 import { cn } from '@/utils/tailwind-utils';
 import { useCurrentUser } from '@/queries';
-import {
-  getThemeGradientClasses,
-  applyUserTheme,
-  DEFAULT_USER_THEME,
-} from '@/utils/theme-colors';
 
 // Loading skeletons for code-split components
 function SearchResultsSkeleton() {
@@ -112,13 +107,6 @@ function SearchResultsPage() {
 
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
-  const userTheme = currentUser?.theme || DEFAULT_USER_THEME;
-  const themeClasses = getThemeGradientClasses();
-
-  // Apply theme on mount and when user changes
-  React.useEffect(() => {
-    applyUserTheme(userTheme);
-  }, [userTheme]);
 
   const filters = {
     tags,
@@ -181,7 +169,7 @@ function SearchResultsPage() {
           <h1
             className={cn(
               'mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl',
-              themeClasses.text
+              'bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent'
             )}
           >
             {q ? `search results for "${q}"` : 'search results'}
@@ -225,7 +213,7 @@ function SearchResultsPage() {
               <h2
                 className={cn(
                   'mb-6 font-semibold lowercase',
-                  themeClasses.text
+                  'bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent'
                 )}
               >
                 filter results
@@ -357,7 +345,7 @@ function SearchResultsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className={cn('w-full lowercase', themeClasses.button)}
+                    className="w-full lowercase bg-gradient-to-r from-theme-primary to-theme-secondary"
                     onClick={() => {
                       navigate({
                         search: {
@@ -477,7 +465,7 @@ function SearchResultsPage() {
                         tab === tabName
                           ? cn(
                               'border-none text-white shadow-lg',
-                              themeClasses.button
+                              'bg-gradient-to-r from-theme-primary to-theme-secondary'
                             )
                           : 'bg-background/90 border-[hsl(var(--theme-primary))]/20 text-[hsl(var(--theme-primary))] hover:bg-[hsl(var(--theme-primary))]/10'
                       )}

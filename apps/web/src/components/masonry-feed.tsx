@@ -30,7 +30,7 @@ export function MasonryFeed({
   onLoadMore,
   ratingDisplayMode = 'most-rated',
   variant = 'feed',
-  queriedEmojis,
+  queriedEmojis: _queriedEmojis,
   className,
   emptyStateTitle = 'no vibes found',
   emptyStateDescription = 'try adjusting your filters or check back later',

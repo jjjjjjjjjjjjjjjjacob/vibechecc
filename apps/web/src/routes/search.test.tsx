@@ -81,6 +81,7 @@ vi.mock('@/features/search/hooks/use-search-results', () => ({
 
 vi.mock('@/queries', () => ({
   useEmojiMetadata: () => ({ data: mockEmojiMetadata, isLoading: false }),
+  useCurrentUser: () => ({ data: null, isLoading: false }),
 }));
 
 // Mock components
@@ -96,7 +97,7 @@ vi.mock('@/features/search/components', () => ({
   }) => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error loading search results</div>;
-    if (!results || results.length === 0) return <div>No results found</div>;
+    if (!results || results.length === 0) return <div>no results found</div>;
 
     return (
       <div data-testid="search-results">
@@ -177,9 +178,9 @@ describe('Search Page - Emoji Filter Integration', () => {
     renderWithRouter({ q: 'test' });
 
     await waitFor(() => {
-      expect(screen.getByText('Search results for "test"')).toBeInTheDocument();
+      expect(screen.getByText('search results for "test"')).toBeInTheDocument();
       expect(screen.getByText('2 results found')).toBeInTheDocument();
-      expect(screen.getByText('Filter Results')).toBeInTheDocument();
+      expect(screen.getByText('filter results')).toBeInTheDocument();
     });
   });
 
@@ -187,7 +188,7 @@ describe('Search Page - Emoji Filter Integration', () => {
     renderWithRouter();
 
     await waitFor(() => {
-      expect(screen.getByText('Filter by Emoji')).toBeInTheDocument();
+      expect(screen.getByText('filter by emoji')).toBeInTheDocument();
     });
   });
 
@@ -211,7 +212,7 @@ describe('Search Page - Emoji Filter Integration', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Minimum Rating: 1')).toBeInTheDocument();
+      expect(screen.getByText('minimum emoji rating: 1')).toBeInTheDocument();
     });
 
     // Should have rating buttons 1-5
@@ -229,7 +230,7 @@ describe('Search Page - Emoji Filter Integration', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Active Filters')).toBeInTheDocument();
+      expect(screen.getByText('active filters')).toBeInTheDocument();
       expect(screen.getByText('Emoji: 4+ 🔥😍')).toBeInTheDocument();
       expect(screen.getByText('4+ rating')).toBeInTheDocument();
     });
@@ -243,7 +244,7 @@ describe('Search Page - Emoji Filter Integration', () => {
 
     // Should show the active filters
     await waitFor(() => {
-      expect(screen.getByText('Active Filters')).toBeInTheDocument();
+      expect(screen.getByText('active filters')).toBeInTheDocument();
       expect(screen.getByText('Emoji: 4+ 🔥')).toBeInTheDocument();
     });
   });
@@ -256,10 +257,10 @@ describe('Search Page - Emoji Filter Integration', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Clear All Filters')).toBeInTheDocument();
+      expect(screen.getByText('clear all filters')).toBeInTheDocument();
     });
 
-    const clearButton = screen.getByText('Clear All Filters');
+    const clearButton = screen.getByText('clear all filters');
     await user.click(clearButton);
 
     // Would trigger navigation to clear filters in real app
@@ -273,7 +274,7 @@ describe('Search Page - Emoji Filter Integration', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Active Filters')).toBeInTheDocument();
+      expect(screen.getByText('active filters')).toBeInTheDocument();
       expect(screen.getByText('Min rating: 4')).toBeInTheDocument();
       expect(screen.getByText('Emoji: 5+ 💯')).toBeInTheDocument();
     });
@@ -287,8 +288,8 @@ describe('Search Page - Emoji Filter Integration', () => {
 
     await waitFor(() => {
       // Should show both the emoji filter and sort option
-      expect(screen.getByText('Active Filters')).toBeInTheDocument();
-      expect(screen.getByText('Sort by:')).toBeInTheDocument();
+      expect(screen.getByText('active filters')).toBeInTheDocument();
+      expect(screen.getByText('sort by:')).toBeInTheDocument();
     });
 
     // The sort select should have the correct value
@@ -312,7 +313,7 @@ describe('Search Page - Emoji Filter Integration', () => {
     // The SearchResultsGrid component will handle the loading display
     await waitFor(() => {
       // Just verify the search structure is present, loading is handled by SearchResultsGrid
-      expect(screen.getByText('All Results')).toBeInTheDocument();
+      expect(screen.getByText('all')).toBeInTheDocument();
     });
   });
 
@@ -347,7 +348,7 @@ describe('Search Page - Emoji Filter Integration', () => {
     renderWithRouter({ q: 'nonexistent' });
 
     await waitFor(() => {
-      expect(screen.getByText('No results found')).toBeInTheDocument();
+      expect(screen.getByText('no results found')).toBeInTheDocument();
     });
   });
 

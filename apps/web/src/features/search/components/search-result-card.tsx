@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import {
   EmojiRatingDisplay,
@@ -11,11 +10,6 @@ import {
 import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
-import {
-  computeUserDisplayName,
-  getUserAvatarUrl,
-  getUserInitials,
-} from '@/utils/user-utils';
 import type {
   SearchResult,
   VibeSearchResult,
@@ -23,7 +17,6 @@ import type {
   TagSearchResult,
   ReviewSearchResult,
 } from '@viberater/types';
-import type { EmojiRating } from '@viberater/types';
 
 interface SearchResultCardProps {
   result: SearchResult;
@@ -104,7 +97,7 @@ function VibeResultCard({
       : 3;
 
   const displayRatings = prioritizedRatings.slice(0, maxRatingsToShow);
-  const hasMoreRatings = emojiRatings.length > maxRatingsToShow;
+  const _hasMoreRatings = emojiRatings.length > maxRatingsToShow;
 
   return (
     <Card className="relative h-full overflow-hidden transition-all duration-200 hover:shadow-md">

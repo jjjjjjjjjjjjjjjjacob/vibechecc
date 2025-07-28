@@ -718,7 +718,7 @@ export const searchAll = query({
           paginatedActions = [];
           paginatedReviews = reviews.slice(offset, offset + limit);
           break;
-        default:
+        default: {
           // Fallback to combined pagination
           totalCount =
             vibes.length +
@@ -742,19 +742,21 @@ export const searchAll = query({
           const paginatedResults = allResults.slice(offset, offset + limit);
           paginatedVibes = paginatedResults
             .filter((item) => item.resultType === 'vibe')
-            .map(({ resultType, ...item }) => item) as VibeSearchResult[];
+            .map(({ resultType: _, ...item }) => item) as VibeSearchResult[];
           paginatedUsers = paginatedResults
             .filter((item) => item.resultType === 'user')
-            .map(({ resultType, ...item }) => item) as UserSearchResult[];
+            .map(({ resultType: _, ...item }) => item) as UserSearchResult[];
           paginatedTags = paginatedResults
             .filter((item) => item.resultType === 'tag')
-            .map(({ resultType, ...item }) => item) as TagSearchResult[];
+            .map(({ resultType: _, ...item }) => item) as TagSearchResult[];
           paginatedActions = paginatedResults
             .filter((item) => item.resultType === 'action')
-            .map(({ resultType, ...item }) => item) as ActionSearchResult[];
+            .map(({ resultType: _, ...item }) => item) as ActionSearchResult[];
           paginatedReviews = paginatedResults
             .filter((item) => item.resultType === 'review')
-            .map(({ resultType, ...item }) => item) as ReviewSearchResult[];
+            .map(({ resultType: _, ...item }) => item) as ReviewSearchResult[];
+          break;
+        }
       }
     } else {
       // Multiple types or no filter - use combined pagination
@@ -774,19 +776,19 @@ export const searchAll = query({
       const paginatedResults = allResults.slice(offset, offset + limit);
       paginatedVibes = paginatedResults
         .filter((item) => item.resultType === 'vibe')
-        .map(({ resultType, ...item }) => item) as VibeSearchResult[];
+        .map(({ resultType: _, ...item }) => item) as VibeSearchResult[];
       paginatedUsers = paginatedResults
         .filter((item) => item.resultType === 'user')
-        .map(({ resultType, ...item }) => item) as UserSearchResult[];
+        .map(({ resultType: _, ...item }) => item) as UserSearchResult[];
       paginatedTags = paginatedResults
         .filter((item) => item.resultType === 'tag')
-        .map(({ resultType, ...item }) => item) as TagSearchResult[];
+        .map(({ resultType: _, ...item }) => item) as TagSearchResult[];
       paginatedActions = paginatedResults
         .filter((item) => item.resultType === 'action')
-        .map(({ resultType, ...item }) => item) as ActionSearchResult[];
+        .map(({ resultType: _, ...item }) => item) as ActionSearchResult[];
       paginatedReviews = paginatedResults
         .filter((item) => item.resultType === 'review')
-        .map(({ resultType, ...item }) => item) as ReviewSearchResult[];
+        .map(({ resultType: _, ...item }) => item) as ReviewSearchResult[];
     }
 
     // Note: Search metrics tracking would need to be handled in a separate mutation

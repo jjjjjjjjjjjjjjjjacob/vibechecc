@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { THEME_COLORS, type ThemeColor } from '@/utils/theme-colors';
 import { cn } from '@/utils/tailwind-utils';
@@ -58,7 +57,7 @@ function ThemeColorOption({
   isSelected,
   onSelect,
 }: ThemeColorOptionProps) {
-  const gradientClass = `bg-gradient-to-br ${theme.gradient.from} ${theme.gradient.to}`;
+  const gradientClass = `bg-gradient-to-br from-${theme.id}-500 to-${theme.id}-700`;
 
   return (
     <button

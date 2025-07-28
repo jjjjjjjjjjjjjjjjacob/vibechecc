@@ -4,13 +4,7 @@ import { HomeFeed } from '@/components/home-feed';
 import { CreateVibeButton } from '@/components/create-vibe-button';
 import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import { useCurrentUser } from '@/queries';
-import {
-  getThemeById,
-  injectUserThemeCSS,
-  getThemeGradientClasses,
-  DEFAULT_USER_THEME,
-  type UserTheme,
-} from '@/utils/theme-colors';
+import { useTheme } from '@/components/theme-provider';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -19,27 +13,25 @@ export const Route = createFileRoute('/')({
 function Home() {
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
-  const userTheme: UserTheme = {
-    primaryColor:
-      currentUser?.primaryColor ||
-      currentUser?.themeColor ||
-      DEFAULT_USER_THEME.primaryColor,
-    secondaryColor:
-      currentUser?.secondaryColor || DEFAULT_USER_THEME.secondaryColor,
-  };
-  const themeClasses = getThemeGradientClasses();
+  const { setColorTheme, setSecondaryColorTheme } = useTheme();
 
-  // Inject theme CSS when user theme changes
+  // Apply user's color themes when user data changes
   React.useEffect(() => {
-    injectUserThemeCSS(userTheme);
-  }, [userTheme]);
+    if (currentUser) {
+      const primaryColor = currentUser.primaryColor || currentUser.themeColor || 'pink';
+      const secondaryColor = currentUser.secondaryColor || 'orange';
+      
+      setColorTheme(`${primaryColor}-primary` as any);
+      setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
+    }
+  }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <section className="mb-12">
         <div
-          className={`rounded-2xl ${themeClasses.button} p-8 text-white md:p-12`}
+          className="rounded-2xl bg-gradient-to-r from-theme-primary to-theme-secondary p-8 text-white md:p-12"
         >
           <div className="max-w-2xl">
             <h1 className="mb-4 text-4xl font-bold lowercase md:text-5xl">

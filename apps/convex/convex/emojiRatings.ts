@@ -1,6 +1,5 @@
-import { query, mutation } from './_generated/server';
+import { query, mutation, type QueryCtx } from './_generated/server';
 import { v } from 'convex/values';
-import type { QueryCtx } from './_generated/server';
 
 // Get emoji metadata by emoji
 export const getEmojiMetadata = query({
@@ -115,7 +114,7 @@ async function getTopEmojiRatingsInternal(
     { count: number; totalValue: number; tags: Set<string> }
   >();
 
-  for (const rating of ratings as any[]) {
+  for (const rating of ratings) {
     const stats = emojiStats.get(rating.emoji) || {
       count: 0,
       totalValue: 0,
@@ -206,7 +205,7 @@ export const getEmojiRatingStats = query({
 
     const emojiGroups = new Map<string, number[]>();
 
-    for (const rating of ratings as any[]) {
+    for (const rating of ratings) {
       const values = emojiGroups.get(rating.emoji) || [];
       values.push(rating.value);
       emojiGroups.set(rating.emoji, values);

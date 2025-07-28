@@ -10,7 +10,6 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { createServerFn } from '@tanstack/react-start';
-import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import * as React from 'react';
 import { Toaster } from '@/components/ui/sonner';

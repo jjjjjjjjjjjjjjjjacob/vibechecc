@@ -7,7 +7,6 @@ import {
   useTopRatedEmojiVibes,
   useVibesPaginated,
   useTopRatedVibes,
-  useTrendingEmojiRatings,
   useAllTags,
   useVibesByTag,
   useCurrentUser,
@@ -15,11 +14,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
-import {
-  getThemeGradientClasses,
-  applyUserTheme,
-  DEFAULT_USER_THEME,
-} from '@/utils/theme-colors';
+import { useTheme } from '@/components/theme-provider';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -110,13 +105,18 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
 function DiscoverPage() {
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
-  const userTheme = currentUser?.theme || DEFAULT_USER_THEME;
-  const themeClasses = getThemeGradientClasses();
+  const { setColorTheme, setSecondaryColorTheme } = useTheme();
 
-  // Apply theme on mount and when user changes
+  // Apply user's color themes when user data changes
   React.useEffect(() => {
-    applyUserTheme(userTheme);
-  }, [userTheme]);
+    if (currentUser) {
+      const primaryColor = currentUser.primaryColor || currentUser.themeColor || 'pink';
+      const secondaryColor = currentUser.secondaryColor || 'orange';
+      
+      setColorTheme(`${primaryColor}-primary` as any);
+      setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
+    }
+  }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
   return (
     <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
@@ -124,10 +124,7 @@ function DiscoverPage() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1
-            className={cn(
-              'mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl',
-              themeClasses.text
-            )}
+            className="mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
           >
             discover vibes by emoji
           </h1>
@@ -139,10 +136,7 @@ function DiscoverPage() {
         {/* Featured Collections Grid */}
         <section className="mb-12">
           <h2
-            className={cn(
-              'mb-6 text-2xl font-semibold lowercase',
-              themeClasses.text
-            )}
+            className="mb-6 text-2xl font-semibold lowercase bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
           >
             featured collections
           </h2>
@@ -283,7 +277,6 @@ function EmojiCollectionSection({
 }: {
   collection: EmojiCollection;
 }) {
-  const themeClasses = getThemeGradientClasses();
   const { data: vibes, isLoading } = useTopRatedEmojiVibes(
     collection.emoji,
     collection.minValue,

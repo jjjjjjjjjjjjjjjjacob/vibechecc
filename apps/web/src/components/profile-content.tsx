@@ -16,16 +16,10 @@ import { MasonryFeed } from '@/components/masonry-feed';
 import { CreateVibeButton } from '@/components/create-vibe-button';
 import { useUser } from '@clerk/tanstack-react-start';
 import { Skeleton } from '@/components/ui/skeleton';
-import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
 import { Sparkles } from 'lucide-react';
 import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 import { ThemeColorPicker } from '@/components/theme-color-picker';
-import {
-  DEFAULT_THEME,
-  getThemeById,
-  getThemeGradientClasses,
-} from '@/utils/theme-colors';
 
 export function ProfileContent() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
@@ -63,7 +57,7 @@ export function ProfileContent() {
   const [uploadedImageFile, setUploadedImageFile] = React.useState<File | null>(
     null
   );
-  const [themeColor, setThemeColor] = React.useState(DEFAULT_THEME.id);
+  const [themeColor, setThemeColor] = React.useState('pink');
 
   // Initialize form with user data when loaded
   React.useEffect(() => {
@@ -72,7 +66,7 @@ export function ProfileContent() {
       setFirstName(convexUser.first_name || '');
       setLastName(convexUser.last_name || '');
       setImageUrl(convexUser.image_url || '');
-      setThemeColor(convexUser.themeColor || DEFAULT_THEME.id);
+      setThemeColor(convexUser.themeColor || 'pink');
       _setBio(convexUser.bio || '');
       _setSocials({
         twitter: convexUser.socials?.twitter || '',
@@ -273,13 +267,6 @@ export function ProfileContent() {
       ? new Date(clerkUser.createdAt).toLocaleDateString()
       : 'Unknown';
 
-  // Get the current theme for styling
-  const currentTheme = getThemeById(
-    isPreviewMode || isEditing
-      ? themeColor
-      : convexUser.themeColor || DEFAULT_THEME.id
-  );
-  const themeClasses = getThemeGradientClasses(currentTheme);
 
   return (
     <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
@@ -428,7 +415,7 @@ export function ProfileContent() {
                           setLastName(convexUser.last_name || '');
                           setImageUrl(convexUser.image_url || '');
                           setThemeColor(
-                            convexUser.themeColor || DEFAULT_THEME.id
+                            convexUser.themeColor || 'pink'
                           );
                         }}
                         className="transition-transform hover:scale-[1.02]"
@@ -440,7 +427,7 @@ export function ProfileContent() {
                 ) : (
                   <div className="flex-1">
                     <h1
-                      className={`mb-2 text-2xl font-bold lowercase drop-shadow-md ${themeClasses.text}`}
+                      className="mb-2 text-2xl font-bold lowercase drop-shadow-md bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
                     >
                       {displayName}
                     </h1>
@@ -479,7 +466,7 @@ export function ProfileContent() {
 
           <div className="mb-8">
             <h2
-              className={`mb-4 text-2xl font-bold lowercase ${themeClasses.text}`}
+              className="mb-4 text-2xl font-bold lowercase bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
             >
               your vibes
             </h2>
@@ -495,7 +482,7 @@ export function ProfileContent() {
               emptyStateAction={
                 <CreateVibeButton
                   variant="default"
-                  className={`${themeClasses.button} text-white shadow-lg`}
+                  className="bg-gradient-to-r from-theme-primary to-theme-secondary text-white shadow-lg"
                 />
               }
             />

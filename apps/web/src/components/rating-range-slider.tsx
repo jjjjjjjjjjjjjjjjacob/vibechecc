@@ -40,6 +40,9 @@ export function RatingRangeSlider({
   };
 
   const formatValue = (val: number) => {
+    if (val === undefined || val === null || isNaN(val)) {
+      return '0';
+    }
     return val === Math.floor(val) ? val.toString() : val.toFixed(1);
   };
 
