@@ -626,46 +626,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
   },
 
   // Sweets
-  {
-    emoji: '🦀',
-    name: 'crab',
-    keywords: ['crab', 'crustacean', 'seafood'],
-    category: 'food',
-    color: '#DC143C',
-    tags: ['crab', 'seafood', 'shellfish'],
-  },
-  {
-    emoji: '🦞',
-    name: 'lobster',
-    keywords: ['lobster', 'seafood', 'bisque'],
-    category: 'food',
-    color: '#DC143C',
-    tags: ['lobster', 'seafood', 'fancy'],
-  },
-  {
-    emoji: '🦐',
-    name: 'shrimp',
-    keywords: ['shrimp', 'seafood', 'ocean'],
-    category: 'food',
-    color: '#FF69B4',
-    tags: ['shrimp', 'seafood', 'prawn'],
-  },
-  {
-    emoji: '🦑',
-    name: 'squid',
-    keywords: ['squid', 'seafood', 'food'],
-    category: 'food',
-    color: '#FFB6C1',
-    tags: ['squid', 'seafood', 'calamari'],
-  },
-  {
-    emoji: '🦪',
-    name: 'oyster',
-    keywords: ['oyster', 'food', 'pearl'],
-    category: 'food',
-    color: '#D3D3D3',
-    tags: ['oyster', 'seafood', 'shellfish'],
-  },
 
   // Desserts and sweets
   {

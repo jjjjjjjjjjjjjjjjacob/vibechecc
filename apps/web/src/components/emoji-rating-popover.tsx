@@ -7,12 +7,12 @@ import {
   DialogTrigger,
 } from './ui/dialog';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from './ui/sheet';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from './ui/drawer';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
@@ -373,8 +373,8 @@ export function EmojiRatingPopover({
                       }}
                       size="lg"
                       showTooltip={false}
-                      onMouseDown={() => setIsMouseDown(true)}
-                      onMouseUp={() => setIsMouseDown(false)}
+                      onPointerDown={() => setIsMouseDown(true)}
+                      onPointerUp={() => setIsMouseDown(false)}
                       mobileSlider={true}
                       className="w-full"
                     />
@@ -471,21 +471,20 @@ export function EmojiRatingPopover({
 
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetTrigger asChild onClick={(e) => e.stopPropagation()}>
+      <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground>
+        <DrawerTrigger asChild onClick={(e) => e.stopPropagation()}>
           {children}
-        </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          className="bg-background/95 border-border max-h-[90vh] overflow-y-auto border-t backdrop-blur"
+        </DrawerTrigger>
+        <DrawerContent
+          className="bg-background/90 min-h-[92vh] overflow-y-auto backdrop-blur"
           onClick={(e) => e.stopPropagation()}
         >
-          <SheetHeader className="p-6 pb-0">
-            <SheetTitle asChild>{headerContent}</SheetTitle>
-          </SheetHeader>
+          <DrawerHeader className="p-6 pb-0">
+            <DrawerTitle asChild>{headerContent}</DrawerTitle>
+          </DrawerHeader>
           {formContent}
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 

@@ -10,8 +10,8 @@ interface EmojiRatingScaleProps {
   showTooltip?: boolean;
   className?: string;
   variant?: 'color' | 'gradient';
-  onMouseDown?: () => void;
-  onMouseUp?: () => void;
+  onPointerDown?: () => void;
+  onPointerUp?: () => void;
   emojiColor?: string;
   mobileSlider?: boolean;
 }
@@ -25,8 +25,8 @@ export function EmojiRatingScale({
   showTooltip = true,
   className,
   variant = 'color',
-  onMouseDown,
-  onMouseUp,
+  onPointerDown,
+  onPointerUp,
   emojiColor,
   mobileSlider = false,
 }: EmojiRatingScaleProps) {
@@ -79,8 +79,8 @@ export function EmojiRatingScale({
 
   const handleMouseLeave = () => {
     setHoverValue(null);
-    if (onMouseUp) {
-      onMouseUp();
+    if (onPointerUp) {
+      onPointerUp();
     }
   };
 
@@ -102,17 +102,17 @@ export function EmojiRatingScale({
       onClick(value);
     }
     setHoverValue(null);
-    if (onMouseUp) {
-      onMouseUp();
+    if (onPointerUp) {
+      onPointerUp();
     }
   };
 
-  const handleMouseDown = () => {
-    onMouseDown?.();
+  const handlePointerDown = () => {
+    onPointerDown?.();
   };
 
-  const handleMouseUpLocal = () => {
-    onMouseUp?.();
+  const handlePointerUpLocal = () => {
+    onPointerUp?.();
   };
 
   return (
@@ -126,8 +126,8 @@ export function EmojiRatingScale({
         )}
         onMouseMove={onChange ? handleMouseMove : undefined}
         onMouseLeave={onChange ? handleMouseLeave : undefined}
-        onMouseDown={onMouseDown ? handleMouseDown : undefined}
-        onMouseUp={onMouseUp ? handleMouseUpLocal : undefined}
+        onPointerDown={onPointerDown ? handlePointerDown : undefined}
+        onPointerUp={onPointerUp ? handlePointerUpLocal : undefined}
         onClick={onClick ? handleClick : undefined}
         onTouchMove={onChange ? handleTouchMove : undefined}
         onTouchEnd={onClick ? handleTouchEnd : undefined}
@@ -143,7 +143,7 @@ export function EmojiRatingScale({
       >
         <div
           data-variant={variant}
-          className="font-noto-color data-[variant=gradient]:font-noto opacity-30 brightness-60 grayscale-100"
+          className="font-noto-color data-[variant=gradient]:font-noto whitespace-pre opacity-30 brightness-60 grayscale-100"
         >
           {[...Array(5)].map((_, i) => (
             <span key={`unfilled-${i}`}>{emoji}</span>
@@ -157,7 +157,7 @@ export function EmojiRatingScale({
             className={cn(
               'flex',
               variant === 'gradient'
-                ? 'font-noto from-theme-primary via-theme-secondary to-theme-primary bg-gradient-to-r bg-clip-text whitespace-pre text-transparent opacity-80 brightness-150 transition-all group-active/rating-display:brightness-[1000%]'
+                ? 'font-noto from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text whitespace-pre text-transparent opacity-80 brightness-150 transition-all group-active:brightness-150'
                 : 'font-noto-color whitespace-pre opacity-[0.99]'
             )}
             style={
@@ -185,14 +185,14 @@ export function EmojiRatingScale({
                 onChange(newValue);
               }
             }}
-            onMouseUp={(e) => {
+            onPointerUp={(e) => {
               const newValue = parseFloat((e.target as HTMLInputElement).value);
               if (onClick) {
                 onClick(newValue);
               }
               setHoverValue(null);
-              if (onMouseUp) {
-                onMouseUp();
+              if (onPointerUp) {
+                onPointerUp();
               }
             }}
             onTouchEnd={(e) => {
@@ -201,8 +201,8 @@ export function EmojiRatingScale({
                 onClick(newValue);
               }
               setHoverValue(null);
-              if (onMouseUp) {
-                onMouseUp();
+              if (onPointerUp) {
+                onPointerUp();
               }
             }}
             className="absolute inset-0 h-full w-full cursor-pointer touch-pan-x opacity-0"

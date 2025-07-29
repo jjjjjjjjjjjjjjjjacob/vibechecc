@@ -192,10 +192,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-background text-foreground min-h-screen">
+      <body className="bg-background text-foreground">
         <PostHogProvider>
           <ThemeProvider>
-            <div className="flex min-h-screen flex-col">
+            <div
+              className="flex min-h-screen flex-col"
+              data-vaul-drawer-wrapper
+            >
               <PostHogPageTracker />
               <ClerkPostHogIntegration />
               <Header />

@@ -598,14 +598,6 @@ export const activityEmojis = [
     color: '#DC143C',
     tags: ['yo-yo', 'toy', 'trick'],
   },
-  {
-    emoji: '🪁',
-    name: 'kite',
-    keywords: ['wind', 'fly', 'soar'],
-    category: 'activities',
-    color: '#FF69B4',
-    tags: ['kite', 'flying', 'wind'],
-  },
 
   // Exercise and fitness
   {

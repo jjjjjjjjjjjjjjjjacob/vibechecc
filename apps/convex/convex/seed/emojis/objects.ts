@@ -617,14 +617,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     tags: ['projector', 'film', 'movie'],
   },
   {
-    emoji: '🎬',
-    name: 'clapper board',
-    keywords: ['movie', 'film', 'record'],
-    category: 'objects',
-    color: '#000000',
-    tags: ['clapper', 'movie', 'action'],
-  },
-  {
     emoji: '📺',
     name: 'television',
     keywords: ['technology', 'program', 'oldschool'],
@@ -1407,22 +1399,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     tags: ['water-gun', 'toy', 'pistol'],
   },
   {
-    emoji: '🪃',
-    name: 'boomerang',
-    keywords: ['weapon', 'australia', 'rebound'],
-    category: 'objects',
-    color: '#8B4513',
-    tags: ['boomerang', 'return', 'throw'],
-  },
-  {
-    emoji: '🏹',
-    name: 'bow and arrow',
-    keywords: ['sports', 'archery', 'bow'],
-    category: 'objects',
-    color: '#8B4513',
-    tags: ['bow', 'arrow', 'archery'],
-  },
-  {
     emoji: '🛡️',
     name: 'shield',
     keywords: ['protection', 'security', 'defense'],
@@ -1879,14 +1855,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     tags: ['urn', 'funeral', 'ashes'],
   },
   {
-    emoji: '🗿',
-    name: 'moai',
-    keywords: ['stone', 'easter island', 'statue'],
-    category: 'objects',
-    color: '#696969',
-    tags: ['moai', 'statue', 'easter-island'],
-  },
-  {
     emoji: '🪧',
     name: 'placard',
     keywords: ['sign', 'protest', 'demonstration'],
@@ -1911,13 +1879,5 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     category: 'objects',
     color: '#87CEEB',
     tags: ['hamsa', 'hand', 'protection'],
-  },
-  {
-    emoji: '💿',
-    name: 'optical disk',
-    keywords: ['technology', 'dvd', 'disk'],
-    category: 'objects',
-    color: '#C0C0C0',
-    tags: ['cd', 'dvd', 'disk'],
   },
 ];
