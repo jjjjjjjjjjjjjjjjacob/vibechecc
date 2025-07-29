@@ -120,7 +120,7 @@ jobs:
 
           # Extract Worker script name for viberater-{prefix}-frontend
           if [ "${{ inputs.environment }}" = "ephemeral" ]; then
-            WORKER_SCRIPT_NAME="viberater-$PREFIX-frontend"
+            WORKER_SCRIPT_NAME="viberater-ephemeral-$PREFIX-frontend"
           else
             WORKER_SCRIPT_NAME="viberater-${{ inputs.environment }}-frontend"
           fi
