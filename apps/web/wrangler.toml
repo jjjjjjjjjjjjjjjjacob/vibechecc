@@ -9,10 +9,6 @@ compatibility_flags = [ "nodejs_compat" ]
 [build]
 command = "bun run build"
 
-# Cache optimization
-[site]
-bucket = "./.output/public"
-
 # TanStack Start static assets
 [assets]
 directory = "./.output/public"
