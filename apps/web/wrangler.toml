@@ -5,10 +5,6 @@ main = "./.output/server/index.mjs"
 compatibility_date = "2025-07-01"
 compatibility_flags = [ "nodejs_compat" ]
 
-# Mobile performance optimizations
-[build]
-command = "bun run build"
-
 # TanStack Start static assets
 [assets]
 directory = "./.output/public"
