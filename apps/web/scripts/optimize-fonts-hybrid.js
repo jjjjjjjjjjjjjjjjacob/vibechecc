@@ -44,7 +44,8 @@ const FONTS_CONFIG = [
     name: 'NotoEmoji',
     file: 'NotoEmoji-VariableFont_wght.ttf',
     skipOptimization: false, // Needs conversion
-    unicodeRange: 'U+1F600-1F64F, U+1F300-1F5FF, U+1F680-1F6FF, U+1F1E0-1F1FF, U+2600-26FF, U+2700-27BF, U+FE00-FE0F, U+1F900-1F9FF', // Common emoji ranges
+    unicodeRange:
+      'U+1F600-1F64F, U+1F300-1F5FF, U+1F680-1F6FF, U+1F1E0-1F1FF, U+2600-26FF, U+2700-27BF, U+FE00-FE0F, U+1F900-1F9FF', // Common emoji ranges
   },
   {
     name: 'NotoColorEmoji',
@@ -96,7 +97,7 @@ function generateCSS(processedFonts) {
   // Add font-face rules
   processedFonts.forEach((font) => {
     if (font.skipInCSS) return; // Skip fonts we'll add manually
-    
+
     const fontPath = `/fonts/optimized/${font.outputName}`;
 
     css += `@font-face {
