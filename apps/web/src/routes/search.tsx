@@ -24,10 +24,8 @@ import { Label } from '@/components/ui/label';
 import { EmojiSearchCommand } from '@/components/emoji-search-command';
 import { EmojiPillFilters } from '@/components/emoji-pill-filters';
 import { RatingRangeSlider } from '@/components/rating-range-slider';
-import { MasonryFeed } from '@/components/masonry-feed';
 import { MobileFilterSheet } from '@/features/search/components/mobile-filter-sheet';
 import { cn } from '@/utils/tailwind-utils';
-import { useCurrentUser } from '@/queries';
 
 // Loading skeletons for code-split components
 function SearchResultsSkeleton() {
@@ -105,9 +103,6 @@ function SearchResultsPage() {
   } = Route.useSearch();
   const [emojiSearchValue, setEmojiSearchValue] = React.useState('');
 
-  // Get current user's theme
-  const { data: currentUser } = useCurrentUser();
-
   const filters = {
     tags,
     minRating:
@@ -169,7 +164,7 @@ function SearchResultsPage() {
           <h1
             className={cn(
               'mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl',
-              'bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent'
+              'from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-transparent'
             )}
           >
             {q ? `search results for "${q}"` : 'search results'}
@@ -213,7 +208,7 @@ function SearchResultsPage() {
               <h2
                 className={cn(
                   'mb-6 font-semibold lowercase',
-                  'bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent'
+                  'from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-transparent'
                 )}
               >
                 filter results
@@ -345,7 +340,7 @@ function SearchResultsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full lowercase bg-gradient-to-r from-theme-primary to-theme-secondary"
+                    className="from-theme-primary to-theme-secondary w-full bg-gradient-to-r lowercase"
                     onClick={() => {
                       navigate({
                         search: {
@@ -465,7 +460,7 @@ function SearchResultsPage() {
                         tab === tabName
                           ? cn(
                               'border-none text-white shadow-lg',
-                              'bg-gradient-to-r from-theme-primary to-theme-secondary'
+                              'from-theme-primary to-theme-secondary bg-gradient-to-r'
                             )
                           : 'bg-background/90 border-[hsl(var(--theme-primary))]/20 text-[hsl(var(--theme-primary))] hover:bg-[hsl(var(--theme-primary))]/10'
                       )}

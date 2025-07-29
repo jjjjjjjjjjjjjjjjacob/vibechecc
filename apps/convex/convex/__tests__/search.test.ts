@@ -23,6 +23,7 @@ describe('Search Functions', () => {
         users: [],
         tags: [],
         actions: [],
+        reviews: [],
         totalCount: 0,
       });
     });

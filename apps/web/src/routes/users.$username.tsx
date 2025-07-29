@@ -35,7 +35,6 @@ function UserProfile() {
     user?.externalId || ''
   );
 
-
   // Early returns after all hooks have been called
   if (userLoading) {
     return <UserProfileSkeleton />;
@@ -46,14 +45,10 @@ function UserProfile() {
       <div className="from-background via-background to-muted/20 min-h-screen bg-gradient-to-br">
         <div className="container mx-auto px-4 py-8">
           <div className="flex min-h-[60vh] items-center justify-center">
-            <Card
-              className="bg-background/80 border-theme-primary/20 w-full max-w-md shadow-2xl backdrop-blur-md"
-            >
+            <Card className="bg-background/80 border-theme-primary/20 w-full max-w-md shadow-2xl backdrop-blur-md">
               <CardContent className="p-8 text-center">
                 <div className="mb-4 text-6xl opacity-50">🔍</div>
-                <h1
-                  className="mb-3 text-2xl font-bold lowercase bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
-                >
+                <h1 className="from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase">
                   user not found
                 </h1>
                 <p className="text-muted-foreground/80">

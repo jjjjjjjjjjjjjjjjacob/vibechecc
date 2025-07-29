@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   CalendarDays,
   Twitter,
@@ -43,30 +43,27 @@ export function UserProfileHero({
   children,
   isOwnProfile = false,
 }: UserProfileHeroProps) {
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-theme-primary/10">
+    <div className="from-background via-background to-theme-primary/10 min-h-screen bg-gradient-to-br">
       <div className="container mx-auto space-y-6 px-4 py-6">
         <div className="mx-auto max-w-5xl">
           {/* Hero Profile Section */}
           <div
-            className={`relative overflow-hidden rounded-2xl bg-background/80 border-theme-primary/20 p-6 shadow-xl backdrop-blur-md sm:p-8`}
+            className={`bg-background/80 border-theme-primary/20 relative overflow-hidden rounded-2xl p-6 shadow-xl backdrop-blur-md sm:p-8`}
           >
-            <div
-              className={`absolute inset-0 bg-background opacity-20`}
-            />
+            <div className={`bg-background absolute inset-0 opacity-20`} />
             <div className="relative z-10">
               <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:gap-8 sm:text-left">
                 {/* Avatar */}
                 <div className="relative flex-shrink-0">
                   <div
-                    className={`absolute -inset-3 bg-theme-primary/20 rounded-full opacity-60 blur-xl`}
+                    className={`bg-theme-primary/20 absolute -inset-3 rounded-full opacity-60 blur-xl`}
                   />
                   <div
-                    className={`relative bg-gradient-to-r from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 rounded-full p-1.5 border-theme-primary/40`}
+                    className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-theme-primary/40 relative rounded-full bg-gradient-to-r p-1.5`}
                   >
                     <Avatar
-                      className={`h-28 w-28 sm:h-32 sm:w-32 border-theme-primary/50`}
+                      className={`border-theme-primary/50 h-28 w-28 sm:h-32 sm:w-32`}
                     >
                       <AvatarImage
                         src={imageUrl}
@@ -74,7 +71,7 @@ export function UserProfileHero({
                         className="object-cover"
                       />
                       <AvatarFallback
-                        className={`bg-background text-2xl font-bold text-primary-foreground sm:text-3xl`}
+                        className={`bg-background text-primary-foreground text-2xl font-bold sm:text-3xl`}
                       >
                         {displayName.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
@@ -85,10 +82,10 @@ export function UserProfileHero({
                 {/* Profile Info */}
                 <div className="flex-1 space-y-4">
                   <div className="space-y-2">
-                    <h1 className="text-3xl font-bold text-primary-foreground lowercase drop-shadow-lg sm:text-4xl">
+                    <h1 className="text-primary-foreground text-3xl font-bold lowercase drop-shadow-lg sm:text-4xl">
                       {displayName}
                     </h1>
-                    <p className="text-lg font-medium text-primary-foreground/70 drop-shadow-md sm:text-xl">
+                    <p className="text-primary-foreground/70 text-lg font-medium drop-shadow-md sm:text-xl">
                       @{username}
                     </p>
                   </div>
@@ -96,7 +93,7 @@ export function UserProfileHero({
                   {/* Bio */}
                   {bio && (
                     <div className="max-w-xl">
-                      <p className="text-sm leading-relaxed text-primary-foreground/80 drop-shadow-sm sm:text-base">
+                      <p className="text-primary-foreground/80 text-sm leading-relaxed drop-shadow-sm sm:text-base">
                         {bio}
                       </p>
                     </div>
@@ -104,24 +101,24 @@ export function UserProfileHero({
 
                   {/* Stats Pills */}
                   <div className="flex flex-wrap gap-3">
-                    <div className="rounded-full border border-primary-foreground/20 bg-primary-foreground/15 px-3 py-1.5 backdrop-blur">
-                      <div className="flex items-center gap-2 text-primary-foreground">
+                    <div className="border-primary-foreground/20 bg-primary-foreground/15 rounded-full border px-3 py-1.5 backdrop-blur">
+                      <div className="text-primary-foreground flex items-center gap-2">
                         <CalendarDays className="h-3.5 w-3.5" />
                         <span className="text-xs font-medium">
                           joined {joinDate}
                         </span>
                       </div>
                     </div>
-                    <div className="rounded-full border border-primary-foreground/20 bg-primary-foreground/15 px-3 py-1.5 backdrop-blur">
-                      <div className="flex items-center gap-2 text-primary-foreground">
+                    <div className="border-primary-foreground/20 bg-primary-foreground/15 rounded-full border px-3 py-1.5 backdrop-blur">
+                      <div className="text-primary-foreground flex items-center gap-2">
                         <Heart className="h-3.5 w-3.5" />
                         <span className="text-xs font-bold">{vibeCount}</span>
                         <span className="text-xs font-medium">vibes</span>
                       </div>
                     </div>
                     {averageReceivedRating && averageReceivedRating > 0 && (
-                      <div className="rounded-full border border-primary-foreground/20 bg-primary-foreground/15 px-3 py-1.5 backdrop-blur">
-                        <div className="flex items-center gap-2 text-primary-foreground">
+                      <div className="border-primary-foreground/20 bg-primary-foreground/15 rounded-full border px-3 py-1.5 backdrop-blur">
+                        <div className="text-primary-foreground flex items-center gap-2">
                           <Star className="h-3.5 w-3.5 fill-yellow-300 text-yellow-300" />
                           <span className="text-xs font-bold">
                             {averageReceivedRating.toFixed(1)}
@@ -142,7 +139,7 @@ export function UserProfileHero({
                           variant="outline"
                           size="sm"
                           asChild
-                          className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground transition-all hover:scale-105 hover:bg-primary-foreground/20"
+                          className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-all hover:scale-105"
                         >
                           <a
                             href={`https://twitter.com/${socials.twitter}`}
@@ -158,7 +155,7 @@ export function UserProfileHero({
                           variant="outline"
                           size="sm"
                           asChild
-                          className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground transition-all hover:scale-105 hover:bg-primary-foreground/20"
+                          className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-all hover:scale-105"
                         >
                           <a
                             href={`https://instagram.com/${socials.instagram}`}
@@ -174,7 +171,7 @@ export function UserProfileHero({
                           variant="outline"
                           size="sm"
                           asChild
-                          className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground transition-all hover:scale-105 hover:bg-primary-foreground/20"
+                          className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-all hover:scale-105"
                         >
                           <a
                             href={socials.website}
@@ -198,7 +195,7 @@ export function UserProfileHero({
               <TabsList className="bg-background/60 rounded-2xl border-0 p-1.5 shadow-2xl backdrop-blur-md">
                 <TabsTrigger
                   value="vibes"
-                  className={`rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-muted/10 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg`}
+                  className={`data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-muted/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg`}
                 >
                   <Heart className="mr-2 h-4 w-4" />
                   vibes
@@ -206,7 +203,7 @@ export function UserProfileHero({
                 {!isOwnProfile && (
                   <TabsTrigger
                     value="reviews"
-                    className={`rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-muted/10 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg`}
+                    className={`data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-muted/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg`}
                   >
                     <Star className="mr-2 h-4 w-4" />
                     reviews
@@ -214,7 +211,7 @@ export function UserProfileHero({
                 )}
                 <TabsTrigger
                   value="about"
-                  className={`rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-muted/10 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg`}
+                  className={`data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-muted/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg`}
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
                   about

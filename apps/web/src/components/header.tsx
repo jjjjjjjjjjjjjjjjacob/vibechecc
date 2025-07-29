@@ -10,7 +10,11 @@ import {
   UserButton,
   SignInButton,
 } from '@clerk/tanstack-react-start';
-import { useTheme } from './theme-provider';
+import {
+  useTheme,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
+} from './theme-provider';
 import { SearchCommand } from '../features/search/components/search-command';
 import { useSearchShortcuts } from '../features/search/hooks/use-search-shortcuts';
 import { useCurrentUser } from '../queries';
@@ -30,8 +34,10 @@ export function Header() {
         currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
 
-      setColorTheme(`${primaryColor}-primary` as any);
-      setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
+      setColorTheme(`${primaryColor}-primary` as PrimaryColorTheme);
+      setSecondaryColorTheme(
+        `${secondaryColor}-secondary` as SecondaryColorTheme
+      );
     }
   }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 

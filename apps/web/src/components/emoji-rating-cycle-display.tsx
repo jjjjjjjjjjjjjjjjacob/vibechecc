@@ -78,6 +78,8 @@ export function EmojiRatingCycleDisplay({
       }
     >
       <div
+        role="button"
+        tabIndex={0}
         className={cn(
           'bg-secondary/50 hover:bg-secondary inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 text-sm font-medium transition-all',
           'hover:animate-scale-spring active:scale-95',
@@ -85,6 +87,11 @@ export function EmojiRatingCycleDisplay({
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+          }
+        }}
       >
         <div className="relative flex h-5 w-5 items-center justify-center overflow-hidden">
           <span

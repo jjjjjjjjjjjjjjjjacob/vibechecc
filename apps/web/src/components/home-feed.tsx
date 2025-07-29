@@ -114,7 +114,16 @@ export function HomeFeed({ className }: HomeFeedProps) {
         }
       });
     }
-  }, [activeTab, forYouQuery.data, hotQuery.data, newQuery.data, cursors]);
+  }, [
+    activeTab,
+    forYouQuery.data,
+    hotQuery.data,
+    newQuery.data,
+    cursors,
+    forYouQuery,
+    hotQuery,
+    newQuery,
+  ]);
 
   // Handle tab change
   const handleTabChange = (tab: FeedTab) => {

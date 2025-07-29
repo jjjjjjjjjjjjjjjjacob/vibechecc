@@ -267,7 +267,6 @@ export function ProfileContent() {
       ? new Date(clerkUser.createdAt).toLocaleDateString()
       : 'Unknown';
 
-
   return (
     <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
       <div className="container mx-auto px-4 py-8">
@@ -414,9 +413,7 @@ export function ProfileContent() {
                           setFirstName(convexUser.first_name || '');
                           setLastName(convexUser.last_name || '');
                           setImageUrl(convexUser.image_url || '');
-                          setThemeColor(
-                            convexUser.themeColor || 'pink'
-                          );
+                          setThemeColor(convexUser.themeColor || 'pink');
                         }}
                         className="transition-transform hover:scale-[1.02]"
                       >
@@ -426,9 +423,7 @@ export function ProfileContent() {
                   </form>
                 ) : (
                   <div className="flex-1">
-                    <h1
-                      className="mb-2 text-2xl font-bold lowercase drop-shadow-md bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
-                    >
+                    <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase drop-shadow-md">
                       {displayName}
                     </h1>
                     {username && (
@@ -465,9 +460,7 @@ export function ProfileContent() {
           </Card>
 
           <div className="mb-8">
-            <h2
-              className="mb-4 text-2xl font-bold lowercase bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
-            >
+            <h2 className="from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase">
               your vibes
             </h2>
 
@@ -482,7 +475,7 @@ export function ProfileContent() {
               emptyStateAction={
                 <CreateVibeButton
                   variant="default"
-                  className="bg-gradient-to-r from-theme-primary to-theme-secondary text-white shadow-lg"
+                  className="from-theme-primary to-theme-secondary bg-gradient-to-r text-white shadow-lg"
                 />
               }
             />
@@ -492,7 +485,7 @@ export function ProfileContent() {
                 <Button
                   variant="outline"
                   asChild
-                  className={`bg-background/90 border-${currentTheme.id}-500/20 text-${currentTheme.id}-600 hover:bg-${currentTheme.id}-500/10 transition-transform hover:scale-[1.02]`}
+                  className="from-theme-primary to-theme-secondary bg-gradient-to-r"
                 >
                   <a href="/vibes/my-vibes">
                     view all vibes ({vibes.length} total)

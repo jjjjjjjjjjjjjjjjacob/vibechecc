@@ -30,18 +30,7 @@ export default defineConfig({
         moduleSideEffects: false,
       },
       output: {
-        manualChunks: {
-          // Separate vendor chunks for better caching
-          vendor: ['react', 'react-dom'],
-          ui: [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-dialog',
-          ],
-          convex: ['convex', '@viberater/convex'],
-          clerk: ['@clerk/tanstack-react-start'],
-          query: ['@tanstack/react-query', '@tanstack/react-router'],
-        },
+        // Manual chunks removed due to SSR external module conflicts
       },
     },
     target: 'es2020',

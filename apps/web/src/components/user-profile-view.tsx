@@ -10,11 +10,27 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MasonryFeed } from '@/components/masonry-feed';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarDays, Star, TrendingUp, Heart, Sparkles, Twitter, Instagram, Globe } from 'lucide-react';
+import {
+  CalendarDays,
+  Star,
+  TrendingUp,
+  Heart,
+  Sparkles,
+  Globe,
+  ChevronLeft,
+  Twitter,
+  Instagram,
+} from 'lucide-react';
 import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/components/theme-provider';
+import {
+  useTheme,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
+} from '@/components/theme-provider';
+import type { Vibe } from '@viberater/types';
+import { getThemeColorValue } from '@/utils/theme-colors';
 
 interface UserProfileViewProps {
   user: {
@@ -37,7 +53,7 @@ interface UserProfileViewProps {
       website?: string;
     };
   };
-  userVibes?: Array<any>;
+  userVibes?: Array<Vibe>;
   vibesLoading?: boolean;
   userRatings?: Array<any>;
   ratingsLoading?: boolean;
@@ -95,23 +111,50 @@ export function UserProfileView({
       : 0;
 
   // Get user's theme colors
-  const userTheme = {
-    primaryColor: user?.primaryColor || user?.themeColor || 'pink',
-    secondaryColor: user?.secondaryColor || 'orange',
-  };
+  const userTheme = React.useMemo(
+    () => ({
+      primaryColor: user?.primaryColor || user?.themeColor || 'pink',
+      secondaryColor: user?.secondaryColor || 'orange',
+    }),
+    [user?.primaryColor, user?.themeColor, user?.secondaryColor]
+  );
 
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
-  
+
   React.useEffect(() => {
-    // Apply global theme when not using scoped theme
+    // Apply global theme when not using scoped theme (e.g., on own profile)
     if (!scopedTheme && user) {
-      setColorTheme(`${userTheme.primaryColor}-primary` as any);
-      setSecondaryColorTheme(`${userTheme.secondaryColor}-secondary` as any);
+      setColorTheme(`${userTheme.primaryColor}-primary` as PrimaryColorTheme);
+      setSecondaryColorTheme(
+        `${userTheme.secondaryColor}-secondary` as SecondaryColorTheme
+      );
     }
-  }, [scopedTheme, user, userTheme, setColorTheme, setSecondaryColorTheme]);
+  }, [
+    scopedTheme,
+    user,
+    userTheme.primaryColor,
+    userTheme.secondaryColor,
+    setColorTheme,
+    setSecondaryColorTheme,
+  ]);
+
+  // Apply scoped theme styles when viewing other users' profiles
+  const scopedThemeStyles = React.useMemo(() => {
+    if (scopedTheme && user) {
+      return {
+        '--theme-primary': getThemeColorValue(userTheme.primaryColor),
+        '--theme-secondary': getThemeColorValue(userTheme.secondaryColor),
+      } as React.CSSProperties;
+    }
+    return {};
+  }, [scopedTheme, user, userTheme.primaryColor, userTheme.secondaryColor]);
 
   return (
-    <div ref={profileContainerRef} className="min-h-screen bg-gradient-to-br from-background via-background to-theme-primary/10">
+    <div
+      ref={profileContainerRef}
+      className="from-background via-background to-theme-primary/10 min-h-screen bg-gradient-to-br"
+      style={scopedThemeStyles}
+    >
       <div className="container mx-auto space-y-6 px-4 py-6">
         <div className="mx-auto max-w-5xl">
           {/* Back Button */}
@@ -122,40 +165,28 @@ export function UserProfileView({
                 onClick={onBackClick}
                 className="text-foreground border-border/50 bg-background/10 transition-all hover:scale-105 hover:bg-white/20"
               >
-                <Heart className="mr-2 h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" />
                 {backButtonText}
               </Button>
             </div>
           )}
 
           {/* Hero Profile Section */}
-          <div
-            className="relative overflow-hidden rounded-2xl bg-background/80 border-theme-primary/20 p-6 shadow-xl backdrop-blur-md sm:p-8"
-          >
-            <div
-              className="absolute inset-0 bg-background opacity-20"
-            />
+          <div className="bg-background/80 border-theme-primary/20 relative overflow-hidden rounded-2xl p-6 shadow-xl backdrop-blur-md sm:p-8">
+            <div className="bg-background absolute inset-0 opacity-20" />
             <div className="relative z-10">
               <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:gap-8 sm:text-left">
                 {/* Avatar */}
                 <div className="relative flex-shrink-0">
-                  <div
-                    className="absolute -inset-3 bg-theme-primary/20 rounded-full opacity-60 blur-xl"
-                  />
-                  <div
-                    className="relative bg-gradient-to-r from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 rounded-full p-1.5 border-theme-primary/40"
-                  >
-                    <Avatar
-                      className="h-28 w-28 sm:h-32 sm:w-32 border-theme-primary/50"
-                    >
+                  <div className="bg-theme-primary/20 absolute -inset-3 rounded-full opacity-60 blur-xl" />
+                  <div className="from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-theme-primary/40 relative rounded-full bg-gradient-to-r p-1.5">
+                    <Avatar className="border-theme-primary/50 h-28 w-28 sm:h-32 sm:w-32">
                       <AvatarImage
                         src={user.image_url || user.profile_image_url}
                         alt={displayName}
                         className="object-cover"
                       />
-                      <AvatarFallback
-                        className="bg-background text-2xl font-bold text-white sm:text-3xl"
-                      >
+                      <AvatarFallback className="bg-background text-2xl font-bold text-white sm:text-3xl">
                         {displayName.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -278,7 +309,7 @@ export function UserProfileView({
               <TabsList className="bg-background/60 rounded-2xl border-0 p-1.5 shadow-2xl backdrop-blur-md">
                 <TabsTrigger
                   value="vibes"
-                  className="rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:text-white data-[state=active]:shadow-lg"
                 >
                   <Heart className="mr-2 h-4 w-4" />
                   vibes
@@ -286,7 +317,7 @@ export function UserProfileView({
                 {userRatings !== undefined && (
                   <TabsTrigger
                     value="reviews"
-                    className="rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                    className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:text-white data-[state=active]:shadow-lg"
                   >
                     <Star className="mr-2 h-4 w-4" />
                     reviews
@@ -294,7 +325,7 @@ export function UserProfileView({
                 )}
                 <TabsTrigger
                   value="about"
-                  className="rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:text-white data-[state=active]:shadow-lg"
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
                   about
@@ -307,7 +338,7 @@ export function UserProfileView({
               <div className="space-y-8">
                 <div className="text-center">
                   <h2
-                    className={`mb-3 text-2xl font-bold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                    className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
                   >
                     created vibes
                   </h2>
@@ -338,7 +369,7 @@ export function UserProfileView({
                 <div className="space-y-8">
                   <div className="text-center">
                     <h2
-                      className={`mb-3 text-2xl font-bold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                      className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
                     >
                       review activity
                     </h2>
@@ -355,13 +386,13 @@ export function UserProfileView({
                       <CardHeader className="pb-4">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`bg-gradient-to-r from-theme-primary to-theme-secondary rounded-lg p-2`}
+                            className={`from-theme-primary to-theme-secondary rounded-lg bg-gradient-to-r p-2`}
                           >
                             <TrendingUp className="text-primary-foreground h-4 w-4" />
                           </div>
                           <div>
                             <CardTitle
-                              className={`text-lg font-bold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase`}
                             >
                               reviews given
                             </CardTitle>
@@ -463,13 +494,13 @@ export function UserProfileView({
                       <CardHeader className="pb-4">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`bg-gradient-to-r from-theme-primary to-theme-secondary rounded-lg p-2`}
+                            className={`from-theme-primary to-theme-secondary rounded-lg bg-gradient-to-r p-2`}
                           >
                             <Star className="text-primary-foreground h-4 w-4" />
                           </div>
                           <div>
                             <CardTitle
-                              className={`text-lg font-bold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase`}
                             >
                               reviews received
                             </CardTitle>
@@ -516,7 +547,9 @@ export function UserProfileView({
                               >
                                 <div className="flex items-start gap-3">
                                   <Avatar className="h-8 w-8">
-                                    <AvatarImage src={rating.rater?.image_url} />
+                                    <AvatarImage
+                                      src={rating.rater?.image_url}
+                                    />
                                     <AvatarFallback>
                                       {rating.rater?.username?.[0] || '?'}
                                     </AvatarFallback>
@@ -591,7 +624,7 @@ export function UserProfileView({
               <div className="space-y-8">
                 <div className="text-center">
                   <h2
-                    className={`mb-3 text-2xl font-bold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                    className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
                   >
                     about {displayName.toLowerCase()}
                   </h2>
@@ -609,7 +642,7 @@ export function UserProfileView({
                       {user.bio && (
                         <div>
                           <h3
-                            className={`mb-3 text-base font-semibold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
                           >
                             bio
                           </h3>
@@ -622,7 +655,7 @@ export function UserProfileView({
                       {user.interests && user.interests.length > 0 && (
                         <div>
                           <h3
-                            className={`mb-3 text-base font-semibold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
                           >
                             interests
                           </h3>
@@ -642,7 +675,7 @@ export function UserProfileView({
 
                       <div>
                         <h3
-                          className={`mb-3 text-base font-semibold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                          className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
                         >
                           member since
                         </h3>
@@ -657,17 +690,17 @@ export function UserProfileView({
                   >
                     <CardContent className="p-6">
                       <h3
-                        className={`mb-4 text-base font-semibold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                        className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
                       >
                         community impact
                       </h3>
                       <div className="grid grid-cols-2 gap-6">
                         <div className="text-center">
                           <div
-                            className={`bg-gradient-to-r from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border p-3`}
+                            className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
                           >
                             <p
-                              className={`text-2xl font-bold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent`}
+                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
                             >
                               {vibeCount}
                             </p>
@@ -679,10 +712,10 @@ export function UserProfileView({
                         {userRatings !== undefined && (
                           <div className="text-center">
                             <div
-                              className={`bg-gradient-to-r from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border p-3`}
+                              className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
                             >
                               <p
-                                className={`text-2xl font-bold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent`}
+                                className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
                               >
                                 {givenRatingsCount}
                               </p>
@@ -694,10 +727,10 @@ export function UserProfileView({
                         )}
                         <div className="text-center">
                           <div
-                            className={`bg-gradient-to-r from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border p-3`}
+                            className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
                           >
                             <p
-                              className={`text-2xl font-bold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent`}
+                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
                             >
                               {receivedRatingsCount}
                             </p>
@@ -709,11 +742,13 @@ export function UserProfileView({
                         {averageReceivedRating > 0 && (
                           <div className="text-center">
                             <div
-                              className={`bg-gradient-to-r from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border p-3`}
+                              className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
                             >
                               <div className="flex items-center justify-center gap-1 text-2xl font-bold">
                                 <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                                <span className={`bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent`}>
+                                <span
+                                  className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-transparent`}
+                                >
                                   {averageReceivedRating.toFixed(1)}
                                 </span>
                               </div>
@@ -734,7 +769,7 @@ export function UserProfileView({
                     >
                       <CardContent className="p-6">
                         <h3
-                          className={`mb-4 text-base font-semibold bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent lowercase`}
+                          className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
                         >
                           emoji personality
                         </h3>
@@ -745,7 +780,7 @@ export function UserProfileView({
                                 signature emoji
                               </p>
                               <div
-                                className={`bg-gradient-to-r from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border p-4`}
+                                className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-4`}
                               >
                                 <span className="mb-2 block text-3xl">
                                   {emojiStats.mostUsedEmoji.emoji}
@@ -774,7 +809,7 @@ export function UserProfileView({
                                   .map((stat) => (
                                     <div
                                       key={stat.emoji}
-                                      className={`bg-gradient-to-r from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border flex items-center gap-1 rounded-full border px-2 py-1`}
+                                      className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border flex items-center gap-1 rounded-full border bg-gradient-to-r px-2 py-1`}
                                     >
                                       <span className="text-sm">
                                         {stat.emoji}

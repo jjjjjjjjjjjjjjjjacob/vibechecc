@@ -13,8 +13,8 @@ import {
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from 'lucide-react';
-import { cn } from '@/utils/tailwind-utils';
 import { useTheme } from '@/components/theme-provider';
+import { VibeCard } from '@/features/vibes/components/vibe-card';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -110,9 +110,10 @@ function DiscoverPage() {
   // Apply user's color themes when user data changes
   React.useEffect(() => {
     if (currentUser) {
-      const primaryColor = currentUser.primaryColor || currentUser.themeColor || 'pink';
+      const primaryColor =
+        currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
-      
+
       setColorTheme(`${primaryColor}-primary` as any);
       setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
     }
@@ -123,9 +124,7 @@ function DiscoverPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1
-            className="mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
-          >
+          <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
             discover vibes by emoji
           </h1>
           <p className="text-muted-foreground drop-shadow-sm">
@@ -135,9 +134,7 @@ function DiscoverPage() {
 
         {/* Featured Collections Grid */}
         <section className="mb-12">
-          <h2
-            className="mb-6 text-2xl font-semibold lowercase bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent"
-          >
+          <h2 className="from-theme-primary to-theme-secondary mb-6 bg-gradient-to-r bg-clip-text text-2xl font-semibold text-transparent lowercase">
             featured collections
           </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -225,14 +222,12 @@ function EmojiCollectionPreview({
   emoji: string;
   minValue: number;
 }) {
-  const { data: vibes, isLoading } = useTopRatedEmojiVibes(emoji, minValue, 3);
+  const { data: vibes, isLoading } = useTopRatedEmojiVibes(emoji, minValue, 1);
 
   if (isLoading) {
     return (
-      <div className="flex gap-1">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-8 w-8 rounded" />
-        ))}
+      <div className="flex-1">
+        <Skeleton className="h-24 w-full rounded-lg" />
       </div>
     );
   }
@@ -241,32 +236,17 @@ function EmojiCollectionPreview({
     return <span className="text-muted-foreground text-xs">no vibes yet</span>;
   }
 
+  const firstVibe = vibes[0];
+
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-1">
-        {vibes.slice(0, 3).map((vibe, index) => (
-          <div
-            key={vibe.id}
-            className="h-8 w-8 overflow-hidden rounded border"
-            style={{ zIndex: 3 - index }}
-          >
-            {vibe.image ? (
-              <img
-                src={vibe.image}
-                alt={vibe.title}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="bg-muted flex h-full w-full items-center justify-center text-xs">
-                {vibe.title.charAt(0).toUpperCase()}
-              </div>
-            )}
-          </div>
-        ))}
+    <div className="pointer-events-none flex-1">
+      <div className="w-[285%] origin-top-left scale-[0.35]">
+        <VibeCard
+          vibe={firstVibe}
+          variant="compact"
+          className="pointer-events-none"
+        />
       </div>
-      <span className="text-muted-foreground text-xs">
-        {vibes.length} vibe{vibes.length !== 1 ? 's' : ''}
-      </span>
     </div>
   );
 }

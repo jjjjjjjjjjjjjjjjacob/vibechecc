@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MasonryFeed } from '@/components/masonry-feed';
 import { CreateVibeButton } from '@/components/create-vibe-button';
 import { useUser } from '@clerk/tanstack-react-start';
@@ -20,12 +19,16 @@ import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarDays, Heart, Sparkles, ArrowLeft } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 import { DualThemeColorPicker } from '@/components/dual-theme-color-picker';
 import { UserProfileView } from '@/components/user-profile-view';
-import { useTheme } from '@/components/theme-provider';
+import {
+  useTheme,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
+} from '@/components/theme-provider';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -87,8 +90,10 @@ function Profile() {
   const [uploadedImageFile, setUploadedImageFile] = React.useState<File | null>(
     null
   );
-  const [userTheme, setUserTheme] =
-    React.useState<{ primaryColor: string; secondaryColor: string }>({ primaryColor: 'pink', secondaryColor: 'orange' });
+  const [userTheme, setUserTheme] = React.useState<{
+    primaryColor: string;
+    secondaryColor: string;
+  }>({ primaryColor: 'pink', secondaryColor: 'orange' });
 
   // Initialize form with user data when loaded
   React.useEffect(() => {
@@ -100,11 +105,8 @@ function Profile() {
 
       // Initialize dual-color theme (with backward compatibility)
       const primaryColor =
-        convexUser.primaryColor ||
-        convexUser.themeColor ||
-        'pink';
-      const secondaryColor =
-        convexUser.secondaryColor || 'orange';
+        convexUser.primaryColor || convexUser.themeColor || 'pink';
+      const secondaryColor = convexUser.secondaryColor || 'orange';
       setUserTheme({ primaryColor, secondaryColor });
 
       _setBio(convexUser.bio || '');
@@ -152,6 +154,25 @@ function Profile() {
     isCreatingUser,
     ensureUserExists,
     refetchUser,
+  ]);
+
+  const { setColorTheme, setSecondaryColorTheme } = useTheme();
+
+  // Apply theme when in preview mode
+  React.useEffect(() => {
+    if (isPreviewMode || isEditing || isFullPreview) {
+      setColorTheme(`${userTheme.primaryColor}-primary` as PrimaryColorTheme);
+      setSecondaryColorTheme(
+        `${userTheme.secondaryColor}-secondary` as SecondaryColorTheme
+      );
+    }
+  }, [
+    userTheme,
+    isPreviewMode,
+    isEditing,
+    isFullPreview,
+    setColorTheme,
+    setSecondaryColorTheme,
   ]);
 
   const isLoading = !clerkLoaded || convexUserLoading || isCreatingUser;
@@ -308,17 +329,6 @@ function Profile() {
     : clerkUser.createdAt
       ? new Date(clerkUser.createdAt).toLocaleDateString()
       : 'Unknown';
-
-  const { setColorTheme, setSecondaryColorTheme } = useTheme();
-  
-  // Apply theme when in preview mode
-  React.useEffect(() => {
-    if (isPreviewMode || isEditing || isFullPreview) {
-      setColorTheme(`${userTheme.primaryColor}-primary` as any);
-      setSecondaryColorTheme(`${userTheme.secondaryColor}-secondary` as any);
-    }
-  }, [userTheme, isPreviewMode, isEditing, isFullPreview, setColorTheme, setSecondaryColorTheme]);
-  
 
   // Full preview mode - render like the user profile page
   if (isFullPreview && convexUser) {
@@ -499,7 +509,7 @@ function Profile() {
                   </form>
                 ) : (
                   <div className="flex-1">
-                    <h1 className="mb-2 text-2xl font-bold lowercase drop-shadow-md bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent">
+                    <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase drop-shadow-md">
                       {displayName}
                     </h1>
                     {username && (
@@ -547,7 +557,7 @@ function Profile() {
           </Card>
 
           <div className="mb-8">
-            <h2 className="mb-4 text-2xl font-bold lowercase bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent">
+            <h2 className="from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase">
               your vibes
             </h2>
 
@@ -562,7 +572,7 @@ function Profile() {
               emptyStateAction={
                 <CreateVibeButton
                   variant="default"
-                  className="bg-gradient-to-r from-theme-primary to-theme-secondary text-foreground shadow-lg"
+                  className="from-theme-primary to-theme-secondary text-foreground bg-gradient-to-r shadow-lg"
                 />
               }
             />

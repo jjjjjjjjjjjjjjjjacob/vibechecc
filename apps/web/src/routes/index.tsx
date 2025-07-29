@@ -18,9 +18,10 @@ function Home() {
   // Apply user's color themes when user data changes
   React.useEffect(() => {
     if (currentUser) {
-      const primaryColor = currentUser.primaryColor || currentUser.themeColor || 'pink';
+      const primaryColor =
+        currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
-      
+
       setColorTheme(`${primaryColor}-primary` as any);
       setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
     }
@@ -30,9 +31,7 @@ function Home() {
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <section className="mb-12">
-        <div
-          className="rounded-2xl bg-gradient-to-r from-theme-primary to-theme-secondary p-8 text-white md:p-12"
-        >
+        <div className="from-theme-primary to-theme-secondary rounded-2xl bg-gradient-to-r p-8 text-white md:p-12">
           <div className="max-w-2xl">
             <h1 className="mb-4 text-4xl font-bold lowercase md:text-5xl">
               discover and share vibes
