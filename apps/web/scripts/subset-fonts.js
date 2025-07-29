@@ -38,21 +38,37 @@ const EXTENDED_RANGES = [
 
 function checkFontTools() {
   try {
+    // Try standard path first
     execSync('pyftsubset --help', { stdio: 'ignore' });
     console.log('✅ pyftsubset found');
-    return true;
+    return 'pyftsubset';
   } catch {
-    console.error(
-      '❌ pyftsubset not found. Install with: pip install fonttools[woff]'
-    );
-    return false;
+    // Try user-installed Python scripts path
+    try {
+      execSync('/Users/jacob/Library/Python/3.9/bin/pyftsubset --help', {
+        stdio: 'ignore',
+      });
+      console.log('✅ pyftsubset found at user path');
+      return '/Users/jacob/Library/Python/3.9/bin/pyftsubset';
+    } catch {
+      console.error(
+        '❌ pyftsubset not found. Install with: pip install fonttools[woff]'
+      );
+      return false;
+    }
   }
 }
 
-function subsetFont(inputPath, outputPath, unicodeRanges, format = 'woff2') {
+function subsetFont(
+  inputPath,
+  outputPath,
+  unicodeRanges,
+  format = 'woff2',
+  pyftsubsetPath = 'pyftsubset'
+) {
   const ranges = unicodeRanges.join(',');
   const cmd = [
-    'pyftsubset',
+    pyftsubsetPath,
     `"${inputPath}"`,
     `--output-file="${outputPath}"`,
     `--flavor=${format}`,
@@ -82,9 +98,12 @@ function subsetFont(inputPath, outputPath, unicodeRanges, format = 'woff2') {
 
 function getFileSize(filePath) {
   try {
+    if (!existsSync(filePath)) {
+      return 'file not found';
+    }
     const stats = execSync(`ls -lh "${filePath}"`, { encoding: 'utf8' });
-    const size = stats.split(/\\s+/)[4];
-    return size;
+    const parts = stats.trim().split(/\s+/);
+    return parts[4] || 'unknown';
   } catch {
     return 'unknown';
   }
@@ -94,7 +113,8 @@ async function main() {
   console.log('🎨 Starting font subsetting process...\n');
 
   // Check if tools are available
-  if (!checkFontTools()) {
+  const pyftsubsetPath = checkFontTools();
+  if (!pyftsubsetPath) {
     console.log(
       '⚠️  Font subsetting skipped - continuing build without optimized fonts'
     );
@@ -125,18 +145,36 @@ async function main() {
       PUBLIC_FONTS_DIR,
       'noto-color-emoji-core.woff2'
     );
-    subsetFont(ORIGINAL_FONT, coreOutputWoff2, CORE_RANGES, 'woff2');
+    subsetFont(
+      ORIGINAL_FONT,
+      coreOutputWoff2,
+      CORE_RANGES,
+      'woff2',
+      pyftsubsetPath
+    );
 
     // Create extended emoji subset (WOFF2)
     const extendedOutputWoff2 = join(
       PUBLIC_FONTS_DIR,
       'noto-color-emoji-extended.woff2'
     );
-    subsetFont(ORIGINAL_FONT, extendedOutputWoff2, EXTENDED_RANGES, 'woff2');
+    subsetFont(
+      ORIGINAL_FONT,
+      extendedOutputWoff2,
+      EXTENDED_RANGES,
+      'woff2',
+      pyftsubsetPath
+    );
 
     // Create TTF fallbacks for older browsers
     const coreOutputTtf = join(PUBLIC_FONTS_DIR, 'noto-color-emoji-core.ttf');
-    subsetFont(ORIGINAL_FONT, coreOutputTtf, CORE_RANGES, 'ttf');
+    subsetFont(
+      ORIGINAL_FONT,
+      coreOutputTtf,
+      CORE_RANGES,
+      'ttf',
+      pyftsubsetPath
+    );
 
     console.log('\n📊 Size comparison:');
     console.log(`Original: ${originalSize}`);

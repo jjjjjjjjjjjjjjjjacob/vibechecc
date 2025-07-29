@@ -57,8 +57,8 @@ export function preloadCriticalFonts() {
     .then((font) => {
       document.fonts.add(font);
     })
-    .catch((error) => {
-      console.warn('Failed to load core emoji font:', error);
+    .catch((_error) => {
+      // console.warn('Failed to load core emoji font:', error);
     });
 }
 
@@ -84,8 +84,8 @@ export function loadExtendedEmojiFont() {
       document.fonts.add(font);
       return font;
     })
-    .catch((error) => {
-      console.warn('Failed to load extended emoji font:', error);
+    .catch((_error) => {
+      // console.warn('Failed to load extended emoji font:', error);
       return null;
     });
 }

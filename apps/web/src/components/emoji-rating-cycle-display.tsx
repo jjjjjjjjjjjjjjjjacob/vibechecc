@@ -14,6 +14,7 @@ interface EmojiRatingCycleDisplayProps {
   vibeTitle?: string;
   emojiMetadata?: Record<string, EmojiRatingMetadata>;
   className?: string;
+  variant?: 'color' | 'gradient';
 }
 
 const DEFAULT_EMOJIS = [
@@ -35,6 +36,7 @@ export function EmojiRatingCycleDisplay({
   vibeTitle,
   emojiMetadata = {},
   className,
+  // variant = 'color',
 }: EmojiRatingCycleDisplayProps) {
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);

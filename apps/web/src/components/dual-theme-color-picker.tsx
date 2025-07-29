@@ -165,7 +165,7 @@ function ColorOption({
           type="button"
           onClick={onSelect}
           className={cn(
-            'group relative flex items-center justify-center rounded-lg border-2 transition-all duration-200',
+            'group relative flex items-center justify-center overflow-hidden rounded-lg border-2 transition-all duration-200',
             'hover:scale-105 hover:shadow-md',
             sizeClasses,
             isSelected
@@ -173,15 +173,19 @@ function ColorOption({
               : 'border-white/20 hover:border-white/40'
           )}
           data-theme-primary={theme.id}
-          style={{
-            backgroundColor: `hsl(var(--color-${theme.id}) / 0.1)`,
-          }}
         >
+          {/* Background color layer */}
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundColor: `var(--color-${theme.id})`,
+            }}
+          />
           {/* Color preview circle */}
           <div
             className={cn('relative overflow-hidden rounded-full', circleSize)}
             style={{
-              backgroundColor: `hsl(var(--color-${theme.id}))`,
+              backgroundColor: `var(--color-${theme.id})`,
             }}
           >
             {isSelected && (

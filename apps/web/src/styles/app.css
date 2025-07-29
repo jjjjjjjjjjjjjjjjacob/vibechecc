@@ -1,90 +1,18 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-
-/* Geist Font Definitions */
-@font-face {
-  font-family: 'Geist Sans';
-  src: url('/fonts/GeistSans-Variable.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Noto Emoji';
-  src: url('/fonts/NotoEmoji-VariableFont_wght.ttf');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Core emoji subset - loads immediately (critical path) */
-@font-face {
-  font-family: 'Noto Color Emoji Core';
-  src:
-    url('/fonts/noto-color-emoji-core.woff2') format('woff2'),
-    url('/fonts/noto-color-emoji-core.ttf') format('truetype');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-  unicode-range:
-    U+1F600-1F64F, U+1F300-1F5FF, U+1F680-1F6FF, U+1F1E0-1F1FF, U+2600-26FF,
-    U+2700-27BF, U+FE00-FE0F, U+1F900-1F9FF;
-}
-
-/* Extended emoji subset - loads on-demand */
-@font-face {
-  font-family: 'Noto Color Emoji Extended';
-  src: url('/fonts/noto-color-emoji-extended.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+1F780-1F7FF, U+1F800-1F8FF, U+1FAA0-1FAFF, U+1FB00-1FBFF;
-}
-
-/* Fallback for unsupported emojis */
-@font-face {
-  font-family: 'Noto Color Emoji';
-  src: url('/fonts/NotoColorEmoji-Regular.ttf');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Doto';
-  src: url('/fonts/Doto-VariableFont_ROND,wght.ttf');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
+@import './fonts.css';
 
 @custom-variant dark (&:is(.dark *));
 
 /* Global themes */
 @theme inline {
-  --font-family-sans:
-    'Geist Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Emoji',
-    'Noto Color Emoji', sans-serif;
-  --font-family-mono:
-    'Geist Mono', 'Inter Mono', 'SF Mono', Monaco, 'Cascadia Code',
-    'Roboto Mono', Menlo, Consolas, 'Courier New', monospace;
-  --font-geist: 'Geist Sans';
-  --font-geist-mono: 'Geist Mono';
+  --font-family-sans: var(--font-sans);
+  --font-family-mono: var(--font-mono);
+  --font-geist: 'GeistSans';
+  --font-geist-mono: 'GeistMono';
   --font-doto: 'Doto';
-  --font-noto: 'Noto Emoji';
-  --font-noto-color:
-    'Noto Color Emoji Core', 'Noto Color Emoji Extended', 'Noto Color Emoji',
-    'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-noto: var(--font-emoji-outline);
+  --font-noto-color: var(--font-emoji);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
@@ -300,17 +228,14 @@
 
 /* Shimmy animation for rating */
 @keyframes shimmy {
-  0% {
-    transform: translateX(0) scale(1.05);
+  0%, 100% {
+    transform: translateX(0) scale(1);
   }
-  25% {
-    transform: translateX(-2px) scale(1.05);
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-1px) scale(1.02);
   }
-  75% {
-    transform: translateX(2px) scale(1.05);
-  }
-  100% {
-    transform: translateX(0) scale(1.05);
+  20%, 40%, 60%, 80% {
+    transform: translateX(1px) scale(1.02);
   }
 }
 
@@ -978,4 +903,143 @@ h1[data-localization-key='userProfile.navbar.title'] {
 
 .yellow-secondary {
   --theme-secondary: hsl(54 92% 50%); /* yellow-500 */
+}
+
+/* Theme-based gradient utilities */
+.themed-gradient-text {
+  @apply bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent;
+}
+
+.themed-gradient-button {
+  @apply bg-gradient-to-r from-theme-primary to-theme-secondary;
+}
+
+/* Apply theme colors when data attributes are set */
+[data-theme-primary="purple"] {
+  --theme-primary: hsl(262 83% 48%);
+}
+
+[data-theme-primary="pink"] {
+  --theme-primary: hsl(330 81% 50%);
+}
+
+[data-theme-primary="blue"] {
+  --theme-primary: hsl(217 91% 50%);
+}
+
+[data-theme-primary="emerald"] {
+  --theme-primary: hsl(160 84% 35%);
+}
+
+[data-theme-primary="orange"] {
+  --theme-primary: hsl(25 95% 48%);
+}
+
+[data-theme-primary="red"] {
+  --theme-primary: hsl(0 84% 50%);
+}
+
+[data-theme-primary="indigo"] {
+  --theme-primary: hsl(239 84% 57%);
+}
+
+[data-theme-primary="teal"] {
+  --theme-primary: hsl(173 80% 35%);
+}
+
+[data-theme-primary="slate"] {
+  --theme-primary: hsl(215 28% 25%);
+}
+
+[data-theme-primary="amber"] {
+  --theme-primary: hsl(45 93% 42%);
+}
+
+[data-theme-primary="lime"] {
+  --theme-primary: hsl(84 81% 39%);
+}
+
+[data-theme-primary="cyan"] {
+  --theme-primary: hsl(188 95% 32%);
+}
+
+[data-theme-primary="violet"] {
+  --theme-primary: hsl(262 90% 65%);
+}
+
+[data-theme-primary="fuchsia"] {
+  --theme-primary: hsl(292 84% 51%);
+}
+
+[data-theme-primary="green"] {
+  --theme-primary: hsl(142 76% 31%);
+}
+
+[data-theme-primary="yellow"] {
+  --theme-primary: hsl(54 92% 50%);
+}
+
+/* Apply secondary theme colors */
+[data-theme-secondary="purple"] {
+  --theme-secondary: hsl(262 83% 48%);
+}
+
+[data-theme-secondary="pink"] {
+  --theme-secondary: hsl(330 81% 50%);
+}
+
+[data-theme-secondary="blue"] {
+  --theme-secondary: hsl(217 91% 50%);
+}
+
+[data-theme-secondary="emerald"] {
+  --theme-secondary: hsl(160 84% 35%);
+}
+
+[data-theme-secondary="orange"] {
+  --theme-secondary: hsl(25 95% 48%);
+}
+
+[data-theme-secondary="red"] {
+  --theme-secondary: hsl(0 84% 50%);
+}
+
+[data-theme-secondary="indigo"] {
+  --theme-secondary: hsl(239 84% 57%);
+}
+
+[data-theme-secondary="teal"] {
+  --theme-secondary: hsl(173 80% 35%);
+}
+
+[data-theme-secondary="slate"] {
+  --theme-secondary: hsl(215 28% 25%);
+}
+
+[data-theme-secondary="amber"] {
+  --theme-secondary: hsl(45 93% 42%);
+}
+
+[data-theme-secondary="lime"] {
+  --theme-secondary: hsl(84 81% 39%);
+}
+
+[data-theme-secondary="cyan"] {
+  --theme-secondary: hsl(188 95% 32%);
+}
+
+[data-theme-secondary="violet"] {
+  --theme-secondary: hsl(262 90% 65%);
+}
+
+[data-theme-secondary="fuchsia"] {
+  --theme-secondary: hsl(292 84% 51%);
+}
+
+[data-theme-secondary="green"] {
+  --theme-secondary: hsl(142 76% 31%);
+}
+
+[data-theme-secondary="yellow"] {
+  --theme-secondary: hsl(54 92% 50%);
 }

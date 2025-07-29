@@ -109,7 +109,7 @@ export function getThemeGradientClasses() {
 
 export function applyUserTheme(_userTheme: UserTheme) {
   // Legacy function - now handled by theme provider
-  console.warn('applyUserTheme is deprecated. Use theme provider instead.');
+  // console.warn('applyUserTheme is deprecated. Use theme provider instead.');
 }
 
 export function applyScopedUserTheme(
@@ -117,14 +117,14 @@ export function applyScopedUserTheme(
   _element: HTMLElement
 ) {
   // Legacy function - now handled by theme provider
-  console.warn(
-    'applyScopedUserTheme is deprecated. Use theme provider instead.'
-  );
+  // console.warn(
+  //   'applyScopedUserTheme is deprecated. Use theme provider instead.'
+  // );
 }
 
 export function injectUserThemeCSS(_userTheme: UserTheme) {
   // Legacy function - now handled by theme provider
-  console.warn('injectUserThemeCSS is deprecated. Use theme provider instead.');
+  // console.warn('injectUserThemeCSS is deprecated. Use theme provider instead.');
 }
 
 // Get the actual HSL color value for a theme color

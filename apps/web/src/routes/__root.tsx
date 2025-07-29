@@ -21,7 +21,6 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
 import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
-import { OptimizedFontLoader } from '@/components/optimized-font-loader';
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
@@ -68,6 +67,28 @@ export const Route = createRootRouteWithContext<{
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
+      // Font preloading for critical fonts
+      {
+        rel: 'preload',
+        href: '/fonts/optimized/GeistSans-Variable.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'preload',
+        href: '/fonts/optimized/NotoEmoji-VariableFont_wght.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'preload',
+        href: '/fonts/optimized/noto-color-emoji-core.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
       {
         rel: 'apple-touch-icon',
         sizes: '180x180',
@@ -175,7 +196,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <PostHogProvider>
           <ThemeProvider>
             <div className="flex min-h-screen flex-col">
-              <OptimizedFontLoader />
               <PostHogPageTracker />
               <ClerkPostHogIntegration />
               <Header />
@@ -211,7 +231,7 @@ function LoadingIndicator() {
         isLoading ? `opacity-100 delay-300` : `opacity-0 delay-0`
       }`}
     >
-      <div className="h-full animate-pulse bg-gradient-to-r from-pink-500 to-orange-500" />
+      <div className="from-theme-primary to-theme-secondary h-full animate-pulse bg-gradient-to-r" />
     </div>
   );
 }

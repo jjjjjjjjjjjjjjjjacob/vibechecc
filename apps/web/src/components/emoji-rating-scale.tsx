@@ -9,7 +9,7 @@ interface EmojiRatingScaleProps {
   size?: 'sm' | 'md' | 'lg';
   showTooltip?: boolean;
   className?: string;
-  preset?: 'color' | 'gradient';
+  variant?: 'color' | 'gradient';
   onMouseDown?: () => void;
   onMouseUp?: () => void;
   emojiColor?: string;
@@ -24,7 +24,7 @@ export function EmojiRatingScale({
   size = 'md',
   showTooltip = true,
   className,
-  preset = 'color',
+  variant = 'color',
   onMouseDown,
   onMouseUp,
   emojiColor,
@@ -142,18 +142,26 @@ export function EmojiRatingScale({
         aria-label={`Rate ${value} out of 5 with ${emoji}`}
       >
         <div
+          data-variant={variant}
+          className="font-noto-color data-[variant=gradient]:font-noto opacity-30 brightness-60 grayscale-100"
+        >
+          {[...Array(5)].map((_, i) => (
+            <span key={`unfilled-${i}`}>{emoji}</span>
+          ))}
+        </div>
+        <div
           className="absolute inset-0 flex overflow-hidden"
           style={{ width: `${(displayValue / 5) * 100}%` }}
         >
           <div
             className={cn(
               'flex',
-              preset === 'gradient'
-                ? 'font-noto bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text whitespace-pre text-transparent transition-all group-active/rating-display:brightness-150'
-                : 'font-noto-color whitespace-pre'
+              variant === 'gradient'
+                ? 'font-noto from-theme-primary via-theme-secondary to-theme-primary bg-gradient-to-r bg-clip-text whitespace-pre text-transparent opacity-80 brightness-150 transition-all group-active/rating-display:brightness-[1000%]'
+                : 'font-noto-color whitespace-pre opacity-[0.99]'
             )}
             style={
-              preset === 'color' && emojiColor
+              variant === 'color' && emojiColor
                 ? { color: emojiColor }
                 : undefined
             }
@@ -162,14 +170,6 @@ export function EmojiRatingScale({
               <span key={`filled-${i}`}>{emoji}</span>
             ))}
           </div>
-        </div>
-        <div
-          data-preset={preset}
-          className="font-noto-color data-[preset=gradient]:font-noto flex opacity-30"
-        >
-          {[...Array(5)].map((_, i) => (
-            <span key={`unfilled-${i}`}>{emoji}</span>
-          ))}
         </div>
         {mobileSlider && (onChange || onClick) && (
           <input

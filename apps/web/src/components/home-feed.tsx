@@ -114,16 +114,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
         }
       });
     }
-  }, [
-    activeTab,
-    forYouQuery.data,
-    hotQuery.data,
-    newQuery.data,
-    cursors,
-    forYouQuery,
-    hotQuery,
-    newQuery,
-  ]);
+  }, [activeTab, forYouQuery.data, hotQuery.data, newQuery.data, cursors]);
 
   // Handle tab change
   const handleTabChange = (tab: FeedTab) => {
@@ -146,7 +137,14 @@ export function HomeFeed({ className }: HomeFeedProps) {
         [activeTab]: currentQuery.data.continueCursor,
       }));
     }
-  }, [activeTab, hasMore, isLoading, forYouQuery, hotQuery, newQuery]);
+  }, [
+    activeTab,
+    hasMore,
+    isLoading,
+    forYouQuery.data?.continueCursor,
+    hotQuery.data?.continueCursor,
+    newQuery.data?.continueCursor,
+  ]);
 
   // Feed tabs configuration
   const feedTabs = [

@@ -15,8 +15,9 @@ import { Button } from './ui/button';
 interface TopEmojiRatingsAccordionProps {
   emojiRatings: EmojiRating[];
   className?: string;
-  onEmojiClick?: (emoji: string) => void;
+  onEmojiClick?: (emoji: string, value: number) => void;
   vibeId?: string;
+  variant?: 'color' | 'gradient';
 }
 
 export function TopEmojiRatingsAccordion({
@@ -24,6 +25,7 @@ export function TopEmojiRatingsAccordion({
   className,
   onEmojiClick,
   vibeId,
+  variant = 'color',
 }: TopEmojiRatingsAccordionProps) {
   const topRatings = emojiRatings.slice(0, 4);
   const remainingRatings = emojiRatings.slice(4);
@@ -48,6 +50,7 @@ export function TopEmojiRatingsAccordion({
               rating={rating}
               showScale={true}
               onEmojiClick={onEmojiClick}
+              variant={variant}
             />
           </div>
         ))}

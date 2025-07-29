@@ -13,7 +13,6 @@ import {
   useMostInteractedEmoji,
   useCreateEmojiRatingMutation,
   useEmojiMetadata,
-  useQuickReactMutation,
 } from '@/queries';
 import toast from '@/utils/toast';
 import {
@@ -82,7 +81,6 @@ export function VibeCard({
   const { user } = useUser();
   const { trackEvents } = usePostHog();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
-  const quickReactMutation = useQuickReactMutation();
   const { data: emojiMetadataArray } = useEmojiMetadata();
 
   // Fetch emoji rating data - get all unique emoji reactions for this vibe
@@ -204,53 +202,25 @@ export function VibeCard({
     });
   };
 
-  const handleEmojiRatingClick = (emojiData: string) => {
+  const handleEmojiRatingClick = (emoji: string, value?: number) => {
     if (!user?.id) {
       setShowAuthDialog(true);
       return;
     }
 
-    // Check if the emoji data contains a decimal value
-    const [emoji, value] = emojiData.includes(':')
-      ? emojiData.split(':')
-      : [emojiData, null];
     setSelectedEmojiForRating(emoji);
 
     // If a specific value was provided, store it for the popover
-    if (value) {
-      setPreselectedRatingValue(parseFloat(value));
+    if (value !== undefined) {
+      setPreselectedRatingValue(value);
     }
 
     setShowEmojiRatingPopover(true);
   };
 
   const handleQuickReact = async (emoji: string) => {
-    if (!user?.id) {
-      setShowAuthDialog(true);
-      return;
-    }
-
-    try {
-      await quickReactMutation.mutateAsync({
-        vibeId: vibe.id,
-        emoji,
-      });
-
-      toast.success('quick reaction added!', {
-        duration: 2000,
-        icon: emoji,
-      });
-    } catch (error) {
-      if (error instanceof Error && error.message?.includes('already rated')) {
-        // User already has a rating, open the rating popover
-        setSelectedEmojiForRating(emoji);
-        setShowEmojiRatingPopover(true);
-      } else {
-        toast.error('failed to add reaction', {
-          duration: 2000,
-        });
-      }
-    }
+    // Always open the emoji rating popover instead of quick reacting
+    handleEmojiRatingClick(emoji, undefined);
   };
 
   // Skeleton component for rating section
@@ -478,7 +448,6 @@ export function VibeCard({
                       reactions={emojiReactions}
                       onReact={handleQuickReact}
                       showAddButton={true}
-                      ratingMode={true}
                       onRatingSubmit={handleEmojiRating}
                       vibeTitle={vibe.title}
                       vibeId={vibe.id}
@@ -486,7 +455,7 @@ export function VibeCard({
                     />
                   ) : (
                     <button
-                      onClick={() => handleEmojiRatingClick('')}
+                      onClick={() => handleEmojiRatingClick('', undefined)}
                       className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs font-medium transition-colors"
                     >
                       <PlusCircle className="h-3.5 w-3.5" />
@@ -501,33 +470,24 @@ export function VibeCard({
       </Card>
 
       {/* Hidden Emoji Rating Popover for clicking on emoji reactions */}
-      <div className="pointer-events-none">
-        <EmojiRatingPopover
-          onSubmit={handleEmojiRating}
-          isSubmitting={createEmojiRatingMutation.isPending}
-          vibeTitle={vibe.title}
-          emojiMetadata={emojiMetadataRecord}
-          preSelectedEmoji={selectedEmojiForRating || undefined}
-          preSelectedValue={preselectedRatingValue || undefined}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedEmojiForRating(null);
-              setPreselectedRatingValue(null);
-            }
-          }}
-        >
-          <button
-            ref={(el) => {
-              if (el && showEmojiRatingPopover && selectedEmojiForRating) {
-                el.click();
-                setShowEmojiRatingPopover(false);
-              }
-            }}
-            className="sr-only"
-            aria-hidden="true"
-          />
-        </EmojiRatingPopover>
-      </div>
+      <EmojiRatingPopover
+        open={showEmojiRatingPopover}
+        onOpenChange={(open) => {
+          setShowEmojiRatingPopover(open);
+          if (!open) {
+            setSelectedEmojiForRating(null);
+            setPreselectedRatingValue(null);
+          }
+        }}
+        onSubmit={handleEmojiRating}
+        isSubmitting={createEmojiRatingMutation.isPending}
+        vibeTitle={vibe.title}
+        emojiMetadata={emojiMetadataRecord}
+        preSelectedEmoji={selectedEmojiForRating || undefined}
+        preSelectedValue={preselectedRatingValue || undefined}
+      >
+        <div style={{ display: 'none' }} />
+      </EmojiRatingPopover>
 
       {/* Auth Prompt Dialog */}
       <AuthPromptDialog
