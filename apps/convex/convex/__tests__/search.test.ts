@@ -15,7 +15,10 @@ describe('Search Functions', () => {
 
       const result = await t.query(api.search.searchAll, {
         query: '',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(result).toEqual({
@@ -60,7 +63,10 @@ describe('Search Functions', () => {
       // Search for "funny"
       const result = await t.query(api.search.searchAll, {
         query: 'funny',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(result.vibes).toHaveLength(1);
@@ -85,7 +91,10 @@ describe('Search Functions', () => {
       // Search for "alice"
       const result = await t.query(api.search.searchAll, {
         query: 'alice',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(result.users).toHaveLength(1);
@@ -141,7 +150,10 @@ describe('Search Functions', () => {
       // Search for "fun"
       const result = await t.query(api.search.searchAll, {
         query: 'fun',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(result.tags).toHaveLength(1);
@@ -175,7 +187,10 @@ describe('Search Functions', () => {
       // Search with typo "amzing" (missing 'a')
       const result = await t.query(api.search.searchAll, {
         query: 'amzing',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(result.vibes).toHaveLength(1);
@@ -258,7 +273,10 @@ describe('Search Functions', () => {
         filters: {
           minRating: 4,
         },
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(result.vibes).toHaveLength(1);
@@ -297,7 +315,10 @@ describe('Search Functions', () => {
       // Search with quotes for exact match
       const exactResult = await t.query(api.search.searchAll, {
         query: '"love coding"',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(exactResult.vibes).toHaveLength(1);
@@ -306,7 +327,10 @@ describe('Search Functions', () => {
       // Search with minus operator for exclusion
       const excludeResult = await t.query(api.search.searchAll, {
         query: 'love -TypeScript',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(excludeResult.vibes).toHaveLength(0); // Both contain TypeScript
@@ -350,7 +374,10 @@ describe('Search Functions', () => {
       // Search for "python"
       const result = await t.query(api.search.searchAll, {
         query: 'python',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(result.vibes).toHaveLength(3);
@@ -390,7 +417,10 @@ describe('Search Functions', () => {
       // Search for C++
       const cppResult = await t.query(api.search.searchAll, {
         query: 'C++',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(cppResult.vibes).toHaveLength(1);
@@ -399,7 +429,10 @@ describe('Search Functions', () => {
       // Search for @mentions
       const mentionResult = await t.query(api.search.searchAll, {
         query: '@mentions',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       expect(mentionResult.vibes).toHaveLength(1);
@@ -434,7 +467,10 @@ describe('Search Functions', () => {
       // Search with limit
       const result = await t.query(api.search.searchAll, {
         query: 'test',
-        limit: 5,
+        paginationOpts: {
+          numItems: 5,
+          cursor: null,
+        },
       });
 
       expect(result.vibes).toHaveLength(5);
@@ -447,7 +483,10 @@ describe('Search Functions', () => {
       // Search for "create"
       const result = await t.query(api.search.searchAll, {
         query: 'create',
-        limit: 10,
+        paginationOpts: {
+          numItems: 10,
+          cursor: null,
+        },
       });
 
       // Should include action to create new vibe
@@ -723,7 +762,10 @@ describe('Search Functions', () => {
       const startTime = Date.now();
       const result = await t.query(api.search.searchAll, {
         query: 'cats',
-        limit: 20,
+        paginationOpts: {
+          numItems: 20,
+          cursor: null,
+        },
       });
       const endTime = Date.now();
 

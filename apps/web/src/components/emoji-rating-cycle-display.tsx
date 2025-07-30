@@ -15,6 +15,7 @@ interface EmojiRatingCycleDisplayProps {
   emojiMetadata?: Record<string, EmojiRatingMetadata>;
   className?: string;
   variant?: 'color' | 'gradient';
+  showBeTheFirst?: boolean;
 }
 
 const DEFAULT_EMOJIS = [
@@ -36,6 +37,7 @@ export function EmojiRatingCycleDisplay({
   vibeTitle,
   emojiMetadata = {},
   className,
+  showBeTheFirst = false,
   // variant = 'color',
 }: EmojiRatingCycleDisplayProps) {
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
@@ -110,7 +112,7 @@ export function EmojiRatingCycleDisplay({
         </div>
 
         <span className="text-muted-foreground text-xs transition-opacity duration-200">
-          {currentEmoji === '❓' ? 'rate' : 'click to rate'}
+          {showBeTheFirst ? 'be the first to rate' : (currentEmoji === '❓' ? 'rate' : 'click to rate')}
         </span>
       </div>
     </EmojiRatingPopover>

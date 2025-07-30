@@ -45,7 +45,14 @@ const schema = defineSchema({
         website: v.optional(v.string()),
       })
     ), // Social media links
-  }).index('byExternalId', ['externalId']), // Primary index for Clerk user lookups
+  })
+    .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
+    .searchIndex('searchUsername', {
+      searchField: 'username',
+    })
+    .searchIndex('searchBio', {
+      searchField: 'bio',
+    }),
 
   vibes: defineTable({
     id: v.string(),
@@ -57,7 +64,16 @@ const schema = defineSchema({
     tags: v.optional(v.array(v.string())),
   })
     .index('id', ['id'])
-    .index('createdBy', ['createdById']),
+    .index('createdBy', ['createdById'])
+    .index('byCreatedAt', ['createdAt'])
+    .searchIndex('searchTitle', {
+      searchField: 'title',
+      filterFields: ['createdById', 'tags'],
+    })
+    .searchIndex('searchDescription', {
+      searchField: 'description',
+      filterFields: ['createdById', 'tags'],
+    }),
 
   ratings: defineTable({
     vibeId: v.string(),
@@ -73,7 +89,13 @@ const schema = defineSchema({
     .index('user', ['userId'])
     .index('vibeAndUser', ['vibeId', 'userId'])
     .index('vibeAndEmoji', ['vibeId', 'emoji'])
-    .index('byCreatedAt', ['createdAt']),
+    .index('byCreatedAt', ['createdAt'])
+    .index('byUserAndEmoji', ['userId', 'emoji'])
+    .index('byValue', ['value'])
+    .searchIndex('searchReview', {
+      searchField: 'review',
+      filterFields: ['vibeId', 'userId', 'emoji', 'value'],
+    }),
 
   // Emojis table to store all available emojis with metadata
   emojis: defineTable({

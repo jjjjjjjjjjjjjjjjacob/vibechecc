@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberater/convex';
-import type { SearchFilters } from '@viberater/types';
+import type { SearchRequest, SearchFilters } from '@viberater/types';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useEffect } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
 
 // Valid sort options for Convex search
@@ -11,8 +11,13 @@ const VALID_CONVEX_SORT_OPTIONS = [
   'relevance',
   'rating_desc',
   'rating_asc',
+  'top_rated',
+  'most_rated',
   'recent',
   'oldest',
+  'name',
+  'creation_date',
+  'interaction_time',
 ] as const;
 
 // Helper to filter SearchFilters to only include Convex-compatible options
@@ -32,30 +37,36 @@ function filterForConvex(filters?: SearchFilters): typeof filters {
   return convexFilters as typeof filters;
 }
 
-interface UseSearchOptions {
-  debounceMs?: number;
+interface UseSearchResultsParams {
+  query: string;
+  filters?: SearchRequest['filters'];
   limit?: number;
-  filters?: SearchFilters;
-  cursor?: string;
+  page?: number;
+  includeTypes?: string[];
 }
 
-export function useSearch(options: UseSearchOptions = {}) {
-  const { debounceMs = 150, limit = 20, filters, cursor } = options;
-  const [query, setQuery] = useState('');
-  const debouncedQuery = useDebouncedValue(query, debounceMs);
+export function useSearchResultsImproved({
+  query,
+  filters,
+  limit = 20,
+  page = 1,
+  includeTypes,
+}: UseSearchResultsParams) {
+  const debouncedQuery = useDebouncedValue(query, 300);
   const { user } = useUser();
 
-  // Use Convex query for search with pagination
+  // Use the improved search API with proper pagination
   const searchQuery = useQuery({
-    ...convexQuery(api.search.searchAll, {
+    ...convexQuery(api.searchImproved.searchAllImproved, {
       query: debouncedQuery,
       filters: filterForConvex(filters),
-      paginationOpts: {
-        numItems: limit,
-        cursor: cursor || null,
-      },
+      page,
+      pageSize: limit,
+      includeTypes,
     }),
-    enabled: debouncedQuery.trim().length > 0,
+    enabled: true, // Always enabled, backend handles empty queries
+    // Keep previous data while loading next page
+    placeholderData: (previousData) => previousData,
   });
 
   // Track search mutation
@@ -63,7 +74,7 @@ export function useSearch(options: UseSearchOptions = {}) {
     mutationFn: useConvexMutation(api.search.trackSearch),
   });
 
-  // Track search when debounced query changes (only for authenticated users)
+  // Track search when debounced query changes (only for non-empty queries and authenticated users)
   useEffect(() => {
     if (debouncedQuery.trim() && searchQuery.data && user?.id) {
       trackSearchMutation.mutate({
@@ -73,40 +84,11 @@ export function useSearch(options: UseSearchOptions = {}) {
     }
   }, [debouncedQuery, searchQuery.data, user?.id, trackSearchMutation]);
 
-  const search = useCallback((searchQuery: string) => {
-    setQuery(searchQuery);
-  }, []);
-
-  const clearSearch = useCallback(() => {
-    setQuery('');
-  }, []);
-
   return {
-    query,
-    results: searchQuery.data ?? null,
+    data: searchQuery.data,
     isLoading: searchQuery.isLoading,
     isError: searchQuery.isError,
     error: searchQuery.error,
-    search,
-    clearSearch,
-  };
-}
-
-export function useSearchSuggestions(query: string) {
-  const debouncedQuery = useDebouncedValue(query, 150); // Faster debounce for suggestions
-
-  // Use Convex query for suggestions
-  const { data, isLoading, isError, error } = useQuery({
-    ...convexQuery(api.search.getSearchSuggestions, {
-      query: debouncedQuery,
-    }),
-    enabled: true, // Always enabled to get suggestions even when query is empty
-  });
-
-  return {
-    data: data ?? null,
-    isLoading,
-    isError,
-    error,
+    isSuccess: searchQuery.isSuccess,
   };
 }

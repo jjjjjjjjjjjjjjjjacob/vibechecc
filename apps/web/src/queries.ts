@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import {
   convexQuery,
   useConvexMutation,
@@ -25,6 +25,52 @@ export function useVibesPaginated(
     ...convexQuery(api.vibes.getAll, {
       limit,
       cursor: options?.cursor,
+    }),
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Infinite query to get paginated vibes with full details
+export function useVibesPaginatedInfinite(
+  limit?: number,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    queryKey: ['vibes', 'paginated-infinite', limit],
+    queryFn: async ({ pageParam }) => {
+      // Use convexQuery directly with the correct API call
+      const queryArgs = convexQuery(api.vibes.getAll, {
+        limit,
+        cursor: pageParam,
+      });
+      return queryArgs.queryFn();
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage?.nextCursor,
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Query to get filtered vibes with pagination
+export function useFilteredVibesPaginated(
+  limit?: number,
+  options?: {
+    enabled?: boolean;
+    cursor?: string;
+    filters?: {
+      emojis?: string[];
+      minRating?: number;
+      maxRating?: number;
+      tags?: string[];
+      sort?: 'recent' | 'rating_desc' | 'rating_asc' | 'top_rated' | 'most_rated' | 'name' | 'creation_date';
+    };
+  }
+) {
+  return useQuery({
+    ...convexQuery(api.vibes.getFilteredVibes, {
+      limit,
+      cursor: options?.cursor,
+      filters: options?.filters,
     }),
     enabled: options?.enabled !== false,
   });
@@ -208,6 +254,27 @@ export function useTopRatedVibes(
       limit,
       cursor: options?.cursor,
     }),
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Infinite query to get top-rated vibes
+export function useTopRatedVibesInfinite(
+  limit?: number,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    queryKey: ['vibes', 'top-rated-infinite', limit],
+    queryFn: async ({ pageParam }) => {
+      // Use convexQuery directly with the correct API call
+      const queryArgs = convexQuery(api.vibes.getTopRated, {
+        limit,
+        cursor: pageParam,
+      });
+      return queryArgs.queryFn();
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage?.nextCursor,
     enabled: options?.enabled !== false,
   });
 }

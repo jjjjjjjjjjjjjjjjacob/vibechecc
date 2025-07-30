@@ -13,6 +13,7 @@ import { SlidersHorizontal, X } from 'lucide-react';
 import { EmojiSearchCommand } from '@/components/emoji-search-command';
 import { EmojiPillFilters } from '@/components/emoji-pill-filters';
 import { RatingRangeSlider } from '@/components/rating-range-slider';
+import { TagSearchCommand } from '@/components/tag-search-command';
 
 interface MobileFilterSheetProps {
   emojiFilter?: string[];
@@ -20,10 +21,12 @@ interface MobileFilterSheetProps {
   rating?: number;
   ratingMin?: number;
   ratingMax?: number;
+  tags?: string[];
   onEmojiFilterChange: (emojis: string[]) => void;
   onEmojiMinValueChange: (value: number) => void;
   onRatingChange: (rating?: number) => void;
   onRatingRangeChange?: (min: number, max: number) => void;
+  onTagsChange: (tags: string[]) => void;
   onClearFilters: () => void;
 }
 
@@ -33,10 +36,12 @@ export function MobileFilterSheet({
   rating,
   ratingMin = 1,
   ratingMax = 5,
+  tags,
   onEmojiFilterChange,
   onEmojiMinValueChange,
   onRatingChange,
   onRatingRangeChange,
+  onTagsChange,
   onClearFilters,
 }: MobileFilterSheetProps) {
   const [emojiSearchValue, setEmojiSearchValue] = React.useState('');
@@ -47,7 +52,8 @@ export function MobileFilterSheet({
     rating !== undefined ||
     ratingMin !== 1 ||
     ratingMax !== 5 ||
-    emojiMinValue !== undefined;
+    emojiMinValue !== undefined ||
+    (tags && tags.length > 0);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -166,6 +172,26 @@ export function MobileFilterSheet({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Tag Filter */}
+          <div>
+            <Label className="mb-2 block text-sm font-medium">
+              filter by tags
+            </Label>
+            <TagSearchCommand
+              selectedTags={tags || []}
+              onTagSelect={(tag) => {
+                const current = tags || [];
+                if (!current.includes(tag)) {
+                  onTagsChange([...current, tag]);
+                }
+              }}
+              onTagRemove={(tag) => {
+                const updated = (tags || []).filter(t => t !== tag);
+                onTagsChange(updated);
+              }}
+            />
           </div>
 
           {/* General Rating Range Filter */}

@@ -7,7 +7,6 @@ import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
-import { PlusCircle } from 'lucide-react';
 import {
   useTopEmojiRatings,
   useMostInteractedEmoji,
@@ -33,7 +32,8 @@ type VibeCardVariant =
   | 'compact'
   | 'feed-grid'
   | 'feed-masonry'
-  | 'feed-single';
+  | 'feed-single'
+  | 'list';
 
 interface VibeCardProps {
   vibe: Vibe;
@@ -246,6 +246,152 @@ export function VibeCard({
     </div>
   );
 
+  // List variant implementation
+  if (finalVariant === 'list') {
+    return (
+      <>
+        <div
+          className={cn(
+            'group relative overflow-hidden rounded-lg transition-all duration-200 hover:shadow-md',
+            'h-24 sm:h-28',
+            className
+          )}
+        >
+          <Link
+            to="/vibes/$vibeId"
+            params={{ vibeId: vibe.id }}
+            onClick={() => {
+              trackEvents.vibeViewed(vibe.id);
+            }}
+            className="block h-full"
+          >
+            {/* Background image or placeholder */}
+            <div className="absolute inset-0">
+              {usePlaceholder ? (
+                <SimpleVibePlaceholder
+                  title={vibe.title}
+                  className="h-full w-full"
+                  hideText
+                />
+              ) : (
+                <img
+                  src={vibe.image}
+                  alt={vibe.title}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={() => setImageError(true)}
+                />
+              )}
+              {/* Gradient overlay */}
+            </div>
+
+            {/* Content overlay */}
+            <div className="relative z-10 flex h-full items-center justify-between p-4">
+              {/* Left side: Avatar and title */}
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                {vibe.createdBy && (
+                  <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-white/20">
+                    <AvatarImage
+                      src={getUserAvatarUrl(vibe.createdBy)}
+                      alt={computeUserDisplayName(vibe.createdBy)}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-background/50 text-xs">
+                      {getUserInitials(vibe.createdBy)}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+                <div className="min-w-0 flex-1">
+                  <h3 className="line-clamp-1 text-base font-bold text-white sm:text-lg">
+                    {vibe.title}
+                  </h3>
+                  <p className="line-clamp-1 text-sm text-white/70">
+                    {vibe.createdBy
+                      ? computeUserDisplayName(vibe.createdBy)
+                      : 'Unknown'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right side: Rating display */}
+              <div className="ml-4 flex-shrink-0">
+                {isRatingsLoading ? (
+                  <Skeleton className="h-10 w-20 rounded-full bg-white/10" />
+                ) : primaryEmojiRating ? (
+                  <div
+                    className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 backdrop-blur-sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEmojiRatingClick(
+                        primaryEmojiRating.emoji,
+                        primaryEmojiRating.value
+                      );
+                    }}
+                  >
+                    <span className="font-noto-color text-lg">
+                      {primaryEmojiRating.emoji}
+                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-white">
+                        {primaryEmojiRating.value.toFixed(1)}
+                      </span>
+                      <span className="text-xs text-white/50">
+                        {primaryEmojiRating.count}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="rounded-full bg-white/10 px-3 py-2 text-sm text-white/70 backdrop-blur-sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!user?.id) {
+                        setShowAuthDialog(true);
+                      } else {
+                        setShowEmojiRatingPopover(true);
+                      }
+                    }}
+                  >
+                    rate this
+                  </div>
+                )}
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Hidden Emoji Rating Popover */}
+        <EmojiRatingPopover
+          open={showEmojiRatingPopover}
+          onOpenChange={(open) => {
+            setShowEmojiRatingPopover(open);
+            if (!open) {
+              setSelectedEmojiForRating(null);
+              setPreselectedRatingValue(null);
+            }
+          }}
+          onSubmit={handleEmojiRating}
+          isSubmitting={createEmojiRatingMutation.isPending}
+          vibeTitle={vibe.title}
+          emojiMetadata={emojiMetadataRecord}
+          preSelectedEmoji={selectedEmojiForRating || undefined}
+          preSelectedValue={preselectedRatingValue || undefined}
+        >
+          <div style={{ display: 'none' }} />
+        </EmojiRatingPopover>
+
+        {/* Auth Prompt Dialog */}
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to rate vibes"
+          description="join viberater to share your reactions and ratings with the community"
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <Card
@@ -437,13 +583,14 @@ export function VibeCard({
                       isSubmitting={createEmojiRatingMutation.isPending}
                       vibeTitle={vibe.title}
                       emojiMetadata={emojiMetadataRecord}
+                      showBeTheFirst={true}
                     />
                   )}
                 </div>
 
-                {/* Emoji Reactions or "Be the first to rate" CTA */}
-                <div className="w-full min-w-0 overflow-hidden">
-                  {emojiReactions.length > 0 ? (
+                {/* Emoji Reactions - only show if there are reactions */}
+                {emojiReactions.length > 0 && (
+                  <div className="w-full min-w-0 overflow-hidden">
                     <EmojiReactions
                       reactions={emojiReactions}
                       onReact={handleQuickReact}
@@ -453,16 +600,8 @@ export function VibeCard({
                       vibeId={vibe.id}
                       className="min-w-0"
                     />
-                  ) : (
-                    <button
-                      onClick={() => handleEmojiRatingClick('', undefined)}
-                      className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs font-medium transition-colors"
-                    >
-                      <PlusCircle className="h-3.5 w-3.5" />
-                      be the first to rate
-                    </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </>
             )}
           </CardFooter>

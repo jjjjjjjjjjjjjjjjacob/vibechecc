@@ -6,7 +6,7 @@ interface SearchSuggestionsProps {
   recentSearches?: SearchSuggestion[];
   trendingSearches?: SearchSuggestion[];
   popularTags?: SearchSuggestion[];
-  onSelect: (term: string) => void;
+  onSelect: (term: string, type?: 'tag' | 'search') => void;
 }
 
 export function SearchSuggestions({
@@ -18,13 +18,13 @@ export function SearchSuggestions({
   return (
     <>
       {recentSearches.length > 0 && (
-        <CommandGroup heading="Recent searches">
+        <CommandGroup heading="recent searches">
           {recentSearches.map((search) => (
             <CommandItem
               key={search.term}
               value={search.term}
               onSelect={() => onSelect(search.term)}
-              className="flex items-center gap-2"
+              className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
             >
               <Clock className="text-muted-foreground h-4 w-4" />
               <span>{search.term}</span>
@@ -34,13 +34,13 @@ export function SearchSuggestions({
       )}
 
       {trendingSearches.length > 0 && (
-        <CommandGroup heading="Trending">
+        <CommandGroup heading="trending">
           {trendingSearches.map((search) => (
             <CommandItem
               key={search.term}
               value={search.term}
               onSelect={() => onSelect(search.term)}
-              className="flex items-center gap-2"
+              className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
             >
               <TrendingUp className="text-muted-foreground h-4 w-4" />
               <span>{search.term}</span>
@@ -50,13 +50,13 @@ export function SearchSuggestions({
       )}
 
       {popularTags.length > 0 && (
-        <CommandGroup heading="Popular tags">
+        <CommandGroup heading="popular tags">
           {popularTags.map((tag) => (
             <CommandItem
               key={tag.term}
               value={tag.term}
-              onSelect={() => onSelect(tag.term)}
-              className="flex items-center gap-2"
+              onSelect={() => onSelect(tag.term, 'tag')}
+              className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
             >
               <Hash className="text-muted-foreground h-4 w-4" />
               <span>{tag.term}</span>
@@ -65,14 +65,14 @@ export function SearchSuggestions({
         </CommandGroup>
       )}
 
-      <CommandGroup heading="Quick actions">
+      <CommandGroup heading="quick actions">
         <CommandItem
-          value="Browse all vibes"
+          value="browse all vibes"
           onSelect={() => onSelect('/vibes')}
-          className="flex items-center gap-2"
+          className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
         >
           <Search className="text-muted-foreground h-4 w-4" />
-          <span>Browse all vibes</span>
+          <span>browse all vibes</span>
         </CommandItem>
       </CommandGroup>
     </>

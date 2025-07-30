@@ -15,5 +15,4 @@ export { RatingFilter } from './rating-filter';
 export { DateRangeFilter } from './date-range-filter';
 
 // Search command components
-export { SearchCommand } from './search-command';
 export { InstantSearchPreview } from './instant-search-preview';

@@ -13,7 +13,7 @@ export function TagResult({ result, onSelect }: TagResultProps) {
 
   const handleSelect = () => {
     const tagName = result.title.replace('#', '');
-    navigate({ to: '/vibes', search: { tags: [tagName] } });
+    navigate({ to: '/search', search: { tab: 'vibes', tags: [tagName] } });
     onSelect?.();
   };
 
@@ -21,7 +21,7 @@ export function TagResult({ result, onSelect }: TagResultProps) {
     <CommandItem
       value={result.title}
       onSelect={handleSelect}
-      className="flex items-center gap-3 py-2"
+      className="data-[selected=true]:bg-muted/60 flex items-center gap-3 py-2"
     >
       <Hash className="text-muted-foreground h-4 w-4" />
 

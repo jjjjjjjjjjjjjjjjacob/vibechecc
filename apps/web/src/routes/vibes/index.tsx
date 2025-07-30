@@ -1,49 +1,54 @@
-import { createFileRoute } from '@tanstack/react-router';
-import * as React from 'react';
-import { useVibesPaginated } from '@/queries';
-import { VibeGrid } from '@/components/vibe-grid';
-import { VibeGridSkeleton } from '@/components/ui/vibe-grid-skeleton';
-import { Skeleton } from '@/components/ui/skeleton';
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { z } from 'zod';
 
-export const Route = createFileRoute('/vibes/')({
-  component: AllVibes,
+const searchParamsSchema = z.object({
+  emoji: z.string().optional(),
+  emojis: z.array(z.string()).optional(),
+  minRating: z.number().min(1).max(5).optional(),
+  maxRating: z.number().min(1).max(5).optional(),
+  emojiMinValue: z.number().min(1).max(5).optional(),
+  tags: z.array(z.string()).optional(),
+  sort: z.string().optional(),
 });
 
-function AllVibes() {
-  const { data: vibesData, isLoading, error } = useVibesPaginated(50); // Get more vibes initially
+export const Route = createFileRoute('/vibes/')({
+  validateSearch: searchParamsSchema,
+  beforeLoad: ({ search }) => {
+    // Redirect to search page with proper parameters
+    const searchParams: any = {
+      tab: 'vibes',
+    };
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Skeleton className="mb-2 h-9 w-32" />
-          <Skeleton className="h-5 w-80" />
-        </div>
-        <VibeGridSkeleton />
-      </div>
-    );
-  }
+    // Convert emoji (single) to emojiFilter (array)
+    if (search.emoji) {
+      searchParams.emojiFilter = [search.emoji];
+    } else if (search.emojis) {
+      searchParams.emojiFilter = search.emojis;
+    }
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-4 py-3">
-          <p>failed to load vibes. please try again later.</p>
-        </div>
-      </div>
-    );
-  }
+    // Set emojiMinValue if emoji filter is present and minRating is specified
+    if ((search.emoji || search.emojis) && search.minRating) {
+      searchParams.emojiMinValue = search.minRating;
+    } else if (search.minRating && search.minRating !== 1) {
+      searchParams.ratingMin = search.minRating;
+    }
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold lowercase">all vibes</h1>
-        <p className="text-muted-foreground">
-          discover and explore all vibes shared by our community.
-        </p>
-      </div>
+    if (search.maxRating && search.maxRating !== 5) {
+      searchParams.ratingMax = search.maxRating;
+    }
 
-      <VibeGrid vibes={vibesData?.vibes ?? []} />
-    </div>
-  );
-}
+    if (search.tags) {
+      searchParams.tags = search.tags;
+    }
+
+    if (search.sort) {
+      searchParams.sort = search.sort;
+    }
+
+    // Perform the redirect
+    throw redirect({
+      to: '/search',
+      search: searchParams,
+    });
+  },
+});

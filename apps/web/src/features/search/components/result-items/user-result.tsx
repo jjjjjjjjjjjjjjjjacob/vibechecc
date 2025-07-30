@@ -21,7 +21,7 @@ export function UserResult({ result, onSelect }: UserResultProps) {
     <CommandItem
       value={result.username}
       onSelect={handleSelect}
-      className="flex items-center gap-3 py-3"
+      className="data-[selected=true]:bg-muted/60 flex items-center gap-3 py-3"
     >
       <Avatar className="h-10 w-10">
         <AvatarImage src={result.image} />

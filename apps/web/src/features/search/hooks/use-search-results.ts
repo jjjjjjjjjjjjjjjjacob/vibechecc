@@ -57,14 +57,15 @@ export function useSearchResults({
   const debouncedQuery = useDebouncedValue(query, 300);
   const { user } = useUser();
 
-  // Use Convex query for search
+  // Use Convex query for search with pagination
   const searchQuery = useQuery({
     ...convexQuery(api.search.searchAll, {
       query: debouncedQuery,
       filters: filterForConvex(filters),
-      limit,
-      page,
-      cursor,
+      paginationOpts: {
+        numItems: limit,
+        cursor: cursor || null,
+      },
       includeTypes,
     }),
     enabled: true, // Always enabled, backend handles empty queries

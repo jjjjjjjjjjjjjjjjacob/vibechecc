@@ -17,13 +17,14 @@ const SearchPagination = lazy(() =>
 );
 
 // Import non-heavy components normally
-import { useSearchResults } from '@/features/search/hooks/use-search-results';
+import { useSearchResultsImproved } from '@/features/search/hooks/use-search-results-improved';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { EmojiSearchCommand } from '@/components/emoji-search-command';
 import { EmojiPillFilters } from '@/components/emoji-pill-filters';
 import { RatingRangeSlider } from '@/components/rating-range-slider';
+import { TagSearchCommand } from '@/components/tag-search-command';
 import { MobileFilterSheet } from '@/features/search/components/mobile-filter-sheet';
 import { cn } from '@/utils/tailwind-utils';
 
@@ -132,10 +133,10 @@ function SearchResultsPage() {
     }
   };
 
-  const { data, isLoading, isError, error } = useSearchResults({
+  const { data, isLoading, isError, error } = useSearchResultsImproved({
     query: q || '',
     filters,
-    page,
+    page: tab === 'all' ? 1 : page, // Always use page 1 for "all" tab
     includeTypes: getIncludeTypes(tab),
   });
 
@@ -151,23 +152,25 @@ function SearchResultsPage() {
     });
   };
 
-  // Since we're now filtering by includeTypes at the backend level,
-  // totalCount represents the actual count for the active tab
+  // Get proper counts from the improved search
   const activeTabCount = data?.totalCount || 0;
-  const totalPages = Math.ceil(activeTabCount / 20);
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
       <div className="container mx-auto px-4 py-8">
         {/* Search header */}
-        <div className="mb-8 text-center">
+        <div className="mb-8 text-left">
           <h1
             className={cn(
-              'mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl',
-              'from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-transparent'
+              'mb-2 text-3xl font-bold lowercase drop-shadow-md sm:text-4xl'
             )}
           >
-            {q ? `search results for "${q}"` : 'search results'}
+            {q
+              ? `search results for "${q}"`
+              : emojiFilter && emojiFilter.length > 0
+                ? `${emojiFilter.join(' ')} vibes`
+                : 'search results'}
           </h1>
           {data?.totalCount !== undefined && (
             <p className="text-muted-foreground drop-shadow-sm">
@@ -177,34 +180,10 @@ function SearchResultsPage() {
           )}
         </div>
 
-        <div
-          className={cn(
-            'grid grid-cols-1 gap-8',
-            // Show sidebar only when there are active filters or on large screens
-            (emojiFilter && emojiFilter.length > 0) ||
-              rating ||
-              ratingMin !== 1 ||
-              ratingMax !== 5 ||
-              emojiMinValue
-              ? 'lg:grid-cols-[320px_1fr]'
-              : 'lg:grid-cols-1'
-          )}
-        >
-          {/* Filter sidebar - show when filters are active or on large screens */}
-          <aside
-            className={cn(
-              'hidden',
-              // Show on tablet and up when there are filters, or always on desktop
-              (emojiFilter && emojiFilter.length > 0) ||
-                rating ||
-                ratingMin !== 1 ||
-                ratingMax !== 5 ||
-                emojiMinValue
-                ? 'md:block'
-                : 'lg:block'
-            )}
-          >
-            <Card className="bg-background/90 sticky top-4 border-none p-6 shadow-lg backdrop-blur">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
+          {/* Filter sidebar - always show on desktop */}
+          <aside className="hidden lg:block">
+            <Card className="bg-background/90 sticky top-4 border-none shadow-lg backdrop-blur">
               <h2
                 className={cn(
                   'mb-6 font-semibold lowercase',
@@ -309,6 +288,38 @@ function SearchResultsPage() {
                   </div>
                 </div>
 
+                {/* Tag Filter */}
+                <div>
+                  <Label className="mb-3 block text-sm font-medium lowercase">
+                    filter by tags
+                  </Label>
+                  <TagSearchCommand
+                    selectedTags={tags || []}
+                    onTagSelect={(tag) => {
+                      const current = tags || [];
+                      if (!current.includes(tag)) {
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            tags: [...current, tag],
+                            page: 1,
+                          }),
+                        });
+                      }
+                    }}
+                    onTagRemove={(tag) => {
+                      const updated = (tags || []).filter((t) => t !== tag);
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          tags: updated.length > 0 ? updated : undefined,
+                          page: 1,
+                        }),
+                      });
+                    }}
+                  />
+                </div>
+
                 {/* General Rating Range Filter */}
                 <div>
                   <RatingRangeSlider
@@ -336,7 +347,8 @@ function SearchResultsPage() {
                   rating ||
                   ratingMin !== 1 ||
                   ratingMax !== 5 ||
-                  (emojiMinValue && emojiMinValue > 1)) && (
+                  (emojiMinValue && emojiMinValue > 1) ||
+                  (tags && tags.length > 0)) && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -347,6 +359,7 @@ function SearchResultsPage() {
                           q,
                           sort,
                           page: 1,
+                          tab,
                         },
                       });
                     }}
@@ -369,6 +382,7 @@ function SearchResultsPage() {
                   rating={rating}
                   ratingMin={ratingMin}
                   ratingMax={ratingMax}
+                  tags={tags}
                   onEmojiFilterChange={(emojis) => {
                     navigate({
                       search: (prev) => ({
@@ -406,12 +420,22 @@ function SearchResultsPage() {
                       }),
                     });
                   }}
+                  onTagsChange={(tags) => {
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        tags: tags.length > 0 ? tags : undefined,
+                        page: 1,
+                      }),
+                    });
+                  }}
                   onClearFilters={() => {
                     navigate({
                       search: {
                         q,
                         sort,
                         page: 1,
+                        tab,
                       },
                     });
                   }}
@@ -536,14 +560,18 @@ function SearchResultsPage() {
               </Suspense>
             )}
 
-            {!isLoading && data && activeTabCount > 0 && totalPages > 1 && (
-              <Suspense fallback={<PaginationSkeleton />}>
-                <SearchPagination
-                  currentPage={page || 1}
-                  totalPages={totalPages}
-                />
-              </Suspense>
-            )}
+            {!isLoading &&
+              data &&
+              activeTabCount > 0 &&
+              totalPages > 1 &&
+              tab !== 'all' && (
+                <Suspense fallback={<PaginationSkeleton />}>
+                  <SearchPagination
+                    currentPage={page || 1}
+                    totalPages={totalPages}
+                  />
+                </Suspense>
+              )}
           </main>
         </div>
       </div>

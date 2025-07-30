@@ -1,12 +1,187 @@
 import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
-import { api } from './_generated/api';
+import { api, internal } from './_generated/api';
 
 // Simple get all vibes (for backwards compatibility)
 export const getAllSimple = query({
   handler: async (ctx) => {
     // Just return basic vibe data without complex joins
     return await ctx.db.query('vibes').order('desc').take(50);
+  },
+});
+
+// Get filtered vibes (paginated)
+export const getFilteredVibes = query({
+  args: {
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+    filters: v.optional(
+      v.object({
+        emojis: v.optional(v.array(v.string())),
+        minRating: v.optional(v.number()),
+        maxRating: v.optional(v.number()),
+        tags: v.optional(v.array(v.string())),
+        sort: v.optional(
+          v.union(
+            v.literal('recent'),
+            v.literal('rating_desc'),
+            v.literal('rating_asc'),
+            v.literal('top_rated'),
+            v.literal('most_rated'),
+            v.literal('name'),
+            v.literal('creation_date')
+          )
+        ),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+    const filters = args.filters || {};
+
+    // Start with base query
+    let vibesQuery = ctx.db.query('vibes');
+
+    // Apply sorting
+    switch (filters.sort) {
+      case 'recent':
+      case 'creation_date':
+        vibesQuery = vibesQuery.order('desc');
+        break;
+      case 'name':
+        // Note: Convex doesn't support ordering by text fields directly
+        vibesQuery = vibesQuery.order('desc');
+        break;
+      default:
+        vibesQuery = vibesQuery.order('desc');
+    }
+
+    // Get paginated vibes
+    const vibesPaginated = await vibesQuery.paginate({
+      cursor: args.cursor || null,
+      numItems: limit * 2, // Get extra to filter
+    });
+
+    // Filter vibes based on criteria
+    let filteredVibes = vibesPaginated.page;
+
+    // Filter by tags
+    if (filters.tags && filters.tags.length > 0) {
+      filteredVibes = filteredVibes.filter((vibe) =>
+        vibe.tags?.some((tag) => filters.tags!.includes(tag))
+      );
+    }
+
+    // Get emoji ratings if emoji filter is present
+    let vibesWithEmojiRatings = filteredVibes;
+    if (filters.emojis && filters.emojis.length > 0) {
+      vibesWithEmojiRatings = await Promise.all(
+        filteredVibes.map(async (vibe) => {
+          const emojiRatings = await ctx.db
+            .query('emojiRatings')
+            .withIndex('by_vibe', (q) => q.eq('vibeId', vibe._id))
+            .collect();
+
+          const relevantEmojiRatings = emojiRatings.filter((rating) =>
+            filters.emojis!.includes(rating.emoji)
+          );
+
+          const avgEmojiRating =
+            relevantEmojiRatings.length > 0
+              ? relevantEmojiRatings.reduce((sum, r) => sum + r.value, 0) /
+                relevantEmojiRatings.length
+              : 0;
+
+          return {
+            ...vibe,
+            avgEmojiRating,
+            hasEmojiFilter: relevantEmojiRatings.length > 0,
+          };
+        })
+      );
+
+      // Filter out vibes without the required emoji ratings
+      vibesWithEmojiRatings = vibesWithEmojiRatings.filter(
+        (vibe) => vibe.hasEmojiFilter
+      );
+
+      // Apply min rating filter for emojis
+      if (filters.minRating) {
+        vibesWithEmojiRatings = vibesWithEmojiRatings.filter(
+          (vibe) => vibe.avgEmojiRating >= filters.minRating!
+        );
+      }
+    }
+
+    // Apply general rating filters
+    if (!filters.emojis && (filters.minRating || filters.maxRating)) {
+      vibesWithEmojiRatings = vibesWithEmojiRatings.filter((vibe) => {
+        if (filters.minRating && vibe.rating < filters.minRating) return false;
+        if (filters.maxRating && vibe.rating > filters.maxRating) return false;
+        return true;
+      });
+    }
+
+    // Sort if needed (for rating-based sorts)
+    if (filters.sort === 'rating_desc') {
+      vibesWithEmojiRatings.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (filters.sort === 'rating_asc') {
+      vibesWithEmojiRatings.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+    } else if (filters.sort === 'most_rated') {
+      vibesWithEmojiRatings.sort((a, b) => (b.ratingCount || 0) - (a.ratingCount || 0));
+    } else if (filters.sort === 'top_rated') {
+      vibesWithEmojiRatings.sort((a, b) => {
+        const scoreA = (a.rating || 0) * Math.log1p(a.ratingCount || 0);
+        const scoreB = (b.rating || 0) * Math.log1p(b.ratingCount || 0);
+        return scoreB - scoreA;
+      });
+    }
+
+    // Limit results
+    const finalVibes = vibesWithEmojiRatings.slice(0, limit);
+
+    // Get details for final vibes
+    const vibesWithDetails = await Promise.all(
+      finalVibes.map(async (vibe) => {
+        const creator = await ctx.db
+          .query('users')
+          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
+          .first();
+
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(10);
+
+        const ratingDetails = await Promise.all(
+          ratings.map(async (rating) => {
+            const user = await ctx.db
+              .query('users')
+              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .first();
+            return {
+              user,
+              emoji: rating.emoji,
+              value: rating.value,
+              review: rating.review,
+              createdAt: rating.createdAt,
+            };
+          })
+        );
+
+        return {
+          ...vibe,
+          createdBy: creator,
+          ratings: ratingDetails,
+        };
+      })
+    );
+
+    return {
+      vibes: vibesWithDetails,
+      continueCursor: vibesPaginated.continueCursor,
+      isDone: vibesPaginated.isDone || finalVibes.length < limit,
+    };
   },
 });
 
@@ -279,9 +454,8 @@ export const create = mutation({
 
     // Update tag usage counts
     if (args.tags && args.tags.length > 0) {
-      await ctx.scheduler.runAfter(0, api.tags.updateTagUsage, {
-        tags: args.tags,
-        increment: true,
+      await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
+        tagsToAdd: args.tags,
       });
     }
 
@@ -934,5 +1108,83 @@ export const getTopRatedByEmoji = query({
 
     // Filter out nulls and return
     return vibes.filter((v) => v !== null);
+  },
+});
+
+// Get vibes by emoji filters (for search page)
+export const getVibesByEmojiFilters = query({
+  args: {
+    emojis: v.array(v.string()),
+    minValue: v.optional(v.number()),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+    const minValue = args.minValue ?? 1;
+
+    // Get all ratings with the specified emojis
+    const allEmojiRatings = await Promise.all(
+      args.emojis.map(emoji =>
+        ctx.db
+          .query('ratings')
+          .filter((q) =>
+            q.and(
+              q.eq(q.field('emoji'), emoji),
+              q.gte(q.field('value'), minValue)
+            )
+          )
+          .collect()
+      )
+    );
+
+    // Flatten and get unique vibe IDs
+    const allRatings = allEmojiRatings.flat();
+    const vibeIds = [...new Set(allRatings.map((r) => r.vibeId))];
+
+    // Apply cursor-based pagination
+    const startIndex = args.cursor ? parseInt(args.cursor) : 0;
+    const paginatedVibeIds = vibeIds.slice(startIndex, startIndex + limit);
+
+    // Fetch vibes with their details
+    const vibes = await Promise.all(
+      paginatedVibeIds.map(async (vibeId) => {
+        const vibe = await ctx.db
+          .query('vibes')
+          .filter((q) => q.eq(q.field('id'), vibeId))
+          .first();
+
+        if (!vibe) return null;
+
+        const creator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) => q.eq('externalId', vibe.createdById))
+          .first();
+
+        // Get all ratings for this vibe
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .collect();
+
+        const averageRating =
+          ratings.length > 0
+            ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
+            : undefined;
+
+        return {
+          ...vibe,
+          createdBy: creator,
+          averageRating,
+          ratingCount: ratings.length,
+        };
+      })
+    );
+
+    return {
+      vibes: vibes.filter((v) => v !== null),
+      totalCount: vibeIds.length,
+      nextCursor: startIndex + limit < vibeIds.length ? (startIndex + limit).toString() : null,
+    };
   },
 });

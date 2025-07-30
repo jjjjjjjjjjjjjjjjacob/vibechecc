@@ -45,8 +45,10 @@ export const searchCacheOptions = {
       ...convexQuery(api.search.searchAll, {
         query,
         filters: filterForConvex(filters),
-        limit,
-        cursor,
+        paginationOpts: {
+          numItems: limit,
+          cursor: cursor || null,
+        },
       }),
       gcTime: CACHE_TIME,
       staleTime: STALE_TIME,
