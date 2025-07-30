@@ -52,6 +52,7 @@ export interface ReviewSearchResult extends BaseSearchResult {
   rating: number; // 1-5 rating value
   vibeId: string;
   vibeTitle: string;
+  vibeImage?: string;
   reviewerId: string;
   reviewerName: string;
   reviewerAvatar?: string;

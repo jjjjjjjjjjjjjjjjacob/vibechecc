@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberater/convex';
@@ -44,6 +44,7 @@ export function useSearch(options: UseSearchOptions = {}) {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebouncedValue(query, debounceMs);
   const { user } = useUser();
+  const previousQuery = useRef<string>('');
 
   // Use Convex query for search with pagination
   const searchQuery = useQuery({
@@ -58,20 +59,67 @@ export function useSearch(options: UseSearchOptions = {}) {
     enabled: debouncedQuery.trim().length > 0,
   });
 
-  // Track search mutation
+  // Track search mutation for automatic search history logging
   const trackSearchMutation = useMutation({
     mutationFn: useConvexMutation(api.search.trackSearch),
   });
 
-  // Track search when debounced query changes (only for authenticated users)
+  // Track search when debounced query changes (for search history)
   useEffect(() => {
-    if (debouncedQuery.trim() && searchQuery.data && user?.id) {
+    console.log('useSearch useEffect triggered:', { 
+      debouncedQuery, 
+      userId: user?.id, 
+      previousQuery: previousQuery.current 
+    });
+    
+    if (debouncedQuery.trim() && user?.id && debouncedQuery !== previousQuery.current) {
+      console.log('Tracking search in useSearch:', debouncedQuery);
+      previousQuery.current = debouncedQuery;
       trackSearchMutation.mutate({
         query: debouncedQuery,
-        resultCount: searchQuery.data.totalCount || 0,
+        resultCount: 0, // We don't need to wait for results
+      }, {
+        onSuccess: (data) => {
+          console.log('useSearch trackSearch success:', data);
+        },
+        onError: (error) => {
+          console.error('useSearch trackSearch error:', error);
+        }
+      });
+    } else {
+      console.log('Skipping search tracking in useSearch:', { 
+        hasQuery: !!debouncedQuery.trim(), 
+        hasUser: !!user?.id, 
+        queryChanged: debouncedQuery !== previousQuery.current 
       });
     }
-  }, [debouncedQuery, searchQuery.data, user?.id, trackSearchMutation]);
+  }, [debouncedQuery, user?.id]); // Track on debounced query changes (excluding trackSearchMutation to avoid infinite loops)
+
+  // Update search history with actual result count when we have results
+  useEffect(() => {
+    if (searchQuery.data && debouncedQuery.trim() && user?.id) {
+      const totalCount = (searchQuery.data.vibes?.length || 0) + 
+                        (searchQuery.data.users?.length || 0) + 
+                        (searchQuery.data.tags?.length || 0) + 
+                        (searchQuery.data.actions?.length || 0) + 
+                        (searchQuery.data.reviews?.length || 0);
+      
+      console.log('useSearch: Updating search with result count:', { query: debouncedQuery, totalCount });
+      
+      // Track again with the actual result count
+      trackSearchMutation.mutate({
+        query: debouncedQuery,
+        resultCount: totalCount,
+      }, {
+        onSuccess: (data) => {
+          console.log('useSearch result count update success:', data);
+        },
+        onError: (error) => {
+          console.error('useSearch result count update error:', error);
+        }
+      });
+    }
+  }, [searchQuery.data, debouncedQuery, user?.id]); // Update when we get actual results
 
   const search = useCallback((searchQuery: string) => {
     setQuery(searchQuery);

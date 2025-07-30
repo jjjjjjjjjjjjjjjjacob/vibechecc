@@ -55,7 +55,7 @@ export function RatingRangeSlider({
             <div className="flex items-center gap-2">
               <Badge
                 variant="secondary"
-                className="border-purple-500/20 bg-purple-500/10 text-xs text-purple-600"
+                className="border-[hsl(var(--theme-primary))]/20 bg-[hsl(var(--theme-primary))]/10 text-xs text-[hsl(var(--theme-primary))]"
               >
                 {formatValue(minValue)} - {formatValue(maxValue)}
               </Badge>
@@ -86,9 +86,9 @@ export function RatingRangeSlider({
           className={cn(
             'w-full',
             '[&_[data-slot=slider-track]]:bg-muted/60',
-            '[&_[data-slot=slider-range]]:bg-gradient-to-r [&_[data-slot=slider-range]]:from-purple-500 [&_[data-slot=slider-range]]:to-pink-500',
-            '[&_[data-slot=slider-thumb]]:bg-background [&_[data-slot=slider-thumb]]:border-purple-500 [&_[data-slot=slider-thumb]]:shadow-lg',
-            '[&_[data-slot=slider-thumb]]:hover:ring-purple-500/30 [&_[data-slot=slider-thumb]]:focus-visible:ring-purple-500/30',
+            '[&_[data-slot=slider-range]]:bg-gradient-to-r [&_[data-slot=slider-range]]:from-[hsl(var(--theme-primary))] [&_[data-slot=slider-range]]:to-[hsl(var(--theme-secondary))]',
+            '[&_[data-slot=slider-thumb]]:bg-background [&_[data-slot=slider-thumb]]:border-[hsl(var(--theme-primary))] [&_[data-slot=slider-thumb]]:shadow-lg',
+            '[&_[data-slot=slider-thumb]]:hover:ring-[hsl(var(--theme-primary))]/30 [&_[data-slot=slider-thumb]]:focus-visible:ring-[hsl(var(--theme-primary))]/30',
             '[&_[data-slot=slider-thumb]]:size-5',
             disabled && 'pointer-events-none opacity-50'
           )}

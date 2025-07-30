@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import {
   useTopRatedEmojiVibes,
   useVibesPaginated,
-  useVibesPaginatedInfinite,
+  useVibesLightweightInfinite,
   useTopRatedVibes,
-  useTopRatedVibesInfinite,
+  useTopRatedVibesLightweightInfinite,
+  useUnratedVibesInfinite,
   useAllTags,
   useVibesByTag,
   useCurrentUser,
@@ -17,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from 'lucide-react';
 import { useTheme } from '@/components/theme-provider';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -134,7 +136,7 @@ function DiscoverPage() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
-            discover vibes by emoji
+            discover all the vibes
           </h1>
           <p className="text-muted-foreground drop-shadow-sm">
             explore curated collections based on emoji ratings
@@ -143,7 +145,7 @@ function DiscoverPage() {
 
         {/* Featured Collections Grid */}
         <section className="mb-12">
-          <h2 className="from-theme-primary to-theme-secondary mb-6 bg-gradient-to-r bg-clip-text text-2xl font-semibold text-transparent lowercase">
+          <h2 className="text-primary mb-6 text-2xl font-semibold lowercase">
             featured collections
           </h2>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -156,11 +158,17 @@ function DiscoverPage() {
           </div>
         </section>
 
+        {/* New Section */}
+        <NewSection />
+
         {/* Trending Section */}
         <TrendingSection />
 
         {/* Recent Arrivals Section */}
         <RecentArrivalsSection />
+
+        {/* Unrated Section */}
+        <UnratedSection />
 
         {/* Community Favorites Section */}
         <CommunityFavoritesSection />
@@ -216,7 +224,7 @@ function EmojiCollectionPreview({
       {vibes.slice(0, 3).map((vibe, index) => (
         <div
           key={vibe.id}
-          className="relative h-16 w-16 overflow-hidden rounded bg-muted/50"
+          className="bg-muted/50 relative h-16 w-16 overflow-hidden rounded"
           style={{ zIndex: 3 - index }}
         >
           {vibe.image ? (
@@ -226,14 +234,18 @@ function EmojiCollectionPreview({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-              <span className="font-noto-color text-2xl opacity-50">{emoji}</span>
+            <div className="text-muted-foreground flex h-full w-full items-center justify-center text-xs">
+              <span className="font-noto-color text-2xl opacity-50">
+                {emoji}
+              </span>
             </div>
           )}
         </div>
       ))}
       {vibes.length > 3 && (
-        <span className="text-muted-foreground text-xs">+{vibes.length - 3}</span>
+        <span className="text-muted-foreground text-xs">
+          +{vibes.length - 3}
+        </span>
       )}
     </div>
   );
@@ -287,7 +299,10 @@ function EmojiCollectionSection({
             emojiFilter: [collection.emoji],
             emojiMinValue: collection.minValue,
             tab: 'vibes',
-            sort: collection.ratingDisplayMode === 'top-rated' ? 'top_rated' : 'most_rated',
+            sort:
+              collection.ratingDisplayMode === 'top-rated'
+                ? 'top_rated'
+                : 'most_rated',
           }}
           className="text-muted-foreground text-sm font-medium transition-colors hover:text-[hsl(var(--theme-primary))]"
         >
@@ -305,155 +320,254 @@ function EmojiCollectionSection({
   );
 }
 
+// New Section Component
+function NewSection() {
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    error,
+  } = useVibesLightweightInfinite(15);
+
+  const newVibes = useMemo(() => {
+    if (!data?.pages) return [];
+    // Get the most recent vibes
+    return data.pages.flatMap((page) => page?.vibes || []);
+  }, [data]);
+
+  return (
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-noto-color">🆕</span> new vibes
+        </>
+      }
+      vibes={newVibes}
+      isLoading={isLoading}
+      error={error}
+      priority
+      ratingDisplayMode="most-rated"
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
+    />
+  );
+}
+
 // Trending Section Component
 function TrendingSection() {
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useVibesPaginatedInfinite(12);
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    error,
+  } = useVibesLightweightInfinite(12);
 
   const trendingVibes = useMemo(() => {
     if (!data?.pages) return [];
-    // Flatten all pages to show all trending vibes
-    return data.pages.flatMap(page => page?.vibes || []);
+    // Filter for vibes with good engagement (rating count >= 3)
+    return data.pages
+      .flatMap((page) => page?.vibes || [])
+      .filter((vibe) => vibe.ratingCount >= 3);
   }, [data]);
 
-  if (isLoading) {
-    return <VibeCategoryRowSkeleton />;
-  }
-
-  if (trendingVibes.length === 0) {
-    return null;
-  }
-
   return (
-    <Suspense fallback={<VibeCategoryRowSkeleton />}>
-      <VibeCategoryRow
-        title={
-          <p>
-            <span className="font-noto-color">🔥</span> trending now
-          </p>
-        }
-        vibes={trendingVibes}
-        priority
-        ratingDisplayMode="most-rated"
-        hasNextPage={hasNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        fetchNextPage={fetchNextPage}
-      />
-    </Suspense>
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-noto-color">🔥</span> trending now
+        </>
+      }
+      vibes={trendingVibes}
+      isLoading={isLoading}
+      error={error}
+      priority
+      ratingDisplayMode="most-rated"
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
+    />
   );
 }
 
 // Recent Arrivals Section Component
 function RecentArrivalsSection() {
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useVibesPaginatedInfinite(10);
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    error,
+  } = useVibesLightweightInfinite(10);
 
   const recentVibes = useMemo(() => {
     if (!data?.pages) return [];
-    // Flatten all pages to show all recent vibes
-    return data.pages.flatMap(page => page?.vibes || []);
+    // Show vibes created in the last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    return data.pages
+      .flatMap((page) => page?.vibes || [])
+      .filter((vibe) => {
+        const vibeDate = new Date(vibe.createdAt);
+        return vibeDate >= sevenDaysAgo;
+      });
   }, [data]);
 
-  if (isLoading) {
-    return <VibeCategoryRowSkeleton />;
-  }
+  return (
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-noto-color">✨</span> fresh arrivals
+        </>
+      }
+      vibes={recentVibes}
+      isLoading={isLoading}
+      error={error}
+      ratingDisplayMode="most-rated"
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
+    />
+  );
+}
 
-  if (recentVibes.length === 0) {
-    return null;
-  }
+// Unrated Section Component
+function UnratedSection() {
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    error,
+  } = useUnratedVibesInfinite(10);
+
+  const unratedVibes = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page) => page?.vibes || []);
+  }, [data]);
 
   return (
-    <Suspense fallback={<VibeCategoryRowSkeleton />}>
-      <VibeCategoryRow
-        title={
-          <p>
-            <span className="font-noto-color">✨</span> fresh arrivals
-          </p>
-        }
-        vibes={recentVibes}
-        ratingDisplayMode="most-rated"
-        hasNextPage={hasNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        fetchNextPage={fetchNextPage}
-      />
-    </Suspense>
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-noto-color">👀</span> needs love
+        </>
+      }
+      vibes={unratedVibes}
+      isLoading={isLoading}
+      error={error}
+      ratingDisplayMode="most-rated"
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
+    />
   );
 }
 
 // Community Favorites Section Component
 function CommunityFavoritesSection() {
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useTopRatedVibesInfinite(10);
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    error,
+  } = useTopRatedVibesLightweightInfinite(10);
 
   const topRatedVibes = useMemo(() => {
     if (!data?.pages) return [];
     // Flatten all pages and get top-rated vibes
-    return data.pages.flatMap(page => page?.vibes || []);
+    return data.pages.flatMap((page) => page?.vibes || []);
   }, [data]);
 
-  if (isLoading) {
-    return <VibeCategoryRowSkeleton />;
-  }
-
-  if (topRatedVibes.length === 0) {
-    return null;
-  }
-
   return (
-    <Suspense fallback={<VibeCategoryRowSkeleton />}>
-      <VibeCategoryRow
-        title={
-          <p>
-            <span className="font-noto-color">❤️</span> community favorites
-          </p>
-        }
-        vibes={topRatedVibes}
-        ratingDisplayMode="top-rated"
-        hasNextPage={hasNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        fetchNextPage={fetchNextPage}
-      />
-    </Suspense>
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-noto-color">❤️</span> community favorites
+        </>
+      }
+      vibes={topRatedVibes}
+      isLoading={isLoading}
+      error={error}
+      ratingDisplayMode="top-rated"
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
+    />
   );
 }
 
 // Popular Tags Section Component
 function PopularTagsSection() {
-  const { data: allTags, isLoading: tagsLoading } = useAllTags();
-
-  if (tagsLoading) {
-    return <VibeCategoryRowSkeleton />;
-  }
-
-  if (!allTags || allTags.length === 0) {
-    return null;
-  }
+  const {
+    data: allTags,
+    isLoading: tagsLoading,
+    error: tagsError,
+  } = useAllTags();
 
   // Get the most popular tag
-  const popularTag = allTags[0];
+  const popularTag = allTags?.[0];
+
+  if (tagsLoading) {
+    return (
+      <DiscoverSectionWrapper
+        title="popular tags"
+        vibes={undefined}
+        isLoading={true}
+        error={null}
+      />
+    );
+  }
+
+  if (tagsError) {
+    return (
+      <DiscoverSectionWrapper
+        title="popular tags"
+        vibes={undefined}
+        isLoading={false}
+        error={tagsError}
+      />
+    );
+  }
+
+  if (!popularTag) {
+    return (
+      <DiscoverSectionWrapper
+        title="popular tags"
+        vibes={[]}
+        isLoading={false}
+        error={null}
+      />
+    );
+  }
 
   return <PopularTagVibes tag={popularTag.tag} />;
 }
 
 // Component for vibes from popular tags
 function PopularTagVibes({ tag }: { tag: string }) {
-  const { data: tagVibes, isLoading } = useVibesByTag(tag, 10);
-
-  if (isLoading) {
-    return <VibeCategoryRowSkeleton />;
-  }
-
-  if (!tagVibes || tagVibes.length < 3) {
-    return null;
-  }
+  const { data: tagVibes, isLoading, error } = useVibesByTag(tag, 10);
 
   const displayTitle = `#${tag}`;
 
   return (
-    <Suspense fallback={<VibeCategoryRowSkeleton />}>
-      <VibeCategoryRow
-        title={displayTitle}
-        vibes={tagVibes}
-        ratingDisplayMode="most-rated"
-      />
-    </Suspense>
+    <DiscoverSectionWrapper
+      title={displayTitle}
+      vibes={tagVibes}
+      isLoading={isLoading}
+      error={error}
+      ratingDisplayMode="most-rated"
+      hideWhenEmpty={false} // Always show popular tags section
+    />
   );
 }
 
@@ -476,7 +590,7 @@ function FeaturedCollectionVibeList({
           <div className="flex items-center gap-3">
             <Skeleton className="h-10 w-10 rounded-full" />
             <div>
-              <Skeleton className="h-5 w-32 mb-1" />
+              <Skeleton className="mb-1 h-5 w-32" />
               <Skeleton className="h-4 w-48" />
             </div>
           </div>
@@ -493,14 +607,17 @@ function FeaturedCollectionVibeList({
   }
 
   return (
-    <Card className="bg-background/90 border-none shadow-lg backdrop-blur hover:shadow-xl transition-all duration-300">
+    <Card className="bg-background/90 border-none shadow-lg backdrop-blur transition-all duration-300 hover:shadow-xl">
       <Link
         to="/search"
         search={{
           emojiFilter: [collection.emoji],
           emojiMinValue: collection.minValue,
           tab: 'vibes',
-          sort: collection.ratingDisplayMode === 'top-rated' ? 'top_rated' : 'most_rated',
+          sort:
+            collection.ratingDisplayMode === 'top-rated'
+              ? 'top_rated'
+              : 'most_rated',
         }}
       >
         <CardHeader>
@@ -519,9 +636,7 @@ function FeaturedCollectionVibeList({
               </div>
             </div>
             {collection.icon && (
-              <div className="text-muted-foreground">
-                {collection.icon}
-              </div>
+              <div className="text-muted-foreground">{collection.icon}</div>
             )}
           </div>
         </CardHeader>
@@ -529,7 +644,7 @@ function FeaturedCollectionVibeList({
       <CardContent className="pt-0">
         <div className="space-y-2">
           {!vibes || vibes.length === 0 ? (
-            <div className="flex items-center justify-center py-8 text-muted-foreground text-sm">
+            <div className="text-muted-foreground flex items-center justify-center py-8 text-sm">
               no vibes yet
             </div>
           ) : (
@@ -549,9 +664,12 @@ function FeaturedCollectionVibeList({
             emojiFilter: [collection.emoji],
             emojiMinValue: collection.minValue,
             tab: 'vibes',
-            sort: collection.ratingDisplayMode === 'top-rated' ? 'top_rated' : 'most_rated',
+            sort:
+              collection.ratingDisplayMode === 'top-rated'
+                ? 'top_rated'
+                : 'most_rated',
           }}
-          className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-[hsl(var(--theme-primary))] transition-colors"
+          className="text-muted-foreground mt-4 flex items-center justify-center gap-2 text-sm transition-colors hover:text-[hsl(var(--theme-primary))]"
         >
           view all {collection.emoji} vibes
           <ArrowRight className="h-4 w-4" />

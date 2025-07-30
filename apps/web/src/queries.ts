@@ -36,18 +36,49 @@ export function useVibesPaginatedInfinite(
   options?: { enabled?: boolean }
 ) {
   return useInfiniteQuery({
-    queryKey: ['vibes', 'paginated-infinite', limit],
-    queryFn: async ({ pageParam }) => {
-      // Use convexQuery directly with the correct API call
-      const queryArgs = convexQuery(api.vibes.getAll, {
-        limit,
-        cursor: pageParam,
-      });
-      return queryArgs.queryFn();
-    },
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage?.nextCursor,
+    ...convexQuery(api.vibes.getAll, {
+      limit,
+      cursor: undefined,
+    }),
+    getNextPageParam: (lastPage) => lastPage?.continueCursor,
     enabled: options?.enabled !== false,
+  });
+}
+
+// Lightweight infinite query for discover page
+export function useVibesLightweightInfinite(
+  limit?: number,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    ...convexQuery(api.vibes.getAll, {
+      limit,
+      cursor: undefined,
+    }),
+    getNextPageParam: (lastPage) => lastPage?.continueCursor,
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Infinite query to get unrated vibes
+export function useUnratedVibesInfinite(
+  limit?: number,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    ...convexQuery(api.vibes.getAll, {
+      limit: (limit || 10) * 2, // Get more to filter client-side
+      cursor: undefined,
+    }),
+    getNextPageParam: (lastPage) => lastPage?.continueCursor,
+    enabled: options?.enabled !== false,
+    select: (data) => ({
+      ...data,
+      pages: data.pages.map(page => ({
+        ...page,
+        vibes: page.vibes?.filter(v => !v.ratings || v.ratings.length === 0).slice(0, limit || 10) || []
+      }))
+    }),
   });
 }
 
@@ -62,7 +93,14 @@ export function useFilteredVibesPaginated(
       minRating?: number;
       maxRating?: number;
       tags?: string[];
-      sort?: 'recent' | 'rating_desc' | 'rating_asc' | 'top_rated' | 'most_rated' | 'name' | 'creation_date';
+      sort?:
+        | 'recent'
+        | 'rating_desc'
+        | 'rating_asc'
+        | 'top_rated'
+        | 'most_rated'
+        | 'name'
+        | 'creation_date';
     };
   }
 ) {
@@ -264,17 +302,26 @@ export function useTopRatedVibesInfinite(
   options?: { enabled?: boolean }
 ) {
   return useInfiniteQuery({
-    queryKey: ['vibes', 'top-rated-infinite', limit],
-    queryFn: async ({ pageParam }) => {
-      // Use convexQuery directly with the correct API call
-      const queryArgs = convexQuery(api.vibes.getTopRated, {
-        limit,
-        cursor: pageParam,
-      });
-      return queryArgs.queryFn();
-    },
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage?.nextCursor,
+    ...convexQuery(api.vibes.getTopRated, {
+      limit,
+      cursor: undefined,
+    }),
+    getNextPageParam: (lastPage) => lastPage?.continueCursor,
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Lightweight infinite query for top-rated vibes
+export function useTopRatedVibesLightweightInfinite(
+  limit?: number,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    ...convexQuery(api.vibes.getTopRated, {
+      limit,
+      cursor: undefined,
+    }),
+    getNextPageParam: (lastPage) => lastPage?.continueCursor,
     enabled: options?.enabled !== false,
   });
 }

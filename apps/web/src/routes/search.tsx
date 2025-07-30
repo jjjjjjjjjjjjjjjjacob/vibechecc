@@ -3,11 +3,17 @@ import { lazy, Suspense } from 'react';
 import * as React from 'react';
 import { z } from 'zod';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 // Lazy load search components for code splitting
 const SearchResultsGrid = lazy(() =>
   import('@/features/search/components').then((m) => ({
     default: m.SearchResultsGrid,
+  }))
+);
+const SearchResultsList = lazy(() =>
+  import('@/features/search/components').then((m) => ({
+    default: m.SearchResultsList,
   }))
 );
 const SearchPagination = lazy(() =>
@@ -104,6 +110,16 @@ function SearchResultsPage() {
   } = Route.useSearch();
   const [emojiSearchValue, setEmojiSearchValue] = React.useState('');
 
+  // Cache for total counts from 'all' query
+  const [cachedTotalCounts, setCachedTotalCounts] = React.useState<{
+    total: number;
+    vibes: number;
+    users: number;
+    tags: number;
+    reviews: number;
+    actions: number;
+  } | null>(null);
+
   const filters = {
     tags,
     minRating:
@@ -139,6 +155,36 @@ function SearchResultsPage() {
     page: tab === 'all' ? 1 : page, // Always use page 1 for "all" tab
     includeTypes: getIncludeTypes(tab),
   });
+
+  // Debug log to check data structure
+  /*
+  React.useEffect(() => {
+    if (data) {
+      console.log('Search data for tab', tab, ':', {
+        vibes: data.vibes?.length || 0,
+        users: data.users?.length || 0,
+        tags: data.tags?.length || 0,
+        reviews: data.reviews?.length || 0,
+        includeTypes: getIncludeTypes(tab),
+      });
+    }
+  }, [data, tab]);
+  */
+
+  // Separate query to get total counts for all types (for badge display)
+  const { data: allCountsData } = useSearchResultsImproved({
+    query: q || '',
+    filters,
+    page: 1,
+    includeTypes: undefined, // Get counts for all types
+  });
+
+  // Update cached counts when we get new data from the all counts query
+  React.useEffect(() => {
+    if (allCountsData?.totalCounts) {
+      setCachedTotalCounts(allCountsData.totalCounts);
+    }
+  }, [allCountsData?.totalCounts]);
 
   const navigate = Route.useNavigate();
 
@@ -465,33 +511,50 @@ function SearchResultsPage() {
               {/* Tabs */}
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {(['all', 'vibes', 'users', 'tags', 'reviews'] as const).map(
-                  (tabName) => (
-                    <Button
-                      key={tabName}
-                      variant={tab === tabName ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => {
-                        navigate({
-                          search: (prev) => ({
-                            ...prev,
-                            tab: tabName,
-                            page: 1,
-                          }),
-                        });
-                      }}
-                      className={cn(
-                        'whitespace-nowrap lowercase',
-                        tab === tabName
-                          ? cn(
-                              'border-none text-white shadow-lg',
-                              'from-theme-primary to-theme-secondary bg-gradient-to-r'
-                            )
-                          : 'bg-background/90 border-[hsl(var(--theme-primary))]/20 text-[hsl(var(--theme-primary))] hover:bg-[hsl(var(--theme-primary))]/10'
-                      )}
-                    >
-                      {tabName}
-                    </Button>
-                  )
+                  (tabName) => {
+                    // Use cached counts for consistent display across all tabs
+                    const count = cachedTotalCounts
+                      ? tabName === 'all'
+                        ? cachedTotalCounts.total
+                        : cachedTotalCounts[tabName] || 0
+                      : 0;
+
+                    return (
+                      <Button
+                        key={tabName}
+                        variant={tab === tabName ? 'default' : ''}
+                        size="sm"
+                        onClick={() => {
+                          navigate({
+                            search: (prev) => ({
+                              ...prev,
+                              tab: tabName,
+                              page: 1,
+                            }),
+                          });
+                        }}
+                        className={cn(
+                          'whitespace-nowrap lowercase',
+                          tab === tabName
+                            ? cn(
+                                'border-none text-white shadow-lg',
+                                'from-theme-primary to-theme-secondary bg-gradient-to-r'
+                              )
+                            : 'bg-background/90 border-border text-primary hover:bg-primary/10 border'
+                        )}
+                      >
+                        <span>{tabName}</span>
+                        {!isLoading && count > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="ml-1.5 h-5 px-1.5 text-xs"
+                          >
+                            {count}
+                          </Badge>
+                        )}
+                      </Button>
+                    );
+                  }
                 )}
               </div>
 
@@ -520,45 +583,35 @@ function SearchResultsPage() {
               </div>
             </div>
 
-            {tab === 'vibes' ? (
-              <Suspense fallback={<SearchResultsSkeleton />}>
-                <SearchResultsGrid
-                  results={data?.vibes || []}
-                  loading={isLoading}
-                  error={isError ? error : undefined}
-                  onRetry={() => window.location.reload()}
-                  queriedEmojis={emojiFilter}
-                />
-              </Suspense>
-            ) : (
-              <Suspense fallback={<SearchResultsSkeleton />}>
-                <SearchResultsGrid
-                  results={
-                    data
-                      ? tab === 'users'
-                        ? data.users || []
-                        : tab === 'tags'
-                          ? data.tags || []
-                          : tab === 'reviews'
-                            ? data.reviews || []
-                            : tab === 'all'
-                              ? [
-                                  ...(data.vibes || []),
-                                  ...(data.users || []),
-                                  ...(data.tags || []),
-                                  ...(data.actions || []),
-                                  ...(data.reviews || []),
-                                ]
+            <Suspense fallback={<SearchResultsSkeleton />}>
+              <SearchResultsList
+                results={
+                  data
+                    ? tab === 'all'
+                      ? [
+                          ...(data.vibes || []),
+                          ...(data.users || []),
+                          ...(data.tags || []),
+                          ...(data.actions || []),
+                          ...(data.reviews || []),
+                        ]
+                      : tab === 'vibes'
+                        ? data.vibes || []
+                        : tab === 'users'
+                          ? data.users || []
+                          : tab === 'tags'
+                            ? data.tags || []
+                            : tab === 'reviews'
+                              ? data.reviews || []
                               : []
-                      : undefined
-                  }
-                  loading={isLoading}
-                  error={isError ? error : undefined}
-                  onRetry={() => window.location.reload()}
-                  queriedEmojis={emojiFilter}
-                />
-              </Suspense>
-            )}
+                    : []
+                }
+                loading={isLoading}
+                error={isError ? error : undefined}
+                onRetry={() => window.location.reload()}
+                queriedEmojis={emojiFilter}
+              />
+            </Suspense>
 
             {!isLoading &&
               data &&

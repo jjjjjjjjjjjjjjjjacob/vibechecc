@@ -6,7 +6,7 @@ interface SearchSuggestionsProps {
   recentSearches?: SearchSuggestion[];
   trendingSearches?: SearchSuggestion[];
   popularTags?: SearchSuggestion[];
-  onSelect: (term: string, type?: 'tag' | 'search') => void;
+  onSelect: (term: string, type?: 'tag' | 'search' | 'recent' | 'trending' | 'recommended') => void;
 }
 
 export function SearchSuggestions({
@@ -23,7 +23,7 @@ export function SearchSuggestions({
             <CommandItem
               key={search.term}
               value={search.term}
-              onSelect={() => onSelect(search.term)}
+              onSelect={() => onSelect(search.term, 'recent')}
               className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
             >
               <Clock className="text-muted-foreground h-4 w-4" />
@@ -39,7 +39,7 @@ export function SearchSuggestions({
             <CommandItem
               key={search.term}
               value={search.term}
-              onSelect={() => onSelect(search.term)}
+              onSelect={() => onSelect(search.term, 'trending')}
               className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
             >
               <TrendingUp className="text-muted-foreground h-4 w-4" />

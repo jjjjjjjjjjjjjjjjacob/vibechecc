@@ -12,6 +12,7 @@ import { TagResult } from './result-items/tag-result';
 import { ActionResult } from './result-items/action-result';
 import { SearchSuggestions } from './search-suggestions';
 import { useSearchSuggestions } from '../hooks/use-search';
+import { useSearchTracking } from '../hooks/use-search-tracking';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
 interface SearchDropdownProps {
@@ -24,6 +25,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebouncedValue(query, 300);
   const { data, isLoading } = useSearchSuggestions(debouncedQuery);
+  const { trackSearch } = useSearchTracking();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -74,9 +76,18 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
     setQuery('');
   };
 
+  const handleResultSelect = (resultId: string, resultType: string, category?: string) => {
+    // Track result click with clicked result info for analytics
+    if (query.trim()) {
+      trackSearch(query.trim(), undefined, [resultId], category || resultType);
+    }
+    handleSelect();
+  };
+
   const handleSearch = (searchQuery?: string) => {
     const finalQuery = searchQuery || query;
     if (finalQuery.trim()) {
+      // Navigate to search page (tracking is handled automatically by search hooks)
       navigate({ to: '/search', search: { q: finalQuery } });
       handleSelect();
     }
@@ -87,7 +98,9 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
       navigate({ to: term as '/vibes' });
       handleSelect();
     } else {
-      handleSearch(term);
+      // Navigate to search page (tracking is handled automatically by search hooks)
+      navigate({ to: '/search', search: { q: term } });
+      handleSelect();
     }
   };
 
@@ -220,7 +233,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                         <VibeResult
                           key={vibe.id}
                           result={vibe}
-                          onSelect={handleSelect}
+                          onSelect={() => handleResultSelect(vibe.id, 'vibe', 'vibes')}
                         />
                       ))}
                     </div>
@@ -238,7 +251,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                         <UserResult
                           key={user.id}
                           result={user}
-                          onSelect={handleSelect}
+                          onSelect={() => handleResultSelect(user.id, 'user', 'users')}
                         />
                       ))}
                     </div>
@@ -256,7 +269,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                         <TagResult
                           key={tag.id}
                           result={tag}
-                          onSelect={handleSelect}
+                          onSelect={() => handleResultSelect(tag.id, 'tag', 'tags')}
                         />
                       ))}
                     </div>
@@ -274,7 +287,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                         <ActionResult
                           key={action.id}
                           result={action}
-                          onSelect={handleSelect}
+                          onSelect={() => handleResultSelect(action.id, 'action', 'actions')}
                         />
                       ))}
                     </div>

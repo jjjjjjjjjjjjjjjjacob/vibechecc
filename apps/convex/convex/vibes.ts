@@ -128,7 +128,9 @@ export const getFilteredVibes = query({
     } else if (filters.sort === 'rating_asc') {
       vibesWithEmojiRatings.sort((a, b) => (a.rating || 0) - (b.rating || 0));
     } else if (filters.sort === 'most_rated') {
-      vibesWithEmojiRatings.sort((a, b) => (b.ratingCount || 0) - (a.ratingCount || 0));
+      vibesWithEmojiRatings.sort(
+        (a, b) => (b.ratingCount || 0) - (a.ratingCount || 0)
+      );
     } else if (filters.sort === 'top_rated') {
       vibesWithEmojiRatings.sort((a, b) => {
         const scoreA = (a.rating || 0) * Math.log1p(a.ratingCount || 0);
@@ -157,7 +159,9 @@ export const getFilteredVibes = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
               .first();
             return {
               user,
@@ -219,7 +223,9 @@ export const getAll = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
               .first();
             return {
               user,
@@ -319,7 +325,9 @@ export const getByUser = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
               .first();
             return {
               user,
@@ -378,7 +386,9 @@ export const getUserRatedVibes = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
               .first();
             return {
               user,
@@ -538,7 +548,7 @@ export const getUserReceivedRatings = query({
       flatRatings.map(async (rating) => {
         const rater = await ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('externalId'), rating.userId))
+          .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
           .first();
 
         return {
@@ -679,10 +689,11 @@ export const getByTag = query({
   handler: async (ctx, args) => {
     const limit = args.limit ?? 10; // Default limit for tag-based rows
 
-    const allVibes = await ctx.db.query('vibes').order('desc').take(100); // Get recent vibes
+    // Get recent vibes and filter by tag
+    const vibesQuery = await ctx.db.query('vibes').order('desc').take(200); // Get recent vibes to search through
 
     // Filter vibes that contain the specified tag
-    const vibesWithTag = allVibes
+    const vibesWithTag = vibesQuery
       .filter((vibe) => vibe.tags && vibe.tags.includes(args.tag))
       .slice(0, limit);
 
@@ -690,7 +701,9 @@ export const getByTag = query({
       vibesWithTag.map(async (vibe) => {
         const creator = await ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', vibe.createdById)
+          )
           .first();
 
         // Get limited ratings for performance
@@ -703,7 +716,9 @@ export const getByTag = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
               .first();
             return {
               user,
@@ -728,23 +743,303 @@ export const getByTag = query({
 // Get all available tags from vibes
 export const getAllTags = query({
   handler: async (ctx) => {
-    const vibes = await ctx.db.query('vibes').collect();
+    // Use the tags table instead of collecting all vibes
+    const tags = await ctx.db
+      .query('tags')
+      .withIndex('byCount')
+      .order('desc')
+      .take(50); // Limit to top 50 tags
 
-    // Extract all tags and count their usage
-    const tagCounts = new Map<string, number>();
+    // Convert to the expected format
+    return tags.map((tag) => ({
+      tag: tag.name,
+      count: tag.count,
+    }));
+  },
+});
 
-    vibes.forEach((vibe) => {
-      if (vibe.tags) {
-        vibe.tags.forEach((tag) => {
-          tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
-        });
-      }
+// Lightweight get all vibes for discover page (updated)
+export const getAllLightweight = query({
+  args: {
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+
+    // Get vibes with pagination
+    const vibesQuery = ctx.db.query('vibes').order('desc');
+    const vibes = await vibesQuery.paginate({
+      cursor: args.cursor || null,
+      numItems: limit,
     });
 
-    // Convert to array and sort by usage count
-    return Array.from(tagCounts.entries())
-      .map(([tag, count]) => ({ tag, count }))
-      .sort((a, b) => b.count - a.count);
+    // Get all creators in one query
+    const creatorIds = Array.from(
+      new Set(vibes.page.map((v) => v.createdById))
+    );
+    const allCreators = [];
+    if (creatorIds.length > 0) {
+      for (const creatorId of creatorIds) {
+        const creator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) => q.eq('externalId', creatorId))
+          .first();
+        if (creator) {
+          allCreators.push(creator);
+        }
+      }
+    }
+
+    const creatorsMap = new Map(allCreators.map((c) => [c.externalId, c]));
+
+    // Get ratings for all vibes
+    const vibeIds = vibes.page.map((v) => v.id);
+    const allRatings = [];
+    if (vibeIds.length > 0) {
+      for (const vibeId of vibeIds) {
+        const vibeRatings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibeId))
+          .collect();
+        allRatings.push(...vibeRatings);
+      }
+    }
+
+    // Group ratings by vibe
+    const ratingsByVibe = new Map<string, any[]>();
+    for (const rating of allRatings) {
+      if (!ratingsByVibe.has(rating.vibeId)) {
+        ratingsByVibe.set(rating.vibeId, []);
+      }
+      ratingsByVibe.get(rating.vibeId)?.push(rating);
+    }
+
+    const vibesWithBasicInfo = vibes.page.map((vibe) => {
+      const creator = creatorsMap.get(vibe.createdById);
+      const vibeRatings = ratingsByVibe.get(vibe.id) || [];
+      const ratingCount = vibeRatings.length;
+      const averageRating =
+        ratingCount > 0
+          ? vibeRatings.reduce((sum, r) => sum + r.value, 0) / ratingCount
+          : 0;
+
+      return {
+        _id: vibe._id,
+        _creationTime: vibe._creationTime,
+        id: vibe.id,
+        title: vibe.title,
+        description: vibe.description,
+        image: vibe.image,
+        imageUrl: vibe.image,
+        createdById: vibe.createdById,
+        createdAt: vibe.createdAt,
+        tags: vibe.tags,
+        createdBy: creator,
+        ratingCount,
+        averageRating,
+      };
+    });
+
+    return {
+      vibes: vibesWithBasicInfo,
+      continueCursor: vibes.continueCursor,
+      isDone: vibes.isDone,
+    };
+  },
+});
+
+// Get unrated vibes
+export const getUnratedVibes = query({
+  args: {
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+
+    // Get all vibes
+    const vibesQuery = ctx.db.query('vibes').order('desc');
+    const allVibes = await vibesQuery.paginate({
+      cursor: args.cursor || null,
+      numItems: limit * 2, // Get more to filter
+    });
+
+    // Get all vibe IDs
+    const vibeIds = allVibes.page.map((v) => v.id);
+
+    // Find which vibes have ratings
+    const vibesWithRatings = new Set<string>();
+    if (vibeIds.length > 0) {
+      // Get just one rating per vibe to check if it has any ratings
+      for (const vibeId of vibeIds) {
+        const hasRating = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibeId))
+          .first();
+
+        if (hasRating) {
+          vibesWithRatings.add(vibeId);
+        }
+      }
+    }
+
+    // Filter unrated vibes
+    const unratedVibesData = allVibes.page
+      .filter((v) => !vibesWithRatings.has(v.id))
+      .slice(0, limit);
+
+    // Get all creators in one query
+    const creatorIds = Array.from(
+      new Set(unratedVibesData.map((v) => v.createdById))
+    );
+    const allCreators = [];
+    if (creatorIds.length > 0) {
+      for (const creatorId of creatorIds) {
+        const creator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) => q.eq('externalId', creatorId))
+          .first();
+        if (creator) {
+          allCreators.push(creator);
+        }
+      }
+    }
+
+    const creatorsMap = new Map(allCreators.map((c) => [c.externalId, c]));
+
+    const unratedVibes = unratedVibesData.map((vibe) => {
+      const creator = creatorsMap.get(vibe.createdById);
+
+      return {
+        _id: vibe._id,
+        _creationTime: vibe._creationTime,
+        id: vibe.id,
+        title: vibe.title,
+        description: vibe.description,
+        image: vibe.image,
+        imageUrl: vibe.image,
+        createdById: vibe.createdById,
+        createdAt: vibe.createdAt,
+        tags: vibe.tags,
+        createdBy: creator,
+        ratingCount: 0,
+        averageRating: 0,
+      };
+    });
+
+    return {
+      vibes: unratedVibes,
+      continueCursor: allVibes.continueCursor,
+      isDone: allVibes.isDone || unratedVibes.length < limit,
+    };
+  },
+});
+
+// Get top-rated vibes (lightweight)
+export const getTopRatedLightweight = query({
+  args: {
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 10;
+
+    // Get more vibes to find top-rated ones
+    const vibesQuery = ctx.db.query('vibes').order('desc');
+    const vibes = await vibesQuery.paginate({
+      cursor: args.cursor || null,
+      numItems: Math.min(limit * 5, 100), // Get more to have enough after filtering
+    });
+
+    // Get all ratings for these vibes
+    const vibeIds = vibes.page.map((v) => v.id);
+    const allRatings = [];
+    if (vibeIds.length > 0) {
+      for (const vibeId of vibeIds) {
+        const vibeRatings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibeId))
+          .collect();
+        allRatings.push(...vibeRatings);
+      }
+    }
+
+    // Group ratings by vibe and calculate averages
+    const ratingsByVibe = new Map<string, any[]>();
+    for (const rating of allRatings) {
+      if (!ratingsByVibe.has(rating.vibeId)) {
+        ratingsByVibe.set(rating.vibeId, []);
+      }
+      ratingsByVibe.get(rating.vibeId)?.push(rating);
+    }
+
+    // Calculate averages and filter
+    const vibesWithRatings = vibes.page
+      .map((vibe) => {
+        const vibeRatings = ratingsByVibe.get(vibe.id) || [];
+        const ratingCount = vibeRatings.length;
+        const averageRating =
+          ratingCount > 0
+            ? vibeRatings.reduce((sum, r) => sum + r.value, 0) / ratingCount
+            : 0;
+
+        return {
+          vibe,
+          ratingCount,
+          averageRating,
+        };
+      })
+      .filter((item) => item.ratingCount >= 2) // Minimum 2 ratings to qualify
+      .sort((a, b) => b.averageRating - a.averageRating)
+      .slice(0, limit);
+
+    // Get all creators
+    const creatorIds = Array.from(
+      new Set(vibesWithRatings.map((item) => item.vibe.createdById))
+    );
+    const allCreators = [];
+    if (creatorIds.length > 0) {
+      for (const creatorId of creatorIds) {
+        const creator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) => q.eq('externalId', creatorId))
+          .first();
+        if (creator) {
+          allCreators.push(creator);
+        }
+      }
+    }
+
+    const creatorsMap = new Map(allCreators.map((c) => [c.externalId, c]));
+
+    const topRatedVibes = vibesWithRatings.map(
+      ({ vibe, ratingCount, averageRating }) => {
+        const creator = creatorsMap.get(vibe.createdById);
+
+        return {
+          _id: vibe._id,
+          _creationTime: vibe._creationTime,
+          id: vibe.id,
+          title: vibe.title,
+          description: vibe.description,
+          image: vibe.image,
+          imageUrl: vibe.image,
+          createdById: vibe.createdById,
+          createdAt: vibe.createdAt,
+          tags: vibe.tags,
+          createdBy: creator,
+          ratingCount,
+          averageRating,
+        };
+      }
+    );
+
+    return {
+      vibes: topRatedVibes,
+      continueCursor: vibes.continueCursor,
+      isDone: vibes.isDone,
+    };
   },
 });
 
@@ -806,7 +1101,9 @@ export const getTopRated = query({
           ratings.map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
               .first();
             return {
               user,
@@ -1080,7 +1377,9 @@ export const getTopRatedByEmoji = query({
           ratings.slice(0, 5).map(async (rating) => {
             const user = await ctx.db
               .query('users')
-              .filter((q) => q.eq(q.field('externalId'), rating.userId))
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
               .first();
             return {
               user,
@@ -1125,7 +1424,7 @@ export const getVibesByEmojiFilters = query({
 
     // Get all ratings with the specified emojis
     const allEmojiRatings = await Promise.all(
-      args.emojis.map(emoji =>
+      args.emojis.map((emoji) =>
         ctx.db
           .query('ratings')
           .filter((q) =>
@@ -1158,7 +1457,9 @@ export const getVibesByEmojiFilters = query({
 
         const creator = await ctx.db
           .query('users')
-          .withIndex('byExternalId', (q) => q.eq('externalId', vibe.createdById))
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', vibe.createdById)
+          )
           .first();
 
         // Get all ratings for this vibe
@@ -1184,7 +1485,10 @@ export const getVibesByEmojiFilters = query({
     return {
       vibes: vibes.filter((v) => v !== null),
       totalCount: vibeIds.length,
-      nextCursor: startIndex + limit < vibeIds.length ? (startIndex + limit).toString() : null,
+      nextCursor:
+        startIndex + limit < vibeIds.length
+          ? (startIndex + limit).toString()
+          : null,
     };
   },
 });

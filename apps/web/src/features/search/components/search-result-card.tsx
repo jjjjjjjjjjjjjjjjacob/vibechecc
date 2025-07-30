@@ -231,49 +231,72 @@ function TagResultCard({ result }: { result: TagSearchResult }) {
 }
 
 function ReviewResultCard({ result }: { result: ReviewSearchResult }) {
+  const usePlaceholder = !result.vibeImage;
+
   return (
     <Link to="/vibes/$vibeId" params={{ vibeId: result.vibeId }}>
       <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-md">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            {/* Reviewer Avatar */}
-            <Avatar className="h-8 w-8">
-              <AvatarImage
-                src={result.reviewerAvatar}
-                alt={result.reviewerName}
-              />
-              <AvatarFallback>
-                {result.reviewerName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-
             <div className="min-w-0 flex-1">
-              {/* Emoji Rating */}
-              <div className="mb-2 flex items-center gap-2">
-                <EmojiRatingDisplay
-                  rating={{
-                    emoji: result.emoji,
-                    value: result.rating,
-                    count: undefined,
-                  }}
-                  showScale={false}
-                />
+              {/* Header with reviewer info and emoji rating */}
+              <div className="mb-2 flex items-start gap-2">
+                {/* Reviewer Avatar */}
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={result.reviewerAvatar}
+                    alt={result.reviewerName}
+                  />
+                  <AvatarFallback>
+                    {result.reviewerName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="flex-1">
+                  {/* Reviewer name and emoji rating on same line */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">
+                      @{result.reviewerName}
+                    </span>
+                    <EmojiRatingDisplay
+                      rating={{
+                        emoji: result.emoji,
+                        value: result.rating,
+                        count: undefined,
+                      }}
+                      showScale={false}
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    on "{result.vibeTitle}"
+                  </p>
+                </div>
               </div>
 
               {/* Review Text */}
-              <p className="mb-3 line-clamp-3 text-sm">{result.reviewText}</p>
+              <p className="line-clamp-3 text-sm">{result.reviewText}</p>
+            </div>
 
-              {/* Metadata */}
-              <div className="text-muted-foreground text-xs">
-                <p className="line-clamp-1">on "{result.vibeTitle}"</p>
-                <p>by @{result.reviewerName}</p>
+            {/* Vibe Image on the right */}
+            <div className="w-20 flex-shrink-0">
+              <div className="relative aspect-square overflow-hidden rounded-md">
+                {usePlaceholder ? (
+                  <SimpleVibePlaceholder title={result.vibeTitle} />
+                ) : (
+                  <img
+                    src={result.vibeImage}
+                    alt={result.vibeTitle}
+                    className="h-full w-full object-cover"
+                  />
+                )}
               </div>
             </div>
           </div>
         </CardContent>
 
         <CardFooter className="p-4 pt-0">
-          <Badge variant="secondary">REVIEW</Badge>
+          <Badge variant="secondary" className="text-xs">REVIEW</Badge>
         </CardFooter>
       </Card>
     </Link>

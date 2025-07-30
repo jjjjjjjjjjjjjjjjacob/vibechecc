@@ -129,6 +129,7 @@ const schema = defineSchema({
     timestamp: v.number(),
     resultCount: v.number(),
     clickedResults: v.optional(v.array(v.string())),
+    category: v.optional(v.string()), // 'recent', 'trending', 'recommended', 'tag', 'search'
   })
     .index('byUser', ['userId', 'timestamp'])
     .index('byTimestamp', ['timestamp']),

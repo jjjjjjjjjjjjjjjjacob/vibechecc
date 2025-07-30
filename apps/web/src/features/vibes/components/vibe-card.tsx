@@ -432,10 +432,7 @@ export function VibeCard({
                 {isAvatarHovered && (
                   <span
                     className={cn(
-                      'bg-background/50 rounded-full px-2 py-1 text-xs font-medium shadow-md backdrop-blur-sm',
-                      finalVariant.startsWith('feed-')
-                        ? 'animate-fade-in-down'
-                        : 'animate-in fade-in slide-in-from-left-2 duration-200'
+                      'bg-background/50 animate-in fade-in slide-in-from-left-2 rounded-full px-2 py-1 text-xs font-medium shadow-md backdrop-blur-sm duration-200'
                     )}
                   >
                     {computeUserDisplayName(vibe.createdBy)}

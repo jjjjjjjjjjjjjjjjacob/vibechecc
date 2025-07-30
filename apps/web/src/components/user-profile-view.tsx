@@ -186,7 +186,7 @@ export function UserProfileView({
                         alt={displayName}
                         className="object-cover"
                       />
-                      <AvatarFallback className="bg-background text-2xl font-bold text-white sm:text-3xl">
+                      <AvatarFallback className="bg-muted text-muted-foreground text-2xl font-bold sm:text-3xl">
                         {displayName.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -196,10 +196,10 @@ export function UserProfileView({
                 {/* Profile Info */}
                 <div className="flex-1 space-y-4">
                   <div className="space-y-2">
-                    <h1 className="text-3xl font-bold text-white lowercase drop-shadow-lg sm:text-4xl">
+                    <h1 className="text-foreground text-3xl font-bold lowercase drop-shadow-lg sm:text-4xl">
                       {displayName}
                     </h1>
-                    <p className="text-lg font-medium text-white/70 drop-shadow-md sm:text-xl">
+                    <p className="text-muted-foreground text-lg font-medium drop-shadow-md sm:text-xl">
                       @{user.username}
                     </p>
                   </div>
@@ -207,7 +207,7 @@ export function UserProfileView({
                   {/* Bio */}
                   {user.bio && (
                     <div className="max-w-xl">
-                      <p className="text-sm leading-relaxed text-white/80 drop-shadow-sm sm:text-base">
+                      <p className="text-muted-foreground text-sm leading-relaxed drop-shadow-sm sm:text-base">
                         {user.bio}
                       </p>
                     </div>
@@ -215,24 +215,24 @@ export function UserProfileView({
 
                   {/* Stats Pills */}
                   <div className="flex flex-wrap gap-3">
-                    <div className="rounded-full border border-white/20 bg-white/15 px-3 py-1.5 backdrop-blur">
-                      <div className="flex items-center gap-2 text-white">
+                    <div className="border-border bg-card/50 rounded-full border px-3 py-1.5 backdrop-blur">
+                      <div className="text-foreground flex items-center gap-2">
                         <CalendarDays className="h-3.5 w-3.5" />
                         <span className="text-xs font-medium">
                           joined {joinDate}
                         </span>
                       </div>
                     </div>
-                    <div className="rounded-full border border-white/20 bg-white/15 px-3 py-1.5 backdrop-blur">
-                      <div className="flex items-center gap-2 text-white">
+                    <div className="border-border bg-card/50 rounded-full border px-3 py-1.5 backdrop-blur">
+                      <div className="text-foreground flex items-center gap-2">
                         <Heart className="h-3.5 w-3.5" />
                         <span className="text-xs font-bold">{vibeCount}</span>
                         <span className="text-xs font-medium">vibes</span>
                       </div>
                     </div>
                     {averageReceivedRating > 0 && (
-                      <div className="rounded-full border border-white/20 bg-white/15 px-3 py-1.5 backdrop-blur">
-                        <div className="flex items-center gap-2 text-white">
+                      <div className="border-border bg-card/50 rounded-full border px-3 py-1.5 backdrop-blur">
+                        <div className="text-foreground flex items-center gap-2">
                           <Star className="h-3.5 w-3.5 fill-yellow-300 text-yellow-300" />
                           <span className="text-xs font-bold">
                             {averageReceivedRating.toFixed(1)}
@@ -253,7 +253,7 @@ export function UserProfileView({
                           variant="outline"
                           size="sm"
                           asChild
-                          className="border-white/20 bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20"
+                          className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
                         >
                           <a
                             href={`https://twitter.com/${user.socials.twitter}`}
@@ -269,7 +269,7 @@ export function UserProfileView({
                           variant="outline"
                           size="sm"
                           asChild
-                          className="border-white/20 bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20"
+                          className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
                         >
                           <a
                             href={`https://instagram.com/${user.socials.instagram}`}
@@ -285,7 +285,7 @@ export function UserProfileView({
                           variant="outline"
                           size="sm"
                           asChild
-                          className="border-white/20 bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20"
+                          className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
                         >
                           <a
                             href={user.socials.website}
@@ -306,10 +306,10 @@ export function UserProfileView({
           {/* Modern Navigation */}
           <Tabs defaultValue="vibes" className="w-full">
             <div className="mt-12 mb-8 flex justify-center">
-              <TabsList className="bg-background/60 rounded-2xl border-0 p-1.5 shadow-2xl backdrop-blur-md">
+              <TabsList className="gap-1 rounded-2xl border-0 bg-transparent p-1.5 shadow-2xl backdrop-blur-md">
                 <TabsTrigger
                   value="vibes"
-                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:text-white data-[state=active]:shadow-lg"
+                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-2 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
                 >
                   <Heart className="mr-2 h-4 w-4" />
                   vibes
@@ -317,7 +317,7 @@ export function UserProfileView({
                 {userRatings !== undefined && (
                   <TabsTrigger
                     value="reviews"
-                    className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:text-white data-[state=active]:shadow-lg"
+                    className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-2 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
                   >
                     <Star className="mr-2 h-4 w-4" />
                     reviews
@@ -325,7 +325,7 @@ export function UserProfileView({
                 )}
                 <TabsTrigger
                   value="about"
-                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 rounded-xl px-6 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:text-white data-[state=active]:shadow-lg"
+                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-2 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
                   about

@@ -204,7 +204,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               <Header />
               <LoadingIndicator />
 
-              <main className="mt-14 mb-4 flex-1">{children}</main>
+              <main className="mb-4 flex-1">{children}</main>
 
               <footer className="bg-background border-t py-6">
                 <div className="container mx-auto px-4">

@@ -38,7 +38,7 @@ export function TagSearchCommand({
 
   return (
     <div className={cn('space-y-3', className)}>
-      <Command className="rounded-lg border">
+      <Command className="rounded-lg border-0 ring-1 ring-border">
         <CommandInput
           placeholder={placeholder}
           value={searchValue}

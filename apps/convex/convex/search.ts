@@ -738,11 +738,27 @@ export const getSearchSuggestions = query({
           .query('searchHistory')
           .withIndex('byUser', (q: any) => q.eq('userId', currentUser.subject))
           .order('desc')
-          .take(5);
+          .take(20); // Get more to ensure we have enough unique ones
 
-        results.recentSearches = recentSearchHistory.map(
-          (search: any) => search.query
-        );
+        // Deduplicate recent searches by query
+        const uniqueSearches = new Map<string, any>();
+        for (const search of recentSearchHistory) {
+          if (!uniqueSearches.has(search.query)) {
+            uniqueSearches.set(search.query, search);
+          }
+        }
+
+        // Take only the first 5 unique searches
+        results.recentSearches = Array.from(uniqueSearches.values())
+          .slice(0, 5)
+          .map((search: any) => search.query);
+          
+        console.log('Recent searches for user:', { 
+          userId: currentUser.subject,
+          recentSearchHistory: recentSearchHistory.length,
+          uniqueSearches: uniqueSearches.size,
+          results: results.recentSearches 
+        });
       }
 
       // Get trending searches
@@ -895,23 +911,69 @@ export const trackSearch = mutation({
     query: v.string(),
     resultCount: v.number(),
     clickedResults: v.optional(v.array(v.string())),
+    category: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { query, resultCount, clickedResults } = args;
+    const { query, resultCount, clickedResults, category } = args;
     const identity = await ctx.auth.getUserIdentity();
 
     if (!identity) {
       throw new Error('User must be authenticated to track searches');
     }
 
-    // Record search history
-    await ctx.db.insert('searchHistory', {
-      userId: identity.subject,
-      query,
-      timestamp: Date.now(),
-      resultCount,
+    console.log('trackSearch called:', { 
+      userId: identity.subject, 
+      query, 
+      resultCount, 
       clickedResults,
+      category 
     });
+
+    // Find the most recent search entry for this user and query
+    const existingSearch = await ctx.db
+      .query('searchHistory')
+      .withIndex('byUser', (q: any) => q.eq('userId', identity.subject))
+      .order('desc')
+      .filter((q) => q.eq(q.field('query'), query))
+      .first();
+    
+    // If we have an existing search from within the last 5 minutes, update it
+    // This handles cases where we track twice (once for search, once for result count)
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+    if (existingSearch && existingSearch.timestamp > fiveMinutesAgo) {
+      console.log('Updating existing search history entry:', { 
+        searchId: existingSearch._id,
+        userId: identity.subject, 
+        query,
+        newResultCount: resultCount,
+        newClickedResults: clickedResults
+      });
+      
+      await ctx.db.patch(existingSearch._id, {
+        resultCount: resultCount > 0 ? resultCount : existingSearch.resultCount,
+        clickedResults: clickedResults && clickedResults.length > 0 ? clickedResults : existingSearch.clickedResults,
+        timestamp: Date.now(), // Update timestamp to keep it recent
+        category: category || existingSearch.category,
+      });
+    } else {
+      console.log('Inserting new search history entry:', { 
+        userId: identity.subject, 
+        query, 
+        resultCount,
+        clickedResults,
+        category,
+        timestamp: Date.now() 
+      });
+      
+      await ctx.db.insert('searchHistory', {
+        userId: identity.subject,
+        query,
+        timestamp: Date.now(),
+        resultCount,
+        clickedResults,
+        category,
+      });
+    }
 
     // Update trending searches
     const normalizedQuery = query.toLowerCase().trim();
@@ -924,12 +986,14 @@ export const trackSearch = mutation({
       await ctx.db.patch(existing._id, {
         count: existing.count + 1,
         lastUpdated: Date.now(),
+        category: category || existing.category,
       });
     } else {
       await ctx.db.insert('trendingSearches', {
         term: normalizedQuery,
         count: 1,
         lastUpdated: Date.now(),
+        category,
       });
     }
 
