@@ -271,22 +271,9 @@ export const searchAllOptimized = query({
       for (const user of users) {
         if (allResults.users.length >= MAX_RESULTS_PER_TYPE) break;
 
-        // If no search query, include all users when searching specifically for users
-        if (!searchTerms.length) {
-          // If we're searching for specific types and users is one of them, include all users
-          if (
-            includeTypes &&
-            includeTypes.includes('user') &&
-            includeTypes.length === 1
-          ) {
-            // Include all users when on users tab
-          } else if (filters && relatedUserIds.size > 0) {
-            // Only filter by related users if we have filters AND we found related users
-            if (!relatedUserIds.has(user.externalId)) continue;
-          }
-          // Otherwise include all users
-        } else if (searchTerms.length > 0) {
-          // Normal search behavior when there's a query
+        // Apply search term filtering regardless of tab
+        if (searchTerms.length > 0) {
+          // Filter by search terms - include location in search
           if (
             !containsSearchTerms(
               `${user.username || ''} ${user.first_name || ''} ${user.last_name || ''} ${user.bio || ''}`,
@@ -294,14 +281,30 @@ export const searchAllOptimized = query({
             )
           )
             continue;
+        } else {
+          // If no search terms, only include users if:
+          // 1. We have other filters and they're related to vibes found
+          // 2. OR we're doing a browsing query (no specific search context)
+          if (filters && relatedUserIds.size > 0) {
+            // Only include users related to filtered vibes if we have other filters
+            if (!relatedUserIds.has(user.externalId)) continue;
+          } else if (
+            !filters &&
+            (!includeTypes ||
+              includeTypes.length !== 1 ||
+              !includeTypes.includes('user'))
+          ) {
+            // If no search terms and no filters, don't include any users unless we're specifically browsing users
+            continue;
+          }
         }
 
         // Get vibe count using index
         const userVibes = await ctx.db
           .query('vibes')
           .withIndex('createdBy', (q) => q.eq('createdById', user.externalId))
-          .take(1);
-        const vibeCount = userVibes.length; // Limited but sufficient for display
+          .collect();
+        const vibeCount = userVibes.length;
 
         allResults.users.push({
           id: user.externalId,
@@ -439,37 +442,61 @@ export const searchAllOptimized = query({
           ? MAX_RESULTS_PER_TYPE
           : Math.min(relatedTags.size, MAX_RESULTS_PER_TYPE);
 
-      const tags = await ctx.db.query('tags').take(tagsLimit);
+      // Use search index when we have search terms, otherwise use count ordering
+      const tags =
+        searchTerms.length > 0
+          ? await ctx.db
+              .query('tags')
+              .withSearchIndex('search', (q) =>
+                q.search('name', searchTerms.join(' '))
+              )
+              .take(tagsLimit)
+          : await ctx.db
+              .query('tags')
+              .withIndex('byCount')
+              .order('desc')
+              .take(tagsLimit);
 
       for (const tag of tags) {
         if (allResults.tags.length >= MAX_RESULTS_PER_TYPE) break;
 
-        // If no search query, include all tags when searching specifically for tags
-        if (!searchTerms.length) {
-          // If we're searching for specific types and tags is one of them, include all tags
-          if (
-            includeTypes &&
-            includeTypes.includes('tag') &&
-            includeTypes.length === 1
-          ) {
-            // Include all tags when on tags tab
-          } else if (filters && relatedTags.size > 0) {
-            // Only filter by related tags if we have filters AND we found related tags
+        // Apply search term filtering regardless of tab
+        if (searchTerms.length > 0) {
+          // Filter by search terms - the search index should handle this, but double-check
+          const matchesSearch =
+            containsSearchTerms(tag.name, searchTerms) ||
+            searchTerms.some(
+              (term) =>
+                tag.name.toLowerCase().includes(term.toLowerCase()) ||
+                term.toLowerCase().includes(tag.name.toLowerCase())
+            );
+          if (!matchesSearch) continue;
+        } else {
+          // If no search terms, only include tags if:
+          // 1. We have other filters and they're related to vibes found
+          // 2. OR we're doing a browsing query (no specific search context)
+          if (filters && relatedTags.size > 0) {
+            // Only include tags related to filtered vibes if we have other filters
             if (!relatedTags.has(tag.name)) continue;
+          } else if (
+            !filters &&
+            (!includeTypes ||
+              includeTypes.length !== 1 ||
+              !includeTypes.includes('tag'))
+          ) {
+            // If no search terms and no filters, don't include any tags unless we're specifically browsing tags
+            continue;
           }
-          // Otherwise include all tags
-        } else if (searchTerms.length > 0) {
-          // Normal search behavior when there's a query
-          if (!containsSearchTerms(tag.name, searchTerms)) continue;
         }
 
-        // If filtering, update tag count to reflect filtered vibes only
+        // Use the actual tag count from the database
         let displayCount = tag.count;
-        if (!searchTerms.length && filters) {
-          // Count how many filtered vibes have this tag
-          displayCount = allResults.vibes.filter((vibe) =>
-            vibe.tags?.includes(tag.name)
-          ).length;
+
+        // Only recalculate count if we have specific tag filters that might affect the display
+        if (!searchTerms.length && filters?.tags?.length) {
+          // If we're filtering by specific tags, show the original count
+          // since the tag filtering happens at the vibe level
+          displayCount = tag.count;
         }
 
         allResults.tags.push({

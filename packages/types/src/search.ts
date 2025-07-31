@@ -20,6 +20,7 @@ export interface VibeSearchResult extends BaseSearchResult {
   rating?: number;
   ratingCount?: number;
   tags?: string[];
+  createdAt?: string | number;
   createdBy?: {
     id: string;
     name: string;

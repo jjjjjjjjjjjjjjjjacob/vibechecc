@@ -16,6 +16,7 @@ interface EmojiRatingCycleDisplayProps {
   className?: string;
   variant?: 'color' | 'gradient';
   showBeTheFirst?: boolean;
+  delay?: number;
 }
 
 const DEFAULT_EMOJIS = [
@@ -38,6 +39,7 @@ export function EmojiRatingCycleDisplay({
   emojiMetadata = {},
   className,
   showBeTheFirst = false,
+  delay = 0,
   // variant = 'color',
 }: EmojiRatingCycleDisplayProps) {
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
@@ -55,21 +57,35 @@ export function EmojiRatingCycleDisplay({
   React.useEffect(() => {
     if (isHovered) return;
 
-    const interval = setInterval(() => {
-      setEmojiTransition('out');
-
-      setTimeout(() => {
-        setCurrentEmojiIndex((prev) => (prev + 1) % emojiOptions.length);
-        setEmojiTransition('in');
+    const startCycling = () => {
+      const interval = setInterval(() => {
+        setEmojiTransition('out');
 
         setTimeout(() => {
-          setEmojiTransition('idle');
-        }, 300);
-      }, 150);
-    }, 2500);
+          setCurrentEmojiIndex((prev) => (prev + 1) % emojiOptions.length);
+          setEmojiTransition('in');
 
-    return () => clearInterval(interval);
-  }, [emojiOptions.length, isHovered]);
+          setTimeout(() => {
+            setEmojiTransition('idle');
+          }, 300);
+        }, 150);
+      }, 2500);
+
+      return interval;
+    };
+
+    if (delay > 0) {
+      const delayTimeout = setTimeout(() => {
+        const interval = startCycling();
+        return () => clearInterval(interval);
+      }, delay);
+
+      return () => clearTimeout(delayTimeout);
+    } else {
+      const interval = startCycling();
+      return () => clearInterval(interval);
+    }
+  }, [emojiOptions.length, isHovered, delay]);
 
   return (
     <EmojiRatingPopover

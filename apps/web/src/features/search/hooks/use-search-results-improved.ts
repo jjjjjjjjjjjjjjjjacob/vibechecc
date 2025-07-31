@@ -3,7 +3,7 @@ import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberater/convex';
 import type { SearchRequest, SearchFilters } from '@viberater/types';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
 
 // Valid sort options for Convex search
@@ -43,6 +43,7 @@ interface UseSearchResultsParams {
   limit?: number;
   page?: number;
   includeTypes?: string[];
+  enabled?: boolean;
 }
 
 export function useSearchResultsImproved({
@@ -51,6 +52,7 @@ export function useSearchResultsImproved({
   limit = 20,
   page = 1,
   includeTypes,
+  enabled = true,
 }: UseSearchResultsParams) {
   const debouncedQuery = useDebouncedValue(query, 300);
   const { user } = useUser();
@@ -65,7 +67,7 @@ export function useSearchResultsImproved({
       pageSize: limit,
       includeTypes,
     }),
-    enabled: true, // Always enabled, backend handles empty queries
+    enabled: enabled, // Configurable enabled state
     // Keep previous data while loading next page
     placeholderData: (previousData) => previousData,
   });
@@ -74,6 +76,15 @@ export function useSearchResultsImproved({
   const trackSearchMutation = useMutation({
     mutationFn: useConvexMutation(api.search.trackSearch),
   });
+
+  // Stable callback for tracking searches
+  const trackSearch = useCallback(
+    (query: string, resultCount: number) => {
+      trackSearchMutation.mutate({ query, resultCount }, {});
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   // Track search when debounced query changes (for search history)
   useEffect(() => {
@@ -85,15 +96,9 @@ export function useSearchResultsImproved({
     ) {
       previousQuery.current = debouncedQuery;
       // Track immediately when query changes for search history
-      trackSearchMutation.mutate(
-        {
-          query: debouncedQuery,
-          resultCount: 0, // We don't know the count yet
-        },
-        {}
-      );
+      trackSearch(debouncedQuery, 0); // We don't know the count yet
     }
-  }, [debouncedQuery, user?.id, trackSearchMutation]); // Track on debounced query changes
+  }, [debouncedQuery, user?.id, trackSearch]); // Track on debounced query changes
 
   // Update search history with actual result count when we have results
   useEffect(() => {
@@ -115,15 +120,9 @@ export function useSearchResultsImproved({
       }
 
       // Always update with the actual result count (even if 0)
-      trackSearchMutation.mutate(
-        {
-          query: debouncedQuery,
-          resultCount: totalCount,
-        },
-        {}
-      );
+      trackSearch(debouncedQuery, totalCount);
     }
-  }, [searchQuery.data, debouncedQuery, user?.id, trackSearchMutation]); // Update when we get actual results
+  }, [searchQuery.data, debouncedQuery, user?.id, trackSearch]); // Update when we get actual results
 
   return {
     data: searchQuery.data,

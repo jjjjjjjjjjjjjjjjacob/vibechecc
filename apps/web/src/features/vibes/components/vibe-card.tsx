@@ -42,6 +42,7 @@ interface VibeCardProps {
   variant?: VibeCardVariant;
   ratingDisplayMode?: RatingDisplayMode;
   className?: string;
+  delay?: number;
   // Legacy props for backward compatibility
   compact?: boolean;
   layout?: 'masonry' | 'grid' | 'single';
@@ -52,6 +53,7 @@ export function VibeCard({
   variant = 'default',
   ratingDisplayMode = 'most-rated',
   className,
+  delay = 0,
   // Legacy prop support
   compact,
   layout,
@@ -260,7 +262,7 @@ export function VibeCard({
                 to="/vibes/$vibeId"
                 params={{ vibeId: vibe.id }}
                 onClick={() => trackEvents.vibeViewed(vibe.id)}
-                className="relative flex-1 overflow-hidden rounded-lg block"
+                className="relative block flex-1 overflow-hidden rounded-lg"
               >
                 <div className="aspect-[4/3] w-full">
                   {usePlaceholder ? (
@@ -285,15 +287,15 @@ export function VibeCard({
                   to="/vibes/$vibeId"
                   params={{ vibeId: vibe.id }}
                   onClick={() => trackEvents.vibeViewed(vibe.id)}
-                  className="min-w-0 block"
+                  className="block min-w-0"
                 >
                   <div className="mb-2">
-                    <h3 className="line-clamp-2 text-base leading-tight font-semibold transition-colors hover:text-foreground/80">
+                    <h3 className="hover:text-foreground/80 line-clamp-2 text-base leading-tight font-semibold transition-colors">
                       {vibe.title}
                     </h3>
                     {vibe.createdBy && (
                       <span className="text-muted-foreground mt-1 block text-sm">
-                        @{vibe.createdBy.name || vibe.createdBy.username}
+                        @{vibe.createdBy.username || vibe.createdBy.full_name}
                       </span>
                     )}
                   </div>
@@ -332,7 +334,10 @@ export function VibeCard({
                           search={{ tags: [tag] }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <Badge variant="outline" className="text-xs hover:bg-secondary/80 transition-colors cursor-pointer">
+                          <Badge
+                            variant="outline"
+                            className="hover:bg-secondary/80 cursor-pointer text-xs transition-colors"
+                          >
                             #{tag}
                           </Badge>
                         </Link>
@@ -726,6 +731,8 @@ export function VibeCard({
                       allRatings={emojiRatings}
                       onEmojiClick={handleEmojiRatingClick}
                       vibeId={vibe.id}
+                      showScale={finalVariant !== 'compact'}
+                      size={finalVariant === 'compact' ? 'sm' : 'md'}
                     />
                   ) : (
                     <EmojiRatingCycleDisplay
@@ -733,13 +740,14 @@ export function VibeCard({
                       isSubmitting={createEmojiRatingMutation.isPending}
                       vibeTitle={vibe.title}
                       emojiMetadata={emojiMetadataRecord}
-                      showBeTheFirst={true}
+                      showBeTheFirst={emojiRatings.length === 0}
+                      delay={delay}
                     />
                   )}
                 </div>
 
-                {/* Emoji Reactions - only show if there are reactions */}
-                {emojiReactions.length > 0 && (
+                {/* Emoji Reactions - only show if there are reactions and not compact */}
+                {emojiReactions.length > 0 && finalVariant !== 'compact' && (
                   <div className="w-full min-w-0 overflow-hidden">
                     <EmojiReactions
                       reactions={emojiReactions}

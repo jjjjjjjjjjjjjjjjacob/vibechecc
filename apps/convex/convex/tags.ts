@@ -81,6 +81,54 @@ export const getPopularTags = query({
   },
 });
 
+// Helper function to rebuild tag counts
+async function rebuildTagCountsHelper(ctx: any) {
+  // Clear existing tags
+  const existingTags = await ctx.db.query('tags').collect();
+  for (const tag of existingTags) {
+    await ctx.db.delete(tag._id);
+  }
+
+  // Get all vibes and their tags
+  const allVibes = await ctx.db.query('vibes').collect();
+  const tagCounts = new Map<string, number>();
+
+  // Count tags from all vibes
+  for (const vibe of allVibes) {
+    if (vibe.tags) {
+      for (const tag of vibe.tags) {
+        const normalizedTag = tag.toLowerCase().trim();
+        if (normalizedTag) {
+          tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
+        }
+      }
+    }
+  }
+
+  // Insert new tag records
+  const now = Date.now();
+  for (const [tagName, count] of tagCounts.entries()) {
+    await ctx.db.insert('tags', {
+      name: tagName,
+      count,
+      createdAt: now,
+      lastUsed: now,
+    });
+  }
+
+  return { tagsRebuilt: tagCounts.size, vibesProcessed: allVibes.length };
+}
+
+// Rebuild tag counts from existing vibes (migration/admin function)
+export const rebuildTagCounts = internalMutation({
+  handler: async (ctx) => {
+    return await rebuildTagCountsHelper(ctx);
+  },
+});
+
+// Export helper for tests
+export { rebuildTagCountsHelper };
+
 // Search tags
 export const searchTags = query({
   args: {

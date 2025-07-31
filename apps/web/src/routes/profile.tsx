@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MasonryFeed } from '@/components/masonry-feed';
 import { CreateVibeButton } from '@/components/create-vibe-button';
-import { useUser } from '@clerk/tanstack-react-start';
+import { useUser, UserProfile } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
@@ -87,6 +87,7 @@ function Profile() {
   const [isPreviewMode, setIsPreviewMode] = React.useState(false);
   const [isFullPreview, setIsFullPreview] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [showUserProfile, setShowUserProfile] = React.useState(false);
   const [uploadedImageFile, setUploadedImageFile] = React.useState<File | null>(
     null
   );
@@ -356,6 +357,30 @@ function Profile() {
     );
   }
 
+  // Show UserProfile modal
+  if (showUserProfile) {
+    return (
+      <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
+        <div className="container mx-auto px-4 py-8">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowUserProfile(false)}
+                className="transition-transform hover:scale-[1.02]"
+              >
+                ← back to profile
+              </Button>
+            </div>
+            <div className="bg-background/90 rounded-lg border-none p-6 shadow-lg backdrop-blur">
+              <UserProfile />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
       <div className="container mx-auto px-4 py-8">
@@ -488,6 +513,7 @@ function Profile() {
                           setIsEditing(false);
                           setIsPreviewMode(false);
                           setIsFullPreview(false);
+                          setShowUserProfile(false);
                           setUsername(convexUser.username || '');
                           setFirstName(convexUser.first_name || '');
                           setLastName(convexUser.last_name || '');
@@ -537,6 +563,13 @@ function Profile() {
                         className="transition-transform hover:scale-[1.02]"
                       >
                         preview profile
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setShowUserProfile(true)}
+                        className="transition-transform hover:scale-[1.02]"
+                      >
+                        manage account
                       </Button>
                       <Button
                         variant="ghost"

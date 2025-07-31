@@ -1,9 +1,11 @@
 # Generated files
 apps/backend/convex/_generated/
+apps/convex/convex/_generated/
 apps/**/dist/
 packages/**/dist/
 .vinxi/
 .output/
+apps/web/src/routeTree.gen.ts
 
 # Build outputs
 dist/

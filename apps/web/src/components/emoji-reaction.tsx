@@ -445,7 +445,7 @@ function HorizontalEmojiPicker({
           'h-24 pb-6'
       )}
       side="top"
-      align="start"
+      align="center"
       sideOffset={8}
     >
       {showFullPicker ? fullPicker : horizontalPicker}

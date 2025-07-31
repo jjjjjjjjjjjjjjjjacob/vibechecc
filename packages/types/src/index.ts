@@ -6,6 +6,7 @@ export * from './search';
 export interface User {
   // Primary identifier (Clerk user ID stored as externalId in our DB)
   externalId: string;
+  id?: string; // Alias for compatibility
 
   // Core user identity fields (synced with Clerk)
   username?: string;
@@ -65,7 +66,9 @@ export interface Vibe {
   description: string;
   image?: string;
   createdBy: User | null;
+  createdById?: string;
   createdAt: string;
   ratings: Rating[];
   tags?: string[];
+  viewCount?: number;
 }

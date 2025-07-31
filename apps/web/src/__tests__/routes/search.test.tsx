@@ -211,7 +211,9 @@ describe('Search Page - Emoji Filter Integration', () => {
 
     await waitFor(() => {
       expect(screen.getByText('search results for "test"')).toBeInTheDocument();
-      expect(screen.getByText('2 results found')).toBeInTheDocument();
+      expect(
+        screen.getByText('2 results found for "test"')
+      ).toBeInTheDocument();
       expect(screen.getByText('filter results')).toBeInTheDocument();
     });
   });

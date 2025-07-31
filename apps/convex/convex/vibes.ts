@@ -416,12 +416,12 @@ export const getById = query({
 
 // Get vibes by user ID
 export const getByUser = query({
-  args: { userId: v.string() },
+  args: { userId: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const vibes = await ctx.db
       .query('vibes')
-      .filter((q) => q.eq(q.field('createdById'), args.userId))
-      .collect();
+      .withIndex('createdBy', (q) => q.eq('createdById', args.userId))
+      .take(args.limit ?? 20);
 
     return await Promise.all(
       vibes.map(async (vibe) => {

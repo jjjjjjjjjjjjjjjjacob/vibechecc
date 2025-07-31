@@ -24,10 +24,10 @@ export function SearchSuggestions({
         <CommandGroup heading="recent searches">
           {recentSearches.map((search) => (
             <CommandItem
-              key={search.term}
-              value={search.term}
+              key={`suggestion-recent-${search.term}`}
+              value={`recent-${search.term}`}
               onSelect={() => onSelect(search.term, 'recent')}
-              className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
+              className="data-[selected=true]:bg-muted/80 flex items-center gap-2"
             >
               <Clock className="text-muted-foreground h-4 w-4" />
               <span>{search.term}</span>
@@ -40,10 +40,10 @@ export function SearchSuggestions({
         <CommandGroup heading="trending">
           {trendingSearches.map((search) => (
             <CommandItem
-              key={search.term}
-              value={search.term}
+              key={`suggestion-trending-${search.term}`}
+              value={`trending-${search.term}`}
               onSelect={() => onSelect(search.term, 'trending')}
-              className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
+              className="data-[selected=true]:bg-muted/80 flex items-center gap-2"
             >
               <TrendingUp className="text-muted-foreground h-4 w-4" />
               <span>{search.term}</span>
@@ -56,10 +56,10 @@ export function SearchSuggestions({
         <CommandGroup heading="popular tags">
           {popularTags.map((tag) => (
             <CommandItem
-              key={tag.term}
-              value={tag.term}
+              key={`suggestion-tags-${tag.term}`}
+              value={`tag-${tag.term}`}
               onSelect={() => onSelect(tag.term, 'tag')}
-              className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
+              className="data-[selected=true]:bg-muted/80 flex items-center gap-2"
             >
               <Hash className="text-muted-foreground h-4 w-4" />
               <span>{tag.term}</span>
@@ -72,7 +72,7 @@ export function SearchSuggestions({
         <CommandItem
           value="browse all vibes"
           onSelect={() => onSelect('/vibes')}
-          className="data-[selected=true]:bg-muted/60 flex items-center gap-2"
+          className="data-[selected=true]:bg-muted/80 flex items-center gap-2"
         >
           <Search className="text-muted-foreground h-4 w-4" />
           <span>browse all vibes</span>

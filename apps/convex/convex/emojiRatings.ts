@@ -102,10 +102,11 @@ async function getTopEmojiRatingsInternal(
 ) {
   const limit = args.limit ?? 5;
 
-  // Get all ratings for this vibe
+  // Get all ratings for this vibe that have emoji field
   const ratings = await ctx.db
     .query('ratings')
     .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
+    .filter((q) => q.neq(q.field('emoji'), undefined))
     .collect();
 
   // Group by emoji and calculate stats

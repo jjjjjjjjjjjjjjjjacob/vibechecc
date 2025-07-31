@@ -18,6 +18,7 @@ interface EmojiRatingDisplayPopoverProps {
   vibeId?: string;
   variant?: 'color' | 'gradient';
   size?: 'sm' | 'md' | 'lg';
+  showScale?: boolean;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }
@@ -30,6 +31,7 @@ export function EmojiRatingDisplayPopover({
   vibeId,
   variant = 'color',
   size = 'md',
+  showScale = true,
   onMouseEnter,
   onMouseLeave,
 }: EmojiRatingDisplayPopoverProps) {
@@ -39,13 +41,21 @@ export function EmojiRatingDisplayPopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div
+          role="button"
+          tabIndex={0}
           className={cn('flex cursor-pointer items-center gap-1', className)}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setOpen(!open);
+            }
+          }}
         >
           <EmojiRatingDisplay
             rating={rating}
-            showScale={true}
+            showScale={showScale}
             onEmojiClick={onEmojiClick}
             variant={variant}
             size={size}

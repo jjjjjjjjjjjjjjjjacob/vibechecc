@@ -149,42 +149,33 @@ function SearchResultsPage() {
     }
   };
 
+  // Main query for current tab results
   const { data, isLoading, isError, error } = useSearchResultsImproved({
     query: q || '',
     filters,
-    page: tab === 'all' ? 1 : page, // Always use page 1 for "all" tab
+    page: page,
     includeTypes: getIncludeTypes(tab),
   });
 
-  // Debug log to check data structure
-  /*
-  React.useEffect(() => {
-    if (data) {
-      console.log('Search data for tab', tab, ':', {
-        vibes: data.vibes?.length || 0,
-        users: data.users?.length || 0,
-        tags: data.tags?.length || 0,
-        reviews: data.reviews?.length || 0,
-        includeTypes: getIncludeTypes(tab),
-      });
-    }
-  }, [data, tab]);
-  */
-
-  // Separate query to get total counts for all types (for badge display)
+  // Only fetch all counts if we're not on the "all" tab (which gives us complete counts anyway)
   const { data: allCountsData } = useSearchResultsImproved({
     query: q || '',
     filters,
     page: 1,
     includeTypes: undefined, // Get counts for all types
+    enabled: tab !== 'all', // Only run this query when not on "all" tab
   });
 
-  // Update cached counts when we get new data from the all counts query
+  // Update cached counts - use data from "all" tab or from separate counts query
   React.useEffect(() => {
-    if (allCountsData?.totalCounts) {
+    if (tab === 'all' && data?.totalCounts) {
+      // Use counts from the main query when on "all" tab
+      setCachedTotalCounts(data.totalCounts);
+    } else if (tab !== 'all' && allCountsData?.totalCounts) {
+      // Use counts from separate query when on specific tabs
       setCachedTotalCounts(allCountsData.totalCounts);
     }
-  }, [allCountsData?.totalCounts]);
+  }, [data?.totalCounts, allCountsData?.totalCounts, tab]);
 
   const navigate = Route.useNavigate();
 
@@ -221,7 +212,7 @@ function SearchResultsPage() {
           {data?.totalCount !== undefined && (
             <p className="text-muted-foreground drop-shadow-sm">
               {data.totalCount} {data.totalCount === 1 ? 'result' : 'results'}{' '}
-              found
+              {q ? `found for "${q}"` : 'found'}
             </p>
           )}
         </div>
@@ -613,18 +604,14 @@ function SearchResultsPage() {
               />
             </Suspense>
 
-            {!isLoading &&
-              data &&
-              activeTabCount > 0 &&
-              totalPages > 1 &&
-              tab !== 'all' && (
-                <Suspense fallback={<PaginationSkeleton />}>
-                  <SearchPagination
-                    currentPage={page || 1}
-                    totalPages={totalPages}
-                  />
-                </Suspense>
-              )}
+            {!isLoading && data && activeTabCount > 0 && totalPages > 1 && (
+              <Suspense fallback={<PaginationSkeleton />}>
+                <SearchPagination
+                  currentPage={page || 1}
+                  totalPages={totalPages}
+                />
+              </Suspense>
+            )}
           </main>
         </div>
       </div>
