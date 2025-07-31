@@ -144,13 +144,13 @@ export function VibeCategoryRow({
           {isFetchingNextPage && (
             <div
               className={cn(
-                'flex flex-shrink-0 items-center justify-center snap-start',
+                'flex flex-shrink-0 snap-start items-center justify-center',
                 priority
                   ? 'w-[280px] md:w-[320px] lg:w-[360px]'
                   : 'w-[250px] md:w-[280px] lg:w-[300px]'
               )}
             >
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="text-muted-foreground flex items-center gap-2">
                 <Loader2 className="h-5 w-5 animate-spin" />
                 <span className="text-sm">loading more...</span>
               </div>
@@ -161,7 +161,7 @@ export function VibeCategoryRow({
           {fetchNextPage && hasNextPage && (
             <div
               ref={infiniteScrollRef}
-              className="flex-shrink-0 w-4"
+              className="w-4 flex-shrink-0"
               style={{ opacity: 0 }}
             />
           )}

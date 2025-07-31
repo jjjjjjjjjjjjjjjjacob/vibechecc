@@ -55,9 +55,44 @@ interface UserProfileViewProps {
   };
   userVibes?: Array<Vibe>;
   vibesLoading?: boolean;
-  userRatings?: Array<any>;
+  userRatings?: Array<{
+    _id: string;
+    vibeId: string;
+    userId: string;
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+    createdAt: string;
+    updatedAt?: string;
+    vibe?: {
+      id: string;
+      title: string;
+      description: string;
+      image?: string;
+      createdBy: any;
+      createdAt: string;
+    };
+  }>;
   ratingsLoading?: boolean;
-  receivedRatings?: Array<any>;
+  receivedRatings?: Array<{
+    _id: string;
+    vibeId: string;
+    userId: string;
+    emoji: string;
+    value: number;
+    review: string;
+    tags?: string[];
+    createdAt: string;
+    updatedAt?: string;
+    rater?: {
+      _id: string;
+      username?: string;
+      first_name?: string;
+      last_name?: string;
+      image_url?: string;
+    };
+  }>;
   receivedRatingsLoading?: boolean;
   emojiStats?: {
     totalEmojiRatings: number;
@@ -580,7 +615,9 @@ export function UserProfileView({
                                       )}
                                     </div>
                                     <p className="text-muted-foreground mb-1 text-sm">
-                                      on "{rating.vibe.title}"
+                                      on "
+                                      {(rating as any).vibe?.title || 'Unknown'}
+                                      "
                                     </p>
                                     {rating?.review && (
                                       <p className="text-muted-foreground text-sm">

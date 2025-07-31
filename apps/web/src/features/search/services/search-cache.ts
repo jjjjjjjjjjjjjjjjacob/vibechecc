@@ -10,6 +10,11 @@ const VALID_CONVEX_SORT_OPTIONS = [
   'rating_asc',
   'recent',
   'oldest',
+  'name',
+  'top_rated',
+  'most_rated',
+  'creation_date',
+  'interaction_time',
 ] as const;
 
 // Helper to filter SearchFilters to only include Convex-compatible options
@@ -21,9 +26,9 @@ function filterForConvex(filters?: SearchFilters): typeof filters {
   // Filter out unsupported sort options
   if (
     convexFilters.sort &&
-    !VALID_CONVEX_SORT_OPTIONS.includes(convexFilters.sort as any)
+    !VALID_CONVEX_SORT_OPTIONS.includes(convexFilters.sort)
   ) {
-    delete convexFilters.sort;
+    convexFilters.sort = 'relevance';
   }
 
   return convexFilters as typeof filters;

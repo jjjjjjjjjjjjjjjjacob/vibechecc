@@ -34,7 +34,7 @@ export function StickySearchBar({
     if (searchParams.q !== query) {
       setQuery(searchParams.q || '');
     }
-  }, [searchParams.q]);
+  }, [searchParams.q, query]);
 
   // Handle query changes
   useEffect(() => {
@@ -76,21 +76,22 @@ export function StickySearchBar({
     <div
       className={cn(
         'sticky top-16 z-40 -mx-4 px-4 transition-all duration-300',
-        isSticky && 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-md',
+        isSticky &&
+          'bg-background/95 supports-[backdrop-filter]:bg-background/60 shadow-md backdrop-blur',
         className
       )}
     >
       <div className="container mx-auto py-4">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
             <Input
               type="text"
               placeholder="Search vibes, users, or tags..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className={cn(
-                'h-12 pl-10 pr-10 text-base',
+                'h-12 pr-10 pl-10 text-base',
                 isSticky && 'bg-background'
               )}
             />
@@ -99,14 +100,14 @@ export function StickySearchBar({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
+                className="absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
                 onClick={handleClear}
               >
                 <X className="h-4 w-4" />
               </Button>
             )}
           </div>
-          
+
           <Button
             type="button"
             variant="outline"
@@ -118,7 +119,7 @@ export function StickySearchBar({
             {activeFiltersCount > 0 && (
               <Badge
                 variant="destructive"
-                className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs"
               >
                 {activeFiltersCount}
               </Badge>
@@ -130,7 +131,8 @@ export function StickySearchBar({
         {isSticky && activeFiltersCount > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge variant="secondary" className="text-xs">
-              {activeFiltersCount} {activeFiltersCount === 1 ? 'filter' : 'filters'} active
+              {activeFiltersCount}{' '}
+              {activeFiltersCount === 1 ? 'filter' : 'filters'} active
             </Badge>
           </div>
         )}
@@ -159,7 +161,7 @@ export function SearchPageHeader({
   };
 
   return (
-    <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
       <div className="container mx-auto px-4 py-6">
         <h1 className="mb-4 text-2xl font-bold lowercase">search results</h1>
         <StickySearchBar

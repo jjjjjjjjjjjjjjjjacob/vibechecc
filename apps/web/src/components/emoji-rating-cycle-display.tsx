@@ -112,7 +112,11 @@ export function EmojiRatingCycleDisplay({
         </div>
 
         <span className="text-muted-foreground text-xs transition-opacity duration-200">
-          {showBeTheFirst ? 'be the first to rate' : (currentEmoji === '❓' ? 'rate' : 'click to rate')}
+          {showBeTheFirst
+            ? 'be the first to rate'
+            : currentEmoji === '❓'
+              ? 'rate'
+              : 'click to rate'}
         </span>
       </div>
     </EmojiRatingPopover>

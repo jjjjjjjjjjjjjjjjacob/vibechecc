@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 
 // Lazy load search components for code splitting
-const SearchResultsGrid = lazy(() =>
+const _SearchResultsGrid = lazy(() =>
   import('@/features/search/components').then((m) => ({
     default: m.SearchResultsGrid,
   }))
@@ -522,7 +522,7 @@ function SearchResultsPage() {
                     return (
                       <Button
                         key={tabName}
-                        variant={tab === tabName ? 'default' : ''}
+                        variant={tab === tabName ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => {
                           navigate({

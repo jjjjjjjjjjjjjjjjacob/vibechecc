@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { Suspense } from 'react';
-import { VibeCategoryRow, type RatingDisplayMode } from '@/components/vibe-category-row';
+import {
+  VibeCategoryRow,
+  type RatingDisplayMode,
+} from '@/components/vibe-category-row';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import type { Vibe } from '@/types';
@@ -14,10 +17,7 @@ function VibeCategoryRowSkeleton() {
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="w-[280px] flex-shrink-0 space-y-2"
-          >
+          <div key={i} className="w-[280px] flex-shrink-0 space-y-2">
             <Skeleton className="h-48 w-full rounded-lg" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
@@ -32,7 +32,7 @@ interface DiscoverSectionWrapperProps {
   title: string | React.ReactNode;
   vibes: Vibe[] | undefined;
   isLoading: boolean;
-  error: any;
+  error: Error | null;
   priority?: boolean;
   ratingDisplayMode?: RatingDisplayMode;
   // Infinite scroll props
@@ -59,9 +59,11 @@ export function DiscoverSectionWrapper({
   if (isLoading) {
     return (
       <div className="mb-10">
-        <h2 className={`mb-6 text-foreground font-bold lowercase transition-colors ${
-          priority ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'
-        }`}>
+        <h2
+          className={`text-foreground mb-6 font-bold lowercase transition-colors ${
+            priority ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'
+          }`}
+        >
           {title}
         </h2>
         <VibeCategoryRowSkeleton />
@@ -72,22 +74,24 @@ export function DiscoverSectionWrapper({
   // Show error state with title
   if (error) {
     const errorMessage = error?.message || 'Failed to load content';
-    const errorCode = error?.code || 'UNKNOWN_ERROR';
-    
+    const errorCode = (error as { code?: string })?.code || 'UNKNOWN_ERROR';
+
     return (
       <div className="mb-10">
-        <h2 className={`mb-6 text-foreground font-bold lowercase transition-colors ${
-          priority ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'
-        }`}>
+        <h2
+          className={`text-foreground mb-6 font-bold lowercase transition-colors ${
+            priority ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'
+          }`}
+        >
           {title}
         </h2>
-        <div className="flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-4">
-          <AlertCircle className="h-5 w-5 text-destructive" />
+        <div className="border-destructive/20 bg-destructive/10 flex items-center gap-3 rounded-lg border p-4">
+          <AlertCircle className="text-destructive h-5 w-5" />
           <div>
-            <p className="text-sm font-medium text-destructive">
+            <p className="text-destructive text-sm font-medium">
               {errorMessage}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               error code: {errorCode}
             </p>
           </div>
@@ -105,12 +109,14 @@ export function DiscoverSectionWrapper({
   if (!vibes || vibes.length === 0) {
     return (
       <div className="mb-10">
-        <h2 className={`mb-6 text-foreground font-bold lowercase transition-colors ${
-          priority ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'
-        }`}>
+        <h2
+          className={`text-foreground mb-6 font-bold lowercase transition-colors ${
+            priority ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'
+          }`}
+        >
           {title}
         </h2>
-        <div className="rounded-lg border border-muted bg-muted/10 p-8 text-center">
+        <div className="border-muted bg-muted/10 rounded-lg border p-8 text-center">
           <p className="text-muted-foreground">no vibes to show yet</p>
         </div>
       </div>

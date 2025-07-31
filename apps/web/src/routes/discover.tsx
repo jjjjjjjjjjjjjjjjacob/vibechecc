@@ -6,17 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import {
   useTopRatedEmojiVibes,
   useVibesPaginated,
-  useVibesLightweightInfinite,
   useTopRatedVibes,
-  useTopRatedVibesLightweightInfinite,
-  useUnratedVibesInfinite,
   useAllTags,
   useVibesByTag,
   useCurrentUser,
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from 'lucide-react';
-import { useTheme } from '@/components/theme-provider';
+import {
+  useTheme,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
+} from '@/components/theme-provider';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 
@@ -125,8 +126,10 @@ function DiscoverPage() {
         currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
 
-      setColorTheme(`${primaryColor}-primary` as any);
-      setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
+      setColorTheme(`${primaryColor}-primary` as PrimaryColorTheme);
+      setSecondaryColorTheme(
+        `${secondaryColor}-secondary` as SecondaryColorTheme
+      );
     }
   }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
@@ -186,67 +189,6 @@ function DiscoverPage() {
           ))}
         </section>
       </div>
-    </div>
-  );
-}
-
-// Component to show thumbnail previews of vibes for a collection
-function EmojiCollectionPreview({
-  emoji,
-  minValue,
-}: {
-  emoji: string;
-  minValue: number;
-}) {
-  const { data: vibes, isLoading } = useTopRatedEmojiVibes(emoji, minValue, 3);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-16 w-16 rounded" />
-        <Skeleton className="h-16 w-16 rounded" />
-        <Skeleton className="h-16 w-16 rounded" />
-      </div>
-    );
-  }
-
-  if (!vibes || vibes.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-4">
-        <span className="text-muted-foreground text-xs">no vibes yet</span>
-      </div>
-    );
-  }
-
-  // Show mini preview images or emoji counts
-  return (
-    <div className="flex items-center gap-1">
-      {vibes.slice(0, 3).map((vibe, index) => (
-        <div
-          key={vibe.id}
-          className="bg-muted/50 relative h-16 w-16 overflow-hidden rounded"
-          style={{ zIndex: 3 - index }}
-        >
-          {vibe.image ? (
-            <img
-              src={vibe.image}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="text-muted-foreground flex h-full w-full items-center justify-center text-xs">
-              <span className="font-noto-color text-2xl opacity-50">
-                {emoji}
-              </span>
-            </div>
-          )}
-        </div>
-      ))}
-      {vibes.length > 3 && (
-        <span className="text-muted-foreground text-xs">
-          +{vibes.length - 3}
-        </span>
-      )}
     </div>
   );
 }
@@ -322,20 +264,9 @@ function EmojiCollectionSection({
 
 // New Section Component
 function NewSection() {
-  const {
-    data,
-    isLoading,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    error,
-  } = useVibesLightweightInfinite(15);
+  const { data, isLoading, error } = useVibesPaginated(15);
 
-  const newVibes = useMemo(() => {
-    if (!data?.pages) return [];
-    // Get the most recent vibes
-    return data.pages.flatMap((page) => page?.vibes || []);
-  }, [data]);
+  const newVibes = data?.vibes || [];
 
   return (
     <DiscoverSectionWrapper
@@ -349,30 +280,18 @@ function NewSection() {
       error={error}
       priority
       ratingDisplayMode="most-rated"
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      fetchNextPage={fetchNextPage}
     />
   );
 }
 
 // Trending Section Component
 function TrendingSection() {
-  const {
-    data,
-    isLoading,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    error,
-  } = useVibesLightweightInfinite(12);
+  const { data, isLoading, error } = useVibesPaginated(20);
 
   const trendingVibes = useMemo(() => {
-    if (!data?.pages) return [];
-    // Filter for vibes with good engagement (rating count >= 3)
-    return data.pages
-      .flatMap((page) => page?.vibes || [])
-      .filter((vibe) => vibe.ratingCount >= 3);
+    if (!data?.vibes) return [];
+    // Filter for vibes with good engagement (rating count >= 3) and limit to 12
+    return data.vibes.filter((vibe) => vibe.ratings?.length >= 3).slice(0, 12);
   }, [data]);
 
   return (
@@ -387,36 +306,26 @@ function TrendingSection() {
       error={error}
       priority
       ratingDisplayMode="most-rated"
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      fetchNextPage={fetchNextPage}
     />
   );
 }
 
 // Recent Arrivals Section Component
 function RecentArrivalsSection() {
-  const {
-    data,
-    isLoading,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    error,
-  } = useVibesLightweightInfinite(10);
+  const { data, isLoading, error } = useVibesPaginated(20);
 
   const recentVibes = useMemo(() => {
-    if (!data?.pages) return [];
-    // Show vibes created in the last 7 days
+    if (!data?.vibes) return [];
+    // Show vibes created in the last 7 days, limit to 10
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    return data.pages
-      .flatMap((page) => page?.vibes || [])
+    return data.vibes
       .filter((vibe) => {
         const vibeDate = new Date(vibe.createdAt);
         return vibeDate >= sevenDaysAgo;
-      });
+      })
+      .slice(0, 10);
   }, [data]);
 
   return (
@@ -430,27 +339,20 @@ function RecentArrivalsSection() {
       isLoading={isLoading}
       error={error}
       ratingDisplayMode="most-rated"
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      fetchNextPage={fetchNextPage}
     />
   );
 }
 
 // Unrated Section Component
 function UnratedSection() {
-  const {
-    data,
-    isLoading,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    error,
-  } = useUnratedVibesInfinite(10);
+  const { data, isLoading, error } = useVibesPaginated(30);
 
   const unratedVibes = useMemo(() => {
-    if (!data?.pages) return [];
-    return data.pages.flatMap((page) => page?.vibes || []);
+    if (!data?.vibes) return [];
+    // Filter for unrated vibes and limit to 10
+    return data.vibes
+      .filter((v) => !v.ratings || v.ratings.length === 0)
+      .slice(0, 10);
   }, [data]);
 
   return (
@@ -464,29 +366,15 @@ function UnratedSection() {
       isLoading={isLoading}
       error={error}
       ratingDisplayMode="most-rated"
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      fetchNextPage={fetchNextPage}
     />
   );
 }
 
 // Community Favorites Section Component
 function CommunityFavoritesSection() {
-  const {
-    data,
-    isLoading,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    error,
-  } = useTopRatedVibesLightweightInfinite(10);
+  const { data, isLoading, error } = useTopRatedVibes(10);
 
-  const topRatedVibes = useMemo(() => {
-    if (!data?.pages) return [];
-    // Flatten all pages and get top-rated vibes
-    return data.pages.flatMap((page) => page?.vibes || []);
-  }, [data]);
+  const topRatedVibes = data?.vibes || [];
 
   return (
     <DiscoverSectionWrapper
@@ -499,9 +387,6 @@ function CommunityFavoritesSection() {
       isLoading={isLoading}
       error={error}
       ratingDisplayMode="top-rated"
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      fetchNextPage={fetchNextPage}
     />
   );
 }

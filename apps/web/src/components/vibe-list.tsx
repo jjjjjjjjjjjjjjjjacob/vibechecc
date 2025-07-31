@@ -9,7 +9,11 @@ interface VibeListProps {
   ratingDisplayMode?: 'most-rated' | 'top-rated';
 }
 
-export function VibeList({ vibes, className, ratingDisplayMode = 'most-rated' }: VibeListProps) {
+export function VibeList({
+  vibes,
+  className,
+  ratingDisplayMode = 'most-rated',
+}: VibeListProps) {
   return (
     <div className={cn('space-y-3', className)}>
       {vibes.map((vibe) => (

@@ -38,11 +38,11 @@ export function SearchResultsWithViewToggle({
     <div className={cn('space-y-4', className)}>
       {/* Header with view toggle */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {vibes.length} {vibes.length === 1 ? 'vibe' : 'vibes'} found
         </p>
-        
-        <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
+
+        <div className="bg-muted flex items-center gap-1 rounded-lg p-1">
           <Button
             variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
             size="sm"
@@ -70,11 +70,7 @@ export function SearchResultsWithViewToggle({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {vibes.map((vibe) => (
-            <VibeCard
-              key={vibe.id}
-              vibe={vibe}
-              variant="default"
-            />
+            <VibeCard key={vibe.id} vibe={vibe} variant="default" />
           ))}
         </div>
       )}
@@ -87,11 +83,7 @@ export function CompactSearchResults({ vibes }: { vibes: Vibe[] }) {
   return (
     <div className="space-y-2">
       {vibes.map((vibe) => (
-        <VibeCard
-          key={vibe.id}
-          vibe={vibe}
-          variant="list"
-        />
+        <VibeCard key={vibe.id} vibe={vibe} variant="list" />
       ))}
     </div>
   );

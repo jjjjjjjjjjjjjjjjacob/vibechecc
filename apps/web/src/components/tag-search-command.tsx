@@ -31,14 +31,15 @@ export function TagSearchCommand({
   const { data: allTags, isLoading } = useAllTags();
 
   // Filter tags based on search
-  const filteredTags = allTags?.filter((tag) =>
-    tag.tag.toLowerCase().includes(searchValue.toLowerCase()) &&
-    !selectedTags.includes(tag.tag)
+  const filteredTags = allTags?.filter(
+    (tag) =>
+      tag.tag.toLowerCase().includes(searchValue.toLowerCase()) &&
+      !selectedTags.includes(tag.tag)
   );
 
   return (
     <div className={cn('space-y-3', className)}>
-      <Command className="rounded-lg border-0 ring-1 ring-border">
+      <Command className="ring-border rounded-lg border-0 ring-1">
         <CommandInput
           placeholder={placeholder}
           value={searchValue}
@@ -46,9 +47,7 @@ export function TagSearchCommand({
           className="h-9"
         />
         <CommandList className="max-h-40 overflow-y-auto">
-          {isLoading && (
-            <CommandEmpty>Loading tags...</CommandEmpty>
-          )}
+          {isLoading && <CommandEmpty>Loading tags...</CommandEmpty>}
           {!isLoading && filteredTags?.length === 0 && (
             <CommandEmpty>No tags found.</CommandEmpty>
           )}
@@ -65,10 +64,10 @@ export function TagSearchCommand({
                   className="flex items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
-                    <Hash className="h-3 w-3 text-muted-foreground" />
+                    <Hash className="text-muted-foreground h-3 w-3" />
                     <span className="text-sm">{tag.tag}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     {tag.count} {tag.count === 1 ? 'vibe' : 'vibes'}
                   </span>
                 </CommandItem>
@@ -85,13 +84,13 @@ export function TagSearchCommand({
             <Badge
               key={tag}
               variant="secondary"
-              className="flex items-center gap-1 pl-2 pr-1"
+              className="flex items-center gap-1 pr-1 pl-2"
             >
               <Hash className="h-3 w-3" />
               {tag}
               <button
                 onClick={() => onTagRemove(tag)}
-                className="ml-1 rounded-full p-0.5 hover:bg-muted"
+                className="hover:bg-muted ml-1 rounded-full p-0.5"
               >
                 <X className="h-3 w-3" />
               </button>

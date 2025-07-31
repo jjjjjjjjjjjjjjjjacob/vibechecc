@@ -10,6 +10,7 @@ const mockUseUser = vi.fn();
 const mockUseVibesPaginated = vi.fn();
 const mockUseTopRatedVibes = vi.fn();
 const mockUsePersonalizedVibes = vi.fn();
+const mockUseVibesInfinite = vi.fn();
 const mockUseMasonryLayout = vi.fn();
 
 // Import the actual useMasonryLayout from the mock
@@ -20,9 +21,11 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 }));
 
 vi.mock('@/queries', () => ({
-  useVibesPaginated: (...args: any[]) => mockUseVibesPaginated(...args),
-  useTopRatedVibes: (...args: any[]) => mockUseTopRatedVibes(...args),
-  usePersonalizedVibes: (...args: any[]) => mockUsePersonalizedVibes(...args),
+  useVibesPaginated: (...args: unknown[]) => mockUseVibesPaginated(...args),
+  useTopRatedVibes: (...args: unknown[]) => mockUseTopRatedVibes(...args),
+  usePersonalizedVibes: (...args: unknown[]) =>
+    mockUsePersonalizedVibes(...args),
+  useVibesInfinite: (...args: unknown[]) => mockUseVibesInfinite(...args),
 }));
 
 vi.mock('./masonry-layout', () => ({
@@ -40,7 +43,15 @@ vi.mock('./masonry-feed', () => ({
     hasMore,
     emptyStateTitle,
     emptyStateDescription,
-  }: any) => {
+  }: {
+    vibes?: unknown[];
+    isLoading?: boolean;
+    error?: Error | null;
+    isLoadingNextPage?: boolean;
+    hasMore?: boolean;
+    emptyStateTitle?: string;
+    emptyStateDescription?: string;
+  }) => {
     if (error) {
       return (
         <div className="py-12 text-center">
@@ -79,7 +90,7 @@ vi.mock('./masonry-feed', () => ({
       <div className="w-full space-y-6">
         {shouldUseMasonry ? (
           <div data-testid="masonry-layout">
-            {vibes.map((vibe: any) => (
+            {vibes.map((vibe: { id: string; title: string }) => (
               <div
                 key={vibe.id}
                 data-testid="vibe-card-masonry"
@@ -91,7 +102,7 @@ vi.mock('./masonry-feed', () => ({
           </div>
         ) : (
           <div className="space-y-5">
-            {vibes.map((vibe: any) => (
+            {vibes.map((vibe: { id: string; title: string }) => (
               <div
                 key={vibe.id}
                 data-testid="vibe-card-single"
@@ -176,6 +187,14 @@ describe('HomeFeed', () => {
     mockUsePersonalizedVibes.mockReturnValue({
       data: { vibes: mockVibes, isDone: false },
       isLoading: false,
+      error: null,
+    });
+    mockUseVibesInfinite.mockReturnValue({
+      data: { pages: [{ vibes: mockVibes }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isLoading: false,
+      isFetchingNextPage: false,
       error: null,
     });
   });
@@ -291,9 +310,12 @@ describe('HomeFeed', () => {
   });
 
   it('shows error state when there is an error', async () => {
-    mockUsePersonalizedVibes.mockReturnValue({
+    mockUseVibesInfinite.mockReturnValue({
       data: null,
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
       isLoading: false,
+      isFetchingNextPage: false,
       error: new Error('Failed to load'),
     });
 
@@ -306,9 +328,12 @@ describe('HomeFeed', () => {
   });
 
   it('shows empty state when no vibes are available', async () => {
-    mockUsePersonalizedVibes.mockReturnValue({
-      data: { vibes: [], isDone: true },
+    mockUseVibesInfinite.mockReturnValue({
+      data: { pages: [{ vibes: [] }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
       isLoading: false,
+      isFetchingNextPage: false,
       error: null,
     });
 
@@ -327,9 +352,12 @@ describe('HomeFeed', () => {
   });
 
   it('shows load more button when there are more pages', async () => {
-    mockUseVibesPaginated.mockReturnValue({
-      data: { vibes: mockVibes, isDone: false },
+    mockUseVibesInfinite.mockReturnValue({
+      data: { pages: [{ vibes: mockVibes }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: true,
       isLoading: false,
+      isFetchingNextPage: false,
       error: null,
     });
 
@@ -348,28 +376,43 @@ describe('HomeFeed', () => {
   it('calls correct query based on active tab', async () => {
     renderComponent();
 
-    // Check "for you" tab (default)
-    expect(mockUsePersonalizedVibes).toHaveBeenCalledWith('test-user', {
-      enabled: true,
-      limit: 20,
-    });
+    // Check that useVibesInfinite is called for "for you" tab (default)
+    expect(mockUseVibesInfinite).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: 'top_rated', limit: 20 }),
+      expect.objectContaining({
+        enabled: true,
+        queryKeyPrefix: ['home-feed'],
+        queryKeyName: 'for-you',
+      })
+    );
 
     // Switch to "hot" tab
     const hotTab = screen.getByText('hot');
     await user.click(hotTab);
 
-    expect(mockUseTopRatedVibes).toHaveBeenCalledWith(20, {
-      enabled: true,
-    });
+    // Check that useVibesInfinite is called with same filters for hot tab (also top_rated)
+    expect(mockUseVibesInfinite).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: 'top_rated', limit: 20 }),
+      expect.objectContaining({
+        enabled: true,
+        queryKeyPrefix: ['home-feed'],
+        queryKeyName: 'hot',
+      })
+    );
 
     // Switch to "new" tab
     const newTab = screen.getByText('new');
     await user.click(newTab);
 
-    expect(mockUseVibesPaginated).toHaveBeenCalledWith(20, {
-      enabled: true,
-      cursor: undefined,
-    });
+    // Check that useVibesInfinite is called with different filters for new tab
+    expect(mockUseVibesInfinite).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: 'recent', limit: 20 }),
+      expect.objectContaining({
+        enabled: true,
+        queryKeyPrefix: ['home-feed'],
+        queryKeyName: 'new',
+      })
+    );
   });
 
   it('uses correct rating display mode for hot vs other tabs', async () => {
@@ -404,21 +447,30 @@ describe('HomeFeed', () => {
   });
 
   it('resets page to 1 when switching tabs', async () => {
-    renderComponent();
+    // Set up infinite scroll with hasNextPage true initially
+    mockUseVibesInfinite.mockReturnValue({
+      data: { pages: [{ vibes: mockVibes }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: true,
+      isLoading: false,
+      isFetchingNextPage: false,
+      error: null,
+    });
 
-    // Load more on initial tab (for-you)
-    const loadMoreButton = screen.queryByText('load more');
-    if (loadMoreButton) {
-      await user.click(loadMoreButton);
-    }
+    renderComponent();
 
     // Switch to hot tab
     const hotTab = screen.getByText('hot');
     await user.click(hotTab);
 
-    // Verify queries are called with page 1
-    expect(mockUseTopRatedVibes).toHaveBeenCalledWith(20, {
-      enabled: true,
-    });
+    // Verify useVibesInfinite is called with hot tab filters
+    expect(mockUseVibesInfinite).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: 'top_rated', limit: 20 }),
+      expect.objectContaining({
+        enabled: true,
+        queryKeyPrefix: ['home-feed'],
+        queryKeyName: 'hot',
+      })
+    );
   });
 });

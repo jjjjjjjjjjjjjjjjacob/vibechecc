@@ -221,7 +221,7 @@ Copy `.env.local.example` to `.env.local` and configure:
 Run `bun run dev` to start:
 
 - Convex backend with DB seeding
-- Frontend at http://localhost:3030
+- Frontend at http://localhost:3000
 - ngrok tunnel for webhooks
 
 ## Package Management

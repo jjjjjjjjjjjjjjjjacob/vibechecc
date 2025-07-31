@@ -6,7 +6,10 @@ interface SearchSuggestionsProps {
   recentSearches?: SearchSuggestion[];
   trendingSearches?: SearchSuggestion[];
   popularTags?: SearchSuggestion[];
-  onSelect: (term: string, type?: 'tag' | 'search' | 'recent' | 'trending' | 'recommended') => void;
+  onSelect: (
+    term: string,
+    type?: 'tag' | 'search' | 'recent' | 'trending' | 'recommended'
+  ) => void;
 }
 
 export function SearchSuggestions({

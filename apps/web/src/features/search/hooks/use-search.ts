@@ -13,6 +13,11 @@ const VALID_CONVEX_SORT_OPTIONS = [
   'rating_asc',
   'recent',
   'oldest',
+  'name',
+  'top_rated',
+  'most_rated',
+  'creation_date',
+  'interaction_time',
 ] as const;
 
 // Helper to filter SearchFilters to only include Convex-compatible options
@@ -24,9 +29,9 @@ function filterForConvex(filters?: SearchFilters): typeof filters {
   // Filter out unsupported sort options
   if (
     convexFilters.sort &&
-    !VALID_CONVEX_SORT_OPTIONS.includes(convexFilters.sort as any)
+    !VALID_CONVEX_SORT_OPTIONS.includes(convexFilters.sort)
   ) {
-    delete convexFilters.sort;
+    convexFilters.sort = 'relevance';
   }
 
   return convexFilters as typeof filters;
@@ -66,60 +71,42 @@ export function useSearch(options: UseSearchOptions = {}) {
 
   // Track search when debounced query changes (for search history)
   useEffect(() => {
-    console.log('useSearch useEffect triggered:', { 
-      debouncedQuery, 
-      userId: user?.id, 
-      previousQuery: previousQuery.current 
-    });
-    
-    if (debouncedQuery.trim() && user?.id && debouncedQuery !== previousQuery.current) {
-      console.log('Tracking search in useSearch:', debouncedQuery);
+    if (
+      debouncedQuery.trim() &&
+      user?.id &&
+      debouncedQuery !== previousQuery.current
+    ) {
       previousQuery.current = debouncedQuery;
-      trackSearchMutation.mutate({
-        query: debouncedQuery,
-        resultCount: 0, // We don't need to wait for results
-      }, {
-        onSuccess: (data) => {
-          console.log('useSearch trackSearch success:', data);
+      trackSearchMutation.mutate(
+        {
+          query: debouncedQuery,
+          resultCount: 0, // We don't need to wait for results
         },
-        onError: (error) => {
-          console.error('useSearch trackSearch error:', error);
-        }
-      });
-    } else {
-      console.log('Skipping search tracking in useSearch:', { 
-        hasQuery: !!debouncedQuery.trim(), 
-        hasUser: !!user?.id, 
-        queryChanged: debouncedQuery !== previousQuery.current 
-      });
+        {}
+      );
     }
-  }, [debouncedQuery, user?.id]); // Track on debounced query changes (excluding trackSearchMutation to avoid infinite loops)
+  }, [debouncedQuery, user?.id, trackSearchMutation]); // Track on debounced query changes
 
   // Update search history with actual result count when we have results
   useEffect(() => {
     if (searchQuery.data && debouncedQuery.trim() && user?.id) {
-      const totalCount = (searchQuery.data.vibes?.length || 0) + 
-                        (searchQuery.data.users?.length || 0) + 
-                        (searchQuery.data.tags?.length || 0) + 
-                        (searchQuery.data.actions?.length || 0) + 
-                        (searchQuery.data.reviews?.length || 0);
-      
-      console.log('useSearch: Updating search with result count:', { query: debouncedQuery, totalCount });
-      
+      const totalCount =
+        (searchQuery.data.vibes?.length || 0) +
+        (searchQuery.data.users?.length || 0) +
+        (searchQuery.data.tags?.length || 0) +
+        (searchQuery.data.actions?.length || 0) +
+        (searchQuery.data.reviews?.length || 0);
+
       // Track again with the actual result count
-      trackSearchMutation.mutate({
-        query: debouncedQuery,
-        resultCount: totalCount,
-      }, {
-        onSuccess: (data) => {
-          console.log('useSearch result count update success:', data);
+      trackSearchMutation.mutate(
+        {
+          query: debouncedQuery,
+          resultCount: totalCount,
         },
-        onError: (error) => {
-          console.error('useSearch result count update error:', error);
-        }
-      });
+        {}
+      );
     }
-  }, [searchQuery.data, debouncedQuery, user?.id]); // Update when we get actual results
+  }, [searchQuery.data, debouncedQuery, user?.id, trackSearchMutation]); // Update when we get actual results
 
   const search = useCallback((searchQuery: string) => {
     setQuery(searchQuery);

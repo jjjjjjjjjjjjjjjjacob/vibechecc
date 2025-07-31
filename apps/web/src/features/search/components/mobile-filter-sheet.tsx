@@ -188,7 +188,7 @@ export function MobileFilterSheet({
                 }
               }}
               onTagRemove={(tag) => {
-                const updated = (tags || []).filter(t => t !== tag);
+                const updated = (tags || []).filter((t) => t !== tag);
                 onTagsChange(updated);
               }}
             />

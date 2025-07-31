@@ -21,7 +21,11 @@ interface SearchDropdownProps {
   triggerRef?: React.RefObject<HTMLButtonElement>;
 }
 
-export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdownProps) {
+export function SearchDropdown({
+  open,
+  onOpenChange,
+  triggerRef,
+}: SearchDropdownProps) {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebouncedValue(query, 300);
   const { data, isLoading } = useSearchSuggestions(debouncedQuery);
@@ -76,7 +80,11 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
     setQuery('');
   };
 
-  const handleResultSelect = (resultId: string, resultType: string, category?: string) => {
+  const handleResultSelect = (
+    resultId: string,
+    resultType: string,
+    category?: string
+  ) => {
     // Track result click with clicked result info for analytics
     if (query.trim()) {
       trackSearch(query.trim(), undefined, [resultId], category || resultType);
@@ -114,17 +122,23 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
 
   // Extract suggestions data
   const recentSearches =
-    !query && data && 'recentSearches' in data ? data.recentSearches : undefined;
+    !query && data && 'recentSearches' in data
+      ? data.recentSearches
+      : undefined;
   const trendingSearchTerms =
-    !query && data && 'trendingSearches' in data ? data.trendingSearches : undefined;
+    !query && data && 'trendingSearches' in data
+      ? data.trendingSearches
+      : undefined;
   const popularTags =
     !query && data && 'popularTags' in data ? data.popularTags : undefined;
 
   // Format suggestions
-  const formattedTrendingSearches = trendingSearchTerms?.map((term: string) => ({
-    term,
-    type: 'trending' as const,
-  }));
+  const formattedTrendingSearches = trendingSearchTerms?.map(
+    (term: string) => ({
+      term,
+      type: 'trending' as const,
+    })
+  );
   const formattedRecentSearches = recentSearches?.map((term: string) => ({
     term,
     type: 'recent' as const,
@@ -136,7 +150,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
 
   // Calculate position based on trigger button
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
-  
+
   useEffect(() => {
     if (open && triggerRef?.current) {
       const rect = triggerRef.current.getBoundingClientRect();
@@ -154,17 +168,17 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm animate-in fade-in-0"
+      <div
+        className="animate-in fade-in-0 fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
         aria-hidden="true"
       />
-      
+
       {/* Dropdown */}
       <div
         ref={dropdownRef}
         className={cn(
-          "fixed z-50 bg-background border rounded-lg shadow-2xl",
-          "animate-in slide-in-from-top-2 fade-in-0 duration-200"
+          'bg-background fixed z-50 rounded-lg border shadow-2xl',
+          'animate-in slide-in-from-top-2 fade-in-0 duration-200'
         )}
         style={{
           top: `${position.top}px`,
@@ -175,7 +189,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
       >
         {/* Search Input */}
         <div className="flex items-center gap-2 border-b p-3">
-          <Search className="h-5 w-5 text-muted-foreground" />
+          <Search className="text-muted-foreground h-5 w-5" />
           <Input
             ref={inputRef}
             type="text"
@@ -187,10 +201,10 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                 handleSearch();
               }
             }}
-            className="flex-1 border-0 bg-transparent p-0 text-base placeholder:text-muted-foreground focus-visible:ring-0"
+            className="placeholder:text-muted-foreground flex-1 border-0 bg-transparent p-0 text-base focus-visible:ring-0"
           />
           {isLoading && (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
           )}
           <Button
             variant="ghost"
@@ -216,7 +230,9 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
 
             {query && !hasResults && !isLoading && (
               <div className="py-8 text-center">
-                <p className="text-muted-foreground">No results found for "{query}"</p>
+                <p className="text-muted-foreground">
+                  No results found for "{query}"
+                </p>
               </div>
             )}
 
@@ -225,7 +241,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                 {/* Vibes */}
                 {data.vibes && data.vibes.length > 0 && (
                   <div>
-                    <h3 className="mb-2 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
                       Vibes
                     </h3>
                     <div className="space-y-1">
@@ -233,7 +249,9 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                         <VibeResult
                           key={vibe.id}
                           result={vibe}
-                          onSelect={() => handleResultSelect(vibe.id, 'vibe', 'vibes')}
+                          onSelect={() =>
+                            handleResultSelect(vibe.id, 'vibe', 'vibes')
+                          }
                         />
                       ))}
                     </div>
@@ -243,7 +261,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                 {/* Users */}
                 {data.users && data.users.length > 0 && (
                   <div>
-                    <h3 className="mb-2 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
                       Users
                     </h3>
                     <div className="space-y-1">
@@ -251,7 +269,9 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                         <UserResult
                           key={user.id}
                           result={user}
-                          onSelect={() => handleResultSelect(user.id, 'user', 'users')}
+                          onSelect={() =>
+                            handleResultSelect(user.id, 'user', 'users')
+                          }
                         />
                       ))}
                     </div>
@@ -261,7 +281,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                 {/* Tags */}
                 {data.tags && data.tags.length > 0 && (
                   <div>
-                    <h3 className="mb-2 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
                       Tags
                     </h3>
                     <div className="space-y-1">
@@ -269,7 +289,9 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                         <TagResult
                           key={tag.id}
                           result={tag}
-                          onSelect={() => handleResultSelect(tag.id, 'tag', 'tags')}
+                          onSelect={() =>
+                            handleResultSelect(tag.id, 'tag', 'tags')
+                          }
                         />
                       ))}
                     </div>
@@ -279,7 +301,7 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                 {/* Actions */}
                 {data.actions && data.actions.length > 0 && (
                   <div>
-                    <h3 className="mb-2 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
                       Actions
                     </h3>
                     <div className="space-y-1">
@@ -287,7 +309,9 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
                         <ActionResult
                           key={action.id}
                           result={action}
-                          onSelect={() => handleResultSelect(action.id, 'action', 'actions')}
+                          onSelect={() =>
+                            handleResultSelect(action.id, 'action', 'actions')
+                          }
                         />
                       ))}
                     </div>
@@ -300,12 +324,12 @@ export function SearchDropdown({ open, onOpenChange, triggerRef }: SearchDropdow
             {query && query.length > 2 && (
               <div className="mt-4 border-t pt-2">
                 <button
-                  className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                  className="hover:bg-accent hover:text-accent-foreground w-full rounded-md px-3 py-2 text-left text-sm transition-colors"
                   onClick={() => handleSearch()}
                 >
                   <span className="flex items-center justify-between">
                     <span>View all results for "{query}"</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       Press Enter
                     </span>
                   </span>

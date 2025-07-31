@@ -61,13 +61,24 @@ export async function getOptimizedAuth(
     }
 
     // Cache successful result
-    setCachedAuth(cacheKey, authResult.userId, authResult.token);
+    if (typeof authResult === 'object' && authResult !== null) {
+      setCachedAuth(cacheKey, authResult.userId, authResult.token);
 
-    return {
-      ...authResult,
-      fromCache: false,
-      computeTime: Date.now() - startTime,
-    };
+      return {
+        ...authResult,
+        fromCache: false,
+        computeTime: Date.now() - startTime,
+      };
+    } else {
+      // Handle string result (fallback)
+      setCachedAuth(cacheKey, null, null);
+      return {
+        userId: null,
+        token: null,
+        fromCache: false,
+        computeTime: Date.now() - startTime,
+      };
+    }
   } catch {
     // Cache failed auth briefly to prevent repeated attempts
     setCachedAuth(cacheKey, null, null);
@@ -155,10 +166,10 @@ async function getAuthWithTimeout(
 /**
  * Create a timeout promise
  */
-function createTimeoutPromise(
+function createTimeoutPromise<T = string>(
   ms: number,
-  value: any = 'TIMEOUT'
-): Promise<any> {
+  value: T = 'TIMEOUT' as T
+): Promise<T> {
   return new Promise((resolve) => {
     setTimeout(() => resolve(value), ms);
   });

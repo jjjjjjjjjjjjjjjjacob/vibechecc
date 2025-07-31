@@ -77,9 +77,11 @@ export function getConnectionInfo(): {
 
   // Navigator.connection is experimental - use type assertion for compatibility
   const connection =
-    (navigator as any).connection ||
-    (navigator as any).mozConnection ||
-    (navigator as any).webkitConnection;
+    (navigator as { connection?: { effectiveType?: string } }).connection ||
+    (navigator as { mozConnection?: { effectiveType?: string } })
+      .mozConnection ||
+    (navigator as { webkitConnection?: { effectiveType?: string } })
+      .webkitConnection;
   const isSlowConnection =
     connection?.effectiveType === '2g' ||
     connection?.effectiveType === 'slow-2g';

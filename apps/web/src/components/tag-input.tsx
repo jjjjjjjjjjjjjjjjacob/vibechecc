@@ -41,7 +41,7 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
 
   const suggestions = inputValue ? searchResults : popularTags;
 
-  const handleAddTag = (tag: any) => {
+  const handleAddTag = (tag: string) => {
     const normalizedTag = tag.toLowerCase().trim();
     if (normalizedTag && !tags.includes(normalizedTag)) {
       onTagsChange([...tags, normalizedTag]);
@@ -129,7 +129,7 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
               <CommandGroup
                 heading={inputValue ? 'matching tags' : 'popular tags'}
               >
-                {suggestions.map((tag: any) => (
+                {suggestions.map((tag: { name: string; count?: number }) => (
                   <CommandItem
                     key={tag.name}
                     value={tag.name}

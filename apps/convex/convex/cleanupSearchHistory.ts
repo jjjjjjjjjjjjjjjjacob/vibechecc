@@ -1,4 +1,5 @@
 import { mutation } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 // One-time cleanup mutation to remove excessive duplicate search history entries
 export const cleanupDuplicateSearchHistory = mutation({
@@ -12,17 +13,16 @@ export const cleanupDuplicateSearchHistory = mutation({
     // Get all search history for the current user
     const allSearchHistory = await ctx.db
       .query('searchHistory')
-      .withIndex('byUser', (q: any) => q.eq('userId', identity.subject))
+      .withIndex('byUser', (q) => q.eq('userId', identity.subject))
       .order('desc')
       .collect();
 
     // Group by query and keep only the most recent entry for each unique query
-    const uniqueSearches = new Map<string, any>();
-    const duplicatesToDelete: string[] = [];
+    const uniqueSearches = new Map<string, (typeof allSearchHistory)[0]>();
+    const duplicatesToDelete: Id<'searchHistory'>[] = [];
 
     for (const search of allSearchHistory) {
       const key = search.query.toLowerCase().trim();
-      
       if (!uniqueSearches.has(key)) {
         // Keep the first (most recent) occurrence
         uniqueSearches.set(key, search);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Command,
   CommandInput,
@@ -27,7 +27,7 @@ interface SearchAccordionProps {
 
 function VibeResultSkeleton() {
   return (
-    <div className="flex items-start gap-3 py-3 px-2">
+    <div className="flex items-start gap-3 px-2 py-3">
       <Skeleton className="h-12 w-12 rounded-md" />
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
@@ -50,7 +50,7 @@ function VibeResultSkeleton() {
 
 function UserResultSkeleton() {
   return (
-    <div className="flex items-center gap-3 py-3 px-2">
+    <div className="flex items-center gap-3 px-2 py-3">
       <Skeleton className="h-10 w-10 rounded-full" />
       <div className="flex-1 space-y-1">
         <Skeleton className="h-4 w-24" />
@@ -66,7 +66,7 @@ function UserResultSkeleton() {
 
 function TagResultSkeleton() {
   return (
-    <div className="flex items-center gap-3 py-3 px-2">
+    <div className="flex items-center gap-3 px-2 py-3">
       <Skeleton className="h-8 w-8 rounded-full" />
       <div className="flex-1">
         <Skeleton className="h-4 w-20" />
@@ -122,7 +122,11 @@ export function SearchAccordion({
     setQuery('');
   };
 
-  const handleResultClick = (resultId: string, resultType: string, category?: string) => {
+  const handleResultClick = (
+    resultId: string,
+    resultType: string,
+    category?: string
+  ) => {
     // Track the result click if there was a query
     if (query.trim()) {
       trackSearch(query.trim(), undefined, [resultId], category || resultType);
@@ -130,13 +134,15 @@ export function SearchAccordion({
     handleSelect();
   };
 
-  const handleSuggestionSelect = (term: string, type?: 'tag' | 'search' | 'recent' | 'trending' | 'recommended') => {
+  const handleSuggestionSelect = (
+    term: string,
+    type?: 'tag' | 'search' | 'recent' | 'trending' | 'recommended'
+  ) => {
     // Track the selection with category information
     if (term.trim() && type) {
-      console.log('Tracking suggestion selection:', { term, type });
       trackSearch(term.trim(), undefined, undefined, type);
     }
-    
+
     if (term.startsWith('/')) {
       navigate({ to: term as '/vibes' });
       handleSelect();
@@ -198,14 +204,6 @@ export function SearchAccordion({
           type: 'recommended' as const,
         }))
       : undefined;
-
-  // Check if there are any suggestions or results to show
-  const hasContent =
-    !query ||
-    hasResults ||
-    (formattedRecentSearches && formattedRecentSearches.length > 0) ||
-    (formattedTrendingSearches && formattedTrendingSearches.length > 0) ||
-    (formattedPopularTags && formattedPopularTags.length > 0);
 
   return (
     <div
@@ -306,7 +304,9 @@ export function SearchAccordion({
                         <VibeResult
                           key={vibe.id}
                           result={vibe}
-                          onSelect={() => handleResultClick(vibe.id, 'vibe', 'vibes')}
+                          onSelect={() =>
+                            handleResultClick(vibe.id, 'vibe', 'vibes')
+                          }
                         />
                       ))}
                     </CommandGroup>
@@ -322,7 +322,9 @@ export function SearchAccordion({
                           <UserResult
                             key={user.id}
                             result={user}
-                            onSelect={() => handleResultClick(user.id, 'user', 'users')}
+                            onSelect={() =>
+                              handleResultClick(user.id, 'user', 'users')
+                            }
                           />
                         ))}
                       </CommandGroup>
@@ -340,7 +342,9 @@ export function SearchAccordion({
                           <TagResult
                             key={tag.id}
                             result={tag}
-                            onSelect={() => handleResultClick(tag.id, 'tag', 'tags')}
+                            onSelect={() =>
+                              handleResultClick(tag.id, 'tag', 'tags')
+                            }
                           />
                         ))}
                       </CommandGroup>
@@ -359,7 +363,9 @@ export function SearchAccordion({
                           <ActionResult
                             key={action.id}
                             result={action}
-                            onSelect={() => handleResultClick(action.id, 'action', 'actions')}
+                            onSelect={() =>
+                              handleResultClick(action.id, 'action', 'actions')
+                            }
                           />
                         ))}
                       </CommandGroup>
@@ -377,7 +383,12 @@ export function SearchAccordion({
                       value={`search-for-${query}`}
                       onSelect={() => {
                         // Track the search for action
-                        trackSearch(query.trim(), undefined, undefined, 'search-for');
+                        trackSearch(
+                          query.trim(),
+                          undefined,
+                          undefined,
+                          'search-for'
+                        );
                         navigate({ to: '/search', search: { q: query } });
                         handleSelect();
                       }}

@@ -228,13 +228,21 @@
 
 /* Shimmy animation for rating */
 @keyframes shimmy {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0) scale(1);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-1px) scale(1.02);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(1px) scale(1.02);
   }
 }
@@ -938,139 +946,139 @@ h1[data-localization-key='userProfile.navbar.title'] {
 
 /* Theme-based gradient utilities */
 .themed-gradient-text {
-  @apply bg-gradient-to-r from-theme-primary to-theme-secondary bg-clip-text text-transparent;
+  @apply from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-transparent;
 }
 
 .themed-gradient-button {
-  @apply bg-gradient-to-r from-theme-primary to-theme-secondary;
+  @apply from-theme-primary to-theme-secondary bg-gradient-to-r;
 }
 
 /* Apply theme colors when data attributes are set */
-[data-theme-primary="purple"] {
+[data-theme-primary='purple'] {
   --theme-primary: hsl(262 83% 48%);
 }
 
-[data-theme-primary="pink"] {
+[data-theme-primary='pink'] {
   --theme-primary: hsl(330 81% 50%);
 }
 
-[data-theme-primary="blue"] {
+[data-theme-primary='blue'] {
   --theme-primary: hsl(217 91% 50%);
 }
 
-[data-theme-primary="emerald"] {
+[data-theme-primary='emerald'] {
   --theme-primary: hsl(160 84% 35%);
 }
 
-[data-theme-primary="orange"] {
+[data-theme-primary='orange'] {
   --theme-primary: hsl(25 95% 48%);
 }
 
-[data-theme-primary="red"] {
+[data-theme-primary='red'] {
   --theme-primary: hsl(0 84% 50%);
 }
 
-[data-theme-primary="indigo"] {
+[data-theme-primary='indigo'] {
   --theme-primary: hsl(239 84% 57%);
 }
 
-[data-theme-primary="teal"] {
+[data-theme-primary='teal'] {
   --theme-primary: hsl(173 80% 35%);
 }
 
-[data-theme-primary="slate"] {
+[data-theme-primary='slate'] {
   --theme-primary: hsl(215 28% 25%);
 }
 
-[data-theme-primary="amber"] {
+[data-theme-primary='amber'] {
   --theme-primary: hsl(45 93% 42%);
 }
 
-[data-theme-primary="lime"] {
+[data-theme-primary='lime'] {
   --theme-primary: hsl(84 81% 39%);
 }
 
-[data-theme-primary="cyan"] {
+[data-theme-primary='cyan'] {
   --theme-primary: hsl(188 95% 32%);
 }
 
-[data-theme-primary="violet"] {
+[data-theme-primary='violet'] {
   --theme-primary: hsl(262 90% 65%);
 }
 
-[data-theme-primary="fuchsia"] {
+[data-theme-primary='fuchsia'] {
   --theme-primary: hsl(292 84% 51%);
 }
 
-[data-theme-primary="green"] {
+[data-theme-primary='green'] {
   --theme-primary: hsl(142 76% 31%);
 }
 
-[data-theme-primary="yellow"] {
+[data-theme-primary='yellow'] {
   --theme-primary: hsl(54 92% 50%);
 }
 
 /* Apply secondary theme colors */
-[data-theme-secondary="purple"] {
+[data-theme-secondary='purple'] {
   --theme-secondary: hsl(262 83% 48%);
 }
 
-[data-theme-secondary="pink"] {
+[data-theme-secondary='pink'] {
   --theme-secondary: hsl(330 81% 50%);
 }
 
-[data-theme-secondary="blue"] {
+[data-theme-secondary='blue'] {
   --theme-secondary: hsl(217 91% 50%);
 }
 
-[data-theme-secondary="emerald"] {
+[data-theme-secondary='emerald'] {
   --theme-secondary: hsl(160 84% 35%);
 }
 
-[data-theme-secondary="orange"] {
+[data-theme-secondary='orange'] {
   --theme-secondary: hsl(25 95% 48%);
 }
 
-[data-theme-secondary="red"] {
+[data-theme-secondary='red'] {
   --theme-secondary: hsl(0 84% 50%);
 }
 
-[data-theme-secondary="indigo"] {
+[data-theme-secondary='indigo'] {
   --theme-secondary: hsl(239 84% 57%);
 }
 
-[data-theme-secondary="teal"] {
+[data-theme-secondary='teal'] {
   --theme-secondary: hsl(173 80% 35%);
 }
 
-[data-theme-secondary="slate"] {
+[data-theme-secondary='slate'] {
   --theme-secondary: hsl(215 28% 25%);
 }
 
-[data-theme-secondary="amber"] {
+[data-theme-secondary='amber'] {
   --theme-secondary: hsl(45 93% 42%);
 }
 
-[data-theme-secondary="lime"] {
+[data-theme-secondary='lime'] {
   --theme-secondary: hsl(84 81% 39%);
 }
 
-[data-theme-secondary="cyan"] {
+[data-theme-secondary='cyan'] {
   --theme-secondary: hsl(188 95% 32%);
 }
 
-[data-theme-secondary="violet"] {
+[data-theme-secondary='violet'] {
   --theme-secondary: hsl(262 90% 65%);
 }
 
-[data-theme-secondary="fuchsia"] {
+[data-theme-secondary='fuchsia'] {
   --theme-secondary: hsl(292 84% 51%);
 }
 
-[data-theme-secondary="green"] {
+[data-theme-secondary='green'] {
   --theme-secondary: hsl(142 76% 31%);
 }
 
-[data-theme-secondary="yellow"] {
+[data-theme-secondary='yellow'] {
   --theme-secondary: hsl(54 92% 50%);
 }

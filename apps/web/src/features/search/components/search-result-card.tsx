@@ -296,7 +296,9 @@ function ReviewResultCard({ result }: { result: ReviewSearchResult }) {
         </CardContent>
 
         <CardFooter className="p-4 pt-0">
-          <Badge variant="secondary" className="text-xs">REVIEW</Badge>
+          <Badge variant="secondary" className="text-xs">
+            REVIEW
+          </Badge>
         </CardFooter>
       </Card>
     </Link>

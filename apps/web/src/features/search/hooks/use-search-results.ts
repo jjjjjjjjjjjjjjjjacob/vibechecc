@@ -29,9 +29,9 @@ function filterForConvex(filters?: SearchFilters): typeof filters {
   // Filter out unsupported sort options
   if (
     convexFilters.sort &&
-    !VALID_CONVEX_SORT_OPTIONS.includes(convexFilters.sort as any)
+    !VALID_CONVEX_SORT_OPTIONS.includes(convexFilters.sort)
   ) {
-    delete convexFilters.sort;
+    convexFilters.sort = 'relevance';
   }
 
   return convexFilters as typeof filters;
@@ -41,7 +41,6 @@ interface UseSearchResultsParams {
   query: string;
   filters?: SearchRequest['filters'];
   limit?: number;
-  page?: number;
   cursor?: string;
   includeTypes?: string[];
 }
@@ -50,7 +49,6 @@ export function useSearchResults({
   query,
   filters,
   limit = 20,
-  page = 1,
   cursor,
   includeTypes,
 }: UseSearchResultsParams) {

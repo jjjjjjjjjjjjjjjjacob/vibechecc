@@ -24,7 +24,13 @@ export function Header() {
   const { resolvedTheme, setColorTheme, setSecondaryColorTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const searchButtonRef = React.useRef<HTMLButtonElement>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+  const searchButtonRef = React.useRef<HTMLButtonElement | null>(null);
+
+  // Track hydration to avoid SSR mismatches
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
@@ -55,7 +61,10 @@ export function Header() {
   );
 
   return (
-    <header data-is-dark={resolvedTheme === 'dark'} className={cn('relative')}>
+    <header
+      data-is-dark={isHydrated ? resolvedTheme === 'dark' : false}
+      className={cn('relative')}
+    >
       <div
         data-is-vibe-page={isVibePage}
         className="h-12 data-[is-vibe-page=true]:h-32"
@@ -278,7 +287,7 @@ export function Header() {
         <SearchAccordion
           open={searchOpen}
           onOpenChange={setSearchOpen}
-          triggerRef={searchButtonRef}
+          triggerRef={searchButtonRef as React.RefObject<HTMLButtonElement>}
         />
       </div>
     </header>
