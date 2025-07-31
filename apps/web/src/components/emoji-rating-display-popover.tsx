@@ -13,9 +13,14 @@ import type { EmojiRating } from '@/types';
 interface EmojiRatingDisplayPopoverProps {
   rating: EmojiRating;
   allRatings?: EmojiRating[];
-  onEmojiClick?: (emoji: string) => void;
+  onEmojiClick?: (emoji: string, value: number) => void;
   className?: string;
   vibeId?: string;
+  variant?: 'color' | 'gradient';
+  size?: 'sm' | 'md' | 'lg';
+  showScale?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export function EmojiRatingDisplayPopover({
@@ -24,6 +29,11 @@ export function EmojiRatingDisplayPopover({
   onEmojiClick,
   className,
   vibeId,
+  variant = 'color',
+  size = 'md',
+  showScale = true,
+  onMouseEnter,
+  onMouseLeave,
 }: EmojiRatingDisplayPopoverProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -31,12 +41,24 @@ export function EmojiRatingDisplayPopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div
+          role="button"
+          tabIndex={0}
           className={cn('flex cursor-pointer items-center gap-1', className)}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setOpen(!open);
+            }
+          }}
         >
           <EmojiRatingDisplay
             rating={rating}
-            showScale={true}
+            showScale={showScale}
             onEmojiClick={onEmojiClick}
+            variant={variant}
+            size={size}
           />
           {allRatings && allRatings?.length > 1 && (
             <button
@@ -60,11 +82,12 @@ export function EmojiRatingDisplayPopover({
         <PopoverContent className="w-80 p-4" align="start">
           <TopEmojiRatingsAccordion
             emojiRatings={allRatings}
-            onEmojiClick={(emoji) => {
-              onEmojiClick?.(emoji);
+            onEmojiClick={(emoji, value) => {
+              onEmojiClick?.(emoji, value);
               setOpen(false);
             }}
             vibeId={vibeId}
+            variant={variant}
           />
         </PopoverContent>
       )}

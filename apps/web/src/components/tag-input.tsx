@@ -26,8 +26,8 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
 
   // Search for tags
   const { data: searchResults } = useQuery({
-    ...convexQuery(api.tags.search, {
-      searchTerm: inputValue,
+    ...convexQuery(api.tags.searchTags, {
+      query: inputValue,
       limit: 8,
     }),
     enabled: inputValue.length > 0,
@@ -35,7 +35,7 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
 
   // Get popular tags when no search term
   const { data: popularTags } = useQuery({
-    ...convexQuery(api.tags.getPopular, { limit: 8 }),
+    ...convexQuery(api.tags.getPopularTags, { limit: 8 }),
     enabled: inputValue.length === 0 && showSuggestions,
   });
 
@@ -129,9 +129,9 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
               <CommandGroup
                 heading={inputValue ? 'matching tags' : 'popular tags'}
               >
-                {suggestions.map((tag) => (
+                {suggestions.map((tag: { name: string; count?: number }) => (
                   <CommandItem
-                    key={tag._id}
+                    key={tag.name}
                     value={tag.name}
                     onSelect={() => handleAddTag(tag.name)}
                     className="cursor-pointer"

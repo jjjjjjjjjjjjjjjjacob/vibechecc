@@ -1,6 +1,8 @@
 // Search result components
 export { SearchResultsGrid } from './search-results-grid';
+export { SearchResultsList } from './search-results-list';
 export { SearchResultCard } from './search-result-card';
+export { SearchResultListCard } from './search-result-list-card';
 export { SearchPagination } from './search-pagination';
 export { SearchEmptyState } from './search-empty-state';
 export { SearchError } from './search-error';
@@ -15,5 +17,4 @@ export { RatingFilter } from './rating-filter';
 export { DateRangeFilter } from './date-range-filter';
 
 // Search command components
-export { SearchCommand } from './search-command';
 export { InstantSearchPreview } from './instant-search-preview';

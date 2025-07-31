@@ -15,7 +15,7 @@ interface EmojiReactionProps {
   onReact?: (emoji: string) => void;
   className?: string;
   showAddButton?: boolean;
-  ratingMode?: boolean; // When true, clicking opens emoji rating popover
+  ratingMode?: boolean;
   onRatingSubmit?: (data: {
     emoji: string;
     value: number;
@@ -31,7 +31,6 @@ export function EmojiReaction({
   onReact,
   className,
   showAddButton: _showAddButton = false,
-  ratingMode = false,
   onRatingSubmit,
   vibeTitle,
   vibeId: _vibeId,
@@ -43,13 +42,13 @@ export function EmojiReaction({
   const hasReacted = user?.id ? reaction.users.includes(user.id) : false;
 
   const handleReact = () => {
-    // In rating mode, open the rating popover with this emoji
-    if (ratingMode && onRatingSubmit) {
+    // Always open the rating popover with this emoji
+    if (onRatingSubmit) {
       setIsRatingPopoverOpen(true);
       return;
     }
 
-    // Normal reaction mode
+    // If onRatingSubmit is not provided, fall back to onReact
     if (onReact) {
       onReact(reaction.emoji);
     }
@@ -103,8 +102,8 @@ export function EmojiReaction({
     </button>
   );
 
-  // In rating mode, wrap with EmojiRatingPopover
-  if (ratingMode && onRatingSubmit) {
+  // Always wrap with EmojiRatingPopover if onRatingSubmit is provided
+  if (onRatingSubmit) {
     return (
       <EmojiRatingPopover
         open={isRatingPopoverOpen}
@@ -127,7 +126,7 @@ interface EmojiReactionsProps {
   className?: string;
   showAddButton?: boolean;
   contextKeywords?: string[];
-  ratingMode?: boolean; // When true, reactions open rating popovers
+  ratingMode?: boolean;
   onRatingSubmit?: (data: {
     emoji: string;
     value: number;
@@ -144,7 +143,6 @@ interface HorizontalEmojiPickerProps {
   contextKeywords?: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  ratingMode?: boolean;
   onRatingSubmit?: (data: {
     emoji: string;
     value: number;
@@ -161,7 +159,6 @@ function HorizontalEmojiPicker({
   contextKeywords: _contextKeywords = [],
   open,
   onOpenChange: _onOpenChange,
-  ratingMode = false,
   onRatingSubmit,
   vibeTitle,
   vibeId: _vibeId,
@@ -204,13 +201,13 @@ function HorizontalEmojiPicker({
   }, [searchResults?.data]);
 
   const handleEmojiClick = (emoji: string) => {
-    if (ratingMode && onRatingSubmit) {
-      // In rating mode, open rating popover instead of quick reaction
+    if (onRatingSubmit) {
+      // Always open rating popover instead of quick reaction
       setSelectedEmojiForRating(emoji);
       setIsRatingPopoverOpen(true);
       // Don't close the picker yet - let the rating popover handle it
     } else {
-      // Normal reaction mode
+      // If onRatingSubmit is not provided, fall back to onEmojiSelect
       onEmojiSelect(emoji);
       onClose();
     }
@@ -448,15 +445,15 @@ function HorizontalEmojiPicker({
           'h-24 pb-6'
       )}
       side="top"
-      align="start"
+      align="center"
       sideOffset={8}
     >
       {showFullPicker ? fullPicker : horizontalPicker}
     </PopoverContent>
   );
 
-  // If in rating mode and an emoji is selected for rating, wrap with rating popover
-  if (ratingMode && selectedEmojiForRating && onRatingSubmit) {
+  // If an emoji is selected for rating and onRatingSubmit is provided, wrap with rating popover
+  if (selectedEmojiForRating && onRatingSubmit) {
     return (
       <>
         {pickerContent}
@@ -482,7 +479,6 @@ export function EmojiReactions({
   className,
   showAddButton = true,
   contextKeywords = [],
-  ratingMode = false,
   onRatingSubmit,
   vibeTitle,
   vibeId,
@@ -490,9 +486,9 @@ export function EmojiReactions({
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
 
   const handleAddEmoji = (emoji: string) => {
-    // This should only be called in non-rating mode now
-    // In rating mode, the HorizontalEmojiPicker handles the emoji selection directly
-    if (onReact && !ratingMode) {
+    // This should only be called when onRatingSubmit is not provided
+    // When onRatingSubmit is provided, the HorizontalEmojiPicker handles the emoji selection directly
+    if (onReact && !onRatingSubmit) {
       onReact(emoji);
     }
   };
@@ -502,25 +498,29 @@ export function EmojiReactions({
   };
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-1', className)}>
-      {reactions.map((reaction) => (
-        <EmojiReaction
-          key={reaction.emoji}
-          reaction={reaction}
-          onReact={onReact}
-          ratingMode={ratingMode}
-          onRatingSubmit={onRatingSubmit}
-          vibeTitle={vibeTitle}
-          vibeId={vibeId}
-        />
-      ))}
+    <div className={cn('flex w-full min-w-0 items-center gap-1', className)}>
+      {/* Container for emoji reactions that can be hidden when overflowing */}
+      <div className="scrollbar-hide flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+        {reactions.map((reaction) => (
+          <EmojiReaction
+            key={reaction.emoji}
+            reaction={reaction}
+            onReact={onReact}
+            onRatingSubmit={onRatingSubmit}
+            vibeTitle={vibeTitle}
+            vibeId={vibeId}
+            className="flex-shrink-0"
+          />
+        ))}
+      </div>
 
+      {/* Plus button always visible at the end */}
       {showAddButton && (
         <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
           <PopoverTrigger asChild>
             <button
               className={cn(
-                'inline-flex items-center justify-center rounded-full p-1',
+                'inline-flex flex-shrink-0 items-center justify-center rounded-full p-1',
                 'bg-muted hover:bg-muted/80 text-sm',
                 'transition-all hover:scale-105 active:scale-95'
               )}
@@ -537,7 +537,6 @@ export function EmojiReactions({
             contextKeywords={contextKeywords}
             open={showEmojiPicker}
             onOpenChange={setShowEmojiPicker}
-            ratingMode={ratingMode}
             onRatingSubmit={onRatingSubmit}
             vibeTitle={vibeTitle}
             vibeId={vibeId}

@@ -3,7 +3,7 @@
  */
 
 // Search result types
-export type SearchResultType = 'vibe' | 'user' | 'tag' | 'action';
+export type SearchResultType = 'vibe' | 'user' | 'tag' | 'action' | 'review';
 
 export interface BaseSearchResult {
   id: string;
@@ -20,6 +20,7 @@ export interface VibeSearchResult extends BaseSearchResult {
   rating?: number;
   ratingCount?: number;
   tags?: string[];
+  createdAt?: string | number;
   createdBy?: {
     id: string;
     name: string;
@@ -45,11 +46,26 @@ export interface ActionSearchResult extends BaseSearchResult {
   icon?: string;
 }
 
+export interface ReviewSearchResult extends BaseSearchResult {
+  type: 'review';
+  reviewText: string;
+  emoji: string;
+  rating: number; // 1-5 rating value
+  vibeId: string;
+  vibeTitle: string;
+  vibeImage?: string;
+  reviewerId: string;
+  reviewerName: string;
+  reviewerAvatar?: string;
+  createdAt: number;
+}
+
 export type SearchResult =
   | VibeSearchResult
   | UserSearchResult
   | TagSearchResult
-  | ActionSearchResult;
+  | ActionSearchResult
+  | ReviewSearchResult;
 
 // Search filters
 export interface SearchFilters {
@@ -72,8 +88,13 @@ export type SearchSortOption =
   | 'relevance'
   | 'rating_desc'
   | 'rating_asc'
+  | 'top_rated'
+  | 'most_rated'
   | 'recent'
-  | 'oldest';
+  | 'oldest'
+  | 'name'
+  | 'creation_date'
+  | 'interaction_time';
 
 // Search request/response
 export interface SearchRequest {
@@ -89,6 +110,7 @@ export interface SearchResponse {
   users: UserSearchResult[];
   tags: TagSearchResult[];
   actions: ActionSearchResult[];
+  reviews: ReviewSearchResult[];
   totalCount: number;
 }
 
@@ -97,6 +119,7 @@ export interface SearchSuggestionsResponse {
   users: UserSearchResult[];
   tags: TagSearchResult[];
   actions?: ActionSearchResult[];
+  reviews?: ReviewSearchResult[];
   recentSearches?: string[];
   trendingSearches?: string[];
   popularTags?: string[];

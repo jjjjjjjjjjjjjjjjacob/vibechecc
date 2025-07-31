@@ -300,6 +300,7 @@ export function getMockSearchResults(query: string): SearchResponse {
     users: filteredUsers,
     tags: filteredTags,
     actions: filteredActions,
+    reviews: [], // Add empty reviews array for now
     totalCount:
       filteredVibes.length +
       filteredUsers.length +

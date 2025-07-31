@@ -476,7 +476,10 @@ describe('useInstantSearch', () => {
           'search.searchAll',
           {
             query: 'prefetch test',
-            limit: 20,
+            paginationOpts: {
+              cursor: null,
+              numItems: 20,
+            },
           },
         ],
         queryFn: expect.any(Function),

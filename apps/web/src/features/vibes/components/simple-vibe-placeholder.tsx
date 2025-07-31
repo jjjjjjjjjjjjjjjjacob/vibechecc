@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react';
 interface SimplePlaceholderProps {
   title?: string;
   className?: string;
+  hideText?: boolean;
 }
 
 export function SimpleVibePlaceholder({
   title,
   className,
+  hideText = false,
 }: SimplePlaceholderProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -84,7 +86,7 @@ export function SimpleVibePlaceholder({
         className
       )}
     >
-      {title && (
+      {title && !hideText && (
         <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
           <span className="line-clamp-3 text-lg font-medium text-white drop-shadow-md">
             {title}

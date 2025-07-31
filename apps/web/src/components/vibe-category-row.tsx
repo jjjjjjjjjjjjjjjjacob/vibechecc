@@ -1,25 +1,45 @@
 import * as React from 'react';
 import { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { cn } from '@/utils/tailwind-utils';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 import type { Vibe } from '@/types';
 
+export type RatingDisplayMode = 'most-rated' | 'top-rated';
+
 interface VibeCategoryRowProps {
-  title: string;
+  title: string | React.ReactNode;
   vibes: Vibe[];
   priority?: boolean; // For prioritizing certain sections
+  ratingDisplayMode?: RatingDisplayMode; // How to display emoji ratings in cards
+  // Infinite scroll props
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  fetchNextPage?: () => void;
 }
 
 export function VibeCategoryRow({
   title,
   vibes,
   priority = false,
+  ratingDisplayMode = 'most-rated',
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  fetchNextPage,
 }: VibeCategoryRowProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Set up infinite scroll if fetchNextPage is provided
+  const infiniteScrollRef = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage: fetchNextPage || (() => {}),
+    rootMargin: '200px',
+  });
 
   const checkScrollButtons = () => {
     if (!scrollContainerRef.current) return;
@@ -51,7 +71,7 @@ export function VibeCategoryRow({
     checkScrollButtons();
   }, [vibes]);
 
-  if (vibes.length === 0) return null;
+  if (vibes?.length === 0 || !vibes) return null;
 
   return (
     <div
@@ -106,7 +126,7 @@ export function VibeCategoryRow({
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           onScroll={checkScrollButtons}
         >
-          {vibes.map((vibe, _index) => (
+          {vibes?.map((vibe, _index) => (
             <div
               key={vibe.id}
               className={cn(
@@ -116,9 +136,35 @@ export function VibeCategoryRow({
                   : 'w-[250px] md:w-[280px] lg:w-[300px]'
               )}
             >
-              <VibeCard vibe={vibe} />
+              <VibeCard vibe={vibe} ratingDisplayMode={ratingDisplayMode} />
             </div>
           ))}
+
+          {/* Infinite scroll loading indicator */}
+          {isFetchingNextPage && (
+            <div
+              className={cn(
+                'flex flex-shrink-0 snap-start items-center justify-center',
+                priority
+                  ? 'w-[280px] md:w-[320px] lg:w-[360px]'
+                  : 'w-[250px] md:w-[280px] lg:w-[300px]'
+              )}
+            >
+              <div className="text-muted-foreground flex items-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="text-sm">loading more...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Infinite scroll trigger - positioned near the end */}
+          {fetchNextPage && hasNextPage && (
+            <div
+              ref={infiniteScrollRef}
+              className="w-4 flex-shrink-0"
+              style={{ opacity: 0 }}
+            />
+          )}
 
           {/* Add spacing at the end for better scrolling experience */}
           <div className="w-4 flex-shrink-0" />

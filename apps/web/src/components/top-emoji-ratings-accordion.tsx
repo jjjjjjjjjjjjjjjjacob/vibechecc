@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { EmojiRating } from '@/types';
 import {
   Accordion,
@@ -16,8 +15,9 @@ import { Button } from './ui/button';
 interface TopEmojiRatingsAccordionProps {
   emojiRatings: EmojiRating[];
   className?: string;
-  onEmojiClick?: (emoji: string) => void;
+  onEmojiClick?: (emoji: string, value: number) => void;
   vibeId?: string;
+  variant?: 'color' | 'gradient';
 }
 
 export function TopEmojiRatingsAccordion({
@@ -25,6 +25,7 @@ export function TopEmojiRatingsAccordion({
   className,
   onEmojiClick,
   vibeId,
+  variant = 'color',
 }: TopEmojiRatingsAccordionProps) {
   const topRatings = emojiRatings.slice(0, 4);
   const remainingRatings = emojiRatings.slice(4);
@@ -37,23 +38,22 @@ export function TopEmojiRatingsAccordion({
             top ratings
           </h3>
         </div>
-        <AnimatePresence mode="popLayout">
-          {topRatings.map((rating, index) => (
-            <motion.div
-              key={`${rating.emoji}-${index}`}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <EmojiRatingDisplay
-                rating={rating}
-                showScale={true}
-                onEmojiClick={onEmojiClick}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        {topRatings.map((rating, index) => (
+          <div
+            key={`${rating.emoji}-${index}`}
+            className="animate-fade-in-down opacity-0"
+            style={{
+              animation: `fade-in-down 0.3s ease-out ${index * 0.05}s forwards`,
+            }}
+          >
+            <EmojiRatingDisplay
+              rating={rating}
+              showScale={true}
+              onEmojiClick={onEmojiClick}
+              variant={variant}
+            />
+          </div>
+        ))}
       </div>
 
       {remainingRatings.length > 0 && (
@@ -66,24 +66,21 @@ export function TopEmojiRatingsAccordion({
               </div>
             </AccordionTrigger>
             <AccordionContent className="pt-2">
-              <AnimatePresence mode="popLayout">
-                {remainingRatings.map((rating, index) => (
-                  <motion.div
-                    key={`${rating.emoji}-${index}`}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="mb-2"
-                  >
-                    <EmojiRatingDisplay
-                      rating={rating}
-                      showScale={true}
-                      onEmojiClick={onEmojiClick}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {remainingRatings.map((rating, index) => (
+                <div
+                  key={`${rating.emoji}-${index}`}
+                  className="animate-fade-in-down mb-2 opacity-0"
+                  style={{
+                    animation: `fade-in-down 0.3s ease-out ${index * 0.05}s forwards`,
+                  }}
+                >
+                  <EmojiRatingDisplay
+                    rating={rating}
+                    showScale={true}
+                    onEmojiClick={onEmojiClick}
+                  />
+                </div>
+              ))}
             </AccordionContent>
           </AccordionItem>
         </Accordion>

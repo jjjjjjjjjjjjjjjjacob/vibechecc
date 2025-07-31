@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Heart, Star, Zap } from 'lucide-react';
@@ -32,12 +31,7 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
   return (
     <div className="space-y-8 text-center">
       {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-4"
-      >
+      <div className="animate-fade-in-down space-y-4">
         <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-orange-500">
           <Sparkles className="h-10 w-10 text-white" />
         </div>
@@ -48,14 +42,12 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
           The place to discover, share, and connect through vibes that matter to
           you.
         </p>
-      </motion.div>
+      </div>
 
       {/* Features Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="grid gap-6 md:grid-cols-3"
+      <div
+        className="animate-fade-in-down grid gap-6 opacity-0 md:grid-cols-3"
+        style={{ animation: 'fade-in-down 0.5s ease-out 0.2s forwards' }}
       >
         {features.map((feature, index) => (
           <Card
@@ -73,14 +65,12 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
             </CardContent>
           </Card>
         ))}
-      </motion.div>
+      </div>
 
       {/* Call to Action */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="space-y-4"
+      <div
+        className="animate-fade-in-down space-y-4 opacity-0"
+        style={{ animation: 'fade-in-down 0.5s ease-out 0.4s forwards' }}
       >
         <p className="text-muted-foreground">
           Let's get you set up in just a few quick steps!
@@ -92,7 +82,7 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
         >
           Get Started
         </Button>
-      </motion.div>
+      </div>
     </div>
   );
 }

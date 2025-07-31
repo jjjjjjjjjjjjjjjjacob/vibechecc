@@ -1,0 +1,82 @@
+# Theme Color Usage Rule
+
+## MANDATORY: Always Use Themed & Moded Colors
+
+**NEVER use hardcoded colors in CSS classes or style attributes.** Always prioritize semantic color tokens that work across all themes and color modes.
+
+### Required Color Usage Hierarchy
+
+1. **Semantic Colors (HIGHEST PRIORITY)**
+   - `primary`, `secondary`, `accent`
+   - `background`, `foreground`, `muted`, `card`
+   - `border`, `input`, `ring`
+   - `destructive`, `warning`, `success`
+
+2. **Theme Colors (SECOND PRIORITY)**
+   - `theme-primary`, `theme-secondary`
+   - `var(--theme-primary)`, `var(--theme-secondary)`
+   - `from-theme-primary`, `to-theme-secondary`
+
+3. **Mode-Aware Colors (THIRD PRIORITY)**
+   - `text-foreground`, `bg-background`
+   - Colors that automatically adapt to light/dark mode
+
+### PROHIBITED Color Usage
+
+❌ **NEVER USE:**
+- Hardcoded color values: `bg-pink-500`, `text-blue-600`, `border-red-400`
+- Fixed hex colors: `#ff0000`, `#3b82f6`
+- RGB values: `rgb(255, 0, 0)`, `rgba(59, 130, 246, 0.5)`
+- HSL values: `hsl(350, 100%, 50%)`
+
+### Correct Patterns
+
+✅ **GOOD:**
+```tsx
+// Using semantic colors
+<div className="bg-primary text-primary-foreground">
+<Button variant="secondary" className="border-border">
+
+// Using theme colors
+<div className="from-theme-primary to-theme-secondary bg-gradient-to-r">
+<div className="border-theme-primary/20 bg-theme-primary/10">
+
+// Using mode-aware colors
+<Card className="bg-background border-border">
+<p className="text-muted-foreground">
+```
+
+❌ **BAD:**
+```tsx
+// Hardcoded colors
+<div className="bg-pink-500 text-white">
+<Button className="border-blue-400 bg-red-300">
+
+// Fixed values
+<div style={{backgroundColor: '#ff0000'}}>
+<div className="shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+```
+
+### Compatibility Requirements
+
+This rule ensures:
+- **Multi-theme support**: Components work with any user's custom theme colors
+- **Dark/light mode compatibility**: All colors adapt to mode changes  
+- **Accessibility**: Proper contrast ratios maintained across themes
+- **Consistency**: Unified visual language across the application
+
+### Implementation Guidelines
+
+1. **Always check existing components** for color usage patterns before implementing
+2. **Test with multiple themes** to ensure compatibility
+3. **Use CSS custom properties** for dynamic theme values when needed
+4. **Prefer Tailwind semantic classes** over arbitrary color values
+
+### Exceptions
+
+The ONLY acceptable use of hardcoded colors:
+- System status colors (success green, error red) when semantic colors aren't sufficient
+- Brand logos or images that require specific colors
+- Third-party component styling that can't use theme variables
+
+**All exceptions must be explicitly documented and justified.**

@@ -105,7 +105,7 @@ bun install
 bun run dev
 ```
 
-- Starts Convex backend, seeds DB, launches frontend (http://localhost:3030), and ngrok tunnel.
+- Starts Convex backend, seeds DB, launches frontend (http://localhost:3000), and ngrok tunnel.
 - See [apps/web/README.md](./apps/web/README.md) and [apps/convex/README.md](./apps/convex/README.md) for app-specific dev info.
 
 ### Troubleshooting

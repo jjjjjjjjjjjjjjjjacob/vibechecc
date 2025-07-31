@@ -99,7 +99,7 @@ describe('emoji ratings', () => {
       await t.run(async (ctx) => {
         const ratings = await ctx.db
           .query('ratings')
-          .withIndex('vibeAndUser', (q: any) =>
+          .withIndex('vibeAndUser', (q) =>
             q.eq('vibeId', vibeId).eq('userId', userId)
           )
           .collect();

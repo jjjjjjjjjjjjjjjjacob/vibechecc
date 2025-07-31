@@ -121,6 +121,14 @@ bun nx reset                            # Clear Nx cache
 - **No comments** unless explicitly requested
 - Prefer existing utility functions over creating new ones
 
+### Theme Color Usage
+
+- **ALWAYS use themed & moded colors** for maximum compatibility across custom themes/modes
+- **Priority**: semantic colors (`primary`, `background`, `muted`) > theme colors (`theme-primary`, `theme-secondary`) > mode-aware colors
+- **NEVER use hardcoded colors**: No `bg-pink-500`, `text-blue-600`, hex values, or RGB/HSL
+- **Exceptions**: Only for system status, brand logos, or documented third-party requirements
+- See `.agent/rules/theme-colors.mdc` for complete guidelines
+
 ### Import Patterns
 
 ```typescript
@@ -213,7 +221,7 @@ Copy `.env.local.example` to `.env.local` and configure:
 Run `bun run dev` to start:
 
 - Convex backend with DB seeding
-- Frontend at http://localhost:3030
+- Frontend at http://localhost:3000
 - ngrok tunnel for webhooks
 
 ## Package Management

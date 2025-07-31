@@ -7,12 +7,12 @@ import {
   DialogTrigger,
 } from './ui/dialog';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from './ui/sheet';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from './ui/drawer';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
@@ -209,11 +209,11 @@ export function EmojiRatingPopover({
   // Shared header content
   const headerContent = (
     <>
-      <div className="bg-gradient-to-r from-purple-500 to-red-500 bg-clip-text text-xl text-transparent drop-shadow-md drop-shadow-red-500/50">
+      <div className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl text-transparent drop-shadow-md">
         {existingRating ? 'update emoji rating' : 'rate with emoji'}
       </div>
       {vibeTitle && (
-        <p className="text-muted-foreground mt-1 text-sm lowercase drop-shadow-sm drop-shadow-yellow-500/20">
+        <p className="text-muted-foreground mt-1 text-sm lowercase">
           {vibeTitle}
         </p>
       )}
@@ -260,21 +260,24 @@ export function EmojiRatingPopover({
             >
               <div
                 className={cn(
-                  'bg-primary/10 flex items-center justify-between gap-4 rounded-3xl p-4 transition-all duration-300',
-                  hasSelectedRating && 'animate-pulse-scale bg-primary/20'
+                  'bg-theme-primary/10 shadow-theme-primary/10 flex items-center justify-between gap-4 rounded-3xl p-4 shadow-lg transition-all duration-300',
+                  hasSelectedRating &&
+                    'animate-pulse-scale bg-theme-primary/20 shadow-theme-primary/30 shadow-3xl',
+                  isMouseDown &&
+                    'bg-theme-primary/15 shadow-theme-secondary/20 shadow-2xl'
                 )}
               >
                 <span
                   data-mouse-down={isMouseDown ? 'true' : 'false'}
-                  className="font-noto-color text-7xl drop-shadow-[0_2px_5px_var(--color-slate-500)] transition-transform duration-4000"
+                  className="font-noto-color text-7xl drop-shadow-lg transition-transform duration-4000"
                   style={
                     isMouseDown
                       ? {
-                          animation: 'shimmy 0.2s ease-in-out infinite',
+                          animation: 'shimmy 0.3s ease-in-out infinite',
                         }
                       : hasSelectedRating
                         ? {
-                            animation: 'bounce 0.5s ease-in-out 1',
+                            animation: 'bounce 1s ease-in-out 1',
                           }
                         : undefined
                   }
@@ -284,9 +287,17 @@ export function EmojiRatingPopover({
                 <span
                   data-mouse-down={isMouseDown ? 'true' : 'false'}
                   className={cn(
-                    'font-doto text-6xl drop-shadow-[0_2px_5px_var(--color-red-500)] transition-all duration-300 data-[mouse-down=true]:drop-shadow-[0px_2px_10px_var(--color-yellow-500)]',
-                    hasSelectedRating && 'animate-number-pop'
+                    'font-doto text-primary text-6xl transition-all duration-300',
+                    hasSelectedRating &&
+                      'animate-number-pop drop-shadow-[0_0_20px_var(--theme-primary)]',
+                    isMouseDown &&
+                      'drop-shadow-[0_0_30px_var(--theme-secondary)]'
                   )}
+                  style={{
+                    textShadow: isMouseDown
+                      ? '0 0 20px var(--theme-secondary), 0 2px 4px rgba(0,0,0,0.2)'
+                      : '0 0 10px var(--theme-primary), 0 2px 4px rgba(0,0,0,0.2)',
+                  }}
                 >
                   {ratingValue.toFixed(1)}
                 </span>
@@ -296,20 +307,20 @@ export function EmojiRatingPopover({
               {showRatingCTA && (
                 <div className="animate-fade-in-down pointer-events-none absolute -top-2">
                   <div className="relative">
-                    <div className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-purple-500/25">
+                    <div className="from-theme-primary to-theme-secondary rounded-full bg-gradient-to-r px-4 py-2 text-xs font-semibold text-white shadow-lg">
                       <span className="drop-shadow-sm">rating locked in!</span>
                       <span className="ml-1.5 inline-block animate-pulse">
                         ✨
                       </span>
                     </div>
                     {/* Sparkle effects */}
-                    <div className="absolute -top-1 -left-1 animate-ping text-yellow-400">
+                    <div className="text-theme-secondary absolute -top-1 -left-1 animate-ping">
                       ✦
                     </div>
-                    <div className="animation-delay-200 absolute -right-1 -bottom-1 animate-ping text-pink-400">
+                    <div className="animation-delay-200 text-theme-primary absolute -right-1 -bottom-1 animate-ping">
                       ✦
                     </div>
-                    <div className="animation-delay-400 absolute top-0 right-2 animate-ping text-purple-400">
+                    <div className="animation-delay-400 text-theme-secondary absolute top-0 right-2 animate-ping">
                       ✦
                     </div>
                   </div>
@@ -326,6 +337,7 @@ export function EmojiRatingPopover({
                     <EmojiRatingScale
                       emoji={selectedEmoji}
                       value={selectedRatingValue}
+                      variant="gradient"
                       onChange={setRatingValue}
                       onClick={(value) => {
                         setSelectedRatingValue(value);
@@ -360,12 +372,11 @@ export function EmojiRatingPopover({
                         }, 500);
                       }}
                       size="lg"
-                      preset="gradient"
                       showTooltip={false}
-                      onMouseDown={() => setIsMouseDown(true)}
-                      onMouseUp={() => setIsMouseDown(false)}
+                      onPointerDown={() => setIsMouseDown(true)}
+                      onPointerUp={() => setIsMouseDown(false)}
                       mobileSlider={true}
-                      className="w-full drop-shadow-[0_2px_5px_var(--color-red-500)]"
+                      className="w-full"
                     />
                   </button>
                 ) : (
@@ -460,21 +471,20 @@ export function EmojiRatingPopover({
 
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetTrigger asChild onClick={(e) => e.stopPropagation()}>
+      <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground>
+        <DrawerTrigger asChild onClick={(e) => e.stopPropagation()}>
           {children}
-        </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          className="bg-background/95 max-h-[90vh] overflow-y-auto border-none backdrop-blur"
+        </DrawerTrigger>
+        <DrawerContent
+          className="bg-background/90 min-h-[92vh] overflow-y-auto backdrop-blur"
           onClick={(e) => e.stopPropagation()}
         >
-          <SheetHeader className="p-6 pb-0">
-            <SheetTitle asChild>{headerContent}</SheetTitle>
-          </SheetHeader>
+          <DrawerHeader className="p-6 pb-0">
+            <DrawerTitle asChild>{headerContent}</DrawerTitle>
+          </DrawerHeader>
           {formContent}
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
@@ -484,7 +494,7 @@ export function EmojiRatingPopover({
         {children}
       </DialogTrigger>
       <DialogContent
-        className="bg-background/90 max-h-screen max-w-lg overflow-y-auto border-none backdrop-blur"
+        className="bg-background/95 border-border max-h-screen max-w-lg overflow-y-auto border backdrop-blur"
         onClick={(e) => e.stopPropagation()}
         showCloseButton={false}
       >

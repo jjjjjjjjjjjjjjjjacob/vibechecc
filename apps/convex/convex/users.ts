@@ -180,6 +180,9 @@ export const updateProfile = action({
     last_name: v.optional(v.string()),
     image_url: v.optional(v.string()),
     bio: v.optional(v.string()),
+    themeColor: v.optional(v.string()), // Legacy field
+    primaryColor: v.optional(v.string()), // Primary gradient color
+    secondaryColor: v.optional(v.string()), // Secondary gradient color
     socials: v.optional(
       v.object({
         twitter: v.optional(v.string()),
@@ -214,6 +217,9 @@ export const updateProfileInternal = internalMutation({
     last_name: v.optional(v.string()),
     image_url: v.optional(v.string()),
     bio: v.optional(v.string()),
+    themeColor: v.optional(v.string()), // Legacy field
+    primaryColor: v.optional(v.string()), // Primary gradient color
+    secondaryColor: v.optional(v.string()), // Secondary gradient color
     socials: v.optional(
       v.object({
         twitter: v.optional(v.string()),
@@ -248,6 +254,15 @@ export const updateProfileInternal = internalMutation({
     }
     if (args.bio !== undefined) {
       updates.bio = args.bio;
+    }
+    if (args.themeColor !== undefined) {
+      updates.themeColor = args.themeColor;
+    }
+    if (args.primaryColor !== undefined) {
+      updates.primaryColor = args.primaryColor;
+    }
+    if (args.secondaryColor !== undefined) {
+      updates.secondaryColor = args.secondaryColor;
     }
     if (args.socials !== undefined) {
       updates.socials = args.socials;

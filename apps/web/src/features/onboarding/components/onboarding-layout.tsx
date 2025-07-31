@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, X } from 'lucide-react';
@@ -73,28 +72,22 @@ export function OnboardingLayout({
         {/* Content */}
         <div className="mx-auto max-w-2xl">
           {title && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mb-6 text-center"
-            >
+            <div className="animate-fade-in-down mb-6 text-center">
               <h2 className="text-foreground mb-2 text-3xl font-bold">
                 {title}
               </h2>
               {subtitle && (
                 <p className="text-muted-foreground text-lg">{subtitle}</p>
               )}
-            </motion.div>
+            </div>
           )}
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
+          <div
+            className="animate-fade-in-down opacity-0"
+            style={{ animation: 'fade-in-down 0.3s ease-out 0.1s forwards' }}
           >
             {children}
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { query, mutation } from './_generated/server';
+import { query, mutation, type QueryCtx } from './_generated/server';
 import { v } from 'convex/values';
 
 // Get emoji metadata by emoji
@@ -97,15 +97,16 @@ export const createOrUpdateEmojiRating = mutation({
 
 // Helper function to get top emoji ratings
 async function getTopEmojiRatingsInternal(
-  ctx: any,
+  ctx: QueryCtx,
   args: { vibeId: string; limit?: number }
 ) {
   const limit = args.limit ?? 5;
 
-  // Get all ratings for this vibe
+  // Get all ratings for this vibe that have emoji field
   const ratings = await ctx.db
     .query('ratings')
-    .withIndex('vibe', (q: any) => q.eq('vibeId', args.vibeId))
+    .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
+    .filter((q) => q.neq(q.field('emoji'), undefined))
     .collect();
 
   // Group by emoji and calculate stats
@@ -114,7 +115,7 @@ async function getTopEmojiRatingsInternal(
     { count: number; totalValue: number; tags: Set<string> }
   >();
 
-  for (const rating of ratings as any[]) {
+  for (const rating of ratings) {
     const stats = emojiStats.get(rating.emoji) || {
       count: 0,
       totalValue: 0,
@@ -144,7 +145,7 @@ async function getTopEmojiRatingsInternal(
     sortedEmojis.map(async (stat) => {
       const emojiData = await ctx.db
         .query('emojis')
-        .withIndex('byEmoji', (q: any) => q.eq('emoji', stat.emoji))
+        .withIndex('byEmoji', (q) => q.eq('emoji', stat.emoji))
         .first();
 
       return {
@@ -199,13 +200,13 @@ export const getEmojiRatingStats = query({
   handler: async (ctx, args) => {
     const ratings = await ctx.db
       .query('ratings')
-      .withIndex('vibe', (q: any) => q.eq('vibeId', args.vibeId))
-      .filter((q: any) => q.neq(q.field('emoji'), undefined))
+      .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
+      .filter((q) => q.neq(q.field('emoji'), undefined))
       .collect();
 
     const emojiGroups = new Map<string, number[]>();
 
-    for (const rating of ratings as any[]) {
+    for (const rating of ratings) {
       const values = emojiGroups.get(rating.emoji) || [];
       values.push(rating.value);
       emojiGroups.set(rating.emoji, values);

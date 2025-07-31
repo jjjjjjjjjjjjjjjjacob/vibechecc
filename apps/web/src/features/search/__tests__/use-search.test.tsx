@@ -250,7 +250,10 @@ describe('useSearch', () => {
         {
           query: '',
           filters: undefined,
-          limit: 10,
+          paginationOpts: {
+            cursor: null,
+            numItems: 10,
+          },
         },
       ]);
       expect(queryConfig.enabled).toBe(false); // Empty query
@@ -354,10 +357,13 @@ describe('useSearch', () => {
       });
 
       await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith({
-          query: 'test query',
-          resultCount: 1,
-        });
+        expect(mockMutate).toHaveBeenCalledWith(
+          {
+            query: 'test query',
+            resultCount: 1,
+          },
+          expect.any(Object)
+        );
       });
     });
 

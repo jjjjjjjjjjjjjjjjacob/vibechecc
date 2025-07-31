@@ -10,7 +10,6 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { createServerFn } from '@tanstack/react-start';
-import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import * as React from 'react';
 import { Toaster } from '@/components/ui/sonner';
@@ -30,92 +29,21 @@ import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { ConvexQueryClient } from '@convex-dev/react-query';
 import { cn } from '@/utils';
 
-// Server function to fetch Clerk auth and get Convex token
+// Optimized server function with caching and mobile optimizations
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
   if (!request) {
-    // During SSR, if no request, return empty auth
     return {
       userId: null,
       token: null,
+      fromCache: false,
+      computeTime: 0,
     };
   }
 
-  try {
-    // Use getAuth with options to handle SSR properly
-    const authResult = await getAuth(request);
-
-    // Check if we got a Response object (handshake redirect)
-    if (
-      authResult &&
-      typeof authResult === 'object' &&
-      'status' in authResult &&
-      'headers' in authResult
-    ) {
-      // This is a Response object for handshake, skip auth during SSR
-      // Clerk handshake redirect detected during SSR, skipping auth
-      return {
-        userId: null,
-        token: null,
-      };
-    }
-
-    const auth = authResult;
-
-    // Check if auth is valid and has userId
-    if (
-      !auth ||
-      typeof auth !== 'object' ||
-      !('userId' in auth) ||
-      !auth.userId
-    ) {
-      return {
-        userId: null,
-        token: null,
-      };
-    }
-
-    // Only try to get token if we have a userId
-    let token = null;
-    try {
-      if ('getToken' in auth && typeof auth.getToken === 'function') {
-        token = await auth.getToken({ template: 'convex' });
-      }
-    } catch {
-      // Token generation might fail during SSR
-      // Convex token generation skipped during SSR
-    }
-
-    return {
-      userId: auth.userId as string,
-      token,
-    };
-  } catch (error) {
-    // Check if the error is a Response object (Clerk handshake redirect)
-    if (
-      error &&
-      typeof error === 'object' &&
-      'status' in error &&
-      'headers' in error
-    ) {
-      // Clerk handshake redirect during SSR
-      return {
-        userId: null,
-        token: null,
-      };
-    }
-
-    // Log other errors for debugging
-    if (error instanceof Error) {
-      // Auth error during SSR
-    }
-
-    // During SSR, authentication errors are expected
-    return {
-      userId: null,
-      token: null,
-    };
-  }
+  // Use optimized auth with caching
+  const { getOptimizedAuth } = await import('@/lib/optimized-auth');
+  return await getOptimizedAuth(request);
 });
 
 export const Route = createRootRouteWithContext<{
@@ -139,6 +67,28 @@ export const Route = createRootRouteWithContext<{
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
+      // Font preloading for critical fonts
+      {
+        rel: 'preload',
+        href: '/fonts/optimized/GeistSans-Variable.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'preload',
+        href: '/fonts/optimized/NotoEmoji-VariableFont_wght.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'preload',
+        href: '/fonts/optimized/noto-color-emoji-core.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
       {
         rel: 'apple-touch-icon',
         sizes: '180x180',
@@ -242,10 +192,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-background text-foreground min-h-screen">
+      <body className="bg-background text-foreground">
         <PostHogProvider>
           <ThemeProvider>
-            <div className="flex min-h-screen flex-col">
+            <div
+              className="relative flex min-h-screen flex-col"
+              data-vaul-drawer-wrapper
+            >
               <PostHogPageTracker />
               <ClerkPostHogIntegration />
               <Header />
@@ -281,7 +234,7 @@ function LoadingIndicator() {
         isLoading ? `opacity-100 delay-300` : `opacity-0 delay-0`
       }`}
     >
-      <div className="h-full animate-pulse bg-gradient-to-r from-pink-500 to-orange-500" />
+      <div className="from-theme-primary to-theme-secondary h-full animate-pulse bg-gradient-to-r" />
     </div>
   );
 }

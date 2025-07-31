@@ -1,77 +1,72 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as React from 'react';
-import {
-  useVibesPaginated,
-  useAllTags,
-  useVibesByTag,
-  useTopRatedVibes,
-} from '@/queries';
-import { VibeCategoryRow } from '@/components/vibe-category-row';
-import { CreateVibeButton } from '@/components/create-vibe-button';
+import { HomeFeed } from '@/components/home-feed';
 import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
-import { HomepageSkeleton } from '@/components/ui/homepage-skeleton';
-import { VibeCategoryRowSkeleton } from '@/components/ui/vibe-category-row-skeleton';
-import { EmojiTrends } from '@/components/emoji-trends';
+import { useCurrentUser } from '@/queries';
+import { useTheme } from '@/components/theme-provider';
+import { Button } from '@/components/ui/button';
+import { Plus, Sparkles } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
 
 function Home() {
-  const {
-    data: vibesData,
-    isLoading: vibesLoading,
-    error: vibesError,
-  } = useVibesPaginated(50);
-  const { data: allTags, isLoading: tagsLoading } = useAllTags();
-  const { data: topRatedVibes, isLoading: topRatedLoading } =
-    useTopRatedVibes(10);
+  // Get current user's theme
+  const { data: currentUser } = useCurrentUser();
+  const { setColorTheme, setSecondaryColorTheme } = useTheme();
 
-  // Get vibes for the most popular tags (top 6 tags)
-  const popularTags = allTags?.slice(0, 6) ?? [];
+  // Apply user's color themes when user data changes
+  React.useEffect(() => {
+    if (currentUser) {
+      const primaryColor =
+        currentUser.primaryColor || currentUser.themeColor || 'pink';
+      const secondaryColor = currentUser.secondaryColor || 'orange';
 
-  if (vibesLoading) {
-    return <HomepageSkeleton />;
-  }
-
-  if (vibesError) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-4 py-3">
-          <p>failed to load vibes. please try again later.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const vibes = vibesData?.vibes ?? [];
-
-  const safeVibes = vibes.filter(() => {
-    // Now we have full vibe data with createdBy info
-    return true;
-  });
-
-  const featuredVibes = safeVibes.slice(0, 8);
-  const recentVibes = safeVibes.slice(0, 12);
+      setColorTheme(`${primaryColor}-primary` as any);
+      setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
+    }
+  }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <section className="mb-12">
-        <div className="rounded-2xl bg-gradient-to-r from-pink-500 to-orange-500 p-8 text-white md:p-12">
+        <div
+          className="from-theme-primary to-theme-secondary animate-gradient-shift rounded-2xl bg-gradient-to-r p-8 text-white md:p-12"
+          style={{ backgroundSize: '200% 200%' }}
+        >
           <div className="max-w-2xl">
             <h1 className="mb-4 text-4xl font-bold lowercase md:text-5xl">
-              discover and share vibes
+              we're vibing here
             </h1>
             <p className="mb-6 text-lg opacity-90 md:text-xl">
               welcome to <strong>viberater</strong>, where you can discover,
               share, and rate vibes from around the world
             </p>
             <SignedIn>
-              <CreateVibeButton
-                variant="outline"
-                className="bg-secondary/20 text-primary hover:bg-secondary-foreground/20"
-              />
+              <div className="flex gap-3">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
+                >
+                  <Link to="/vibes/create">
+                    <Plus className="mr-2 h-4 w-4" />
+                    create vibe
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
+                >
+                  <Link to="/discover">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    discover vibes
+                  </Link>
+                </Button>
+              </div>
             </SignedIn>
             <SignedOut>
               <p className="text-lg opacity-75">
@@ -82,79 +77,8 @@ function Home() {
         </div>
       </section>
 
-      {/* Emoji Trends - Show on larger screens */}
-      <div className="mb-8 hidden lg:block">
-        <div className="grid grid-cols-4 gap-8">
-          <div className="col-span-3">
-            {/* Featured Vibes */}
-            <VibeCategoryRow
-              title="featured vibes"
-              vibes={featuredVibes}
-              priority
-            />
-          </div>
-          <div className="col-span-1">
-            <EmojiTrends />
-          </div>
-        </div>
-      </div>
-
-      {/* Featured Vibes - Show on mobile */}
-      <div className="lg:hidden">
-        <VibeCategoryRow
-          title="featured vibes"
-          vibes={featuredVibes}
-          priority
-        />
-      </div>
-
-      {/* Top Rated Vibes */}
-      {topRatedLoading ? (
-        <VibeCategoryRowSkeleton />
-      ) : (
-        topRatedVibes &&
-        topRatedVibes.length > 0 && (
-          <VibeCategoryRow title="top rated" vibes={topRatedVibes} />
-        )
-      )}
-
-      {/* Recent Vibes */}
-      <VibeCategoryRow title="trending now" vibes={recentVibes} />
-
-      {/* Tag-based Categories */}
-      {!tagsLoading &&
-        popularTags.map((tagData) => (
-          <TagBasedSection key={tagData.tag} tag={tagData.tag} />
-        ))}
-
-      {/* Show all vibes link */}
-      <section className="mt-12 text-center">
-        <Link
-          to="/vibes"
-          className="text-primary text-lg lowercase hover:underline"
-        >
-          explore all vibes →
-        </Link>
-      </section>
+      {/* Home Feed */}
+      <HomeFeed />
     </div>
   );
-}
-
-// Component for tag-based sections
-function TagBasedSection({ tag }: { tag: string }) {
-  const { data: tagVibes, isLoading } = useVibesByTag(tag, 10);
-
-  if (isLoading) {
-    return <VibeCategoryRowSkeleton />;
-  }
-
-  // Only show sections with at least 3 vibes for a good experience
-  if (!tagVibes || tagVibes.length < 3) {
-    return null;
-  }
-
-  // Capitalize tag name for better display
-  const displayTitle = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
-
-  return <VibeCategoryRow title={`${displayTitle} vibes`} vibes={tagVibes} />;
 }

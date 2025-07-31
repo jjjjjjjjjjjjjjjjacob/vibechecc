@@ -22,7 +22,7 @@ export function VibeResult({ result, onSelect }: VibeResultProps) {
     <CommandItem
       value={result.title}
       onSelect={handleSelect}
-      className="flex items-start gap-3 py-3"
+      className="data-[selected=true]:bg-muted/60 flex items-start gap-3 py-3"
     >
       {result.image && (
         <img

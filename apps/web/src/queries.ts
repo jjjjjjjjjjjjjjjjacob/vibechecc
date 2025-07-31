@@ -1,11 +1,35 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
 import {
   convexQuery,
   useConvexMutation,
   useConvexAction,
 } from '@convex-dev/react-query';
+import { useConvex } from 'convex/react';
+import type { FunctionReference, FunctionArgs } from 'convex/server';
 import { api } from '@viberater/convex';
 // import { useAuth } from '@clerk/tanstack-react-start';
+
+// CONVEX INFINITE QUERY HELPER
+
+const _convexInfiniteQuery = <
+  ConvexQueryReference extends FunctionReference<'query'>,
+  Args extends FunctionArgs<ConvexQueryReference>,
+>(
+  funcRef: ConvexQueryReference,
+  queryArgs: Args
+) => {
+  return {
+    queryKey: ['convexQuery', JSON.stringify(funcRef), queryArgs],
+    staleTime: Infinity,
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage: any) => lastPage?.continueCursor || undefined,
+  };
+};
 
 // viberater QUERIES
 
@@ -17,9 +41,48 @@ export function useVibes() {
 }
 
 // Query to get paginated vibes with full details
-export function useVibesPaginated(limit?: number, cursor?: string) {
+export function useVibesPaginated(
+  limit?: number,
+  options?: { enabled?: boolean; cursor?: string }
+) {
   return useQuery({
-    ...convexQuery(api.vibes.getAll, { limit, cursor }),
+    ...convexQuery(api.vibes.getAll, {
+      limit,
+      cursor: options?.cursor,
+    }),
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Query to get filtered vibes with pagination
+export function useFilteredVibesPaginated(
+  limit?: number,
+  options?: {
+    enabled?: boolean;
+    cursor?: string;
+    filters?: {
+      emojis?: string[];
+      minRating?: number;
+      maxRating?: number;
+      tags?: string[];
+      sort?:
+        | 'recent'
+        | 'rating_desc'
+        | 'rating_asc'
+        | 'top_rated'
+        | 'most_rated'
+        | 'name'
+        | 'creation_date';
+    };
+  }
+) {
+  return useQuery({
+    ...convexQuery(api.vibes.getFilteredVibes, {
+      limit,
+      cursor: options?.cursor,
+      filters: options?.filters,
+    }),
+    enabled: options?.enabled !== false,
   });
 }
 
@@ -192,9 +255,31 @@ export function useAllTags() {
 }
 
 // Query to get top-rated vibes
-export function useTopRatedVibes(limit?: number) {
+export function useTopRatedVibes(
+  limit?: number,
+  options?: { enabled?: boolean; cursor?: string }
+) {
   return useQuery({
-    ...convexQuery(api.vibes.getTopRated, { limit }),
+    ...convexQuery(api.vibes.getTopRated, {
+      limit,
+      cursor: options?.cursor,
+    }),
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Query to get personalized vibes for a user (based on their interactions)
+export function usePersonalizedVibes(
+  userId?: string,
+  options?: { enabled?: boolean; cursor?: string; limit?: number }
+) {
+  return useQuery({
+    // For now, fall back to top-rated vibes - this will be enhanced with a proper recommendation algorithm
+    ...convexQuery(api.vibes.getTopRated, {
+      limit: options?.limit || 20,
+      cursor: options?.cursor,
+    }),
+    enabled: options?.enabled !== false && !!userId,
   });
 }
 
@@ -316,5 +401,108 @@ export function useCreateColumnMutation() {
         'useCreateColumnMutation is deprecated and not implemented'
       );
     },
+  });
+}
+
+// GENERALIZED QUERY HOOKS
+
+// Generalized infinite query for vibes using getFilteredVibes
+export function useVibesInfinite(
+  filters?: {
+    emojis?: string[];
+    minRating?: number;
+    maxRating?: number;
+    tags?: string[];
+    sort?:
+      | 'recent'
+      | 'rating_desc'
+      | 'rating_asc'
+      | 'top_rated'
+      | 'most_rated'
+      | 'name'
+      | 'creation_date';
+    minRatingCount?: number;
+    maxRatingCount?: number;
+    limit?: number;
+  },
+  options?: {
+    enabled?: boolean;
+    queryKeyPrefix?: string[];
+    select?: (data: any) => any;
+    queryKeyName?: string; // Override for the query key identifier
+  }
+) {
+  const {
+    enabled = true,
+    queryKeyPrefix = ['vibes'],
+    select,
+    queryKeyName,
+  } = options || {};
+  const { limit = 20, ...filterOptions } = filters || {};
+  const convex = useConvex();
+
+  // Generate a query key based on filters or use provided queryKeyName
+  const filterKey = queryKeyName || JSON.stringify(filterOptions || {});
+
+  return useInfiniteQuery({
+    queryKey: [...queryKeyPrefix, 'infinite', 'getFilteredVibes', filterKey],
+    queryFn: async ({ pageParam }) => {
+      return await convex.query(api.vibes.getFilteredVibes, {
+        limit,
+        cursor: pageParam || undefined,
+        filters: filterOptions,
+      });
+    },
+    getNextPageParam: (lastPage) => lastPage?.continueCursor || undefined,
+    enabled,
+    initialPageParam: null as string | null,
+    select,
+  });
+}
+
+// Generalized paginated query for vibes using getFilteredVibes
+export function useVibesPaginatedGeneric(
+  filters?: {
+    emojis?: string[];
+    minRating?: number;
+    maxRating?: number;
+    tags?: string[];
+    sort?:
+      | 'recent'
+      | 'rating_desc'
+      | 'rating_asc'
+      | 'top_rated'
+      | 'most_rated'
+      | 'name'
+      | 'creation_date';
+    minRatingCount?: number;
+    maxRatingCount?: number;
+    limit?: number;
+    cursor?: string;
+  },
+  options?: {
+    enabled?: boolean;
+    queryKeyPrefix?: string[];
+    queryKeyName?: string; // Override for the query key identifier
+  }
+) {
+  const {
+    enabled = true,
+    queryKeyPrefix: _queryKeyPrefix = ['vibes'],
+    queryKeyName,
+  } = options || {};
+  const { limit, cursor, ...filterOptions } = filters || {};
+
+  // Generate a query key based on filters or use provided queryKeyName
+  const _filterKey =
+    queryKeyName || JSON.stringify({ ...filterOptions, cursor });
+
+  return useQuery({
+    ...convexQuery(api.vibes.getFilteredVibes, {
+      limit,
+      cursor,
+      filters: filterOptions,
+    }),
+    enabled,
   });
 }

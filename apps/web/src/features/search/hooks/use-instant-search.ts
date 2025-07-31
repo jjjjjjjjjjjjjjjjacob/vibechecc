@@ -45,7 +45,10 @@ export function useInstantSearch(options: UseInstantSearchOptions = {}) {
     // This will cache the results for when the user navigates
     return convexQuery(api.search.searchAll, {
       query: resultQuery,
-      limit: 20,
+      paginationOpts: {
+        numItems: 20,
+        cursor: null,
+      },
     });
   }, []);
 

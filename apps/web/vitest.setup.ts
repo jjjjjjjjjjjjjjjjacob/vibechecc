@@ -107,6 +107,8 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
           functionName = 'getPopular';
         } else if (queryStr.includes('getCategories')) {
           functionName = 'getCategories';
+        } else if (queryStr.includes('searchAllOptimized')) {
+          functionName = 'searchAllOptimized';
         } else if (queryStr.includes('search')) {
           functionName = 'search';
         }
@@ -118,6 +120,8 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
           functionName = 'getPopular';
         } else if (query.includes('getCategories')) {
           functionName = 'getCategories';
+        } else if (query.includes('searchAllOptimized')) {
+          functionName = 'searchAllOptimized';
         } else if (query.includes('search')) {
           functionName = 'search';
         }
@@ -145,6 +149,7 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
                 if (
                   key === 'getPopular' ||
                   key === 'getCategories' ||
+                  key === 'searchAllOptimized' ||
                   key === 'search'
                 ) {
                   functionName = key;
@@ -180,6 +185,24 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
       'animals',
       'food',
     ];
+  } else if (
+    fnStr === 'searchAllOptimized' ||
+    fnStr.includes('searchAllOptimized')
+  ) {
+    // Handle searchAllOptimized specifically
+    baseQuery.queryFn = async (): Promise<any> => {
+      return {
+        vibes: [],
+        users: [],
+        tags: [],
+        actions: [],
+        reviews: [],
+        totalCount: 0,
+        hasMore: false,
+        page: args?.page || 0,
+        continueCursor: null,
+      };
+    };
   } else if (fnStr === 'search' || fnStr.includes('search')) {
     baseQuery.queryFn = async (): Promise<any> => {
       if (args?.searchTerm) {
@@ -218,6 +241,7 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
 
 vi.mock('@convex-dev/react-query', () => ({
   convexQuery: mockConvexQuery,
+  useConvexMutation: (fn: any) => fn, // Just return the function as-is for mocking
 }));
 
 // Also mock the api import to provide consistent function references
@@ -233,6 +257,22 @@ vi.mock('@viberater/convex', () => ({
       getEmojiMetadata: 'api.emojiRatings.getEmojiMetadata',
       getAllEmojiMetadata: 'api.emojiRatings.getAllEmojiMetadata',
       getEmojiByCategory: 'api.emojiRatings.getEmojiByCategory',
+    },
+    searchOptimized: {
+      searchAllOptimized: 'api.searchOptimized.searchAllOptimized',
+    },
+    search: {
+      trackSearch: 'api.search.trackSearch',
+    },
+    vibes: {
+      getAllSimple: 'api.vibes.getAllSimple',
+      getAll: 'api.vibes.getAll',
+      getFilteredVibes: 'api.vibes.getFilteredVibes',
+      getById: 'api.vibes.getById',
+      getByUser: 'api.vibes.getByUser',
+    },
+    users: {
+      current: 'api.users.current',
     },
   },
 }));

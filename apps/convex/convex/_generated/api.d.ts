@@ -14,17 +14,22 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as analytics_search_metrics from "../analytics/search_metrics.js";
+import type * as cleanupSearchHistory from "../cleanupSearchHistory.js";
+import type * as debugSearchHistory from "../debugSearchHistory.js";
 import type * as emojiMetadata from "../emojiMetadata.js";
 import type * as emojiRatings from "../emojiRatings.js";
 import type * as emojis from "../emojis.js";
 import type * as http from "../http.js";
 import type * as importEmojis from "../importEmojis.js";
 import type * as lib_emojiColors from "../lib/emojiColors.js";
-import type * as migrations_consolidateRatings from "../migrations/consolidateRatings.js";
 import type * as search_fuzzy_search from "../search/fuzzy_search.js";
 import type * as search_search_scorer from "../search/search_scorer.js";
 import type * as search_search_utils from "../search/search_utils.js";
 import type * as search from "../search.js";
+import type * as searchImproved from "../searchImproved.js";
+import type * as searchOptimized from "../searchOptimized.js";
+import type * as searchV2 from "../searchV2.js";
+import type * as search_backup from "../search_backup.js";
 import type * as seed_emojis_activities from "../seed/emojis/activities.js";
 import type * as seed_emojis_animals from "../seed/emojis/animals.js";
 import type * as seed_emojis_food from "../seed/emojis/food.js";
@@ -48,17 +53,22 @@ import type * as vibes from "../vibes.js";
  */
 declare const fullApi: ApiFromModules<{
   "analytics/search_metrics": typeof analytics_search_metrics;
+  cleanupSearchHistory: typeof cleanupSearchHistory;
+  debugSearchHistory: typeof debugSearchHistory;
   emojiMetadata: typeof emojiMetadata;
   emojiRatings: typeof emojiRatings;
   emojis: typeof emojis;
   http: typeof http;
   importEmojis: typeof importEmojis;
   "lib/emojiColors": typeof lib_emojiColors;
-  "migrations/consolidateRatings": typeof migrations_consolidateRatings;
   "search/fuzzy_search": typeof search_fuzzy_search;
   "search/search_scorer": typeof search_search_scorer;
   "search/search_utils": typeof search_search_utils;
   search: typeof search;
+  searchImproved: typeof searchImproved;
+  searchOptimized: typeof searchOptimized;
+  searchV2: typeof searchV2;
+  search_backup: typeof search_backup;
   "seed/emojis/activities": typeof seed_emojis_activities;
   "seed/emojis/animals": typeof seed_emojis_animals;
   "seed/emojis/food": typeof seed_emojis_food;

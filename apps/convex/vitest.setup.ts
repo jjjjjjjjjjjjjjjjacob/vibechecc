@@ -8,6 +8,7 @@ export const modules = {
   'convex/search.ts': () => import('./convex/search'),
   'convex/emojiRatings.ts': () => import('./convex/emojiRatings'),
   'convex/emojis.ts': () => import('./convex/emojis'),
+  'convex/tags.ts': () => import('./convex/tags'),
   'convex/_generated/api.js': () => import('./convex/_generated/api'),
   'convex/_generated/server.js': () => import('./convex/_generated/server'),
 };
