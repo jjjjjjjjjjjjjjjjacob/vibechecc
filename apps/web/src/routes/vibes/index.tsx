@@ -15,7 +15,7 @@ export const Route = createFileRoute('/vibes/')({
   validateSearch: searchParamsSchema,
   beforeLoad: ({ search }) => {
     // Redirect to search page with proper parameters
-    const searchParams: any = {
+    const searchParams: Record<string, unknown> = {
       tab: 'vibes',
     };
 

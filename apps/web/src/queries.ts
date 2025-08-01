@@ -27,7 +27,8 @@ const _convexInfiniteQuery = <
     queryKey: ['convexQuery', JSON.stringify(funcRef), queryArgs],
     staleTime: Infinity,
     initialPageParam: null as string | null,
-    getNextPageParam: (lastPage: any) => lastPage?.continueCursor || undefined,
+    getNextPageParam: (lastPage: { continueCursor?: string }) =>
+      lastPage?.continueCursor || undefined,
   };
 };
 
@@ -428,7 +429,7 @@ export function useVibesInfinite(
   options?: {
     enabled?: boolean;
     queryKeyPrefix?: string[];
-    select?: (data: any) => any;
+    select?: (data: unknown) => unknown;
     queryKeyName?: string; // Override for the query key identifier
   }
 ) {

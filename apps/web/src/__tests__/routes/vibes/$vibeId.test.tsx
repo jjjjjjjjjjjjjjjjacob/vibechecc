@@ -162,7 +162,7 @@ vi.mock('@/features/ratings/components/emoji-rating-popover', () => ({
     const handleEmojiSelect = (emoji: string) => {
       setSelectedEmoji(emoji);
       // Force immediate re-render
-      setForceRender(prev => prev + 1);
+      setForceRender((prev) => prev + 1);
     };
 
     if (!isOpen) return <>{children}</>;
@@ -175,15 +175,14 @@ vi.mock('@/features/ratings/components/emoji-rating-popover', () => ({
           <div>
             <p>select an emoji</p>
             {['🔥', '😍', '😱'].map((emoji) => (
-              <button 
-                key={emoji} 
-                onClick={() => handleEmojiSelect(emoji)}
-              >
+              <button key={emoji} onClick={() => handleEmojiSelect(emoji)}>
                 {emoji}
               </button>
             ))}
           </div>
-          {selectedEmoji && <p data-testid="selected-emoji">Selected: {selectedEmoji}</p>}
+          {selectedEmoji && (
+            <p data-testid="selected-emoji">Selected: {selectedEmoji}</p>
+          )}
           {selectedEmoji && (
             <form onSubmit={handleSubmit}>
               <label htmlFor="review">your review</label>
@@ -273,7 +272,6 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     });
   });
 
-
   it('opens rating popover when clicking the emoji rating selector', async () => {
     renderWithRouter(<VibePage />);
 
@@ -338,14 +336,20 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     if (emojiButton) await user.click(emojiButton);
 
     // Wait for the emoji to be selected first
-    await waitFor(() => {
-      expect(screen.getByTestId('selected-emoji')).toBeInTheDocument();
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('selected-emoji')).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
 
     // Then wait for the review textarea to appear
-    await waitFor(() => {
-      expect(screen.getByLabelText(/your review/i)).toBeInTheDocument();
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(screen.getByLabelText(/your review/i)).toBeInTheDocument();
+      },
+      { timeout: 1000 }
+    );
 
     const reviewTextarea = screen.getByLabelText(/your review/i);
     await user.type(
@@ -398,14 +402,20 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     if (emojiButton) await user.click(emojiButton);
 
     // Wait for the emoji to be selected first
-    await waitFor(() => {
-      expect(screen.getByTestId('selected-emoji')).toBeInTheDocument();
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('selected-emoji')).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
 
-    // Then wait for the review textarea to appear  
-    await waitFor(() => {
-      expect(screen.getByLabelText(/your review/i)).toBeInTheDocument();
-    }, { timeout: 1000 });
+    // Then wait for the review textarea to appear
+    await waitFor(
+      () => {
+        expect(screen.getByLabelText(/your review/i)).toBeInTheDocument();
+      },
+      { timeout: 1000 }
+    );
 
     // Don't type anything in the review textarea, just try to submit
     const submitButton = screen.getByRole('button', {

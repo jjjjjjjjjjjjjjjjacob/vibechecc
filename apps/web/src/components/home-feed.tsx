@@ -145,7 +145,9 @@ export function HomeFeed({ className }: HomeFeedProps) {
 
   // Flatten all pages to get vibes array
   const vibes = React.useMemo(() => {
-    return data?.pages.flatMap((page: any) => page.vibes) || [];
+    return (
+      data?.pages.flatMap((page: { vibes: unknown[] }) => page.vibes) || []
+    );
   }, [data]);
 
   // Load more function for intersection observer

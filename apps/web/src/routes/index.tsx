@@ -23,8 +23,8 @@ function Home() {
         currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
 
-      setColorTheme(`${primaryColor}-primary` as any);
-      setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
+      setColorTheme(`${primaryColor}-primary`);
+      setSecondaryColorTheme(`${secondaryColor}-secondary`);
     }
   }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 

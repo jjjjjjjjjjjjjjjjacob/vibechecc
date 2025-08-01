@@ -207,20 +207,6 @@ export function EmojiRatingPopover({
     }
   };
 
-  // Shared header content
-  const headerContent = (
-    <div>
-      <div className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl text-transparent drop-shadow-md">
-        {existingRating ? 'update emoji rating' : 'rate with emoji'}
-      </div>
-      {vibeTitle && (
-        <p className="text-muted-foreground mt-1 text-sm lowercase">
-          {vibeTitle}
-        </p>
-      )}
-    </div>
-  );
-
   // Shared form content
   const formContent = (
     <form onSubmit={handleSubmit} className="space-y-6 p-6">
@@ -331,9 +317,10 @@ export function EmojiRatingPopover({
 
               <div className="font-[500]">
                 {selectedEmoji ? (
-                  <div
+                  <button
                     onMouseLeave={() => setRatingValue(selectedRatingValue)}
                     className="w-full text-left focus:outline-none"
+                    aria-label="Emoji rating scale"
                   >
                     <EmojiRatingScale
                       emoji={selectedEmoji}
@@ -379,7 +366,7 @@ export function EmojiRatingPopover({
                       mobileSlider={true}
                       className="w-full"
                     />
-                  </div>
+                  </button>
                 ) : (
                   <div className="text-muted-foreground text-sm">
                     please select an emoji first
@@ -481,7 +468,9 @@ export function EmojiRatingPopover({
           onClick={(e) => e.stopPropagation()}
         >
           <DrawerHeader className="p-6 pb-0">
-            <DrawerTitle>{existingRating ? 'update emoji rating' : 'rate with emoji'}</DrawerTitle>
+            <DrawerTitle>
+              {existingRating ? 'update emoji rating' : 'rate with emoji'}
+            </DrawerTitle>
             {vibeTitle && (
               <p className="text-muted-foreground mt-1 text-sm lowercase">
                 {vibeTitle}
@@ -506,9 +495,13 @@ export function EmojiRatingPopover({
         data-testid="dialog-content"
       >
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle>{existingRating ? 'update emoji rating' : 'rate with emoji'}</DialogTitle>
+          <DialogTitle>
+            {existingRating ? 'update emoji rating' : 'rate with emoji'}
+          </DialogTitle>
           <DialogDescription>
-            {vibeTitle ? `Rate "${vibeTitle}" with an emoji and detailed review` : 'Share your thoughts with an emoji rating and review'}
+            {vibeTitle
+              ? `Rate "${vibeTitle}" with an emoji and detailed review`
+              : 'Share your thoughts with an emoji rating and review'}
           </DialogDescription>
         </DialogHeader>
         {formContent}

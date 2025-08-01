@@ -67,9 +67,9 @@ function UserProfile() {
       user={user}
       userVibes={userVibes}
       vibesLoading={vibesLoading}
-      userRatings={userRatings as any}
+      userRatings={userRatings}
       ratingsLoading={ratingsLoading}
-      receivedRatings={receivedRatings as any}
+      receivedRatings={receivedRatings}
       receivedRatingsLoading={receivedRatingsLoading}
       emojiStats={emojiStats}
       scopedTheme={true}

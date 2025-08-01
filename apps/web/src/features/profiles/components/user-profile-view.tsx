@@ -70,7 +70,7 @@ interface UserProfileViewProps {
       title: string;
       description: string;
       image?: string;
-      createdBy: any;
+      createdBy: { id: string; name: string; avatar?: string };
       createdAt: string;
     };
   }>;
@@ -616,7 +616,8 @@ export function UserProfileView({
                                     </div>
                                     <p className="text-muted-foreground mb-1 text-sm">
                                       on "
-                                      {(rating as any).vibe?.title || 'Unknown'}
+                                      {(rating as { vibe?: { title?: string } })
+                                        .vibe?.title || 'Unknown'}
                                       "
                                     </p>
                                     {rating?.review && (

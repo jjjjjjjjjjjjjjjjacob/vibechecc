@@ -438,7 +438,7 @@ describe('Users Functions', () => {
       };
 
       // This should work as it's an internal mutation
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       await t.mutation((api.users as any).upsertFromClerk, {
         data: clerkUserData,
       });
@@ -471,7 +471,7 @@ describe('Users Functions', () => {
       expect(user).toBeDefined();
 
       // Delete user via webhook
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       await t.mutation((api.users as any).deleteFromClerk, {
         clerkUserId: userData.externalId,
       });

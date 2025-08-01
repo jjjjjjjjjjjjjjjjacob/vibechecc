@@ -144,7 +144,9 @@ describe('EmojiRatingPopover', () => {
     );
 
     expect(screen.getByText('rate with emoji')).toBeInTheDocument();
-    expect(screen.getByText(/Rate "Test Vibe" with an emoji/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Rate "Test Vibe" with an emoji/)
+    ).toBeInTheDocument();
     expect(screen.getByText('select an emoji')).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'submit rating' })
