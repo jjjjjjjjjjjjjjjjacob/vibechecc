@@ -2,24 +2,25 @@ import * as React from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog';
+} from '@/components/ui/dialog';
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from './ui/drawer';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Label } from './ui/label';
+} from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
 import type { EmojiRating, EmojiRatingMetadata } from '@viberater/types';
 import { Circle, Info } from 'lucide-react';
-import { Badge } from './ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { EmojiSearchCommand } from './emoji-search-command';
 import { EmojiRatingScale } from './emoji-rating-scale';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -208,7 +209,7 @@ export function EmojiRatingPopover({
 
   // Shared header content
   const headerContent = (
-    <>
+    <div>
       <div className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl text-transparent drop-shadow-md">
         {existingRating ? 'update emoji rating' : 'rate with emoji'}
       </div>
@@ -217,7 +218,7 @@ export function EmojiRatingPopover({
           {vibeTitle}
         </p>
       )}
-    </>
+    </div>
   );
 
   // Shared form content
@@ -234,6 +235,7 @@ export function EmojiRatingPopover({
             maxHeight="h-[340px]"
             pageSize={200}
             className="border-0"
+            data-testid="emoji-search-command"
           />
           <div className="text-muted-foreground flex items-center gap-1 text-xs">
             <Info className="h-3 w-3" />
@@ -329,10 +331,9 @@ export function EmojiRatingPopover({
 
               <div className="font-[500]">
                 {selectedEmoji ? (
-                  <button
+                  <div
                     onMouseLeave={() => setRatingValue(selectedRatingValue)}
                     className="w-full text-left focus:outline-none"
-                    type="button"
                   >
                     <EmojiRatingScale
                       emoji={selectedEmoji}
@@ -378,7 +379,7 @@ export function EmojiRatingPopover({
                       mobileSlider={true}
                       className="w-full"
                     />
-                  </button>
+                  </div>
                 ) : (
                   <div className="text-muted-foreground text-sm">
                     please select an emoji first
@@ -480,7 +481,12 @@ export function EmojiRatingPopover({
           onClick={(e) => e.stopPropagation()}
         >
           <DrawerHeader className="p-6 pb-0">
-            <DrawerTitle asChild>{headerContent}</DrawerTitle>
+            <DrawerTitle>{existingRating ? 'update emoji rating' : 'rate with emoji'}</DrawerTitle>
+            {vibeTitle && (
+              <p className="text-muted-foreground mt-1 text-sm lowercase">
+                {vibeTitle}
+              </p>
+            )}
           </DrawerHeader>
           {formContent}
         </DrawerContent>
@@ -497,9 +503,13 @@ export function EmojiRatingPopover({
         className="bg-background/95 border-border max-h-screen max-w-lg overflow-y-auto border backdrop-blur"
         onClick={(e) => e.stopPropagation()}
         showCloseButton={false}
+        data-testid="dialog-content"
       >
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle asChild>{headerContent}</DialogTitle>
+          <DialogTitle>{existingRating ? 'update emoji rating' : 'rate with emoji'}</DialogTitle>
+          <DialogDescription>
+            {vibeTitle ? `Rate "${vibeTitle}" with an emoji and detailed review` : 'Share your thoughts with an emoji rating and review'}
+          </DialogDescription>
         </DialogHeader>
         {formContent}
       </DialogContent>

@@ -22,11 +22,11 @@ import {
 } from '@/utils/user-utils';
 import type { Vibe } from '@/types';
 import type { RatingDisplayMode } from '@/components/vibe-category-row';
-import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
+import { EmojiRatingPopover } from '@/features/ratings/components/emoji-rating-popover';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
-import { EmojiRatingDisplayPopover } from '@/components/emoji-rating-display-popover';
-import { EmojiRatingCycleDisplay } from '@/components/emoji-rating-cycle-display';
-import { EmojiReactions } from '@/components/emoji-reaction';
+import { EmojiRatingDisplayPopover } from '@/features/ratings/components/emoji-rating-display-popover';
+import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
+import { EmojiReactions } from '@/features/ratings/components/emoji-reaction';
 
 type VibeCardVariant =
   | 'default'

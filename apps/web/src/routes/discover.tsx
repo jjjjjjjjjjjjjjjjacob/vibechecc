@@ -17,7 +17,7 @@ import {
   useTheme,
   type PrimaryColorTheme,
   type SecondaryColorTheme,
-} from '@/components/theme-provider';
+} from '@/features/theming/components/theme-provider';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 

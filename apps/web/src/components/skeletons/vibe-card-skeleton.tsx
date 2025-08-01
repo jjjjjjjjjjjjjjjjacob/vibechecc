@@ -1,5 +1,5 @@
-import { Skeleton } from './skeleton';
-import { Card, CardContent, CardFooter } from './card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { cn } from '@/utils/tailwind-utils';
 
 interface VibeCardSkeletonProps {

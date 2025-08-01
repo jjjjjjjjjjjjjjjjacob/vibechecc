@@ -1,4 +1,4 @@
-import { Skeleton } from './skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { VibeCardSkeleton } from './vibe-card-skeleton';
 
 export function VibeCategoryRowSkeleton() {

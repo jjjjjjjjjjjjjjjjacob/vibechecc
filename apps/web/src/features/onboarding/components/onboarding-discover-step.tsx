@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, Heart, Eye } from 'lucide-react';
 import { useVibes } from '@/queries';
-import { StarRating } from '@/components/star-rating';
+import { StarRating } from '@/features/ratings/components/star-rating';
 
 interface OnboardingDiscoverStepProps {
   onNext: () => void;

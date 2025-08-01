@@ -10,7 +10,7 @@ import {
 import { EmojiRatingDisplay } from './emoji-rating-display';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 
 interface TopEmojiRatingsAccordionProps {
   emojiRatings: EmojiRating[];

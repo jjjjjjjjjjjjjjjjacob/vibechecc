@@ -4,7 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RatingPopover } from './rating-popover';
 import React from 'react';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/features/theming/components';
 
 // Wrapper for tests
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (

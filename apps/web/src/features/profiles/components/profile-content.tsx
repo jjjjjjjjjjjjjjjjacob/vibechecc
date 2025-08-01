@@ -13,13 +13,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MasonryFeed } from '@/components/masonry-feed';
-import { CreateVibeButton } from '@/components/create-vibe-button';
+import { CreateVibeButton } from '@/features/vibes/components/create-vibe-button';
 import { useUser } from '@clerk/tanstack-react-start';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sparkles } from 'lucide-react';
 import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
-import { ThemeColorPicker } from '@/components/theme-color-picker';
+import { ThemeColorPicker } from '@/features/theming/components/theme-color-picker';
 
 export function ProfileContent() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();

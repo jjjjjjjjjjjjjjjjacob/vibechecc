@@ -1,9 +1,13 @@
 import * as React from 'react';
-import { cn } from '../utils/tailwind-utils';
+import { cn } from '@/utils/tailwind-utils';
 import { PlusCircle, Search, ChevronDown, X } from 'lucide-react';
 import { useUser } from '@clerk/tanstack-react-start';
-import type { EmojiReaction as EmojiReactionType } from '../types';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import type { EmojiReaction as EmojiReactionType } from '@/types';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { EmojiSearchCommand } from './emoji-search-command';
 import { EmojiRatingPopover } from './emoji-rating-popover';
 import { api } from '@viberater/convex';

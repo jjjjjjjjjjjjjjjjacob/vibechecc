@@ -1,7 +1,7 @@
 import { HeroSectionSkeleton } from './hero-section-skeleton';
 import { VibeCategoryRowSkeleton } from './vibe-category-row-skeleton';
 import { VibeGridSkeleton } from './vibe-grid-skeleton';
-import { Skeleton } from './skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function HomepageSkeleton() {
   return (

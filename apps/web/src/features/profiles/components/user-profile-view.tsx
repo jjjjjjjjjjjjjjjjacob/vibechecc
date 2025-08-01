@@ -21,14 +21,14 @@ import {
   Twitter,
   Instagram,
 } from 'lucide-react';
-import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
+import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
   useTheme,
   type PrimaryColorTheme,
   type SecondaryColorTheme,
-} from '@/components/theme-provider';
+} from '@/features/theming/components/theme-provider';
 import type { Vibe } from '@viberater/types';
 import { getThemeColorValue } from '@/utils/theme-colors';
 

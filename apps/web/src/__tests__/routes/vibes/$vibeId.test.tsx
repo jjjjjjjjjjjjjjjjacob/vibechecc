@@ -94,7 +94,7 @@ vi.mock('@/components/auth-prompt-dialog', () => ({
 // Mock the emoji rating components with proper integration
 let mockEmojiRatingPopoverOpen = false;
 
-vi.mock('@/components/emoji-rating-selector', () => ({
+vi.mock('@/features/ratings/components/emoji-rating-selector', () => ({
   EmojiRatingSelector: () => {
     const openPopover = () => {
       mockEmojiRatingPopoverOpen = true;
@@ -113,7 +113,7 @@ vi.mock('@/components/emoji-rating-selector', () => ({
   },
 }));
 
-vi.mock('@/components/emoji-rating-popover', () => ({
+vi.mock('@/features/ratings/components/emoji-rating-popover', () => ({
   EmojiRatingPopover: ({
     onSubmit,
     isSubmitting,
@@ -130,6 +130,7 @@ vi.mock('@/components/emoji-rating-popover', () => ({
     const [selectedEmoji, setSelectedEmoji] = React.useState('');
     const [review, setReview] = React.useState('');
     const [error, setError] = React.useState('');
+    const [forceRender, setForceRender] = React.useState(0);
 
     // Listen for custom event to open
     React.useEffect(() => {
@@ -158,21 +159,31 @@ vi.mock('@/components/emoji-rating-popover', () => ({
       });
     };
 
+    const handleEmojiSelect = (emoji: string) => {
+      setSelectedEmoji(emoji);
+      // Force immediate re-render
+      setForceRender(prev => prev + 1);
+    };
+
     if (!isOpen) return <>{children}</>;
 
     return (
       <>
         {children}
-        <div data-testid="dialog-content">
+        <div data-testid="dialog-content" key={forceRender}>
           <h2>rate with emoji</h2>
           <div>
             <p>select an emoji</p>
             {['🔥', '😍', '😱'].map((emoji) => (
-              <button key={emoji} onClick={() => setSelectedEmoji(emoji)}>
+              <button 
+                key={emoji} 
+                onClick={() => handleEmojiSelect(emoji)}
+              >
                 {emoji}
               </button>
             ))}
           </div>
+          {selectedEmoji && <p data-testid="selected-emoji">Selected: {selectedEmoji}</p>}
           {selectedEmoji && (
             <form onSubmit={handleSubmit}>
               <label htmlFor="review">your review</label>
@@ -262,10 +273,6 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     });
   });
 
-  // This test is no longer relevant as there's no quick star rating anymore
-  it.skip('allows quick rating without review', async () => {
-    // Quick star rating functionality has been removed
-  });
 
   it('opens rating popover when clicking the emoji rating selector', async () => {
     renderWithRouter(<VibePage />);
@@ -320,20 +327,25 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     await waitFor(() => {
       const dialogs = screen.getAllByTestId('dialog-content');
       const dialog = dialogs[dialogs.length - 1];
-      const fireEmoji = within(dialog).getByText('🔥');
-      expect(fireEmoji).toBeInTheDocument();
+      const fireEmojis = within(dialog).getAllByText('🔥');
+      expect(fireEmojis.length).toBeGreaterThan(0);
     });
 
     const dialogs = screen.getAllByTestId('dialog-content');
     const dialog = dialogs[dialogs.length - 1];
-    const emojiButton = within(dialog).getByText('🔥').closest('button');
+    const fireEmojis = within(dialog).getAllByText('🔥');
+    const emojiButton = fireEmojis[0].closest('button');
     if (emojiButton) await user.click(emojiButton);
 
-    // The emoji popover has a default rating value of 3, so we don't need to select a rating
-    // Just write review
+    // Wait for the emoji to be selected first
+    await waitFor(() => {
+      expect(screen.getByTestId('selected-emoji')).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    // Then wait for the review textarea to appear
     await waitFor(() => {
       expect(screen.getByLabelText(/your review/i)).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
 
     const reviewTextarea = screen.getByLabelText(/your review/i);
     await user.type(
@@ -385,11 +397,15 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     const emojiButton = within(dialog).getByText('😍').closest('button');
     if (emojiButton) await user.click(emojiButton);
 
-    // Now the rating scale should be visible
-    // Wait for the review textarea to be visible
+    // Wait for the emoji to be selected first
+    await waitFor(() => {
+      expect(screen.getByTestId('selected-emoji')).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    // Then wait for the review textarea to appear  
     await waitFor(() => {
       expect(screen.getByLabelText(/your review/i)).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
 
     // Don't type anything in the review textarea, just try to submit
     const submitButton = screen.getByRole('button', {

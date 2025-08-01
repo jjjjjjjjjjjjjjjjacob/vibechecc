@@ -3,7 +3,7 @@ import * as React from 'react';
 import { HomeFeed } from '@/components/home-feed';
 import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import { useCurrentUser } from '@/queries';
-import { useTheme } from '@/components/theme-provider';
+import { useTheme } from '@/features/theming/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import { Plus, Sparkles } from 'lucide-react';
 

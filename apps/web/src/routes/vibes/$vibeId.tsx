@@ -13,11 +13,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
+import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 
 // Constants to avoid rollup issues with empty array literals
 const EMPTY_ARRAY: never[] = [];
-import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
+import { VibeDetailSkeleton } from '@/components/skeletons/vibe-detail-skeleton';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import {
   computeUserDisplayName,
@@ -27,10 +27,10 @@ import {
 import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import toast from '@/utils/toast';
 import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
-import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
-import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
-import { EmojiRatingSelector } from '@/components/emoji-rating-selector';
-import { EmojiRatingCycleDisplay } from '@/components/emoji-rating-cycle-display';
+import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
+import { EmojiRatingPopover } from '@/features/ratings/components/emoji-rating-popover';
+import { EmojiRatingSelector } from '@/features/ratings/components/emoji-rating-selector';
+import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
 import {
   Accordion,
   AccordionContent,

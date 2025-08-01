@@ -1,14 +1,18 @@
 import * as React from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { StarRating } from './star-rating';
 import { DecimalRatingSelector } from './decimal-rating-selector';
-import { Textarea } from './ui/textarea';
-import { Button } from './ui/button';
-import { Label } from './ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
 import type { Rating } from '@viberater/types';
 import { Circle } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface RatingPopoverProps {
   children: React.ReactNode;

@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { SlidersHorizontal, X } from 'lucide-react';
-import { EmojiSearchCommand } from '@/components/emoji-search-command';
-import { EmojiPillFilters } from '@/components/emoji-pill-filters';
-import { RatingRangeSlider } from '@/components/rating-range-slider';
+import { EmojiSearchCommand } from '@/features/ratings/components/emoji-search-command';
+import { EmojiPillFilters } from '@/features/ratings/components/emoji-pill-filters';
+import { RatingRangeSlider } from '@/features/ratings/components/rating-range-slider';
 import { TagSearchCommand } from '@/components/tag-search-command';
 
 interface MobileFilterSheetProps {

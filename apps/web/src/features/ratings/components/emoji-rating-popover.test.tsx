@@ -25,6 +25,9 @@ vi.mock('@/components/ui/dialog', () => ({
   DialogTitle: ({ children }: { children: React.ReactNode }) => (
     <h2>{children}</h2>
   ),
+  DialogDescription: ({ children }: { children: React.ReactNode }) => (
+    <p>{children}</p>
+  ),
 }));
 
 // Mock EmojiSearchCommand
@@ -141,7 +144,7 @@ describe('EmojiRatingPopover', () => {
     );
 
     expect(screen.getByText('rate with emoji')).toBeInTheDocument();
-    expect(screen.getByText('Test Vibe')).toBeInTheDocument();
+    expect(screen.getByText(/Rate "Test Vibe" with an emoji/)).toBeInTheDocument();
     expect(screen.getByText('select an emoji')).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'submit rating' })

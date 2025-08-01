@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MasonryFeed } from '@/components/masonry-feed';
-import { CreateVibeButton } from '@/components/create-vibe-button';
+import { CreateVibeButton } from '@/features/vibes/components/create-vibe-button';
 import { useUser, UserProfile } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
@@ -22,13 +22,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Sparkles } from 'lucide-react';
 import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
-import { DualThemeColorPicker } from '@/components/dual-theme-color-picker';
-import { UserProfileView } from '@/components/user-profile-view';
+import { DualThemeColorPicker } from '@/features/theming/components/dual-theme-color-picker';
+import { UserProfileView } from '@/features/profiles/components/user-profile-view';
 import {
   useTheme,
   type PrimaryColorTheme,
   type SecondaryColorTheme,
-} from '@/components/theme-provider';
+} from '@/features/theming/components/theme-provider';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {

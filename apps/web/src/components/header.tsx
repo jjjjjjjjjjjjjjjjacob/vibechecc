@@ -4,7 +4,7 @@ import { Search, Menu, ChevronUp } from 'lucide-react';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '../utils/tailwind-utils';
-import { ThemeToggle } from './theme-toggle';
+import { ThemeToggle } from '@/features/theming/components/theme-toggle';
 import {
   SignedIn,
   SignedOut,
@@ -15,7 +15,7 @@ import {
   useTheme,
   type PrimaryColorTheme,
   type SecondaryColorTheme,
-} from './theme-provider';
+} from '@/features/theming/components/theme-provider';
 import { SearchAccordion } from '../features/search/components/search-accordion';
 import { useSearchShortcuts } from '../features/search/hooks/use-search-shortcuts';
 import { useCurrentUser } from '../queries';

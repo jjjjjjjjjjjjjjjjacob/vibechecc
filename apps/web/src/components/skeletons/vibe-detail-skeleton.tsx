@@ -1,5 +1,5 @@
-import { Skeleton } from './skeleton';
-import { Card, CardContent } from './card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function VibeDetailSkeleton() {
   return (

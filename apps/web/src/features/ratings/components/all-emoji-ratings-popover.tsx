@@ -11,10 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  TopEmojiRatings,
-  type EmojiRating,
-} from '@/components/emoji-rating-display';
+import { TopEmojiRatings, type EmojiRating } from './emoji-rating-display';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';

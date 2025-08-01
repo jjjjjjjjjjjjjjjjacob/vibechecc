@@ -9,7 +9,7 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandItem,
-} from './ui/command';
+} from '@/components/ui/command';
 import { cn } from '@/utils/tailwind-utils';
 import { BASIC_EMOJIS } from '@/lib/basic-emojis';
 
@@ -22,6 +22,7 @@ interface EmojiSearchCommandProps {
   showCategories?: boolean;
   maxHeight?: string;
   pageSize?: number;
+  'data-testid'?: string;
 }
 
 export function EmojiSearchCommand({
@@ -33,6 +34,7 @@ export function EmojiSearchCommand({
   showCategories = true,
   maxHeight = 'h-48',
   pageSize = 50,
+  'data-testid': dataTestId,
 }: EmojiSearchCommandProps) {
   const [loadedEmojis, setLoadedEmojis] = React.useState<
     { emoji: string; name: string; color?: string; category?: string }[]
@@ -248,6 +250,7 @@ export function EmojiSearchCommand({
     <Command
       className={cn('rounded-lg border', className)}
       shouldFilter={false}
+      data-testid={dataTestId}
     >
       <CommandInput
         placeholder={placeholder}

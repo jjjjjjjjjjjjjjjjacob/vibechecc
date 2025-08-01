@@ -17,7 +17,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
 import { NotFound } from '@/components/not-found';
 import { Header } from '@/components/header';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/features/theming/components/theme-provider';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
 import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
