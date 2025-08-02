@@ -31,10 +31,18 @@ import {
 } from '@/features/theming/components/theme-provider';
 import type { Vibe } from '@viberater/types';
 import { getThemeColorValue } from '@/utils/theme-colors';
+import { useUser } from '@clerk/tanstack-react-start';
+import {
+  FollowButton,
+  FollowStats,
+  FollowersModal,
+  FollowingModal,
+} from '@/features/follows/components';
 
 interface UserProfileViewProps {
   user: {
-    _id: string;
+    _id?: string;
+    id?: string;
     externalId: string;
     username?: string;
     first_name?: string;
@@ -43,6 +51,7 @@ interface UserProfileViewProps {
     profile_image_url?: string;
     bio?: string;
     created_at?: number;
+    _creationTime?: number;
     primaryColor?: string;
     themeColor?: string;
     secondaryColor?: string;
@@ -56,7 +65,7 @@ interface UserProfileViewProps {
   userVibes?: Array<Vibe>;
   vibesLoading?: boolean;
   userRatings?: Array<{
-    _id: string;
+    _id?: string;
     vibeId: string;
     userId: string;
     emoji: string;
@@ -76,7 +85,7 @@ interface UserProfileViewProps {
   }>;
   ratingsLoading?: boolean;
   receivedRatings?: Array<{
-    _id: string;
+    _id?: string;
     vibeId: string;
     userId: string;
     emoji: string;
@@ -86,7 +95,7 @@ interface UserProfileViewProps {
     createdAt: string;
     updatedAt?: string;
     rater?: {
-      _id: string;
+      _id?: string;
       username?: string;
       first_name?: string;
       last_name?: string;
@@ -110,6 +119,7 @@ interface UserProfileViewProps {
   onBackClick?: () => void;
   backButtonText?: string;
   scopedTheme?: boolean;
+  currentUserId?: string;
 }
 
 export function UserProfileView({
@@ -125,17 +135,24 @@ export function UserProfileView({
   onBackClick,
   backButtonText = 'back to profile',
   scopedTheme = true,
+  currentUserId,
 }: UserProfileViewProps) {
   const profileContainerRef = React.useRef<HTMLDivElement>(null);
+  const { user: clerkUser } = useUser();
+
+  // Modal states for follow system
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = React.useState(false);
+  const [isFollowingModalOpen, setIsFollowingModalOpen] = React.useState(false);
 
   // Calculate derived data
   const displayName =
     `${user?.first_name || ''} ${user?.last_name || ''}`.trim() ||
     user?.username ||
     'User';
-  const joinDate = user?.created_at
-    ? new Date(user.created_at).toLocaleDateString()
-    : 'Unknown';
+  const joinDate =
+    user?.created_at || user?._creationTime
+      ? new Date(user.created_at || user._creationTime!).toLocaleDateString()
+      : 'Unknown';
   const vibeCount = userVibes?.length || 0;
   const givenRatingsCount = userRatings?.length || 0;
   const receivedRatingsCount = receivedRatings?.length || 0;
@@ -144,6 +161,11 @@ export function UserProfileView({
       ? receivedRatings.reduce((sum, rating) => sum + (rating.value || 0), 0) /
         receivedRatings.length
       : 0;
+
+  // Determine if viewing own profile
+  const isOwnProfile = currentUserId
+    ? currentUserId === user.externalId
+    : clerkUser?.id === user.externalId;
 
   // Get user's theme colors
   const userTheme = React.useMemo(
@@ -278,61 +300,105 @@ export function UserProfileView({
                         </div>
                       </div>
                     )}
+                    {/* Follow Stats Pills */}
+                    {clerkUser && (
+                      <FollowStats
+                        userId={user.externalId}
+                        onFollowersClick={() => setIsFollowersModalOpen(true)}
+                        onFollowingClick={() => setIsFollowingModalOpen(true)}
+                        variant="default"
+                      />
+                    )}
                   </div>
 
-                  {/* Social Links */}
-                  {user.socials && (
-                    <div className="flex gap-3">
-                      {user.socials.twitter && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
+                  {/* Interests Preview - show up to 3 interests */}
+                  {user.interests && user.interests.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Sparkles className="text-muted-foreground h-3.5 w-3.5" />
+                      {user.interests.slice(0, 3).map((interest) => (
+                        <Badge
+                          key={interest}
+                          variant="secondary"
+                          className="border-border bg-card/30 text-foreground hover:bg-card/50 text-xs transition-all"
                         >
-                          <a
-                            href={`https://twitter.com/${user.socials.twitter}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Twitter className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
-                      {user.socials.instagram && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
-                        >
-                          <a
-                            href={`https://instagram.com/${user.socials.instagram}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Instagram className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
-                      {user.socials.website && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
-                        >
-                          <a
-                            href={user.socials.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Globe className="h-4 w-4" />
-                          </a>
-                        </Button>
+                          {interest}
+                        </Badge>
+                      ))}
+                      {user.interests.length > 3 && (
+                        <span className="text-muted-foreground text-xs">
+                          +{user.interests.length - 3} more
+                        </span>
                       )}
                     </div>
                   )}
+
+                  {/* Social Links and Follow Button */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Social Links */}
+                    {user.socials && (
+                      <>
+                        {user.socials.twitter && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
+                          >
+                            <a
+                              href={`https://twitter.com/${user.socials.twitter}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Twitter className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                        {user.socials.instagram && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
+                          >
+                            <a
+                              href={`https://instagram.com/${user.socials.instagram}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Instagram className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                        {user.socials.website && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
+                          >
+                            <a
+                              href={user.socials.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Globe className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                      </>
+                    )}
+
+                    {/* Follow Button - only show for authenticated users viewing other profiles */}
+                    {clerkUser && !isOwnProfile && (
+                      <FollowButton
+                        targetUserId={user.externalId}
+                        username={user.username}
+                        variant="default"
+                        size="sm"
+                        className="ml-auto sm:ml-0"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -453,9 +519,12 @@ export function UserProfileView({
                           </div>
                         ) : userRatings && userRatings.length > 0 ? (
                           <div className="space-y-4">
-                            {userRatings.slice(0, 5).map((rating) => (
+                            {userRatings.slice(0, 5).map((rating, index) => (
                               <div
-                                key={rating?._id || Math.random()}
+                                key={
+                                  rating?._id ||
+                                  `rating-${rating?.vibeId}-${rating?.userId}-${index}`
+                                }
                                 className="border-border bg-card rounded-lg border p-4"
                               >
                                 <div className="flex items-start gap-3">
@@ -575,67 +644,75 @@ export function UserProfileView({
                           </div>
                         ) : receivedRatings && receivedRatings.length > 0 ? (
                           <div className="space-y-4">
-                            {receivedRatings.slice(0, 5).map((rating) => (
-                              <div
-                                key={rating?._id || Math.random()}
-                                className="border-border bg-card rounded-lg border p-4"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarImage
-                                      src={rating.rater?.image_url}
-                                    />
-                                    <AvatarFallback>
-                                      {rating.rater?.username?.[0] || '?'}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1">
-                                    <div className="mb-1 flex items-center gap-2">
-                                      <span className="text-sm font-medium">
-                                        {rating.rater?.username || 'Unknown'}
-                                      </span>
-                                      {rating?.emoji ? (
-                                        <EmojiRatingDisplay
-                                          rating={{
-                                            emoji: rating.emoji,
-                                            value: rating.value || 0,
-                                            count: 1,
-                                          }}
-                                          showScale={false}
-                                        />
-                                      ) : (
-                                        <div className="flex items-center gap-1">
-                                          {[...Array(5)].map((_, i) => (
-                                            <Star
-                                              key={i}
-                                              className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                            />
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <p className="text-muted-foreground mb-1 text-sm">
-                                      on "
-                                      {(rating as { vibe?: { title?: string } })
-                                        .vibe?.title || 'Unknown'}
-                                      "
-                                    </p>
-                                    {rating?.review && (
-                                      <p className="text-muted-foreground text-sm">
-                                        {rating.review}
+                            {receivedRatings
+                              .slice(0, 5)
+                              .map((rating, index) => (
+                                <div
+                                  key={
+                                    rating?._id ||
+                                    `received-rating-${rating?.vibeId}-${rating?.userId}-${index}`
+                                  }
+                                  className="border-border bg-card rounded-lg border p-4"
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage
+                                        src={rating.rater?.image_url}
+                                      />
+                                      <AvatarFallback>
+                                        {rating.rater?.username?.[0] || '?'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <div className="mb-1 flex items-center gap-2">
+                                        <span className="text-sm font-medium">
+                                          {rating.rater?.username || 'Unknown'}
+                                        </span>
+                                        {rating?.emoji ? (
+                                          <EmojiRatingDisplay
+                                            rating={{
+                                              emoji: rating.emoji,
+                                              value: rating.value || 0,
+                                              count: 1,
+                                            }}
+                                            showScale={false}
+                                          />
+                                        ) : (
+                                          <div className="flex items-center gap-1">
+                                            {[...Array(5)].map((_, i) => (
+                                              <Star
+                                                key={i}
+                                                className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                              />
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <p className="text-muted-foreground mb-1 text-sm">
+                                        on "
+                                        {(
+                                          rating as {
+                                            vibe?: { title?: string };
+                                          }
+                                        ).vibe?.title || 'Unknown'}
+                                        "
                                       </p>
-                                    )}
-                                    <p className="text-muted-foreground mt-1 text-xs">
-                                      {rating?.createdAt
-                                        ? new Date(
-                                            rating.createdAt
-                                          ).toLocaleDateString()
-                                        : ''}
-                                    </p>
+                                      {rating?.review && (
+                                        <p className="text-muted-foreground text-sm">
+                                          {rating.review}
+                                        </p>
+                                      )}
+                                      <p className="text-muted-foreground mt-1 text-xs">
+                                        {rating?.createdAt
+                                          ? new Date(
+                                              rating.createdAt
+                                            ).toLocaleDateString()
+                                          : ''}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
                             {receivedRatings.length > 5 && (
                               <p className="text-muted-foreground text-center text-sm">
                                 and {receivedRatings.length - 5} more reviews...
@@ -870,6 +947,24 @@ export function UserProfileView({
           </Tabs>
         </div>
       </div>
+
+      {/* Follow Modals */}
+      {clerkUser && (
+        <>
+          <FollowersModal
+            isOpen={isFollowersModalOpen}
+            onClose={() => setIsFollowersModalOpen(false)}
+            userId={user.externalId}
+            username={user.username}
+          />
+          <FollowingModal
+            isOpen={isFollowingModalOpen}
+            onClose={() => setIsFollowingModalOpen(false)}
+            userId={user.externalId}
+            username={user.username}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -5,8 +5,8 @@
 export { EmojiRatingDisplay, TopEmojiRatings } from './emoji-rating-display';
 export { EmojiRatingDisplayPopover } from './emoji-rating-display-popover';
 export { EmojiRatingCycleDisplay } from './emoji-rating-cycle-display';
-export { EmojiRatingPopover } from './emoji-rating-popover';
-export { EmojiRatingScale } from './emoji-rating-scale';
+export { RatingPopover } from './rating-popover';
+export { RatingScale } from './rating-scale';
 export { EmojiRatingSelector } from './emoji-rating-selector';
 export { EmojiRatingFilter } from './emoji-rating-filter';
 
@@ -18,8 +18,6 @@ export { EmojiTrends } from './emoji-trends';
 
 // Rating System Components
 export { StarRating } from './star-rating';
-export { StarRatingWithPopover } from './star-rating-with-popover';
-export { RatingPopover } from './rating-popover';
 export { RatingRangeSlider } from './rating-range-slider';
 export { DecimalRatingSelector } from './decimal-rating-selector';
 

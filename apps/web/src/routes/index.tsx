@@ -23,15 +23,15 @@ function Home() {
         currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
 
-      setColorTheme(`${primaryColor}-primary`);
-      setSecondaryColorTheme(`${secondaryColor}-secondary`);
+      setColorTheme(`${primaryColor}-primary` as any);
+      setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
     }
   }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
       {/* Hero Section */}
-      <section className="mb-12">
+      <section className="container mx-auto px-4 py-8">
         <div
           className="from-theme-primary to-theme-secondary animate-gradient-shift rounded-2xl bg-gradient-to-r p-8 text-white md:p-12"
           style={{ backgroundSize: '200% 200%' }}
@@ -79,6 +79,6 @@ function Home() {
 
       {/* Home Feed */}
       <HomeFeed />
-    </div>
+    </>
   );
 }

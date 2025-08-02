@@ -9,19 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as DataRouteImport } from './routes/data'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibesIndexRouteImport } from './routes/vibes/index'
 import { Route as VibesMyVibesRouteImport } from './routes/vibes/my-vibes'
 import { Route as VibesCreateRouteImport } from './routes/vibes/create'
 import { Route as VibesVibeIdRouteImport } from './routes/vibes/$vibeId'
 import { Route as UsersUsernameRouteImport } from './routes/users.$username'
+import { Route as VibesVibeIdEditRouteImport } from './routes/vibes/$vibeId/edit'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
@@ -42,6 +51,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -50,6 +64,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataRoute = DataRouteImport.update({
+  id: '/data',
+  path: '/data',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -82,105 +101,137 @@ const UsersUsernameRoute = UsersUsernameRouteImport.update({
   path: '/users/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VibesVibeIdEditRoute = VibesVibeIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => VibesVibeIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/data': typeof DataRoute
   '/discover': typeof DiscoverRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/terms': typeof TermsRoute
   '/users/$username': typeof UsersUsernameRoute
-  '/vibes/$vibeId': typeof VibesVibeIdRoute
+  '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
   '/vibes': typeof VibesIndexRoute
+  '/vibes/$vibeId/edit': typeof VibesVibeIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/data': typeof DataRoute
   '/discover': typeof DiscoverRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/terms': typeof TermsRoute
   '/users/$username': typeof UsersUsernameRoute
-  '/vibes/$vibeId': typeof VibesVibeIdRoute
+  '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
   '/vibes': typeof VibesIndexRoute
+  '/vibes/$vibeId/edit': typeof VibesVibeIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/data': typeof DataRoute
   '/discover': typeof DiscoverRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/terms': typeof TermsRoute
   '/users/$username': typeof UsersUsernameRoute
-  '/vibes/$vibeId': typeof VibesVibeIdRoute
+  '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
   '/vibes/': typeof VibesIndexRoute
+  '/vibes/$vibeId/edit': typeof VibesVibeIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/data'
     | '/discover'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/sign-in'
     | '/sign-up'
+    | '/terms'
     | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
     | '/vibes'
+    | '/vibes/$vibeId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/data'
     | '/discover'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/sign-in'
     | '/sign-up'
+    | '/terms'
     | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
     | '/vibes'
+    | '/vibes/$vibeId/edit'
   id:
     | '__root__'
     | '/'
+    | '/data'
     | '/discover'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/sign-in'
     | '/sign-up'
+    | '/terms'
     | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
     | '/vibes/my-vibes'
     | '/vibes/'
+    | '/vibes/$vibeId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DataRoute: typeof DataRoute
   DiscoverRoute: typeof DiscoverRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  TermsRoute: typeof TermsRoute
   UsersUsernameRoute: typeof UsersUsernameRoute
-  VibesVibeIdRoute: typeof VibesVibeIdRoute
+  VibesVibeIdRoute: typeof VibesVibeIdRouteWithChildren
   VibesCreateRoute: typeof VibesCreateRoute
   VibesMyVibesRoute: typeof VibesMyVibesRoute
   VibesIndexRoute: typeof VibesIndexRoute
@@ -188,6 +239,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-up': {
       id: '/sign-up'
       path: '/sign-up'
@@ -216,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -228,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data': {
+      id: '/data'
+      path: '/data'
+      fullPath: '/data'
+      preLoaderRoute: typeof DataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -272,19 +344,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vibes/$vibeId/edit': {
+      id: '/vibes/$vibeId/edit'
+      path: '/edit'
+      fullPath: '/vibes/$vibeId/edit'
+      preLoaderRoute: typeof VibesVibeIdEditRouteImport
+      parentRoute: typeof VibesVibeIdRoute
+    }
   }
 }
 
+interface VibesVibeIdRouteChildren {
+  VibesVibeIdEditRoute: typeof VibesVibeIdEditRoute
+}
+
+const VibesVibeIdRouteChildren: VibesVibeIdRouteChildren = {
+  VibesVibeIdEditRoute: VibesVibeIdEditRoute,
+}
+
+const VibesVibeIdRouteWithChildren = VibesVibeIdRoute._addFileChildren(
+  VibesVibeIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DataRoute: DataRoute,
   DiscoverRoute: DiscoverRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  TermsRoute: TermsRoute,
   UsersUsernameRoute: UsersUsernameRoute,
-  VibesVibeIdRoute: VibesVibeIdRoute,
+  VibesVibeIdRoute: VibesVibeIdRouteWithChildren,
   VibesCreateRoute: VibesCreateRoute,
   VibesMyVibesRoute: VibesMyVibesRoute,
   VibesIndexRoute: VibesIndexRoute,

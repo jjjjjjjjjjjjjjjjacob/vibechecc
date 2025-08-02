@@ -7,17 +7,17 @@ import { Badge } from '@/components/ui/badge';
 
 // Lazy load search components for code splitting
 const _SearchResultsGrid = lazy(() =>
-  import('@/features/search/components').then((m) => ({
+  import('@/features/search/components/search-results-grid').then((m) => ({
     default: m.SearchResultsGrid,
   }))
 );
 const SearchResultsList = lazy(() =>
-  import('@/features/search/components').then((m) => ({
+  import('@/features/search/components/search-results-list').then((m) => ({
     default: m.SearchResultsList,
   }))
 );
 const SearchPagination = lazy(() =>
-  import('@/features/search/components').then((m) => ({
+  import('@/features/search/components/search-pagination').then((m) => ({
     default: m.SearchPagination,
   }))
 );
@@ -619,3 +619,5 @@ function SearchResultsPage() {
     </div>
   );
 }
+
+export default SearchResultsPage;

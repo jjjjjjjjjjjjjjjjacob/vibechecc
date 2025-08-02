@@ -563,3 +563,5 @@ function FeaturedCollectionVibeList({
     </Card>
   );
 }
+
+export default DiscoverPage;

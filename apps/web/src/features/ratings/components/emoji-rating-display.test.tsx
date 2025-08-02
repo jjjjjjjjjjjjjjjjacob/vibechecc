@@ -90,7 +90,7 @@ describe('EmojiRatingDisplay', () => {
 
     // Should render the rating value and scale correctly
     expect(screen.getByText('4.0')).toBeInTheDocument();
-    // Check that the EmojiRatingScale component is rendered
+    // Check that the RatingScale component is rendered
     expect(
       screen.getByRole('button', { name: 'Rate 4 out of 5' })
     ).toBeInTheDocument();

@@ -17,10 +17,12 @@ import type { QueryClient } from '@tanstack/react-query';
 import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
 import { NotFound } from '@/components/not-found';
 import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
 import { ThemeProvider } from '@/features/theming/components/theme-provider';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
 import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
+import { OnboardingGuard } from '@/features/onboarding/components/onboarding-guard';
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
@@ -201,19 +203,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             >
               <PostHogPageTracker />
               <ClerkPostHogIntegration />
-              <Header />
-              <LoadingIndicator />
+              <OnboardingGuard>
+                <Header />
+                <LoadingIndicator />
 
-              <main className="mb-4 flex-1">{children}</main>
+                <main className="flex-1">{children}</main>
+              </OnboardingGuard>
 
-              <footer className="bg-background border-t py-6">
-                <div className="container mx-auto px-4">
-                  <p className="text-muted-foreground text-center text-sm">
-                    © {new Date().getFullYear()} viberater. all rights
-                    reserved.
-                  </p>
-                </div>
-              </footer>
+              <Footer />
               <Toaster />
             </div>
           </ThemeProvider>

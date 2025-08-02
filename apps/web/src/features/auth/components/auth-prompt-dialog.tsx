@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { SignInButton, SignUpButton } from '@clerk/tanstack-react-start';
 import {
   Dialog,

@@ -68,14 +68,14 @@ export function DualThemeColorPicker({
           <TabsList className="bg-background/60 grid w-full grid-cols-2 backdrop-blur">
             <TabsTrigger
               value="primary"
-              className="data-[state=active]:themed-gradient-button flex items-center gap-2 data-[state=active]:text-white"
+              className="data-[state=active]:themed-gradient-button data-[state=active]:text-foreground flex items-center gap-2"
             >
               <Layers className="h-4 w-4" />
               primary
             </TabsTrigger>
             <TabsTrigger
               value="secondary"
-              className="data-[state=active]:themed-gradient-button flex items-center gap-2 data-[state=active]:text-white"
+              className="data-[state=active]:themed-gradient-button data-[state=active]:text-foreground flex items-center gap-2"
             >
               <Palette className="h-4 w-4" />
               secondary

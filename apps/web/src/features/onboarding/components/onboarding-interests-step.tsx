@@ -111,14 +111,14 @@ export function OnboardingInterestsStep({
         <Card className="border-border/50 border-2">
           <CardHeader className="space-y-4 text-center">
             <div className="flex justify-center">
-              <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-orange-500">
+              <div className="from-theme-primary to-theme-secondary inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r">
                 <Heart className="h-8 w-8 text-white" />
               </div>
             </div>
             <div>
-              <CardTitle className="text-2xl">What Are You Into?</CardTitle>
+              <CardTitle className="text-2xl">what are you into?</CardTitle>
               <p className="text-muted-foreground mt-2">
-                Select topics that interest you so we can personalize your
+                select topics that interest you so we can personalize your
                 experience
               </p>
             </div>
@@ -141,12 +141,12 @@ export function OnboardingInterestsStep({
                     }
                     className={`cursor-pointer px-4 py-2 text-sm transition-all duration-200 hover:scale-105 ${
                       selectedInterests.includes(interest)
-                        ? 'border-0 bg-gradient-to-r from-pink-500 to-orange-500 text-white hover:from-pink-600 hover:to-orange-600'
-                        : 'border-2 hover:border-pink-300 hover:bg-pink-50 dark:hover:bg-pink-950'
+                        ? 'from-theme-primary to-theme-secondary text-primary-foreground hover:from-theme-primary/90 hover:to-theme-secondary/90 border-0 bg-gradient-to-r'
+                        : 'hover:border-primary/30 hover:bg-primary/5 dark:hover:bg-primary/10 border-2'
                     } `}
                     onClick={() => toggleInterest(interest)}
                   >
-                    <span className="capitalize">{interest}</span>
+                    <span className="lowercase">{interest}</span>
                     {selectedInterests.includes(interest) && (
                       <Check className="ml-1 h-3 w-3" />
                     )}
@@ -173,16 +173,16 @@ export function OnboardingInterestsStep({
                 onClick={onNext}
                 className="flex-1"
               >
-                Skip for Now
+                skip for now
               </Button>
               <Button
                 onClick={handleContinue}
                 disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-pink-500 to-orange-500 text-white hover:from-pink-600 hover:to-orange-600"
+                className="from-theme-primary to-theme-secondary text-primary-foreground hover:from-theme-primary/90 hover:to-theme-secondary/90 flex-1 bg-gradient-to-r"
               >
                 {isLoading
-                  ? 'Saving...'
-                  : `Continue${selectedInterests.length > 0 ? ` (${selectedInterests.length})` : ''}`}
+                  ? 'saving...'
+                  : `continue${selectedInterests.length > 0 ? ` (${selectedInterests.length})` : ''}`}
               </Button>
             </div>
           </CardContent>

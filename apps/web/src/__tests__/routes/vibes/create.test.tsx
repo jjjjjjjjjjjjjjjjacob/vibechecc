@@ -55,7 +55,7 @@ vi.mock('@/hooks/usePostHog', () => ({
   }),
 }));
 
-vi.mock('@/components/tag-input', () => {
+vi.mock('@/features/search', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {

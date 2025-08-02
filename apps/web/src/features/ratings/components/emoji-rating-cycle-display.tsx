@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
-import { EmojiRatingPopover } from './emoji-rating-popover';
+import { RatingPopover } from './rating-popover';
 import type { EmojiRatingMetadata } from '@viberater/types';
 
 interface EmojiRatingCycleDisplayProps {
@@ -88,7 +88,7 @@ export function EmojiRatingCycleDisplay({
   }, [emojiOptions.length, isHovered, delay]);
 
   return (
-    <EmojiRatingPopover
+    <RatingPopover
       onSubmit={onSubmit}
       isSubmitting={isSubmitting}
       vibeTitle={vibeTitle}
@@ -135,6 +135,6 @@ export function EmojiRatingCycleDisplay({
               : 'click to rate'}
         </span>
       </div>
-    </EmojiRatingPopover>
+    </RatingPopover>
   );
 }

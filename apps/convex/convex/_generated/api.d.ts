@@ -19,6 +19,8 @@ import type * as debugSearchHistory from "../debugSearchHistory.js";
 import type * as emojiMetadata from "../emojiMetadata.js";
 import type * as emojiRatings from "../emojiRatings.js";
 import type * as emojis from "../emojis.js";
+import type * as files from "../files.js";
+import type * as follows from "../follows.js";
 import type * as http from "../http.js";
 import type * as importEmojis from "../importEmojis.js";
 import type * as lib_emojiColors from "../lib/emojiColors.js";
@@ -58,6 +60,8 @@ declare const fullApi: ApiFromModules<{
   emojiMetadata: typeof emojiMetadata;
   emojiRatings: typeof emojiRatings;
   emojis: typeof emojis;
+  files: typeof files;
+  follows: typeof follows;
   http: typeof http;
   importEmojis: typeof importEmojis;
   "lib/emojiColors": typeof lib_emojiColors;

@@ -9,6 +9,8 @@ export const modules = {
   'convex/emojiRatings.ts': () => import('./convex/emojiRatings'),
   'convex/emojis.ts': () => import('./convex/emojis'),
   'convex/tags.ts': () => import('./convex/tags'),
+  'convex/follows.ts': () => import('./convex/follows'),
+  'convex/files.ts': () => import('./convex/files'),
   'convex/_generated/api.js': () => import('./convex/_generated/api'),
   'convex/_generated/server.js': () => import('./convex/_generated/server'),
 };

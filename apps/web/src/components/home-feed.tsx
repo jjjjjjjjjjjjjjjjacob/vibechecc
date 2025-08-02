@@ -1,9 +1,17 @@
 import * as React from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { MasonryFeed } from '@/components/masonry-feed';
-import { cn } from '@/utils/tailwind-utils';
-import { useVibesInfinite } from '@/queries';
+import { FeedLayout } from '@/components/layouts';
+import { useVibesInfinite, useForYouFeedInfinite } from '@/queries';
+import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
+import { ForYouEmptyState } from '@/components/for-you-empty-state';
 import { Flame, Sparkles, Clock, TrendingUp, Star } from 'lucide-react';
 
 type FeedTab = 'for-you' | 'hot' | 'new' | 'unrated';
@@ -15,6 +23,7 @@ interface HomeFeedProps {
 export function HomeFeed({ className }: HomeFeedProps) {
   const [activeTab, setActiveTab] = React.useState<FeedTab>('for-you');
   const { user } = useUser();
+  const { data: followStats } = useCurrentUserFollowStats();
 
   // Handle tab change
   const handleTabChange = (tab: FeedTab) => {
@@ -27,7 +36,10 @@ export function HomeFeed({ className }: HomeFeedProps) {
       id: 'for-you' as const,
       label: 'for you',
       icon: <Sparkles className="h-4 w-4" />,
-      description: 'personalized based on your interactions',
+      description:
+        followStats?.following > 0
+          ? `personalized vibes from ${followStats.following} ${followStats.following === 1 ? 'person' : 'people'} you follow`
+          : 'discover and follow people to see personalized content',
       requiresAuth: true,
     },
     {
@@ -70,21 +82,12 @@ export function HomeFeed({ className }: HomeFeedProps) {
     switch (activeTab) {
       case 'for-you':
         return {
-          filters: { sort: 'top_rated' as const, limit: 20 }, // For now, fallback to top-rated
+          usePersonalizedFeed: true, // Use dedicated personalized feed
           enabled: !!user?.id,
           emptyTitle: 'your personalized feed is empty',
           emptyDescription:
-            'start rating and interacting with vibes to get personalized recommendations!',
-          emptyAction: (
-            <div className="flex justify-center gap-3">
-              <Button asChild>
-                <a href="/?tab=hot">explore hot vibes</a>
-              </Button>
-              <Button variant="outline" asChild>
-                <a href="/vibes/create">create a vibe</a>
-              </Button>
-            </div>
-          ),
+            'start following users to see their vibes in your personalized feed!',
+          emptyAction: null, // Handled by custom component
         };
       case 'hot':
         return {
@@ -129,7 +132,20 @@ export function HomeFeed({ className }: HomeFeedProps) {
   };
 
   const queryConfig = getQueryConfig();
-  // Use the generalized infinite query hook
+
+  // Use personalized feed for "for-you" tab, otherwise use generalized feed
+  const personalizedFeedQuery = useForYouFeedInfinite({
+    enabled: queryConfig.enabled && activeTab === 'for-you',
+    queryKeyPrefix: ['home-feed', 'for-you'],
+  });
+
+  const generalFeedQuery = useVibesInfinite(queryConfig.filters, {
+    enabled: queryConfig.enabled && activeTab !== 'for-you',
+    queryKeyPrefix: ['home-feed'],
+    queryKeyName: activeTab, // Use tab name as safe identifier
+  });
+
+  // Use the appropriate query based on the active tab
   const {
     data,
     fetchNextPage,
@@ -137,18 +153,18 @@ export function HomeFeed({ className }: HomeFeedProps) {
     isLoading,
     isFetchingNextPage,
     error,
-  } = useVibesInfinite(queryConfig.filters, {
-    enabled: queryConfig.enabled,
-    queryKeyPrefix: ['home-feed'],
-    queryKeyName: activeTab, // Use tab name as safe identifier
-  });
+  } = activeTab === 'for-you' ? personalizedFeedQuery : generalFeedQuery;
 
   // Flatten all pages to get vibes array
   const vibes = React.useMemo(() => {
-    return (
-      data?.pages.flatMap((page: { vibes: unknown[] }) => page.vibes) || []
-    );
+    if (!data || typeof data !== 'object' || !('pages' in data) || !data.pages)
+      return [];
+    return (data as any).pages.flatMap((page: any) => page?.vibes || []);
   }, [data]);
+
+  // For "for you" tab, use custom empty state component
+  const shouldUseCustomEmptyState =
+    activeTab === 'for-you' && vibes.length === 0 && !isLoading;
 
   // Load more function for intersection observer
   const loadMore = React.useCallback(() => {
@@ -156,52 +172,72 @@ export function HomeFeed({ className }: HomeFeedProps) {
     fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  return (
-    <div className={cn('w-full', className)}>
-      {/* Feed Header */}
-      <div className="mb-8">
-        <div className="mb-4 flex items-center gap-2">
-          <TrendingUp className="text-primary h-5 w-5" />
-          <h1 className="text-2xl font-bold">feed</h1>
-        </div>
+  // Prepare header content
+  const headerContent = (
+    <div className="mb-4 flex items-center gap-2">
+      <TrendingUp className="text-primary h-5 w-5" />
+      <h1 className="text-2xl font-bold">feed</h1>
+    </div>
+  );
 
-        {/* Tab Navigation */}
-        <div className="flex flex-col gap-4">
+  // Prepare sticky navigation
+  const stickyNavigation = [
+    {
+      id: 'feed-tabs',
+      content: (
+        <TooltipProvider>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {availableTabs.map((tab) => (
-              <Button
-                key={tab.id}
-                variant={activeTab === tab.id ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleTabChange(tab.id)}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                {tab.icon}
-                {tab.label}
-              </Button>
+              <Tooltip key={tab.id}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={activeTab === tab.id ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleTabChange(tab.id)}
+                    className="flex items-center gap-2 whitespace-nowrap"
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{tab.description}</p>
+                </TooltipContent>
+              </Tooltip>
             ))}
           </div>
+        </TooltipProvider>
+      ),
+    },
+  ];
 
-          {/* Tab Description */}
-          <p className="text-muted-foreground text-sm">
-            {availableTabs.find((tab) => tab.id === activeTab)?.description}
-          </p>
-        </div>
-      </div>
-
+  return (
+    <FeedLayout
+      className={className}
+      header={headerContent}
+      stickyNavigation={stickyNavigation}
+      headerSpacing="md"
+      contentSpacing="sm"
+    >
       {/* Feed Content */}
-      <MasonryFeed
-        vibes={vibes}
-        isLoading={isLoading}
-        error={error}
-        hasMore={hasNextPage}
-        onLoadMore={loadMore}
-        ratingDisplayMode={activeTab === 'hot' ? 'top-rated' : 'most-rated'}
-        variant="feed"
-        emptyStateTitle={queryConfig.emptyTitle}
-        emptyStateDescription={queryConfig.emptyDescription}
-        emptyStateAction={queryConfig.emptyAction}
-      />
-    </div>
+      {shouldUseCustomEmptyState ? (
+        <ForYouEmptyState />
+      ) : (
+        <MasonryFeed
+          vibes={vibes}
+          isLoading={isLoading}
+          error={error}
+          hasMore={hasNextPage}
+          onLoadMore={loadMore}
+          ratingDisplayMode={activeTab === 'hot' ? 'top-rated' : 'most-rated'}
+          variant="feed"
+          emptyStateTitle={queryConfig.emptyTitle}
+          emptyStateDescription={queryConfig.emptyDescription}
+          emptyStateAction={
+            activeTab === 'for-you' ? null : queryConfig.emptyAction
+          }
+        />
+      )}
+    </FeedLayout>
   );
 }

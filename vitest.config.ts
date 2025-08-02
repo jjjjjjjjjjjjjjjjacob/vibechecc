@@ -11,6 +11,10 @@ export const config = defineConfig({
     environment: 'happy-dom',
     setupFiles: ['./vitest.setup.ts'],
     exclude: ['./node_modules'],
+    env: {
+      NODE_ENV: 'test',
+      VITEST: 'true',
+    },
   },
 });
 

@@ -145,9 +145,9 @@ export function OnboardingProfileStep({
         <Card className="border-border/50 border-2">
           <CardHeader className="space-y-4 text-center">
             <div>
-              <CardTitle className="text-2xl">Set Up Your Profile</CardTitle>
+              <CardTitle className="text-2xl">set up your profile</CardTitle>
               <p className="text-muted-foreground mt-2">
-                Tell us a bit about yourself so others can discover your vibes!
+                tell us a bit about yourself so others can discover your vibes
               </p>
             </div>
           </CardHeader>
@@ -165,15 +165,15 @@ export function OnboardingProfileStep({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="username" className="text-sm font-medium">
-                    Username
+                    username
                   </Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder="Choose a unique username"
+                    placeholder="choose a unique username"
                     value={formData.username}
                     onChange={handleChange('username')}
-                    className="border-2 focus:border-pink-400"
+                    className="focus:border-primary border-2"
                   />
                   <p className="text-muted-foreground text-xs">
                     This is how others will find and identify you on viberater
@@ -183,29 +183,29 @@ export function OnboardingProfileStep({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="first_name" className="text-sm font-medium">
-                      First Name
+                      first name
                     </Label>
                     <Input
                       id="first_name"
                       type="text"
-                      placeholder="Your first name"
+                      placeholder="your first name"
                       value={formData.first_name}
                       onChange={handleChange('first_name')}
-                      className="border-2 focus:border-pink-400"
+                      className="focus:border-primary border-2"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="last_name" className="text-sm font-medium">
-                      Last Name
+                      last name
                     </Label>
                     <Input
                       id="last_name"
                       type="text"
-                      placeholder="Your last name"
+                      placeholder="your last name"
                       value={formData.last_name}
                       onChange={handleChange('last_name')}
-                      className="border-2 focus:border-pink-400"
+                      className="focus:border-primary border-2"
                     />
                   </div>
                 </div>
@@ -223,7 +223,7 @@ export function OnboardingProfileStep({
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 bg-gradient-to-r from-pink-500 to-orange-500 text-white hover:from-pink-600 hover:to-orange-600"
+                  className="from-theme-primary to-theme-secondary text-primary-foreground hover:from-theme-primary/90 hover:to-theme-secondary/90 flex-1 bg-gradient-to-r"
                 >
                   {isLoading ? 'Saving...' : 'Continue'}
                 </Button>

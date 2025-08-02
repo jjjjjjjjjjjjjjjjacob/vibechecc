@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
-import { VibeList } from '@/components/vibe-list';
+// VibeList component doesn't exist, we'll use VibeCard with list variant
 import { Button } from '@/components/ui/button';
 import { LayoutGrid, List } from 'lucide-react';
 import type { Vibe } from '@/types';
@@ -66,7 +66,11 @@ export function SearchResultsWithViewToggle({
 
       {/* Results */}
       {viewMode === 'list' ? (
-        <VibeList vibes={vibes} />
+        <div className="space-y-3">
+          {vibes.map((vibe) => (
+            <VibeCard key={vibe.id} vibe={vibe} variant="list" />
+          ))}
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {vibes.map((vibe) => (

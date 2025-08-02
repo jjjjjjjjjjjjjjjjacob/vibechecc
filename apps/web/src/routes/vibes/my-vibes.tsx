@@ -89,3 +89,5 @@ function MyVibes() {
     </div>
   );
 }
+
+export default MyVibes;

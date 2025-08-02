@@ -94,6 +94,7 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          showBorder={showSuggestions}
         />
         {showSuggestions && (
           <CommandList>

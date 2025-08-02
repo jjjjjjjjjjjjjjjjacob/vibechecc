@@ -11,8 +11,11 @@ import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { TagInput } from '@/components/tag-input';
+import { ImageUpload } from '@/components/image-upload';
 import { cn } from '@/utils/tailwind-utils';
 import { Circle, Sparkles } from 'lucide-react';
+import type { Id } from '@viberater/convex/dataModel';
+import toast from '@/utils/toast';
 import '@/styles/create-vibe.css';
 
 // Server function to check authentication
@@ -42,6 +45,8 @@ function CreateVibe() {
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [tags, setTags] = React.useState<string[]>([]);
+  const [imageStorageId, setImageStorageId] =
+    React.useState<Id<'_storage'> | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState('');
   const createVibeMutation = useCreateVibeMutation();
@@ -66,11 +71,25 @@ function CreateVibe() {
       const result = await createVibeMutation.mutateAsync({
         title: title.trim(),
         description: description.trim(),
+        image: imageStorageId || undefined,
         tags: tags.length > 0 ? tags : undefined,
       });
 
       // Track vibe creation (result is the document ID)
       trackEvents.vibeCreated((result as string) || 'unknown', tags);
+
+      // Show success toast with action to go to vibe
+      toast.success('vibe created successfully!', {
+        duration: 5000,
+        action: {
+          label: 'Go to Vibe',
+          onClick: () =>
+            navigate({
+              to: '/vibes/$vibeId',
+              params: { vibeId: result as string },
+            }),
+        },
+      });
 
       // Redirect to home page after successful creation
       navigate({ to: '/' });
@@ -84,13 +103,21 @@ function CreateVibe() {
     }
   };
 
+  const handleImageUpload = (storageId: Id<'_storage'>, _url: string) => {
+    setImageStorageId(storageId);
+  };
+
+  const handleImageRemove = () => {
+    setImageStorageId(null);
+  };
+
   return (
     <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="mx-auto max-w-2xl">
           {/* Header with gradient text */}
-          <div className="mb-6 text-center">
-            <h1 className="animate-gradient-text bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md drop-shadow-purple-500/50 sm:text-4xl">
+          <div className="my-6 text-center">
+            <h1 className="animate-gradient-text drop-shadow-theme-secondary/50 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
               create a new vibe
             </h1>
             <p className="text-muted-foreground mt-2 text-sm">
@@ -105,7 +132,7 @@ function CreateVibe() {
           )}
 
           {/* Main form card with backdrop blur */}
-          <div className="bg-background/90 animate-in fade-in-0 slide-in-from-bottom-4 rounded-2xl border-none p-6 shadow-2xl backdrop-blur duration-500 sm:p-8">
+          <div className="bg-background/90 animate-in fade-in-0 slide-in-from-bottom-4 rounded-2xl border-none p-3 shadow-2xl backdrop-blur duration-500 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Title Section */}
               <div className="space-y-3">
@@ -158,6 +185,13 @@ function CreateVibe() {
                   <span>{description.length} characters</span>
                 </div>
               </div>
+
+              {/* Image Upload Section */}
+              <ImageUpload
+                onImageUpload={handleImageUpload}
+                onImageRemove={handleImageRemove}
+                disabled={isSubmitting}
+              />
 
               {/* Tags Section */}
               <div className="space-y-3">
@@ -226,3 +260,5 @@ function CreateVibe() {
     </div>
   );
 }
+
+export default CreateVibe;

@@ -71,3 +71,5 @@ export function AuthTest() {
     </div>
   );
 }
+
+export default AuthTest;

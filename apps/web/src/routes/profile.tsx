@@ -1,20 +1,20 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import {
-  useUserVibes,
-  useUserReactedVibes,
   useUpdateProfileMutation,
   useCurrentUser,
   useEnsureUserExistsMutation,
+  useUserVibes,
+  useUserRatings,
+  useUserReceivedRatings,
+  useUserEmojiStats,
 } from '@/queries';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MasonryFeed } from '@/components/masonry-feed';
-import { CreateVibeButton } from '@/features/vibes/components/create-vibe-button';
-import { useUser, UserProfile } from '@clerk/tanstack-react-start';
+import { useUser, useClerk } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
@@ -23,7 +23,17 @@ import { Sparkles } from 'lucide-react';
 import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 import { DualThemeColorPicker } from '@/features/theming/components/dual-theme-color-picker';
-import { UserProfileView } from '@/features/profiles/components/user-profile-view';
+import {
+  UserProfileView,
+  UserVibesSection,
+  UserReviewsSection,
+  UserInterestsSection,
+} from '@/features/profiles/components';
+import {
+  FollowStats,
+  FollowersModal,
+  FollowingModal,
+} from '@/features/follows/components';
 import {
   useTheme,
   type PrimaryColorTheme,
@@ -55,6 +65,7 @@ export const Route = createFileRoute('/profile')({
 
 function Profile() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+  const { openUserProfile } = useClerk();
   // console.log('clerkUser', clerkUser);
   const {
     data: convexUser,
@@ -64,12 +75,20 @@ function Profile() {
   // console.log('convexUser', convexUser);
   const { mutate: ensureUserExists, isPending: isCreatingUser } =
     useEnsureUserExistsMutation();
-  const { data: vibes, isLoading: vibesLoading } = useUserVibes(
+  const updateProfileMutation = useUpdateProfileMutation();
+
+  // Fetch user data for the profile view
+  const { data: userVibes, isLoading: vibesLoading } = useUserVibes(
     convexUser?.externalId || ''
   );
-  const { data: _reactedVibes, isLoading: _reactedVibesLoading } =
-    useUserReactedVibes(convexUser?.externalId || '');
-  const updateProfileMutation = useUpdateProfileMutation();
+  const { data: userRatings, isLoading: ratingsLoading } = useUserRatings(
+    convexUser?.externalId || ''
+  );
+  const { data: receivedRatings, isLoading: receivedRatingsLoading } =
+    useUserReceivedRatings(convexUser?.externalId || '') as any;
+  const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
+    convexUser?.externalId || ''
+  );
 
   const [username, setUsername] = React.useState('');
   const [firstName, setFirstName] = React.useState('');
@@ -87,7 +106,6 @@ function Profile() {
   const [isPreviewMode, setIsPreviewMode] = React.useState(false);
   const [isFullPreview, setIsFullPreview] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
-  const [showUserProfile, setShowUserProfile] = React.useState(false);
   const [uploadedImageFile, setUploadedImageFile] = React.useState<File | null>(
     null
   );
@@ -95,6 +113,13 @@ function Profile() {
     primaryColor: string;
     secondaryColor: string;
   }>({ primaryColor: 'pink', secondaryColor: 'orange' });
+
+  // Follow modal states
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = React.useState(false);
+  const [isFollowingModalOpen, setIsFollowingModalOpen] = React.useState(false);
+
+  // User interests state
+  const [userInterests, setUserInterests] = React.useState<string[]>([]);
 
   // Initialize form with user data when loaded
   React.useEffect(() => {
@@ -118,6 +143,7 @@ function Profile() {
         youtube: convexUser.socials?.youtube || '',
         website: convexUser.socials?.website || '',
       });
+      setUserInterests(convexUser.interests || []);
     }
   }, [convexUser]);
 
@@ -181,11 +207,11 @@ function Profile() {
   if (isLoading) {
     return (
       <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-8">
           <div className="mx-auto max-w-4xl">
-            <Card className="bg-background/90 mb-8 border-none shadow-lg backdrop-blur">
-              <CardContent className="p-6 sm:p-8">
-                <div className="flex flex-col gap-6 md:flex-row md:items-center">
+            <Card className="bg-background/90 mb-6 border-none shadow-lg backdrop-blur sm:mb-8">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
+                <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
                   <div className="flex-shrink-0">
                     <Skeleton className="h-24 w-24 rounded-full" />
                   </div>
@@ -199,14 +225,16 @@ function Profile() {
               </CardContent>
             </Card>
 
-            <div className="mb-8">
-              <Skeleton className="mb-4 h-8 w-24" />
-              <MasonryFeed
-                vibes={[]}
-                isLoading={true}
-                variant="category"
-                showLoadMoreTarget={false}
-              />
+            <div className="mb-6 sm:mb-8">
+              <Skeleton className="mb-3 h-6 w-24 sm:mb-4 sm:h-8" />
+              <div className="space-y-4">
+                <Skeleton className="h-6 w-32" />
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="aspect-video rounded-lg" />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -218,9 +246,9 @@ function Profile() {
   if (!clerkUser || !convexUser) {
     return (
       <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-8">
           <DebugAuth />
-          <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-4 py-3">
+          <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base">
             <p>failed to load user profile. please try again later.</p>
           </div>
         </div>
@@ -316,6 +344,10 @@ function Profile() {
     }
   };
 
+  const handleInterestsUpdate = (newInterests: string[]) => {
+    setUserInterests(newInterests);
+  };
+
   const displayName =
     `${firstName || ''} ${lastName || ''}`.trim() ||
     username ||
@@ -347,50 +379,33 @@ function Profile() {
     return (
       <UserProfileView
         user={previewUser}
-        userVibes={vibes}
+        userVibes={userVibes}
         vibesLoading={vibesLoading}
+        userRatings={userRatings as any}
+        ratingsLoading={ratingsLoading}
+        receivedRatings={receivedRatings as any}
+        receivedRatingsLoading={receivedRatingsLoading}
+        emojiStats={emojiStats}
         showBackButton={true}
         onBackClick={() => setIsFullPreview(false)}
         backButtonText="back to profile"
         scopedTheme={false} // Use global theme for preview since we're already injecting theme above
+        currentUserId={clerkUser?.id}
       />
-    );
-  }
-
-  // Show UserProfile modal
-  if (showUserProfile) {
-    return (
-      <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
-        <div className="container mx-auto px-4 py-8">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowUserProfile(false)}
-                className="transition-transform hover:scale-[1.02]"
-              >
-                ← back to profile
-              </Button>
-            </div>
-            <div className="bg-background/90 rounded-lg border-none p-6 shadow-lg backdrop-blur">
-              <UserProfile />
-            </div>
-          </div>
-        </div>
-      </div>
     );
   }
 
   return (
     <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-8">
         <div className="mx-auto max-w-4xl">
-          <Card className="bg-background/90 mb-8 border-none shadow-lg backdrop-blur transition-all duration-300 hover:shadow-xl">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex flex-col gap-6 md:flex-row md:items-center">
+          {/* A) USER SNAPSHOT & PROFILE MANAGEMENT */}
+          <Card className="bg-background/90 mb-6 border-none shadow-lg backdrop-blur transition-all duration-300 hover:shadow-xl sm:mb-8">
+            <CardContent className="p-4 sm:p-6 lg:p-8">
+              <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-6">
                 <div className="flex-shrink-0">
                   <div className="relative">
-                    <Avatar className="h-24 w-24">
+                    <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
                       <AvatarImage
                         src={
                           imageUrl || convexUser.image_url || clerkUser.imageUrl
@@ -398,18 +413,18 @@ function Profile() {
                         alt={displayName}
                         className="object-cover"
                       />
-                      <AvatarFallback className="text-2xl">
+                      <AvatarFallback className="text-lg sm:text-2xl">
                         {displayName.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     {isEditing && (
                       <label
                         htmlFor="image-upload"
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-0 bottom-0 cursor-pointer rounded-full p-1"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 absolute -right-1 -bottom-1 cursor-pointer rounded-full p-1.5 shadow-md transition-all hover:scale-105"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
+                          className="h-3.5 w-3.5 sm:h-4 sm:w-4"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -442,57 +457,73 @@ function Profile() {
                 {isEditing ? (
                   <form
                     onSubmit={handleSaveProfile}
-                    className="flex-1 space-y-4"
+                    className="w-full flex-1 space-y-3 sm:space-y-4"
                   >
-                    <div>
-                      <Label htmlFor="username">username</Label>
-                      <Input
-                        type="text"
-                        id="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter username"
-                      />
+                    <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                      <div>
+                        <Label
+                          htmlFor="username"
+                          className="text-sm font-medium"
+                        >
+                          username
+                        </Label>
+                        <Input
+                          type="text"
+                          id="username"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder="enter username"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="firstName"
+                          className="text-sm font-medium"
+                        >
+                          first name
+                        </Label>
+                        <Input
+                          type="text"
+                          id="firstName"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          placeholder="enter first name"
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="firstName">first name</Label>
-                      <Input
-                        type="text"
-                        id="firstName"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Enter first name"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="lastName">last name</Label>
+                      <Label htmlFor="lastName" className="text-sm font-medium">
+                        last name
+                      </Label>
                       <Input
                         type="text"
                         id="lastName"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Enter last name"
+                        placeholder="enter last name"
+                        className="mt-1"
                       />
                     </div>
 
-                    <div>
+                    <div className="pt-2">
                       <DualThemeColorPicker
                         selectedTheme={userTheme}
                         onThemeChange={(theme) => {
                           setUserTheme(theme);
                           setIsPreviewMode(true);
                         }}
-                        className="mt-4"
+                        className="w-full"
                       />
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                       <Button
                         type="submit"
                         disabled={isSaving}
-                        className="transition-transform hover:scale-[1.02]"
+                        className="flex-1 transition-transform hover:scale-[1.02] sm:flex-none"
                       >
                         {isSaving ? 'saving...' : 'save profile'}
                       </Button>
@@ -501,7 +532,7 @@ function Profile() {
                           type="button"
                           variant="secondary"
                           onClick={() => setIsPreviewMode(false)}
-                          className="transition-transform hover:scale-[1.02]"
+                          className="flex-1 transition-transform hover:scale-[1.02] sm:flex-none"
                         >
                           exit preview
                         </Button>
@@ -513,7 +544,6 @@ function Profile() {
                           setIsEditing(false);
                           setIsPreviewMode(false);
                           setIsFullPreview(false);
-                          setShowUserProfile(false);
                           setUsername(convexUser.username || '');
                           setFirstName(convexUser.first_name || '');
                           setLastName(convexUser.last_name || '');
@@ -526,62 +556,74 @@ function Profile() {
                           const secondaryColor =
                             convexUser.secondaryColor || 'orange';
                           setUserTheme({ primaryColor, secondaryColor });
+                          setUserInterests(convexUser.interests || []);
                         }}
-                        className="transition-transform hover:scale-[1.02]"
+                        className="flex-1 transition-transform hover:scale-[1.02] sm:flex-none"
                       >
                         cancel
                       </Button>
                     </div>
                   </form>
                 ) : (
-                  <div className="flex-1">
-                    <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase drop-shadow-md">
-                      {displayName}
-                    </h1>
-                    {username && (
-                      <p className="text-muted-foreground mb-2 drop-shadow-sm drop-shadow-yellow-500/20">
-                        @{username}
+                  <div className="w-full flex-1 text-center sm:text-left">
+                    <div className="mb-4">
+                      <h1 className="from-theme-primary to-theme-secondary mb-1.5 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase drop-shadow-md sm:text-2xl">
+                        {displayName}
+                      </h1>
+                      {username && (
+                        <p className="text-muted-foreground drop-theme-secondary/20 mb-1 text-sm drop-shadow-sm sm:text-base">
+                          @{username}
+                        </p>
+                      )}
+                      <p className="text-muted-foreground drop-theme-secondary/20 mb-1 text-sm drop-shadow-sm sm:text-base">
+                        {userEmail}
                       </p>
-                    )}
-                    <p className="text-muted-foreground mb-2 drop-shadow-sm drop-shadow-yellow-500/20">
-                      {userEmail}
-                    </p>
-                    <p className="text-muted-foreground mb-4 drop-shadow-sm drop-shadow-yellow-500/20">
-                      member since {userJoinDate}
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditing(true)}
-                        className="transition-transform hover:scale-[1.02]"
-                      >
-                        edit profile
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        onClick={() => setIsFullPreview(true)}
-                        className="transition-transform hover:scale-[1.02]"
-                      >
-                        preview profile
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setShowUserProfile(true)}
-                        className="transition-transform hover:scale-[1.02]"
-                      >
-                        manage account
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="transition-transform hover:scale-[1.02]"
-                      >
-                        <Link to="/onboarding">
-                          <Sparkles className="mr-2 h-4 w-4" />
-                          take tour
-                        </Link>
-                      </Button>
+                      <p className="text-muted-foreground drop-theme-secondary/20 mb-3 text-xs drop-shadow-sm sm:text-sm">
+                        member since {userJoinDate}
+                      </p>
+                    </div>
+
+                    {/* Follow Stats Pills */}
+                    <div className="mb-4 flex justify-center sm:justify-start">
+                      <FollowStats
+                        userId={convexUser.externalId}
+                        onFollowersClick={() => setIsFollowersModalOpen(true)}
+                        onFollowingClick={() => setIsFollowingModalOpen(true)}
+                        variant="default"
+                      />
+                    </div>
+
+                    {/* Action buttons - mobile-first stacked layout */}
+                    <div className="space-y-2">
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditing(true)}
+                          className="flex-1 transition-transform hover:scale-[1.02] sm:flex-none"
+                        >
+                          edit profile
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() => setIsFullPreview(true)}
+                          className="flex-1 transition-transform hover:scale-[1.02] sm:flex-none"
+                        >
+                          preview profile
+                        </Button>
+                      </div>
+                      <div className="flex justify-center sm:justify-start">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="transition-transform hover:scale-[1.02]"
+                        >
+                          <Link to="/onboarding">
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            take tour
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -589,45 +631,57 @@ function Profile() {
             </CardContent>
           </Card>
 
-          <div className="mb-8">
-            <h2 className="from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase">
-              your vibes
-            </h2>
+          {/* B) CONTENT MANAGEMENT SECTION */}
+          <div className="space-y-6 sm:space-y-8">
+            {/* 1. Your Vibes */}
+            <UserVibesSection user={convexUser} className="mb-6 sm:mb-8" />
 
-            <MasonryFeed
-              vibes={vibes?.slice(0, 6) || []}
-              isLoading={vibesLoading}
-              variant="category"
-              ratingDisplayMode="most-rated"
-              showLoadMoreTarget={false}
-              emptyStateTitle="no vibes created yet"
-              emptyStateDescription="share your first vibe with the community!"
-              emptyStateAction={
-                <CreateVibeButton
-                  variant="default"
-                  className="from-theme-primary to-theme-secondary text-foreground bg-gradient-to-r shadow-lg"
-                />
-              }
+            {/* 2. Your Reviews */}
+            <UserReviewsSection user={convexUser} className="mb-6 sm:mb-8" />
+
+            {/* 3. Your Interests */}
+            <UserInterestsSection
+              user={convexUser}
+              userInterests={userInterests}
+              onInterestsUpdate={handleInterestsUpdate}
+              updateProfileMutation={updateProfileMutation}
+              className="mb-6 sm:mb-8"
             />
+          </div>
 
-            {!vibesLoading && vibes && vibes.length > 6 && (
-              <div className="mt-6 text-center">
-                <Button
-                  variant="outline"
-                  asChild
-                  className="bg-background/90 border-theme-primary/30 text-theme-primary transition-transform hover:scale-[1.02] hover:bg-current/10"
-                >
-                  <a href="/vibes/my-vibes">
-                    view all vibes ({vibes.length} total)
-                  </a>
-                </Button>
-              </div>
-            )}
-
-            {/* Empty state is now handled by MasonryFeed component */}
+          {/* C) ACCOUNT MANAGEMENT SECTION */}
+          <div className="border-muted/20 border-t pt-6">
+            <h2 className="from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase sm:text-2xl">
+              account management
+            </h2>
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={() => openUserProfile()}
+                className="border-theme-primary/30 text-theme-primary hover:bg-theme-primary/10"
+              >
+                manage account settings
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Follow Modals */}
+      <FollowersModal
+        isOpen={isFollowersModalOpen}
+        onClose={() => setIsFollowersModalOpen(false)}
+        userId={convexUser.externalId}
+        username={convexUser.username}
+      />
+      <FollowingModal
+        isOpen={isFollowingModalOpen}
+        onClose={() => setIsFollowingModalOpen(false)}
+        userId={convexUser.externalId}
+        username={convexUser.username}
+      />
     </div>
   );
 }
+
+export default Profile;

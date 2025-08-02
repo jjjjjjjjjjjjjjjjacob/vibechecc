@@ -52,3 +52,5 @@ export const Route = createFileRoute('/vibes/')({
     });
   },
 });
+
+export default Route;

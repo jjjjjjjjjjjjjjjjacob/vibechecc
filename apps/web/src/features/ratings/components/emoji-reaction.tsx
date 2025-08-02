@@ -9,7 +9,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { EmojiSearchCommand } from './emoji-search-command';
-import { EmojiRatingPopover } from './emoji-rating-popover';
+import { RatingPopover } from './rating-popover';
+import { AuthPromptDialog } from '@/features/auth';
 import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
@@ -41,11 +42,18 @@ export function EmojiReaction({
 }: EmojiReactionProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [isRatingPopoverOpen, setIsRatingPopoverOpen] = React.useState(false);
+  const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const { user } = useUser();
 
   const hasReacted = user?.id ? reaction.users.includes(user.id) : false;
 
   const handleReact = () => {
+    // Check if user is signed in first
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+
     // Always open the rating popover with this emoji
     if (onRatingSubmit) {
       setIsRatingPopoverOpen(true);
@@ -106,22 +114,40 @@ export function EmojiReaction({
     </button>
   );
 
-  // Always wrap with EmojiRatingPopover if onRatingSubmit is provided
+  // Always wrap with RatingPopover if onRatingSubmit is provided
   if (onRatingSubmit) {
     return (
-      <EmojiRatingPopover
-        open={isRatingPopoverOpen}
-        onOpenChange={setIsRatingPopoverOpen}
-        onSubmit={handleRatingSubmit}
-        vibeTitle={vibeTitle}
-        preSelectedEmoji={reaction.emoji}
-      >
-        {buttonContent}
-      </EmojiRatingPopover>
+      <>
+        <RatingPopover
+          open={isRatingPopoverOpen}
+          onOpenChange={setIsRatingPopoverOpen}
+          onSubmit={handleRatingSubmit}
+          vibeTitle={vibeTitle}
+          preSelectedEmoji={reaction.emoji}
+        >
+          {buttonContent}
+        </RatingPopover>
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to rate"
+          description="you must sign in to rate vibes with emojis"
+        />
+      </>
     );
   }
 
-  return buttonContent;
+  return (
+    <>
+      {buttonContent}
+      <AuthPromptDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        title="sign in to react"
+        description="you must sign in to react to vibes"
+      />
+    </>
+  );
 }
 
 interface EmojiReactionsProps {
@@ -175,7 +201,9 @@ function HorizontalEmojiPicker({
     string | null
   >(null);
   const [isRatingPopoverOpen, setIsRatingPopoverOpen] = React.useState(false);
+  const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const { user } = useUser();
 
   // Get popular emojis from database
   const popularEmojis = useQuery({
@@ -205,6 +233,12 @@ function HorizontalEmojiPicker({
   }, [searchResults?.data]);
 
   const handleEmojiClick = (emoji: string) => {
+    // Check if user is signed in first
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+
     if (onRatingSubmit) {
       // Always open rating popover instead of quick reaction
       setSelectedEmojiForRating(emoji);
@@ -461,7 +495,7 @@ function HorizontalEmojiPicker({
     return (
       <>
         {pickerContent}
-        <EmojiRatingPopover
+        <RatingPopover
           open={isRatingPopoverOpen}
           onOpenChange={setIsRatingPopoverOpen}
           onSubmit={handleRatingSubmit}
@@ -469,12 +503,28 @@ function HorizontalEmojiPicker({
           preSelectedEmoji={selectedEmojiForRating}
         >
           <div style={{ display: 'none' }} />
-        </EmojiRatingPopover>
+        </RatingPopover>
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to rate"
+          description="you must sign in to rate vibes with emojis"
+        />
       </>
     );
   }
 
-  return pickerContent;
+  return (
+    <>
+      {pickerContent}
+      <AuthPromptDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        title="sign in to react"
+        description="you must sign in to react to vibes"
+      />
+    </>
+  );
 }
 
 export function EmojiReactions({
@@ -488,6 +538,8 @@ export function EmojiReactions({
   vibeId,
 }: EmojiReactionsProps) {
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
+  const [showAuthDialog, setShowAuthDialog] = React.useState(false);
+  const { user } = useUser();
 
   const handleAddEmoji = (emoji: string) => {
     // This should only be called when onRatingSubmit is not provided
@@ -530,6 +582,11 @@ export function EmojiReactions({
               )}
               aria-label="Add reaction"
               title="Add your reaction"
+              onClick={() => {
+                if (!user) {
+                  setShowAuthDialog(true);
+                }
+              }}
             >
               <PlusCircle className="h-4 w-4" />
             </button>
@@ -547,6 +604,12 @@ export function EmojiReactions({
           />
         </Popover>
       )}
+      <AuthPromptDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        title="sign in to react"
+        description="you must sign in to react to vibes"
+      />
     </div>
   );
 }

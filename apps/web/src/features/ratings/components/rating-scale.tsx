@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 
-interface EmojiRatingScaleProps {
+interface RatingScaleProps {
   emoji: string;
   value: number;
   onChange?: (value: number) => void;
@@ -16,7 +16,7 @@ interface EmojiRatingScaleProps {
   mobileSlider?: boolean;
 }
 
-export function EmojiRatingScale({
+export function RatingScale({
   emoji,
   value,
   onChange,
@@ -29,7 +29,7 @@ export function EmojiRatingScale({
   onPointerUp,
   emojiColor,
   mobileSlider = false,
-}: EmojiRatingScaleProps) {
+}: RatingScaleProps) {
   const [hoverValue, setHoverValue] = React.useState<number | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 

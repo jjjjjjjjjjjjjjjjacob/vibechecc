@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/utils/tailwind-utils';
-import { EmojiRatingPopover } from './emoji-rating-popover';
+import { RatingPopover } from './rating-popover';
 import type { EmojiRating, EmojiRatingMetadata } from '@viberater/types';
 
 interface EmojiRatingSelectorProps {
@@ -90,7 +90,7 @@ export function EmojiRatingSelector({
         rate & review this vibe
       </h3>
 
-      <EmojiRatingPopover
+      <RatingPopover
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
         vibeTitle={vibeTitle}
@@ -219,7 +219,7 @@ export function EmojiRatingSelector({
             </svg>
           </motion.div>
         </motion.button>
-      </EmojiRatingPopover>
+      </RatingPopover>
 
       {topEmojis.length === 0 && (
         <p className="text-muted-foreground text-xs">

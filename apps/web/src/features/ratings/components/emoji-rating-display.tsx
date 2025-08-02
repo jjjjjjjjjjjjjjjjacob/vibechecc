@@ -3,7 +3,7 @@ import { cn } from '@/utils/tailwind-utils';
 import type { EmojiRating } from '@viberater/types';
 import { AllEmojiRatingsPopover } from './all-emoji-ratings-popover';
 import { ChevronDown } from 'lucide-react';
-import { EmojiRatingScale } from './emoji-rating-scale';
+import { RatingScale } from './rating-scale';
 import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
@@ -69,7 +69,7 @@ export function EmojiRatingDisplay({
             tabIndex={0}
             aria-label={`Rate ${localValue} out of 5`}
           >
-            <EmojiRatingScale
+            <RatingScale
               emoji={rating.emoji}
               value={localValue}
               size={size}

@@ -9,6 +9,7 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router';
+import { ThemeProvider } from '@/features/theming/components/theme-provider';
 import { Route } from '@/routes/search';
 // Get the component from the Route
 const SearchResultsPage =
@@ -90,6 +91,21 @@ vi.mock('@/queries', () => ({
       { tag: 'surprise' },
     ],
     isLoading: false,
+  }),
+  useCreateEmojiRatingMutation: () => ({
+    mutate: vi.fn(),
+    isLoading: false,
+    error: null,
+  }),
+  useTopEmojiRatings: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
+  useMostInteractedEmoji: () => ({
+    data: ['🔥', '😍', '💯'],
+    isLoading: false,
+    error: null,
   }),
 }));
 
@@ -201,7 +217,9 @@ describe('Search Page - Emoji Filter Integration', () => {
 
     return render(
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <ThemeProvider>
+          <RouterProvider router={router} />
+        </ThemeProvider>
       </QueryClientProvider>
     );
   };
@@ -370,9 +388,7 @@ describe('Search Page - Emoji Filter Integration', () => {
     renderWithRouter();
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Error loading search results')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Search Error')).toBeInTheDocument();
     });
   });
 
@@ -389,7 +405,9 @@ describe('Search Page - Emoji Filter Integration', () => {
     renderWithRouter({ q: 'nonexistent' });
 
     await waitFor(() => {
-      expect(screen.getByText('no results found')).toBeInTheDocument();
+      expect(
+        screen.getByText(/0.*results.*found for.*nonexistent/)
+      ).toBeInTheDocument();
     });
   });
 

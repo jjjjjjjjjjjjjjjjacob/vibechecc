@@ -214,7 +214,7 @@ export function SearchAccordion({
       )}
     >
       <div className="border-b shadow-md">
-        <div className="container">
+        <div className="container pt-2">
           <Command className="rounded-none border-0 bg-transparent">
             <CommandInput
               ref={inputRef}

@@ -3,15 +3,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SearchFilters } from '../components/search-filters';
+import { SearchFilters } from '@/features/search/components/search-filters';
 import type { SearchFilters as SearchFiltersType } from '@viberater/types';
 
 // Mock child components
-vi.mock('../components/filters/active-filters-bar', () => ({
+vi.mock('@/features/search/components/filters/active-filters-bar', () => ({
   ActiveFiltersBar: () => null,
 }));
 
-vi.mock('../components/filters/tag-filter-enhanced', () => ({
+vi.mock('@/features/search/components/filters/tag-filter-enhanced', () => ({
   TagFilterEnhanced: ({
     selected,
     onChange,
@@ -27,7 +27,7 @@ vi.mock('../components/filters/tag-filter-enhanced', () => ({
   ),
 }));
 
-vi.mock('../components/filters/rating-slider', () => ({
+vi.mock('@/features/search/components/filters/rating-slider', () => ({
   RatingSlider: ({
     min,
     onChange,
@@ -44,7 +44,7 @@ vi.mock('../components/filters/rating-slider', () => ({
   ),
 }));
 
-vi.mock('../components/filters/date-range-picker', () => ({
+vi.mock('@/features/search/components/filters/date-range-picker', () => ({
   DateRangePicker: ({
     value,
     onChange,
