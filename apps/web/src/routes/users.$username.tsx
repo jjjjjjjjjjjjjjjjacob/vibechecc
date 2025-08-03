@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MasonryFeed } from '@/components/masonry-feed';
 import { UserProfileView } from '@/features/profiles/components/user-profile-view';
 import { useUser } from '@clerk/tanstack-react-start';
+import { trackEvents } from '@/lib/posthog';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,
@@ -36,6 +37,13 @@ function UserProfile() {
   const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
     user?.externalId || ''
   );
+
+  // Track profile view when user data is loaded
+  React.useEffect(() => {
+    if (user && !userLoading) {
+      trackEvents.profileViewed(user.externalId, user.username);
+    }
+  }, [user, userLoading]);
 
   // Early returns after all hooks have been called
   if (userLoading) {

@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Allow crawling of user profiles and public vibes
+Allow: /users/
+Allow: /vibes/
+
+# Disallow crawling of private/auth pages
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /profile
+Disallow: /onboarding
+
+# Allow search engines to find our sitemap
+Sitemap: https://viberater.com/sitemap/xml

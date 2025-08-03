@@ -14,6 +14,7 @@ import { AuthPromptDialog } from '@/features/auth';
 import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
+import { trackEvents } from '@/lib/posthog';
 
 interface EmojiReactionProps {
   reaction: EmojiReactionType;
@@ -277,6 +278,10 @@ function HorizontalEmojiPicker({
     setSearchValue(value);
 
     if (value.trim() && !showSearchResults) {
+      // Track emoji search
+      const resultsCount = searchResults?.data?.emojis?.length ?? 0;
+      trackEvents.emojiSearched(value, resultsCount, _vibeId);
+
       // Start the animation sequence when first character is typed
       setTimeout(() => setShowSearchResults(true), 400); // After search field expands
     } else if (!value.trim() && showSearchResults) {
@@ -572,7 +577,17 @@ export function EmojiReactions({
 
       {/* Plus button always visible at the end */}
       {showAddButton && (
-        <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+        <Popover
+          open={showEmojiPicker}
+          onOpenChange={(open) => {
+            if (open) {
+              trackEvents.emojiPopoverOpened(vibeId, 'vibe_reactions');
+            } else {
+              trackEvents.emojiPopoverClosed(vibeId, 'vibe_reactions');
+            }
+            setShowEmojiPicker(open);
+          }}
+        >
           <PopoverTrigger asChild>
             <button
               className={cn(

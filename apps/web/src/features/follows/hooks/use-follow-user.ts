@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@viberater/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { toast } from 'sonner';
+import { trackEvents } from '@/lib/posthog';
 
 interface UseFollowUserOptions {
   onSuccess?: () => void;
@@ -79,7 +80,10 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       toast.error(`failed to follow ${username ? `@${username}` : 'user'}`);
       options.onError?.(err as Error);
     },
-    onSuccess: (data, { username }) => {
+    onSuccess: (data, { targetUserId, username }) => {
+      // Track follow event
+      trackEvents.followUser(targetUserId, username);
+
       toast.success(
         `followed ${username ? `@${username}` : 'user'} successfully! 🎉`
       );
@@ -171,7 +175,10 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       toast.error(`failed to unfollow ${username ? `@${username}` : 'user'}`);
       options.onError?.(err as Error);
     },
-    onSuccess: (data, { username }) => {
+    onSuccess: (data, { targetUserId, username }) => {
+      // Track unfollow event
+      trackEvents.unfollowUser(targetUserId, username);
+
       toast.success(
         `unfollowed ${username ? `@${username}` : 'user'} successfully`
       );
