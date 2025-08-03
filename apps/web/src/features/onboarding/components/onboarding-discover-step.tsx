@@ -18,10 +18,8 @@ export function OnboardingDiscoverStep({
   onNext,
 }: OnboardingDiscoverStepProps) {
   const { data: vibes } = useVibes();
-  const [_selectedRating, setSelectedRating] = React.useState(0);
   const [hasInteracted, setHasInteracted] = React.useState(false);
   const [isFollowing, setIsFollowing] = React.useState(false);
-  const [_hasRatedWithEmoji, setHasRatedWithEmoji] = React.useState(false);
   const [currentSection, setCurrentSection] = React.useState(0);
 
   // Mock data for demonstrations
@@ -59,11 +57,6 @@ export function OnboardingDiscoverStep({
     ],
   };
 
-  const _handleRatingChange = (rating: number) => {
-    setSelectedRating(rating);
-    setHasInteracted(true);
-  };
-
   const handleFollowToggle = () => {
     setIsFollowing(!isFollowing);
     setHasInteracted(true);
@@ -76,7 +69,6 @@ export function OnboardingDiscoverStep({
     tags?: string[];
   }) => {
     // Mock submission - don't make real API calls
-    setHasRatedWithEmoji(true);
     setHasInteracted(true);
   };
 

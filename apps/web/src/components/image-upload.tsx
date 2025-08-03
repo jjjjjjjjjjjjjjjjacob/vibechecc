@@ -132,6 +132,15 @@ export function ImageUpload({
             disabled && 'pointer-events-none opacity-50'
           )}
           onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Upload image file"
         >
           <div className="flex h-32 flex-col items-center justify-center gap-2 p-6">
             <ImageIcon className="text-muted-foreground h-8 w-8" />

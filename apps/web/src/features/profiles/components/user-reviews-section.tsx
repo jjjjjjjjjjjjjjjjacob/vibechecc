@@ -12,7 +12,7 @@ import {
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { useUserRatings } from '@/queries';
-import type { User } from '@viberater/types';
+import type { User, Rating } from '@viberater/types';
 import { MessageSquare } from 'lucide-react';
 
 interface UserReviewsSectionProps {
@@ -104,13 +104,23 @@ export function UserReviewsSection({
       </h2>
 
       <div className="space-y-3">
-        {displayedReviews.map((rating) => (
-          <ReviewCard
-            key={`${rating?.vibeId}-${rating?.createdAt}`}
-            rating={rating}
-            currentUser={user}
-          />
-        ))}
+        {displayedReviews.map((rating) => {
+          if (!rating) return null;
+
+          // Ensure the rating object matches the Rating type by adding the user field
+          const completeRating = {
+            ...rating,
+            user: user,
+          } as unknown as Rating;
+
+          return (
+            <ReviewCard
+              key={`${rating.vibeId}-${rating.createdAt}`}
+              rating={completeRating}
+              currentUser={user}
+            />
+          );
+        })}
       </div>
 
       {showViewAllButton && hasMoreReviews && (
@@ -131,13 +141,17 @@ export function UserReviewsSection({
 }
 
 interface ReviewCardProps {
-  rating: any; // TODO: Add proper typing
+  rating: Rating;
   currentUser: User;
 }
 
 function ReviewCard({ rating, currentUser }: ReviewCardProps) {
   const vibe = rating.vibe;
   const usePlaceholder = !vibe?.image;
+
+  if (!vibe) {
+    return null;
+  }
 
   return (
     <Link to="/vibes/$vibeId" params={{ vibeId: vibe.id }}>
@@ -175,7 +189,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
                     `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim()}
                 </span>
                 <span className="text-muted-foreground flex-shrink-0 text-xs">
-                  on "{vibe?.title || 'Unknown Vibe'}"
+                  on "{vibe.title}"
                 </span>
                 <Badge variant="outline" className="ml-auto text-xs">
                   <MessageSquare className="mr-1 h-3 w-3" />
@@ -204,9 +218,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
                   <TooltipTrigger asChild>
                     <div className="relative h-8 w-8 cursor-pointer overflow-hidden rounded">
                       {usePlaceholder ? (
-                        <SimpleVibePlaceholder
-                          title={vibe?.title || 'Unknown'}
-                        />
+                        <SimpleVibePlaceholder title={vibe.title} />
                       ) : (
                         <img
                           src={vibe.image}
@@ -232,7 +244,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
                       )}
                       <div className="p-3">
                         <p className="text-foreground text-sm font-medium">
-                          {vibe?.title || 'Unknown Vibe'}
+                          {vibe.title}
                         </p>
                       </div>
                     </div>

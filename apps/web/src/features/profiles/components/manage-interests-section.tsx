@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from '@/utils/toast';
 import { useAllTags } from '@/queries';
 import type { UseMutationResult } from '@tanstack/react-query';
+import { DEFAULT_INTERESTS } from '@/constants/interests';
 
 interface ManageInterestsSectionProps {
   userInterests: string[];
@@ -37,71 +38,8 @@ export function ManageInterestsSection({
     setLocalInterests(userInterests);
   }, [userInterests]);
 
-  // Predefined popular interests (same as onboarding)
-  const defaultInterests = [
-    'music',
-    'travel',
-    'food',
-    'art',
-    'photography',
-    'nature',
-    'fitness',
-    'books',
-    'movies',
-    'fashion',
-    'technology',
-    'gaming',
-    'sports',
-    'cooking',
-    'coffee',
-    'beach',
-    'hiking',
-    'dancing',
-    'writing',
-    'reading',
-    'meditation',
-    'yoga',
-    'swimming',
-    'cycling',
-    'painting',
-    'gardening',
-    'learning',
-    'coding',
-    'anime',
-    'podcasts',
-    'volunteering',
-    'crafting',
-    'singing',
-    'guitar',
-    'piano',
-    'drawing',
-    'running',
-    'climbing',
-    'skiing',
-    'surfing',
-    'kayaking',
-    'camping',
-    'fishing',
-    'baking',
-    'wine',
-    'beer',
-    'cocktails',
-    'comedy',
-    'theater',
-    'concerts',
-    'festivals',
-    'exploring',
-    'adventure',
-    'wellness',
-    'mindfulness',
-    'productivity',
-    'entrepreneurship',
-    'investing',
-    'sustainability',
-  ];
-
   const availableInterests =
-    allTags?.slice(0, 50).map((tag) => tag.tag) || defaultInterests;
+    allTags?.slice(0, 50).map((tag) => tag.tag) || DEFAULT_INTERESTS;
 
   const toggleInterest = (interest: string) => {
     setLocalInterests((prev) =>

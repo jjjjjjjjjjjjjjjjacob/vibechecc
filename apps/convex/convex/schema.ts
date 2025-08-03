@@ -45,6 +45,10 @@ const schema = defineSchema({
         website: v.optional(v.string()),
       })
     ), // Social media links
+
+    // Follow count fields for efficient querying
+    followerCount: v.optional(v.number()), // Number of users following this user
+    followingCount: v.optional(v.number()), // Number of users this user follows
   })
     .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
     .searchIndex('searchUsername', {

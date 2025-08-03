@@ -1,12 +1,11 @@
-/// <reference lib="dom" />
 import { describe, it, expect, beforeEach } from 'vitest';
-import { convexTest } from 'convex-test';
+import { convexTest, type TestConvex } from 'convex-test';
 import { api } from '../_generated/api';
 import schema from '../schema';
 import { modules } from '../../vitest.setup';
 
 describe('Follows', () => {
-  let t: any;
+  let t: TestConvex<typeof schema>;
 
   beforeEach(() => {
     t = convexTest(schema, modules);
@@ -26,10 +25,10 @@ describe('Follows', () => {
       });
 
       // Mock authentication for user1
-      t = t.withIdentity({ subject: 'user1' });
+      const tWithAuth = t.withIdentity({ subject: 'user1' });
 
       // User1 follows user2
-      const result = await t.mutation(api.follows.follow, {
+      const result = await tWithAuth.mutation(api.follows.follow, {
         followingId: 'user2',
       });
 

@@ -159,7 +159,9 @@ export function HomeFeed({ className }: HomeFeedProps) {
   const vibes = React.useMemo(() => {
     if (!data || typeof data !== 'object' || !('pages' in data) || !data.pages)
       return [];
-    return (data as any).pages.flatMap((page: any) => page?.vibes || []);
+    return (
+      data as { pages: Array<{ vibes?: import('@/types').Vibe[] }> }
+    ).pages.flatMap((page) => page?.vibes || []);
   }, [data]);
 
   // For "for you" tab, use custom empty state component

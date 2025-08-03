@@ -25,8 +25,8 @@ export function OnboardingFlow() {
     last_name: '',
     image_url: '',
     interests: [] as string[],
-    primaryColor: 'pink-primary',
-    secondaryColor: 'orange-primary',
+    primaryColor: 'pink',
+    secondaryColor: 'orange',
   });
   const [uploadedImageFile, setUploadedImageFile] = React.useState<File | null>(
     null

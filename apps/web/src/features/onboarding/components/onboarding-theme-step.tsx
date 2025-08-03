@@ -4,13 +4,6 @@ import { DualThemeColorPicker } from '@/features/theming/components/dual-theme-c
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   Drawer,
   DrawerContent,
   DrawerHeader,
@@ -20,6 +13,7 @@ import {
 import { Heart, Star, MessageCircle, Sparkles, Eye } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import type { UserTheme } from '@/utils/theme-colors';
+import toast from '@/utils/toast';
 
 interface OnboardingThemeStepProps {
   onNext: () => void;
@@ -48,7 +42,9 @@ export function OnboardingThemeStep({
       await onUpdateTheme(selectedTheme);
       onNext();
     } catch {
-      // Error saving theme - could show toast notification instead
+      toast.error('failed to save theme settings. please try again.', {
+        duration: 4000,
+      });
     }
   };
 
@@ -147,51 +143,28 @@ export function OnboardingThemeStep({
       {/* Live Preview Button - Mobile */}
       {isMobile && (
         <div className="flex justify-center">
-          {isMobile ? (
-            <Drawer open={showPreview} onOpenChange={setShowPreview}>
-              <DrawerTrigger asChild>
-                <Button variant="outline" className="w-full max-w-xs">
-                  <Eye className="mr-2 h-4 w-4" />
-                  preview theme
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="bg-background/95 backdrop-blur">
-                <DrawerHeader>
-                  <DrawerTitle className="flex items-center gap-2 text-lg font-medium lowercase">
-                    <Sparkles className="text-theme-primary h-5 w-5" />
-                    live preview
-                  </DrawerTitle>
-                  <p className="text-muted-foreground/70 text-sm">
-                    see how your theme affects the interface
-                  </p>
-                </DrawerHeader>
-                <div className="p-6">
-                  <PreviewContent />
-                </div>
-              </DrawerContent>
-            </Drawer>
-          ) : (
-            <Dialog open={showPreview} onOpenChange={setShowPreview}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full max-w-xs">
-                  <Eye className="mr-2 h-4 w-4" />
-                  preview theme
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-background/95 max-w-md backdrop-blur">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2 text-lg font-medium lowercase">
-                    <Sparkles className="text-theme-primary h-5 w-5" />
-                    live preview
-                  </DialogTitle>
-                  <p className="text-muted-foreground/70 text-sm">
-                    see how your theme affects the interface
-                  </p>
-                </DialogHeader>
+          <Drawer open={showPreview} onOpenChange={setShowPreview}>
+            <DrawerTrigger asChild>
+              <Button variant="outline" className="w-full max-w-xs">
+                <Eye className="mr-2 h-4 w-4" />
+                preview theme
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="bg-background/95 backdrop-blur">
+              <DrawerHeader>
+                <DrawerTitle className="flex items-center gap-2 text-lg font-medium lowercase">
+                  <Sparkles className="text-theme-primary h-5 w-5" />
+                  live preview
+                </DrawerTitle>
+                <p className="text-muted-foreground/70 text-sm">
+                  see how your theme affects the interface
+                </p>
+              </DrawerHeader>
+              <div className="p-6">
                 <PreviewContent />
-              </DialogContent>
-            </Dialog>
-          )}
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
       )}
 

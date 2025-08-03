@@ -47,6 +47,16 @@ export const follow = mutation({
       createdAt: Date.now(),
     });
 
+    // Update follower count for the user being followed
+    await ctx.db.patch(userToFollow._id, {
+      followerCount: (userToFollow.followerCount ?? 0) + 1,
+    });
+
+    // Update following count for the current user
+    await ctx.db.patch(currentUser._id, {
+      followingCount: (currentUser.followingCount ?? 0) + 1,
+    });
+
     return { success: true, followId };
   },
 });
@@ -73,8 +83,26 @@ export const unfollow = mutation({
       throw new Error('You are not following this user');
     }
 
+    // Get user being unfollowed for count updates
+    const userToUnfollow = await ctx.db
+      .query('users')
+      .withIndex('byExternalId', (q) => q.eq('externalId', args.followingId))
+      .first();
+
     // Remove follow relationship
     await ctx.db.delete(existingFollow._id);
+
+    // Update follower count for the user being unfollowed
+    if (userToUnfollow) {
+      await ctx.db.patch(userToUnfollow._id, {
+        followerCount: Math.max((userToUnfollow.followerCount ?? 1) - 1, 0),
+      });
+    }
+
+    // Update following count for the current user
+    await ctx.db.patch(currentUser._id, {
+      followingCount: Math.max((currentUser.followingCount ?? 1) - 1, 0),
+    });
 
     return { success: true };
   },
@@ -118,16 +146,15 @@ export const getUserFollowers = query({
       })
     );
 
-    // Get total follower count
-    const totalFollowers = await ctx.db
-      .query('follows')
-      .withIndex('byFollowing', (q) => q.eq('followingId', args.userId))
-      .collect()
-      .then((results) => results.length);
+    // Get user to access their follower count efficiently
+    const user = await ctx.db
+      .query('users')
+      .withIndex('byExternalId', (q) => q.eq('externalId', args.userId))
+      .first();
 
     return {
       followers: followersWithDetails.filter((f) => f.user !== null),
-      totalCount: totalFollowers,
+      totalCount: user?.followerCount ?? 0,
       continueCursor: follows.continueCursor,
       isDone: follows.isDone,
     };
@@ -172,16 +199,15 @@ export const getUserFollowing = query({
       })
     );
 
-    // Get total following count
-    const totalFollowing = await ctx.db
-      .query('follows')
-      .withIndex('byFollower', (q) => q.eq('followerId', args.userId))
-      .collect()
-      .then((results) => results.length);
+    // Get user to access their following count efficiently
+    const user = await ctx.db
+      .query('users')
+      .withIndex('byExternalId', (q) => q.eq('externalId', args.userId))
+      .first();
 
     return {
       following: followingWithDetails.filter((f) => f.user !== null),
-      totalCount: totalFollowing,
+      totalCount: user?.followingCount ?? 0,
       continueCursor: follows.continueCursor,
       isDone: follows.isDone,
     };
@@ -239,23 +265,15 @@ export const getFollowStats = query({
     userId: v.string(), // External ID of user
   },
   handler: async (ctx, args) => {
-    // Get follower count (users following this user)
-    const followerCount = await ctx.db
-      .query('follows')
-      .withIndex('byFollowing', (q) => q.eq('followingId', args.userId))
-      .collect()
-      .then((results) => results.length);
-
-    // Get following count (users this user follows)
-    const followingCount = await ctx.db
-      .query('follows')
-      .withIndex('byFollower', (q) => q.eq('followerId', args.userId))
-      .collect()
-      .then((results) => results.length);
+    // Get user to access cached count fields efficiently
+    const user = await ctx.db
+      .query('users')
+      .withIndex('byExternalId', (q) => q.eq('externalId', args.userId))
+      .first();
 
     return {
-      followers: followerCount,
-      following: followingCount,
+      followers: user?.followerCount ?? 0,
+      following: user?.followingCount ?? 0,
     };
   },
 });
@@ -271,27 +289,10 @@ export const getCurrentUserFollowStats = query({
       };
     }
 
-    // Get follower count (users following current user)
-    const followerCount = await ctx.db
-      .query('follows')
-      .withIndex('byFollowing', (q) =>
-        q.eq('followingId', currentUser.externalId)
-      )
-      .collect()
-      .then((results) => results.length);
-
-    // Get following count (users current user follows)
-    const followingCount = await ctx.db
-      .query('follows')
-      .withIndex('byFollower', (q) =>
-        q.eq('followerId', currentUser.externalId)
-      )
-      .collect()
-      .then((results) => results.length);
-
+    // Use cached count fields for efficient access
     return {
-      followers: followerCount,
-      following: followingCount,
+      followers: currentUser.followerCount ?? 0,
+      following: currentUser.followingCount ?? 0,
     };
   },
 });
@@ -362,6 +363,29 @@ async function getPopularUserSuggestions(
     .order('desc')
     .take(200);
 
+  // Filter vibes to process (exclude own content and already followed users)
+  const vibesToProcess = recentVibes.filter(
+    (vibe) =>
+      vibe.createdById !== currentUserId && !followingIds.has(vibe.createdById)
+  );
+
+  // Batch fetch all ratings for the filtered vibes in a single query
+  const allVibeIds = vibesToProcess.map((vibe) => vibe.id);
+  const allRatings = await ctx.db
+    .query('ratings')
+    .filter((q) =>
+      q.or(...allVibeIds.map((vibeId) => q.eq(q.field('vibeId'), vibeId)))
+    )
+    .collect();
+
+  // Group ratings by vibeId for efficient lookup
+  const ratingsByVibeId = new Map<string, Doc<'ratings'>[]>();
+  for (const rating of allRatings) {
+    const existing = ratingsByVibeId.get(rating.vibeId) || [];
+    existing.push(rating);
+    ratingsByVibeId.set(rating.vibeId, existing);
+  }
+
   // Group by creator and calculate engagement metrics
   const userEngagement = new Map<
     string,
@@ -373,18 +397,9 @@ async function getPopularUserSuggestions(
     }
   >();
 
-  for (const vibe of recentVibes) {
-    if (
-      vibe.createdById === currentUserId ||
-      followingIds.has(vibe.createdById)
-    )
-      continue; // Skip own content and already followed users
-
-    // Get all ratings for this vibe
-    const vibeRatings = await ctx.db
-      .query('ratings')
-      .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-      .collect();
+  for (const vibe of vibesToProcess) {
+    // Use pre-fetched and grouped ratings instead of querying in loop
+    const vibeRatings = ratingsByVibeId.get(vibe.id) || [];
 
     if (vibeRatings.length === 0) continue; // Skip vibes with no ratings
 
@@ -481,10 +496,15 @@ export const getSuggestedFollows = query({
       );
     }
 
+    // Limit to top 10 most recent follows to reduce query load
+    const recentFollows = currentUserFollowing
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, 10);
+
     // Get users followed by people the current user follows
     const suggestionCounts = new Map<string, number>();
 
-    for (const follow of currentUserFollowing) {
+    for (const follow of recentFollows) {
       const theirFollowing = await ctx.db
         .query('follows')
         .withIndex('byFollower', (q) => q.eq('followerId', follow.followingId))

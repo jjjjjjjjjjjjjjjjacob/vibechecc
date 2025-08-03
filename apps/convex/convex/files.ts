@@ -35,6 +35,11 @@ export const deleteFile = mutation({
       throw new Error('You must be logged in to delete files');
     }
 
-    await ctx.storage.delete(args.storageId);
+    try {
+      await ctx.storage.delete(args.storageId);
+    } catch {
+      // Handle cases where the file doesn't exist or cannot be deleted
+      throw new Error('File not found or cannot be deleted');
+    }
   },
 });

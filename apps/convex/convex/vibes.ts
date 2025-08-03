@@ -1,7 +1,12 @@
-import { mutation, query, internalMutation } from './_generated/server';
+import {
+  mutation,
+  query,
+  internalMutation,
+  type MutationCtx,
+} from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import type { Doc } from './_generated/dataModel';
+import type { Doc, Id } from './_generated/dataModel';
 
 // Helper to detect test environment
 function isTestEnvironment() {
@@ -626,7 +631,7 @@ export const create = mutation({
 
     // Handle image storage - store both legacy URL and new storage ID
     let imageValue: string | undefined;
-    let imageStorageIdValue: any | undefined;
+    let imageStorageIdValue: Id<'_storage'> | undefined;
 
     if (args.image) {
       if (typeof args.image === 'string') {
@@ -672,7 +677,7 @@ export const create = mutation({
 
 // Helper function to add vibe tags to user interests
 const addInterestsFromVibe = async (
-  ctx: any,
+  ctx: MutationCtx,
   userId: string,
   vibeId: string
 ): Promise<void> => {
@@ -680,7 +685,7 @@ const addInterestsFromVibe = async (
     // Get the vibe to extract its tags
     const vibe = await ctx.db
       .query('vibes')
-      .filter((q: any) => q.eq(q.field('id'), vibeId))
+      .filter((q) => q.eq(q.field('id'), vibeId))
       .first();
 
     // Return early if vibe doesn't exist or has no tags
@@ -691,7 +696,7 @@ const addInterestsFromVibe = async (
     // Get the user to get current interests
     const user = await ctx.db
       .query('users')
-      .withIndex('byExternalId', (q: any) => q.eq('externalId', userId))
+      .withIndex('byExternalId', (q) => q.eq('externalId', userId))
       .first();
 
     // Return early if user doesn't exist
@@ -1814,14 +1819,28 @@ export const getForYouFeed = query({
       .order('desc')
       .take(200); // Get more vibes to ensure we have a good pool
 
+    // Batch fetch all ratings for all vibes to avoid N+1 query problem
+    const allVibeIds = recentVibes.map((vibe) => vibe.id);
+    const allRatings = await ctx.db
+      .query('ratings')
+      .filter((q) =>
+        q.or(...allVibeIds.map((vibeId) => q.eq(q.field('vibeId'), vibeId)))
+      )
+      .collect();
+
+    // Group ratings by vibeId for efficient lookup
+    const ratingsByVibeId = new Map<string, typeof allRatings>();
+    for (const rating of allRatings) {
+      const existing = ratingsByVibeId.get(rating.vibeId) || [];
+      existing.push(rating);
+      ratingsByVibeId.set(rating.vibeId, existing);
+    }
+
     // Calculate engagement scores for all vibes
     const vibesWithEngagement = await Promise.all(
       recentVibes.map(async (vibe) => {
-        // Get all ratings for this vibe
-        const ratings = await ctx.db
-          .query('ratings')
-          .withIndex('vibe', (q: any) => q.eq('vibeId', vibe.id))
-          .collect();
+        // Get pre-fetched ratings for this vibe
+        const ratings = ratingsByVibeId.get(vibe.id) || [];
 
         // Check if vibe has tags matching user interests
         const hasMatchingInterests =
@@ -1894,7 +1913,7 @@ export const getForYouFeed = query({
 
         const ratings = await ctx.db
           .query('ratings')
-          .withIndex('vibe', (q: any) => q.eq('vibeId', vibe.id))
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
           .take(10);
 
         const ratingDetails = await Promise.all(
@@ -2159,13 +2178,25 @@ export const getUserDerivedInterests = query({
       }
     }
 
+    // Batch fetch all vibes for rated vibe IDs to avoid N+1 queries
+    const ratedVibeIds = userRatings.map((rating) => rating.vibeId);
+    const ratedVibes = await ctx.db
+      .query('vibes')
+      .filter((q) =>
+        q.or(...ratedVibeIds.map((vibeId) => q.eq(q.field('id'), vibeId)))
+      )
+      .collect();
+
+    // Create map of vibe ID to vibe object for O(1) lookup
+    const vibeMap = new Map<string, (typeof ratedVibes)[0]>();
+    for (const vibe of ratedVibes) {
+      vibeMap.set(vibe.id, vibe);
+    }
+
     // Collect all tags from vibes the user rated
     const ratedTags = new Set<string>();
     for (const rating of userRatings) {
-      const vibe = await ctx.db
-        .query('vibes')
-        .withIndex('id', (q) => q.eq('id', rating.vibeId))
-        .first();
+      const vibe = vibeMap.get(rating.vibeId);
       if (vibe && vibe.tags) {
         vibe.tags.forEach((tag: string) => ratedTags.add(tag));
       }
@@ -2186,15 +2217,12 @@ export const getUserDerivedInterests = query({
       allTags.push({ tag, source: 'created', count: createdCount * 3 }); // Weight created tags higher
     });
 
-    // Add rated tags
+    // Add rated tags (using pre-fetched vibe map for O(1) lookup)
     for (const tag of Array.from(ratedTags)) {
       if (!createdTags.has(tag)) {
         let ratedCount = 0;
         for (const rating of userRatings) {
-          const vibe = await ctx.db
-            .query('vibes')
-            .withIndex('id', (q) => q.eq('id', rating.vibeId))
-            .first();
+          const vibe = vibeMap.get(rating.vibeId);
           if (vibe?.tags?.includes(tag)) {
             ratedCount++;
           }
@@ -2248,7 +2276,7 @@ export const updateVibe = mutation({
     }
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: Partial<Doc<'vibes'>> & { updatedAt: string } = {
       updatedAt: new Date().toISOString(),
     };
 

@@ -82,27 +82,30 @@ export function AvatarPicker({
         role="button"
         aria-label="Change avatar"
       >
-        <Avatar
+        {/* Gradient border wrapper */}
+        <div
           className={cn(
-            sizeClasses[size],
-            'border-gradient-to-r from-theme-primary to-theme-secondary border-4 transition-transform hover:scale-105'
+            'from-theme-primary to-theme-secondary rounded-full bg-gradient-to-r p-1 transition-transform hover:scale-105',
+            sizeClasses[size]
           )}
         >
-          <AvatarImage
-            src={previewUrl}
-            alt={userName}
-            className="object-cover"
-          />
-          <AvatarFallback className="from-theme-primary/10 to-theme-secondary/10 dark:from-theme-primary/20 dark:to-theme-secondary/20 bg-gradient-to-r">
-            {previewUrl ? (
-              <User className="text-primary h-6 w-6" />
-            ) : (
-              <span className="text-primary text-lg font-semibold">
-                {getInitials(userName)}
-              </span>
-            )}
-          </AvatarFallback>
-        </Avatar>
+          <Avatar className={cn(sizeClasses[size], 'bg-background')}>
+            <AvatarImage
+              src={previewUrl}
+              alt={userName}
+              className="object-cover"
+            />
+            <AvatarFallback className="from-theme-primary/10 to-theme-secondary/10 dark:from-theme-primary/20 dark:to-theme-secondary/20 bg-gradient-to-r">
+              {previewUrl ? (
+                <User className="text-primary h-6 w-6" />
+              ) : (
+                <span className="text-primary text-lg font-semibold">
+                  {getInitials(userName)}
+                </span>
+              )}
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
         {/* Edit button overlay */}
         <Button

@@ -474,6 +474,15 @@ export function Header() {
         <div
           className="animate-in fade-in fixed inset-0 z-40 bg-black/50 backdrop-blur-sm duration-200 sm:hidden"
           onClick={() => setMobileNavState(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setMobileNavState(null);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close navigation menu"
           style={{ top: '64px' }} // Start below the header
         />
       )}

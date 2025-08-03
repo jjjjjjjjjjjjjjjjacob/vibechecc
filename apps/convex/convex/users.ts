@@ -643,6 +643,13 @@ export const createForSeed = mutation({
     created_at: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // Security guard: prevent usage in production environment
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'createForSeed is not available in production environment'
+      );
+    }
+
     // Check if user already exists by externalId
     const existingUser = await userByExternalId(ctx, args.externalId);
 

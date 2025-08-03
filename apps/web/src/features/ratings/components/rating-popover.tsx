@@ -319,6 +319,7 @@ export function RatingPopover({
                 {selectedEmoji ? (
                   <div
                     onMouseLeave={() => setRatingValue(selectedRatingValue)}
+                    role="group"
                     className="w-full text-left focus:outline-none"
                     aria-label="Emoji rating scale"
                   >
