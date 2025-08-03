@@ -12,4 +12,4 @@ Disallow: /profile
 Disallow: /onboarding
 
 # Allow search engines to find our sitemap
-Sitemap: https://viberater.com/sitemap/xml
+Sitemap: https://viberatr.com/sitemap/xml

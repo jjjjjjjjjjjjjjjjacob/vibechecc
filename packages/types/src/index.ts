@@ -1,4 +1,4 @@
-// Core viberater types that can be shared across applications
+// Core viberatr types that can be shared across applications
 
 // Re-export search types
 export * from './search';

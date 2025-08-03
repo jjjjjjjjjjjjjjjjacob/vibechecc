@@ -28,7 +28,7 @@ import toast from '@/utils/toast';
 import { useAllTags, useUserDerivedInterests } from '@/queries';
 import { cn } from '@/utils/tailwind-utils';
 import type { UseMutationResult } from '@tanstack/react-query';
-import type { User } from '@viberater/types';
+import type { User } from '@viberatr/types';
 
 interface UserInterestsSectionProps {
   user: User;

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { SearchSuggestion } from '@viberater/types';
+import type { SearchSuggestion } from '@viberatr/types';
 
-const RECENT_SEARCHES_KEY = 'viberater:recent-searches';
+const RECENT_SEARCHES_KEY = 'viberatr:recent-searches';
 const MAX_RECENT_SEARCHES = 10;
 
 export function useRecentSearches() {

@@ -43,7 +43,7 @@ ENDPOINTS="{ s3 = \"https://${TF_VAR_cloudflare_account_id}.r2.cloudflarestorage
 # Generate the .tfvars file
 cat > backend.tfvars << EOF
 bucket = "$R2_BUCKET"
-key = "viberater/terraform.tfstate"
+key = "viberatr/terraform.tfstate"
 endpoints = $ENDPOINTS
 access_key = "$R2_ACCESS_KEY_ID"
 secret_key = "$R2_SECRET_ACCESS_KEY"

@@ -150,7 +150,7 @@ export function ForYouEmptyState({ className }: ForYouEmptyStateProps) {
       <Card className="bg-background/50 border-theme-secondary/20 shadow-lg backdrop-blur-md">
         <CardContent className="p-6">
           <div className="text-center">
-            <h4 className="mb-2 font-semibold">new to viberater?</h4>
+            <h4 className="mb-2 font-semibold">new to viberatr?</h4>
             <p className="text-muted-foreground/80 mb-4 text-sm">
               share your life experiences, rate others' vibes, and discover
               content from people you connect with.

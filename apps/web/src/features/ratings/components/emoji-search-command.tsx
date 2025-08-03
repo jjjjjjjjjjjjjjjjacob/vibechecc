@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@viberater/convex';
+import { api } from '@viberatr/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import {
   Command,

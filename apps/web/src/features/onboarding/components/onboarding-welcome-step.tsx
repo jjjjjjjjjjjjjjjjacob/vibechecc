@@ -36,7 +36,7 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
           <Sparkles className="h-10 w-10 text-white" />
         </div>
         <h1 className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
-          welcome to viberater
+          welcome to viberatr
         </h1>
         <p className="text-muted-foreground mx-auto max-w-md text-xl">
           a place to discover, share, and connect through vibes that matter to

@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { EMOJI_DATABASE } from '../lib/emoji-database';
-import { api } from '@viberater/convex';
+import { api } from '@viberatr/convex';
 import { ConvexHttpClient } from 'convex/browser';
 
 const CONVEX_URL = process.env.VITE_CONVEX_URL || process.env.CONVEX_URL;

@@ -1,7 +1,7 @@
 # Backend Search Implementation Learnings
 
 ## Context
-While implementing the backend search infrastructure for viberater (Agent 1 task), several important patterns and considerations emerged.
+While implementing the backend search infrastructure for viberatr (Agent 1 task), several important patterns and considerations emerged.
 
 ## Key Learnings
 
@@ -11,8 +11,8 @@ While implementing the backend search infrastructure for viberater (Agent 1 task
 - Consider compound indexes for queries that filter by multiple fields
 
 ### 2. Type Imports from Shared Packages
-- The `@viberater/types` package exports search-related types
-- Import types directly: `import type { SearchResult, ... } from '@viberater/types'`
+- The `@viberatr/types` package exports search-related types
+- Import types directly: `import type { SearchResult, ... } from '@viberatr/types'`
 - Types are automatically available after the package is built
 
 ### 3. Convex Query Patterns

@@ -1,4 +1,4 @@
-import { api } from '@viberater/convex';
+import { api } from '@viberatr/convex';
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
 

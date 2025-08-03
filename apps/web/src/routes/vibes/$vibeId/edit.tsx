@@ -21,7 +21,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from 'lucide-react';
-import type { Id } from '@viberater/convex/dataModel';
+import type { Id } from '@viberatr/convex/dataModel';
 import toast from '@/utils/toast';
 import '@/styles/create-vibe.css';
 
@@ -542,7 +542,7 @@ function EditVibe() {
 
           {/* Bottom hint */}
           <p className="text-muted-foreground mt-6 text-center text-xs">
-            your updated vibe will be visible to everyone on viberater
+            your updated vibe will be visible to everyone on viberatr
           </p>
         </div>
       </div>

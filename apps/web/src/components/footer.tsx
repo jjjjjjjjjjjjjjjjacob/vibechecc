@@ -15,7 +15,7 @@ export function Footer({ className }: FooterProps) {
           {/* Logo/Brand */}
           <div className="flex items-center gap-2">
             <Link to="/" className="text-foreground text-lg font-semibold">
-              viberater
+              viberatr
             </Link>
           </div>
 
@@ -45,7 +45,7 @@ export function Footer({ className }: FooterProps) {
 
           {/* Copyright */}
           <div className="text-muted-foreground text-center text-sm md:text-right">
-            © {currentYear} viberater. all rights reserved.
+            © {currentYear} viberatr. all rights reserved.
           </div>
         </div>
       </div>

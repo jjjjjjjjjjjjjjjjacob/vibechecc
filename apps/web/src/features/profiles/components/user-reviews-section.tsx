@@ -12,7 +12,7 @@ import {
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { useUserRatings } from '@/queries';
-import type { User, Rating } from '@viberater/types';
+import type { User, Rating } from '@viberatr/types';
 import { MessageSquare } from 'lucide-react';
 
 interface UserReviewsSectionProps {

@@ -12,7 +12,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { SearchFilters } from './search-filters';
-import type { SearchFilters as SearchFiltersType } from '@viberater/types';
+import type { SearchFilters as SearchFiltersType } from '@viberatr/types';
 
 interface MobileFilterDrawerProps {
   filters: Partial<SearchFiltersType>;

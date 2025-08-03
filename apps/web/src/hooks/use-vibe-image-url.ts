@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
-import { api } from '@viberater/convex';
-import type { Id } from '@viberater/convex/dataModel';
+import { api } from '@viberatr/convex';
+import type { Id } from '@viberatr/convex/dataModel';
 
 export function useVibeImageUrl(vibe: {
   image?: string;

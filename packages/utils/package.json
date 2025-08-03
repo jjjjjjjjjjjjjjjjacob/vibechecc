@@ -1,7 +1,7 @@
 {
-  "name": "@viberater/utils",
+  "name": "@viberatr/utils",
   "version": "1.0.0",
-  "description": "Shared utility functions for the viberater workspace",
+  "description": "Shared utility functions for the viberatr workspace",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

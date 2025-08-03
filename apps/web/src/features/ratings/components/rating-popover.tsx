@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
-import type { EmojiRating, EmojiRatingMetadata } from '@viberater/types';
+import type { EmojiRating, EmojiRatingMetadata } from '@viberatr/types';
 import { Circle, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { EmojiSearchCommand } from './emoji-search-command';

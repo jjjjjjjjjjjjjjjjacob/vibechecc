@@ -1,5 +1,5 @@
 /**
- * Shared constants for the viberater platform
+ * Shared constants for the viberatr platform
  */
 
 export * from './limits';

@@ -7,7 +7,7 @@ import {
   EmojiRatingDisplay,
   TopEmojiRatings,
 } from '@/features/ratings/components/emoji-rating-display';
-import { api } from '@viberater/convex';
+import { api } from '@viberatr/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -16,7 +16,7 @@ import type {
   UserSearchResult,
   TagSearchResult,
   ReviewSearchResult,
-} from '@viberater/types';
+} from '@viberatr/types';
 
 interface SearchResultCardProps {
   result: SearchResult;

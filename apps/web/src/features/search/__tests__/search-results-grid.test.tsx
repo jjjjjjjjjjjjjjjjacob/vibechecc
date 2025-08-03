@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SearchResultsGrid } from '@/features/search/components/search-results-grid';
-import type { SearchResult } from '@viberater/types';
+import type { SearchResult } from '@viberatr/types';
 
 // Mock the child components
 vi.mock('@/features/search/components/search-result-card', () => ({

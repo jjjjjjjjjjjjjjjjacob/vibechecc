@@ -30,14 +30,14 @@
     "baseUrl": ".",
     "noEmit": true,
     "paths": {
-      "@viberater/convex": ["./apps/convex"],
-      "@viberater/convex/*": ["./apps/convex/*"],
-      "@viberater/types": ["./packages/types/src"],
-      "@viberater/types/*": ["./packages/types/src/*"],
-      "@viberater/utils": ["./packages/utils/src"],
-      "@viberater/utils/*": ["./packages/utils/src/*"],
-      "@viberater/web": ["./apps/web"],
-      "@viberater/web/*": ["./apps/web/*"]
+      "@viberatr/convex": ["./apps/convex"],
+      "@viberatr/convex/*": ["./apps/convex/*"],
+      "@viberatr/types": ["./packages/types/src"],
+      "@viberatr/types/*": ["./packages/types/src/*"],
+      "@viberatr/utils": ["./packages/utils/src"],
+      "@viberatr/utils/*": ["./packages/utils/src/*"],
+      "@viberatr/web": ["./apps/web"],
+      "@viberatr/web/*": ["./apps/web/*"]
     }
   },
   "exclude": ["vitest.setup.ts", "node_modules", "dist", ".output"]
