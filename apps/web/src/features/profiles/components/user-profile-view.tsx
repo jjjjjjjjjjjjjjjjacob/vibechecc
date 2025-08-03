@@ -29,7 +29,7 @@ import {
   type PrimaryColorTheme,
   type SecondaryColorTheme,
 } from '@/features/theming/components/theme-provider';
-import type { Vibe } from '@viberater/types';
+import type { Vibe } from '@viberatr/types';
 import { getThemeColorValue } from '@/utils/theme-colors';
 import { useUser } from '@clerk/tanstack-react-start';
 import {

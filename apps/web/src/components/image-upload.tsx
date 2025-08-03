@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
 import { X, Image as ImageIcon } from 'lucide-react';
-import type { Id } from '@viberater/convex/dataModel';
+import type { Id } from '@viberatr/convex/dataModel';
 
 interface ImageUploadProps {
   onImageUpload?: (storageId: Id<'_storage'>, url: string) => void;

@@ -85,7 +85,7 @@ export function OnboardingCompleteStep({
           you're all set
         </h1>
         <p className="text-muted-foreground text-xl">
-          welcome to the viberater community!
+          welcome to the viberatr community!
           <br />
           you're ready to start discovering and sharing vibes.
         </p>

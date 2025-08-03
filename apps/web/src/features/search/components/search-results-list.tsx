@@ -4,7 +4,7 @@ import { SearchLoading } from './search-loading';
 import { SearchError } from './search-error';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import type { SearchResult, VibeSearchResult } from '@viberater/types';
+import type { SearchResult, VibeSearchResult } from '@viberatr/types';
 import type { Vibe } from '@/types';
 
 interface SearchResultsListProps {

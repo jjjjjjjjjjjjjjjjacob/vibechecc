@@ -13,7 +13,7 @@ import { Search, Users, X } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useFollowers } from '../hooks/use-followers';
 import { FollowButton } from './follow-button';
-import type { User } from '@viberater/types';
+import type { User } from '@viberatr/types';
 import { trackEvents } from '@/lib/posthog';
 
 interface _Follower {

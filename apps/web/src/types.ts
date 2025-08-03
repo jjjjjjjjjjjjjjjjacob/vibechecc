@@ -1,5 +1,5 @@
-// Re-export shared types from @viberater/types
-export type { User, Vibe, Rating } from '@viberater/types';
+// Re-export shared types from @viberatr/types
+export type { User, Vibe, Rating } from '@viberatr/types';
 
 // Local types
 export interface EmojiReaction {

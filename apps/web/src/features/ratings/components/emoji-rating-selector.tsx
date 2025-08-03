@@ -2,7 +2,7 @@ import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/utils/tailwind-utils';
 import { RatingPopover } from './rating-popover';
-import type { EmojiRating, EmojiRatingMetadata } from '@viberater/types';
+import type { EmojiRating, EmojiRatingMetadata } from '@viberatr/types';
 
 interface EmojiRatingSelectorProps {
   topEmojis?: EmojiRating[];

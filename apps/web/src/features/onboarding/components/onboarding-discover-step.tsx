@@ -8,7 +8,7 @@ import { Heart, Eye, UserPlus, Users, Sparkles } from 'lucide-react';
 import { useVibes } from '@/queries';
 import { EmojiRatingSelector } from '@/features/ratings/components/emoji-rating-selector';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import type { User, EmojiRating } from '@viberater/types';
+import type { User, EmojiRating } from '@viberatr/types';
 
 interface OnboardingDiscoverStepProps {
   onNext: () => void;
@@ -400,7 +400,7 @@ export function OnboardingDiscoverStep({
           className="rounded-lg border border-green-500/20 bg-green-500/10 p-4 text-center"
         >
           <p className="text-sm font-medium text-green-700 dark:text-green-300">
-            awesome! you're ready to start your viberater journey 🚀
+            awesome! you're ready to start your viberatr journey 🚀
           </p>
         </motion.div>
       )}

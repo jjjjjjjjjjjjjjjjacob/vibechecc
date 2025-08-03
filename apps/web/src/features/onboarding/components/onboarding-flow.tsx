@@ -53,7 +53,7 @@ export function OnboardingFlow() {
   const handleSkip = async () => {
     try {
       await completeOnboardingMutation.mutateAsync({});
-      toast.success('welcome to viberater!');
+      toast.success('welcome to viberatr!');
       navigate({ to: '/' });
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -156,7 +156,7 @@ export function OnboardingFlow() {
       // Execute all updates in parallel
       await Promise.all(promises);
 
-      toast.success('welcome to viberater! 🎉');
+      toast.success('welcome to viberatr! 🎉');
       navigate({ to: '/' });
     } catch (error) {
       // eslint-disable-next-line no-console

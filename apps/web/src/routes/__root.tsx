@@ -63,8 +63,8 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       ...seo({
-        title: 'viberater | share and discover vibes',
-        description: `viberater is a platform for sharing and discovering vibes. rate, react, and share your favorite vibes with the world.`,
+        title: 'viberatr | share and discover vibes',
+        description: `viberatr is a platform for sharing and discovering vibes. rate, react, and share your favorite vibes with the world.`,
       }),
     ],
     links: [

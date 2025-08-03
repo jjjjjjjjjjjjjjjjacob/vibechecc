@@ -1,6 +1,6 @@
-# @viberater/utils
+# @viberatr/utils
 
-Shared utility functions for the viberater workspace.
+Shared utility functions for the viberatr workspace.
 
 ## Important: Separation of Concerns
 
@@ -8,7 +8,7 @@ This package should **only** contain utilities that are:
 
 - Actually used by 2+ workspaces (not "might be used")
 - Pure functions with no workspace-specific dependencies
-- Working with shared types from `@viberater/types`
+- Working with shared types from `@viberatr/types`
 
 Workspace-specific utilities should remain in their respective workspaces:
 
@@ -21,7 +21,7 @@ Workspace-specific utilities should remain in their respective workspaces:
 ### Constants
 
 ```typescript
-import { PAGINATION, CONTENT_LIMITS, RATING } from '@viberater/utils/constants';
+import { PAGINATION, CONTENT_LIMITS, RATING } from '@viberatr/utils/constants';
 
 // Pagination limits
 PAGINATION.DEFAULT_PAGE_SIZE; // 20
@@ -43,7 +43,7 @@ import {
   formatDate,
   formatRelativeTime,
   toISOString,
-} from '@viberater/utils/format';
+} from '@viberatr/utils/format';
 
 // Format date for display
 formatDate('2024-01-15'); // "Jan 15, 2024"
@@ -68,11 +68,11 @@ Import what you need:
 
 ```typescript
 // Import from main entry
-import { PAGINATION, formatDate } from '@viberater/utils';
+import { PAGINATION, formatDate } from '@viberatr/utils';
 
 // Or use subpath imports for better tree-shaking
-import { PAGINATION } from '@viberater/utils/constants';
-import { formatDate } from '@viberater/utils/format';
+import { PAGINATION } from '@viberatr/utils/constants';
+import { formatDate } from '@viberatr/utils/format';
 ```
 
 ## Adding New Utilities

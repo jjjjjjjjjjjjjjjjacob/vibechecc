@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@viberater/convex';
+import { api } from '@viberatr/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { toast } from 'sonner';
 import { trackEvents } from '@/lib/posthog';

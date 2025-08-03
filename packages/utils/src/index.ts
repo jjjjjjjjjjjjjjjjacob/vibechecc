@@ -1,5 +1,5 @@
 /**
- * @viberater/utils - Shared utilities for the viberater workspace
+ * @viberatr/utils - Shared utilities for the viberatr workspace
  *
  * This package contains only truly shared utilities that are used
  * across multiple workspaces (frontend, backend, etc.).

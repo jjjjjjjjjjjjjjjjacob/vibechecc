@@ -14,7 +14,7 @@ import { TagInput } from '@/components/tag-input';
 import { ImageUpload } from '@/components/image-upload';
 import { cn } from '@/utils/tailwind-utils';
 import { Circle, Sparkles } from 'lucide-react';
-import type { Id } from '@viberater/convex/dataModel';
+import type { Id } from '@viberatr/convex/dataModel';
 import toast from '@/utils/toast';
 import '@/styles/create-vibe.css';
 
@@ -253,7 +253,7 @@ function CreateVibe() {
 
           {/* Bottom hint */}
           <p className="text-muted-foreground mt-6 text-center text-xs">
-            your vibe will be visible to everyone on viberater
+            your vibe will be visible to everyone on viberatr
           </p>
         </div>
       </div>

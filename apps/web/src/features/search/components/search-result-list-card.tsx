@@ -11,7 +11,7 @@ import {
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import { api } from '@viberater/convex';
+import { api } from '@viberatr/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -21,7 +21,7 @@ import type {
   TagSearchResult,
   ReviewSearchResult,
   Vibe,
-} from '@viberater/types';
+} from '@viberatr/types';
 import { Hash, Users, MessageSquare } from 'lucide-react';
 
 interface SearchResultListCardProps {

@@ -1,7 +1,7 @@
 {
-  "name": "@viberater/types",
+  "name": "@viberatr/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types for the viberater workspace",
+  "description": "Shared TypeScript types for the viberatr workspace",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

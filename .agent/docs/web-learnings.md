@@ -1,6 +1,6 @@
-# Web Development Learnings - viberater
+# Web Development Learnings - viberatr
 
-This document captures learnings, patterns, and best practices discovered during web development tasks in the viberater project.
+This document captures learnings, patterns, and best practices discovered during web development tasks in the viberatr project.
 
 ## Personalized Feed Enhancement Patterns
 

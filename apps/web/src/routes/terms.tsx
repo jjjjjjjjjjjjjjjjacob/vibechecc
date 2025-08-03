@@ -6,8 +6,8 @@ export const Route = createFileRoute('/terms')({
   head: () => ({
     meta: [
       ...seo({
-        title: 'terms of service | viberater',
-        description: 'terms of service for viberater platform',
+        title: 'terms of service | viberatr',
+        description: 'terms of service for viberatr platform',
       }),
     ],
   }),
@@ -29,7 +29,7 @@ function TermsPage() {
             1. acceptance of terms
           </h2>
           <p className="mb-4">
-            by accessing and using viberater ("the service", "platform"), you
+            by accessing and using viberatr ("the service", "platform"), you
             accept and agree to be bound by the terms and provision of this
             agreement. if you do not agree to abide by the above, please do not
             use this service.
@@ -41,7 +41,7 @@ function TermsPage() {
             2. description of service
           </h2>
           <p className="mb-4">
-            viberater is a social platform that allows users to share "vibes"
+            viberatr is a social platform that allows users to share "vibes"
             (experiences, thoughts, situations), rate and react to content with
             emojis and stars, and discover trending content through search and
             filtering capabilities.
@@ -102,13 +102,13 @@ function TermsPage() {
           </h2>
           <div className="space-y-4">
             <p>
-              you retain ownership of content you post on viberater. however, by
-              posting content, you grant viberater a worldwide, non-exclusive,
+              you retain ownership of content you post on viberatr. however, by
+              posting content, you grant viberatr a worldwide, non-exclusive,
               royalty-free license to use, reproduce, modify, adapt, publish,
               translate, distribute, and display such content.
             </p>
             <p>
-              viberater respects intellectual property rights. if you believe
+              viberatr respects intellectual property rights. if you believe
               your copyright has been infringed, please contact us with details
               of the alleged infringement.
             </p>
@@ -120,7 +120,7 @@ function TermsPage() {
           <p className="mb-4">
             your privacy is important to us. our privacy policy explains how we
             collect, use, and protect your information when you use our service.
-            by using viberater, you agree to our privacy policy.
+            by using viberatr, you agree to our privacy policy.
           </p>
         </section>
 
@@ -156,10 +156,9 @@ function TermsPage() {
             9. limitation of liability
           </h2>
           <p className="mb-4">
-            to the maximum extent permitted by law, viberater shall not be
-            liable for any indirect, incidental, special, consequential, or
-            punitive damages, including but not limited to loss of profits,
-            data, or use.
+            to the maximum extent permitted by law, viberatr shall not be liable
+            for any indirect, incidental, special, consequential, or punitive
+            damages, including but not limited to loss of profits, data, or use.
           </p>
         </section>
 

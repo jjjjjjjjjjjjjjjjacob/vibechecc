@@ -134,7 +134,7 @@ export function Header() {
             <div className="flex items-center gap-2 md:gap-4">
               <Link to="/" className="flex items-center gap-2">
                 <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent">
-                  viberater
+                  viberatr
                 </span>
               </Link>
 

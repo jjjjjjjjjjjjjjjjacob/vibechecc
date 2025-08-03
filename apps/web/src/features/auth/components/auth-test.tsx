@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
-import { api } from '@viberater/convex';
+import { api } from '@viberatr/convex';
 import { useUser } from '@clerk/tanstack-react-start';
 
 export function AuthTest() {

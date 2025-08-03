@@ -1,5 +1,5 @@
 /**
- * Shared limits and defaults used across the viberater platform
+ * Shared limits and defaults used across the viberatr platform
  */
 
 // Pagination limits

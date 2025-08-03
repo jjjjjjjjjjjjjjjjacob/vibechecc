@@ -1,8 +1,8 @@
-# viberater Infrastructure
+# viberatr Infrastructure
 
 > **Note:** For monorepo setup, scripts, and app details, see the [root README.md](../README.md).
 
-This directory contains the Terraform configuration for the viberater application.
+This directory contains the Terraform configuration for the viberatr application.
 
 ## Overview
 
@@ -22,9 +22,9 @@ Infrastructure is managed by Terraform and deployed to Cloudflare. Key resources
 
 ## Environments
 
-- `production`: viberater.vip
-- `development`: dev.viberater.vip
-- `ephemeral`: pr-{number}.viberater.vip (PR previews)
+- `production`: viberatr.io
+- `development`: dev.viberatr.io
+- `ephemeral`: pr-{number}.viberatr.io (PR previews)
 
 ---
 

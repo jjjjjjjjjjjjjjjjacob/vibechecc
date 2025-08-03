@@ -1,7 +1,7 @@
 # Search Integration Learnings
 
 ## Context
-These learnings come from implementing the real-time search integration (Agent 1's work) for the viberater project.
+These learnings come from implementing the real-time search integration (Agent 1's work) for the viberatr project.
 
 ## Key Learnings
 
@@ -41,7 +41,7 @@ These learnings come from implementing the real-time search integration (Agent 1
 - Include retry functionality for better UX
 
 ### 6. Type Safety
-- Import types from `@viberater/types` for consistency
+- Import types from `@viberatr/types` for consistency
 - Use proper type guards when checking for specific result types
 - Handle union types carefully in search results
 

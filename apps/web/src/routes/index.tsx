@@ -41,7 +41,7 @@ function Home() {
               we're vibing here
             </h1>
             <p className="mb-6 text-lg opacity-90 md:text-xl">
-              welcome to <strong>viberater</strong>, where you can discover,
+              welcome to <strong>viberatr</strong>, where you can discover,
               share, and rate vibes from around the world
             </p>
             <SignedIn>

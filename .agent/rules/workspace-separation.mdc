@@ -11,9 +11,9 @@ Keep code where it belongs. Only extract to shared packages when multiple worksp
 
 ## Guidelines
 
-### What belongs in shared packages (e.g., @viberater/utils):
+### What belongs in shared packages (e.g., @viberatr/utils):
 - Utilities used by 2+ workspaces (frontend, backend, etc.)
-- Type definitions shared across workspaces (@viberater/types)
+- Type definitions shared across workspaces (@viberatr/types)
 - Constants and configurations used by multiple apps
 - Generic utilities with no workspace-specific dependencies
 

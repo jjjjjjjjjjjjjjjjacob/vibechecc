@@ -1,9 +1,9 @@
 {
-  "name": "@viberater/web",
+  "name": "@viberatr/web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/web",
-  "inputs": ["@viberater/convex", "@viberater/types"],
+  "inputs": ["@viberatr/convex", "@viberatr/types"],
   "targets": {
     "dev": {
       "executor": "nx:run-commands",
