@@ -1,0 +1,202 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { createAPIFileRoute } from '@tanstack/react-start';
+import { 
+  generateComprehensiveSitemap, 
+  generateRobotsTxt,
+  type SitemapData 
+} from '@/utils/sitemap-generator';
+
+/**
+ * XML Sitemap API Route
+ * 
+ * Generates dynamic XML sitemaps for SEO optimization.
+ * Supports both single sitemap and sitemap index for large sites.
+ * 
+ * Usage: 
+ *   GET /api/sitemap - Main sitemap or sitemap index
+ *   GET /api/sitemap?index=1 - Specific sitemap chunk
+ *   GET /api/sitemap?type=robots - robots.txt
+ */
+export const Route = createAPIFileRoute('/api/sitemap')({
+  GET: async ({ request }: { request: Request }) => {
+    try {
+      const url = new URL(request.url);
+      const searchParams = url.searchParams;
+      
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://viberater.com' 
+        : 'http://localhost:3000';
+      
+      // Handle robots.txt request
+      if (searchParams.get('type') === 'robots') {
+        const robotsTxt = generateRobotsTxt(baseUrl, false); // Will be updated based on actual sitemap size
+        
+        return new Response(robotsTxt, {
+          headers: {
+            'Content-Type': 'text/plain',
+            'Cache-Control': 'public, max-age=86400', // 24 hour cache
+          },
+        });
+      }
+      
+      // Get index parameter for multi-sitemap scenarios
+      const sitemapIndex = searchParams.get('index');
+      
+      // In a real implementation, you would fetch data from your Convex backend
+      // For now, we'll use mock data to demonstrate the structure
+      const sitemapData: SitemapData = await fetchSitemapData();
+      
+      const sitemapResult = generateComprehensiveSitemap(sitemapData, {
+        baseUrl,
+        maxEntries: 50000,
+        excludeNoIndex: true,
+      });
+      
+      // Handle specific sitemap index request
+      if (sitemapIndex && sitemapResult.sitemaps) {
+        const index = parseInt(sitemapIndex) - 1; // Convert to 0-based index
+        if (index >= 0 && index < sitemapResult.sitemaps.length) {
+          return new Response(sitemapResult.sitemaps[index], {
+            headers: {
+              'Content-Type': 'application/xml',
+              'Cache-Control': 'public, max-age=3600', // 1 hour cache for individual sitemaps
+            },
+          });
+        } else {
+          return new Response('Sitemap not found', { status: 404 });
+        }
+      }
+      
+      // Return main sitemap or sitemap index
+      const sitemapContent = sitemapResult.needsIndex 
+        ? sitemapResult.sitemapIndex 
+        : sitemapResult.sitemap;
+      
+      if (!sitemapContent) {
+        return new Response('Error generating sitemap', { status: 500 });
+      }
+      
+      return new Response(sitemapContent, {
+        headers: {
+          'Content-Type': 'application/xml',
+          'Cache-Control': 'public, max-age=3600', // 1 hour cache
+        },
+      });
+      
+    } catch (error) {
+      console.error('Error generating sitemap:', error);
+      
+      // Return a minimal sitemap as fallback
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://viberater.com' 
+        : 'http://localhost:3000';
+        
+      const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/discover</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>`;
+      
+      return new Response(fallbackSitemap, {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/xml',
+          'Cache-Control': 'no-cache',
+        },
+      });
+    }
+  },
+});
+
+/**
+ * Fetch sitemap data from Convex backend
+ * This would be replaced with actual Convex queries in a real implementation
+ */
+async function fetchSitemapData(): Promise<SitemapData> {
+  try {
+    // In a real implementation, you would use Convex queries here
+    // For now, return mock data to demonstrate the structure
+    
+    // This is how you would fetch data in a real implementation:
+    /*
+    const convexClient = new ConvexReactClient(process.env.VITE_CONVEX_URL!);
+    
+    const [vibes, users, tags] = await Promise.all([
+      convexClient.query(api.vibes.getAllForSitemap),
+      convexClient.query(api.users.getAllForSitemap),
+      convexClient.query(api.tags.getAllForSitemap),
+    ]);
+    
+    return { vibes, users, tags };
+    */
+    
+    // Mock data for demonstration
+    return {
+      vibes: [
+        {
+          id: 'vibe-1',
+          title: 'Sample Vibe',
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-15T12:00:00Z',
+          tags: ['travel', 'adventure'],
+          visibility: 'public',
+        },
+        {
+          id: 'vibe-2', 
+          title: 'Another Vibe',
+          createdAt: '2024-01-02T00:00:00Z',
+          tags: ['food', 'cooking'],
+          visibility: 'public',
+        },
+      ],
+      users: [
+        {
+          username: 'johndoe',
+          created_at: Date.now() - 86400000, // 1 day ago
+          updated_at: Date.now() - 3600000,  // 1 hour ago
+        },
+        {
+          username: 'janedoe',
+          created_at: Date.now() - 172800000, // 2 days ago
+          updated_at: Date.now() - 7200000,   // 2 hours ago
+        },
+      ],
+      tags: [
+        {
+          name: 'travel',
+          count: 25,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          name: 'food',
+          count: 18,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          name: 'adventure',
+          count: 12,
+          updated_at: new Date().toISOString(),
+        },
+      ],
+    };
+  } catch (error) {
+    console.error('Error fetching sitemap data:', error);
+    
+    // Return minimal data on error
+    return {
+      vibes: [],
+      users: [],
+      tags: [],
+    };
+  }
+}

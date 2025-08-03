@@ -1,6 +1,6 @@
 // Structured Data (JSON-LD) utilities for SEO
 
-interface BaseSchema {
+export interface BaseSchema {
   '@context': string;
   '@type': string;
 }
@@ -133,8 +133,12 @@ interface BreadcrumbItem {
 // Site configuration
 const SITE_CONFIG = {
   name: 'viberater',
-  url: process.env.NODE_ENV === 'production' ? 'https://viberater.com' : 'http://localhost:3000',
-  description: 'Share and discover vibes. Rate, react, and share your favorite vibes with the world.',
+  url:
+    process.env.NODE_ENV === 'production'
+      ? 'https://viberater.com'
+      : 'http://localhost:3000',
+  description:
+    'Share and discover vibes. Rate, react, and share your favorite vibes with the world.',
   logo: `${process.env.NODE_ENV === 'production' ? 'https://viberater.com' : 'http://localhost:3000'}/logo.png`,
   social: {
     twitter: 'https://twitter.com/viberater',
@@ -187,11 +191,14 @@ export function generateVibeSchema(vibe: VibeData): CreativeWorkSchema {
   const author: PersonSchema = {
     '@context': 'https://schema.org',
     '@type': 'Person',
-    name: vibe.createdBy?.first_name && vibe.createdBy?.last_name
-      ? `${vibe.createdBy.first_name} ${vibe.createdBy.last_name}`
-      : vibe.createdBy?.username || 'Anonymous',
+    name:
+      vibe.createdBy?.first_name && vibe.createdBy?.last_name
+        ? `${vibe.createdBy.first_name} ${vibe.createdBy.last_name}`
+        : vibe.createdBy?.username || 'Anonymous',
     alternateName: vibe.createdBy?.username,
-    url: vibe.createdBy?.username ? `${SITE_CONFIG.url}/users/${vibe.createdBy.username}` : undefined,
+    url: vibe.createdBy?.username
+      ? `${SITE_CONFIG.url}/users/${vibe.createdBy.username}`
+      : undefined,
   };
 
   const schema: CreativeWorkSchema = {
@@ -240,9 +247,10 @@ export function generateUserProfileSchema(user: UserData): PersonSchema {
   const schema: PersonSchema = {
     '@context': 'https://schema.org',
     '@type': 'Person',
-    name: user.first_name && user.last_name
-      ? `${user.first_name} ${user.last_name}`
-      : user.username,
+    name:
+      user.first_name && user.last_name
+        ? `${user.first_name} ${user.last_name}`
+        : user.username,
     alternateName: user.username,
     url: `${SITE_CONFIG.url}/users/${user.username}`,
   };
@@ -263,7 +271,7 @@ export function generateUserProfileSchema(user: UserData): PersonSchema {
     if (user.socialLinks.twitter) sameAs.push(user.socialLinks.twitter);
     if (user.socialLinks.instagram) sameAs.push(user.socialLinks.instagram);
     if (user.socialLinks.tiktok) sameAs.push(user.socialLinks.tiktok);
-    
+
     if (sameAs.length > 0) {
       schema.sameAs = sameAs;
     }
@@ -273,7 +281,9 @@ export function generateUserProfileSchema(user: UserData): PersonSchema {
 }
 
 // Breadcrumb schema for navigation
-export function generateBreadcrumbSchema(breadcrumbs: BreadcrumbItem[]): BreadcrumbListSchema {
+export function generateBreadcrumbSchema(
+  breadcrumbs: BreadcrumbItem[]
+): BreadcrumbListSchema {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -320,8 +330,11 @@ export const breadcrumbGenerators = {
 };
 
 // Helper to generate JSON-LD script tag content
-export function generateStructuredDataScript(schema: BaseSchema | BaseSchema[]): string {
-  const content = typeof schema === 'string' ? schema : JSON.stringify(schema, null, 0);
+export function generateStructuredDataScript(
+  schema: BaseSchema | BaseSchema[]
+): string {
+  const content =
+    typeof schema === 'string' ? schema : JSON.stringify(schema, null, 0);
   return content;
 }
 
@@ -330,13 +343,15 @@ export function validateSchema(schema: BaseSchema): boolean {
   try {
     // Basic validation - check required fields
     if (!schema['@context'] || !schema['@type']) {
+      // eslint-disable-next-line no-console
       console.warn('Schema missing required @context or @type');
       return false;
     }
-    
+
     // Additional type-specific validation can be added here
     return true;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Schema validation error:', error);
     return false;
   }

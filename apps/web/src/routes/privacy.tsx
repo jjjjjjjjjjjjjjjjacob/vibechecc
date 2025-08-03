@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';
+import { usePageTracking } from '@/hooks/use-enhanced-analytics';
 
 export const Route = createFileRoute('/privacy')({
   head: () => ({
@@ -16,6 +17,13 @@ export const Route = createFileRoute('/privacy')({
 });
 
 function PrivacyPage() {
+  // Performance tracking
+  usePageTracking('privacy', {
+    section: 'legal',
+    content_type: 'policy',
+    document_type: 'privacy_policy',
+  });
+
   return (
     <BaseLayout maxWidth="4xl" padding="lg">
       <div className="prose prose-lg max-w-none">

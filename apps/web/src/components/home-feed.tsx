@@ -13,6 +13,7 @@ import { useVibesInfinite, useForYouFeedInfinite } from '@/queries';
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
 import { ForYouEmptyState } from '@/components/for-you-empty-state';
 import { Flame, Sparkles, Clock, TrendingUp, Star } from 'lucide-react';
+import type { Vibe } from '@viberater/types';
 
 type FeedTab = 'for-you' | 'hot' | 'new' | 'unrated';
 
@@ -159,7 +160,9 @@ export function HomeFeed({ className }: HomeFeedProps) {
   const vibes = React.useMemo(() => {
     if (!data || typeof data !== 'object' || !('pages' in data) || !data.pages)
       return [];
-    return (data as any).pages.flatMap((page: any) => page?.vibes || []);
+    return (data as { pages: Array<{ vibes?: unknown[] }> }).pages.flatMap(
+      (page) => page?.vibes || []
+    );
   }, [data]);
 
   // For "for you" tab, use custom empty state component
@@ -224,7 +227,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
         <ForYouEmptyState />
       ) : (
         <MasonryFeed
-          vibes={vibes}
+          vibes={vibes as Vibe[]}
           isLoading={isLoading}
           error={error}
           hasMore={hasNextPage}

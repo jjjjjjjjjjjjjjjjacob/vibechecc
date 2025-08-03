@@ -16,7 +16,7 @@ export const seo = ({
   const config: SEOConfig = {
     title,
     description: description || '',
-    keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
+    keywords: keywords ? keywords.split(',').map((k) => k.trim()) : undefined,
     image,
   };
 

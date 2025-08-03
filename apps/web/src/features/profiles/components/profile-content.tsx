@@ -20,6 +20,7 @@ import { Sparkles } from 'lucide-react';
 import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 import { ThemeColorPicker } from '@/features/theming/components/theme-color-picker';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
 
 export function ProfileContent() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
@@ -172,12 +173,32 @@ export function ProfileContent() {
       // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
+
+        // Track upload error for UX insights
+        if (clerkUser) {
+          enhancedTrackEvents.error_upload_failed(
+            file.type,
+            file.size,
+            'File size exceeds 5MB limit',
+            'profile_avatar'
+          );
+        }
         return;
       }
 
       // Check file type
       if (!file.type.startsWith('image/')) {
         toast.error('Please select an image file');
+
+        // Track upload error for UX insights
+        if (clerkUser) {
+          enhancedTrackEvents.error_upload_failed(
+            file.type,
+            file.size,
+            'Invalid file type - not an image',
+            'profile_avatar'
+          );
+        }
         return;
       }
 
@@ -186,6 +207,16 @@ export function ProfileContent() {
         const url = e.target?.result as string;
         setImageUrl(url);
         setUploadedImageFile(file);
+
+        // Track successful image selection (not yet uploaded)
+        if (clerkUser) {
+          enhancedTrackEvents.content_image_uploaded(
+            'profile_avatar_preview',
+            file.size,
+            `${file.type}`,
+            undefined // upload time not measured at this stage
+          );
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -205,14 +236,48 @@ export function ProfileContent() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const promises: Promise<any>[] = [];
 
+      // Track which fields are being updated for analytics (NO PII values)
+      const updatedFields: string[] = [];
+      const analyticsChanges: Record<string, unknown> = {};
+
       // Prepare Convex updates
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const convexUpdates: any = {};
-      if (username) convexUpdates.username = username;
-      if (firstName) convexUpdates.first_name = firstName;
-      if (lastName) convexUpdates.last_name = lastName;
-      if (imageUrl) convexUpdates.image_url = imageUrl;
-      if (themeColor) convexUpdates.themeColor = themeColor;
+      if (username && username !== (convexUser?.username || '')) {
+        convexUpdates.username = username;
+        updatedFields.push('username');
+        analyticsChanges.username_length = username.length;
+      }
+      if (firstName && firstName !== (convexUser?.first_name || '')) {
+        convexUpdates.first_name = firstName;
+        updatedFields.push('first_name');
+        analyticsChanges.first_name_length = firstName.length;
+      }
+      if (lastName && lastName !== (convexUser?.last_name || '')) {
+        convexUpdates.last_name = lastName;
+        updatedFields.push('last_name');
+        analyticsChanges.last_name_length = lastName.length;
+      }
+      if (imageUrl && imageUrl !== (convexUser?.image_url || '')) {
+        convexUpdates.image_url = imageUrl;
+        updatedFields.push('image_url');
+        analyticsChanges.image_upload_method = uploadedImageFile
+          ? 'file_upload'
+          : 'url_input';
+      }
+      if (themeColor && themeColor !== (convexUser?.themeColor || 'pink')) {
+        const previousTheme = convexUser?.themeColor || 'pink';
+        convexUpdates.themeColor = themeColor;
+        updatedFields.push('themeColor');
+        analyticsChanges.previous_theme = previousTheme;
+
+        // Track theme change separately
+        enhancedTrackEvents.profile_theme_changed(
+          clerkUser.id,
+          themeColor,
+          'default' // secondary color not implemented yet
+        );
+      }
 
       // Add Convex update to promises
       if (Object.keys(convexUpdates).length > 0) {
@@ -222,9 +287,15 @@ export function ProfileContent() {
       // Prepare Clerk updates
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const clerkUpdates: any = {};
-      if (username) clerkUpdates.username = username;
-      if (firstName) clerkUpdates.firstName = firstName;
-      if (lastName) clerkUpdates.lastName = lastName;
+      if (username && username !== (clerkUser.username || '')) {
+        clerkUpdates.username = username;
+      }
+      if (firstName && firstName !== (clerkUser.firstName || '')) {
+        clerkUpdates.firstName = firstName;
+      }
+      if (lastName && lastName !== (clerkUser.lastName || '')) {
+        clerkUpdates.lastName = lastName;
+      }
 
       // Add Clerk user update to promises if there are field updates
       if (Object.keys(clerkUpdates).length > 0) {
@@ -234,12 +305,28 @@ export function ProfileContent() {
       // Add Clerk avatar update to promises if there's an uploaded image
       if (uploadedImageFile) {
         promises.push(clerkUser.setProfileImage({ file: uploadedImageFile }));
+
+        // Track avatar change with privacy-compliant metrics
+        enhancedTrackEvents.profile_avatar_changed(
+          clerkUser.id,
+          'file_upload',
+          uploadedImageFile.size
+        );
       }
 
       // Execute all updates in parallel
       if (promises.length > 0) {
         await Promise.all(promises);
         toast.success('Profile updated successfully!');
+
+        // Track profile update with field metadata only (NO PII values)
+        if (updatedFields.length > 0) {
+          enhancedTrackEvents.profile_updated(
+            clerkUser.id,
+            updatedFields,
+            analyticsChanges
+          );
+        }
       }
 
       setIsEditing(false);

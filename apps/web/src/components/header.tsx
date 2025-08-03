@@ -23,6 +23,7 @@ import { SearchAccordion } from '../features/search/components/search-accordion'
 import { useSearchShortcuts } from '../features/search/hooks/use-search-shortcuts';
 import { useCurrentUser } from '../queries';
 import { ProfileDropdown } from '@/features/profiles/components/profile-dropdown';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
 
 type MobileNavState = 'nav' | 'profile' | 'search' | null;
 
@@ -43,6 +44,32 @@ export function Header() {
 
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
+
+  // Navigation analytics helpers
+  const handleInternalNavigation = (to: string, _source: string = 'header') => {
+    enhancedTrackEvents.navigation_internal_link_clicked(
+      to,
+      location.pathname,
+      currentUser?._id
+    );
+  };
+
+  const _handleExternalLink = (url: string, source: string = 'header') => {
+    enhancedTrackEvents.navigation_external_link_clicked(
+      url,
+      source,
+      currentUser?._id
+    );
+  };
+
+  const handleMenuToggle = (isOpen: boolean, menuType: string) => {
+    enhancedTrackEvents.ui_menu_toggled(
+      currentUser?._id,
+      isOpen ? 'opened' : 'closed',
+      menuType,
+      'header'
+    );
+  };
 
   // Apply user's color themes when user data changes
   useEffect(() => {
@@ -132,7 +159,11 @@ export function Header() {
         >
           <div className="container flex h-16 items-center">
             <div className="flex items-center gap-2 md:gap-4">
-              <Link to="/" className="flex items-center gap-2">
+              <Link
+                to="/"
+                className="flex items-center gap-2"
+                onClick={() => handleInternalNavigation('/', 'brand_logo')}
+              >
                 <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent">
                   viberater
                 </span>
@@ -147,6 +178,7 @@ export function Header() {
                       ? 'text-foreground font-medium'
                       : 'text-foreground/60'
                   )}
+                  onClick={() => handleInternalNavigation('/', 'desktop_nav')}
                 >
                   home
                 </Link>
@@ -158,6 +190,9 @@ export function Header() {
                       ? 'text-foreground font-medium'
                       : 'text-foreground/60'
                   )}
+                  onClick={() =>
+                    handleInternalNavigation('/discover', 'desktop_nav')
+                  }
                 >
                   discover
                 </Link>
@@ -170,6 +205,9 @@ export function Header() {
                         ? 'text-foreground font-medium'
                         : 'text-foreground/60'
                     )}
+                    onClick={() =>
+                      handleInternalNavigation('/vibes/my-vibes', 'desktop_nav')
+                    }
                   >
                     my vibes
                   </Link>
@@ -181,6 +219,9 @@ export function Header() {
                         ? 'text-foreground font-medium'
                         : 'text-foreground/60'
                     )}
+                    onClick={() =>
+                      handleInternalNavigation('/profile', 'desktop_nav')
+                    }
                   >
                     profile
                   </Link>
@@ -194,11 +235,13 @@ export function Header() {
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 rounded-lg"
-                onClick={() =>
+                onClick={() => {
+                  const isOpening = mobileNavState !== 'search';
                   setMobileNavState(
                     mobileNavState === 'search' ? null : 'search'
-                  )
-                }
+                  );
+                  handleMenuToggle(isOpening, 'search');
+                }}
               >
                 <div className="relative h-4 w-4">
                   <Search
@@ -227,10 +270,13 @@ export function Header() {
                 onClick={() => {
                   if (mobileNavState === 'nav') {
                     setMobileNavState(null);
+                    handleMenuToggle(false, 'mobile_nav');
                   } else if (mobileNavState === 'profile') {
                     handleNavTransition('nav');
+                    handleMenuToggle(true, 'mobile_nav');
                   } else {
                     setMobileNavState('nav');
+                    handleMenuToggle(true, 'mobile_nav');
                   }
                 }}
               >
@@ -271,10 +317,13 @@ export function Header() {
                     onClick={() => {
                       if (mobileNavState === 'profile') {
                         setMobileNavState(null);
+                        handleMenuToggle(false, 'mobile_profile');
                       } else if (mobileNavState === 'nav') {
                         handleNavTransition('profile');
+                        handleMenuToggle(true, 'mobile_profile');
                       } else {
                         setMobileNavState('profile');
+                        handleMenuToggle(true, 'mobile_profile');
                       }
                     }}
                   >
@@ -331,6 +380,7 @@ export function Header() {
                         'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block rounded-lg bg-transparent px-2 py-1.5 lowercase transition-all duration-150'
                       )}
                       onClick={() => {
+                        handleInternalNavigation('/', 'mobile_nav');
                         setMobileNavState(null);
                       }}
                     >
@@ -342,6 +392,7 @@ export function Header() {
                         'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
                       )}
                       onClick={() => {
+                        handleInternalNavigation('/discover', 'mobile_nav');
                         setMobileNavState(null);
                       }}
                     >
@@ -354,6 +405,10 @@ export function Header() {
                           'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
                         )}
                         onClick={() => {
+                          handleInternalNavigation(
+                            '/vibes/my-vibes',
+                            'mobile_nav'
+                          );
                           setMobileNavState(null);
                         }}
                       >
@@ -363,6 +418,12 @@ export function Header() {
                         data-selected={location.pathname === '/profile'}
                         className="hover:bg-muted/50 hover:text-foreground/80 data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 text-left lowercase transition-all duration-150"
                         onClick={() => {
+                          enhancedTrackEvents.ui_menu_toggled(
+                            currentUser?._id,
+                            'opened',
+                            'mobile_profile_submenu',
+                            'mobile_nav'
+                          );
                           handleNavTransition('profile');
                         }}
                       >
@@ -372,6 +433,7 @@ export function Header() {
                     <button
                       className="hover:bg-muted/50 hover:text-foreground flex w-full items-center rounded-lg px-2 py-1.5 text-left lowercase transition-all duration-150"
                       onClick={() => {
+                        handleMenuToggle(true, 'search');
                         setMobileNavState('search');
                       }}
                     >
@@ -392,6 +454,10 @@ export function Header() {
                             'hover:text-foreground/80 hover:bg-muted/50 data-[selected=true]:text-primary ml-auto block w-full rounded-lg px-2 py-1.5 text-right lowercase transition-all duration-150'
                           )}
                           onClick={() => {
+                            handleInternalNavigation(
+                              item.href,
+                              'mobile_profile'
+                            );
                             setMobileNavState(null);
                           }}
                         >
@@ -401,6 +467,11 @@ export function Header() {
                       <button
                         className="hover:bg-muted/50 hover:text-foreground ml-auto block w-full rounded-lg px-2 py-1.5 text-right lowercase transition-all duration-150"
                         onClick={() => {
+                          enhancedTrackEvents.ui_modal_opened(
+                            'clerk_user_profile',
+                            'mobile_profile_menu',
+                            currentUser?._id
+                          );
                           setMobileNavState(null);
                           openUserProfile();
                         }}
@@ -416,7 +487,13 @@ export function Header() {
                         <Switch
                           checked={resolvedTheme === 'dark'}
                           onCheckedChange={(checked) => {
-                            setTheme(checked ? 'dark' : 'light');
+                            const newTheme = checked ? 'dark' : 'light';
+                            enhancedTrackEvents.ui_theme_toggled(
+                              newTheme,
+                              resolvedTheme,
+                              currentUser?._id
+                            );
+                            setTheme(newTheme);
                           }}
                         />
                       </div>
@@ -425,6 +502,9 @@ export function Header() {
                           <button
                             className="hover:bg-muted/50 hover:text-foreground block w-full rounded-lg px-2 py-1.5 text-right lowercase transition-all duration-150"
                             onClick={() => {
+                              enhancedTrackEvents.auth_signout_completed(
+                                currentUser?._id || 'unknown'
+                              );
                               setMobileNavState(null);
                             }}
                           >
@@ -446,6 +526,9 @@ export function Header() {
                     <Link
                       to="/"
                       className="hover:text-foreground transition-colors"
+                      onClick={() =>
+                        handleInternalNavigation('/', 'vibe_page_breadcrumb')
+                      }
                     >
                       home
                     </Link>
@@ -474,6 +557,15 @@ export function Header() {
         <div
           className="animate-in fade-in fixed inset-0 z-40 bg-black/50 backdrop-blur-sm duration-200 sm:hidden"
           onClick={() => setMobileNavState(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setMobileNavState(null);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close mobile navigation"
           style={{ top: '64px' }} // Start below the header
         />
       )}

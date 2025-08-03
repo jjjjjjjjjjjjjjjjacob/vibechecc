@@ -17,7 +17,7 @@ import type { UseMutationResult } from '@tanstack/react-query';
 interface ManageInterestsSectionProps {
   userInterests: string[];
   onInterestsUpdate: (interests: string[]) => void;
-  updateProfileMutation: UseMutationResult<any, Error, any, unknown>;
+  updateProfileMutation: UseMutationResult<unknown, Error, unknown, unknown>;
 }
 
 export function ManageInterestsSection({

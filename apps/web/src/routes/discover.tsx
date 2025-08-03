@@ -20,6 +20,7 @@ import {
 } from '@/features/theming/components/theme-provider';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
+import { usePageTracking } from '@/hooks/use-enhanced-analytics';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -115,6 +116,13 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
 ];
 
 function DiscoverPage() {
+  // Performance tracking
+  usePageTracking('discover', {
+    section: 'discovery',
+    content_type: 'curated_feed',
+    page_type: 'explore',
+  });
+
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useTheme();

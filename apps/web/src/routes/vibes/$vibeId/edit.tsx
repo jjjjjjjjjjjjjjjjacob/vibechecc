@@ -5,6 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useUser } from '@clerk/tanstack-react-start';
+import { enhancedTrackEvents, enhancedAnalytics } from '@/lib/enhanced-posthog';
+import {
+  useFormTracking,
+  usePageTracking,
+} from '@/hooks/use-enhanced-analytics';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
@@ -67,6 +72,15 @@ function EditVibe() {
   const [isPreviewMode, setIsPreviewMode] = React.useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
   const updateVibeMutation = useUpdateVibeMutation();
+  const [formStartTime] = React.useState(Date.now());
+
+  // Enhanced analytics tracking
+  const { trackFieldInteraction, trackFormSubmit: _trackFormSubmit } =
+    useFormTracking('edit_vibe');
+  usePageTracking('edit_vibe', {
+    form_type: 'vibe_editing',
+    vibe_id: vibeId,
+  });
 
   // Preview vibe data
   const previewVibe = React.useMemo(() => {
@@ -204,11 +218,25 @@ function EditVibe() {
     // Check for validation errors
     if (Object.keys(validationErrors).length > 0) {
       setError('Please fix the validation errors before submitting');
+      // Track validation errors
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'edit_vibe',
+        success: false,
+        validation_error_count: Object.keys(validationErrors).length,
+        user_id: user?.id,
+      });
       return;
     }
 
     if (!user?.id) {
       setError('You must be signed in to edit a vibe');
+      // Track auth error
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'edit_vibe',
+        success: false,
+        auth_error: 'User not authenticated',
+        user_id: user?.id,
+      });
       return;
     }
 
@@ -216,6 +244,17 @@ function EditVibe() {
     setError('');
 
     try {
+      const updateStartTime = Date.now();
+
+      // Determine what fields changed
+      const changedFields: string[] = [];
+      if (description !== originalValues.description)
+        changedFields.push('description');
+      if (currentImageUrl !== originalValues.imageUrl)
+        changedFields.push('image');
+      if (JSON.stringify(tags) !== JSON.stringify(originalValues.tags))
+        changedFields.push('tags');
+
       await updateVibeMutation.mutateAsync({
         vibeId,
         description: description.trim(),
@@ -223,15 +262,70 @@ function EditVibe() {
         tags: tags.length > 0 ? tags : undefined,
       });
 
+      const updateDuration = Date.now() - updateStartTime;
+      const timeSinceCreation = vibe?.createdAt
+        ? Date.now() - new Date(vibe.createdAt).getTime()
+        : undefined;
+
+      // Track enhanced vibe editing with change detection
+      enhancedTrackEvents.content_vibe_edited(
+        vibeId,
+        user.id,
+        changedFields,
+        timeSinceCreation
+      );
+
+      // Track form submission success
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'edit_vibe',
+        success: true,
+        update_duration: updateDuration,
+        form_completion_time: Date.now() - formStartTime,
+        change_count: changedFields.length,
+        content_quality_score:
+          description.trim().length +
+          tags.length * 10 +
+          (imageStorageId ? 20 : 0),
+        user_id: user.id,
+      });
+
       toast.success('vibe updated successfully!');
       setHasUnsavedChanges(false); // Reset unsaved changes flag
       navigate({ to: '/vibes/$vibeId', params: { vibeId } });
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An error occurred while updating your vibe');
-      }
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while updating your vibe';
+      setError(errorMessage);
+
+      // Track form submission failure
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'edit_vibe',
+        success: false,
+        api_error: errorMessage,
+        update_attempt_duration: Date.now() - formStartTime,
+        attempted_change_count: [
+          description !== originalValues.description,
+          currentImageUrl !== originalValues.imageUrl,
+          JSON.stringify(tags) !== JSON.stringify(originalValues.tags),
+        ].filter(Boolean).length,
+        user_id: user?.id,
+      });
+
+      // Track enhanced error
+      enhancedTrackEvents.error_api_failed(
+        'vibes/edit',
+        'UPDATE_FAILED',
+        errorMessage,
+        {
+          vibe_id: vibeId,
+          description_length: description.trim().length,
+          tag_count: tags.length,
+          has_image: !!imageStorageId,
+        }
+      );
+
       setIsSubmitting(false);
     }
   };
@@ -241,13 +335,60 @@ function EditVibe() {
       const confirmLeave = window.confirm(
         'You have unsaved changes. Are you sure you want to leave without saving?'
       );
-      if (!confirmLeave) return;
+      if (!confirmLeave) {
+        // Track cancellation of leaving (user decided to stay)
+        enhancedTrackEvents.ui_modal_closed(
+          'edit_form',
+          'cancel_abandon',
+          undefined,
+          user?.id
+        );
+        return;
+      }
+
+      // Track form abandonment with unsaved changes
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'edit_vibe',
+        success: false,
+        abandonment_reason: 'user_cancelled_with_changes',
+        time_spent: Date.now() - formStartTime,
+        had_unsaved_changes: true,
+        user_id: user?.id,
+      });
+    } else {
+      // Track clean cancellation (no unsaved changes)
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'edit_vibe',
+        success: false,
+        abandonment_reason: 'user_cancelled_clean',
+        time_spent: Date.now() - formStartTime,
+        had_unsaved_changes: false,
+        user_id: user?.id,
+      });
     }
+
     navigate({ to: '/vibes/$vibeId', params: { vibeId } });
   };
 
   const togglePreview = () => {
-    setIsPreviewMode(!isPreviewMode);
+    const newPreviewMode = !isPreviewMode;
+    setIsPreviewMode(newPreviewMode);
+
+    // Track preview mode usage
+    if (newPreviewMode) {
+      enhancedTrackEvents.ui_modal_opened(
+        'vibe_preview',
+        'preview_button',
+        user?.id
+      );
+    } else {
+      enhancedTrackEvents.ui_modal_closed(
+        'vibe_preview',
+        'exit_preview',
+        undefined,
+        user?.id
+      );
+    }
   };
 
   const isFormValid =
@@ -256,11 +397,23 @@ function EditVibe() {
   const handleImageUpload = (storageId: Id<'_storage'>, url: string) => {
     setImageStorageId(storageId);
     setCurrentImageUrl(url);
+
+    // Track image upload for editing
+    enhancedTrackEvents.content_image_uploaded(
+      'file_upload',
+      0, // File size not available
+      undefined, // Dimensions not available
+      undefined // Upload time not available
+    );
+
+    // Track field interaction
+    trackFieldInteraction('image', 'change');
   };
 
   const handleImageRemove = () => {
     setImageStorageId(null);
     setCurrentImageUrl('');
+    trackFieldInteraction('image', 'change');
   };
 
   if (isPreviewMode && previewVibe) {
@@ -402,7 +555,12 @@ function EditVibe() {
                 <Textarea
                   id="description"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    trackFieldInteraction('description', 'change');
+                  }}
+                  onFocus={() => trackFieldInteraction('description', 'focus')}
+                  onBlur={() => trackFieldInteraction('description', 'blur')}
                   placeholder="describe your vibe in detail..."
                   rows={5}
                   className={cn(
@@ -456,7 +614,10 @@ function EditVibe() {
                 </Label>
                 <TagInput
                   tags={tags}
-                  onTagsChange={setTags}
+                  onTagsChange={(newTags) => {
+                    setTags(newTags);
+                    trackFieldInteraction('tags', 'change');
+                  }}
                   placeholder="add tags to help others discover your vibe..."
                 />
                 <div className="flex justify-between text-xs">

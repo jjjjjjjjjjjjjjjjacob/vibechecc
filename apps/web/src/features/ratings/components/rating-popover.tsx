@@ -24,6 +24,9 @@ import { Badge } from '@/components/ui/badge';
 import { EmojiSearchCommand } from './emoji-search-command';
 import { RatingScale } from './rating-scale';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
+import { getEmojiSentiment } from '../utils/emoji-sentiment';
+import { useUser } from '@clerk/tanstack-react-start';
 
 interface RatingPopoverProps {
   children: React.ReactNode;
@@ -41,6 +44,7 @@ interface RatingPopoverProps {
   preSelectedValue?: number;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
+  vibeId?: string;
 }
 
 // Creative placeholder templates
@@ -65,9 +69,23 @@ export function RatingPopover({
   preSelectedValue,
   onOpenChange,
   open: controlledOpen,
+  vibeId,
 }: RatingPopoverProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
+  const { user } = useUser();
+
+  // Analytics tracking state
+  const [emojiSelectionStartTime, setEmojiSelectionStartTime] = React.useState<
+    number | null
+  >(null);
+  const [ratingInteractionStartTime, setRatingInteractionStartTime] =
+    React.useState<number | null>(null);
+  const [reviewStartTime, setReviewStartTime] = React.useState<number | null>(
+    null
+  );
+  const [_totalKeystrokesInReview, setTotalKeystrokesInReview] =
+    React.useState(0);
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
   const setOpen = React.useCallback(
     (newOpen: boolean) => {
@@ -137,12 +155,37 @@ export function RatingPopover({
       return; // Don't allow typing beyond max length
     }
 
+    // Track review start time on first keystroke
+    if (!reviewStartTime && value.length === 1) {
+      setReviewStartTime(Date.now());
+    }
+
+    // Track keystroke count for engagement analytics
+    if (value.length > review.length) {
+      setTotalKeystrokesInReview((prev) => prev + 1);
+    }
+
     setReview(value);
     setCharacterCount(value.length);
     setError(null);
   };
 
   const handleEmojiSelect = (emoji: string) => {
+    // Track emoji selection analytics
+    if (user?.id && vibeId) {
+      const selectionTime = emojiSelectionStartTime
+        ? Date.now() - emojiSelectionStartTime
+        : undefined;
+
+      enhancedTrackEvents.engagement_emoji_selected(
+        vibeId,
+        user.id,
+        emoji,
+        getEmojiSentiment(emoji),
+        selectionTime
+      );
+    }
+
     setSelectedEmoji(emoji);
     setShowEmojiPicker(false);
     setSearchValue('');
@@ -199,11 +242,21 @@ export function RatingPopover({
       setShowEmojiPicker(!existingRating && !preSelectedEmoji);
       setHasSelectedRating(false);
       setShowRatingCTA(false);
+
+      // Reset analytics tracking state
+      setEmojiSelectionStartTime(null);
+      setRatingInteractionStartTime(null);
+      setReviewStartTime(null);
+      setTotalKeystrokesInReview(0);
     } else {
       // Randomize placeholder when dialog opens
       setPlaceholderIndex(
         Math.floor(Math.random() * REVIEW_PLACEHOLDERS.length)
       );
+
+      // Start analytics tracking
+      setEmojiSelectionStartTime(Date.now());
+      setRatingInteractionStartTime(Date.now());
     }
   };
 
@@ -321,6 +374,7 @@ export function RatingPopover({
                     onMouseLeave={() => setRatingValue(selectedRatingValue)}
                     className="w-full text-left focus:outline-none"
                     aria-label="Emoji rating scale"
+                    role="application"
                   >
                     <RatingScale
                       emoji={selectedEmoji}
@@ -328,6 +382,20 @@ export function RatingPopover({
                       variant="gradient"
                       onChange={setRatingValue}
                       onClick={(value) => {
+                        // Track rating selection analytics
+                        if (user?.id && vibeId && selectedEmoji) {
+                          const _interactionTime = ratingInteractionStartTime
+                            ? Date.now() - ratingInteractionStartTime
+                            : undefined;
+
+                          enhancedTrackEvents.ui_filter_toggled(
+                            'rating_value',
+                            true,
+                            'emoji_rating_popover',
+                            user.id
+                          );
+                        }
+
                         setSelectedRatingValue(value);
                         setRatingValue(value);
                         setHasSelectedRating(true);

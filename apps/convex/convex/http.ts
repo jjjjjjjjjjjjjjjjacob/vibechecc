@@ -11,12 +11,32 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
   if (!event) {
     return new Response('Error occured', { status: 400 });
   }
+
   switch (event.type) {
-    case 'user.created': // intentional fallthrough
+    case 'user.created':
       await ctx.runMutation(internal.users.upsertFromClerk, {
         data: event.data,
       });
+
+      // Track signup completion (privacy-compliant - no PII)
+      await ctx.runMutation(internal.users.trackAuthEvent, {
+        userId: event.data.id,
+        eventType: 'signup_completed',
+        method: 'clerk',
+        timestamp: Date.now(),
+        metadata: {
+          // Only non-PII metadata
+          hasImage: event.data.has_image || false,
+          emailVerified:
+            event.data.email_addresses?.[0]?.verification?.status ===
+            'verified',
+          phoneVerified:
+            event.data.phone_numbers?.[0]?.verification?.status === 'verified',
+          twoFactorEnabled: event.data.two_factor_enabled || false,
+        },
+      });
       break;
+
     case 'user.updated':
       await ctx.runMutation(internal.users.upsertFromClerk, {
         data: event.data,
@@ -25,12 +45,23 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
 
     case 'user.deleted': {
       const clerkUserId = event.data.id!;
-      // console.log('Deleting user', clerkUserId);
+
+      // Track account deletion (privacy-compliant)
+      await ctx.runMutation(internal.users.trackAuthEvent, {
+        userId: clerkUserId,
+        eventType: 'account_deleted',
+        method: 'clerk',
+        timestamp: Date.now(),
+        metadata: {
+          deletedBy: 'user', // Assume user-initiated unless specified
+        },
+      });
+
       await ctx.runMutation(internal.users.deleteFromClerk, { clerkUserId });
       break;
     }
     default:
-    // console.log('Ignored Clerk webhook event', event.type);
+    // Ignored webhook event types
   }
 
   return new Response(null, { status: 200 });

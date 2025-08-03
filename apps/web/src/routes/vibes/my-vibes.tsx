@@ -9,6 +9,7 @@ import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { VibeGridSkeleton } from '@/components/skeletons/vibe-grid-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePageTracking } from '@/hooks/use-enhanced-analytics';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -31,6 +32,13 @@ export const Route = createFileRoute('/vibes/my-vibes')({
 });
 
 function MyVibes() {
+  // Performance tracking
+  usePageTracking('my_vibes', {
+    section: 'user_content',
+    content_type: 'vibe_list',
+    page_type: 'personal',
+  });
+
   const { user, isLoaded } = useUser();
   const { data: vibes, isLoading, error } = useUserVibes(user?.id || '');
 

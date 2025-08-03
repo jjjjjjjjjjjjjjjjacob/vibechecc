@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
 
 interface ProfileDropdownProps {
   className?: string;
@@ -24,6 +25,26 @@ export function ProfileDropdown({
   const { user: clerkUser } = useUser();
   const { location } = useRouterState();
   const [open, setOpen] = useState(false);
+
+  // Navigation analytics helper
+  const handleInternalNavigation = (to: string) => {
+    enhancedTrackEvents.navigation_internal_link_clicked(
+      to,
+      location.pathname,
+      currentUser?._id
+    );
+  };
+
+  // Handle dropdown toggle
+  const handleToggle = (isOpen: boolean) => {
+    enhancedTrackEvents.ui_menu_toggled(
+      currentUser?._id,
+      isOpen ? 'opened' : 'closed',
+      'desktop_profile_dropdown',
+      'header'
+    );
+    setOpen(isOpen);
+  };
 
   if (!currentUser || !clerkUser) return null;
 
@@ -49,7 +70,7 @@ export function ProfileDropdown({
   ];
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleToggle}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -85,7 +106,10 @@ export function ProfileDropdown({
                     ? 'bg-accent/50 text-accent-foreground font-medium'
                     : 'text-foreground/80'
                 )}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  handleInternalNavigation(item.href);
+                  setOpen(false);
+                }}
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
@@ -95,7 +119,12 @@ export function ProfileDropdown({
               <SignOutButton>
                 <button
                   className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors"
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    enhancedTrackEvents.auth_signout_completed(
+                      currentUser?._id || 'unknown'
+                    );
+                    setOpen(false);
+                  }}
                 >
                   <LogOut className="h-4 w-4" />
                   sign out

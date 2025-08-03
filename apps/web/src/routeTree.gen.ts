@@ -24,6 +24,8 @@ import { Route as VibesMyVibesRouteImport } from './routes/vibes/my-vibes'
 import { Route as VibesCreateRouteImport } from './routes/vibes/create'
 import { Route as VibesVibeIdRouteImport } from './routes/vibes/$vibeId'
 import { Route as UsersUsernameRouteImport } from './routes/users.$username'
+import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
+import { Route as RobotsTxtRouteImport } from './routes/robots.txt'
 import { Route as VibesVibeIdEditRouteImport } from './routes/vibes/$vibeId/edit'
 
 const TermsRoute = TermsRouteImport.update({
@@ -101,6 +103,16 @@ const UsersUsernameRoute = UsersUsernameRouteImport.update({
   path: '/users/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapXmlRoute = SitemapXmlRouteImport.update({
+  id: '/sitemap/xml',
+  path: '/sitemap/xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsTxtRoute = RobotsTxtRouteImport.update({
+  id: '/robots/txt',
+  path: '/robots/txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VibesVibeIdEditRoute = VibesVibeIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -118,6 +130,8 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
   '/vibes/create': typeof VibesCreateRoute
@@ -136,6 +150,8 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
   '/vibes/create': typeof VibesCreateRoute
@@ -155,6 +171,8 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
   '/vibes/create': typeof VibesCreateRoute
@@ -175,6 +193,8 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/terms'
+    | '/robots/txt'
+    | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
@@ -193,6 +213,8 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/terms'
+    | '/robots/txt'
+    | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
@@ -211,6 +233,8 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/terms'
+    | '/robots/txt'
+    | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
     | '/vibes/create'
@@ -230,6 +254,8 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   TermsRoute: typeof TermsRoute
+  RobotsTxtRoute: typeof RobotsTxtRoute
+  SitemapXmlRoute: typeof SitemapXmlRoute
   UsersUsernameRoute: typeof UsersUsernameRoute
   VibesVibeIdRoute: typeof VibesVibeIdRouteWithChildren
   VibesCreateRoute: typeof VibesCreateRoute
@@ -344,6 +370,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap/xml': {
+      id: '/sitemap/xml'
+      path: '/sitemap/xml'
+      fullPath: '/sitemap/xml'
+      preLoaderRoute: typeof SitemapXmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots/txt': {
+      id: '/robots/txt'
+      path: '/robots/txt'
+      fullPath: '/robots/txt'
+      preLoaderRoute: typeof RobotsTxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vibes/$vibeId/edit': {
       id: '/vibes/$vibeId/edit'
       path: '/edit'
@@ -377,6 +417,8 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   TermsRoute: TermsRoute,
+  RobotsTxtRoute: RobotsTxtRoute,
+  SitemapXmlRoute: SitemapXmlRoute,
   UsersUsernameRoute: UsersUsernameRoute,
   VibesVibeIdRoute: VibesVibeIdRouteWithChildren,
   VibesCreateRoute: VibesCreateRoute,

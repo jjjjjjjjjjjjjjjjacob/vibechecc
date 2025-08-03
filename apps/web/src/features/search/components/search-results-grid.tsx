@@ -10,6 +10,7 @@ interface SearchResultsGridProps {
   error?: Error | unknown;
   onRetry?: () => void;
   queriedEmojis?: string[]; // Pass queried emojis to prioritize in vibe cards
+  searchQuery?: string; // Search query for tracking
 }
 
 export function SearchResultsGrid({
@@ -18,6 +19,7 @@ export function SearchResultsGrid({
   error,
   onRetry,
   queriedEmojis,
+  searchQuery = '',
 }: SearchResultsGridProps) {
   if (error) {
     return <SearchError error={error} onRetry={onRetry} />;
@@ -33,11 +35,13 @@ export function SearchResultsGrid({
 
   return (
     <div className="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {results.map((result) => (
+      {results.map((result, index) => (
         <SearchResultCard
           key={result.id}
           result={result}
           queriedEmojis={queriedEmojis}
+          position={index}
+          searchQuery={searchQuery}
         />
       ))}
     </div>

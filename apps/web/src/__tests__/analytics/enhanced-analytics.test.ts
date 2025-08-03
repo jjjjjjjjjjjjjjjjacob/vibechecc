@@ -2,12 +2,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { enhancedAnalytics, enhancedTrackEvents } from '@/lib/enhanced-posthog';
-import { 
-  useEnhancedAnalytics, 
-  usePageTracking, 
+import {
+  useEnhancedAnalytics,
+  usePageTracking,
   useFormTracking,
   useSearchTracking,
-  useContentTracking 
+  useContentTracking,
 } from '@/hooks/use-enhanced-analytics';
 
 // Mock PostHog
@@ -27,6 +27,8 @@ vi.mock('@/lib/enhanced-posthog', () => ({
     engagement_vibe_viewed: vi.fn(),
     engagement_vibe_rated: vi.fn(),
     search_query_performed: vi.fn(),
+    search_result_clicked: vi.fn(),
+    search_filter_applied: vi.fn(),
     navigation_page_viewed: vi.fn(),
     perf_page_load_completed: vi.fn(),
     ui_modal_opened: vi.fn(),
@@ -37,7 +39,7 @@ vi.mock('@/lib/enhanced-posthog', () => ({
 // Mock Clerk user
 vi.mock('@clerk/tanstack-react-start', () => ({
   useUser: vi.fn(() => ({
-    user: { id: 'test-user-123' }
+    user: { id: 'test-user-123' },
   })),
 }));
 
@@ -53,7 +55,7 @@ Object.defineProperty(window, 'performance', {
       requestStart: 300,
       responseEnd: 800,
       domContentLoadedEventEnd: 1500,
-    }
+    },
   },
   writable: true,
 });
@@ -69,13 +71,13 @@ describe('Enhanced Analytics', () => {
       },
       writable: true,
     });
-    
+
     // Mock document
     Object.defineProperty(document, 'title', {
       value: 'Test Page',
       writable: true,
     });
-    
+
     Object.defineProperty(document, 'referrer', {
       value: 'https://example.com/previous',
       writable: true,
@@ -89,9 +91,11 @@ describe('Enhanced Analytics', () => {
   describe('useEnhancedAnalytics Hook', () => {
     it('should track engagement with user context', () => {
       const { result } = renderHook(() => useEnhancedAnalytics());
-      
+
       act(() => {
-        result.current.trackEngagement('click', 'button', { button_type: 'primary' });
+        result.current.trackEngagement('click', 'button', {
+          button_type: 'primary',
+        });
       });
 
       expect(enhancedAnalytics.trackEngagement).toHaveBeenCalledWith(
@@ -106,7 +110,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track performance metrics', () => {
       const { result } = renderHook(() => useEnhancedAnalytics());
-      
+
       act(() => {
         result.current.trackPerformance('page_load', 1500, { page: 'home' });
       });
@@ -123,9 +127,11 @@ describe('Enhanced Analytics', () => {
 
     it('should track funnel steps', () => {
       const { result } = renderHook(() => useEnhancedAnalytics());
-      
+
       act(() => {
-        result.current.trackFunnelStep('onboarding', 'profile_setup', true, { step: 1 });
+        result.current.trackFunnelStep('onboarding', 'profile_setup', true, {
+          step: 1,
+        });
       });
 
       expect(enhancedAnalytics.trackFunnelStep).toHaveBeenCalledWith(
@@ -142,7 +148,7 @@ describe('Enhanced Analytics', () => {
     it('should track errors with context', () => {
       const { result } = renderHook(() => useEnhancedAnalytics());
       const testError = new Error('Test error');
-      
+
       act(() => {
         result.current.trackError(testError, { component: 'TestComponent' });
       });
@@ -158,7 +164,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track custom events', () => {
       const { result } = renderHook(() => useEnhancedAnalytics());
-      
+
       act(() => {
         result.current.trackEvent('custom_action', { action_type: 'test' });
       });
@@ -187,7 +193,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track page exit on unmount', () => {
       const { unmount } = renderHook(() => usePageTracking('test-page'));
-      
+
       act(() => {
         unmount();
       });
@@ -217,7 +223,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track field interactions', () => {
       const { result } = renderHook(() => useFormTracking('signup-form'));
-      
+
       act(() => {
         result.current.trackFieldInteraction('email', 'focus');
       });
@@ -235,7 +241,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track field errors', () => {
       const { result } = renderHook(() => useFormTracking('signup-form'));
-      
+
       act(() => {
         result.current.trackFieldError('email', 'Invalid email format');
       });
@@ -253,7 +259,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track form submission', () => {
       const { result } = renderHook(() => useFormTracking('signup-form'));
-      
+
       // Simulate field interaction first
       act(() => {
         result.current.trackFieldInteraction('email', 'change');
@@ -279,7 +285,7 @@ describe('Enhanced Analytics', () => {
   describe('useSearchTracking Hook', () => {
     it('should track search start', () => {
       const { result } = renderHook(() => useSearchTracking());
-      
+
       act(() => {
         result.current.trackSearchStart('test query', { source: 'header' });
       });
@@ -297,7 +303,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track search completion with timing', () => {
       const { result } = renderHook(() => useSearchTracking());
-      
+
       act(() => {
         result.current.trackSearchStart('test query');
       });
@@ -317,9 +323,14 @@ describe('Enhanced Analytics', () => {
 
     it('should track search result clicks', () => {
       const { result } = renderHook(() => useSearchTracking());
-      
+
       act(() => {
-        result.current.trackSearchResultClick('test query', 'vibe-123', 2, 'vibe');
+        result.current.trackSearchResultClick(
+          'test query',
+          'vibe-123',
+          2,
+          'vibe'
+        );
       });
 
       expect(enhancedTrackEvents.search_result_clicked).toHaveBeenCalledWith(
@@ -333,7 +344,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track filter applications', () => {
       const { result } = renderHook(() => useSearchTracking());
-      
+
       act(() => {
         result.current.trackFilterApplied('tag', 'music', 25);
       });
@@ -350,7 +361,7 @@ describe('Enhanced Analytics', () => {
   describe('useContentTracking Hook', () => {
     it('should track content view', () => {
       const { result } = renderHook(() => useContentTracking());
-      
+
       act(() => {
         result.current.trackContentView('vibe-123', 'vibe', 'search_results');
       });
@@ -366,7 +377,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track scroll depth milestones', () => {
       const { result } = renderHook(() => useContentTracking());
-      
+
       act(() => {
         result.current.trackScrollDepth(25);
       });
@@ -382,7 +393,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track content exit with duration', () => {
       const { result } = renderHook(() => useContentTracking());
-      
+
       act(() => {
         result.current.trackContentView('vibe-123');
       });
@@ -403,7 +414,7 @@ describe('Enhanced Analytics', () => {
 
     it('should track content interactions', () => {
       const { result } = renderHook(() => useContentTracking());
-      
+
       act(() => {
         result.current.trackContentInteraction('vibe-123', 'rate', 5);
       });
@@ -422,7 +433,11 @@ describe('Enhanced Analytics', () => {
 
   describe('Enhanced Track Events', () => {
     it('should track authentication events', () => {
-      enhancedTrackEvents.auth_signup_completed('user-123', 'email', 'profile_setup');
+      enhancedTrackEvents.auth_signup_completed(
+        'user-123',
+        'email',
+        'profile_setup'
+      );
 
       expect(enhancedTrackEvents.auth_signup_completed).toHaveBeenCalledWith(
         'user-123',
@@ -473,7 +488,7 @@ describe('Enhanced Analytics', () => {
   describe('Analytics Context Enrichment', () => {
     it('should enrich events with browser context', () => {
       const { result } = renderHook(() => useEnhancedAnalytics());
-      
+
       act(() => {
         result.current.trackEvent('test_event');
       });
@@ -489,15 +504,17 @@ describe('Enhanced Analytics', () => {
 
   describe('Error Handling', () => {
     it('should handle analytics errors gracefully', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
       // Mock analytics to throw an error
       vi.mocked(enhancedAnalytics.captureWithContext).mockImplementation(() => {
         throw new Error('Analytics error');
       });
 
       const { result } = renderHook(() => useEnhancedAnalytics());
-      
+
       // Should not throw
       expect(() => {
         act(() => {
@@ -512,19 +529,19 @@ describe('Enhanced Analytics', () => {
   describe('Performance Impact', () => {
     it('should not block main thread', async () => {
       const { result } = renderHook(() => useEnhancedAnalytics());
-      
+
       const startTime = performance.now();
-      
+
       act(() => {
         // Track multiple events quickly
         for (let i = 0; i < 100; i++) {
           result.current.trackEvent(`test_event_${i}`);
         }
       });
-      
+
       const endTime = performance.now();
       const duration = endTime - startTime;
-      
+
       // Should complete quickly (under 100ms)
       expect(duration).toBeLessThan(100);
     });

@@ -166,6 +166,14 @@ export function FollowingModal({
                     <div
                       className="flex flex-1 cursor-pointer items-center gap-3"
                       onClick={() => handleUserClick(user)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleUserClick(user);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <Avatar className="h-10 w-10">
                         <AvatarImage

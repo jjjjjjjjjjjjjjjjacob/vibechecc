@@ -38,7 +38,7 @@
     "test:watch": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun vitest",
+        "command": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' bun vitest",
         "cwd": "{projectRoot}"
       }
     },

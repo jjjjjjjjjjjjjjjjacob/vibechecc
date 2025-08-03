@@ -24,3 +24,10 @@ export { DecimalRatingSelector } from './decimal-rating-selector';
 // Aggregate Views
 export { AllEmojiRatingsPopover } from './all-emoji-ratings-popover';
 export { TopEmojiRatingsAccordion } from './top-emoji-ratings-accordion';
+
+// Analytics Utilities
+export {
+  getEmojiSentiment,
+  analyzeSentimentDistribution,
+  getDominantSentiment,
+} from '../utils/emoji-sentiment';

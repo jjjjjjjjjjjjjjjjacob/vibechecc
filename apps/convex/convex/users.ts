@@ -662,3 +662,29 @@ export const createForSeed = mutation({
     });
   },
 });
+
+// Privacy-compliant authentication event tracking (internal mutation)
+export const trackAuthEvent = internalMutation({
+  args: {
+    userId: v.string(),
+    eventType: v.string(),
+    method: v.string(),
+    timestamp: v.number(),
+    metadata: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    // Store privacy-compliant auth event for analytics
+    // This data contains no PII and follows data minimization principles
+    await ctx.db.insert('authEvents', {
+      userId: args.userId, // Clerk user ID (already anonymized)
+      eventType: args.eventType,
+      method: args.method,
+      timestamp: args.timestamp,
+      metadata: args.metadata || {},
+      createdAt: Date.now(),
+    });
+
+    // Optional: Could trigger frontend analytics events via action
+    // but this ensures we have server-side audit trail
+  },
+});

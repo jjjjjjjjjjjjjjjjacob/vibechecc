@@ -38,6 +38,7 @@ import {
   FollowersModal,
   FollowingModal,
 } from '@/features/follows/components';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
 
 interface UserProfileViewProps {
   user: {
@@ -177,6 +178,31 @@ export function UserProfileView({
   );
 
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
+
+  // Track profile visits with privacy compliance
+  React.useEffect(() => {
+    if (user?.externalId && !isOwnProfile) {
+      const visitStartTime = Date.now();
+
+      // Track profile visit
+      enhancedTrackEvents.engagement_profile_visited(
+        clerkUser?.id || null,
+        user.externalId,
+        'profile_page'
+      );
+
+      // Track visit duration on unmount
+      return () => {
+        const visitDuration = Date.now() - visitStartTime;
+        enhancedTrackEvents.engagement_profile_visited(
+          clerkUser?.id || null,
+          user.externalId,
+          'profile_page',
+          visitDuration
+        );
+      };
+    }
+  }, [user?.externalId, isOwnProfile, clerkUser?.id]);
 
   React.useEffect(() => {
     // Apply global theme when not using scoped theme (e.g., on own profile)
@@ -348,6 +374,15 @@ export function UserProfileView({
                               href={`https://twitter.com/${user.socials.twitter}`}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => {
+                                if (clerkUser && user.socials?.twitter) {
+                                  enhancedTrackEvents.navigation_external_link_clicked(
+                                    `https://twitter.com/${user.socials.twitter}`,
+                                    'profile_social_twitter',
+                                    clerkUser.id
+                                  );
+                                }
+                              }}
                             >
                               <Twitter className="h-4 w-4" />
                             </a>
@@ -364,6 +399,15 @@ export function UserProfileView({
                               href={`https://instagram.com/${user.socials.instagram}`}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => {
+                                if (clerkUser && user.socials?.instagram) {
+                                  enhancedTrackEvents.navigation_external_link_clicked(
+                                    `https://instagram.com/${user.socials.instagram}`,
+                                    'profile_social_instagram',
+                                    clerkUser.id
+                                  );
+                                }
+                              }}
                             >
                               <Instagram className="h-4 w-4" />
                             </a>
@@ -380,6 +424,15 @@ export function UserProfileView({
                               href={user.socials.website}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => {
+                                if (clerkUser && user.socials?.website) {
+                                  enhancedTrackEvents.navigation_external_link_clicked(
+                                    user.socials.website,
+                                    'profile_social_website',
+                                    clerkUser.id
+                                  );
+                                }
+                              }}
                             >
                               <Globe className="h-4 w-4" />
                             </a>

@@ -7,6 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
+import { enhancedTrackEvents, enhancedAnalytics } from '@/lib/enhanced-posthog';
+import {
+  useFormTracking,
+  usePageTracking,
+} from '@/hooks/use-enhanced-analytics';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
@@ -50,17 +55,41 @@ function CreateVibe() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState('');
   const createVibeMutation = useCreateVibeMutation();
+  const [formStartTime] = React.useState(Date.now());
+
+  // Enhanced analytics tracking
+  const { trackFieldInteraction, trackFormSubmit: _trackFormSubmit } =
+    useFormTracking('create_vibe');
+  usePageTracking('create_vibe', { form_type: 'vibe_creation' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim() || !description.trim()) {
       setError('Title and description are required');
+      // Track form submission failure with validation errors
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'create_vibe',
+        success: false,
+        validation_error: 'Title and description are required',
+        field_errors: {
+          title: !title.trim() ? 'required' : undefined,
+          description: !description.trim() ? 'required' : undefined,
+        },
+        user_id: user?.id,
+      });
       return;
     }
 
     if (!user?.id) {
       setError('You must be signed in to create a vibe');
+      // Track auth error
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'create_vibe',
+        success: false,
+        auth_error: 'User not authenticated',
+        user_id: user?.id,
+      });
       return;
     }
 
@@ -68,14 +97,38 @@ function CreateVibe() {
     setError('');
 
     try {
+      const creationStartTime = Date.now();
       const result = await createVibeMutation.mutateAsync({
         title: title.trim(),
         description: description.trim(),
         image: imageStorageId || undefined,
         tags: tags.length > 0 ? tags : undefined,
       });
+      const creationDuration = Date.now() - creationStartTime;
 
-      // Track vibe creation (result is the document ID)
+      // Track enhanced vibe creation with comprehensive metadata
+      enhancedTrackEvents.content_vibe_created(
+        (result as string) || 'unknown',
+        user.id,
+        tags,
+        !!imageStorageId,
+        description.trim().length
+      );
+
+      // Track form completion analytics
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'create_vibe',
+        success: true,
+        creation_duration: creationDuration,
+        form_completion_time: Date.now() - formStartTime,
+        content_quality_score:
+          description.trim().length +
+          tags.length * 10 +
+          (imageStorageId ? 20 : 0),
+        user_id: user.id,
+      });
+
+      // Track legacy event for backward compatibility
       trackEvents.vibeCreated((result as string) || 'unknown', tags);
 
       // Show success toast with action to go to vibe
@@ -94,21 +147,56 @@ function CreateVibe() {
       // Redirect to home page after successful creation
       navigate({ to: '/' });
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An error occurred while creating your vibe');
-      }
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while creating your vibe';
+      setError(errorMessage);
+
+      // Track form submission failure
+      enhancedAnalytics.captureWithContext('form_submitted', {
+        form_name: 'create_vibe',
+        success: false,
+        api_error: errorMessage,
+        creation_attempt_duration: Date.now() - formStartTime,
+        user_id: user?.id,
+      });
+
+      // Track enhanced error
+      enhancedTrackEvents.error_api_failed(
+        'vibes/create',
+        'CREATION_FAILED',
+        errorMessage,
+        {
+          title_length: title.trim().length,
+          description_length: description.trim().length,
+          tag_count: tags.length,
+          has_image: !!imageStorageId,
+        }
+      );
+
       setIsSubmitting(false);
     }
   };
 
   const handleImageUpload = (storageId: Id<'_storage'>, _url: string) => {
     setImageStorageId(storageId);
+
+    // Track image upload completion
+    enhancedTrackEvents.content_image_uploaded(
+      'file_upload', // Using file upload method
+      0, // File size not available in this callback
+      undefined, // Dimensions not available
+      undefined // Upload time not available without component modification
+    );
+
+    // Track field interaction
+    trackFieldInteraction('image', 'change');
   };
 
   const handleImageRemove = () => {
     setImageStorageId(null);
+    trackFieldInteraction('image', 'change');
   };
 
   return (
@@ -145,7 +233,12 @@ function CreateVibe() {
                 <Input
                   id="title"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    trackFieldInteraction('title', 'change');
+                  }}
+                  onFocus={() => trackFieldInteraction('title', 'focus')}
+                  onBlur={() => trackFieldInteraction('title', 'blur')}
                   placeholder="give your vibe a catchy title"
                   className={cn(
                     'input-glow h-11 border-2 bg-transparent text-base transition-all sm:h-12',
@@ -170,7 +263,12 @@ function CreateVibe() {
                 <Textarea
                   id="description"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    trackFieldInteraction('description', 'change');
+                  }}
+                  onFocus={() => trackFieldInteraction('description', 'focus')}
+                  onBlur={() => trackFieldInteraction('description', 'blur')}
                   placeholder="describe your vibe in detail..."
                   rows={5}
                   className={cn(
@@ -203,7 +301,10 @@ function CreateVibe() {
                 </Label>
                 <TagInput
                   tags={tags}
-                  onTagsChange={setTags}
+                  onTagsChange={(newTags) => {
+                    setTags(newTags);
+                    trackFieldInteraction('tags', 'change');
+                  }}
                   placeholder="add tags to help others discover your vibe..."
                 />
                 <p className="text-muted-foreground text-xs">

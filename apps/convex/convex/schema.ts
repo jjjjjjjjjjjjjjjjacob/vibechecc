@@ -197,6 +197,19 @@ const schema = defineSchema({
     .index('byFollower', ['followerId'])
     .index('byFollowing', ['followingId'])
     .index('byFollowerAndFollowing', ['followerId', 'followingId']),
+
+  // Privacy-compliant authentication events tracking
+  authEvents: defineTable({
+    userId: v.string(), // Clerk user ID (already anonymized)
+    eventType: v.string(), // 'signup_completed', 'signin_completed', 'signout_completed', 'account_deleted'
+    method: v.string(), // 'clerk', 'oauth', etc.
+    timestamp: v.number(), // Event timestamp
+    metadata: v.optional(v.any()), // Non-PII metadata (verification status, etc.)
+    createdAt: v.number(), // Record creation timestamp
+  })
+    .index('byUser', ['userId', 'timestamp'])
+    .index('byEventType', ['eventType', 'timestamp'])
+    .index('byTimestamp', ['timestamp']),
 });
 export default schema;
 

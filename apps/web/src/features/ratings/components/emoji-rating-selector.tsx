@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/utils/tailwind-utils';
 import { RatingPopover } from './rating-popover';
 import type { EmojiRating, EmojiRatingMetadata } from '@viberater/types';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
+import { getEmojiSentiment } from '../utils/emoji-sentiment';
+import { useUser } from '@clerk/tanstack-react-start';
 
 interface EmojiRatingSelectorProps {
   topEmojis?: EmojiRating[];
@@ -16,6 +19,7 @@ interface EmojiRatingSelectorProps {
   vibeTitle?: string;
   emojiMetadata?: Record<string, EmojiRatingMetadata>;
   className?: string;
+  vibeId?: string;
 }
 
 const DEFAULT_EMOJIS = [
@@ -38,9 +42,17 @@ export function EmojiRatingSelector({
   vibeTitle,
   emojiMetadata = {},
   className,
+  vibeId,
 }: EmojiRatingSelectorProps) {
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);
+  const [ratingStartTime, setRatingStartTime] = React.useState<number | null>(
+    null
+  );
+  const [popoverOpenTime, setPopoverOpenTime] = React.useState<number | null>(
+    null
+  );
+  const { user } = useUser();
 
   // Create emoji options for cycling animation
   const emojiOptions = React.useMemo(() => {
@@ -73,16 +85,55 @@ export function EmojiRatingSelector({
     };
   }, [currentEmojiIndex, emojiOptions, topEmojis]);
 
+  // Track emoji cycling interactions
+  const trackEmojiCycle = React.useCallback(
+    (emoji: string, _index: number) => {
+      if (user?.id && vibeId) {
+        enhancedTrackEvents.engagement_emoji_selected(
+          vibeId,
+          user.id,
+          emoji,
+          getEmojiSentiment(emoji),
+          Date.now() - (ratingStartTime || Date.now())
+        );
+      }
+    },
+    [user?.id, vibeId, ratingStartTime]
+  );
+
   // Cycle through emojis
   React.useEffect(() => {
     if (isHovered) return;
 
     const interval = setInterval(() => {
-      setCurrentEmojiIndex((prev) => (prev + 1) % emojiOptions.length);
+      setCurrentEmojiIndex((prev) => {
+        const newIndex = (prev + 1) % emojiOptions.length;
+        const newEmoji = emojiOptions[newIndex];
+
+        // Track emoji cycling for analytics
+        if (newEmoji !== '❓') {
+          trackEmojiCycle(newEmoji, newIndex);
+        }
+
+        return newIndex;
+      });
     }, 2500);
 
     return () => clearInterval(interval);
-  }, [emojiOptions.length, isHovered]);
+  }, [emojiOptions, emojiOptions.length, isHovered, trackEmojiCycle]);
+
+  // Track component mount and rating start
+  React.useEffect(() => {
+    setRatingStartTime(Date.now());
+
+    if (user?.id && vibeId) {
+      enhancedTrackEvents.ui_modal_opened(
+        'emoji_rating_selector',
+        'vibe_view',
+        user.id
+      );
+    }
+  }, [user?.id, vibeId]);
 
   return (
     <div className={cn('space-y-3', className)}>
@@ -91,15 +142,62 @@ export function EmojiRatingSelector({
       </h3>
 
       <RatingPopover
-        onSubmit={onSubmit}
+        onSubmit={async (data) => {
+          // Track rating submission analytics
+          if (user?.id && vibeId) {
+            enhancedTrackEvents.engagement_vibe_rated(
+              vibeId,
+              user.id,
+              data.value,
+              data.emoji,
+              !!data.review,
+              data.review?.length
+            );
+
+            // Track popover interaction duration
+            if (popoverOpenTime) {
+              enhancedTrackEvents.ui_modal_closed(
+                'emoji_rating_popover',
+                'rating_submitted',
+                Date.now() - popoverOpenTime,
+                user.id
+              );
+            }
+          }
+
+          await onSubmit(data);
+        }}
         isSubmitting={isSubmitting}
         vibeTitle={vibeTitle}
         emojiMetadata={emojiMetadata}
+        vibeId={vibeId}
         preSelectedEmoji={
           isHovered && currentEmojiData.emoji !== '❓'
             ? currentEmojiData.emoji
             : undefined
         }
+        onOpenChange={(open) => {
+          if (open) {
+            setPopoverOpenTime(Date.now());
+            if (user?.id) {
+              enhancedTrackEvents.ui_modal_opened(
+                'emoji_rating_popover',
+                'emoji_selector_click',
+                user.id
+              );
+            }
+          } else {
+            if (popoverOpenTime && user?.id) {
+              enhancedTrackEvents.ui_modal_closed(
+                'emoji_rating_popover',
+                'cancelled',
+                Date.now() - popoverOpenTime,
+                user.id
+              );
+            }
+            setPopoverOpenTime(null);
+          }
+        }}
       >
         <motion.button
           className={cn(
@@ -110,7 +208,19 @@ export function EmojiRatingSelector({
             'hover:scale-[1.02] active:scale-[0.98]',
             'group cursor-pointer'
           )}
-          onMouseEnter={() => setIsHovered(true)}
+          onMouseEnter={() => {
+            setIsHovered(true);
+            // Track hover start for engagement analytics
+            if (user?.id && vibeId && currentEmojiData.emoji !== '❓') {
+              enhancedTrackEvents.engagement_emoji_selected(
+                vibeId,
+                user.id,
+                currentEmojiData.emoji,
+                getEmojiSentiment(currentEmojiData.emoji),
+                Date.now() - (ratingStartTime || Date.now())
+              );
+            }
+          }}
           onMouseLeave={() => setIsHovered(false)}
           whileHover={{ y: -1 }}
           whileTap={{ scale: 0.98 }}

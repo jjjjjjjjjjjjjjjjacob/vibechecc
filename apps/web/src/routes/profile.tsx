@@ -1,4 +1,5 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import type { UseMutationResult } from '@tanstack/react-query';
 import * as React from 'react';
 import {
   useUpdateProfileMutation,
@@ -39,6 +40,7 @@ import {
   type PrimaryColorTheme,
   type SecondaryColorTheme,
 } from '@/features/theming/components/theme-provider';
+import { usePageTracking } from '@/hooks/use-enhanced-analytics';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -64,6 +66,13 @@ export const Route = createFileRoute('/profile')({
 });
 
 function Profile() {
+  // Performance tracking
+  usePageTracking('profile', {
+    section: 'user_settings',
+    page_type: 'personal',
+    is_edit_mode: true,
+  });
+
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { openUserProfile } = useClerk();
   // console.log('clerkUser', clerkUser);
@@ -85,7 +94,7 @@ function Profile() {
     convexUser?.externalId || ''
   );
   const { data: receivedRatings, isLoading: receivedRatingsLoading } =
-    useUserReceivedRatings(convexUser?.externalId || '') as any;
+    useUserReceivedRatings(convexUser?.externalId || '');
   const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
     convexUser?.externalId || ''
   );
@@ -296,8 +305,7 @@ function Profile() {
       const promises: Promise<any>[] = [];
 
       // Prepare Convex updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const convexUpdates: any = {};
+      const convexUpdates: Record<string, unknown> = {};
       if (username) convexUpdates.username = username;
       if (firstName) convexUpdates.first_name = firstName;
       if (lastName) convexUpdates.last_name = lastName;
@@ -312,8 +320,7 @@ function Profile() {
       }
 
       // Prepare Clerk updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const clerkUpdates: any = {};
+      const clerkUpdates: Record<string, unknown> = {};
       if (username) clerkUpdates.username = username;
       if (firstName) clerkUpdates.firstName = firstName;
       if (lastName) clerkUpdates.lastName = lastName;
@@ -644,7 +651,14 @@ function Profile() {
               user={convexUser}
               userInterests={userInterests}
               onInterestsUpdate={handleInterestsUpdate}
-              updateProfileMutation={updateProfileMutation}
+              updateProfileMutation={
+                updateProfileMutation as UseMutationResult<
+                  unknown,
+                  Error,
+                  unknown,
+                  unknown
+                >
+              }
               className="mb-6 sm:mb-8"
             />
           </div>

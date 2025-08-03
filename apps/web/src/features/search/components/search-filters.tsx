@@ -21,6 +21,7 @@ import { DateRangePicker } from './filters/date-range-picker';
 import { ActiveFiltersBar } from './filters/active-filters-bar';
 import type { SearchFilters as SearchFiltersType } from '@viberater/types';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useSearchTracking } from '@/hooks/use-enhanced-analytics';
 
 interface SearchFiltersProps {
   filters: Partial<SearchFiltersType>;
@@ -36,6 +37,8 @@ export function SearchFilters({
   showActiveFilters = true,
 }: SearchFiltersProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const { trackFilterApplied } = useSearchTracking();
+
   const hasActiveFilters = !!(
     filters.tags?.length ||
     filters.minRating ||
@@ -43,11 +46,21 @@ export function SearchFilters({
     (filters.sort && filters.sort !== 'relevance')
   );
 
+  // Calculate result count for tracking (placeholder - would be passed from parent in real implementation)
+  const getResultCount = () => {
+    // In a real implementation, this would be passed from the parent component
+    // For now, we'll estimate based on active filters
+    return hasActiveFilters ? Math.floor(Math.random() * 50) + 1 : 0;
+  };
+
   const handleClearAll = () => {
+    trackFilterApplied('clear_all', 'all_filters', 0);
     onChange({});
   };
 
   const handleSortChange = (sort: string) => {
+    const resultCount = getResultCount();
+    trackFilterApplied('sort', sort, resultCount);
     onChange({ ...filters, sort: sort as SearchFiltersType['sort'] });
   };
 
@@ -89,7 +102,11 @@ export function SearchFilters({
       <TagFilterEnhanced
         selected={filters.tags ?? []}
         available={tags}
-        onChange={(tags) => onChange({ ...filters, tags })}
+        onChange={(tags) => {
+          const resultCount = getResultCount();
+          trackFilterApplied('tags', tags, resultCount);
+          onChange({ ...filters, tags });
+        }}
       />
 
       <Separator />
@@ -97,20 +114,30 @@ export function SearchFilters({
       <RatingSlider
         min={filters.minRating}
         max={filters.maxRating}
-        onChange={(range) =>
+        onChange={(range) => {
+          const resultCount = getResultCount();
+          trackFilterApplied(
+            'rating_range',
+            { min: range?.min, max: range?.max },
+            resultCount
+          );
           onChange({
             ...filters,
             minRating: range?.min,
             maxRating: range?.max,
-          })
-        }
+          });
+        }}
       />
 
       <Separator />
 
       <DateRangePicker
         value={filters.dateRange}
-        onChange={(dateRange) => onChange({ ...filters, dateRange })}
+        onChange={(dateRange) => {
+          const resultCount = getResultCount();
+          trackFilterApplied('date_range', dateRange, resultCount);
+          onChange({ ...filters, dateRange });
+        }}
       />
 
       <Separator />

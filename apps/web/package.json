@@ -9,6 +9,8 @@
     "lint:fix": "eslint . --fix",
     "build": "bun run fonts:optimize && vite build --config vite.config.ts",
     "preview": "vite preview --config vite.config.ts",
+    "test": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' bun vitest run",
+    "test:watch": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' bun vitest",
     "typecheck": "tsc --noEmit",
     "wrangler:dev": "wrangler dev --port 3000",
     "wrangler:deploy": "wrangler deploy",

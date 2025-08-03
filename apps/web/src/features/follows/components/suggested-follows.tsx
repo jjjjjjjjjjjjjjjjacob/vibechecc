@@ -16,6 +16,26 @@ interface SuggestedFollowsProps {
   showMutualConnections?: boolean;
 }
 
+interface UserSuggestion {
+  user: {
+    _id: string;
+    externalId: string;
+    username?: string;
+    first_name?: string;
+    last_name?: string;
+    image_url?: string;
+    profile_image_url?: string;
+    bio?: string;
+  } | null;
+  reason?: string;
+  mutualConnections?: number;
+  score?: number;
+  engagementStats?: {
+    averageRating: number;
+    totalRatings: number;
+  };
+}
+
 export function SuggestedFollows({
   limit = 5,
   variant = 'card',
@@ -128,7 +148,7 @@ export function SuggestedFollows({
             variant === 'list' ? 'space-y-3' : 'grid gap-3 sm:grid-cols-2'
           )}
         >
-          {suggestions.map((suggestion: any) => {
+          {suggestions.map((suggestion: UserSuggestion) => {
             if (!suggestion.user) return null;
 
             const user = suggestion.user;
@@ -164,7 +184,7 @@ export function SuggestedFollows({
 
                   {/* Mutual Connections Badge */}
                   {showMutualConnections &&
-                    suggestion.mutualConnections > 0 && (
+                    (suggestion.mutualConnections ?? 0) > 0 && (
                       <div className="mt-1">
                         <Badge
                           variant="secondary"

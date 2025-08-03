@@ -12,6 +12,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MasonryFeed } from '@/components/masonry-feed';
 import { UserProfileView } from '@/features/profiles/components/user-profile-view';
 import { useUser } from '@clerk/tanstack-react-start';
+import { ProfileSEO } from '@/components/seo-head';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
+import { usePageTracking } from '@/hooks/use-enhanced-analytics';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,
@@ -20,6 +23,13 @@ export const Route = createFileRoute('/users/$username')({
 function UserProfile() {
   const { username } = Route.useParams();
   const { user: clerkUser } = useUser();
+
+  // Performance tracking
+  usePageTracking('user_profile', {
+    section: 'profile',
+    profile_type: 'public',
+    username_length: username.length,
+  });
   const {
     data: user,
     isLoading: userLoading,
@@ -36,6 +46,30 @@ function UserProfile() {
   const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
     user?.externalId || ''
   );
+
+  // Track profile visits for analytics
+  React.useEffect(() => {
+    if (user) {
+      enhancedTrackEvents.engagement_profile_visited(
+        clerkUser?.id || null,
+        user.externalId,
+        'direct'
+      );
+    }
+  }, [user, clerkUser?.id]);
+
+  // Transform user data for SEO component compatibility
+  const userForSEO = React.useMemo(() => {
+    if (!user) return null;
+
+    return {
+      username: user.username || '',
+      first_name: user.first_name,
+      last_name: user.last_name,
+      bio: user.bio,
+      avatar: user.profile_image_url || user.image_url,
+    };
+  }, [user]);
 
   // Early returns after all hooks have been called
   if (userLoading) {
@@ -65,18 +99,21 @@ function UserProfile() {
   }
 
   return (
-    <UserProfileView
-      user={user}
-      userVibes={userVibes}
-      vibesLoading={vibesLoading}
-      userRatings={userRatings as any}
-      ratingsLoading={ratingsLoading}
-      receivedRatings={receivedRatings as any}
-      receivedRatingsLoading={receivedRatingsLoading}
-      emojiStats={emojiStats}
-      scopedTheme={true}
-      currentUserId={clerkUser?.id}
-    />
+    <>
+      {userForSEO && <ProfileSEO user={userForSEO} />}
+      <UserProfileView
+        user={user}
+        userVibes={userVibes}
+        vibesLoading={vibesLoading}
+        userRatings={userRatings as any}
+        ratingsLoading={ratingsLoading}
+        receivedRatings={receivedRatings as any}
+        receivedRatingsLoading={receivedRatingsLoading}
+        emojiStats={emojiStats}
+        scopedTheme={true}
+        currentUserId={clerkUser?.id}
+      />
+    </>
   );
 }
 

@@ -5,6 +5,7 @@ import { api } from '@viberater/convex';
 import type { SearchFilters } from '@viberater/types';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUser } from '@clerk/tanstack-react-start';
+import { useSearchTracking } from '@/hooks/use-enhanced-analytics';
 
 // Valid sort options for Convex search
 const VALID_CONVEX_SORT_OPTIONS = [
@@ -50,6 +51,15 @@ export function useSearch(options: UseSearchOptions = {}) {
   const debouncedQuery = useDebouncedValue(query, debounceMs);
   const { user } = useUser();
   const previousQuery = useRef<string>('');
+  const searchStartTime = useRef<number>(Date.now());
+  const { trackSearchComplete } = useSearchTracking();
+
+  // Track search start time when query changes
+  useEffect(() => {
+    if (debouncedQuery.trim()) {
+      searchStartTime.current = performance.now();
+    }
+  }, [debouncedQuery]);
 
   // Use Convex query for search with pagination
   const searchQuery = useQuery({
@@ -87,7 +97,7 @@ export function useSearch(options: UseSearchOptions = {}) {
     }
   }, [debouncedQuery, user?.id, trackSearchMutation]); // Track on debounced query changes
 
-  // Update search history with actual result count when we have results
+  // Update search history with actual result count and track performance when we have results
   useEffect(() => {
     if (searchQuery.data && debouncedQuery.trim() && user?.id) {
       const totalCount =
@@ -97,7 +107,31 @@ export function useSearch(options: UseSearchOptions = {}) {
         (searchQuery.data.actions?.length || 0) +
         (searchQuery.data.reviews?.length || 0);
 
-      // Track again with the actual result count
+      // Calculate search performance
+      const searchResponseTime = searchStartTime.current
+        ? performance.now() - searchStartTime.current
+        : 0;
+
+      // Track search completion with performance metrics
+      trackSearchComplete(
+        debouncedQuery,
+        totalCount,
+        (filterForConvex(filters) as Record<string, unknown>) || {},
+        {
+          response_time: searchResponseTime,
+          has_filters: !!(filters && Object.keys(filters).length > 0),
+          filter_count: filters ? Object.keys(filters).length : 0,
+          result_breakdown: {
+            vibes: searchQuery.data.vibes?.length || 0,
+            users: searchQuery.data.users?.length || 0,
+            tags: searchQuery.data.tags?.length || 0,
+            actions: searchQuery.data.actions?.length || 0,
+            reviews: searchQuery.data.reviews?.length || 0,
+          },
+        }
+      );
+
+      // Track search in database for history
       trackSearchMutation.mutate(
         {
           query: debouncedQuery,
@@ -106,7 +140,14 @@ export function useSearch(options: UseSearchOptions = {}) {
         {}
       );
     }
-  }, [searchQuery.data, debouncedQuery, user?.id, trackSearchMutation]); // Update when we get actual results
+  }, [
+    searchQuery.data,
+    debouncedQuery,
+    user?.id,
+    trackSearchMutation,
+    trackSearchComplete,
+    filters,
+  ]); // Update when we get actual results
 
   const search = useCallback((searchQuery: string) => {
     setQuery(searchQuery);

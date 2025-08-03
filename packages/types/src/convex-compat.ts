@@ -146,17 +146,21 @@ export function transformConvexFollow(
 }
 
 // Type guards to check if objects are Convex documents
-export function isConvexDoc(obj: any): obj is ConvexDoc {
+export function isConvexDoc(obj: unknown): obj is ConvexDoc {
   return (
-    obj && typeof obj._id === 'string' && typeof obj._creationTime === 'number'
+    Boolean(obj) &&
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof (obj as ConvexDoc)._id === 'string' &&
+    typeof (obj as ConvexDoc)._creationTime === 'number'
   );
 }
 
-export function isConvexUser(obj: any): obj is ConvexUser {
+export function isConvexUser(obj: unknown): obj is ConvexUser {
   return isConvexDoc(obj) && typeof (obj as ConvexUser).externalId === 'string';
 }
 
-export function isConvexVibe(obj: any): obj is ConvexVibe {
+export function isConvexVibe(obj: unknown): obj is ConvexVibe {
   return (
     isConvexDoc(obj) &&
     typeof (obj as ConvexVibe).title === 'string' &&
@@ -164,7 +168,7 @@ export function isConvexVibe(obj: any): obj is ConvexVibe {
   );
 }
 
-export function isConvexRating(obj: any): obj is ConvexRating {
+export function isConvexRating(obj: unknown): obj is ConvexRating {
   return (
     isConvexDoc(obj) &&
     typeof (obj as ConvexRating).emoji === 'string' &&

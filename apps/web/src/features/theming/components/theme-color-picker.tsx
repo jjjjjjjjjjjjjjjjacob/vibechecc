@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { THEME_COLORS, type ThemeColor } from '@/utils/theme-colors';
 import { cn } from '@/utils/tailwind-utils';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
+import { useUser } from '@clerk/tanstack-react-start';
 
 interface ThemeColorPickerProps {
   selectedTheme: string;
@@ -15,6 +17,18 @@ export function ThemeColorPicker({
   onThemeChange,
   className,
 }: ThemeColorPickerProps) {
+  const { user } = useUser();
+
+  const handleThemeSelect = (themeId: string) => {
+    const previousTheme = selectedTheme;
+    onThemeChange(themeId);
+
+    // Track theme selection for UX insights (not a save yet)
+    if (user && themeId !== previousTheme) {
+      enhancedTrackEvents.ui_theme_toggled(themeId, previousTheme, user.id);
+    }
+  };
+
   return (
     <Card
       className={cn(
@@ -37,7 +51,7 @@ export function ThemeColorPicker({
               key={theme.id}
               theme={theme}
               isSelected={selectedTheme === theme.id}
-              onSelect={() => onThemeChange(theme.id)}
+              onSelect={() => handleThemeSelect(theme.id)}
             />
           ))}
         </div>

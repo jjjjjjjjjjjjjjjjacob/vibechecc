@@ -34,7 +34,7 @@ interface UserInterestsSectionProps {
   user: User;
   userInterests: string[];
   onInterestsUpdate: (interests: string[]) => void;
-  updateProfileMutation: UseMutationResult<any, Error, any, unknown>;
+  updateProfileMutation: UseMutationResult<unknown, Error, unknown, unknown>;
   className?: string;
 }
 

@@ -86,10 +86,10 @@ export function UserReviewsSection({
               asChild
               className="border-theme-primary/30 text-theme-primary hover:bg-theme-primary/10"
             >
-              <a href="/discover">
+              <Link to="/discover">
                 <MessageSquare className="mr-2 h-4 w-4" />
                 explore vibes
-              </a>
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -104,13 +104,15 @@ export function UserReviewsSection({
       </h2>
 
       <div className="space-y-3">
-        {displayedReviews.map((rating) => (
-          <ReviewCard
-            key={`${rating?.vibeId}-${rating?.createdAt}`}
-            rating={rating}
-            currentUser={user}
-          />
-        ))}
+        {displayedReviews.map((rating) =>
+          rating ? (
+            <ReviewCard
+              key={`${rating.vibeId as string}-${rating.createdAt as string}`}
+              rating={rating}
+              currentUser={user}
+            />
+          ) : null
+        )}
       </div>
 
       {showViewAllButton && hasMoreReviews && (
@@ -120,9 +122,9 @@ export function UserReviewsSection({
             asChild
             className="bg-background/90 border-theme-primary/30 text-theme-primary w-full transition-transform hover:scale-[1.02] hover:bg-current/10 sm:w-auto"
           >
-            <a href="/vibes/my-reviews">
+            <Link to="/profile">
               view all reviews ({ratingsWithReviews.length} total)
-            </a>
+            </Link>
           </Button>
         </div>
       )}
@@ -131,16 +133,16 @@ export function UserReviewsSection({
 }
 
 interface ReviewCardProps {
-  rating: any; // TODO: Add proper typing
+  rating: Record<string, unknown>;
   currentUser: User;
 }
 
 function ReviewCard({ rating, currentUser }: ReviewCardProps) {
-  const vibe = rating.vibe;
+  const vibe = rating.vibe as Record<string, unknown>;
   const usePlaceholder = !vibe?.image;
 
   return (
-    <Link to="/vibes/$vibeId" params={{ vibeId: vibe.id }}>
+    <Link to="/vibes/$vibeId" params={{ vibeId: String(vibe?.id) }}>
       <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
         <CardContent className="p-0">
           <div className="flex gap-3 p-4">
@@ -150,7 +152,8 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
                 src={currentUser.image_url}
                 alt={
                   `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() ||
-                  currentUser.username
+                  currentUser.username ||
+                  'User'
                 }
                 className="object-cover"
               />
@@ -175,7 +178,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
                     `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim()}
                 </span>
                 <span className="text-muted-foreground flex-shrink-0 text-xs">
-                  on "{vibe?.title || 'Unknown Vibe'}"
+                  on "{String(vibe?.title) || 'Unknown Vibe'}"
                 </span>
                 <Badge variant="outline" className="ml-auto text-xs">
                   <MessageSquare className="mr-1 h-3 w-3" />
@@ -185,15 +188,17 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
 
               {/* Review Text */}
               <div className="mb-3">
-                <p className="text-sm leading-relaxed">{rating.review}</p>
+                <p className="text-sm leading-relaxed">
+                  {String(rating.review)}
+                </p>
               </div>
 
               {/* Rating and Vibe Image */}
               <div className="flex items-center justify-between">
                 <EmojiRatingDisplay
                   rating={{
-                    emoji: rating.emoji,
-                    value: rating.value,
+                    emoji: String(rating.emoji) || '⭐',
+                    value: Number(rating.value) || 3,
                     count: undefined,
                   }}
                   showScale={false}
@@ -205,12 +210,12 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
                     <div className="relative h-8 w-8 cursor-pointer overflow-hidden rounded">
                       {usePlaceholder ? (
                         <SimpleVibePlaceholder
-                          title={vibe?.title || 'Unknown'}
+                          title={String(vibe?.title) || 'Unknown'}
                         />
                       ) : (
                         <img
-                          src={vibe.image}
-                          alt={vibe.title}
+                          src={String(vibe?.image)}
+                          alt={String(vibe?.title)}
                           className="h-full w-full object-cover"
                         />
                       )}
@@ -224,15 +229,15 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
                       {!usePlaceholder && (
                         <div className="relative h-48 w-full overflow-hidden rounded-t">
                           <img
-                            src={vibe.image}
-                            alt={vibe.title}
+                            src={String(vibe?.image)}
+                            alt={String(vibe?.title)}
                             className="h-full w-full object-cover"
                           />
                         </div>
                       )}
                       <div className="p-3">
                         <p className="text-foreground text-sm font-medium">
-                          {vibe?.title || 'Unknown Vibe'}
+                          {String(vibe?.title) || 'Unknown Vibe'}
                         </p>
                       </div>
                     </div>

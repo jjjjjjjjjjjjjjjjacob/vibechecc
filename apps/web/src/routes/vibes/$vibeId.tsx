@@ -45,6 +45,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { VibeSEO } from '@/components/seo-head';
+import {
+  useContentTracking,
+  usePageTracking,
+} from '@/hooks/use-enhanced-analytics';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
 
 export const Route = createFileRoute('/vibes/$vibeId')({
   component: VibePage,
@@ -54,6 +60,13 @@ function VibePage() {
   const { vibeId } = Route.useParams();
   const { data: vibe, isLoading, error } = useVibe(vibeId);
   const location = useLocation();
+
+  // Performance tracking
+  usePageTracking('vibe_detail', {
+    section: 'content',
+    content_type: 'vibe',
+    vibe_id: vibeId,
+  });
   const { data: allVibesData } = useVibesPaginated(50);
   const { data: emojiMetadataArray } = useEmojiMetadata();
   const [review, setReview] = React.useState('');
@@ -65,6 +78,9 @@ function VibePage() {
   const [_authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
     'react'
   );
+
+  // Content tracking for analytics
+  const { trackContentView, trackContentExit } = useContentTracking();
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
   >(null);
@@ -72,6 +88,14 @@ function VibePage() {
     number | null
   >(null);
   const [showRatingPopover, setShowRatingPopover] = React.useState(false);
+
+  // Track vibe view for analytics
+  React.useEffect(() => {
+    if (vibe) {
+      trackContentView(vibe.id, 'vibe', 'direct');
+      return () => trackContentExit(vibe.id);
+    }
+  }, [vibe, trackContentView, trackContentExit]);
 
   // Get image URL (handles both legacy URLs and storage IDs)
   const { data: imageUrl, isLoading: isImageLoading } = useVibeImageUrl(
@@ -229,6 +253,33 @@ function VibePage() {
 
   // Check if we're on the edit route
   const isEditRoute = location.pathname.endsWith('/edit');
+
+  // Transform vibe data for SEO component compatibility
+  const vibeForSEO = React.useMemo(() => {
+    if (!vibe) return null;
+
+    return {
+      id: vibe.id,
+      title: vibe.title,
+      description: vibe.description,
+      tags: vibe.tags,
+      image: vibe.image,
+      createdAt: vibe.createdAt,
+      createdBy:
+        vibe.createdBy && vibe.createdBy.username
+          ? {
+              username: vibe.createdBy.username,
+              first_name: vibe.createdBy.first_name,
+              last_name: vibe.createdBy.last_name,
+            }
+          : undefined,
+      rating:
+        vibe.ratings?.length > 0
+          ? vibe.ratings.reduce((sum, r) => sum + r.value, 0) /
+            vibe.ratings.length
+          : undefined,
+    };
+  }, [vibe]);
 
   // If we're on the edit route, render only the outlet
   if (isEditRoute) {
@@ -415,13 +466,46 @@ function VibePage() {
       )
     ) {
       try {
+        const _deletionStartTime = Date.now();
+        const timeSinceCreation = vibe.createdAt
+          ? Date.now() - new Date(vibe.createdAt).getTime()
+          : undefined;
+
         await deleteVibeMutation.mutateAsync({ vibeId });
+
+        // Track enhanced vibe deletion
+        enhancedTrackEvents.content_vibe_deleted(
+          vibeId,
+          _user.id,
+          'user_initiated', // Reason for deletion
+          timeSinceCreation
+        );
+
         toast.success('Vibe deleted successfully');
         // The query will automatically invalidate and refetch
-      } catch {
+      } catch (error) {
+        // Track deletion failure
+        enhancedTrackEvents.error_api_failed(
+          'vibes/delete',
+          'DELETION_FAILED',
+          error instanceof Error ? error.message : 'Unknown deletion error',
+          {
+            vibe_id: vibeId,
+            user_id: _user.id,
+          }
+        );
+
         // Failed to delete vibe - already showing user-facing error toast
         toast.error('Failed to delete vibe. Please try again.');
       }
+    } else {
+      // Track deletion cancellation
+      enhancedTrackEvents.ui_modal_closed(
+        'delete_confirmation',
+        'cancelled',
+        undefined,
+        _user?.id
+      );
     }
   };
 
@@ -429,272 +513,289 @@ function VibePage() {
   const isOwner = _user?.id && vibe && vibe.createdById === _user.id;
 
   return (
-    <div className="container mx-auto">
-      <div className="grid w-full grid-cols-3 gap-8 transition-all duration-300">
-        {/* Main Content */}
-        <div className="col-span-3 w-full transition-all duration-300 sm:col-span-2">
-          {/* Main Vibe Card */}
-          <div className="relative mb-6 overflow-hidden rounded-lg">
-            {/* Main Image */}
-            <div className="relative aspect-video">
-              {imageUrl && !isImageLoading ? (
-                <img
-                  src={imageUrl}
-                  alt={vibe.title}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <SimpleVibePlaceholder title={vibe.title} />
-              )}
-            </div>
-          </div>
-
-          {/* Tags */}
-          {vibe.tags && vibe.tags.length > 0 && (
-            <div className="mb-4">
-              <div className="flex flex-wrap gap-2">
-                {vibe.tags.map((tag: string) => (
-                  <Link
-                    key={tag}
-                    to="/search"
-                    search={{ q: tag }}
-                    className="inline-block"
-                  >
-                    <Badge
-                      variant="secondary"
-                      className="hover:bg-secondary/80 cursor-pointer text-xs transition-colors"
-                    >
-                      {tag.toLowerCase()}
-                    </Badge>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Title with Emoji Rating */}
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold lowercase">{vibe.title}</h1>
-              {mostInteractedEmoji ? (
-                <EmojiRatingDisplay
-                  rating={mostInteractedEmoji}
-                  showScale={true}
-                  onEmojiClick={handleEmojiRatingClick}
-                />
-              ) : (
-                <div className="mt-2">
-                  <EmojiRatingCycleDisplay
-                    onSubmit={handleEmojiRating}
-                    isSubmitting={createEmojiRatingMutation.isPending}
-                    vibeTitle={vibe.title}
-                    emojiMetadata={emojiMetadataRecord}
+    <>
+      {vibeForSEO && <VibeSEO vibe={vibeForSEO} />}
+      <div className="container mx-auto">
+        <div className="grid w-full grid-cols-3 gap-8 transition-all duration-300">
+          {/* Main Content */}
+          <div className="col-span-3 w-full transition-all duration-300 sm:col-span-2">
+            {/* Main Vibe Card */}
+            <div className="relative mb-6 overflow-hidden rounded-lg">
+              {/* Main Image */}
+              <div className="relative aspect-video">
+                {imageUrl && !isImageLoading ? (
+                  <img
+                    src={imageUrl}
+                    alt={vibe.title}
+                    className="h-full w-full object-cover"
                   />
-                </div>
-              )}
-            </div>
-
-            {/* Edit/Delete buttons for vibe owner */}
-            {isOwner && (
-              <div className="flex gap-2">
-                <Link
-                  to="/vibes/$vibeId/edit"
-                  params={{ vibeId }}
-                  className="inline-block"
-                >
-                  <Button variant="outline" size="sm">
-                    <Edit className="mr-2 h-4 w-4" />
-                    edit
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDeleteVibe}
-                  disabled={deleteVibeMutation.isPending}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {deleteVibeMutation.isPending ? 'deleting...' : 'delete'}
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Top Emoji Ratings */}
-          {emojiRatings.length > 0 ? (
-            <div className="bg-secondary/20 mb-6 rounded-lg p-4">
-              <h3 className="text-muted-foreground mb-3 text-sm font-medium">
-                top ratings
-              </h3>
-              <div className="space-y-2">
-                {/* First 3 ratings always visible */}
-                {emojiRatings.slice(0, 3).map((rating, index) => (
-                  <div key={`${rating.emoji}-${index}`}>
-                    <EmojiRatingDisplay
-                      rating={rating}
-                      showScale={true}
-                      onEmojiClick={handleEmojiRatingClick}
-                    />
-                  </div>
-                ))}
-
-                {/* Accordion for remaining ratings */}
-                {emojiRatings.length > 3 && (
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="more-ratings" className="border-none">
-                      <AccordionTrigger className="text-muted-foreground hover:text-foreground py-2 text-xs transition-colors hover:no-underline">
-                        {emojiRatings.length - 3} more
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-2 pt-2">
-                        {emojiRatings.slice(3).map((rating, index) => (
-                          <div key={`${rating.emoji}-${index + 3}`}>
-                            <EmojiRatingDisplay
-                              rating={rating}
-                              showScale={true}
-                              onEmojiClick={handleEmojiRatingClick}
-                            />
-                          </div>
-                        ))}
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
+                ) : (
+                  <SimpleVibePlaceholder title={vibe.title} />
                 )}
               </div>
             </div>
-          ) : (
-            <div className="bg-secondary/20 mb-6 rounded-lg p-4 text-center">
-              <p className="text-muted-foreground mb-2 text-sm">
-                no ratings yet
-              </p>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  if (!_user?.id) {
-                    setAuthDialogType('rate');
-                    setShowAuthDialog(true);
-                  } else {
-                    // Scroll to rating selector or open emoji picker
-                    const ratingSection = document.querySelector(
-                      '[data-rating-selector]'
-                    );
-                    ratingSection?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-              >
-                be the first to rate
-              </Button>
-            </div>
-          )}
 
-          {/* Creator Info */}
-          <div className="mb-6 flex items-center">
-            {vibe.createdBy && vibe.createdBy.username ? (
-              <Link
-                to="/users/$username"
-                params={{ username: vibe.createdBy.username }}
-                className="flex items-center transition-opacity hover:opacity-80"
-              >
-                <Avatar className="mr-3 h-10 w-10">
-                  <AvatarImage
-                    src={getUserAvatarUrl(vibe.createdBy)}
-                    alt={computeUserDisplayName(vibe.createdBy)}
-                  />
-                  <AvatarFallback>
-                    {getUserInitials(vibe.createdBy)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="hover:text-foreground/80 font-medium">
-                    originally vibed by {computeUserDisplayName(vibe.createdBy)}
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {new Date(vibe.createdAt).toLocaleDateString()}
-                  </p>
+            {/* Tags */}
+            {vibe.tags && vibe.tags.length > 0 && (
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-2">
+                  {vibe.tags.map((tag: string) => (
+                    <Link
+                      key={tag}
+                      to="/search"
+                      search={{ q: tag }}
+                      className="inline-block"
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="hover:bg-secondary/80 cursor-pointer text-xs transition-colors"
+                      >
+                        {tag.toLowerCase()}
+                      </Badge>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
-            ) : (
-              <>
-                <Avatar className="mr-3 h-10 w-10">
-                  <AvatarFallback>??</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">Unknown User</p>
-                  <p className="text-muted-foreground text-sm">
-                    {new Date(vibe.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </>
+              </div>
             )}
-          </div>
 
-          {/* Description */}
-          <p className="text-muted-foreground mb-8 leading-relaxed">
-            {vibe.description}
-          </p>
+            {/* Title with Emoji Rating */}
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold lowercase">{vibe.title}</h1>
+                {mostInteractedEmoji ? (
+                  <EmojiRatingDisplay
+                    rating={mostInteractedEmoji}
+                    showScale={true}
+                    onEmojiClick={handleEmojiRatingClick}
+                  />
+                ) : (
+                  <div className="mt-2">
+                    <EmojiRatingCycleDisplay
+                      onSubmit={handleEmojiRating}
+                      isSubmitting={createEmojiRatingMutation.isPending}
+                      vibeTitle={vibe.title}
+                      emojiMetadata={emojiMetadataRecord}
+                    />
+                  </div>
+                )}
+              </div>
 
-          {/* Rate & Review This Vibe */}
-          <div className="mb-6" data-rating-selector>
-            <SignedIn>
-              <EmojiRatingSelector
-                topEmojis={emojiRatings}
-                onSubmit={handleEmojiRating}
-                isSubmitting={createEmojiRatingMutation.isPending}
-                vibeTitle={vibe.title}
-                emojiMetadata={emojiMetadataRecord}
-              />
-            </SignedIn>
+              {/* Edit/Delete buttons for vibe owner */}
+              {isOwner && (
+                <div className="flex gap-2">
+                  <Link
+                    to="/vibes/$vibeId/edit"
+                    params={{ vibeId }}
+                    className="inline-block"
+                  >
+                    <Button variant="outline" size="sm">
+                      <Edit className="mr-2 h-4 w-4" />
+                      edit
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDeleteVibe}
+                    disabled={deleteVibeMutation.isPending}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {deleteVibeMutation.isPending ? 'deleting...' : 'delete'}
+                  </Button>
+                </div>
+              )}
+            </div>
 
-            <SignedOut>
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold lowercase">
-                  rate & review this vibe
+            {/* Top Emoji Ratings */}
+            {emojiRatings.length > 0 ? (
+              <div className="bg-secondary/20 mb-6 rounded-lg p-4">
+                <h3 className="text-muted-foreground mb-3 text-sm font-medium">
+                  top ratings
                 </h3>
+                <div className="space-y-2">
+                  {/* First 3 ratings always visible */}
+                  {emojiRatings.slice(0, 3).map((rating, index) => (
+                    <div key={`${rating.emoji}-${index}`}>
+                      <EmojiRatingDisplay
+                        rating={rating}
+                        showScale={true}
+                        onEmojiClick={handleEmojiRatingClick}
+                      />
+                    </div>
+                  ))}
+
+                  {/* Accordion for remaining ratings */}
+                  {emojiRatings.length > 3 && (
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem
+                        value="more-ratings"
+                        className="border-none"
+                      >
+                        <AccordionTrigger className="text-muted-foreground hover:text-foreground py-2 text-xs transition-colors hover:no-underline">
+                          {emojiRatings.length - 3} more
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-2 pt-2">
+                          {emojiRatings.slice(3).map((rating, index) => (
+                            <div key={`${rating.emoji}-${index + 3}`}>
+                              <EmojiRatingDisplay
+                                rating={rating}
+                                showScale={true}
+                                onEmojiClick={handleEmojiRatingClick}
+                              />
+                            </div>
+                          ))}
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-secondary/20 mb-6 rounded-lg p-4 text-center">
+                <p className="text-muted-foreground mb-2 text-sm">
+                  no ratings yet
+                </p>
                 <Button
                   variant="secondary"
-                  size="lg"
-                  className="w-full"
+                  size="sm"
                   onClick={() => {
-                    setAuthDialogType('rate');
-                    setShowAuthDialog(true);
+                    if (!_user?.id) {
+                      setAuthDialogType('rate');
+                      setShowAuthDialog(true);
+                    } else {
+                      // Scroll to rating selector or open emoji picker
+                      const ratingSection = document.querySelector(
+                        '[data-rating-selector]'
+                      );
+                      ratingSection?.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }}
                 >
-                  <span className="mr-2 text-2xl">❓</span>
-                  sign in to rate with an emoji
+                  be the first to rate
                 </Button>
               </div>
-            </SignedOut>
-          </div>
+            )}
 
-          {/* Reviews */}
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
-              {vibe.ratings.filter((r) => r.review).length > 0 ? (
-                <div className="space-y-4">
-                  {vibe.ratings
+            {/* Creator Info */}
+            <div className="mb-6 flex items-center">
+              {vibe.createdBy && vibe.createdBy.username ? (
+                <Link
+                  to="/users/$username"
+                  params={{ username: vibe.createdBy.username }}
+                  className="flex items-center transition-opacity hover:opacity-80"
+                >
+                  <Avatar className="mr-3 h-10 w-10">
+                    <AvatarImage
+                      src={getUserAvatarUrl(vibe.createdBy)}
+                      alt={computeUserDisplayName(vibe.createdBy)}
+                    />
+                    <AvatarFallback>
+                      {getUserInitials(vibe.createdBy)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="hover:text-foreground/80 font-medium">
+                      originally vibed by{' '}
+                      {computeUserDisplayName(vibe.createdBy)}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {new Date(vibe.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </Link>
+              ) : (
+                <>
+                  <Avatar className="mr-3 h-10 w-10">
+                    <AvatarFallback>??</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">Unknown User</p>
+                    <p className="text-muted-foreground text-sm">
+                      {new Date(vibe.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
 
-                    .filter((r) => r.review)
-                    .sort(
-                      (a, b) =>
-                        new Date(b.createdAt).getTime() -
-                        new Date(a.createdAt).getTime()
-                    )
+            {/* Description */}
+            <p className="text-muted-foreground mb-8 leading-relaxed">
+              {vibe.description}
+            </p>
 
-                    .map((rating, index) => (
-                      <div
-                        key={index}
-                        className="border-b pb-4 last:border-b-0"
-                      >
-                        <div className="mb-3 flex items-start gap-3">
-                          {rating.user && rating.user.username ? (
-                            <Link
-                              to="/users/$username"
-                              params={{ username: rating.user.username }}
-                              className="flex-shrink-0 transition-opacity hover:opacity-80"
-                            >
-                              <Avatar className="h-10 w-10">
+            {/* Rate & Review This Vibe */}
+            <div className="mb-6" data-rating-selector>
+              <SignedIn>
+                <EmojiRatingSelector
+                  topEmojis={emojiRatings}
+                  onSubmit={handleEmojiRating}
+                  isSubmitting={createEmojiRatingMutation.isPending}
+                  vibeTitle={vibe.title}
+                  emojiMetadata={emojiMetadataRecord}
+                />
+              </SignedIn>
+
+              <SignedOut>
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold lowercase">
+                    rate & review this vibe
+                  </h3>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="w-full"
+                    onClick={() => {
+                      setAuthDialogType('rate');
+                      setShowAuthDialog(true);
+                    }}
+                  >
+                    <span className="mr-2 text-2xl">❓</span>
+                    sign in to rate with an emoji
+                  </Button>
+                </div>
+              </SignedOut>
+            </div>
+
+            {/* Reviews */}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
+                {vibe.ratings.filter((r) => r.review).length > 0 ? (
+                  <div className="space-y-4">
+                    {vibe.ratings
+
+                      .filter((r) => r.review)
+                      .sort(
+                        (a, b) =>
+                          new Date(b.createdAt).getTime() -
+                          new Date(a.createdAt).getTime()
+                      )
+
+                      .map((rating, index) => (
+                        <div
+                          key={index}
+                          className="border-b pb-4 last:border-b-0"
+                        >
+                          <div className="mb-3 flex items-start gap-3">
+                            {rating.user && rating.user.username ? (
+                              <Link
+                                to="/users/$username"
+                                params={{ username: rating.user.username }}
+                                className="flex-shrink-0 transition-opacity hover:opacity-80"
+                              >
+                                <Avatar className="h-10 w-10">
+                                  <AvatarImage
+                                    src={getUserAvatarUrl(rating.user)}
+                                    alt={computeUserDisplayName(rating.user)}
+                                  />
+                                  <AvatarFallback>
+                                    {getUserInitials(rating.user)}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </Link>
+                            ) : (
+                              <Avatar className="h-10 w-10 flex-shrink-0">
                                 <AvatarImage
                                   src={getUserAvatarUrl(rating.user)}
                                   alt={computeUserDisplayName(rating.user)}
@@ -703,128 +804,120 @@ function VibePage() {
                                   {getUserInitials(rating.user)}
                                 </AvatarFallback>
                               </Avatar>
-                            </Link>
-                          ) : (
-                            <Avatar className="h-10 w-10 flex-shrink-0">
-                              <AvatarImage
-                                src={getUserAvatarUrl(rating.user)}
-                                alt={computeUserDisplayName(rating.user)}
-                              />
-                              <AvatarFallback>
-                                {getUserInitials(rating.user)}
-                              </AvatarFallback>
-                            </Avatar>
-                          )}
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <div>
-                                {rating.user && rating.user.username ? (
-                                  <Link
-                                    to="/users/$username"
-                                    params={{ username: rating.user.username }}
-                                    className="transition-opacity hover:opacity-80"
-                                  >
-                                    <p className="hover:text-foreground/80 font-medium">
+                            )}
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <div>
+                                  {rating.user && rating.user.username ? (
+                                    <Link
+                                      to="/users/$username"
+                                      params={{
+                                        username: rating.user.username,
+                                      }}
+                                      className="transition-opacity hover:opacity-80"
+                                    >
+                                      <p className="hover:text-foreground/80 font-medium">
+                                        {computeUserDisplayName(rating.user)}
+                                      </p>
+                                    </Link>
+                                  ) : (
+                                    <p className="font-medium">
                                       {computeUserDisplayName(rating.user)}
                                     </p>
-                                  </Link>
-                                ) : (
-                                  <p className="font-medium">
-                                    {computeUserDisplayName(rating.user)}
+                                  )}
+                                  <p className="text-muted-foreground text-sm">
+                                    {new Date(
+                                      rating.createdAt || Date.now()
+                                    ).toLocaleDateString()}
                                   </p>
-                                )}
-                                <p className="text-muted-foreground text-sm">
-                                  {new Date(
-                                    rating.createdAt || Date.now()
-                                  ).toLocaleDateString()}
-                                </p>
-                              </div>
-                              {/* Show emoji rating on the right */}
-                              <div className="flex-shrink-0">
-                                <EmojiRatingDisplay
-                                  rating={{
-                                    emoji: rating.emoji || '😊', // Default emoji if somehow missing
-                                    value: rating.value || 3,
-                                    count: 1,
-                                  }}
-                                  showScale={false}
-                                  className="text-lg"
-                                />
+                                </div>
+                                {/* Show emoji rating on the right */}
+                                <div className="flex-shrink-0">
+                                  <EmojiRatingDisplay
+                                    rating={{
+                                      emoji: rating.emoji || '😊', // Default emoji if somehow missing
+                                      value: rating.value || 3,
+                                      count: 1,
+                                    }}
+                                    showScale={false}
+                                    className="text-lg"
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>
+                          {rating.review && (
+                            <p className="text-muted-foreground whitespace-pre-line">
+                              {rating.review}
+                            </p>
+                          )}
                         </div>
-                        {rating.review && (
-                          <p className="text-muted-foreground whitespace-pre-line">
-                            {rating.review}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <div className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">
-                    No written reviews yet
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    Be the first to review this vibe!
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <p className="text-muted-foreground mb-4">
+                      No written reviews yet
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      Be the first to review this vibe!
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Similar Vibes Sidebar */}
-        <div className="col-span-1 hidden overflow-y-auto sm:block">
-          <div className="sticky">
-            <div className="space-y-4">
-              {similarVibes.map((similarVibe) => (
-                <VibeCard
-                  key={similarVibe.id}
-                  vibe={similarVibe}
-                  compact={true}
-                />
-              ))}
-              {similarVibes.length === 0 && (
-                <div className="text-muted-foreground py-8 text-center">
-                  <p>no similar vibes found</p>
-                </div>
-              )}
+          {/* Similar Vibes Sidebar */}
+          <div className="col-span-1 hidden overflow-y-auto sm:block">
+            <div className="sticky">
+              <div className="space-y-4">
+                {similarVibes.map((similarVibe) => (
+                  <VibeCard
+                    key={similarVibe.id}
+                    vibe={similarVibe}
+                    compact={true}
+                  />
+                ))}
+                {similarVibes.length === 0 && (
+                  <div className="text-muted-foreground py-8 text-center">
+                    <p>no similar vibes found</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Auth Prompt Dialog */}
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to rate"
+          description="you must sign in to rate and review vibes"
+        />
+
+        {/* Emoji Rating Popover for clicking on top ratings */}
+        <RatingPopover
+          open={showRatingPopover}
+          onSubmit={handleEmojiRating}
+          isSubmitting={createEmojiRatingMutation.isPending}
+          vibeTitle={vibe.title}
+          emojiMetadata={emojiMetadataRecord}
+          preSelectedEmoji={selectedEmojiForRating || undefined}
+          preSelectedValue={preselectedRatingValue || undefined}
+          onOpenChange={(open) => {
+            setShowRatingPopover(open);
+            if (!open) {
+              setSelectedEmojiForRating(null);
+              setPreselectedRatingValue(null);
+            }
+          }}
+        >
+          <div />
+        </RatingPopover>
       </div>
-
-      {/* Auth Prompt Dialog */}
-      <AuthPromptDialog
-        open={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
-        title="sign in to rate"
-        description="you must sign in to rate and review vibes"
-      />
-
-      {/* Emoji Rating Popover for clicking on top ratings */}
-      <RatingPopover
-        open={showRatingPopover}
-        onSubmit={handleEmojiRating}
-        isSubmitting={createEmojiRatingMutation.isPending}
-        vibeTitle={vibe.title}
-        emojiMetadata={emojiMetadataRecord}
-        preSelectedEmoji={selectedEmojiForRating || undefined}
-        preSelectedValue={preselectedRatingValue || undefined}
-        onOpenChange={(open) => {
-          setShowRatingPopover(open);
-          if (!open) {
-            setSelectedEmojiForRating(null);
-            setPreselectedRatingValue(null);
-          }
-        }}
-      >
-        <div />
-      </RatingPopover>
-    </div>
+    </>
   );
 }
 

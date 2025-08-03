@@ -6,12 +6,19 @@ import { useCurrentUser } from '@/queries';
 import { useTheme } from '@/features/theming/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import { Plus, Sparkles } from 'lucide-react';
+import { SEOHead } from '@/components/seo-head';
+import { seoConfigs } from '@/utils/enhanced-seo';
+import { generateWebSiteSchema } from '@/utils/structured-data';
+import { usePageTracking } from '@/hooks/use-enhanced-analytics';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
 
 function Home() {
+  // Performance tracking
+  usePageTracking('home', { section: 'main', content_type: 'feed' });
+
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
@@ -30,6 +37,10 @@ function Home() {
 
   return (
     <>
+      <SEOHead
+        config={seoConfigs.home()}
+        structuredData={generateWebSiteSchema()}
+      />
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8">
         <div

@@ -14,6 +14,8 @@ import { AuthPromptDialog } from '@/features/auth';
 import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
+import { getEmojiSentiment } from '../utils/emoji-sentiment';
 
 interface EmojiReactionProps {
   reaction: EmojiReactionType;
@@ -38,11 +40,14 @@ export function EmojiReaction({
   showAddButton: _showAddButton = false,
   onRatingSubmit,
   vibeTitle,
-  vibeId: _vibeId,
+  vibeId,
 }: EmojiReactionProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [isRatingPopoverOpen, setIsRatingPopoverOpen] = React.useState(false);
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
+  const [reactionStartTime, setReactionStartTime] = React.useState<
+    number | null
+  >(null);
   const { user } = useUser();
 
   const hasReacted = user?.id ? reaction.users.includes(user.id) : false;
@@ -52,6 +57,21 @@ export function EmojiReaction({
     if (!user) {
       setShowAuthDialog(true);
       return;
+    }
+
+    // Track emoji reaction analytics
+    if (user.id && vibeId) {
+      const interactionTime = reactionStartTime
+        ? Date.now() - reactionStartTime
+        : undefined;
+
+      enhancedTrackEvents.engagement_emoji_selected(
+        vibeId,
+        user.id,
+        reaction.emoji,
+        getEmojiSentiment(reaction.emoji),
+        interactionTime
+      );
     }
 
     // Always open the rating popover with this emoji
@@ -85,7 +105,21 @@ export function EmojiReaction({
         hasReacted ? 'bg-primary/10' : 'bg-muted hover:bg-muted/80',
         className
       )}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        setReactionStartTime(Date.now());
+
+        // Track emoji hover for engagement analytics
+        if (user?.id && vibeId) {
+          enhancedTrackEvents.engagement_emoji_selected(
+            vibeId,
+            user.id,
+            reaction.emoji,
+            getEmojiSentiment(reaction.emoji),
+            0 // Hover start time
+          );
+        }
+      }}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleReact}
       onKeyDown={(e: React.KeyboardEvent) => {
@@ -120,9 +154,30 @@ export function EmojiReaction({
       <>
         <RatingPopover
           open={isRatingPopoverOpen}
-          onOpenChange={setIsRatingPopoverOpen}
+          onOpenChange={(open) => {
+            setIsRatingPopoverOpen(open);
+
+            // Track popover interactions
+            if (user?.id && vibeId) {
+              if (open) {
+                enhancedTrackEvents.ui_modal_opened(
+                  'emoji_rating_popover',
+                  'emoji_reaction_click',
+                  user.id
+                );
+              } else {
+                enhancedTrackEvents.ui_modal_closed(
+                  'emoji_rating_popover',
+                  'cancelled',
+                  undefined,
+                  user.id
+                );
+              }
+            }
+          }}
           onSubmit={handleRatingSubmit}
           vibeTitle={vibeTitle}
+          vibeId={vibeId}
           preSelectedEmoji={reaction.emoji}
         >
           {buttonContent}
@@ -191,7 +246,7 @@ function HorizontalEmojiPicker({
   onOpenChange: _onOpenChange,
   onRatingSubmit,
   vibeTitle,
-  vibeId: _vibeId,
+  vibeId,
 }: HorizontalEmojiPickerProps) {
   const [searchValue, setSearchValue] = React.useState('');
   const [isSearchExpanded, setIsSearchExpanded] = React.useState(false);
@@ -202,6 +257,12 @@ function HorizontalEmojiPicker({
   >(null);
   const [isRatingPopoverOpen, setIsRatingPopoverOpen] = React.useState(false);
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
+  const [pickerOpenTime, setPickerOpenTime] = React.useState<number | null>(
+    null
+  );
+  const [searchStartTime, setSearchStartTime] = React.useState<number | null>(
+    null
+  );
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const { user } = useUser();
 
@@ -239,6 +300,21 @@ function HorizontalEmojiPicker({
       return;
     }
 
+    // Track emoji selection analytics
+    if (user.id && vibeId) {
+      const selectionTime = pickerOpenTime
+        ? Date.now() - pickerOpenTime
+        : undefined;
+
+      enhancedTrackEvents.engagement_emoji_selected(
+        vibeId,
+        user.id,
+        emoji,
+        getEmojiSentiment(emoji),
+        selectionTime
+      );
+    }
+
     if (onRatingSubmit) {
       // Always open rating popover instead of quick reaction
       setSelectedEmojiForRating(emoji);
@@ -267,6 +343,17 @@ function HorizontalEmojiPicker({
 
   const handleSearchClick = () => {
     setIsSearchExpanded(true);
+    setSearchStartTime(Date.now());
+
+    // Track search expansion analytics
+    if (user?.id && vibeId) {
+      enhancedTrackEvents.ui_modal_opened(
+        'emoji_search',
+        'search_button_click',
+        user.id
+      );
+    }
+
     // Focus the input after the animation
     setTimeout(() => {
       searchInputRef.current?.focus();
@@ -275,6 +362,21 @@ function HorizontalEmojiPicker({
 
   const handleSearchInput = (value: string) => {
     setSearchValue(value);
+
+    // Track search behavior analytics
+    if (user?.id && vibeId && value.trim()) {
+      const searchTime = searchStartTime
+        ? Date.now() - searchStartTime
+        : undefined;
+
+      enhancedTrackEvents.search_query_performed(
+        value,
+        { context: 'emoji_picker' },
+        0, // Result count will be tracked when results load
+        searchTime || 0,
+        user.id
+      );
+    }
 
     if (value.trim() && !showSearchResults) {
       // Start the animation sequence when first character is typed
@@ -294,15 +396,37 @@ function HorizontalEmojiPicker({
     setShowSearchResults(false);
   };
 
-  // Reset states when popover closes
+  // Track picker open/close and reset states
   React.useEffect(() => {
-    if (!open) {
+    if (open) {
+      setPickerOpenTime(Date.now());
+
+      if (user?.id && vibeId) {
+        enhancedTrackEvents.ui_modal_opened(
+          'horizontal_emoji_picker',
+          'add_reaction_click',
+          user.id
+        );
+      }
+    } else {
+      // Track close analytics
+      if (pickerOpenTime && user?.id && vibeId) {
+        enhancedTrackEvents.ui_modal_closed(
+          'horizontal_emoji_picker',
+          'closed',
+          Date.now() - pickerOpenTime,
+          user.id
+        );
+      }
+
       setIsSearchExpanded(false);
       setSearchValue('');
       setShowFullPicker(false);
       setShowSearchResults(false);
+      setPickerOpenTime(null);
+      setSearchStartTime(null);
     }
-  }, [open]);
+  }, [open, pickerOpenTime, user?.id, vibeId]);
 
   const horizontalPicker = (
     <div className="space-y-0">
@@ -500,6 +624,7 @@ function HorizontalEmojiPicker({
           onOpenChange={setIsRatingPopoverOpen}
           onSubmit={handleRatingSubmit}
           vibeTitle={vibeTitle}
+          vibeId={vibeId}
           preSelectedEmoji={selectedEmojiForRating}
         >
           <div style={{ display: 'none' }} />
@@ -539,9 +664,27 @@ export function EmojiReactions({
 }: EmojiReactionsProps) {
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
+  const [reactionsStartTime, setReactionsStartTime] = React.useState<
+    number | null
+  >(null);
   const { user } = useUser();
 
   const handleAddEmoji = (emoji: string) => {
+    // Track emoji addition analytics
+    if (user?.id && vibeId) {
+      const selectionTime = reactionsStartTime
+        ? Date.now() - reactionsStartTime
+        : undefined;
+
+      enhancedTrackEvents.engagement_emoji_selected(
+        vibeId,
+        user.id,
+        emoji,
+        getEmojiSentiment(emoji),
+        selectionTime
+      );
+    }
+
     // This should only be called when onRatingSubmit is not provided
     // When onRatingSubmit is provided, the HorizontalEmojiPicker handles the emoji selection directly
     if (onReact && !onRatingSubmit) {
@@ -552,6 +695,11 @@ export function EmojiReactions({
   const handleCloseEmojiPicker = () => {
     setShowEmojiPicker(false);
   };
+
+  // Track reactions component mount
+  React.useEffect(() => {
+    setReactionsStartTime(Date.now());
+  }, []);
 
   return (
     <div className={cn('flex w-full min-w-0 items-center gap-1', className)}>
@@ -585,6 +733,13 @@ export function EmojiReactions({
               onClick={() => {
                 if (!user) {
                   setShowAuthDialog(true);
+                } else if (vibeId) {
+                  // Track add reaction button click
+                  enhancedTrackEvents.ui_modal_opened(
+                    'emoji_reactions_picker',
+                    'add_reaction_button',
+                    user.id
+                  );
                 }
               }}
             >

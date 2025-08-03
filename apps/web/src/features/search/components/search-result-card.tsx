@@ -10,6 +10,7 @@ import {
 import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchTracking } from '@/hooks/use-enhanced-analytics';
 import type {
   SearchResult,
   VibeSearchResult,
@@ -21,31 +22,57 @@ import type {
 interface SearchResultCardProps {
   result: SearchResult;
   queriedEmojis?: string[]; // Pass queried emojis to prioritize in display
+  position?: number; // Position in search results for tracking
+  searchQuery?: string; // Search query that produced this result
 }
 
 export function SearchResultCard({
   result,
   queriedEmojis,
+  position = 0,
+  searchQuery = '',
 }: SearchResultCardProps) {
+  const { trackSearchResultClick } = useSearchTracking();
+
+  const handleResultClick = () => {
+    trackSearchResultClick(searchQuery, result.id, position, result.type);
+  };
+
   if (result.type === 'vibe') {
     return (
       <VibeResultCard
         result={result as VibeSearchResult}
         queriedEmojis={queriedEmojis}
+        onResultClick={handleResultClick}
       />
     );
   }
 
   if (result.type === 'user') {
-    return <UserResultCard result={result as UserSearchResult} />;
+    return (
+      <UserResultCard
+        result={result as UserSearchResult}
+        onResultClick={handleResultClick}
+      />
+    );
   }
 
   if (result.type === 'tag') {
-    return <TagResultCard result={result as TagSearchResult} />;
+    return (
+      <TagResultCard
+        result={result as TagSearchResult}
+        onResultClick={handleResultClick}
+      />
+    );
   }
 
   if (result.type === 'review') {
-    return <ReviewResultCard result={result as ReviewSearchResult} />;
+    return (
+      <ReviewResultCard
+        result={result as ReviewSearchResult}
+        onResultClick={handleResultClick}
+      />
+    );
   }
 
   return null;
@@ -54,9 +81,11 @@ export function SearchResultCard({
 function VibeResultCard({
   result,
   queriedEmojis,
+  onResultClick,
 }: {
   result: VibeSearchResult;
   queriedEmojis?: string[];
+  onResultClick: () => void;
 }) {
   const usePlaceholder = !result.image;
 
@@ -118,7 +147,11 @@ function VibeResultCard({
       )}
 
       <div className="block h-full">
-        <Link to="/vibes/$vibeId" params={{ vibeId: result.id }}>
+        <Link
+          to="/vibes/$vibeId"
+          params={{ vibeId: result.id }}
+          onClick={onResultClick}
+        >
           <div className="relative">
             <div className="relative aspect-video overflow-hidden">
               {usePlaceholder ? (
@@ -174,9 +207,19 @@ function VibeResultCard({
   );
 }
 
-function UserResultCard({ result }: { result: UserSearchResult }) {
+function UserResultCard({
+  result,
+  onResultClick,
+}: {
+  result: UserSearchResult;
+  onResultClick: () => void;
+}) {
   return (
-    <Link to="/users/$username" params={{ username: result.username }}>
+    <Link
+      to="/users/$username"
+      params={{ username: result.username }}
+      onClick={onResultClick}
+    >
       <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-lg">
         <div className="flex flex-col items-center space-y-4 p-6 text-center">
           <Avatar className="h-20 w-20">
@@ -207,9 +250,19 @@ function UserResultCard({ result }: { result: UserSearchResult }) {
   );
 }
 
-function TagResultCard({ result }: { result: TagSearchResult }) {
+function TagResultCard({
+  result,
+  onResultClick,
+}: {
+  result: TagSearchResult;
+  onResultClick: () => void;
+}) {
   return (
-    <Link to="/search" search={{ tags: [result.title] }}>
+    <Link
+      to="/search"
+      search={{ tags: [result.title] }}
+      onClick={onResultClick}
+    >
       <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-lg">
         <div className="flex flex-col items-center space-y-4 p-6 text-center">
           <div className="bg-primary/10 flex h-20 w-20 items-center justify-center rounded-full">
@@ -230,11 +283,21 @@ function TagResultCard({ result }: { result: TagSearchResult }) {
   );
 }
 
-function ReviewResultCard({ result }: { result: ReviewSearchResult }) {
+function ReviewResultCard({
+  result,
+  onResultClick,
+}: {
+  result: ReviewSearchResult;
+  onResultClick: () => void;
+}) {
   const usePlaceholder = !result.vibeImage;
 
   return (
-    <Link to="/vibes/$vibeId" params={{ vibeId: result.vibeId }}>
+    <Link
+      to="/vibes/$vibeId"
+      params={{ vibeId: result.vibeId }}
+      onClick={onResultClick}
+    >
       <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-md">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">

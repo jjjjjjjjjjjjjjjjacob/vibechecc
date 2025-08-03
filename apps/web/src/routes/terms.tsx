@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';
+import { usePageTracking } from '@/hooks/use-enhanced-analytics';
 
 export const Route = createFileRoute('/terms')({
   head: () => ({
@@ -15,6 +16,13 @@ export const Route = createFileRoute('/terms')({
 });
 
 function TermsPage() {
+  // Performance tracking
+  usePageTracking('terms', {
+    section: 'legal',
+    content_type: 'policy',
+    document_type: 'terms_of_service',
+  });
+
   return (
     <BaseLayout maxWidth="4xl" padding="lg">
       <div className="prose prose-lg max-w-none">

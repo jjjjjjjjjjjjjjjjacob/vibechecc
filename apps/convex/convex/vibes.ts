@@ -1,7 +1,12 @@
-import { mutation, query, internalMutation } from './_generated/server';
+import {
+  mutation,
+  query,
+  internalMutation,
+  type MutationCtx,
+} from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import type { Doc } from './_generated/dataModel';
+import type { Doc, Id } from './_generated/dataModel';
 
 // Helper to detect test environment
 function isTestEnvironment() {
@@ -626,7 +631,7 @@ export const create = mutation({
 
     // Handle image storage - store both legacy URL and new storage ID
     let imageValue: string | undefined;
-    let imageStorageIdValue: any | undefined;
+    let imageStorageIdValue: Id<'_storage'> | undefined;
 
     if (args.image) {
       if (typeof args.image === 'string') {
@@ -672,7 +677,7 @@ export const create = mutation({
 
 // Helper function to add vibe tags to user interests
 const addInterestsFromVibe = async (
-  ctx: any,
+  ctx: MutationCtx,
   userId: string,
   vibeId: string
 ): Promise<void> => {
@@ -680,7 +685,7 @@ const addInterestsFromVibe = async (
     // Get the vibe to extract its tags
     const vibe = await ctx.db
       .query('vibes')
-      .filter((q: any) => q.eq(q.field('id'), vibeId))
+      .filter((q) => q.eq(q.field('id'), vibeId))
       .first();
 
     // Return early if vibe doesn't exist or has no tags
@@ -691,7 +696,7 @@ const addInterestsFromVibe = async (
     // Get the user to get current interests
     const user = await ctx.db
       .query('users')
-      .withIndex('byExternalId', (q: any) => q.eq('externalId', userId))
+      .withIndex('byExternalId', (q) => q.eq('externalId', userId))
       .first();
 
     // Return early if user doesn't exist
@@ -1820,7 +1825,7 @@ export const getForYouFeed = query({
         // Get all ratings for this vibe
         const ratings = await ctx.db
           .query('ratings')
-          .withIndex('vibe', (q: any) => q.eq('vibeId', vibe.id))
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
           .collect();
 
         // Check if vibe has tags matching user interests
@@ -1894,7 +1899,7 @@ export const getForYouFeed = query({
 
         const ratings = await ctx.db
           .query('ratings')
-          .withIndex('vibe', (q: any) => q.eq('vibeId', vibe.id))
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
           .take(10);
 
         const ratingDetails = await Promise.all(
@@ -2248,7 +2253,15 @@ export const updateVibe = mutation({
     }
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: Partial<{
+      updatedAt: string;
+      title: string;
+      description: string;
+      tags: string[];
+      image: string;
+      imageStorageId: Id<'_storage'>;
+      visibility: 'public' | 'deleted';
+    }> = {
       updatedAt: new Date().toISOString(),
     };
 

@@ -8,10 +8,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { enhancedTrackEvents } from '@/lib/enhanced-posthog';
+import { useCurrentUser } from '@/queries';
 
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const { data: currentUser } = useCurrentUser();
+
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    enhancedTrackEvents.ui_theme_toggled(
+      newTheme,
+      resolvedTheme,
+      currentUser?._id
+    );
+    setTheme(newTheme);
+  };
 
   // Avoid hydration mismatch by only rendering after mount
   React.useEffect(() => {
@@ -41,21 +53,21 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onClick={() => setTheme('light')}
+          onClick={() => handleThemeChange('light')}
           className="lowercase"
         >
           <Sun className="mr-2 h-4 w-4" />
           <span>light</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setTheme('dark')}
+          onClick={() => handleThemeChange('dark')}
           className="lowercase"
         >
           <Moon className="mr-2 h-4 w-4" />
           <span>dark</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setTheme('system')}
+          onClick={() => handleThemeChange('system')}
           className="lowercase"
         >
           <Laptop className="mr-2 h-4 w-4" />

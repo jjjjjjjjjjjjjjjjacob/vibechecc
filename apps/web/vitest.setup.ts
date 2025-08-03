@@ -72,222 +72,50 @@ const mockSearchResults = [
   },
 ];
 
-// Mock @convex-dev/react-query to return mock data immediately
-const mockConvexQuery = vi.fn((query: unknown, args: any) => {
-  // Default structure for all queries
-  const baseQuery = {
-    queryKey: ['convexQuery', query, args],
-    queryFn: async (): Promise<any> => {
-      // Default return for unknown queries
-      return [];
-    },
-    enabled: args?.enabled !== false,
+// Mock for Convex queries with proper data
+const mockConvexQuery = vi.fn((apiFunction, params) => {
+  // Return different data based on the API function being called
+  if (apiFunction === 'api.emojis.getPopular') {
+    return {
+      queryKey: ['convexQuery', apiFunction, params],
+      queryFn: async () => mockPopularEmojis,
+      enabled: true,
+      staleTime: 0,
+    };
+  }
+  
+  if (apiFunction === 'api.emojis.search') {
+    return {
+      queryKey: ['convexQuery', apiFunction, params],
+      queryFn: async () => ({ 
+        emojis: params?.searchTerm ? mockSearchResults : mockCategoryEmojis, 
+        hasMore: false 
+      }),
+      enabled: true,
+      staleTime: 0,
+    };
+  }
+  
+  if (apiFunction === 'api.search.getTrendingSearches') {
+    return {
+      queryKey: ['convexQuery', apiFunction, params],
+      queryFn: async () => [
+        { term: 'happy vibes', count: 42 },
+        { term: 'weekend', count: 38 },
+        { term: 'mood', count: 35 }
+      ],
+      enabled: true,
+      staleTime: 0,
+    };
+  }
+  
+  // Default fallback
+  return {
+    queryKey: ['convexQuery', apiFunction, params],
+    queryFn: async () => ({ emojis: [], hasMore: false }),
+    enabled: true,
     staleTime: 0,
   };
-
-  // Log for debugging
-  // console.log('convexQuery called with:', { query, args });
-
-  // Try to identify the query function name from various possible structures
-  let functionName = '';
-
-  try {
-    // Safely extract function name from query object
-    if (query) {
-      // Try JSON stringify to see the structure, handling circular references
-      let queryStr = '';
-      try {
-        queryStr = JSON.stringify(query);
-      } catch {
-        // Handle circular reference or other stringify errors
-        if (query.toString) {
-          queryStr = query.toString();
-        }
-      }
-
-      // Look for function names in the stringified version
-      if (queryStr && typeof queryStr === 'string') {
-        if (queryStr.includes('getPopular')) {
-          functionName = 'getPopular';
-        } else if (queryStr.includes('getCategories')) {
-          functionName = 'getCategories';
-        } else if (queryStr.includes('searchAllOptimized')) {
-          functionName = 'searchAllOptimized';
-        } else if (queryStr.includes('getCurrentUserFollowStats')) {
-          functionName = 'getCurrentUserFollowStats';
-        } else if (queryStr.includes('getFollowStats')) {
-          functionName = 'getFollowStats';
-        } else if (queryStr.includes('getForYouFeed')) {
-          functionName = 'getForYouFeed';
-        } else if (queryStr.includes('search')) {
-          functionName = 'search';
-        } else if (queryStr.includes('getUrl')) {
-          functionName = 'getUrl';
-        }
-      }
-
-      // Check if query is a string (from our mock)
-      if (typeof query === 'string') {
-        if (query.includes('getPopular')) {
-          functionName = 'getPopular';
-        } else if (query.includes('getCategories')) {
-          functionName = 'getCategories';
-        } else if (query.includes('searchAllOptimized')) {
-          functionName = 'searchAllOptimized';
-        } else if (query.includes('getCurrentUserFollowStats')) {
-          functionName = 'getCurrentUserFollowStats';
-        } else if (query.includes('getFollowStats')) {
-          functionName = 'getFollowStats';
-        } else if (query.includes('getForYouFeed')) {
-          functionName = 'getForYouFeed';
-        } else if (query.includes('search')) {
-          functionName = 'search';
-        } else if (query.includes('getUrl')) {
-          functionName = 'getUrl';
-        }
-      }
-
-      // Also try direct property access
-      if (!functionName && typeof query === 'object' && query !== null) {
-        // First check direct properties
-        const queryObj = query as any;
-        functionName =
-          queryObj._name || queryObj.name || queryObj.functionName || '';
-
-        // Check nested properties if still no function name
-        if (!functionName) {
-          try {
-            const queryKeys = Object.keys(query);
-            for (const key of queryKeys) {
-              const value = (query as any)[key];
-              if (value && typeof value === 'object') {
-                if (value._name || value.name) {
-                  functionName = value._name || value.name;
-                  break;
-                }
-                // Check if the key itself might be the function name
-                if (
-                  key === 'getPopular' ||
-                  key === 'getCategories' ||
-                  key === 'searchAllOptimized' ||
-                  key === 'search' ||
-                  key === 'getUrl'
-                ) {
-                  functionName = key;
-                  break;
-                }
-              }
-            }
-          } catch {
-            // Ignore errors when accessing properties
-          }
-        }
-      }
-    }
-  } catch {
-    // If any error occurs during extraction, just use empty string
-    functionName = '';
-  }
-
-  // Ensure functionName is always a string
-  if (typeof functionName !== 'string') {
-    functionName = '';
-  }
-
-  // Match against our expected function names
-  const fnStr = String(functionName || '');
-  if (fnStr === 'getPopular' || fnStr.includes('getPopular')) {
-    // Return the array directly for getPopular
-    baseQuery.queryFn = async (): Promise<any[]> => mockPopularEmojis;
-  } else if (fnStr === 'getCategories' || fnStr.includes('getCategories')) {
-    baseQuery.queryFn = async (): Promise<string[]> => [
-      'smileys',
-      'people',
-      'animals',
-      'food',
-    ];
-  } else if (
-    fnStr === 'searchAllOptimized' ||
-    fnStr.includes('searchAllOptimized')
-  ) {
-    // Handle searchAllOptimized specifically
-    baseQuery.queryFn = async (): Promise<any> => {
-      return {
-        vibes: [],
-        users: [],
-        tags: [],
-        actions: [],
-        reviews: [],
-        totalCount: 0,
-        hasMore: false,
-        page: args?.page || 0,
-        continueCursor: null,
-      };
-    };
-  } else if (
-    fnStr === 'getCurrentUserFollowStats' ||
-    fnStr.includes('getCurrentUserFollowStats')
-  ) {
-    baseQuery.queryFn = async (): Promise<any> => {
-      return {
-        followers: 5,
-        following: 10,
-      };
-    };
-  } else if (fnStr === 'getFollowStats' || fnStr.includes('getFollowStats')) {
-    baseQuery.queryFn = async (): Promise<any> => {
-      return {
-        followers: 3,
-        following: 7,
-      };
-    };
-  } else if (fnStr === 'getForYouFeed' || fnStr.includes('getForYouFeed')) {
-    baseQuery.queryFn = async (): Promise<any> => {
-      return {
-        results: [],
-        isDone: true,
-        continueCursor: null,
-      };
-    };
-  } else if (fnStr === 'search' || fnStr.includes('search')) {
-    baseQuery.queryFn = async (): Promise<any> => {
-      if (args?.searchTerm) {
-        if (args.searchTerm === 'xyzabc123notfound') {
-          return {
-            emojis: [],
-            hasMore: false,
-            page: 0,
-            pageSize: 50,
-            totalCount: 0,
-          };
-        }
-
-        return {
-          emojis: mockSearchResults,
-          hasMore: false,
-          page: args.page || 0,
-          pageSize: args.pageSize || 50,
-          totalCount: mockSearchResults.length,
-        };
-      }
-
-      // Category browsing
-      return {
-        emojis: args?.page === 0 ? mockCategoryEmojis : [],
-        hasMore: args?.page === 0,
-        page: args.page || 0,
-        pageSize: args.pageSize || 200,
-        totalCount: mockCategoryEmojis.length,
-      };
-    };
-  } else if (fnStr === 'getUrl' || fnStr.includes('getUrl')) {
-    baseQuery.queryFn = async (): Promise<string | null> => {
-      // Return mock file URL
-      return mockFileUrl;
-    };
-  }
-
-  return baseQuery;
 });
 
 vi.mock('@convex-dev/react-query', () => ({
@@ -314,6 +142,7 @@ vi.mock('@viberater/convex', () => ({
     },
     search: {
       trackSearch: 'api.search.trackSearch',
+      getTrendingSearches: 'api.search.getTrendingSearches',
     },
     vibes: {
       getAllSimple: 'api.vibes.getAllSimple',
@@ -336,17 +165,14 @@ vi.mock('@viberater/convex', () => ({
   },
 }));
 
-// Mock @/queries module
+// Simplified mock for @/queries module
+const defaultQuery = () => ({ data: [], isLoading: false, error: null });
+const defaultMutation = () => ({ mutate: vi.fn(), isLoading: false, error: null });
+
 vi.mock('@/queries', () => ({
-  useVibes: () => ({
-    data: [],
-    isLoading: false,
-    error: null,
-  }),
+  useVibes: defaultQuery,
   useVibesInfinite: () => ({
-    data: {
-      pages: [{ results: [], isDone: true, continueCursor: null }],
-    },
+    data: { pages: [{ results: [], isDone: true }] },
     isLoading: false,
     error: null,
     hasNextPage: false,
@@ -354,35 +180,15 @@ vi.mock('@/queries', () => ({
     fetchNextPage: vi.fn(),
   }),
   useForYouFeedInfinite: () => ({
-    data: {
-      pages: [{ results: [], isDone: true, continueCursor: null }],
-    },
+    data: { pages: [{ results: [], isDone: true }] },
     isLoading: false,
-    error: null,
     hasNextPage: false,
-    isFetchingNextPage: false,
     fetchNextPage: vi.fn(),
   }),
-  useVibesPaginated: () => ({
-    data: [],
-    isLoading: false,
-    error: null,
-  }),
-  useDeleteVibeMutation: () => ({
-    mutate: vi.fn(),
-    isLoading: false,
-    error: null,
-  }),
-  useCreateEmojiRatingMutation: () => ({
-    mutate: vi.fn(),
-    isLoading: false,
-    error: null,
-  }),
-  useTopEmojiRatings: () => ({
-    data: [],
-    isLoading: false,
-    error: null,
-  }),
+  useVibesPaginated: defaultQuery,
+  useDeleteVibeMutation: defaultMutation,
+  useCreateEmojiRatingMutation: defaultMutation,
+  useTopEmojiRatings: defaultQuery,
 }));
 
 // Mock @clerk/tanstack-react-start
@@ -422,6 +228,12 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 // Cleanup after each test
 afterEach(() => {
   cleanup();
+  // Force garbage collection in test environment
+  if (global.gc) {
+    global.gc();
+  }
+  // Clear vi mocks
+  vi.clearAllMocks();
 });
 
 // Mock window.matchMedia

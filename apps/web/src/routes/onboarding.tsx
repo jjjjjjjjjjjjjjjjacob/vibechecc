@@ -3,12 +3,20 @@ import { OnboardingFlow } from '@/features/onboarding/components/onboarding-flow
 import { useOnboardingStatus } from '@/queries';
 import { SignedIn, SignedOut, useAuth } from '@clerk/tanstack-react-start';
 import { useEffect } from 'react';
+import { usePageTracking } from '@/hooks/use-enhanced-analytics';
 
 export const Route = createFileRoute('/onboarding')({
   component: OnboardingPage,
 });
 
 function OnboardingPage() {
+  // Performance tracking
+  usePageTracking('onboarding', {
+    section: 'user_setup',
+    funnel_step: 'onboarding_flow',
+    page_type: 'guided_setup',
+  });
+
   const { data: _onboardingStatus, isLoading } = useOnboardingStatus();
   const { getToken, isLoaded } = useAuth();
 
