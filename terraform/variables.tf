@@ -21,7 +21,7 @@ variable "cloudflare_zone_id" {
 }
 
 variable "cloudflare_zone" {
-  description = "The Cloudflare Zone name for the domain (e.g., 'viberatr.vip')."
+  description = "The Cloudflare Zone name for the domain (e.g., 'viberatr.io')."
   type        = string
 }
 
