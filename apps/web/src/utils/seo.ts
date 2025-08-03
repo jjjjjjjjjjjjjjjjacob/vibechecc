@@ -1,3 +1,6 @@
+// Legacy SEO function - use enhanced-seo.ts for new implementations
+import { generateSEOTags, type SEOConfig } from './enhanced-seo';
+
 export const seo = ({
   title,
   description,
@@ -9,26 +12,17 @@ export const seo = ({
   image?: string;
   keywords?: string;
 }) => {
-  const tags = [
-    { title },
-    { name: 'description', content: description },
-    { name: 'keywords', content: keywords },
-    { name: 'twitter:title', content: title },
-    { name: 'twitter:description', content: description },
-    { name: 'twitter:creator', content: '@tannerlinsley' },
-    { name: 'twitter:site', content: '@tannerlinsley' },
-    { name: 'og:type', content: 'website' },
-    { name: 'og:title', content: title },
-    { name: 'og:description', content: description },
-  ];
+  // Convert to new SEO config format
+  const config: SEOConfig = {
+    title,
+    description: description || '',
+    keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
+    image,
+  };
 
-  if (image) {
-    tags.push(
-      { name: 'twitter:image', content: image },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'og:image', content: image }
-    );
-  }
-
-  return tags;
+  // Use the enhanced SEO function
+  return generateSEOTags(config);
 };
+
+// Re-export enhanced utilities for easy migration
+export * from './enhanced-seo';
