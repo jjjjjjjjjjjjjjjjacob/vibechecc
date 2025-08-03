@@ -29,7 +29,7 @@ export function OnboardingLayout({
   const progress = (currentStep / totalSteps) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="from-theme-primary/5 to-theme-secondary/5 dark:from-background dark:to-muted/50 min-h-screen bg-gradient-to-br">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">

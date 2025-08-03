@@ -6,7 +6,7 @@ import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-p
 import {
   EmojiRatingDisplay,
   TopEmojiRatings,
-} from '@/components/emoji-rating-display';
+} from '@/features/ratings/components/emoji-rating-display';
 import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';

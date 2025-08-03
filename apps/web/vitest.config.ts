@@ -15,6 +15,32 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: ['./vitest.setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      exclude: [
+        'coverage/**',
+        'dist/**',
+        '**/*.d.ts',
+        'test{,s}/**',
+        '**/*{.,-}test.{js,cjs,mjs,ts,tsx,jsx}',
+        '**/*{.,-}spec.{js,cjs,mjs,ts,tsx,jsx}',
+        '**/__tests__/**',
+        '**/*.config.{js,ts}',
+        'src/components/ui/**', // shadcn components
+        'src/vite-env.d.ts',
+        'src/routeTree.gen.ts',
+      ],
+      include: ['src/**/*.{ts,tsx}'],
+      thresholds: {
+        global: {
+          branches: 60,
+          functions: 60,
+          lines: 60,
+          statements: 60,
+        },
+      },
+    },
   },
   resolve: {
     alias: {

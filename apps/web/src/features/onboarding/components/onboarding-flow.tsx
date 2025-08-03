@@ -3,12 +3,14 @@ import { useNavigate } from '@tanstack/react-router';
 import { OnboardingLayout } from './onboarding-layout';
 import { OnboardingWelcomeStep } from './onboarding-welcome-step';
 import { OnboardingProfileStep } from './onboarding-profile-step';
+import { OnboardingThemeStep } from './onboarding-theme-step';
 import { OnboardingInterestsStep } from './onboarding-interests-step';
 import { OnboardingDiscoverStep } from './onboarding-discover-step';
 import { OnboardingCompleteStep } from './onboarding-complete-step';
 import {
   useUpdateOnboardingDataMutation,
   useCompleteOnboardingMutation,
+  useUpdateThemeMutation,
 } from '@/queries';
 import { useUser } from '@clerk/tanstack-react-start';
 import toast from '@/utils/toast';
@@ -23,6 +25,8 @@ export function OnboardingFlow() {
     last_name: '',
     image_url: '',
     interests: [] as string[],
+    primaryColor: 'pink',
+    secondaryColor: 'orange',
   });
   const [uploadedImageFile, setUploadedImageFile] = React.useState<File | null>(
     null
@@ -30,8 +34,9 @@ export function OnboardingFlow() {
 
   const updateOnboardingMutation = useUpdateOnboardingDataMutation();
   const completeOnboardingMutation = useCompleteOnboardingMutation();
+  const updateThemeMutation = useUpdateThemeMutation();
 
-  const totalSteps = 5;
+  const totalSteps = 6;
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -48,7 +53,7 @@ export function OnboardingFlow() {
   const handleSkip = async () => {
     try {
       await completeOnboardingMutation.mutateAsync({});
-      toast.success('Welcome to viberater!');
+      toast.success('welcome to viberater!');
       navigate({ to: '/' });
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -67,7 +72,7 @@ export function OnboardingFlow() {
       setOnboardingData((prev) => ({ ...prev, ...profileData }));
       // console.log('profileData', profileData);
       await updateOnboardingMutation.mutateAsync(profileData);
-      toast.success('Profile updated!');
+      toast.success('profile updated!');
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('(Onboarding Flow) Error updating profile:', error);
@@ -80,12 +85,28 @@ export function OnboardingFlow() {
     try {
       setOnboardingData((prev) => ({ ...prev, interests }));
       await updateOnboardingMutation.mutateAsync({ interests });
-      toast.success('Interests saved!');
+      toast.success('interests saved!');
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error updating interests:', error);
       toast.error('Failed to save interests. Please try again.');
       // Don't prevent user from continuing on interests errors
+    }
+  };
+
+  const handleUpdateTheme = async (theme: {
+    primaryColor: string;
+    secondaryColor: string;
+  }) => {
+    try {
+      setOnboardingData((prev) => ({ ...prev, ...theme }));
+      await updateThemeMutation.mutateAsync(theme);
+      toast.success('theme saved!');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error updating theme:', error);
+      toast.error('Failed to save theme. Please try again.');
+      // Don't prevent user from continuing on theme errors
     }
   };
 
@@ -135,7 +156,7 @@ export function OnboardingFlow() {
       // Execute all updates in parallel
       await Promise.all(promises);
 
-      toast.success('Welcome to viberater! 🎉');
+      toast.success('welcome to viberater! 🎉');
       navigate({ to: '/' });
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -159,15 +180,23 @@ export function OnboardingFlow() {
         );
       case 3:
         return (
+          <OnboardingThemeStep
+            onNext={handleNext}
+            onUpdateTheme={handleUpdateTheme}
+            isLoading={updateThemeMutation.isPending}
+          />
+        );
+      case 4:
+        return (
           <OnboardingInterestsStep
             onNext={handleNext}
             onUpdateInterests={handleUpdateInterests}
             isLoading={updateOnboardingMutation.isPending}
           />
         );
-      case 4:
-        return <OnboardingDiscoverStep onNext={handleNext} />;
       case 5:
+        return <OnboardingDiscoverStep onNext={handleNext} />;
+      case 6:
         return (
           <OnboardingCompleteStep
             onComplete={handleComplete}
@@ -184,12 +213,14 @@ export function OnboardingFlow() {
       case 1:
         return undefined; // Welcome step has its own title
       case 2:
-        return 'Set Up Your Profile';
+        return 'set up your profile';
       case 3:
-        return 'Choose Your Interests';
+        return 'choose your theme';
       case 4:
-        return 'Learn to Discover';
+        return 'choose your interests';
       case 5:
+        return 'learn to vibe';
+      case 6:
         return undefined; // Complete step has its own title
       default:
         return undefined;
@@ -199,11 +230,13 @@ export function OnboardingFlow() {
   const getStepSubtitle = () => {
     switch (currentStep) {
       case 2:
-        return 'Tell us about yourself';
+        return 'tell us about yourself';
       case 3:
-        return 'Help us personalize your experience';
+        return 'pick colors that represent you';
       case 4:
-        return 'See how to interact with vibes';
+        return 'help us personalize your experience';
+      case 5:
+        return 'see how to interact with vibes';
       default:
         return undefined;
     }
@@ -215,8 +248,8 @@ export function OnboardingFlow() {
       totalSteps={totalSteps}
       onBack={handleBack}
       onSkip={handleSkip}
-      showBack={currentStep > 1 && currentStep < 5}
-      showSkip={currentStep < 5}
+      showBack={currentStep > 1 && currentStep < 6}
+      showSkip={currentStep < 6}
       title={getStepTitle()}
       subtitle={getStepSubtitle()}
     >

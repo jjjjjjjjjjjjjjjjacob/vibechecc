@@ -70,7 +70,7 @@ export function SearchResultsList({
               <VibeCard
                 key={result.id}
                 vibe={vibeData}
-                variant="list"
+                variant="feed-single"
                 ratingDisplayMode="most-rated"
               />
             );

@@ -1,4 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useLocation,
+} from '@tanstack/react-router';
 import * as React from 'react';
 import {
   useVibe,
@@ -8,16 +13,18 @@ import {
   useEmojiMetadata,
   useTopEmojiRatings,
   useMostInteractedEmoji,
+  useDeleteVibeMutation,
 } from '@/queries';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { SimpleVibePlaceholder } from '@/components/simple-vibe-placeholder';
+import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
+import { AlertTriangle, Edit, Trash2 } from 'lucide-react';
 
 // Constants to avoid rollup issues with empty array literals
 const EMPTY_ARRAY: never[] = [];
-import { VibeDetailSkeleton } from '@/components/ui/vibe-detail-skeleton';
+import { VibeDetailSkeleton } from '@/components/skeletons/vibe-detail-skeleton';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import {
   computeUserDisplayName,
@@ -26,11 +33,12 @@ import {
 } from '@/utils/user-utils';
 import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import toast from '@/utils/toast';
-import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
-import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
-import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
-import { EmojiRatingSelector } from '@/components/emoji-rating-selector';
-import { EmojiRatingCycleDisplay } from '@/components/emoji-rating-cycle-display';
+import { AuthPromptDialog } from '@/features/auth/components/auth-prompt-dialog';
+import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
+import { RatingPopover } from '@/features/ratings/components/rating-popover';
+import { EmojiRatingSelector } from '@/features/ratings/components/emoji-rating-selector';
+import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
+import { useVibeImageUrl } from '@/hooks/use-vibe-image-url';
 import {
   Accordion,
   AccordionContent,
@@ -45,12 +53,14 @@ export const Route = createFileRoute('/vibes/$vibeId')({
 function VibePage() {
   const { vibeId } = Route.useParams();
   const { data: vibe, isLoading, error } = useVibe(vibeId);
+  const location = useLocation();
   const { data: allVibesData } = useVibesPaginated(50);
   const { data: emojiMetadataArray } = useEmojiMetadata();
   const [review, setReview] = React.useState('');
   const { user: _user } = useUser();
   const addRatingMutation = useAddRatingMutation();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
+  const deleteVibeMutation = useDeleteVibeMutation();
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const [_authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
     'react'
@@ -61,8 +71,12 @@ function VibePage() {
   const [preselectedRatingValue, setPreselectedRatingValue] = React.useState<
     number | null
   >(null);
-  const [showEmojiRatingPopover, setShowEmojiRatingPopover] =
-    React.useState(false);
+  const [showRatingPopover, setShowRatingPopover] = React.useState(false);
+
+  // Get image URL (handles both legacy URLs and storage IDs)
+  const { data: imageUrl, isLoading: isImageLoading } = useVibeImageUrl(
+    vibe || {}
+  );
 
   // Fetch real emoji rating data
   const { data: topEmojiRatings } = useTopEmojiRatings(vibeId, 5);
@@ -213,6 +227,14 @@ function VibePage() {
     return similar.slice(0, 4); // Limit to 4 similar vibes
   }, [vibe, allVibesData?.vibes]);
 
+  // Check if we're on the edit route
+  const isEditRoute = location.pathname.endsWith('/edit');
+
+  // If we're on the edit route, render only the outlet
+  if (isEditRoute) {
+    return <Outlet />;
+  }
+
   if (isLoading) {
     return <VibeDetailSkeleton />;
   }
@@ -222,6 +244,41 @@ function VibePage() {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-4 py-3">
           <p>failed to load vibe. it may not exist or has been removed.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show deleted notice for deleted vibes
+  if (vibe.isDeleted) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <Card className="border-destructive/20 bg-destructive/5">
+            <CardContent className="p-8">
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-destructive/10 rounded-full p-4">
+                  <AlertTriangle className="text-destructive h-8 w-8" />
+                </div>
+                <div>
+                  <h1 className="text-destructive mb-2 text-2xl font-bold">
+                    this vibe has been deleted
+                  </h1>
+                  <p className="text-muted-foreground">
+                    this vibe is no longer available. it may have been removed
+                    by the creator or for policy violations.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => window.history.back()}
+                  className="mt-4"
+                >
+                  ← go back
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -346,8 +403,30 @@ function VibePage() {
       setPreselectedRatingValue(value);
     }
 
-    setShowEmojiRatingPopover(true);
+    setShowRatingPopover(true);
   };
+
+  const handleDeleteVibe = async () => {
+    if (!_user?.id || !vibe) return;
+
+    if (
+      confirm(
+        'Are you sure you want to delete this vibe? This action cannot be undone.'
+      )
+    ) {
+      try {
+        await deleteVibeMutation.mutateAsync({ vibeId });
+        toast.success('Vibe deleted successfully');
+        // The query will automatically invalidate and refetch
+      } catch {
+        // Failed to delete vibe - already showing user-facing error toast
+        toast.error('Failed to delete vibe. Please try again.');
+      }
+    }
+  };
+
+  // Check if current user owns this vibe
+  const isOwner = _user?.id && vibe && vibe.createdById === _user.id;
 
   return (
     <div className="container mx-auto">
@@ -358,9 +437,9 @@ function VibePage() {
           <div className="relative mb-6 overflow-hidden rounded-lg">
             {/* Main Image */}
             <div className="relative aspect-video">
-              {vibe.image ? (
+              {imageUrl && !isImageLoading ? (
                 <img
-                  src={vibe.image}
+                  src={imageUrl}
                   alt={vibe.title}
                   className="h-full w-full object-cover"
                 />
@@ -414,6 +493,32 @@ function VibePage() {
                 </div>
               )}
             </div>
+
+            {/* Edit/Delete buttons for vibe owner */}
+            {isOwner && (
+              <div className="flex gap-2">
+                <Link
+                  to="/vibes/$vibeId/edit"
+                  params={{ vibeId }}
+                  className="inline-block"
+                >
+                  <Button variant="outline" size="sm">
+                    <Edit className="mr-2 h-4 w-4" />
+                    edit
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDeleteVibe}
+                  disabled={deleteVibeMutation.isPending}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {deleteVibeMutation.isPending ? 'deleting...' : 'delete'}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Top Emoji Ratings */}
@@ -701,8 +806,8 @@ function VibePage() {
       />
 
       {/* Emoji Rating Popover for clicking on top ratings */}
-      <EmojiRatingPopover
-        open={showEmojiRatingPopover}
+      <RatingPopover
+        open={showRatingPopover}
         onSubmit={handleEmojiRating}
         isSubmitting={createEmojiRatingMutation.isPending}
         vibeTitle={vibe.title}
@@ -710,7 +815,7 @@ function VibePage() {
         preSelectedEmoji={selectedEmojiForRating || undefined}
         preSelectedValue={preselectedRatingValue || undefined}
         onOpenChange={(open) => {
-          setShowEmojiRatingPopover(open);
+          setShowRatingPopover(open);
           if (!open) {
             setSelectedEmojiForRating(null);
             setPreselectedRatingValue(null);
@@ -718,7 +823,9 @@ function VibePage() {
         }}
       >
         <div />
-      </EmojiRatingPopover>
+      </RatingPopover>
     </div>
   );
 }
+
+export default VibePage;

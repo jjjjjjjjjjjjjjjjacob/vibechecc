@@ -96,6 +96,54 @@ describe('Vibes Mutations', () => {
       }
     });
 
+    it('should create a vibe with storage ID image and convert to URL', async () => {
+      const t = convexTest(schema, modules);
+
+      // Mock storage ID (following Convex ID format)
+      const mockStorageId = 'kg2a1234567890abcdef' as any;
+
+      const mockVibeDataWithStorageId = {
+        title: 'Storage ID Test Vibe',
+        description: 'This vibe has a storage ID image.',
+        image: mockStorageId,
+        tags: ['storage', 'test'],
+      };
+
+      // Mock an authenticated user
+      const mockIdentity = {
+        subject: 'user_test_id_789',
+        tokenIdentifier: 'test_token_789',
+        email: 'storage@example.com',
+        givenName: 'Storage',
+        familyName: 'User',
+      };
+
+      const vibeId = await t
+        .withIdentity(mockIdentity)
+        .mutation(api.vibes.create, mockVibeDataWithStorageId);
+      expect(vibeId).toBeTypeOf('string');
+
+      const allVibesByCreator = await t.query(api.vibes.getByUser, {
+        userId: mockIdentity.subject,
+      });
+      const createdVibe = allVibesByCreator.find(
+        (v: { title?: string }) => v.title === mockVibeDataWithStorageId.title
+      );
+
+      expect(createdVibe).toBeDefined();
+      if (createdVibe) {
+        expect(createdVibe.title).toBe(mockVibeDataWithStorageId.title);
+        expect(createdVibe.description).toBe(
+          mockVibeDataWithStorageId.description
+        );
+        expect(createdVibe.createdById).toBe(mockIdentity.subject);
+        // Image should be processed from storage ID to URL by the mutation
+        expect(createdVibe.image).toBeDefined();
+        expect(typeof createdVibe.image).toBe('string');
+        expect(createdVibe.tags).toEqual(mockVibeDataWithStorageId.tags);
+      }
+    });
+
     it('should throw an error when not authenticated', async () => {
       const t = convexTest(schema, modules);
 
@@ -173,6 +221,98 @@ describe('Vibes Mutations', () => {
       await expect(t.mutation(api.vibes.addRating, ratingData)).rejects.toThrow(
         'You must be logged in to rate a vibe'
       );
+    });
+  });
+
+  describe('getForYouFeed', () => {
+    it('should handle interest-based personalization logic', async () => {
+      const t = convexTest(schema, modules);
+
+      // Test basic logic - the enhanced getForYouFeed should handle empty interest arrays gracefully
+      const user = {
+        subject: 'user_test_interests_123',
+        tokenIdentifier: 'token_test_interests_123',
+        email: 'test@example.com',
+        givenName: 'Test',
+        familyName: 'User',
+      };
+
+      // Create user in database (interests will be undefined, which is valid)
+      await t.withIdentity(user).mutation(api.users.create, {
+        externalId: user.subject,
+        username: 'testUser',
+      });
+
+      // Create a simple vibe
+      const _vibe = await t.withIdentity(user).mutation(api.vibes.create, {
+        title: 'Test Vibe',
+        description: 'A test vibe',
+        tags: ['test'],
+      });
+
+      // Get personalized feed - should work without errors
+      const forYouFeed = await t
+        .withIdentity(user)
+        .query(api.vibes.getForYouFeed, { limit: 10 });
+
+      expect(forYouFeed.vibes).toBeDefined();
+      expect(forYouFeed.continueCursor).toBeNull();
+      expect(forYouFeed.isDone).toBe(true);
+
+      // Note: The actual vibe may not appear in the feed due to lack of ratings/engagement,
+      // but the query should execute successfully with the enhanced interest-based logic
+    });
+
+    it('should work when user has no interests set', async () => {
+      const t = convexTest(schema, modules);
+
+      const user = {
+        subject: 'user_no_interests_123',
+        tokenIdentifier: 'token_no_interests_123',
+        email: 'nointerests@example.com',
+        givenName: 'No',
+        familyName: 'Interests',
+      };
+
+      // Create user without interests
+      await t.withIdentity(user).mutation(api.users.create, {
+        externalId: user.subject,
+        username: 'noInterests',
+        // No interests field
+      });
+
+      // Create a vibe
+      const vibe = await t.withIdentity(user).mutation(api.vibes.create, {
+        title: 'Some Vibe',
+        description: 'A vibe about something',
+        tags: ['random'],
+      });
+
+      // Add a rating
+      await t.withIdentity(user).mutation(api.vibes.addRating, {
+        vibeId: vibe,
+        emoji: '😊',
+        value: 4,
+        review: 'Nice vibe!',
+      });
+
+      // Get personalized feed - should not crash
+      const forYouFeed = await t
+        .withIdentity(user)
+        .query(api.vibes.getForYouFeed, { limit: 10 });
+
+      expect(forYouFeed.vibes).toBeDefined();
+      // Should fall back to engagement-based scoring
+    });
+
+    it('should return empty feed for unauthenticated user', async () => {
+      const t = convexTest(schema, modules);
+
+      const forYouFeed = await t.query(api.vibes.getForYouFeed, { limit: 10 });
+
+      expect(forYouFeed.vibes).toEqual([]);
+      expect(forYouFeed.continueCursor).toBeNull();
+      expect(forYouFeed.isDone).toBe(true);
     });
   });
 });

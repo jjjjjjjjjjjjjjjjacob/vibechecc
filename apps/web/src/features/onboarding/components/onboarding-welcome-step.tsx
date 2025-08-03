@@ -11,20 +11,20 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
   const features = [
     {
       icon: Heart,
-      title: 'Share Vibes',
+      title: 'share vibes',
       description:
-        'Create and share your favorite moments, places, and feelings',
+        'create and share your favorite moments, places, and feelings',
     },
     {
       icon: Star,
-      title: 'Rate & Discover',
-      description: 'Rate vibes from others and discover new experiences',
+      title: 'rate & discover',
+      description: 'rate vibes from others and discover new experiences',
     },
     {
       icon: Zap,
-      title: 'React & Connect',
+      title: 'react & connect',
       description:
-        'Express yourself with emoji reactions and connect with others',
+        'express yourself with emoji reactions and connect with others',
     },
   ];
 
@@ -32,15 +32,15 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
     <div className="space-y-8 text-center">
       {/* Hero Section */}
       <div className="animate-fade-in-down space-y-4">
-        <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-orange-500">
+        <div className="from-theme-primary to-theme-secondary mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r">
           <Sparkles className="h-10 w-10 text-white" />
         </div>
-        <h1 className="bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-4xl font-bold text-transparent">
-          Welcome to viberater!
+        <h1 className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
+          welcome to viberater
         </h1>
         <p className="text-muted-foreground mx-auto max-w-md text-xl">
-          The place to discover, share, and connect through vibes that matter to
-          you.
+          a place to discover, share, and connect through vibes that matter to
+          you
         </p>
       </div>
 
@@ -52,11 +52,11 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
         {features.map((feature, index) => (
           <Card
             key={index}
-            className="border-border/50 border-2 transition-colors hover:border-pink-200"
+            className="border-border/50 hover:border-primary/20 border-2 transition-colors"
           >
             <CardContent className="space-y-3 p-6 text-center">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-pink-100 to-orange-100 dark:from-pink-900 dark:to-orange-900">
-                <feature.icon className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+              <div className="from-theme-primary/10 to-theme-secondary/10 dark:from-theme-primary/20 dark:to-theme-secondary/20 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r">
+                <feature.icon className="text-primary h-6 w-6" />
               </div>
               <h3 className="text-foreground font-semibold">{feature.title}</h3>
               <p className="text-muted-foreground text-sm">
@@ -73,14 +73,14 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
         style={{ animation: 'fade-in-down 0.5s ease-out 0.4s forwards' }}
       >
         <p className="text-muted-foreground">
-          Let's get you set up in just a few quick steps!
+          let's get you set up in just a few quick steps
         </p>
         <Button
           onClick={onNext}
           size="lg"
-          className="bg-gradient-to-r from-pink-500 to-orange-500 px-8 py-3 text-lg text-white hover:from-pink-600 hover:to-orange-600"
+          className="from-theme-primary to-theme-secondary text-primary-foreground hover:from-theme-primary/90 hover:to-theme-secondary/90 bg-gradient-to-r px-8 py-3 text-lg"
         >
-          Get Started
+          get started
         </Button>
       </div>
     </div>

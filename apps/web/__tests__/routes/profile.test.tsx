@@ -190,12 +190,10 @@ describe('Profile Page', () => {
         createdAt: new Date('2023-01-01'),
         update: vi.fn().mockResolvedValue({}),
         setProfileImage: vi.fn().mockResolvedValue({}),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       isLoaded: true,
       isSignedIn: true,
       ...overrides.clerkUser,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     mockQueries.useCurrentUser.mockReturnValue({

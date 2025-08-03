@@ -2,6 +2,7 @@
 import '@testing-library/jest-dom/vitest';
 import { vi, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import * as React from 'react';
 
 // Mock data
 const mockPopularEmojis = [
@@ -19,6 +20,9 @@ const mockPopularEmojis = [
     keywords: ['perfect', 'score'],
   },
 ];
+
+// Mock file URL data
+const mockFileUrl = 'https://example.com/mock-image.jpg';
 
 const mockCategoryEmojis = [
   {
@@ -109,8 +113,16 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
           functionName = 'getCategories';
         } else if (queryStr.includes('searchAllOptimized')) {
           functionName = 'searchAllOptimized';
+        } else if (queryStr.includes('getCurrentUserFollowStats')) {
+          functionName = 'getCurrentUserFollowStats';
+        } else if (queryStr.includes('getFollowStats')) {
+          functionName = 'getFollowStats';
+        } else if (queryStr.includes('getForYouFeed')) {
+          functionName = 'getForYouFeed';
         } else if (queryStr.includes('search')) {
           functionName = 'search';
+        } else if (queryStr.includes('getUrl')) {
+          functionName = 'getUrl';
         }
       }
 
@@ -122,8 +134,16 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
           functionName = 'getCategories';
         } else if (query.includes('searchAllOptimized')) {
           functionName = 'searchAllOptimized';
+        } else if (query.includes('getCurrentUserFollowStats')) {
+          functionName = 'getCurrentUserFollowStats';
+        } else if (query.includes('getFollowStats')) {
+          functionName = 'getFollowStats';
+        } else if (query.includes('getForYouFeed')) {
+          functionName = 'getForYouFeed';
         } else if (query.includes('search')) {
           functionName = 'search';
+        } else if (query.includes('getUrl')) {
+          functionName = 'getUrl';
         }
       }
 
@@ -150,7 +170,8 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
                   key === 'getPopular' ||
                   key === 'getCategories' ||
                   key === 'searchAllOptimized' ||
-                  key === 'search'
+                  key === 'search' ||
+                  key === 'getUrl'
                 ) {
                   functionName = key;
                   break;
@@ -203,6 +224,31 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
         continueCursor: null,
       };
     };
+  } else if (
+    fnStr === 'getCurrentUserFollowStats' ||
+    fnStr.includes('getCurrentUserFollowStats')
+  ) {
+    baseQuery.queryFn = async (): Promise<any> => {
+      return {
+        followers: 5,
+        following: 10,
+      };
+    };
+  } else if (fnStr === 'getFollowStats' || fnStr.includes('getFollowStats')) {
+    baseQuery.queryFn = async (): Promise<any> => {
+      return {
+        followers: 3,
+        following: 7,
+      };
+    };
+  } else if (fnStr === 'getForYouFeed' || fnStr.includes('getForYouFeed')) {
+    baseQuery.queryFn = async (): Promise<any> => {
+      return {
+        results: [],
+        isDone: true,
+        continueCursor: null,
+      };
+    };
   } else if (fnStr === 'search' || fnStr.includes('search')) {
     baseQuery.queryFn = async (): Promise<any> => {
       if (args?.searchTerm) {
@@ -233,6 +279,11 @@ const mockConvexQuery = vi.fn((query: unknown, args: any) => {
         pageSize: args.pageSize || 200,
         totalCount: mockCategoryEmojis.length,
       };
+    };
+  } else if (fnStr === 'getUrl' || fnStr.includes('getUrl')) {
+    baseQuery.queryFn = async (): Promise<string | null> => {
+      // Return mock file URL
+      return mockFileUrl;
     };
   }
 
@@ -270,11 +321,68 @@ vi.mock('@viberater/convex', () => ({
       getFilteredVibes: 'api.vibes.getFilteredVibes',
       getById: 'api.vibes.getById',
       getByUser: 'api.vibes.getByUser',
+      getForYouFeed: 'api.vibes.getForYouFeed',
     },
     users: {
       current: 'api.users.current',
     },
+    follows: {
+      getFollowStats: 'api.follows.getFollowStats',
+      getCurrentUserFollowStats: 'api.follows.getCurrentUserFollowStats',
+    },
+    files: {
+      getUrl: 'api.files.getUrl',
+    },
   },
+}));
+
+// Mock @/queries module
+vi.mock('@/queries', () => ({
+  useVibes: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
+  useVibesInfinite: () => ({
+    data: {
+      pages: [{ results: [], isDone: true, continueCursor: null }],
+    },
+    isLoading: false,
+    error: null,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn(),
+  }),
+  useForYouFeedInfinite: () => ({
+    data: {
+      pages: [{ results: [], isDone: true, continueCursor: null }],
+    },
+    isLoading: false,
+    error: null,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn(),
+  }),
+  useVibesPaginated: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
+  useDeleteVibeMutation: () => ({
+    mutate: vi.fn(),
+    isLoading: false,
+    error: null,
+  }),
+  useCreateEmojiRatingMutation: () => ({
+    mutate: vi.fn(),
+    isLoading: false,
+    error: null,
+  }),
+  useTopEmojiRatings: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 // Mock @clerk/tanstack-react-start
@@ -285,6 +393,30 @@ vi.mock('@clerk/tanstack-react-start', () => ({
     isLoaded: true,
     isSignedIn: true,
   }),
+  SignInButton: ({ children, ...props }: any) =>
+    React.createElement(
+      'button',
+      { ...props, 'data-testid': 'sign-in-button' },
+      children || 'Sign In'
+    ),
+  SignOutButton: ({ children, ...props }: any) =>
+    React.createElement(
+      'button',
+      { ...props, 'data-testid': 'sign-out-button' },
+      children || 'Sign Out'
+    ),
+  SignUpButton: ({ children, ...props }: any) =>
+    React.createElement(
+      'button',
+      { ...props, 'data-testid': 'sign-up-button' },
+      children || 'Sign Up'
+    ),
+  UserButton: ({ ...props }: any) =>
+    React.createElement(
+      'button',
+      { ...props, 'data-testid': 'user-button' },
+      'User'
+    ),
 }));
 
 // Cleanup after each test

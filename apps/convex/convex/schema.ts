@@ -45,6 +45,10 @@ const schema = defineSchema({
         website: v.optional(v.string()),
       })
     ), // Social media links
+
+    // Follow count fields for efficient querying
+    followerCount: v.optional(v.number()), // Number of users following this user
+    followingCount: v.optional(v.number()), // Number of users this user follows
   })
     .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
     .searchIndex('searchUsername', {
@@ -58,21 +62,26 @@ const schema = defineSchema({
     id: v.string(),
     title: v.string(),
     description: v.string(),
-    image: v.optional(v.string()),
+    image: v.optional(v.string()), // Legacy: URL string
+    imageStorageId: v.optional(v.id('_storage')), // New: Convex storage ID
     createdById: v.string(),
     createdAt: v.string(),
     tags: v.optional(v.array(v.string())),
+    visibility: v.optional(v.union(v.literal('public'), v.literal('deleted'))), // Default 'public', 'deleted' for soft delete
+    updatedAt: v.optional(v.string()), // Track when vibe was last updated
   })
     .index('id', ['id'])
     .index('createdBy', ['createdById'])
     .index('byCreatedAt', ['createdAt'])
+    .index('byVisibility', ['visibility']) // Index for filtering by visibility
+    .index('byCreatedByAndVisibility', ['createdById', 'visibility']) // Index for user's public vibes
     .searchIndex('searchTitle', {
       searchField: 'title',
-      filterFields: ['createdById', 'tags'],
+      filterFields: ['createdById', 'tags', 'visibility'],
     })
     .searchIndex('searchDescription', {
       searchField: 'description',
-      filterFields: ['createdById', 'tags'],
+      filterFields: ['createdById', 'tags', 'visibility'],
     }),
 
   ratings: defineTable({
@@ -182,6 +191,16 @@ const schema = defineSchema({
     .searchIndex('search', {
       searchField: 'name',
     }),
+
+  // User follows table to track follow relationships
+  follows: defineTable({
+    followerId: v.string(), // External ID of user doing the following
+    followingId: v.string(), // External ID of user being followed
+    createdAt: v.number(), // Timestamp when follow relationship was created
+  })
+    .index('byFollower', ['followerId'])
+    .index('byFollowing', ['followingId'])
+    .index('byFollowerAndFollowing', ['followerId', 'followingId']),
 });
 export default schema;
 
@@ -192,6 +211,7 @@ const _emoji = schema.tables.emojis.validator;
 const _searchHistory = schema.tables.searchHistory.validator;
 const _trendingSearches = schema.tables.trendingSearches.validator;
 const _searchMetrics = schema.tables.searchMetrics.validator;
+const _follows = schema.tables.follows.validator;
 
 export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
@@ -200,11 +220,12 @@ export type Emoji = Infer<typeof _emoji>;
 export type SearchHistory = Infer<typeof _searchHistory>;
 export type TrendingSearches = Infer<typeof _trendingSearches>;
 export type SearchMetrics = Infer<typeof _searchMetrics>;
+export type Follow = Infer<typeof _follows>;
 
 export const createVibeSchema = v.object({
   title: vibe.fields.title,
   description: vibe.fields.description,
-  image: v.optional(vibe.fields.image),
+  image: v.optional(v.union(v.string(), v.id('_storage'))),
   tags: v.optional(vibe.fields.tags),
   createdById: vibe.fields.createdById,
 });

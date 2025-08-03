@@ -3,10 +3,14 @@
 // Re-export search types
 export * from './search';
 
+// Re-export Convex compatibility types
+export * from './convex-compat';
+
 export interface User {
   // Primary identifier (Clerk user ID stored as externalId in our DB)
   externalId: string;
   id?: string; // Alias for compatibility
+  _id?: string; // Convex document ID for compatibility
 
   // Core user identity fields (synced with Clerk)
   username?: string;
@@ -29,10 +33,24 @@ export interface User {
   // Timestamps
   created_at?: number;
   updated_at?: number;
+  _creationTime?: number; // Convex creation time for compatibility
 
   // Onboarding fields
   onboardingCompleted?: boolean;
   interests?: string[];
+
+  // Profile customization fields (from Convex schema)
+  bio?: string;
+  themeColor?: string; // Legacy field
+  primaryColor?: string;
+  secondaryColor?: string;
+  socials?: {
+    twitter?: string;
+    instagram?: string;
+    tiktok?: string;
+    youtube?: string;
+    website?: string;
+  };
 }
 
 export interface EmojiRating {
@@ -43,14 +61,33 @@ export interface EmojiRating {
 }
 
 export interface Rating {
+  _id?: string; // Convex document ID for compatibility
   user: User | null;
   value: number;
   emoji: string;
   review: string;
   createdAt: string;
+  updatedAt?: string;
+  _creationTime?: number; // Convex creation time for compatibility
   tags?: string[];
   vibeId?: string;
   userId?: string;
+  // Additional fields that might be populated
+  vibe?: {
+    id: string;
+    title: string;
+    description: string;
+    image?: string;
+    createdBy: { id: string; name: string; avatar?: string };
+    createdAt: string;
+  };
+  rater?: {
+    _id?: string;
+    username?: string;
+    first_name?: string;
+    last_name?: string;
+    image_url?: string;
+  };
 }
 
 export interface EmojiRatingMetadata {
@@ -61,14 +98,32 @@ export interface EmojiRatingMetadata {
 }
 
 export interface Vibe {
+  _id?: string; // Convex document ID for compatibility
   id: string;
   title: string;
   description: string;
-  image?: string;
+  image?: string; // Legacy: URL string
+  imageStorageId?: string; // New: Convex storage ID - using string for compatibility
   createdBy: User | null;
   createdById?: string;
   createdAt: string;
+  updatedAt?: string;
+  _creationTime?: number; // Convex creation time for compatibility
   ratings: Rating[];
   tags?: string[];
   viewCount?: number;
+  visibility?: 'public' | 'deleted'; // From Convex schema
+}
+
+export interface Follow {
+  _id?: string; // Convex document ID for compatibility
+  followerId: string; // External ID of user doing the following
+  followingId: string; // External ID of user being followed
+  createdAt: number; // Timestamp when follow relationship was created
+  _creationTime?: number; // Convex creation time for compatibility
+}
+
+export interface FollowStats {
+  followers: number; // Number of users following this user
+  following: number; // Number of users this user follows
 }

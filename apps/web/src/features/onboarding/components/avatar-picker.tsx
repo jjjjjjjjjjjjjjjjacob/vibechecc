@@ -82,27 +82,30 @@ export function AvatarPicker({
         role="button"
         aria-label="Change avatar"
       >
-        <Avatar
+        {/* Gradient border wrapper */}
+        <div
           className={cn(
-            sizeClasses[size],
-            'border-gradient-to-r border-4 from-pink-500 to-orange-500 transition-transform hover:scale-105'
+            'from-theme-primary to-theme-secondary rounded-full bg-gradient-to-r p-1 transition-transform hover:scale-105',
+            sizeClasses[size]
           )}
         >
-          <AvatarImage
-            src={previewUrl}
-            alt={userName}
-            className="object-cover"
-          />
-          <AvatarFallback className="bg-gradient-to-r from-pink-100 to-orange-100 dark:from-pink-900 dark:to-orange-900">
-            {previewUrl ? (
-              <User className="h-6 w-6 text-pink-600 dark:text-pink-400" />
-            ) : (
-              <span className="text-lg font-semibold text-pink-600 dark:text-pink-400">
-                {getInitials(userName)}
-              </span>
-            )}
-          </AvatarFallback>
-        </Avatar>
+          <Avatar className={cn(sizeClasses[size], 'bg-background')}>
+            <AvatarImage
+              src={previewUrl}
+              alt={userName}
+              className="object-cover"
+            />
+            <AvatarFallback className="from-theme-primary/10 to-theme-secondary/10 dark:from-theme-primary/20 dark:to-theme-secondary/20 bg-gradient-to-r">
+              {previewUrl ? (
+                <User className="text-primary h-6 w-6" />
+              ) : (
+                <span className="text-primary text-lg font-semibold">
+                  {getInitials(userName)}
+                </span>
+              )}
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
         {/* Edit button overlay */}
         <Button
@@ -112,7 +115,7 @@ export function AvatarPicker({
             e.stopPropagation();
             triggerFileInput();
           }}
-          className="absolute -right-1 -bottom-1 h-8 w-8 rounded-full bg-pink-500 p-0 text-white transition-transform hover:scale-110 hover:bg-pink-600"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 absolute -right-1 -bottom-1 h-8 w-8 rounded-full p-0 transition-transform hover:scale-110"
         >
           <Camera className="h-4 w-4" />
         </Button>

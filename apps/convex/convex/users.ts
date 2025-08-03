@@ -183,6 +183,7 @@ export const updateProfile = action({
     themeColor: v.optional(v.string()), // Legacy field
     primaryColor: v.optional(v.string()), // Primary gradient color
     secondaryColor: v.optional(v.string()), // Secondary gradient color
+    interests: v.optional(v.array(v.string())), // User interests
     socials: v.optional(
       v.object({
         twitter: v.optional(v.string()),
@@ -220,6 +221,7 @@ export const updateProfileInternal = internalMutation({
     themeColor: v.optional(v.string()), // Legacy field
     primaryColor: v.optional(v.string()), // Primary gradient color
     secondaryColor: v.optional(v.string()), // Secondary gradient color
+    interests: v.optional(v.array(v.string())), // User interests
     socials: v.optional(
       v.object({
         twitter: v.optional(v.string()),
@@ -263,6 +265,9 @@ export const updateProfileInternal = internalMutation({
     }
     if (args.secondaryColor !== undefined) {
       updates.secondaryColor = args.secondaryColor;
+    }
+    if (args.interests !== undefined) {
+      updates.interests = args.interests;
     }
     if (args.socials !== undefined) {
       updates.socials = args.socials;
@@ -628,7 +633,7 @@ export const deleteFromClerk = internalMutation({
 });
 
 // Create user for seeding purposes (bypasses authentication)
-export const createForSeed = internalMutation({
+export const createForSeed = mutation({
   args: {
     externalId: v.string(),
     username: v.optional(v.string()),
@@ -638,6 +643,13 @@ export const createForSeed = internalMutation({
     created_at: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // Security guard: prevent usage in production environment
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'createForSeed is not available in production environment'
+      );
+    }
+
     // Check if user already exists by externalId
     const existingUser = await userByExternalId(ctx, args.externalId);
 

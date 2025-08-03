@@ -5,6 +5,10 @@ interface ToastOptions {
   icon?: string;
   id?: string | number;
   className?: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 export const toast = {
@@ -14,6 +18,7 @@ export const toast = {
       icon: options?.icon,
       id: options?.id,
       className: options?.className,
+      action: options?.action,
     });
   },
   error: (message: string, options?: ToastOptions) => {
@@ -22,6 +27,7 @@ export const toast = {
       icon: options?.icon,
       id: options?.id,
       className: options?.className,
+      action: options?.action,
     });
   },
   info: (message: string, options?: ToastOptions) => {
@@ -30,6 +36,7 @@ export const toast = {
       icon: options?.icon,
       id: options?.id,
       className: options?.className,
+      action: options?.action,
     });
   },
   loading: (message: string, options?: { id?: string | number }) => {
@@ -45,6 +52,7 @@ export const toast = {
       icon: options?.icon,
       id: options?.id,
       className: options?.className,
+      action: options?.action,
     });
   },
 };

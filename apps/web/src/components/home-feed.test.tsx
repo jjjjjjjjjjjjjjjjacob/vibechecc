@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from '@/features/theming/components/theme-provider';
 import { HomeFeed } from './home-feed';
 
 // Mock hooks
@@ -26,6 +27,16 @@ vi.mock('@/queries', () => ({
   usePersonalizedVibes: (...args: unknown[]) =>
     mockUsePersonalizedVibes(...args),
   useVibesInfinite: (...args: unknown[]) => mockUseVibesInfinite(...args),
+  useForYouFeedInfinite: (...args: unknown[]) =>
+    mockUsePersonalizedVibes(...args),
+}));
+
+vi.mock('@/features/follows/hooks/use-follow-stats', () => ({
+  useCurrentUserFollowStats: () => ({
+    data: { followers: 5, following: 10 },
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 vi.mock('./masonry-layout', () => ({
@@ -185,8 +196,13 @@ describe('HomeFeed', () => {
       error: null,
     });
     mockUsePersonalizedVibes.mockReturnValue({
-      data: { vibes: mockVibes, isDone: false },
+      data: {
+        pages: [{ vibes: mockVibes, isDone: false }],
+      },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
       isLoading: false,
+      isFetchingNextPage: false,
       error: null,
     });
     mockUseVibesInfinite.mockReturnValue({
@@ -207,7 +223,9 @@ describe('HomeFeed', () => {
   const renderComponent = () => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <HomeFeed />
+        <ThemeProvider>
+          <HomeFeed />
+        </ThemeProvider>
       </QueryClientProvider>
     );
   };
@@ -224,9 +242,15 @@ describe('HomeFeed', () => {
   it('shows "for you" tab description initially for authenticated users', async () => {
     renderComponent();
 
-    expect(
-      screen.getByText('personalized based on your interactions')
-    ).toBeInTheDocument();
+    const forYouButton = screen.getByText('for you');
+    await user.hover(forYouButton);
+
+    await waitFor(() => {
+      const descriptions = screen.getAllByText(
+        'personalized vibes from 10 people you follow'
+      );
+      expect(descriptions.length).toBeGreaterThan(0);
+    });
   });
 
   it('hides "for you" tab for unauthenticated users', async () => {
@@ -242,10 +266,18 @@ describe('HomeFeed', () => {
     mockUseUser.mockReturnValue({ user: null });
     renderComponent();
 
+    // The hot tab should be active by default
+    const hotButton = screen.getByText('hot');
+    expect(hotButton).toBeInTheDocument();
+
+    // Hover to see tooltip
+    await user.hover(hotButton);
+
     await waitFor(() => {
-      expect(
-        screen.getByText('most rated & recently active vibes')
-      ).toBeInTheDocument();
+      const descriptions = screen.getAllByText(
+        'most rated & recently active vibes'
+      );
+      expect(descriptions.length).toBeGreaterThan(0);
     });
   });
 
@@ -256,18 +288,22 @@ describe('HomeFeed', () => {
     await user.click(hotTab);
 
     await waitFor(() => {
-      expect(
-        screen.getByText('most rated & recently active vibes')
-      ).toBeInTheDocument();
+      // Check that the tab has the active styling (primary background)
+      expect(hotTab).toHaveClass('bg-primary');
     });
   });
 
   it('displays vibes in single column layout when masonry is disabled', async () => {
     mockUseMasonryLayout.mockReturnValue(false);
-    // Ensure we have data
+    // Ensure we have data in infinite query format
     mockUsePersonalizedVibes.mockReturnValue({
-      data: { vibes: mockVibes, isDone: false },
+      data: {
+        pages: [{ vibes: mockVibes, isDone: false }],
+      },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
       isLoading: false,
+      isFetchingNextPage: false,
       error: null,
     });
 
@@ -280,10 +316,15 @@ describe('HomeFeed', () => {
 
   it('displays vibes in masonry layout when enabled', async () => {
     mockUseMasonryLayout.mockReturnValue(true);
-    // Ensure we have data
+    // Ensure we have data in infinite query format
     mockUsePersonalizedVibes.mockReturnValue({
-      data: { vibes: mockVibes, isDone: false },
+      data: {
+        pages: [{ vibes: mockVibes, isDone: false }],
+      },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
       isLoading: false,
+      isFetchingNextPage: false,
       error: null,
     });
 
@@ -310,6 +351,8 @@ describe('HomeFeed', () => {
   });
 
   it('shows error state when there is an error', async () => {
+    // Switch to a tab that uses the general feed (not personalized)
+    mockUseUser.mockReturnValue({ user: null }); // No user to force "hot" tab
     mockUseVibesInfinite.mockReturnValue({
       data: null,
       fetchNextPage: vi.fn(),
@@ -328,7 +371,8 @@ describe('HomeFeed', () => {
   });
 
   it('shows empty state when no vibes are available', async () => {
-    mockUseVibesInfinite.mockReturnValue({
+    // Use personalized feed for empty state
+    mockUsePersonalizedVibes.mockReturnValue({
       data: { pages: [{ vibes: [] }] },
       fetchNextPage: vi.fn(),
       hasNextPage: false,
@@ -341,12 +385,10 @@ describe('HomeFeed', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('your personalized feed is empty')
+        screen.getByText('your personalized feed is getting ready')
       ).toBeInTheDocument();
       expect(
-        screen.getByText(
-          'start rating and interacting with vibes to get personalized recommendations!'
-        )
+        screen.getByText(/haven't shared any vibes yet/)
       ).toBeInTheDocument();
     });
   });
@@ -376,11 +418,19 @@ describe('HomeFeed', () => {
   it('calls correct query based on active tab', async () => {
     renderComponent();
 
-    // Check that useVibesInfinite is called for "for you" tab (default)
-    expect(mockUseVibesInfinite).toHaveBeenCalledWith(
-      expect.objectContaining({ sort: 'top_rated', limit: 20 }),
+    // Check that useForYouFeedInfinite is called for "for you" tab (default)
+    expect(mockUsePersonalizedVibes).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: true,
+        queryKeyPrefix: ['home-feed', 'for-you'],
+      })
+    );
+
+    // Check that useVibesInfinite is called with enabled: false for "for you" tab
+    expect(mockUseVibesInfinite).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        enabled: false,
         queryKeyPrefix: ['home-feed'],
         queryKeyName: 'for-you',
       })
@@ -416,15 +466,25 @@ describe('HomeFeed', () => {
   });
 
   it('uses correct rating display mode for hot vs other tabs', async () => {
-    // Ensure we have data for all tabs
+    // Ensure we have data for all tabs in infinite query format
     mockUsePersonalizedVibes.mockReturnValue({
-      data: { vibes: mockVibes, isDone: false },
+      data: {
+        pages: [{ vibes: mockVibes, isDone: false }],
+      },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
       isLoading: false,
+      isFetchingNextPage: false,
       error: null,
     });
-    mockUseTopRatedVibes.mockReturnValue({
-      data: { vibes: mockVibes, isDone: false },
+    mockUseVibesInfinite.mockReturnValue({
+      data: {
+        pages: [{ vibes: mockVibes }],
+      },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
       isLoading: false,
+      isFetchingNextPage: false,
       error: null,
     });
 

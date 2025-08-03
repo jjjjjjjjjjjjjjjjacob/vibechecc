@@ -1,176 +1,219 @@
-# Frontend (apps/web) Development Learnings
+# Web Development Learnings - viberater
 
-## Component Development
+This document captures learnings, patterns, and best practices discovered during web development tasks in the viberater project.
 
-### Emoji Rating System Implementation
+## Personalized Feed Enhancement Patterns
 
-**When to reference**: Building interactive rating/feedback components
+### Context
+Enhanced the home feed UI to provide better personalized experience using newly implemented personalized feed backend functions, including empty states and follow suggestions.
 
-- Use framer-motion for smooth animations (already a dependency)
-- EmojiRatingDisplay component now has single mode (removed expanded mode)
-- Always provide fallback to existing systems (e.g., star ratings)
-- Required fields (like review text) improve content quality
-- Use `showScale` prop to toggle between simple display and full 5-emoji scale
+### Key Patterns Discovered
 
-**Code pattern**:
-
-```tsx
-// Compact display mode
-<div className="flex items-center gap-1">
-  <span>{emoji}</span>
-  <span>{rating}/5</span>
-</div>
-
-// Expanded mode with animations
-<motion.div
-  whileHover={{ scale: 1.05 }}
-  transition={{ type: "spring", stiffness: 300 }}
->
-  {/* content */}
-</motion.div>
-```
-
-### Circular Button Design
-
-**When to reference**: Creating emoji reactions or similar UI elements
-
-- Use fixed dimensions (48x48px) for consistency
-- Apply theme-aware colors with `bg-secondary/50`
-- Show/hide borders on selection state
-- Include hover scale effects for interactivity
-
-### Accordion Implementation
-
-**When to reference**: Displaying expandable lists with more than 3 items
-
-- Use shadcn/ui Accordion component from `@/components/ui/accordion`
-- Show first 3 items always visible
-- Use `{n} more` pattern for accordion trigger
-- Add CSS animations for smooth expand/collapse:
-  ```css
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-  ```
-- Keep accordion trigger text small and subtle (`text-xs text-muted-foreground`)
-
-### Popover Integration
-
-**When to reference**: Building interactive overlays
-
-- Use radix-ui popover (via shadcn/ui)
-- Pre-select values when opening from existing data
-- Handle both creation and editing in same component
-- Align popover to avoid viewport edges
-
-## State Management
-
-### Real-time Updates with Convex
-
-**When to reference**: Implementing features that need live updates
-
-- Use hooks from `src/queries.ts` for consistency
-- Convex queries automatically subscribe to changes
-- No need for manual WebSocket management
-- Optimistic updates handled by Convex mutations
-
-### Form State
-
-**When to reference**: Building forms with complex validation
-
-- Use React Hook Form for form management
-- Integrate with zod for schema validation
-- Show validation errors inline
-- Disable submit during mutation
-
-## Testing Patterns
-
-### Component Testing
-
-**When to reference**: Writing tests for UI components
-
-- Always include `/// <reference lib="dom" />` at the top
-- Use `@testing-library/react` queries
-- Test user interactions, not implementation
-- Mock Convex hooks when needed
-
-## Performance Optimizations
-
-### Image Loading
-
-**When to reference**: Displaying user avatars or emoji
-
-- Use native lazy loading for images
-- Provide width/height to prevent layout shift
-- Consider using CSS for simple shapes
-- Cache emoji data in a central store
-
-### List Rendering
-
-**When to reference**: Displaying large lists of items
-
-- Implement virtualization for lists > 50 items
-- Use proper React keys for list items
-- Memoize expensive computations
-- Consider pagination as alternative
-
-## Common Gotchas
-
-### TanStack Router
-
-**When to reference**: Adding new routes
-
-- File-based routing in `src/routes/`
-- Use `$` prefix for dynamic segments
-- Nested routes inherit parent layouts
-- Route components must be default exports
-
-### Tailwind CSS v4
-
-**When to reference**: Styling components
-
-- Import styles via `@import` in CSS files
-- Use CSS variables for theme colors
-- Tailwind v4 uses native CSS features
-- No need for `tailwind.config.js`
-
-### Workspace Imports
-
-**When to reference**: Importing from shared packages
-
-- Use `@viberater/types` for shared TypeScript types
-- Use `@viberater/utils` for shared utilities
-- Use `@viberater/convex` for API imports
-- Never use relative imports across workspace boundaries
-
-## React Query with Convex Integration
-
-**When to reference**: Using `convexQuery` with `useQuery`
-
-### Correct Usage Pattern
-
-- Always spread the convexQuery result into useQuery options object
-- The convexQuery helper returns a configuration object, not a direct query function
-
+#### 1. Custom Empty State Handling
+**Pattern**: Conditional rendering of custom empty states vs default MasonryFeed empty states
 ```typescript
-// ❌ Wrong - causes TypeError: client.defaultQueryOptions is not a function
-const result = useQuery(convexQuery(api.emojis.search, { searchTerm }));
+const shouldUseCustomEmptyState = activeTab === 'for-you' && vibes.length === 0 && !isLoading;
 
-// ✅ Correct - spread the convexQuery result
-const result = useQuery({
-  ...convexQuery(api.emojis.search, { searchTerm }),
+{shouldUseCustomEmptyState ? (
+  <ForYouEmptyState />
+) : (
+  <MasonryFeed 
+    // ... other props
+    emptyStateAction={activeTab === 'for-you' ? null : queryConfig.emptyAction}
+  />
+)}
+```
+
+**Why**: Allows for rich, contextual empty states while maintaining default behavior for other feed types.
+
+#### 2. Follow Stats Integration for Dynamic UX
+**Pattern**: Use follow stats to determine user onboarding state and customize messaging
+```typescript
+const { data: followStats } = useCurrentUserFollowStats();
+const hasFollows = followStats.following > 0;
+
+// Dynamic tab descriptions based on follow state
+description: followStats?.following > 0 
+  ? `personalized vibes from ${followStats.following} ${followStats.following === 1 ? 'person' : 'people'} you follow`
+  : 'discover and follow people to see personalized content'
+```
+
+**Why**: Provides contextual messaging that helps users understand the value proposition of following others.
+
+#### 3. Progressive Empty State Design
+**Pattern**: Different empty states for different user journey stages
+- New users (no follows): Onboarding-focused with follow suggestions
+- Existing users (has follows): Activity-focused encouraging content creation
+
+**Implementation**: Single component with conditional rendering based on follow stats.
+
+#### 4. Smooth User Onboarding with Follow Suggestions
+**Pattern**: Integrate existing components (`CompactSuggestedFollows`) into empty states
+```typescript
+<CompactSuggestedFollows 
+  limit={4}
+  showMutualConnections={false}
+/>
+```
+
+**Why**: Reuses tested components while providing contextual user guidance.
+
+### Component Architecture Insights
+
+#### 1. Feed Tab Configuration Pattern
+**Current Pattern**: Array-based tab configuration with dynamic descriptions
+```typescript
+const feedTabs = [
+  {
+    id: 'for-you' as const,
+    label: 'for you',
+    icon: <Sparkles className="h-4 w-4" />,
+    description: followStats?.following > 0 
+      ? `personalized vibes from ${followStats.following} people you follow`
+      : 'discover and follow people to see personalized content',
+    requiresAuth: true,
+  },
+  // ... other tabs
+];
+```
+
+**Benefits**: 
+- Centralized tab configuration
+- Dynamic descriptions based on user state
+- Type-safe tab IDs with const assertions
+
+#### 2. Query Handling for Different Feed Types
+**Pattern**: Conditional query usage with proper TypeScript handling
+```typescript
+const personalizedFeedQuery = useForYouFeedInfinite({
+  enabled: queryConfig.enabled && activeTab === 'for-you',
+  queryKeyPrefix: ['home-feed', 'for-you'],
 });
 
-// ✅ With additional options
-const result = useQuery({
-  ...convexQuery(api.emojis.search, { searchTerm }),
-  enabled: !!searchTerm,
+const generalFeedQuery = useVibesInfinite(queryConfig.filters, {
+  enabled: queryConfig.enabled && activeTab !== 'for-you',
+  queryKeyPrefix: ['home-feed'],
+  queryKeyName: activeTab,
+});
+
+const {data, ...} = activeTab === 'for-you' ? personalizedFeedQuery : generalFeedQuery;
+```
+
+**TypeScript Consideration**: Infinite query data structure requires careful type handling:
+```typescript
+const vibes = React.useMemo(() => {
+  if (!data?.pages) return [];
+  return data.pages.flatMap((page: any) => page?.vibes || []);
+}, [data]);
+```
+
+### UI/UX Design Patterns
+
+#### 1. Themed Empty State Design
+**Pattern**: Consistent theming with gradient backgrounds and themed colors
+```typescript
+<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-theme-primary to-theme-secondary">
+  <Users className="text-primary-foreground h-8 w-8" />
+</div>
+```
+
+**Benefits**: Maintains visual consistency with the app's custom theming system.
+
+#### 2. Progressive Information Architecture
+**Hierarchy for new user onboarding**:
+1. Clear value proposition (what is "for you" feed)
+2. Feature highlights (badges with benefits)
+3. Primary action (find people to follow)
+4. Alternative actions (explore other content)
+5. Follow suggestions (actual users to follow)
+6. Additional help (learn more about the platform)
+
+#### 3. Smooth Interaction Patterns
+**Pattern**: Scroll-to-element on button click for better UX flow
+```typescript
+<Button onClick={() => {
+  const suggestionsElement = document.querySelector('[data-suggestions]');
+  suggestionsElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}}>
+  find people to follow
+</Button>
+```
+
+### Performance Considerations
+
+#### 1. Conditional Hook Execution
+**Pattern**: Enable/disable queries based on active state to prevent unnecessary requests
+```typescript
+const personalizedFeedQuery = useForYouFeedInfinite({
+  enabled: queryConfig.enabled && activeTab === 'for-you',
 });
 ```
 
-**Context**: This error occurs because convexQuery returns an object with query configuration that needs to be spread into useQuery's options parameter. This pattern is consistent throughout the codebase as seen in `src/queries.ts`.
+#### 2. Memoized Data Processing
+**Pattern**: Use React.useMemo for data transformation to prevent unnecessary recalculations
+```typescript
+const vibes = React.useMemo(() => {
+  if (!data?.pages) return [];
+  return data.pages.flatMap((page: any) => page?.vibes || []);
+}, [data]);
+```
+
+### Integration Patterns
+
+#### 1. Cross-Feature Component Reuse
+**Pattern**: Import and use components from feature directories in shared components
+```typescript
+import { CompactSuggestedFollows } from '@/features/follows/components/suggested-follows';
+import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
+```
+
+**Benefits**: Promotes code reuse while maintaining feature boundaries.
+
+#### 2. Hook Composition for Complex State
+**Pattern**: Combine multiple hooks to build complex UI logic
+```typescript
+const { user } = useUser(); // Auth state
+const { data: followStats } = useCurrentUserFollowStats(); // Follow stats
+const personalizedFeedQuery = useForYouFeedInfinite(...); // Data fetching
+```
+
+### Debugging and Development Insights
+
+#### 1. TypeScript with Infinite Queries
+**Issue**: Infinite query return types can be complex and require careful handling
+**Solution**: Use optional chaining and type guards:
+```typescript
+if (!data?.pages) return [];
+return data.pages.flatMap((page: any) => page?.vibes || []);
+```
+
+#### 2. Development Server Testing
+**Pattern**: Use `bun run dev:frontend` to test compilation and basic functionality
+**Note**: Full TypeScript checking across the monorepo can be noisy - focus on specific workspace testing for development.
+
+### Future Enhancements
+
+#### Opportunities Identified
+1. **Follow Suggestions Enhancement**: Could add user activity indicators or vibe previews
+2. **Personalized Content Hints**: Show preview of what personalized feed would look like
+3. **Onboarding Flow**: Could create a dedicated onboarding sequence for new users
+4. **Analytics Integration**: Track conversion from empty state to follow actions
+
+### Best Practices Established
+
+1. **Always check follow stats** when designing personalized features
+2. **Use conditional empty states** for better user experience
+3. **Integrate existing components** rather than recreating functionality
+4. **Provide clear value propositions** in empty states
+5. **Use smooth transitions** and interactions for better UX
+6. **Maintain theming consistency** across all custom components
+7. **Test compilation early** to catch TypeScript issues
+8. **CRITICAL: Always pass empty object `{}` to convexQuery for queries with no parameters** - prevents "undefined is not a valid Convex value" errors
+
+### Applicable Situations
+
+- **Personalized Content Features**: When building features that depend on user relationships
+- **Empty State Design**: When creating engaging empty states for social features
+- **User Onboarding**: When designing first-time user experiences
+- **Feed Systems**: When working with infinite scroll feeds and custom content states
+- **Follow/Social Features**: When integrating follow system with other features

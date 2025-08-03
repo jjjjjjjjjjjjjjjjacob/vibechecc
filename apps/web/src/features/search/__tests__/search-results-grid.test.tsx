@@ -1,12 +1,14 @@
 /// <reference lib="dom" />
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import React from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
-import { SearchResultsGrid } from '../components/search-results-grid';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SearchResultsGrid } from '@/features/search/components/search-results-grid';
 import type { SearchResult } from '@viberater/types';
 
 // Mock the child components
-vi.mock('../components/search-result-card', () => ({
+vi.mock('@/features/search/components/search-result-card', () => ({
   SearchResultCard: ({ result }: { result: SearchResult }) => (
     <div data-testid={`result-card-${result.id}`}>
       {result.type === 'vibe' ? result.content : result.title}
@@ -14,11 +16,11 @@ vi.mock('../components/search-result-card', () => ({
   ),
 }));
 
-vi.mock('../components/search-empty-state', () => ({
+vi.mock('@/features/search/components/search-empty-state', () => ({
   SearchEmptyState: () => <div data-testid="empty-state">No results found</div>,
 }));
 
-vi.mock('../components/search-loading', () => ({
+vi.mock('@/features/search/components/search-loading', () => ({
   SearchLoading: ({ itemCount }: { itemCount?: number }) => (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: itemCount || 6 }).map((_, i) => (
@@ -37,14 +39,36 @@ vi.mock('../components/search-loading', () => ({
 }));
 
 describe('SearchResultsGrid', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+  });
+
   afterEach(() => {
     cleanup();
   });
 
+  const renderWithProviders = (ui: React.ReactElement) => {
+    // Mock useNavigate hook directly
+    const _mockNavigate = vi.fn();
+    return render(
+      <QueryClientProvider client={queryClient}>
+        {React.cloneElement(ui)}
+      </QueryClientProvider>
+    );
+  };
+
   describe('Loading State', () => {
     it('displays loading skeletons when loading', () => {
-      render(<SearchResultsGrid loading={true} />);
+      renderWithProviders(<SearchResultsGrid loading={true} />);
 
+      // Check that loading cards are rendered
       const loadingCards = screen.getAllByTestId('loading-card');
       expect(loadingCards).toHaveLength(9); // SearchLoading renders 9 cards by default
 
@@ -53,7 +77,9 @@ describe('SearchResultsGrid', () => {
     });
 
     it('displays correct grid layout for loading state', () => {
-      const { container } = render(<SearchResultsGrid loading={true} />);
+      const { container } = renderWithProviders(
+        <SearchResultsGrid loading={true} />
+      );
 
       const grid = container.querySelector('.grid');
       expect(grid).toHaveClass(
@@ -68,14 +94,14 @@ describe('SearchResultsGrid', () => {
 
   describe('Empty State', () => {
     it('displays empty state when results is undefined', () => {
-      render(<SearchResultsGrid loading={false} />);
+      renderWithProviders(<SearchResultsGrid loading={false} />);
 
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
       expect(screen.getByText('No results found')).toBeInTheDocument();
     });
 
     it('displays empty state when results is empty array', () => {
-      render(<SearchResultsGrid results={[]} loading={false} />);
+      renderWithProviders(<SearchResultsGrid results={[]} loading={false} />);
 
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
     });
@@ -111,7 +137,9 @@ describe('SearchResultsGrid', () => {
     ];
 
     it('displays all results in a grid', () => {
-      render(<SearchResultsGrid results={mockResults} loading={false} />);
+      renderWithProviders(
+        <SearchResultsGrid results={mockResults} loading={false} />
+      );
 
       expect(screen.getByTestId('result-card-1')).toBeInTheDocument();
       expect(screen.getByTestId('result-card-2')).toBeInTheDocument();
@@ -119,7 +147,9 @@ describe('SearchResultsGrid', () => {
     });
 
     it('displays correct content for each result type', () => {
-      render(<SearchResultsGrid results={mockResults} loading={false} />);
+      renderWithProviders(
+        <SearchResultsGrid results={mockResults} loading={false} />
+      );
 
       expect(screen.getByText('First vibe')).toBeInTheDocument();
       expect(screen.getByText('Second vibe')).toBeInTheDocument();
@@ -127,7 +157,7 @@ describe('SearchResultsGrid', () => {
     });
 
     it('applies correct grid layout classes', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <SearchResultsGrid results={mockResults} loading={false} />
       );
 
@@ -146,10 +176,12 @@ describe('SearchResultsGrid', () => {
 
   describe('Edge Cases', () => {
     it('does not show empty state while loading', () => {
-      render(<SearchResultsGrid results={[]} loading={true} />);
+      renderWithProviders(<SearchResultsGrid results={[]} loading={true} />);
 
       expect(screen.queryByTestId('empty-state')).not.toBeInTheDocument();
-      expect(screen.getAllByTestId('skeleton')).toHaveLength(45); // 9 cards * 5 skeletons each
+      // Check that loading cards are shown instead
+      const loadingCards = screen.getAllByTestId('loading-card');
+      expect(loadingCards).toHaveLength(9);
     });
 
     it('handles single result correctly', () => {
@@ -165,7 +197,9 @@ describe('SearchResultsGrid', () => {
         },
       ];
 
-      render(<SearchResultsGrid results={singleResult} loading={false} />);
+      renderWithProviders(
+        <SearchResultsGrid results={singleResult} loading={false} />
+      );
 
       expect(screen.getByTestId('result-card-1')).toBeInTheDocument();
       expect(screen.queryByTestId('result-card-2')).not.toBeInTheDocument();
@@ -185,7 +219,7 @@ describe('SearchResultsGrid', () => {
         })
       );
 
-      const { container } = render(
+      const { container } = renderWithProviders(
         <SearchResultsGrid results={manyResults} loading={false} />
       );
 

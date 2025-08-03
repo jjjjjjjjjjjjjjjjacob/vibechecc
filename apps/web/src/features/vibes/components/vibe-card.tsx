@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
-import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
+import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/usePostHog';
 import { Badge } from '@/components/ui/badge';
@@ -22,11 +22,12 @@ import {
 } from '@/utils/user-utils';
 import type { Vibe } from '@/types';
 import type { RatingDisplayMode } from '@/components/vibe-category-row';
-import { EmojiRatingPopover } from '@/components/emoji-rating-popover';
-import { AuthPromptDialog } from '@/components/auth-prompt-dialog';
-import { EmojiRatingDisplayPopover } from '@/components/emoji-rating-display-popover';
-import { EmojiRatingCycleDisplay } from '@/components/emoji-rating-cycle-display';
-import { EmojiReactions } from '@/components/emoji-reaction';
+import { RatingPopover } from '@/features/ratings/components/rating-popover';
+import { AuthPromptDialog } from '@/features/auth';
+import { EmojiRatingDisplayPopover } from '@/features/ratings/components/emoji-rating-display-popover';
+import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
+import { EmojiReactions } from '@/features/ratings/components/emoji-reaction';
+import { useVibeImageUrl } from '@/hooks/use-vibe-image-url';
 
 type VibeCardVariant =
   | 'default'
@@ -78,14 +79,16 @@ export function VibeCard({
   const [preselectedRatingValue, setPreselectedRatingValue] = React.useState<
     number | null
   >(null);
-  const [showEmojiRatingPopover, setShowEmojiRatingPopover] =
-    React.useState(false);
+  const [showRatingPopover, setShowRatingPopover] = React.useState(false);
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const [isAvatarHovered, setIsAvatarHovered] = React.useState(false);
   const { user } = useUser();
   const { trackEvents } = usePostHog();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
   const { data: emojiMetadataArray } = useEmojiMetadata();
+
+  // Get image URL (handles both legacy URLs and storage IDs)
+  const { data: imageUrl, isLoading: isImageLoading } = useVibeImageUrl(vibe);
 
   // Fetch emoji rating data - get all unique emoji reactions for this vibe
   const { data: topEmojiRatings, isLoading: isTopEmojiRatingsLoading } =
@@ -96,7 +99,7 @@ export function VibeCard({
   } = useMostInteractedEmoji(vibe.id);
 
   // Determine if we should use a placeholder
-  const usePlaceholder = !vibe.image || imageError;
+  const usePlaceholder = !imageUrl || imageError || isImageLoading;
 
   // Determine if ratings are loading
   const isRatingsLoading =
@@ -219,7 +222,7 @@ export function VibeCard({
       setPreselectedRatingValue(value);
     }
 
-    setShowEmojiRatingPopover(true);
+    setShowRatingPopover(true);
   };
 
   const handleQuickReact = async (emoji: string) => {
@@ -272,7 +275,7 @@ export function VibeCard({
                     />
                   ) : (
                     <img
-                      src={vibe.image}
+                      src={imageUrl}
                       alt={vibe.title}
                       className="h-full w-full object-cover transition-transform duration-200 hover:scale-105"
                       onError={() => setImageError(true)}
@@ -351,10 +354,10 @@ export function VibeCard({
         </Card>
 
         {/* Hidden Emoji Rating Popover */}
-        <EmojiRatingPopover
-          open={showEmojiRatingPopover}
+        <RatingPopover
+          open={showRatingPopover}
           onOpenChange={(open) => {
-            setShowEmojiRatingPopover(open);
+            setShowRatingPopover(open);
             if (!open) {
               setSelectedEmojiForRating(null);
               setPreselectedRatingValue(null);
@@ -368,7 +371,7 @@ export function VibeCard({
           preSelectedValue={preselectedRatingValue || undefined}
         >
           <div style={{ display: 'none' }} />
-        </EmojiRatingPopover>
+        </RatingPopover>
 
         {/* Auth Prompt Dialog */}
         <AuthPromptDialog
@@ -410,7 +413,7 @@ export function VibeCard({
                 />
               ) : (
                 <img
-                  src={vibe.image}
+                  src={imageUrl}
                   alt={vibe.title}
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   onError={() => setImageError(true)}
@@ -495,7 +498,7 @@ export function VibeCard({
                       if (!user?.id) {
                         setShowAuthDialog(true);
                       } else {
-                        setShowEmojiRatingPopover(true);
+                        setShowRatingPopover(true);
                       }
                     }}
                     onKeyDown={(e) => {
@@ -505,7 +508,7 @@ export function VibeCard({
                         if (!user?.id) {
                           setShowAuthDialog(true);
                         } else {
-                          setShowEmojiRatingPopover(true);
+                          setShowRatingPopover(true);
                         }
                       }
                     }}
@@ -520,10 +523,10 @@ export function VibeCard({
         </div>
 
         {/* Hidden Emoji Rating Popover */}
-        <EmojiRatingPopover
-          open={showEmojiRatingPopover}
+        <RatingPopover
+          open={showRatingPopover}
           onOpenChange={(open) => {
-            setShowEmojiRatingPopover(open);
+            setShowRatingPopover(open);
             if (!open) {
               setSelectedEmojiForRating(null);
               setPreselectedRatingValue(null);
@@ -537,7 +540,7 @@ export function VibeCard({
           preSelectedValue={preselectedRatingValue || undefined}
         >
           <div style={{ display: 'none' }} />
-        </EmojiRatingPopover>
+        </RatingPopover>
 
         {/* Auth Prompt Dialog */}
         <AuthPromptDialog
@@ -656,7 +659,7 @@ export function VibeCard({
                   <SimpleVibePlaceholder title={vibe.title} />
                 ) : (
                   <img
-                    src={vibe.image}
+                    src={imageUrl}
                     alt={vibe.title}
                     className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                     onError={() => setImageError(true)}
@@ -767,10 +770,10 @@ export function VibeCard({
       </Card>
 
       {/* Hidden Emoji Rating Popover for clicking on emoji reactions */}
-      <EmojiRatingPopover
-        open={showEmojiRatingPopover}
+      <RatingPopover
+        open={showRatingPopover}
         onOpenChange={(open) => {
-          setShowEmojiRatingPopover(open);
+          setShowRatingPopover(open);
           if (!open) {
             setSelectedEmojiForRating(null);
             setPreselectedRatingValue(null);
@@ -784,7 +787,7 @@ export function VibeCard({
         preSelectedValue={preselectedRatingValue || undefined}
       >
         <div style={{ display: 'none' }} />
-      </EmojiRatingPopover>
+      </RatingPopover>
 
       {/* Auth Prompt Dialog */}
       <AuthPromptDialog

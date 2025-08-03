@@ -2,7 +2,7 @@ import { convexTest } from 'convex-test';
 import { modules } from '../vitest.setup';
 import { describe, it, expect } from 'vitest';
 import schema from './schema';
-import { api } from './_generated/api';
+import { api, internal } from './_generated/api';
 
 describe('Users Functions', () => {
   describe('Authentication Tests', () => {
@@ -438,7 +438,7 @@ describe('Users Functions', () => {
       };
 
       // This should work as it's an internal mutation
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       await t.mutation((api.users as any).upsertFromClerk, {
         data: clerkUserData,
       });
@@ -471,8 +471,8 @@ describe('Users Functions', () => {
       expect(user).toBeDefined();
 
       // Delete user via webhook
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await t.mutation((api.users as any).deleteFromClerk, {
+
+      await t.mutation(internal.users.deleteFromClerk, {
         clerkUserId: userData.externalId,
       });
 

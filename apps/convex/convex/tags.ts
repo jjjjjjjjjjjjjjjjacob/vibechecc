@@ -1,4 +1,4 @@
-import { query, internalMutation } from './_generated/server';
+import { query, internalMutation, type MutationCtx } from './_generated/server';
 import { v } from 'convex/values';
 
 // Internal mutation to update tag counts
@@ -82,7 +82,7 @@ export const getPopularTags = query({
 });
 
 // Helper function to rebuild tag counts
-async function rebuildTagCountsHelper(ctx: any) {
+async function rebuildTagCountsHelper(ctx: MutationCtx) {
   // Clear existing tags
   const existingTags = await ctx.db.query('tags').collect();
   for (const tag of existingTags) {

@@ -10,7 +10,8 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MasonryFeed } from '@/components/masonry-feed';
-import { UserProfileView } from '@/components/user-profile-view';
+import { UserProfileView } from '@/features/profiles/components/user-profile-view';
+import { useUser } from '@clerk/tanstack-react-start';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,
@@ -18,6 +19,7 @@ export const Route = createFileRoute('/users/$username')({
 
 function UserProfile() {
   const { username } = Route.useParams();
+  const { user: clerkUser } = useUser();
   const {
     data: user,
     isLoading: userLoading,
@@ -73,6 +75,7 @@ function UserProfile() {
       receivedRatingsLoading={receivedRatingsLoading}
       emojiStats={emojiStats}
       scopedTheme={true}
+      currentUserId={clerkUser?.id}
     />
   );
 }
@@ -126,3 +129,5 @@ function UserProfileSkeleton() {
     </div>
   );
 }
+
+export default UserProfile;

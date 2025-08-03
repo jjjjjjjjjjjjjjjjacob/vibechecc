@@ -121,3 +121,5 @@ export function DebugAuth() {
     </div>
   );
 }
+
+export default DebugAuth;

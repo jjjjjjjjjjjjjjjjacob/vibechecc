@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/tooltip';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
-import { EmojiRatingDisplay } from '@/components/emoji-rating-display';
+import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { api } from '@viberater/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';

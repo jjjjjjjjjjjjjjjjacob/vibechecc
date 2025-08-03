@@ -248,9 +248,9 @@ describe('Authentication Debug Tests', () => {
       expect(statusWithUser.completed).toBe(false);
       expect(statusWithUser.needsOnboarding).toBe(true);
       expect(statusWithUser.userExists).toBe(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       expect((statusWithUser as any).user).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       expect((statusWithUser as any).user.externalId).toBe(
         mockIdentity.subject
       );

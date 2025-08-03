@@ -3,7 +3,7 @@ import * as React from 'react';
 import { HomeFeed } from '@/components/home-feed';
 import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import { useCurrentUser } from '@/queries';
-import { useTheme } from '@/components/theme-provider';
+import { useTheme } from '@/features/theming/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import { Plus, Sparkles } from 'lucide-react';
 
@@ -29,9 +29,9 @@ function Home() {
   }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
       {/* Hero Section */}
-      <section className="mb-12">
+      <section className="container mx-auto px-4 py-8">
         <div
           className="from-theme-primary to-theme-secondary animate-gradient-shift rounded-2xl bg-gradient-to-r p-8 text-white md:p-12"
           style={{ backgroundSize: '200% 200%' }}
@@ -79,6 +79,6 @@ function Home() {
 
       {/* Home Feed */}
       <HomeFeed />
-    </div>
+    </>
   );
 }

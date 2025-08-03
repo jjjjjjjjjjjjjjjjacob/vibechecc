@@ -7,17 +7,17 @@ import { Badge } from '@/components/ui/badge';
 
 // Lazy load search components for code splitting
 const _SearchResultsGrid = lazy(() =>
-  import('@/features/search/components').then((m) => ({
+  import('@/features/search/components/search-results-grid').then((m) => ({
     default: m.SearchResultsGrid,
   }))
 );
 const SearchResultsList = lazy(() =>
-  import('@/features/search/components').then((m) => ({
+  import('@/features/search/components/search-results-list').then((m) => ({
     default: m.SearchResultsList,
   }))
 );
 const SearchPagination = lazy(() =>
-  import('@/features/search/components').then((m) => ({
+  import('@/features/search/components/search-pagination').then((m) => ({
     default: m.SearchPagination,
   }))
 );
@@ -27,9 +27,9 @@ import { useSearchResultsImproved } from '@/features/search/hooks/use-search-res
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { EmojiSearchCommand } from '@/components/emoji-search-command';
-import { EmojiPillFilters } from '@/components/emoji-pill-filters';
-import { RatingRangeSlider } from '@/components/rating-range-slider';
+import { EmojiSearchCommand } from '@/features/ratings/components/emoji-search-command';
+import { EmojiPillFilters } from '@/features/ratings/components/emoji-pill-filters';
+import { RatingRangeSlider } from '@/features/ratings/components/rating-range-slider';
 import { TagSearchCommand } from '@/components/tag-search-command';
 import { MobileFilterSheet } from '@/features/search/components/mobile-filter-sheet';
 import { cn } from '@/utils/tailwind-utils';
@@ -239,6 +239,7 @@ function SearchResultsPage() {
                     <EmojiSearchCommand
                       searchValue={emojiSearchValue}
                       onSearchChange={setEmojiSearchValue}
+                      data-testid="emoji-search-command"
                       onSelect={(emoji) => {
                         const current = emojiFilter || [];
                         const updated = current.includes(emoji)
@@ -618,3 +619,5 @@ function SearchResultsPage() {
     </div>
   );
 }
+
+export default SearchResultsPage;
