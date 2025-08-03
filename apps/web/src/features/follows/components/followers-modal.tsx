@@ -14,6 +14,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useFollowers } from '../hooks/use-followers';
 import { FollowButton } from './follow-button';
 import type { User } from '@viberater/types';
+import { trackEvents } from '@/lib/posthog';
 
 interface _Follower {
   user: User | null;
@@ -75,8 +76,20 @@ export function FollowersModal({
     }
   };
 
+  // Track modal open/close
+  React.useEffect(() => {
+    if (isOpen) {
+      trackEvents.modalOpened('followers', { user_id: userId, username });
+    }
+  }, [isOpen, userId, username]);
+
+  const handleClose = () => {
+    trackEvents.modalClosed('followers', { user_id: userId, username });
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="bg-background/95 border-theme-primary/20 max-w-md shadow-xl backdrop-blur-md">
         <DialogHeader>
           <DialogTitle className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase">

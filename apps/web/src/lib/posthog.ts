@@ -124,6 +124,89 @@ export const trackEvents = {
   searchPerformed: (query: string, results_count: number) =>
     analytics.capture('search_performed', { query, results_count }),
 
+  searchFilterApplied: (
+    filterType: string,
+    filterValue: any,
+    searchQuery?: string
+  ) =>
+    analytics.capture('search_filter_applied', {
+      filter_type: filterType,
+      filter_value: filterValue,
+      search_query: searchQuery,
+    }),
+
+  searchFilterRemoved: (
+    filterType: string,
+    filterValue: any,
+    searchQuery?: string
+  ) =>
+    analytics.capture('search_filter_removed', {
+      filter_type: filterType,
+      filter_value: filterValue,
+      search_query: searchQuery,
+    }),
+
+  searchResultClicked: (
+    resultType: 'vibe' | 'user' | 'tag',
+    resultId: string,
+    position: number,
+    searchQuery?: string
+  ) =>
+    analytics.capture('search_result_clicked', {
+      result_type: resultType,
+      result_id: resultId,
+      position,
+      search_query: searchQuery,
+    }),
+
+  searchSortChanged: (
+    sortType: 'recent' | 'rating_desc' | 'rating_asc' | 'top_rated',
+    searchQuery?: string
+  ) =>
+    analytics.capture('search_sort_changed', {
+      sort_type: sortType,
+      search_query: searchQuery,
+    }),
+
+  // Social interactions
+  followUser: (targetUserId: string, username?: string) =>
+    analytics.capture('user_followed', {
+      target_user_id: targetUserId,
+      username,
+    }),
+
+  unfollowUser: (targetUserId: string, username?: string) =>
+    analytics.capture('user_unfollowed', {
+      target_user_id: targetUserId,
+      username,
+    }),
+
+  profileViewed: (profileUserId: string, username?: string) =>
+    analytics.capture('profile_viewed', {
+      profile_user_id: profileUserId,
+      username,
+    }),
+
+  // UI interactions
+  emojiPopoverOpened: (vibeId?: string, context?: string) =>
+    analytics.capture('emoji_popover_opened', { vibe_id: vibeId, context }),
+
+  emojiPopoverClosed: (vibeId?: string, context?: string) =>
+    analytics.capture('emoji_popover_closed', { vibe_id: vibeId, context }),
+
+  emojiSearched: (searchTerm: string, resultsCount: number, vibeId?: string) =>
+    analytics.capture('emoji_searched', {
+      search_term: searchTerm,
+      results_count: resultsCount,
+      vibe_id: vibeId,
+    }),
+
+  modalOpened: (modalType: string, context?: Record<string, any>) =>
+    analytics.capture('modal_opened', { modal_type: modalType, ...context }),
+
+  modalClosed: (modalType: string, context?: Record<string, any>) =>
+    analytics.capture('modal_closed', { modal_type: modalType, ...context }),
+
   // Errors
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errorOccurred: (error: string, context?: Record<string, any>) =>
