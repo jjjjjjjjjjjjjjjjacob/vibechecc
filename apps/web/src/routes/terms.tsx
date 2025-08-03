@@ -156,10 +156,9 @@ function TermsPage() {
             9. limitation of liability
           </h2>
           <p className="mb-4">
-            to the maximum extent permitted by law, viberatr shall not be
-            liable for any indirect, incidental, special, consequential, or
-            punitive damages, including but not limited to loss of profits,
-            data, or use.
+            to the maximum extent permitted by law, viberatr shall not be liable
+            for any indirect, incidental, special, consequential, or punitive
+            damages, including but not limited to loss of profits, data, or use.
           </p>
         </section>
 
