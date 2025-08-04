@@ -130,8 +130,10 @@ export function useUserReceivedRatings(userId: string) {
 // Mutation to create a vibe
 export function useCreateVibeMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.vibes.create);
+
   return useMutation({
-    mutationFn: useConvexMutation(api.vibes.create),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibes'] });
     },
@@ -141,8 +143,10 @@ export function useCreateVibeMutation() {
 // Mutation to update a vibe
 export function useUpdateVibeMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.vibes.updateVibe);
+
   return useMutation({
-    mutationFn: useConvexMutation(api.vibes.updateVibe),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibes'] });
     },
@@ -152,8 +156,10 @@ export function useUpdateVibeMutation() {
 // Mutation to delete a vibe (soft delete)
 export function useDeleteVibeMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.vibes.deleteVibe);
+
   return useMutation({
-    mutationFn: useConvexMutation(api.vibes.deleteVibe),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibes'] });
     },
@@ -163,8 +169,10 @@ export function useDeleteVibeMutation() {
 // Mutation to add a rating
 export function useAddRatingMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.vibes.addRating);
+
   return useMutation({
-    mutationFn: useConvexMutation(api.vibes.addRating),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibes'] });
     },
@@ -174,8 +182,12 @@ export function useAddRatingMutation() {
 // Mutation to create/update emoji rating
 export function useCreateEmojiRatingMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(
+    api.emojiRatings.createOrUpdateEmojiRating
+  );
+
   return useMutation({
-    mutationFn: useConvexMutation(api.emojiRatings.createOrUpdateEmojiRating),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibes'] });
       queryClient.invalidateQueries({ queryKey: ['emojiRatings'] });
@@ -186,8 +198,10 @@ export function useCreateEmojiRatingMutation() {
 // Mutation for quick react to a vibe
 export function useQuickReactMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.vibes.quickReact);
+
   return useMutation({
-    mutationFn: useConvexMutation(api.vibes.quickReact),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibes'] });
       queryClient.invalidateQueries({ queryKey: ['emojiRatings'] });
@@ -232,8 +246,10 @@ export function useCurrentUser() {
 // Mutation to create a user
 export function useCreateUserMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.users.create);
+
   return useMutation({
-    mutationFn: useConvexMutation(api.users.create),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
@@ -243,8 +259,10 @@ export function useCreateUserMutation() {
 // Mutation to update a user
 export function useUpdateUserMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.users.update);
+
   return useMutation({
-    mutationFn: useConvexMutation(api.users.update),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
@@ -254,8 +272,10 @@ export function useUpdateUserMutation() {
 // Action to update user profile (syncs with both Convex and Clerk)
 export function useUpdateProfileMutation() {
   const queryClient = useQueryClient();
+  const convexAction = useConvexAction(api.users.updateProfile);
+
   return useMutation({
-    mutationFn: useConvexAction(api.users.updateProfile),
+    mutationFn: convexAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
@@ -446,8 +466,10 @@ export function useOnboardingStatus() {
 // Action to update onboarding data (syncs with both Convex and Clerk)
 export function useUpdateOnboardingDataMutation() {
   const queryClient = useQueryClient();
+  const convexAction = useConvexAction(api.users.updateOnboardingData);
+
   return useMutation({
-    mutationFn: useConvexAction(api.users.updateOnboardingData),
+    mutationFn: convexAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['onboarding'] });
@@ -458,8 +480,10 @@ export function useUpdateOnboardingDataMutation() {
 // Action to complete onboarding (syncs with both Convex and Clerk)
 export function useCompleteOnboardingMutation() {
   const queryClient = useQueryClient();
+  const convexAction = useConvexAction(api.users.completeOnboarding);
+
   return useMutation({
-    mutationFn: useConvexAction(api.users.completeOnboarding),
+    mutationFn: convexAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['onboarding'] });
@@ -470,8 +494,10 @@ export function useCompleteOnboardingMutation() {
 // Action to update user theme (syncs with Convex)
 export function useUpdateThemeMutation() {
   const queryClient = useQueryClient();
+  const convexAction = useConvexAction(api.users.updateProfile);
+
   return useMutation({
-    mutationFn: useConvexAction(api.users.updateProfile),
+    mutationFn: convexAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
@@ -481,8 +507,10 @@ export function useUpdateThemeMutation() {
 // Mutation to ensure user exists in Convex
 export function useEnsureUserExistsMutation() {
   const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.users.ensureUserExists);
+
   return useMutation({
-    mutationFn: useConvexMutation(api.users.ensureUserExists),
+    mutationFn: convexMutation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['onboarding'] });
@@ -561,6 +589,87 @@ export function useCreateColumnMutation() {
 
 // FOLLOW SYSTEM QUERIES
 export * from './features/follows/hooks';
+
+// NOTIFICATION SYSTEM QUERIES
+
+// Query to get notifications with pagination and filtering
+export function useNotificationsQuery(
+  type?: 'rating' | 'new_rating' | 'new_vibe' | 'follow',
+  options?: { enabled?: boolean; limit?: number; cursor?: string }
+) {
+  return useQuery({
+    ...convexQuery(api.notifications.getNotifications, {
+      limit: options?.limit || 20,
+      cursor: options?.cursor,
+      type,
+    }),
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Infinite query for notifications
+export function useNotificationsInfinite(
+  type?: 'rating' | 'new_rating' | 'new_vibe' | 'follow',
+  options?: { enabled?: boolean; limit?: number }
+) {
+  const { enabled = true, limit = 20 } = options || {};
+  const convex = useConvex();
+
+  return useInfiniteQuery({
+    queryKey: ['notifications', 'infinite', type || 'all'],
+    queryFn: async ({ pageParam }) => {
+      return await convex.query(api.notifications.getNotifications, {
+        limit,
+        cursor: pageParam || undefined,
+        type,
+      });
+    },
+    getNextPageParam: (lastPage) => lastPage?.nextCursor || undefined,
+    enabled,
+    initialPageParam: null as string | null,
+  });
+}
+
+// Query to get unread notification count
+export function useUnreadNotificationCount(options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.notifications.getUnreadCount, {}),
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Query to get unread notification count by type
+export function useUnreadNotificationCountByType() {
+  return useQuery({
+    ...convexQuery(api.notifications.getUnreadCountByType, {}),
+  });
+}
+
+// Mutation to mark notification as read
+export function useMarkNotificationAsReadMutation() {
+  const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.notifications.markAsRead);
+
+  return useMutation({
+    mutationFn: convexMutation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
+// Mutation to mark all notifications as read
+export function useMarkAllNotificationsAsReadMutation() {
+  const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.notifications.markAllAsRead);
+
+  return useMutation({
+    mutationFn: convexMutation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
 
 // GENERALIZED QUERY HOOKS
 

@@ -127,3 +127,18 @@ export interface FollowStats {
   followers: number; // Number of users following this user
   following: number; // Number of users this user follows
 }
+
+export interface Notification {
+  _id?: string; // Convex document ID for compatibility
+  userId: string; // External ID of user receiving notification
+  type: 'follow' | 'rating' | 'new_vibe' | 'new_rating';
+  triggerUserId: string; // External ID of user who triggered notification
+  targetId: string; // ID of the target - vibeId, ratingId, etc.
+  title: string; // e.g., "John followed you"
+  description: string; // e.g., "Check out their profile"
+  metadata?: any; // Additional data like vibe title, rating emoji
+  read: boolean; // Whether notification has been read
+  createdAt: number; // Timestamp
+  _creationTime?: number; // Convex creation time for compatibility
+  triggerUser?: User; // Populated user data for the user who triggered the notification
+}

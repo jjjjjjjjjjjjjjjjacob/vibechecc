@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
-import { Search, ChevronUp, Menu, User, Heart, Sun, Moon } from 'lucide-react';
+import { Search, ChevronUp, Menu, User, Heart, Sun, Moon, Bell } from 'lucide-react';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '../utils/tailwind-utils';
@@ -21,10 +21,12 @@ import {
 } from '@/features/theming/components/theme-provider';
 import { SearchAccordion } from '../features/search/components/search-accordion';
 import { useSearchShortcuts } from '../features/search/hooks/use-search-shortcuts';
-import { useCurrentUser } from '../queries';
+import { useCurrentUser, useUnreadNotificationCount } from '../queries';
 import { ProfileDropdown } from '@/features/profiles/components/profile-dropdown';
+import { NotificationDropdown } from '@/features/notifications/components/notification-dropdown';
+import { useConvex } from 'convex/react';
 
-type MobileNavState = 'nav' | 'profile' | 'search' | null;
+type MobileNavState = 'nav' | 'profile' | 'search' | 'notifications' | null;
 
 export function Header() {
   const { resolvedTheme, setTheme, setColorTheme, setSecondaryColorTheme } =
@@ -35,6 +37,15 @@ export function Header() {
   const searchButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
+  
+  // Check if Convex context is available - call useConvex at top level
+  const convex = useConvex();
+  const convexAvailable = !!convex;
+
+  // Get unread notification count for signed-in users only (when Convex is available)
+  const { data: unreadCount } = useUnreadNotificationCount({ 
+    enabled: !!clerkUser && convexAvailable
+  });
 
   // Track hydration to avoid SSR mismatches
   useEffect(() => {
@@ -70,7 +81,8 @@ export function Header() {
       if (
         event.key === 'Escape' &&
         mobileNavState &&
-        mobileNavState !== 'search'
+        mobileNavState !== 'search' &&
+        mobileNavState !== 'notifications'
       ) {
         setMobileNavState(null);
       }
@@ -219,6 +231,28 @@ export function Header() {
                   />
                 </div>
               </Button>
+
+              <SignedIn>
+                <NotificationDropdown
+                  open={mobileNavState === 'notifications'}
+                  onOpenChange={(open) => setMobileNavState(open ? 'notifications' : null)}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-lg"
+                  >
+                    <div className="relative">
+                      <Bell className="h-4 w-4" />
+                      {unreadCount && unreadCount > 0 && (
+                        <span className="bg-theme-primary text-primary-foreground absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-xs font-medium">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </Button>
+                </NotificationDropdown>
+              </SignedIn>
 
               <Button
                 variant="ghost"
@@ -470,7 +504,7 @@ export function Header() {
       </header>
 
       {/* Mobile Navigation Overlay */}
-      {mobileNavState && mobileNavState !== 'search' && (
+      {mobileNavState && mobileNavState !== 'search' && mobileNavState !== 'notifications' && (
         <div
           className="animate-in fade-in fixed inset-0 z-40 bg-black/50 backdrop-blur-sm duration-200 sm:hidden"
           onClick={() => setMobileNavState(null)}

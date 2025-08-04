@@ -1,5 +1,31 @@
 import { query, mutation, type QueryCtx } from './_generated/server';
 import { v } from 'convex/values';
+import { internal } from './_generated/api';
+import type { Doc } from './_generated/dataModel';
+
+// Helper function to compute user display name (backend version)
+function computeUserDisplayName(user: Doc<'users'> | null): string {
+  if (!user) {
+    return 'Someone';
+  }
+
+  // Priority 1: username
+  if (user.username?.trim()) {
+    return user.username.trim();
+  }
+
+  // Priority 2: first_name + last_name
+  const firstName = user.first_name?.trim();
+  const lastName = user.last_name?.trim();
+  if (firstName || lastName) {
+    return `${firstName || ''} ${lastName || ''}`.trim();
+  }
+
+  // No legacy name field in Convex schema - skip this step
+
+  // Fallback
+  return 'Someone';
+}
 
 // Get emoji metadata by emoji
 export const getEmojiMetadata = query({
@@ -80,18 +106,136 @@ export const createOrUpdateEmojiRating = mutation({
       updatedAt: now,
     };
 
+    let result;
     if (existingRating) {
       // Update existing rating
-      return await ctx.db.patch(existingRating._id, ratingData);
+      result = await ctx.db.patch(existingRating._id, ratingData);
     } else {
       // Create new rating
-      return await ctx.db.insert('ratings', {
+      result = await ctx.db.insert('ratings', {
         vibeId: args.vibeId,
         userId: identity.subject,
         createdAt: now,
         ...ratingData,
       });
     }
+
+    // Create rating notification for the vibe creator (only for new ratings or significant updates)
+    try {
+      // Get the vibe to find the creator
+      const vibe = await ctx.db
+        .query('vibes')
+        .filter((q) => q.eq(q.field('id'), args.vibeId))
+        .first();
+
+      if (vibe && vibe.createdById !== identity.subject) {
+        // Don't notify yourself
+        // Get the rater's user info
+        const raterUser = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', identity.subject)
+          )
+          .first();
+
+        const raterDisplayName = computeUserDisplayName(raterUser);
+        const ratingId = existingRating ? existingRating._id : result;
+
+        await ctx.scheduler.runAfter(
+          0,
+          internal.notifications.createNotification,
+          {
+            userId: vibe.createdById,
+            type: 'rating',
+            triggerUserId: identity.subject,
+            targetId: ratingId ? ratingId.toString() : '', // Link to the rating
+            title: `${raterDisplayName} rated your vibe with ${args.emoji}`,
+            description: 'see what they thought',
+            metadata: {
+              vibeTitle: vibe.title,
+              emoji: args.emoji,
+              ratingValue: args.value,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      // Don't fail the rating operation if notification creation fails
+      console.error('Failed to create rating notification:', error);
+    }
+
+    // Create new rating notifications for users who follow the rater (only for new ratings)
+    if (!existingRating) {
+      try {
+        // Get users who follow the current user (rater)
+        const followers = await ctx.db
+          .query('follows')
+          .withIndex('byFollowing', (q) =>
+            q.eq('followingId', identity.subject)
+          )
+          .collect();
+
+        // Limit to recent followers to avoid performance issues (max 50)
+        const recentFollowers = followers.slice(0, 50);
+
+        // Get the rater's and vibe info (we already have some of this from above)
+        const raterUser = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', identity.subject)
+          )
+          .first();
+
+        const vibe = await ctx.db
+          .query('vibes')
+          .filter((q) => q.eq(q.field('id'), args.vibeId))
+          .first();
+
+        if (raterUser && vibe && recentFollowers.length > 0) {
+          const raterDisplayName = computeUserDisplayName(raterUser);
+
+          // Get vibe creator info
+          const vibeCreator = await ctx.db
+            .query('users')
+            .withIndex('byExternalId', (q) =>
+              q.eq('externalId', vibe.createdById)
+            )
+            .first();
+
+          const vibeCreatorName = computeUserDisplayName(vibeCreator);
+
+          // Create notifications for each follower
+          for (const follow of recentFollowers) {
+            await ctx.scheduler.runAfter(
+              0,
+              internal.notifications.createNotification,
+              {
+                userId: follow.followerId,
+                type: 'new_rating',
+                triggerUserId: identity.subject,
+                targetId: result ? result.toString() : '', // Link to the rating
+                title: `${raterDisplayName} reviewed a vibe`,
+                description: 'see their review',
+                metadata: {
+                  vibeTitle: vibe.title,
+                  vibeCreator: vibeCreatorName,
+                  emoji: args.emoji,
+                  ratingValue: args.value,
+                },
+              }
+            );
+          }
+        }
+      } catch (error) {
+        // Don't fail the rating operation if notification creation fails
+        console.error(
+          'Failed to create new rating notifications for followers:',
+          error
+        );
+      }
+    }
+
+    return result;
   },
 });
 
