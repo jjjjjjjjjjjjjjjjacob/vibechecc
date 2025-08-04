@@ -1,4 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { SignInButton } from '@clerk/tanstack-react-start';
+import { Button } from '@/components/ui/button';
+import { LogIn } from 'lucide-react';
 import { usePostHog } from '@/hooks/usePostHog';
 import {
   canAccessCurrentEnvironment,
@@ -68,11 +71,16 @@ export function EnvironmentAccessGuard({
   if (isLoading || hasAccess === null) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="space-y-4 text-center">
-          <div className="border-primary mx-auto h-8 w-8 animate-spin rounded-full border-b-2"></div>
-          <p className="text-muted-foreground">
-            checking access permissions...
-          </p>
+        <div className="space-y-6 text-center">
+          <div className="space-y-4">
+            <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
+              viberatr
+            </span>
+            <div className="border-theme-primary mx-auto h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
+            <p className="text-muted-foreground">
+              checking access permissions...
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -89,12 +97,26 @@ export function EnvironmentAccessGuard({
 
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="mx-auto max-w-md space-y-6 p-6 text-center">
-          <div className="space-y-2">
-            <h1 className="text-foreground text-2xl font-semibold">
-              access restricted
-            </h1>
-            <p className="text-muted-foreground">{message}</p>
+        <div className="mx-auto max-w-md space-y-8 p-6 text-center">
+          <div className="space-y-4">
+            <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
+              viberatr
+            </span>
+            <div className="space-y-2">
+              <h1 className="text-foreground text-2xl font-semibold">
+                access restricted
+              </h1>
+              <p className="text-muted-foreground">{message}</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <SignInButton mode="modal">
+              <Button className="from-theme-primary to-theme-secondary h-12 w-full bg-gradient-to-r text-base font-semibold text-white transition-all hover:scale-[1.02] hover:shadow-lg">
+                <LogIn className="mr-2 h-5 w-5" />
+                sign in to viberatr
+              </Button>
+            </SignInButton>
           </div>
 
           <div className="text-muted-foreground space-y-2 text-sm">
@@ -105,8 +127,13 @@ export function EnvironmentAccessGuard({
               </span>
             </p>
             <p>
-              if you believe this is an error, please contact your development
-              team
+              if you believe this is an error, please contact{' '}
+              <a
+                href="mailto:admin@viberatr.io"
+                className="text-theme-primary hover:text-theme-primary/80 underline transition-colors"
+              >
+                admin@viberatr.io
+              </a>
             </p>
           </div>
         </div>
