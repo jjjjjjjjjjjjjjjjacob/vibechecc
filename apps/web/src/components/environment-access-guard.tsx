@@ -72,7 +72,7 @@ export function EnvironmentAccessGuard({
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="space-y-6 text-center">
-          <div className="space-y-4">
+          <div className="flex flex-col space-y-4">
             <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
               viberatr
             </span>
