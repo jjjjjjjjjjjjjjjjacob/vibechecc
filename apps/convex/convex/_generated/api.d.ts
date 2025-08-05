@@ -24,6 +24,7 @@ import type * as follows from "../follows.js";
 import type * as http from "../http.js";
 import type * as importEmojis from "../importEmojis.js";
 import type * as lib_emojiColors from "../lib/emojiColors.js";
+import type * as lib_securityValidators from "../lib/securityValidators.js";
 import type * as notifications from "../notifications.js";
 import type * as ratings from "../ratings.js";
 import type * as search_fuzzy_search from "../search/fuzzy_search.js";
@@ -67,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   importEmojis: typeof importEmojis;
   "lib/emojiColors": typeof lib_emojiColors;
+  "lib/securityValidators": typeof lib_securityValidators;
   notifications: typeof notifications;
   ratings: typeof ratings;
   "search/fuzzy_search": typeof search_fuzzy_search;

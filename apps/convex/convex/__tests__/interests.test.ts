@@ -38,7 +38,9 @@ describe('User Interests from Ratings', () => {
       const tWithAuthUser2 = t.withIdentity({ subject: 'user2' });
 
       // Get user2's initial interests (should be empty)
-      const userBefore = await t.query(api.users.getById, { id: 'user2' });
+      const userBefore = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userBefore?.interests || []).toHaveLength(0);
 
       // Rate the vibe
@@ -50,7 +52,9 @@ describe('User Interests from Ratings', () => {
       });
 
       // Check that user's interests now include the vibe tags
-      const userAfter = await t.query(api.users.getById, { id: 'user2' });
+      const userAfter = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userAfter?.interests).toEqual(
         expect.arrayContaining(['music', 'art', 'creativity'])
       );
@@ -92,7 +96,9 @@ describe('User Interests from Ratings', () => {
       });
 
       // Check that user's interests include new tags but no duplicates
-      const userAfter = await t.query(api.users.getById, { id: 'user2' });
+      const userAfter = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       const interests = userAfter?.interests || [];
 
       // Should contain all unique tags
@@ -107,14 +113,21 @@ describe('User Interests from Ratings', () => {
     });
 
     it('should preserve existing interests when adding new ones', async () => {
-      // Create test user with existing interests
+      // Create test user with existing interests (vibe creator)
       await t.mutation(api.users.createForSeed, {
         externalId: 'user1',
         username: 'testuser1',
         interests: ['cooking', 'travel'],
       });
 
-      // Create test vibe with different tags
+      // Create rating user with existing interests
+      await t.mutation(api.users.createForSeed, {
+        externalId: 'user2',
+        username: 'testuser2',
+        interests: ['cooking', 'travel'],
+      });
+
+      // Create test vibe with different tags (created by user1)
       const vibeId = await t.mutation(api.vibes.createForSeed, {
         title: 'Test Vibe',
         description: 'A test vibe with new tags',
@@ -122,19 +135,21 @@ describe('User Interests from Ratings', () => {
         createdById: 'user1',
       });
 
-      // Mock authentication for user1
-      const tWithAuthUser1 = t.withIdentity({ subject: 'user1' });
+      // Mock authentication for user2 (different from creator)
+      const tWithAuthUser2 = t.withIdentity({ subject: 'user2' });
 
-      // Rate the vibe
-      await tWithAuthUser1.mutation(api.vibes.addRating, {
+      // Rate the vibe with user2
+      await tWithAuthUser2.mutation(api.vibes.addRating, {
         vibeId,
         emoji: '🔥',
         value: 5,
         review: 'Amazing!',
       });
 
-      // Check that user's interests include both old and new tags
-      const userAfter = await t.query(api.users.getById, { id: 'user1' });
+      // Check that user2's interests include both old and new tags
+      const userAfter = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userAfter?.interests).toEqual(
         expect.arrayContaining(['cooking', 'travel', 'music', 'fitness'])
       );
@@ -142,45 +157,60 @@ describe('User Interests from Ratings', () => {
     });
 
     it('should handle vibes with no tags gracefully', async () => {
-      // Create test user
+      // Create vibe creator
       await t.mutation(api.users.createForSeed, {
         externalId: 'user1',
         username: 'testuser1',
         interests: ['existing'],
       });
 
-      // Create test vibe without tags
+      // Create rater with existing interests
+      await t.mutation(api.users.createForSeed, {
+        externalId: 'user2',
+        username: 'testuser2',
+        interests: ['existing'],
+      });
+
+      // Create test vibe without tags (created by user1)
       const vibeId = await t.mutation(api.vibes.createForSeed, {
         title: 'Test Vibe',
         description: 'A test vibe without tags',
         createdById: 'user1',
       });
 
-      // Mock authentication for user1
-      const tWithAuthUser1 = t.withIdentity({ subject: 'user1' });
+      // Mock authentication for user2 (different from creator)
+      const tWithAuthUser2 = t.withIdentity({ subject: 'user2' });
 
-      // Rate the vibe
-      await tWithAuthUser1.mutation(api.vibes.addRating, {
+      // Rate the vibe with user2
+      await tWithAuthUser2.mutation(api.vibes.addRating, {
         vibeId,
         emoji: '😊',
         value: 3,
         review: 'Nice vibe',
       });
 
-      // Check that user's interests remain unchanged
-      const userAfter = await t.query(api.users.getById, { id: 'user1' });
+      // Check that user2's interests remain unchanged (no tags to add)
+      const userAfter = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userAfter?.interests).toEqual(['existing']);
       expect(userAfter?.interests).toHaveLength(1);
     });
 
     it('should handle users with no existing interests', async () => {
-      // Create test user without interests
+      // Create vibe creator without interests
       await t.mutation(api.users.createForSeed, {
         externalId: 'user1',
         username: 'testuser1',
       });
 
-      // Create test vibe with tags
+      // Create rater without interests
+      await t.mutation(api.users.createForSeed, {
+        externalId: 'user2',
+        username: 'testuser2',
+      });
+
+      // Create test vibe with tags (created by user1)
       const vibeId = await t.mutation(api.vibes.createForSeed, {
         title: 'Test Vibe',
         description: 'A test vibe with tags',
@@ -188,19 +218,21 @@ describe('User Interests from Ratings', () => {
         createdById: 'user1',
       });
 
-      // Mock authentication for user1
-      const tWithAuthUser1 = t.withIdentity({ subject: 'user1' });
+      // Mock authentication for user2 (different from creator)
+      const tWithAuthUser2 = t.withIdentity({ subject: 'user2' });
 
-      // Rate the vibe
-      await tWithAuthUser1.mutation(api.vibes.addRating, {
+      // Rate the vibe with user2
+      await tWithAuthUser2.mutation(api.vibes.addRating, {
         vibeId,
         emoji: '📸',
         value: 4,
         review: 'Beautiful shots!',
       });
 
-      // Check that user's interests are now set
-      const userAfter = await t.query(api.users.getById, { id: 'user1' });
+      // Check that user2's interests are now set
+      const userAfter = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userAfter?.interests).toEqual(
         expect.arrayContaining(['photography', 'nature'])
       );
@@ -240,7 +272,9 @@ describe('User Interests from Ratings', () => {
       });
 
       // Check that user's interests now include the vibe tags
-      const userAfter = await t.query(api.users.getById, { id: 'user2' });
+      const userAfter = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userAfter?.interests).toEqual(
         expect.arrayContaining(['gaming', 'entertainment'])
       );
@@ -273,7 +307,9 @@ describe('User Interests from Ratings', () => {
       });
 
       // Check that user's interests include both old and new, no duplicates
-      const userAfter = await t.query(api.users.getById, { id: 'user1' });
+      const userAfter = await tWithAuthUser1.query(api.users.getById, {
+        id: 'user1',
+      });
       expect(userAfter?.interests).toEqual(
         expect.arrayContaining(['gaming', 'competition'])
       );
@@ -293,28 +329,39 @@ describe('User Interests from Ratings', () => {
       // Mock authentication for user1
       const tWithAuthUser1 = t.withIdentity({ subject: 'user1' });
 
-      // Try to rate non-existent vibe - this may succeed at rating level but shouldn't affect interests
-      await tWithAuthUser1.mutation(api.vibes.addRating, {
-        vibeId: 'nonexistent',
-        emoji: '😕',
-        value: 1,
-        review: 'This should complete but not affect interests',
-      });
+      // Try to rate non-existent vibe - should throw error
+      await expect(
+        tWithAuthUser1.mutation(api.vibes.addRating, {
+          vibeId: 'nonexistent',
+          emoji: '😕',
+          value: 1,
+          review: 'This should fail',
+        })
+      ).rejects.toThrow('Vibe not found');
 
-      // Check that user's interests remain unchanged (no vibe found = no tags added)
-      const userAfter = await t.query(api.users.getById, { id: 'user1' });
+      // Check that user's interests remain unchanged (rating failed)
+      const userAfter = await tWithAuthUser1.query(api.users.getById, {
+        id: 'user1',
+      });
       expect(userAfter?.interests).toEqual(['existing']);
     });
 
     it('should handle rating updates (existing ratings)', async () => {
-      // Create test user
+      // Create vibe creator
       await t.mutation(api.users.createForSeed, {
         externalId: 'user1',
         username: 'testuser1',
         interests: ['initial'],
       });
 
-      // Create test vibe with tags
+      // Create rater with initial interests
+      await t.mutation(api.users.createForSeed, {
+        externalId: 'user2',
+        username: 'testuser2',
+        interests: ['initial'],
+      });
+
+      // Create test vibe with tags (created by user1)
       const vibeId = await t.mutation(api.vibes.createForSeed, {
         title: 'Test Vibe',
         description: 'A test vibe for rating updates',
@@ -322,11 +369,11 @@ describe('User Interests from Ratings', () => {
         createdById: 'user1',
       });
 
-      // Mock authentication for user1
-      const tWithAuthUser1 = t.withIdentity({ subject: 'user1' });
+      // Mock authentication for user2 (different from creator)
+      const tWithAuthUser2 = t.withIdentity({ subject: 'user2' });
 
       // Rate the vibe first time
-      await tWithAuthUser1.mutation(api.vibes.addRating, {
+      await tWithAuthUser2.mutation(api.vibes.addRating, {
         vibeId,
         emoji: '😊',
         value: 3,
@@ -334,13 +381,15 @@ describe('User Interests from Ratings', () => {
       });
 
       // Check interests after first rating
-      const userAfterFirst = await t.query(api.users.getById, { id: 'user1' });
+      const userAfterFirst = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userAfterFirst?.interests).toEqual(
         expect.arrayContaining(['initial', 'first-tag'])
       );
 
       // Update the same rating
-      await tWithAuthUser1.mutation(api.vibes.addRating, {
+      await tWithAuthUser2.mutation(api.vibes.addRating, {
         vibeId,
         emoji: '😍',
         value: 5,
@@ -348,7 +397,9 @@ describe('User Interests from Ratings', () => {
       });
 
       // Check interests after update (should not duplicate)
-      const userAfterUpdate = await t.query(api.users.getById, { id: 'user1' });
+      const userAfterUpdate = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userAfterUpdate?.interests).toEqual(
         expect.arrayContaining(['initial', 'first-tag'])
       );
@@ -356,14 +407,21 @@ describe('User Interests from Ratings', () => {
     });
 
     it('should handle empty tags array', async () => {
-      // Create test user
+      // Create vibe creator
       await t.mutation(api.users.createForSeed, {
         externalId: 'user1',
         username: 'testuser1',
         interests: ['existing'],
       });
 
-      // Create test vibe with empty tags array
+      // Create rater with existing interests
+      await t.mutation(api.users.createForSeed, {
+        externalId: 'user2',
+        username: 'testuser2',
+        interests: ['existing'],
+      });
+
+      // Create test vibe with empty tags array (created by user1)
       const vibeId = await t.mutation(api.vibes.createForSeed, {
         title: 'Test Vibe',
         description: 'A test vibe with empty tags',
@@ -371,19 +429,21 @@ describe('User Interests from Ratings', () => {
         createdById: 'user1',
       });
 
-      // Mock authentication for user1
-      const tWithAuthUser1 = t.withIdentity({ subject: 'user1' });
+      // Mock authentication for user2 (different from creator)
+      const tWithAuthUser2 = t.withIdentity({ subject: 'user2' });
 
-      // Rate the vibe
-      await tWithAuthUser1.mutation(api.vibes.addRating, {
+      // Rate the vibe with user2
+      await tWithAuthUser2.mutation(api.vibes.addRating, {
         vibeId,
         emoji: '👍',
         value: 4,
         review: 'Good vibe',
       });
 
-      // Check that user's interests remain unchanged
-      const userAfter = await t.query(api.users.getById, { id: 'user1' });
+      // Check that user2's interests remain unchanged
+      const userAfter = await tWithAuthUser2.query(api.users.getById, {
+        id: 'user2',
+      });
       expect(userAfter?.interests).toEqual(['existing']);
       expect(userAfter?.interests).toHaveLength(1);
     });

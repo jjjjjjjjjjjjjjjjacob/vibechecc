@@ -7,6 +7,7 @@ import {
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
+import { SecurityValidators, AuthUtils } from './lib/securityValidators';
 
 // Helper function to compute user display name (backend version)
 function computeUserDisplayName(user: Doc<'users'> | null): string {
@@ -30,11 +31,6 @@ function computeUserDisplayName(user: Doc<'users'> | null): string {
 
   // Fallback
   return 'Someone';
-}
-
-// Helper to detect test environment
-function isTestEnvironment() {
-  return process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
 }
 
 // Type definitions for extended vibe objects
@@ -441,10 +437,11 @@ export const getAll = query({
   },
 });
 
-// Get a single vibe by ID
+// Get a single vibe by ID - SECURITY ENHANCED
 export const getById = query({
   args: { id: v.string() },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
     const vibe = await ctx.db
       .query('vibes')
       .filter((q) => q.eq(q.field('id'), args.id))
@@ -454,8 +451,12 @@ export const getById = query({
       return null;
     }
 
-    // For deleted vibes, still return the vibe but with limited data for the deleted notice
+    // SECURITY: For deleted vibes, only show to owner
     if (vibe.visibility === 'deleted') {
+      const isOwner = identity?.subject === vibe.createdById;
+      if (!isOwner) {
+        return null; // Don't expose deleted vibes to non-owners
+      }
       return {
         ...vibe,
         isDeleted: true,
@@ -463,6 +464,8 @@ export const getById = query({
         ratings: [],
       };
     }
+
+    // Note: All vibes are public or deleted - no private visibility
 
     const creator = await ctx.db
       .query('users')
@@ -504,16 +507,34 @@ export const getById = query({
   },
 });
 
-// Get vibes by user ID
+// Get vibes by user ID - SECURITY ENHANCED
 export const getByUser = query({
   args: { userId: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const vibes = await ctx.db
-      .query('vibes')
-      .withIndex('byCreatedByAndVisibility', (q) =>
-        q.eq('createdById', args.userId).eq('visibility', 'public')
-      )
-      .take(args.limit ?? 20);
+    const identity = await ctx.auth.getUserIdentity();
+    const isOwnProfile = identity?.subject === args.userId;
+
+    // SECURITY: For non-own profiles, only show public vibes
+    // For own profile, show all non-deleted vibes
+    let query;
+    if (isOwnProfile) {
+      query = ctx.db
+        .query('vibes')
+        .filter((q) =>
+          q.and(
+            q.eq(q.field('createdById'), args.userId),
+            q.neq(q.field('visibility'), 'deleted')
+          )
+        );
+    } else {
+      query = ctx.db
+        .query('vibes')
+        .withIndex('byCreatedByAndVisibility', (q) =>
+          q.eq('createdById', args.userId).eq('visibility', 'public')
+        );
+    }
+
+    const vibes = await query.take(args.limit ?? 20);
 
     // PERFORMANCE OPTIMIZED: Batch creator queries
     const uniqueCreatorIds = [...new Set(vibes.map((v) => v.createdById))];
@@ -643,7 +664,7 @@ export const getUserRatedVibes = query({
   },
 });
 
-// Create a new vibe
+// Create a new vibe - SECURITY ENHANCED
 export const create = mutation({
   args: {
     title: v.string(),
@@ -652,27 +673,35 @@ export const create = mutation({
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    // Check if user is authenticated
+    // SECURITY: Check authentication and validate input
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error('You must be logged in to create a vibe');
-    }
+    const userId = AuthUtils.requireAuth(identity?.subject);
+
+    // SECURITY: Rate limiting check
+    await SecurityValidators.checkRateLimit(userId, 'create_vibe', 5, 300000); // 5 vibes per 5 minutes
+
+    // SECURITY: Validate and sanitize inputs
+    const title = SecurityValidators.validateVibeTitle(args.title);
+    const description = SecurityValidators.validateVibeDescription(
+      args.description
+    );
+    const tags = SecurityValidators.validateTags(args.tags);
 
     // Ensure user exists in our database
     const user = await ctx.db
       .query('users')
-      .withIndex('byExternalId', (q) => q.eq('externalId', identity.subject))
+      .withIndex('byExternalId', (q) => q.eq('externalId', identity!.subject))
       .first();
 
     // If user doesn't exist, create them with basic info from Clerk
     if (!user) {
       await ctx.db.insert('users', {
-        externalId: identity.subject,
-        username: identity.nickname || undefined,
-        first_name: identity.givenName || undefined,
-        last_name: identity.familyName || undefined,
-        image_url: identity.pictureUrl || undefined,
-        profile_image_url: identity.pictureUrl || undefined,
+        externalId: identity!.subject,
+        username: undefined,
+        first_name: undefined,
+        last_name: undefined,
+        image_url: undefined,
+        profile_image_url: undefined,
         created_at: Date.now(),
         updated_at: Date.now(),
       });
@@ -682,14 +711,14 @@ export const create = mutation({
     const id = Math.random().toString(36).substring(2, 15);
     const now = new Date().toISOString();
 
-    // Handle image storage - store both legacy URL and new storage ID
+    // SECURITY: Handle image validation and storage
     let imageValue: string | undefined;
     let imageStorageIdValue: Id<'_storage'> | undefined;
 
     if (args.image) {
       if (typeof args.image === 'string') {
-        // Legacy string URL support
-        imageValue = args.image;
+        // SECURITY: Validate URL format
+        imageValue = SecurityValidators.validateUrl(args.image) || undefined;
       } else {
         // Store storage ID directly - more reliable than converting to URL
         imageStorageIdValue = args.image;
@@ -705,54 +734,54 @@ export const create = mutation({
       }
     }
 
-    const vibeId = await ctx.db.insert('vibes', {
+    const _vibeId = await ctx.db.insert('vibes', {
       id,
-      title: args.title,
-      description: args.description,
+      title,
+      description,
       image: imageValue,
       imageStorageId: imageStorageIdValue,
-      createdById: identity.subject, // Use the authenticated user's ID from JWT
+      createdById: userId,
       createdAt: now,
-      tags: args.tags ?? [],
+      tags,
       visibility: 'public', // Default to public visibility
     });
 
-    // Update tag usage counts (skip in test environment)
-    if (args.tags && args.tags.length > 0 && !isTestEnvironment()) {
+    // Update tag usage counts
+    if (args.tags && args.tags.length > 0) {
       await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
         tagsToAdd: args.tags,
       });
     }
 
     // Create notifications for followers (skip in test environment)
-    if (!isTestEnvironment()) {
-      try {
-        const creatorDisplayName = computeUserDisplayName(user);
+    try {
+      if (!identity) throw new Error('No identity found');
 
-        // PERFORMANCE OPTIMIZED: Use batch notification system
-        await ctx.scheduler.runAfter(
-          0,
-          internal.notifications.createFollowerNotifications,
-          {
-            triggerUserId: identity.subject,
-            triggerUserDisplayName: creatorDisplayName,
-            type: 'new_vibe',
-            targetId: id, // Link to the new vibe
-            title: `${creatorDisplayName} shared a new vibe`,
-            description: 'check it out',
-            metadata: {
-              vibeTitle: args.title,
-            },
-            maxFollowers: 100, // Explicit limit for performance
-          }
-        );
-      } catch (error) {
-        // Don't fail the vibe creation if notification creation fails
-        console.error('Failed to create new vibe notifications:', error);
-      }
+      const creatorDisplayName = computeUserDisplayName(user);
+
+      // PERFORMANCE OPTIMIZED: Use batch notification system
+      await ctx.scheduler.runAfter(
+        0,
+        internal.notifications.createFollowerNotifications,
+        {
+          triggerUserId: identity.subject,
+          triggerUserDisplayName: creatorDisplayName,
+          type: 'new_vibe',
+          targetId: id, // Link to the new vibe
+          title: `${creatorDisplayName} shared a new vibe`,
+          description: 'check it out',
+          metadata: {
+            vibeTitle: args.title,
+          },
+          maxFollowers: 100, // Explicit limit for performance
+        }
+      );
+    } catch (error) {
+      // Don't fail the vibe creation if notification creation fails
+      console.error('Failed to create new vibe notifications:', error);
     }
 
-    return vibeId;
+    return id;
   },
 });
 
@@ -908,20 +937,48 @@ export const addRating = mutation({
     review: v.string(), // REQUIRED
   },
   handler: async (ctx, args) => {
-    // Check if user is authenticated
+    // SECURITY: Authentication and input validation
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error('You must be logged in to rate a vibe');
+    const userId = AuthUtils.requireAuth(identity?.subject);
+
+    // SECURITY: Rate limiting for ratings
+    await SecurityValidators.checkRateLimit(userId, 'add_rating', 20, 300000); // 20 ratings per 5 minutes
+
+    // SECURITY: Validate inputs
+    const rating = SecurityValidators.validateRating(args.value);
+    const review = SecurityValidators.validateReview(args.review);
+    const vibeId = SecurityValidators.validateString(args.vibeId, {
+      required: true,
+      minLength: 1,
+      maxLength: 50,
+      fieldName: 'Vibe ID',
+    })!;
+    const emoji = SecurityValidators.validateString(args.emoji, {
+      required: true,
+      minLength: 1,
+      maxLength: 10,
+      fieldName: 'Emoji',
+    })!;
+
+    // SECURITY: Verify vibe exists and is accessible
+    const vibe = await ctx.db
+      .query('vibes')
+      .filter((q) => q.eq(q.field('id'), vibeId))
+      .first();
+
+    if (!vibe) {
+      throw new Error('Vibe not found');
     }
 
-    // Validate value
-    if (args.value < 1 || args.value > 5) {
-      throw new Error('Rating value must be between 1 and 5');
+    if (vibe.visibility === 'deleted') {
+      throw new Error('Cannot rate a deleted vibe');
     }
 
-    // Validate review
-    if (!args.review || args.review.trim().length === 0) {
-      throw new Error('Review is required');
+    // Note: All vibes are public or deleted - no private visibility
+
+    // SECURITY: Prevent self-rating
+    if (vibe.createdById === userId) {
+      throw new Error('You cannot rate your own vibe');
     }
 
     const now = new Date().toISOString();
@@ -930,7 +987,7 @@ export const addRating = mutation({
     // Get emoji metadata for tags
     const emojiData = await ctx.db
       .query('emojis')
-      .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
+      .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
       .first();
 
     if (emojiData && emojiData.tags) {
@@ -941,14 +998,14 @@ export const addRating = mutation({
     const existingRating = await ctx.db
       .query('ratings')
       .withIndex('vibeAndUser', (q) =>
-        q.eq('vibeId', args.vibeId).eq('userId', identity.subject)
+        q.eq('vibeId', vibeId).eq('userId', userId)
       )
       .first();
 
     const ratingData = {
-      emoji: args.emoji,
-      value: args.value,
-      review: args.review.trim(),
+      emoji,
+      value: rating,
+      review,
       tags: tags.length > 0 ? tags : undefined,
       updatedAt: now,
     };
@@ -961,20 +1018,22 @@ export const addRating = mutation({
     } else {
       // Create a new rating
       result = await ctx.db.insert('ratings', {
-        vibeId: args.vibeId,
-        userId: identity.subject,
+        vibeId,
+        userId,
         createdAt: now,
         ...ratingData,
       });
     }
 
     // Add vibe tags to user interests after successful rating
-    await addInterestsFromVibe(ctx, identity.subject, args.vibeId);
+    await addInterestsFromVibe(ctx, userId, vibeId);
 
     // Create new rating notifications for users who follow the rater (skip in test environment)
-    if (!isTestEnvironment() && !existingRating) {
+    if (!existingRating) {
       // Only notify for new ratings, not updates
       try {
+        if (!identity) throw new Error('No identity found');
+
         // Get the rater's user info and vibe info in parallel for efficiency
         const [raterUser, vibe] = await Promise.all([
           ctx.db
@@ -1088,60 +1147,58 @@ export const quickReact = mutation({
     await addInterestsFromVibe(ctx, identity.subject, args.vibeId);
 
     // Create new rating notifications for users who follow the rater (skip in test environment)
-    if (!isTestEnvironment()) {
-      try {
-        // Get the rater's user info and vibe info in parallel for efficiency
-        const [raterUser, vibe] = await Promise.all([
-          ctx.db
-            .query('users')
-            .withIndex('byExternalId', (q) =>
-              q.eq('externalId', identity.subject)
-            )
-            .first(),
-          ctx.db
-            .query('vibes')
-            .withIndex('id', (q) => q.eq('id', args.vibeId))
-            .first(),
-        ]);
+    try {
+      // Get the rater's user info and vibe info in parallel for efficiency
+      const [raterUser, vibe] = await Promise.all([
+        ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', identity.subject)
+          )
+          .first(),
+        ctx.db
+          .query('vibes')
+          .withIndex('id', (q) => q.eq('id', args.vibeId))
+          .first(),
+      ]);
 
-        if (raterUser && vibe) {
-          const raterDisplayName = computeUserDisplayName(raterUser);
+      if (raterUser && vibe) {
+        const raterDisplayName = computeUserDisplayName(raterUser);
 
-          // Get vibe creator info
-          const vibeCreator = await ctx.db
-            .query('users')
-            .withIndex('byExternalId', (q) =>
-              q.eq('externalId', vibe.createdById)
-            )
-            .first();
+        // Get vibe creator info
+        const vibeCreator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', vibe.createdById)
+          )
+          .first();
 
-          const vibeCreatorName = computeUserDisplayName(vibeCreator);
+        const vibeCreatorName = computeUserDisplayName(vibeCreator);
 
-          // PERFORMANCE OPTIMIZED: Use batch notification system
-          await ctx.scheduler.runAfter(
-            0,
-            internal.notifications.createFollowerNotifications,
-            {
-              triggerUserId: identity.subject,
-              triggerUserDisplayName: raterDisplayName,
-              type: 'new_rating',
-              targetId: result ? result.toString() : '', // Link to the rating
-              title: `${raterDisplayName} reviewed a vibe`,
-              description: 'see their review',
-              metadata: {
-                vibeTitle: vibe.title,
-                vibeCreator: vibeCreatorName,
-                emoji: args.emoji,
-                ratingValue: defaultValue,
-              },
-              maxFollowers: 50, // Explicit limit for performance
-            }
-          );
-        }
-      } catch (error) {
-        // Don't fail the rating operation if notification creation fails
-        console.error('Failed to create new rating notifications:', error);
+        // PERFORMANCE OPTIMIZED: Use batch notification system
+        await ctx.scheduler.runAfter(
+          0,
+          internal.notifications.createFollowerNotifications,
+          {
+            triggerUserId: identity.subject,
+            triggerUserDisplayName: raterDisplayName,
+            type: 'new_rating',
+            targetId: result ? result.toString() : '', // Link to the rating
+            title: `${raterDisplayName} reviewed a vibe`,
+            description: 'see their review',
+            metadata: {
+              vibeTitle: vibe.title,
+              vibeCreator: vibeCreatorName,
+              emoji: args.emoji,
+              ratingValue: defaultValue,
+            },
+            maxFollowers: 50, // Explicit limit for performance
+          }
+        );
       }
+    } catch (error) {
+      // Don't fail the rating operation if notification creation fails
+      console.error('Failed to create new rating notifications:', error);
     }
 
     return result;
@@ -1596,7 +1653,7 @@ export const getTopRated = query({
   },
 });
 
-// Get current authenticated user
+// Get current authenticated user - SECURE
 export const getCurrentUser = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -1610,14 +1667,9 @@ export const getCurrentUser = query({
       .filter((q) => q.eq(q.field('externalId'), identity.subject))
       .first();
 
-    return (
-      user || {
-        externalId: identity.subject,
-        email: identity.email,
-        name: identity.name,
-        // Add other fields as needed
-      }
-    );
+    // SECURITY: Only return if user exists in database
+    // Don't expose raw Clerk identity data
+    return user || null;
   },
 });
 
@@ -1994,7 +2046,7 @@ export const getForYouFeed = query({
     // Get current user's data including interests
     const currentUser = await ctx.db
       .query('users')
-      .withIndex('byExternalId', (q) => q.eq('externalId', identity.subject))
+      .withIndex('byExternalId', (q) => q.eq('externalId', identity!.subject))
       .first();
 
     const userInterests = new Set(currentUser?.interests || []);
@@ -2509,13 +2561,13 @@ export const updateVibe = mutation({
       const tagsToAdd = newTags.filter((tag) => !oldTags.includes(tag));
       const tagsToRemove = oldTags.filter((tag) => !newTags.includes(tag));
 
-      if (tagsToAdd.length > 0 && !isTestEnvironment()) {
+      if (tagsToAdd.length > 0) {
         await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
           tagsToAdd,
         });
       }
 
-      if (tagsToRemove.length > 0 && !isTestEnvironment()) {
+      if (tagsToRemove.length > 0) {
         await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
           tagsToRemove,
         });
@@ -2565,7 +2617,7 @@ export const deleteVibe = mutation({
     });
 
     // Remove tags from count (since the vibe is no longer visible)
-    if (vibe.tags && vibe.tags.length > 0 && !isTestEnvironment()) {
+    if (vibe.tags && vibe.tags.length > 0) {
       await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
         tagsToRemove: vibe.tags,
       });

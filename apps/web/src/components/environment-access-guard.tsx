@@ -76,10 +76,7 @@ export function EnvironmentAccessGuard({
             <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
               viberatr
             </span>
-            <div className="border-theme-primary mx-auto h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-            <p className="text-muted-foreground">
-              checking access permissions...
-            </p>
+            <div className="border-muted border-t-theme-primary mx-auto h-8 w-8 animate-spin rounded-full border-4"></div>
           </div>
         </div>
       </div>

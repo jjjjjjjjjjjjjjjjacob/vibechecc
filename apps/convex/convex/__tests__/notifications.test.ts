@@ -809,21 +809,6 @@ describe('Notifications', () => {
       vi.runAllTimers();
       await t.finishAllScheduledFunctions(vi.runAllTimers);
 
-      // Manually create the notification since scheduled functions don't work in tests
-      await t.mutation(internal.notifications.createNotification, {
-        userId: 'user1', // vibe creator
-        type: 'rating',
-        triggerUserId: 'user2',
-        targetId: vibeId,
-        title: 'testuser2 rated your vibe with 😍',
-        description: 'Test left a rating on your vibe',
-        metadata: {
-          vibeTitle: 'Test Vibe',
-          emoji: '😍',
-          ratingValue: 5,
-        },
-      });
-
       // Check if notification was created for user1 (vibe creator)
       const notifications = await t
         .withIdentity({ subject: 'user1' })
@@ -869,7 +854,7 @@ describe('Notifications', () => {
         .mutation(api.notifications.markAllAsRead, {});
 
       // User1 creates a vibe
-      const newVibeId = await t
+      const _newVibeId = await t
         .withIdentity({ subject: 'user1' })
         .mutation(api.vibes.create, {
           title: 'New Test Vibe',
@@ -879,17 +864,6 @@ describe('Notifications', () => {
       // Wait for new vibe notification to complete
       vi.runAllTimers();
       await t.finishAllScheduledFunctions(vi.runAllTimers);
-
-      // Manually create the notification since scheduled functions don't work in tests
-      await t.mutation(internal.notifications.createNotification, {
-        userId: 'user2', // follower
-        type: 'new_vibe',
-        triggerUserId: 'user1',
-        targetId: newVibeId,
-        title: 'testuser1 shared a new vibe',
-        description: 'Test shared: New Test Vibe',
-        metadata: { vibeTitle: 'New Test Vibe' },
-      });
 
       // Check if notification was created for user2 (follower)
       const notifications = await t
@@ -965,22 +939,6 @@ describe('Notifications', () => {
       // Wait for new rating notification to complete
       vi.runAllTimers();
       await t.finishAllScheduledFunctions(vi.runAllTimers);
-
-      // Manually create the notification since scheduled functions don't work in tests
-      await t.mutation(internal.notifications.createNotification, {
-        userId: 'user2', // user1's follower
-        type: 'new_rating',
-        triggerUserId: 'user1',
-        targetId: vibeId,
-        title: 'testuser1 reviewed a vibe',
-        description: 'Test left a rating on Third User Vibe',
-        metadata: {
-          vibeTitle: 'Third User Vibe',
-          vibeCreator: 'testuser3',
-          emoji: '🎉',
-          ratingValue: 4,
-        },
-      });
 
       // Check if notification was created for user2 (user1's follower)
       const notifications = await t

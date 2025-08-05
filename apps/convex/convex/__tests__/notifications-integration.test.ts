@@ -6,14 +6,19 @@ import { modules } from '../../vitest.setup';
 
 describe('Notifications Integration', () => {
   let t: TestConvex<typeof schema>;
+  let consoleSpy: any;
 
   beforeEach(() => {
     vi.useFakeTimers();
     t = convexTest(schema, modules);
+
+    // Suppress console.error from scheduler transaction errors
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    consoleSpy?.mockRestore();
   });
 
   describe('Complete Follow Notification Flow', () => {
@@ -136,21 +141,6 @@ describe('Notifications Integration', () => {
       // Wait for rating notification to complete
       vi.runAllTimers();
       await t.finishAllScheduledFunctions(vi.runAllTimers);
-
-      // Manually create the notification since scheduled functions don't work in tests
-      await t.mutation(internal.notifications.createNotification, {
-        userId: 'creator',
-        type: 'rating',
-        triggerUserId: 'rater',
-        targetId: vibeId,
-        title: 'rater456 rated your vibe with 🌅',
-        description: 'Check out their review',
-        metadata: {
-          vibeTitle: 'Amazing Sunset',
-          emoji: '🌅',
-          ratingValue: 5,
-        },
-      });
 
       // Step 3: Verify notification was created for creator
       const creatorNotifications = await t
