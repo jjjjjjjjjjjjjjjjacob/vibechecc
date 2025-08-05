@@ -7,7 +7,7 @@ import {
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
-import { SecurityValidators, AuthUtils } from './lib/security-validators';
+import { SecurityValidators, AuthUtils } from './lib/securityValidators';
 
 // Helper function to compute user display name (backend version)
 function computeUserDisplayName(user: Doc<'users'> | null): string {
