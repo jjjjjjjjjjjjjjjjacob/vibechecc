@@ -481,6 +481,7 @@ export const getById = query({
           .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
           .first();
         return {
+          _id: rating._id,
           user,
           emoji: rating.emoji,
           value: rating.value,
@@ -939,7 +940,8 @@ export const addRating = mutation({
     let result;
     if (existingRating) {
       // Update the existing rating
-      result = await ctx.db.patch(existingRating._id, ratingData);
+      await ctx.db.patch(existingRating._id, ratingData);
+      result = existingRating._id;
     } else {
       // Create a new rating
       result = await ctx.db.insert('ratings', {

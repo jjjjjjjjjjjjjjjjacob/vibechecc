@@ -197,22 +197,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="bg-background text-foreground">
         <PostHogProvider>
           <ThemeProvider>
-            <OnboardingGuard>
-              <div
-                className="relative flex min-h-screen flex-col"
-                data-vaul-drawer-wrapper
-              >
-                <PostHogPageTracker />
-                <ClerkPostHogIntegration />
+            <div
+              className="relative flex min-h-screen flex-col"
+              data-vaul-drawer-wrapper
+            >
+              <PostHogPageTracker />
+              <ClerkPostHogIntegration />
+              <OnboardingGuard>
                 <Header />
                 <LoadingIndicator />
 
                 <main className="flex-1">{children}</main>
+              </OnboardingGuard>
 
-                <Footer />
-                <Toaster />
-              </div>
-            </OnboardingGuard>
+              <Footer />
+              <Toaster />
+            </div>
           </ThemeProvider>
         </PostHogProvider>
         <ReactQueryDevtools />

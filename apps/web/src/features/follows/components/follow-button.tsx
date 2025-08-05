@@ -113,25 +113,23 @@ export function FollowButton({
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
         // Base styles
-        'transition-all duration-200',
+        'border-none transition-all duration-200',
 
         // Following state styles (gradient)
         isFollowing && [
           'from-theme-primary to-theme-secondary text-primary-foreground bg-gradient-to-r',
-          'border-theme-primary/20 shadow-lg backdrop-blur-md',
+          'shadow-lg backdrop-blur-md',
           'hover:scale-105 hover:shadow-xl',
           // Hover state for unfollow
-          isHovered && [
-            'bg-gradient-to-r from-red-500 to-red-600',
-            'border-red-500/20',
-          ],
+          isHovered &&
+            'from-theme-primary to-theme-secondary border-none bg-gradient-to-r',
         ],
 
         // Not following state styles
         !isFollowing && [
-          'bg-background/80 border-theme-primary/20 text-foreground',
+          'bg-background/80 border-theme-primary/80 text-theme-primary border border-solid',
           'hover:from-theme-primary hover:to-theme-secondary hover:bg-gradient-to-r',
-          'hover:text-primary-foreground hover:border-theme-primary/30',
+          'hover:text-foreground hover:border-none',
           'hover:scale-105 hover:shadow-lg',
         ],
 
@@ -146,9 +144,7 @@ export function FollowButton({
     >
       {getButtonIcon()}
       {variant !== 'compact' && (
-        <span className={cn('ml-2 font-medium lowercase')}>
-          {getButtonText()}
-        </span>
+        <span className={cn('font-medium lowercase')}>{getButtonText()}</span>
       )}
     </Button>
   );

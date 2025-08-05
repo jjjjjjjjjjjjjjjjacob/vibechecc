@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useConvex } from 'convex/react';
 
 interface ConvexBoundaryProps {
   children: React.ReactNode;

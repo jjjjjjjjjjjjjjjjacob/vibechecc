@@ -109,7 +109,8 @@ export const createOrUpdateEmojiRating = mutation({
     let result;
     if (existingRating) {
       // Update existing rating
-      result = await ctx.db.patch(existingRating._id, ratingData);
+      await ctx.db.patch(existingRating._id, ratingData);
+      result = existingRating._id;
     } else {
       // Create new rating
       result = await ctx.db.insert('ratings', {

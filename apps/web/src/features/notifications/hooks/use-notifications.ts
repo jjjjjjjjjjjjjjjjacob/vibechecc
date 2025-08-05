@@ -2,12 +2,20 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useConvex } from 'convex/react';
 import { api } from '@viberatr/convex';
 
-export type NotificationFilter = 'all' | 'rating' | 'new_rating' | 'new_vibe' | 'follow';
+export type NotificationFilter =
+  | 'all'
+  | 'rating'
+  | 'new_rating'
+  | 'new_vibe'
+  | 'follow';
 
-export function useNotifications(filter?: NotificationFilter, options?: {
-  enabled?: boolean;
-  limit?: number;
-}) {
+export function useNotifications(
+  filter?: NotificationFilter,
+  options?: {
+    enabled?: boolean;
+    limit?: number;
+  }
+) {
   const { enabled = true, limit = 20 } = options || {};
   const convex = useConvex();
 

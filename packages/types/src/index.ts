@@ -136,7 +136,7 @@ export interface Notification {
   targetId: string; // ID of the target - vibeId, ratingId, etc.
   title: string; // e.g., "John followed you"
   description: string; // e.g., "Check out their profile"
-  metadata?: any; // Additional data like vibe title, rating emoji
+  metadata?: Record<string, unknown>; // Additional data like vibe title, rating emoji
   read: boolean; // Whether notification has been read
   createdAt: number; // Timestamp
   _creationTime?: number; // Convex creation time for compatibility

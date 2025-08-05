@@ -3,16 +3,24 @@
 This document captures learnings, patterns, and implementation details discovered during the implementation of the notification system backend for the viberatr project.
 
 ## Context
+
 Implemented a comprehensive notification system backend including database schema, core backend functions, and TypeScript interfaces to support user notifications for social interactions (follows, ratings, new vibes, etc.).
 
 ## Key Implementation Patterns
 
 ### 1. Database Schema Design
+
 **Pattern**: Structured notification table with proper indexes for efficient querying
+
 ```typescript
 notifications: defineTable({
   userId: v.string(), // External ID of user receiving notification
-  type: v.union(v.literal('follow'), v.literal('rating'), v.literal('new_vibe'), v.literal('new_rating')),
+  type: v.union(
+    v.literal('follow'),
+    v.literal('rating'),
+    v.literal('new_vibe'),
+    v.literal('new_rating')
+  ),
   triggerUserId: v.string(), // External ID of user who triggered notification
   targetId: v.string(), // ID of the target - vibeId, ratingId, etc.
   title: v.string(), // e.g., "John followed you"
@@ -21,19 +29,22 @@ notifications: defineTable({
   read: v.boolean(), // Whether notification has been read
   createdAt: v.number(), // Timestamp
 })
-.index('byUser', ['userId', 'createdAt'])
-.index('byUserAndRead', ['userId', 'read', 'createdAt'])
-.index('byUserAndType', ['userId', 'type', 'createdAt'])
+  .index('byUser', ['userId', 'createdAt'])
+  .index('byUserAndRead', ['userId', 'read', 'createdAt'])
+  .index('byUserAndType', ['userId', 'type', 'createdAt']);
 ```
 
-**Why**: 
+**Why**:
+
 - Multiple indexes support different query patterns efficiently
 - `byUser` for general user notifications with chronological order
 - `byUserAndRead` for filtering unread notifications
 - `byUserAndType` for type-specific notification queries
 
 ### 2. Authentication Patterns for Notifications
+
 **Pattern**: Consistent authentication checks using existing helper functions
+
 ```typescript
 // For queries that can return empty state for unauthenticated users
 const currentUser = await getCurrentUser(ctx);
@@ -45,41 +56,51 @@ if (!currentUser) {
 const currentUser = await getCurrentUserOrThrow(ctx);
 ```
 
-**Benefits**: 
+**Benefits**:
+
 - Maintains security while providing graceful degradation
 - Follows existing codebase patterns for authentication
 - Prevents unauthorized access to sensitive notification data
 
 ### 3. Internal Mutations for System-Generated Notifications
+
 **Pattern**: Use `internalMutation` for creating notifications from other backend functions
+
 ```typescript
 export const createNotification = internalMutation({
-  args: { /* notification fields */ },
+  args: {
+    /* notification fields */
+  },
   handler: async (ctx, args) => {
     // Prevent self-notifications
     if (args.userId === args.triggerUserId) {
       return null;
     }
-    
+
     // Validate users exist
     // Create notification
   },
 });
 ```
 
-**Why**: 
+**Why**:
+
 - Internal mutations can only be called from other backend functions, not directly from client
 - Prevents clients from creating arbitrary notifications
 - Allows other backend functions (follows, ratings, etc.) to trigger notifications
 
 ### 4. Data Enrichment Pattern
+
 **Pattern**: Enrich notifications with related user data for better UX
+
 ```typescript
 const enrichedNotifications = await Promise.all(
   notifications.page.map(async (notification) => {
     const triggerUser = await ctx.db
       .query('users')
-      .withIndex('byExternalId', (q) => q.eq('externalId', notification.triggerUserId))
+      .withIndex('byExternalId', (q) =>
+        q.eq('externalId', notification.triggerUserId)
+      )
       .first();
 
     return { ...notification, triggerUser };
@@ -87,19 +108,21 @@ const enrichedNotifications = await Promise.all(
 );
 ```
 
-**Benefits**: 
+**Benefits**:
+
 - Provides all necessary data for rich notification UI
 - Follows existing patterns in the codebase for data enrichment
 - Reduces client-side queries
 
 ### 5. Pagination Support
+
 **Pattern**: Built-in pagination support for notification lists
+
 ```typescript
-const notifications = await notificationsQuery
-  .paginate({ 
-    numItems: limit,
-    cursor: args.cursor ?? null,
-  });
+const notifications = await notificationsQuery.paginate({
+  numItems: limit,
+  cursor: args.cursor ?? null,
+});
 
 return {
   notifications: enrichedNotifications,
@@ -108,7 +131,8 @@ return {
 };
 ```
 
-**Why**: 
+**Why**:
+
 - Essential for performance with large notification lists
 - Follows Convex pagination patterns
 - Provides smooth infinite scroll capabilities
@@ -116,21 +140,26 @@ return {
 ## Function Architecture
 
 ### Query Functions
+
 1. **getNotifications**: Paginated notifications with optional type filtering and user data enrichment
 2. **getUnreadCount**: Simple count of unread notifications for badge display
 3. **getUnreadCountByType**: Detailed breakdown of unread counts per notification type
 
 ### Mutation Functions
+
 1. **markAsRead**: Mark individual notifications as read with ownership validation
 2. **markAllAsRead**: Bulk mark notifications as read with optional type filtering
 
 ### Internal Functions
+
 1. **createNotification**: System-generated notification creation with validation
 
 ## Security Considerations
 
 ### 1. Ownership Validation
+
 **Pattern**: Always verify notification ownership before allowing modifications
+
 ```typescript
 if (notification.userId !== currentUser.externalId) {
   throw new Error('Not authorized to update this notification');
@@ -138,7 +167,9 @@ if (notification.userId !== currentUser.externalId) {
 ```
 
 ### 2. User Existence Validation
+
 **Pattern**: Validate both trigger and receiving users exist before creating notifications
+
 ```typescript
 const receivingUser = await ctx.db
   .query('users')
@@ -151,7 +182,9 @@ if (!receivingUser) {
 ```
 
 ### 3. Self-Notification Prevention
+
 **Pattern**: Prevent users from creating notifications for themselves
+
 ```typescript
 if (args.userId === args.triggerUserId) {
   return null;
@@ -161,14 +194,18 @@ if (args.userId === args.triggerUserId) {
 ## Type System Integration
 
 ### 1. Convex Schema Type Export
+
 **Pattern**: Export notification type from schema for use across backend
+
 ```typescript
 const _notification = schema.tables.notifications.validator;
 export type Notification = Infer<typeof _notification>;
 ```
 
 ### 2. Shared Type Interface
+
 **Pattern**: Create comprehensive interface in shared types package
+
 ```typescript
 export interface Notification {
   _id?: string; // Convex document ID for compatibility
@@ -186,7 +223,8 @@ export interface Notification {
 }
 ```
 
-**Benefits**: 
+**Benefits**:
+
 - Maintains type safety across frontend and backend
 - Includes compatibility fields for Convex integration
 - Supports data enrichment patterns
@@ -194,16 +232,22 @@ export interface Notification {
 ## Performance Optimizations
 
 ### 1. Index-Based Queries
+
 **Pattern**: Always use appropriate indexes for efficient querying
+
 ```typescript
 // Use specific indexes for different query patterns
-ctx.db.query('notifications').withIndex('byUserAndType', (q) => 
-  q.eq('userId', userId).eq('type', args.type)
-)
+ctx.db
+  .query('notifications')
+  .withIndex('byUserAndType', (q) =>
+    q.eq('userId', userId).eq('type', args.type)
+  );
 ```
 
 ### 2. Bulk Operations
+
 **Pattern**: Use Promise.all for bulk operations like marking all as read
+
 ```typescript
 const updatePromises = unreadNotifications.map((notification) =>
   ctx.db.patch(notification._id, { read: true })
@@ -214,12 +258,14 @@ await Promise.all(updatePromises);
 ## Integration Points
 
 ### Future Integration Requirements
+
 1. **Follow System**: Call `createNotification` when users follow each other
 2. **Rating System**: Call `createNotification` when users rate vibes
 3. **Vibe Creation**: Call `createNotification` to notify followers of new vibes
 4. **Frontend Integration**: Use shared types for consistent data handling
 
 ### Example Integration Pattern
+
 ```typescript
 // In follows.ts after successful follow
 await ctx.runMutation(internal.notifications.createNotification, {
@@ -236,12 +282,14 @@ await ctx.runMutation(internal.notifications.createNotification, {
 ## Testing Considerations
 
 ### Unit Testing Approaches
+
 1. **Function-level testing**: Each notification function should be testable independently
 2. **Authentication testing**: Verify proper authentication handling
 3. **Data validation testing**: Ensure proper validation of input parameters
 4. **Integration testing**: Test notification creation from other systems
 
 ### Edge Cases to Test
+
 1. Self-notification prevention
 2. Non-existent user handling
 3. Authorization validation

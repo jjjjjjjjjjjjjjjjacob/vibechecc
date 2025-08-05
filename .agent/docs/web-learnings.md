@@ -5,19 +5,22 @@ This document captures learnings, patterns, and best practices discovered during
 ## Personalized Feed Enhancement Patterns
 
 ### Context
+
 Enhanced the home feed UI to provide better personalized experience using newly implemented personalized feed backend functions, including empty states and follow suggestions.
 
 ### Key Patterns Discovered
 
 #### 1. Custom Empty State Handling
+
 **Pattern**: Conditional rendering of custom empty states vs default MasonryFeed empty states
+
 ```typescript
 const shouldUseCustomEmptyState = activeTab === 'for-you' && vibes.length === 0 && !isLoading;
 
 {shouldUseCustomEmptyState ? (
   <ForYouEmptyState />
 ) : (
-  <MasonryFeed 
+  <MasonryFeed
     // ... other props
     emptyStateAction={activeTab === 'for-you' ? null : queryConfig.emptyAction}
   />
@@ -27,30 +30,36 @@ const shouldUseCustomEmptyState = activeTab === 'for-you' && vibes.length === 0 
 **Why**: Allows for rich, contextual empty states while maintaining default behavior for other feed types.
 
 #### 2. Follow Stats Integration for Dynamic UX
+
 **Pattern**: Use follow stats to determine user onboarding state and customize messaging
+
 ```typescript
 const { data: followStats } = useCurrentUserFollowStats();
 const hasFollows = followStats.following > 0;
 
 // Dynamic tab descriptions based on follow state
-description: followStats?.following > 0 
+description: followStats?.following > 0
   ? `personalized vibes from ${followStats.following} ${followStats.following === 1 ? 'person' : 'people'} you follow`
-  : 'discover and follow people to see personalized content'
+  : 'discover and follow people to see personalized content';
 ```
 
 **Why**: Provides contextual messaging that helps users understand the value proposition of following others.
 
 #### 3. Progressive Empty State Design
+
 **Pattern**: Different empty states for different user journey stages
+
 - New users (no follows): Onboarding-focused with follow suggestions
 - Existing users (has follows): Activity-focused encouraging content creation
 
 **Implementation**: Single component with conditional rendering based on follow stats.
 
 #### 4. Smooth User Onboarding with Follow Suggestions
+
 **Pattern**: Integrate existing components (`CompactSuggestedFollows`) into empty states
+
 ```typescript
-<CompactSuggestedFollows 
+<CompactSuggestedFollows
   limit={4}
   showMutualConnections={false}
 />
@@ -61,14 +70,16 @@ description: followStats?.following > 0
 ### Component Architecture Insights
 
 #### 1. Feed Tab Configuration Pattern
+
 **Current Pattern**: Array-based tab configuration with dynamic descriptions
+
 ```typescript
 const feedTabs = [
   {
     id: 'for-you' as const,
     label: 'for you',
     icon: <Sparkles className="h-4 w-4" />,
-    description: followStats?.following > 0 
+    description: followStats?.following > 0
       ? `personalized vibes from ${followStats.following} people you follow`
       : 'discover and follow people to see personalized content',
     requiresAuth: true,
@@ -77,13 +88,16 @@ const feedTabs = [
 ];
 ```
 
-**Benefits**: 
+**Benefits**:
+
 - Centralized tab configuration
 - Dynamic descriptions based on user state
 - Type-safe tab IDs with const assertions
 
 #### 2. Query Handling for Different Feed Types
+
 **Pattern**: Conditional query usage with proper TypeScript handling
+
 ```typescript
 const personalizedFeedQuery = useForYouFeedInfinite({
   enabled: queryConfig.enabled && activeTab === 'for-you',
@@ -100,6 +114,7 @@ const {data, ...} = activeTab === 'for-you' ? personalizedFeedQuery : generalFee
 ```
 
 **TypeScript Consideration**: Infinite query data structure requires careful type handling:
+
 ```typescript
 const vibes = React.useMemo(() => {
   if (!data?.pages) return [];
@@ -110,7 +125,9 @@ const vibes = React.useMemo(() => {
 ### UI/UX Design Patterns
 
 #### 1. Themed Empty State Design
+
 **Pattern**: Consistent theming with gradient backgrounds and themed colors
+
 ```typescript
 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-theme-primary to-theme-secondary">
   <Users className="text-primary-foreground h-8 w-8" />
@@ -120,7 +137,9 @@ const vibes = React.useMemo(() => {
 **Benefits**: Maintains visual consistency with the app's custom theming system.
 
 #### 2. Progressive Information Architecture
+
 **Hierarchy for new user onboarding**:
+
 1. Clear value proposition (what is "for you" feed)
 2. Feature highlights (badges with benefits)
 3. Primary action (find people to follow)
@@ -129,7 +148,9 @@ const vibes = React.useMemo(() => {
 6. Additional help (learn more about the platform)
 
 #### 3. Smooth Interaction Patterns
+
 **Pattern**: Scroll-to-element on button click for better UX flow
+
 ```typescript
 <Button onClick={() => {
   const suggestionsElement = document.querySelector('[data-suggestions]');
@@ -142,7 +163,9 @@ const vibes = React.useMemo(() => {
 ### Performance Considerations
 
 #### 1. Conditional Hook Execution
+
 **Pattern**: Enable/disable queries based on active state to prevent unnecessary requests
+
 ```typescript
 const personalizedFeedQuery = useForYouFeedInfinite({
   enabled: queryConfig.enabled && activeTab === 'for-you',
@@ -150,7 +173,9 @@ const personalizedFeedQuery = useForYouFeedInfinite({
 ```
 
 #### 2. Memoized Data Processing
+
 **Pattern**: Use React.useMemo for data transformation to prevent unnecessary recalculations
+
 ```typescript
 const vibes = React.useMemo(() => {
   if (!data?.pages) return [];
@@ -161,7 +186,9 @@ const vibes = React.useMemo(() => {
 ### Integration Patterns
 
 #### 1. Cross-Feature Component Reuse
+
 **Pattern**: Import and use components from feature directories in shared components
+
 ```typescript
 import { CompactSuggestedFollows } from '@/features/follows/components/suggested-follows';
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
@@ -170,7 +197,9 @@ import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-s
 **Benefits**: Promotes code reuse while maintaining feature boundaries.
 
 #### 2. Hook Composition for Complex State
+
 **Pattern**: Combine multiple hooks to build complex UI logic
+
 ```typescript
 const { user } = useUser(); // Auth state
 const { data: followStats } = useCurrentUserFollowStats(); // Follow stats
@@ -180,20 +209,24 @@ const personalizedFeedQuery = useForYouFeedInfinite(...); // Data fetching
 ### Debugging and Development Insights
 
 #### 1. TypeScript with Infinite Queries
+
 **Issue**: Infinite query return types can be complex and require careful handling
 **Solution**: Use optional chaining and type guards:
+
 ```typescript
 if (!data?.pages) return [];
 return data.pages.flatMap((page: any) => page?.vibes || []);
 ```
 
 #### 2. Development Server Testing
+
 **Pattern**: Use `bun run dev:frontend` to test compilation and basic functionality
 **Note**: Full TypeScript checking across the monorepo can be noisy - focus on specific workspace testing for development.
 
 ### Future Enhancements
 
 #### Opportunities Identified
+
 1. **Follow Suggestions Enhancement**: Could add user activity indicators or vibe previews
 2. **Personalized Content Hints**: Show preview of what personalized feed would look like
 3. **Onboarding Flow**: Could create a dedicated onboarding sequence for new users
@@ -213,12 +246,15 @@ return data.pages.flatMap((page: any) => page?.vibes || []);
 ## Notification System Implementation Patterns
 
 ### Context
+
 Implemented a complete notification UI system including dropdown, filters, infinite scroll, and responsive mobile/desktop behavior using the existing backend notification system.
 
 ### Key Patterns Discovered
 
 #### 1. Backend Type Integration
+
 **Pattern**: Always check backend types before implementing frontend components
+
 ```typescript
 // Check the actual Notification interface from types package
 export interface Notification {
@@ -240,7 +276,9 @@ export interface Notification {
 **Why**: Prevents TypeScript errors and ensures proper data access patterns.
 
 #### 2. Infinite Query Pattern for Notifications
+
 **Pattern**: Use proper response property names in infinite queries
+
 ```typescript
 // CORRECT: Use nextCursor, not continueCursor
 getNextPageParam: (lastPage) => lastPage?.nextCursor || undefined,
@@ -250,7 +288,9 @@ type: filter === 'all' ? undefined : filter,
 ```
 
 #### 3. Mobile-First Notification Dropdown
+
 **Pattern**: Use conditional rendering for mobile drawer vs desktop dropdown
+
 ```typescript
 if (isMobile) {
   return (
@@ -272,7 +312,9 @@ return (
 ```
 
 #### 4. Header Integration Pattern
+
 **Pattern**: Add notification state to existing mobile nav state management
+
 ```typescript
 type MobileNavState = 'nav' | 'profile' | 'search' | 'notifications' | null;
 
@@ -288,7 +330,9 @@ if (
 ```
 
 #### 5. Filter System with LocalStorage Persistence
+
 **Pattern**: Cache user's filter preference across sessions
+
 ```typescript
 useEffect(() => {
   const savedFilter = localStorage.getItem('viberatr-notification-filter');
@@ -303,7 +347,9 @@ useEffect(() => {
 ```
 
 #### 6. Notification Badge Implementation
+
 **Pattern**: Themed notification count badge with proper positioning
+
 ```typescript
 <div className="relative">
   <Bell className="h-4 w-4" />
@@ -318,7 +364,9 @@ useEffect(() => {
 ### Component Architecture Insights
 
 #### 1. Empty State Contextual Design
+
 **Pattern**: Different empty states per filter category with contextual actions
+
 ```typescript
 const getEmptyStateContent = () => {
   switch (filter) {
@@ -326,7 +374,7 @@ const getEmptyStateContent = () => {
       return {
         icon: Heart,
         title: 'no likes yet',
-        description: 'when someone rates your vibes, you\'ll see them here',
+        description: "when someone rates your vibes, you'll see them here",
         action: 'share a vibe',
         href: '/',
       };
@@ -336,7 +384,9 @@ const getEmptyStateContent = () => {
 ```
 
 #### 2. Notification Item Dynamic Content
+
 **Pattern**: Switch statement for different notification types with dynamic icons and text
+
 ```typescript
 switch (notification.type) {
   case 'rating':
@@ -353,7 +403,9 @@ switch (notification.type) {
 ```
 
 #### 3. Intersection Observer for Infinite Scroll
+
 **Pattern**: Use react-intersection-observer for efficient infinite loading
+
 ```typescript
 const { ref: loadMoreRef, inView } = useInView();
 
@@ -378,7 +430,9 @@ useEffect(() => {
 ### Dependency Management
 
 #### 1. Required Dependencies
+
 **Pattern**: Install needed packages for advanced UI patterns
+
 ```bash
 bun add react-intersection-observer
 ```
@@ -388,7 +442,9 @@ bun add react-intersection-observer
 ### TypeScript Considerations
 
 #### 1. Convex ID Type Handling
+
 **Pattern**: Use type assertion for Convex ID compatibility
+
 ```typescript
 // CORRECT: Handle the ID type mismatch gracefully
 if (!notification.read && notification._id) {
@@ -397,7 +453,9 @@ if (!notification.read && notification._id) {
 ```
 
 #### 2. Backend Response Property Mapping
+
 **Pattern**: Always verify backend response structure before implementation
+
 - `continueCursor` vs `nextCursor`
 - `isRead` vs `read`
 - `fromUser` vs `triggerUser`
@@ -405,7 +463,9 @@ if (!notification.read && notification._id) {
 ### Performance Optimizations
 
 #### 1. Conditional Query Execution
+
 **Pattern**: Only fetch notifications when dropdown is open
+
 ```typescript
 const notificationQuery = useNotificationsInfinite(
   FILTER_TYPE_MAP[activeFilter],
@@ -414,18 +474,24 @@ const notificationQuery = useNotificationsInfinite(
 ```
 
 #### 2. Memoized Data Processing
+
 **Pattern**: Flatten infinite query pages with useMemo
+
 ```typescript
 const notifications = React.useMemo(() => {
   if (!notificationQuery.data?.pages) return [];
-  return notificationQuery.data.pages.flatMap((page: any) => page?.notifications || []);
+  return notificationQuery.data.pages.flatMap(
+    (page: any) => page?.notifications || []
+  );
 }, [notificationQuery.data]);
 ```
 
 ### Theming Integration
 
 #### 1. Consistent Theme Color Usage
+
 **Pattern**: Use theme-primary for notification badges and unread indicators
+
 ```typescript
 // Badge
 <span className="bg-theme-primary text-primary-foreground">
@@ -439,7 +505,9 @@ const notifications = React.useMemo(() => {
 ### Responsive Design
 
 #### 1. Screen Size Detection
+
 **Pattern**: Use window resize listener for mobile/desktop detection
+
 ```typescript
 useEffect(() => {
   const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -471,3 +539,60 @@ useEffect(() => {
 - **User Onboarding**: When designing first-time user experiences
 - **Feed Systems**: When working with infinite scroll feeds and custom content states
 - **Follow/Social Features**: When integrating follow system with other features
+
+## TanStack Router beforeLoad Redirect Patterns
+
+### Context
+
+Working with TanStack Router's `beforeLoad` function to handle data-driven redirects, particularly for rating routes that redirect to vibe pages with anchors.
+
+### Critical Issue: Try-Catch Blocks Break Redirects
+
+**Problem**: When using `throw redirect()` inside a try-catch block in TanStack Router's `beforeLoad` function, the redirect gets caught as an error and triggers the catch block instead of performing the redirect.
+
+**Root Cause**: TanStack Router redirects work by throwing special redirect objects that are caught by the router. Wrapping them in try-catch prevents the router from receiving them.
+
+**Example - Wrong**:
+
+```typescript
+beforeLoad: async ({ params, context }) => {
+  try {
+    const data = await context.convexClient.query(api.something.get, { id });
+    if (!data) {
+      throw redirect({ to: '/' }); // Gets caught by catch block!
+    }
+    throw redirect({ to: `/somewhere/${data.id}` }); // Gets caught by catch block!
+  } catch (error) {
+    // Redirect ends up here instead of working
+    throw redirect({ to: '/', search: { error: 'Failed' } });
+  }
+};
+```
+
+**Example - Correct**:
+
+```typescript
+beforeLoad: async ({ params, context }) => {
+  const data = await context.convexClient.query(api.something.get, { id });
+
+  if (!data?.expectedField) {
+    throw redirect({ to: '/', search: { error: 'Not found' } });
+  }
+
+  throw redirect({ to: `/somewhere/${data.id}` });
+};
+```
+
+### Best Practices for beforeLoad Redirects
+
+1. **Avoid try-catch around redirects**: Let query errors bubble up naturally or handle them without try-catch
+2. **Use optional chaining**: Check for required fields with `data?.field` instead of relying on try-catch
+3. **Handle API errors at the query level**: Use Convex error handling patterns instead of wrapping in try-catch
+4. **Test redirects carefully**: Always verify that redirects actually work, especially when refactoring
+
+### Applicable Situations
+
+- **Data-driven redirects**: Routes that fetch data and redirect based on results
+- **Rating/comment permalink routes**: Routes that redirect to parent content with anchors
+- **Authentication redirects**: Routes that check auth state and redirect accordingly
+- **Legacy URL handling**: Routes that convert old URLs to new formats

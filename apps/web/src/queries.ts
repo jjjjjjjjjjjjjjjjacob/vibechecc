@@ -624,7 +624,8 @@ export function useNotificationsInfinite(
         type,
       });
     },
-    getNextPageParam: (lastPage) => lastPage?.nextCursor || undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage?.hasMore ? lastPage?.nextCursor : undefined,
     enabled,
     initialPageParam: null as string | null,
   });
@@ -639,9 +640,12 @@ export function useUnreadNotificationCount(options?: { enabled?: boolean }) {
 }
 
 // Query to get unread notification count by type
-export function useUnreadNotificationCountByType() {
+export function useUnreadNotificationCountByType(options?: {
+  enabled?: boolean;
+}) {
   return useQuery({
     ...convexQuery(api.notifications.getUnreadCountByType, {}),
+    enabled: options?.enabled !== false,
   });
 }
 
@@ -668,6 +672,14 @@ export function useMarkAllNotificationsAsReadMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
+  });
+}
+
+// Query to get rating by ID
+export function useRating(ratingId: string) {
+  return useQuery({
+    ...convexQuery(api.ratings.getById, { ratingId }),
+    enabled: !!ratingId,
   });
 }
 

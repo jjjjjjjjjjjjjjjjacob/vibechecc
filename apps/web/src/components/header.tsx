@@ -1,7 +1,16 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
-import { Search, ChevronUp, Menu, User, Heart, Sun, Moon, Bell } from 'lucide-react';
+import {
+  Search,
+  ChevronUp,
+  Menu,
+  User,
+  Heart,
+  Sun,
+  Moon,
+  Bell,
+} from 'lucide-react';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '../utils/tailwind-utils';
@@ -24,6 +33,7 @@ import { useSearchShortcuts } from '../features/search/hooks/use-search-shortcut
 import { useCurrentUser, useUnreadNotificationCount } from '../queries';
 import { ProfileDropdown } from '@/features/profiles/components/profile-dropdown';
 import { NotificationDropdown } from '@/features/notifications/components/notification-dropdown';
+import { NotificationAccordion } from '@/features/notifications/components/notification-accordion';
 import { useConvex } from 'convex/react';
 
 type MobileNavState = 'nav' | 'profile' | 'search' | 'notifications' | null;
@@ -37,14 +47,14 @@ export function Header() {
   const searchButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
-  
+
   // Check if Convex context is available - call useConvex at top level
   const convex = useConvex();
   const convexAvailable = !!convex;
 
   // Get unread notification count for signed-in users only (when Convex is available)
-  const { data: unreadCount } = useUnreadNotificationCount({ 
-    enabled: !!clerkUser && convexAvailable
+  const { data: unreadCount } = useUnreadNotificationCount({
+    enabled: !!clerkUser && convexAvailable,
   });
 
   // Track hydration to avoid SSR mismatches
@@ -233,25 +243,50 @@ export function Header() {
               </Button>
 
               <SignedIn>
-                <NotificationDropdown
-                  open={mobileNavState === 'notifications'}
-                  onOpenChange={(open) => setMobileNavState(open ? 'notifications' : null)}
-                >
+                <div className="hidden sm:block">
+                  <NotificationDropdown
+                    open={mobileNavState === 'notifications'}
+                    onOpenChange={(open) =>
+                      setMobileNavState(open ? 'notifications' : null)
+                    }
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative h-10 w-10 rounded-lg"
+                    >
+                      <Bell className="h-4 w-4" />
+                      {unreadCount && unreadCount > 0 ? (
+                        <span className="bg-theme-primary text-primary-foreground absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-xs font-medium">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      ) : null}
+                    </Button>
+                  </NotificationDropdown>
+                </div>
+                <div className="sm:hidden">
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-10 w-10 rounded-lg"
+                    onClick={() =>
+                      setMobileNavState(
+                        mobileNavState === 'notifications'
+                          ? null
+                          : 'notifications'
+                      )
+                    }
                   >
                     <div className="relative">
-                      <Bell className="h-4 w-4" />
-                      {unreadCount && unreadCount > 0 && (
-                        <span className="bg-theme-primary text-primary-foreground absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-xs font-medium">
+                      <Bell className="relative h-4 w-4" />
+                      {unreadCount && unreadCount > 0 ? (
+                        <span className="bg-theme-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-xs font-medium">
                           {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </Button>
-                </NotificationDropdown>
+                </div>
               </SignedIn>
 
               <Button
@@ -500,26 +535,34 @@ export function Header() {
             onOpenChange={(open) => setMobileNavState(open ? 'search' : null)}
             triggerRef={searchButtonRef as React.RefObject<HTMLButtonElement>}
           />
+          <NotificationAccordion
+            open={mobileNavState === 'notifications'}
+            onOpenChange={(open) =>
+              setMobileNavState(open ? 'notifications' : null)
+            }
+          />
         </div>
       </header>
 
       {/* Mobile Navigation Overlay */}
-      {mobileNavState && mobileNavState !== 'search' && mobileNavState !== 'notifications' && (
-        <div
-          className="animate-in fade-in fixed inset-0 z-40 bg-black/50 backdrop-blur-sm duration-200 sm:hidden"
-          onClick={() => setMobileNavState(null)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setMobileNavState(null);
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label="Close navigation menu"
-          style={{ top: '64px' }} // Start below the header
-        />
-      )}
+      {mobileNavState &&
+        mobileNavState !== 'search' &&
+        mobileNavState !== 'notifications' && (
+          <div
+            className="animate-in fade-in fixed inset-0 z-40 bg-black/50 backdrop-blur-sm duration-200 sm:hidden"
+            onClick={() => setMobileNavState(null)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setMobileNavState(null);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="Close navigation menu"
+            style={{ top: '64px' }} // Start below the header
+          />
+        )}
     </>
   );
 }

@@ -4,7 +4,7 @@ import { api } from '@viberatr/convex';
 
 export function useMarkNotificationAsRead() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: useConvexMutation(api.notifications.markAsRead),
     onSuccess: () => {
@@ -15,7 +15,7 @@ export function useMarkNotificationAsRead() {
 
 export function useMarkAllNotificationsAsRead() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: useConvexMutation(api.notifications.markAllAsRead),
     onSuccess: () => {

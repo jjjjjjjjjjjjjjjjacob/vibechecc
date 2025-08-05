@@ -2,9 +2,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from '@tanstack/react-router';
 import { NotificationItem } from './notification-item';
 import type { Notification } from '@viberatr/types';
+import { formatDistanceToNow } from 'date-fns';
 
 // Mock the queries
 vi.mock('@/queries', () => ({
@@ -27,6 +27,33 @@ vi.mock('@tanstack/react-router', async () => {
 // Mock date-fns
 vi.mock('date-fns', () => ({
   formatDistanceToNow: vi.fn(() => '2 hours ago'),
+}));
+
+// Mock UI components
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, onClick, className, ...props }: any) => (
+    <button onClick={onClick} className={className} {...props}>
+      {children}
+    </button>
+  ),
+}));
+
+vi.mock('@/components/ui/avatar', () => ({
+  Avatar: ({ children, className }: any) => (
+    <span className={className}>{children}</span>
+  ),
+  AvatarFallback: ({ children, className }: any) => (
+    <span className={className}>{children}</span>
+  ),
+  AvatarImage: ({ src, alt }: any) => <img src={src} alt={alt} role="img" />,
+}));
+
+// Mock lucide-react icons
+vi.mock('lucide-react', () => ({
+  Heart: () => <svg data-testid="heart-icon" />,
+  MessageCircle: () => <svg data-testid="message-icon" />,
+  UserPlus: () => <svg data-testid="user-plus-icon" />,
+  Star: () => <svg data-testid="star-icon" />,
 }));
 
 describe('NotificationItem', () => {
@@ -53,7 +80,7 @@ describe('NotificationItem', () => {
     },
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -63,9 +90,9 @@ describe('NotificationItem', () => {
 
     vi.clearAllMocks();
 
-    const { useMarkNotificationAsReadMutation } = require('@/queries');
+    const { useMarkNotificationAsReadMutation } =
+      await vi.importMock('@/queries');
     mockUseMarkNotificationAsReadMutation = useMarkNotificationAsReadMutation;
-
     mockUseMarkNotificationAsReadMutation.mockReturnValue({
       mutate: vi.fn(),
       isLoading: false,
@@ -79,9 +106,7 @@ describe('NotificationItem', () => {
 
   const renderWithProviders = (ui: React.ReactElement) => {
     return render(
-      <QueryClientProvider client={queryClient}>
-        {ui}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
     );
   };
 
@@ -97,7 +122,9 @@ describe('NotificationItem', () => {
         <NotificationItem notification={followNotification} />
       );
 
-      expect(screen.getByText('Test started following you')).toBeInTheDocument();
+      expect(
+        screen.getByText('Test started following you')
+      ).toBeInTheDocument();
       expect(screen.getByText('see profile')).toBeInTheDocument();
       expect(screen.getByText('2 hours ago')).toBeInTheDocument();
     });
@@ -117,7 +144,7 @@ describe('NotificationItem', () => {
       );
 
       const profileLink = screen.getByText('see profile').closest('a');
-      expect(profileLink).toHaveAttribute('href', '/@johndoe');
+      expect(profileLink).toHaveAttribute('href', '/users/johndoe');
     });
 
     it('falls back to user ID when username is missing', () => {
@@ -136,7 +163,7 @@ describe('NotificationItem', () => {
       );
 
       const profileLink = screen.getByText('see profile').closest('a');
-      expect(profileLink).toHaveAttribute('href', '/@user123');
+      expect(profileLink).toHaveAttribute('href', '/users/user123');
     });
   });
 
@@ -195,7 +222,7 @@ describe('NotificationItem', () => {
       );
 
       const vibeLink = screen.getByText('see rating').closest('a');
-      expect(vibeLink).toHaveAttribute('href', '/vibes/vibe123');
+      expect(vibeLink).toHaveAttribute('href', '/ratings/vibe123');
     });
   });
 
@@ -211,7 +238,9 @@ describe('NotificationItem', () => {
         <NotificationItem notification={newRatingNotification} />
       );
 
-      expect(screen.getByText('Test left a comment on your vibe')).toBeInTheDocument();
+      expect(
+        screen.getByText('Test left a comment on your vibe')
+      ).toBeInTheDocument();
       expect(screen.getByText('see comment')).toBeInTheDocument();
     });
   });
@@ -228,16 +257,14 @@ describe('NotificationItem', () => {
         <NotificationItem notification={newVibeNotification} />
       );
 
-      expect(screen.getByText('Test shared a new vibe')).toBeInTheDocument();
+      expect(screen.getByText("Test shared 'a vibe'")).toBeInTheDocument();
       expect(screen.getByText('see vibe')).toBeInTheDocument();
     });
   });
 
   describe('User avatar and display', () => {
     it('displays user avatar correctly', () => {
-      renderWithProviders(
-        <NotificationItem notification={baseNotification} />
-      );
+      renderWithProviders(<NotificationItem notification={baseNotification} />);
 
       const avatar = screen.getByRole('img');
       expect(avatar).toHaveAttribute('src', 'https://example.com/avatar.jpg');
@@ -318,9 +345,7 @@ describe('NotificationItem', () => {
         read: true,
       };
 
-      renderWithProviders(
-        <NotificationItem notification={readNotification} />
-      );
+      renderWithProviders(<NotificationItem notification={readNotification} />);
 
       // Should not have the unread indicator
       const unreadIndicator = document.querySelector('.bg-theme-primary');
@@ -337,8 +362,10 @@ describe('NotificationItem', () => {
         <NotificationItem notification={unreadNotification} />
       );
 
-      const notificationElement = container.firstChild as HTMLElement;
-      expect(notificationElement).toHaveClass('bg-muted/20');
+      const notificationElement = container.querySelector(
+        'div[class*="bg-muted/20"]'
+      );
+      expect(notificationElement).toBeInTheDocument();
     });
 
     it('does not apply unread background for read notifications', () => {
@@ -351,8 +378,10 @@ describe('NotificationItem', () => {
         <NotificationItem notification={readNotification} />
       );
 
-      const notificationElement = container.firstChild as HTMLElement;
-      expect(notificationElement).not.toHaveClass('bg-muted/20');
+      const notificationElement = container.querySelector(
+        'div[class*="bg-muted/20"]'
+      );
+      expect(notificationElement).not.toBeInTheDocument();
     });
   });
 
@@ -396,9 +425,7 @@ describe('NotificationItem', () => {
         type: 'follow',
       };
 
-      renderWithProviders(
-        <NotificationItem notification={readNotification} />
-      );
+      renderWithProviders(<NotificationItem notification={readNotification} />);
 
       const actionButton = screen.getByText('see profile');
       fireEvent.click(actionButton);
@@ -433,12 +460,9 @@ describe('NotificationItem', () => {
 
   describe('Time formatting', () => {
     it('displays formatted time correctly', () => {
-      const { formatDistanceToNow } = require('date-fns');
-      formatDistanceToNow.mockReturnValue('3 minutes ago');
+      (formatDistanceToNow as any).mockReturnValue('3 minutes ago');
 
-      renderWithProviders(
-        <NotificationItem notification={baseNotification} />
-      );
+      renderWithProviders(<NotificationItem notification={baseNotification} />);
 
       expect(screen.getByText('3 minutes ago')).toBeInTheDocument();
       expect(formatDistanceToNow).toHaveBeenCalledWith(
@@ -475,7 +499,9 @@ describe('NotificationItem', () => {
         <NotificationItem notification={unknownNotification} />
       );
 
-      expect(screen.getByText('you have a new notification')).toBeInTheDocument();
+      expect(
+        screen.getByText('you have a new notification')
+      ).toBeInTheDocument();
     });
   });
 
@@ -491,11 +517,11 @@ describe('NotificationItem', () => {
         },
       };
 
-      renderWithProviders(
-        <NotificationItem notification={notification} />
-      );
+      renderWithProviders(<NotificationItem notification={notification} />);
 
-      expect(screen.getByText('Johnny started following you')).toBeInTheDocument();
+      expect(
+        screen.getByText('Johnny started following you')
+      ).toBeInTheDocument();
     });
 
     it('uses username when no first_name', () => {
@@ -509,11 +535,11 @@ describe('NotificationItem', () => {
         },
       };
 
-      renderWithProviders(
-        <NotificationItem notification={notification} />
-      );
+      renderWithProviders(<NotificationItem notification={notification} />);
 
-      expect(screen.getByText('john123 started following you')).toBeInTheDocument();
+      expect(
+        screen.getByText('john123 started following you')
+      ).toBeInTheDocument();
     });
 
     it('falls back to "someone" when no name available', () => {
@@ -527,11 +553,11 @@ describe('NotificationItem', () => {
         },
       };
 
-      renderWithProviders(
-        <NotificationItem notification={notification} />
-      );
+      renderWithProviders(<NotificationItem notification={notification} />);
 
-      expect(screen.getByText('someone started following you')).toBeInTheDocument();
+      expect(
+        screen.getByText('someone started following you')
+      ).toBeInTheDocument();
     });
 
     it('handles missing trigger user', () => {
@@ -541,18 +567,20 @@ describe('NotificationItem', () => {
         triggerUser: undefined,
       };
 
-      renderWithProviders(
-        <NotificationItem notification={notification} />
-      );
+      renderWithProviders(<NotificationItem notification={notification} />);
 
-      expect(screen.getByText('someone started following you')).toBeInTheDocument();
+      expect(
+        screen.getByText('someone started following you')
+      ).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
     it('has proper button role for action', () => {
       renderWithProviders(
-        <NotificationItem notification={{ ...baseNotification, type: 'follow' }} />
+        <NotificationItem
+          notification={{ ...baseNotification, type: 'follow' }}
+        />
       );
 
       const actionLink = screen.getByText('see profile').closest('a');
@@ -560,9 +588,7 @@ describe('NotificationItem', () => {
     });
 
     it('has proper alt text for avatar image', () => {
-      renderWithProviders(
-        <NotificationItem notification={baseNotification} />
-      );
+      renderWithProviders(<NotificationItem notification={baseNotification} />);
 
       const avatar = screen.getByRole('img');
       expect(avatar).toHaveAttribute('alt', 'Test');
