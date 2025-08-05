@@ -1,12 +1,20 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { convexTest } from 'convex-test';
 import schema from '../schema';
 import { api } from '../_generated/api';
 import { modules } from '../../vitest.setup';
 
+// Mock console.error to suppress scheduler transaction errors
+let consoleSpy: any;
+
 describe('Search Functions', () => {
   beforeEach(async () => {
     // Tests run in isolation with a fresh database for convex-test
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleSpy?.mockRestore();
   });
 
   describe('searchAll', () => {

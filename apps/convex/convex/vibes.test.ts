@@ -1,8 +1,19 @@
 import { convexTest } from 'convex-test';
 import { modules } from '../vitest.setup';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import schema from './schema'; // Your schema definition
 import { api } from './_generated/api'; // Typed API methods
+
+// Mock console.error to suppress scheduler transaction errors
+let consoleSpy: any;
+
+beforeEach(() => {
+  consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  consoleSpy?.mockRestore();
+});
 
 describe('Vibes Mutations', () => {
   describe('create', () => {

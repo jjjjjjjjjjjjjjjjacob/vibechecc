@@ -31,3 +31,5 @@ terraform/.envrc
 
 .nx/cache
 .nx/workspace-data
+
+tmp*

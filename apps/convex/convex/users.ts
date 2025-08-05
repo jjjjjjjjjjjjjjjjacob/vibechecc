@@ -3,12 +3,17 @@ import {
   query,
   internalMutation,
   action,
+  internalAction,
   QueryCtx,
   MutationCtx,
 } from './_generated/server';
 import { v, Validator } from 'convex/values';
 import type { UserJSON } from '@clerk/backend';
 import { internal } from './_generated/api';
+
+// PostHog configuration for server-side tracking
+const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY;
+const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://app.posthog.com';
 
 // Helper function to get user by externalId
 async function userByExternalId(
@@ -731,5 +736,126 @@ export const createForSeed = mutation({
       updated_at: Date.now(),
       onboardingCompleted: true, // Set to true for seeded users
     });
+  },
+});
+
+/**
+ * Track user signup event to PostHog via server-side HTTP API
+ * This ensures 100% reliable signup tracking from Clerk webhooks
+ */
+export const trackUserSignup = internalAction({
+  args: {
+    userId: v.string(),
+    email: v.optional(v.string()),
+    username: v.optional(v.string()),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    signupMethod: v.optional(v.string()),
+    createdAt: v.optional(v.number()),
+  },
+  handler: async (
+    ctx,
+    {
+      userId,
+      email,
+      username,
+      firstName,
+      lastName,
+      signupMethod = 'clerk',
+      createdAt,
+    }
+  ) => {
+    if (!POSTHOG_API_KEY) {
+      console.warn(
+        'PostHog API key not configured, skipping server-side signup tracking'
+      );
+      return { success: false, reason: 'no_api_key' };
+    }
+
+    try {
+      // Track the signup event
+      const signupPayload = {
+        api_key: POSTHOG_API_KEY,
+        event: 'user_signed_up',
+        distinct_id: userId,
+        properties: {
+          email,
+          username,
+          first_name: firstName,
+          last_name: lastName,
+          method: signupMethod,
+          source: 'server_webhook',
+          created_at: createdAt
+            ? new Date(createdAt).toISOString()
+            : new Date().toISOString(),
+          $lib: 'convex-server',
+          $lib_version: '1.0.0',
+        },
+      };
+
+      const signupResponse = await fetch(`${POSTHOG_HOST}/capture/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(signupPayload),
+      });
+
+      if (!signupResponse.ok) {
+        console.error(
+          'Failed to track signup to PostHog:',
+          signupResponse.status,
+          signupResponse.statusText
+        );
+        return {
+          success: false,
+          reason: 'http_error',
+          status: signupResponse.status,
+        };
+      }
+
+      // Set user properties for better targeting
+      const identifyPayload = {
+        api_key: POSTHOG_API_KEY,
+        event: '$identify',
+        distinct_id: userId,
+        properties: {
+          $set: {
+            email,
+            username,
+            first_name: firstName,
+            last_name: lastName,
+            signup_method: signupMethod,
+            signup_date: createdAt
+              ? new Date(createdAt).toISOString()
+              : new Date().toISOString(),
+            is_new_user: true,
+            user_source: 'server_webhook',
+          },
+        },
+      };
+
+      const identifyResponse = await fetch(`${POSTHOG_HOST}/capture/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(identifyPayload),
+      });
+
+      if (!identifyResponse.ok) {
+        console.warn(
+          'Failed to set user properties in PostHog:',
+          identifyResponse.status
+        );
+        // Don't fail the whole operation for this
+      }
+
+      console.log(`Successfully tracked signup for user ${userId} to PostHog`);
+      return { success: true, userId, email };
+    } catch (error) {
+      console.error('Error tracking signup to PostHog:', error);
+      return { success: false, reason: 'network_error', error: String(error) };
+    }
   },
 });

@@ -12,6 +12,8 @@ export function OnboardingGuard({ children }: OnboardingGuardProps) {
   const location = useLocation();
   const { isSignedIn, isLoaded } = useUser();
   const { data: onboardingStatus, isLoading, error } = useOnboardingStatus();
+
+  // Only initialize mutation when user is authenticated
   const { mutate: ensureUserExists } = useEnsureUserExistsMutation();
 
   React.useEffect(() => {

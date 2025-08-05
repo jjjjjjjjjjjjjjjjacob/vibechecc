@@ -9,9 +9,28 @@ import { internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
 import { SecurityValidators, AuthUtils } from './lib/security-validators';
 
-// Helper to detect test environment
-function isTestEnvironment() {
-  return process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
+// Helper function to compute user display name (backend version)
+function computeUserDisplayName(user: Doc<'users'> | null): string {
+  if (!user) {
+    return 'Someone';
+  }
+
+  // Priority 1: username
+  if (user.username?.trim()) {
+    return user.username.trim();
+  }
+
+  // Priority 2: first_name + last_name
+  const firstName = user.first_name?.trim();
+  const lastName = user.last_name?.trim();
+  if (firstName || lastName) {
+    return `${firstName || ''} ${lastName || ''}`.trim();
+  }
+
+  // No legacy name field in Convex schema - skip this step
+
+  // Fallback
+  return 'Someone';
 }
 
 // Type definitions for extended vibe objects
@@ -465,6 +484,7 @@ export const getById = query({
           .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
           .first();
         return {
+          _id: rating._id,
           user,
           emoji: rating.emoji,
           value: rating.value,
@@ -698,11 +718,47 @@ export const create = mutation({
       visibility: 'public', // Default to public visibility
     });
 
-    // Update tag usage counts (skip in test environment)
-    if (args.tags && args.tags.length > 0 && !isTestEnvironment()) {
+    // Update tag usage counts
+    if (args.tags && args.tags.length > 0) {
       await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
         tagsToAdd: args.tags,
       });
+    }
+
+    // Create notifications for followers (skip in test environment)
+    try {
+      // Get the creator's followers
+      const followers = await ctx.db
+        .query('follows')
+        .withIndex('byFollowing', (q) => q.eq('followingId', identity!.subject))
+        .collect();
+
+      // Limit to recent followers to avoid performance issues (max 100)
+      const recentFollowers = followers.slice(0, 100);
+
+      const creatorDisplayName = computeUserDisplayName(user);
+
+      // Create notifications for each follower
+      for (const follow of recentFollowers) {
+        await ctx.scheduler.runAfter(
+          0,
+          internal.notifications.createNotification,
+          {
+            userId: follow.followerId,
+            type: 'new_vibe',
+            triggerUserId: identity!.subject,
+            targetId: id, // Link to the new vibe
+            title: `${creatorDisplayName} shared a new vibe`,
+            description: 'check it out',
+            metadata: {
+              vibeTitle: args.title,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      // Don't fail the vibe creation if notification creation fails
+      console.error('Failed to create new vibe notifications:', error);
     }
 
     return id;
@@ -937,7 +993,8 @@ export const addRating = mutation({
     let result;
     if (existingRating) {
       // Update the existing rating
-      result = await ctx.db.patch(existingRating._id, ratingData);
+      await ctx.db.patch(existingRating._id, ratingData);
+      result = existingRating._id;
     } else {
       // Create a new rating
       result = await ctx.db.insert('ratings', {
@@ -950,6 +1007,75 @@ export const addRating = mutation({
 
     // Add vibe tags to user interests after successful rating
     await addInterestsFromVibe(ctx, userId, vibeId);
+
+    // Create new rating notifications for users who follow the rater (skip in test environment)
+    if (!existingRating) {
+      // Only notify for new ratings, not updates
+      try {
+        // Get users who follow the current user (rater)
+        const followers = await ctx.db
+          .query('follows')
+          .withIndex('byFollowing', (q) =>
+            q.eq('followingId', identity!.subject)
+          )
+          .collect();
+
+        // Limit to recent followers to avoid performance issues (max 50)
+        const recentFollowers = followers.slice(0, 50);
+
+        // Get the rater's user info and vibe info
+        const raterUser = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', identity!.subject)
+          )
+          .first();
+
+        const vibe = await ctx.db
+          .query('vibes')
+          .filter((q) => q.eq(q.field('id'), args.vibeId))
+          .first();
+
+        if (raterUser && vibe) {
+          const raterDisplayName = computeUserDisplayName(raterUser);
+
+          // Get vibe creator info
+          const vibeCreator = await ctx.db
+            .query('users')
+            .withIndex('byExternalId', (q) =>
+              q.eq('externalId', vibe.createdById)
+            )
+            .first();
+
+          const vibeCreatorName = computeUserDisplayName(vibeCreator);
+
+          // Create notifications for each follower
+          for (const follow of recentFollowers) {
+            await ctx.scheduler.runAfter(
+              0,
+              internal.notifications.createNotification,
+              {
+                userId: follow.followerId,
+                type: 'new_rating',
+                triggerUserId: identity!.subject,
+                targetId: result ? result.toString() : '', // Link to the rating
+                title: `${raterDisplayName} reviewed a vibe`,
+                description: 'see their review',
+                metadata: {
+                  vibeTitle: vibe.title,
+                  vibeCreator: vibeCreatorName,
+                  emoji: args.emoji,
+                  ratingValue: args.value,
+                },
+              }
+            );
+          }
+        }
+      } catch (error) {
+        // Don't fail the rating operation if notification creation fails
+        console.error('Failed to create new rating notifications:', error);
+      }
+    }
 
     return result;
   },
@@ -1008,6 +1134,68 @@ export const quickReact = mutation({
 
     // Add vibe tags to user interests after successful quick reaction
     await addInterestsFromVibe(ctx, identity.subject, args.vibeId);
+
+    // Create new rating notifications for users who follow the rater (skip in test environment)
+    try {
+      // Get users who follow the current user (rater)
+      const followers = await ctx.db
+        .query('follows')
+        .withIndex('byFollowing', (q) => q.eq('followingId', identity.subject))
+        .collect();
+
+      // Limit to recent followers to avoid performance issues (max 50)
+      const recentFollowers = followers.slice(0, 50);
+
+      // Get the rater's user info and vibe info
+      const raterUser = await ctx.db
+        .query('users')
+        .withIndex('byExternalId', (q) => q.eq('externalId', identity.subject))
+        .first();
+
+      const vibe = await ctx.db
+        .query('vibes')
+        .filter((q) => q.eq(q.field('id'), args.vibeId))
+        .first();
+
+      if (raterUser && vibe) {
+        const raterDisplayName = computeUserDisplayName(raterUser);
+
+        // Get vibe creator info
+        const vibeCreator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', vibe.createdById)
+          )
+          .first();
+
+        const vibeCreatorName = computeUserDisplayName(vibeCreator);
+
+        // Create notifications for each follower
+        for (const follow of recentFollowers) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.createNotification,
+            {
+              userId: follow.followerId,
+              type: 'new_rating',
+              triggerUserId: identity.subject,
+              targetId: result ? result.toString() : '', // Link to the rating
+              title: `${raterDisplayName} reviewed a vibe`,
+              description: 'see their review',
+              metadata: {
+                vibeTitle: vibe.title,
+                vibeCreator: vibeCreatorName,
+                emoji: args.emoji,
+                ratingValue: defaultValue,
+              },
+            }
+          );
+        }
+      }
+    } catch (error) {
+      // Don't fail the rating operation if notification creation fails
+      console.error('Failed to create new rating notifications:', error);
+    }
 
     return result;
   },
@@ -2369,13 +2557,13 @@ export const updateVibe = mutation({
       const tagsToAdd = newTags.filter((tag) => !oldTags.includes(tag));
       const tagsToRemove = oldTags.filter((tag) => !newTags.includes(tag));
 
-      if (tagsToAdd.length > 0 && !isTestEnvironment()) {
+      if (tagsToAdd.length > 0) {
         await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
           tagsToAdd,
         });
       }
 
-      if (tagsToRemove.length > 0 && !isTestEnvironment()) {
+      if (tagsToRemove.length > 0) {
         await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
           tagsToRemove,
         });
@@ -2425,7 +2613,7 @@ export const deleteVibe = mutation({
     });
 
     // Remove tags from count (since the vibe is no longer visible)
-    if (vibe.tags && vibe.tags.length > 0 && !isTestEnvironment()) {
+    if (vibe.tags && vibe.tags.length > 0) {
       await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
         tagsToRemove: vibe.tags,
       });

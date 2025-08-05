@@ -28,10 +28,26 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
     return new Response('Webhook validation failed', { status: 400 });
   }
   switch (event.type) {
-    case 'user.created': // intentional fallthrough
+    case 'user.created':
+      // Create user in database
       await ctx.runMutation(internal.users.upsertFromClerk, {
         data: event.data,
       });
+
+      // Track signup to PostHog
+      await ctx.runAction(internal.users.trackUserSignup, {
+        userId: event.data.id,
+        email: event.data.email_addresses?.[0]?.email_address,
+        username: event.data.username || undefined,
+        firstName: event.data.first_name || undefined,
+        lastName: event.data.last_name || undefined,
+        signupMethod: 'clerk',
+        createdAt: event.data.created_at,
+      });
+
+      console.log(
+        `New user created: ${event.data.id} (${event.data.email_addresses?.[0]?.email_address})`
+      );
       break;
     case 'user.updated':
       await ctx.runMutation(internal.users.upsertFromClerk, {

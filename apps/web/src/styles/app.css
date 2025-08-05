@@ -156,7 +156,7 @@
   }
 
   *::-webkit-scrollbar {
-    @apply w-2 bg-transparent;
+    @apply h-[5px] w-2 bg-transparent;
   }
   *::-webkit-scrollbar-track {
     @apply bg-transparent;

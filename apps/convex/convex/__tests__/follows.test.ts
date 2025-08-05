@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { convexTest, type TestConvex } from 'convex-test';
 import { api } from '../_generated/api';
 import schema from '../schema';
@@ -6,9 +6,17 @@ import { modules } from '../../vitest.setup';
 
 describe('Follows', () => {
   let t: TestConvex<typeof schema>;
+  let consoleSpy: any;
 
   beforeEach(() => {
     t = convexTest(schema, modules);
+
+    // Suppress console.error from scheduler failures in tests
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleSpy?.mockRestore();
   });
 
   describe('follow', () => {
