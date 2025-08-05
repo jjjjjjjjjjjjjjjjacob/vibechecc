@@ -104,7 +104,7 @@ export interface Vibe {
   description: string;
   image?: string; // Legacy: URL string
   imageStorageId?: string; // New: Convex storage ID - using string for compatibility
-  createdBy: User | null;
+  createdBy?: User | null;
   createdById?: string;
   createdAt: string;
   updatedAt?: string;
@@ -140,5 +140,5 @@ export interface Notification {
   read: boolean; // Whether notification has been read
   createdAt: number; // Timestamp
   _creationTime?: number; // Convex creation time for compatibility
-  triggerUser?: User; // Populated user data for the user who triggered the notification
+  triggerUser: User | null; // Populated user data for the user who triggered the notification (can be null if user deleted)
 }

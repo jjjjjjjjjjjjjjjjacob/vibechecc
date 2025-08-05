@@ -477,22 +477,26 @@ export const getById = query({
       .filter((q) => q.eq(q.field('vibeId'), vibe.id))
       .collect();
 
-    const ratingDetails = await Promise.all(
-      ratings.map(async (rating) => {
-        const user = await ctx.db
-          .query('users')
-          .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
-          .first();
-        return {
-          _id: rating._id,
-          user,
-          emoji: rating.emoji,
-          value: rating.value,
-          review: rating.review,
-          createdAt: rating.createdAt,
-        };
-      })
-    );
+    // PERFORMANCE OPTIMIZED: Batch user queries to eliminate N+1 pattern
+    const uniqueUserIds = [...new Set(ratings.map((r) => r.userId))];
+    const users = await ctx.db
+      .query('users')
+      .filter((q) =>
+        q.or(...uniqueUserIds.map((id) => q.eq(q.field('externalId'), id)))
+      )
+      .collect();
+
+    // Create lookup map for O(1) user access
+    const userMap = new Map(users.map((user) => [user.externalId, user]));
+
+    const ratingDetails = ratings.map((rating) => ({
+      _id: rating._id,
+      user: userMap.get(rating.userId) || null,
+      emoji: rating.emoji,
+      value: rating.value,
+      review: rating.review,
+      createdAt: rating.createdAt,
+    }));
 
     return {
       ...vibe,
@@ -532,43 +536,67 @@ export const getByUser = query({
 
     const vibes = await query.take(args.limit ?? 20);
 
-    return await Promise.all(
-      vibes.map(async (vibe) => {
-        const creator = await ctx.db
-          .query('users')
-          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
-          .first();
+    // PERFORMANCE OPTIMIZED: Batch creator queries
+    const uniqueCreatorIds = [...new Set(vibes.map((v) => v.createdById))];
+    const creators = await ctx.db
+      .query('users')
+      .filter((q) =>
+        q.or(...uniqueCreatorIds.map((id) => q.eq(q.field('externalId'), id)))
+      )
+      .collect();
 
-        const ratings = await ctx.db
-          .query('ratings')
-          .filter((q) => q.eq(q.field('vibeId'), vibe.id))
-          .collect();
+    const creatorMap = new Map(creators.map((user) => [user.externalId, user]));
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+    // PERFORMANCE OPTIMIZED: Batch all ratings queries and user queries
+    const allVibeIds = vibes.map((v) => v.id);
+    const allRatings = await ctx.db
+      .query('ratings')
+      .filter((q) =>
+        q.or(...allVibeIds.map((id) => q.eq(q.field('vibeId'), id)))
+      )
+      .collect();
 
-        return {
-          ...vibe,
-          createdBy: creator,
-          ratings: ratingDetails,
-        };
-      })
+    // Group ratings by vibeId for efficient lookup
+    const ratingsByVibeId = new Map<string, typeof allRatings>();
+    allRatings.forEach((rating) => {
+      const existing = ratingsByVibeId.get(rating.vibeId) || [];
+      existing.push(rating);
+      ratingsByVibeId.set(rating.vibeId, existing);
+    });
+
+    // Get all unique rating user IDs for batch user query
+    const uniqueRatingUserIds = [...new Set(allRatings.map((r) => r.userId))];
+    const ratingUsers = await ctx.db
+      .query('users')
+      .filter((q) =>
+        q.or(
+          ...uniqueRatingUserIds.map((id) => q.eq(q.field('externalId'), id))
+        )
+      )
+      .collect();
+
+    const ratingUserMap = new Map(
+      ratingUsers.map((user) => [user.externalId, user])
     );
+
+    return vibes.map((vibe) => {
+      const creator = creatorMap.get(vibe.createdById);
+      const vibeRatings = ratingsByVibeId.get(vibe.id) || [];
+
+      const ratingDetails = vibeRatings.map((rating) => ({
+        user: ratingUserMap.get(rating.userId) || null,
+        emoji: rating.emoji,
+        value: rating.value,
+        review: rating.review,
+        createdAt: rating.createdAt,
+      }));
+
+      return {
+        ...vibe,
+        createdBy: creator,
+        ratings: ratingDetails,
+      };
+    });
   },
 });
 
@@ -727,35 +755,27 @@ export const create = mutation({
 
     // Create notifications for followers (skip in test environment)
     try {
-      // Get the creator's followers
-      const followers = await ctx.db
-        .query('follows')
-        .withIndex('byFollowing', (q) => q.eq('followingId', identity!.subject))
-        .collect();
-
-      // Limit to recent followers to avoid performance issues (max 100)
-      const recentFollowers = followers.slice(0, 100);
+      if (!identity) throw new Error('No identity found');
 
       const creatorDisplayName = computeUserDisplayName(user);
 
-      // Create notifications for each follower
-      for (const follow of recentFollowers) {
-        await ctx.scheduler.runAfter(
-          0,
-          internal.notifications.createNotification,
-          {
-            userId: follow.followerId,
-            type: 'new_vibe',
-            triggerUserId: identity!.subject,
-            targetId: id, // Link to the new vibe
-            title: `${creatorDisplayName} shared a new vibe`,
-            description: 'check it out',
-            metadata: {
-              vibeTitle: args.title,
-            },
-          }
-        );
-      }
+      // PERFORMANCE OPTIMIZED: Use batch notification system
+      await ctx.scheduler.runAfter(
+        0,
+        internal.notifications.createFollowerNotifications,
+        {
+          triggerUserId: identity.subject,
+          triggerUserDisplayName: creatorDisplayName,
+          type: 'new_vibe',
+          targetId: id, // Link to the new vibe
+          title: `${creatorDisplayName} shared a new vibe`,
+          description: 'check it out',
+          metadata: {
+            vibeTitle: args.title,
+          },
+          maxFollowers: 100, // Explicit limit for performance
+        }
+      );
     } catch (error) {
       // Don't fail the vibe creation if notification creation fails
       console.error('Failed to create new vibe notifications:', error);
@@ -1012,29 +1032,21 @@ export const addRating = mutation({
     if (!existingRating) {
       // Only notify for new ratings, not updates
       try {
-        // Get users who follow the current user (rater)
-        const followers = await ctx.db
-          .query('follows')
-          .withIndex('byFollowing', (q) =>
-            q.eq('followingId', identity!.subject)
-          )
-          .collect();
+        if (!identity) throw new Error('No identity found');
 
-        // Limit to recent followers to avoid performance issues (max 50)
-        const recentFollowers = followers.slice(0, 50);
-
-        // Get the rater's user info and vibe info
-        const raterUser = await ctx.db
-          .query('users')
-          .withIndex('byExternalId', (q) =>
-            q.eq('externalId', identity!.subject)
-          )
-          .first();
-
-        const vibe = await ctx.db
-          .query('vibes')
-          .filter((q) => q.eq(q.field('id'), args.vibeId))
-          .first();
+        // Get the rater's user info and vibe info in parallel for efficiency
+        const [raterUser, vibe] = await Promise.all([
+          ctx.db
+            .query('users')
+            .withIndex('byExternalId', (q) =>
+              q.eq('externalId', identity.subject)
+            )
+            .first(),
+          ctx.db
+            .query('vibes')
+            .withIndex('id', (q) => q.eq('id', args.vibeId))
+            .first(),
+        ]);
 
         if (raterUser && vibe) {
           const raterDisplayName = computeUserDisplayName(raterUser);
@@ -1049,27 +1061,26 @@ export const addRating = mutation({
 
           const vibeCreatorName = computeUserDisplayName(vibeCreator);
 
-          // Create notifications for each follower
-          for (const follow of recentFollowers) {
-            await ctx.scheduler.runAfter(
-              0,
-              internal.notifications.createNotification,
-              {
-                userId: follow.followerId,
-                type: 'new_rating',
-                triggerUserId: identity!.subject,
-                targetId: result ? result.toString() : '', // Link to the rating
-                title: `${raterDisplayName} reviewed a vibe`,
-                description: 'see their review',
-                metadata: {
-                  vibeTitle: vibe.title,
-                  vibeCreator: vibeCreatorName,
-                  emoji: args.emoji,
-                  ratingValue: args.value,
-                },
-              }
-            );
-          }
+          // PERFORMANCE OPTIMIZED: Use batch notification system
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.createFollowerNotifications,
+            {
+              triggerUserId: identity.subject,
+              triggerUserDisplayName: raterDisplayName,
+              type: 'new_rating',
+              targetId: result ? result.toString() : '', // Link to the rating
+              title: `${raterDisplayName} reviewed a vibe`,
+              description: 'see their review',
+              metadata: {
+                vibeTitle: vibe.title,
+                vibeCreator: vibeCreatorName,
+                emoji: args.emoji,
+                ratingValue: args.value,
+              },
+              maxFollowers: 50, // Explicit limit for performance
+            }
+          );
         }
       } catch (error) {
         // Don't fail the rating operation if notification creation fails
@@ -1137,25 +1148,19 @@ export const quickReact = mutation({
 
     // Create new rating notifications for users who follow the rater (skip in test environment)
     try {
-      // Get users who follow the current user (rater)
-      const followers = await ctx.db
-        .query('follows')
-        .withIndex('byFollowing', (q) => q.eq('followingId', identity.subject))
-        .collect();
-
-      // Limit to recent followers to avoid performance issues (max 50)
-      const recentFollowers = followers.slice(0, 50);
-
-      // Get the rater's user info and vibe info
-      const raterUser = await ctx.db
-        .query('users')
-        .withIndex('byExternalId', (q) => q.eq('externalId', identity.subject))
-        .first();
-
-      const vibe = await ctx.db
-        .query('vibes')
-        .filter((q) => q.eq(q.field('id'), args.vibeId))
-        .first();
+      // Get the rater's user info and vibe info in parallel for efficiency
+      const [raterUser, vibe] = await Promise.all([
+        ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', identity.subject)
+          )
+          .first(),
+        ctx.db
+          .query('vibes')
+          .withIndex('id', (q) => q.eq('id', args.vibeId))
+          .first(),
+      ]);
 
       if (raterUser && vibe) {
         const raterDisplayName = computeUserDisplayName(raterUser);
@@ -1170,27 +1175,26 @@ export const quickReact = mutation({
 
         const vibeCreatorName = computeUserDisplayName(vibeCreator);
 
-        // Create notifications for each follower
-        for (const follow of recentFollowers) {
-          await ctx.scheduler.runAfter(
-            0,
-            internal.notifications.createNotification,
-            {
-              userId: follow.followerId,
-              type: 'new_rating',
-              triggerUserId: identity.subject,
-              targetId: result ? result.toString() : '', // Link to the rating
-              title: `${raterDisplayName} reviewed a vibe`,
-              description: 'see their review',
-              metadata: {
-                vibeTitle: vibe.title,
-                vibeCreator: vibeCreatorName,
-                emoji: args.emoji,
-                ratingValue: defaultValue,
-              },
-            }
-          );
-        }
+        // PERFORMANCE OPTIMIZED: Use batch notification system
+        await ctx.scheduler.runAfter(
+          0,
+          internal.notifications.createFollowerNotifications,
+          {
+            triggerUserId: identity.subject,
+            triggerUserDisplayName: raterDisplayName,
+            type: 'new_rating',
+            targetId: result ? result.toString() : '', // Link to the rating
+            title: `${raterDisplayName} reviewed a vibe`,
+            description: 'see their review',
+            metadata: {
+              vibeTitle: vibe.title,
+              vibeCreator: vibeCreatorName,
+              emoji: args.emoji,
+              ratingValue: defaultValue,
+            },
+            maxFollowers: 50, // Explicit limit for performance
+          }
+        );
       }
     } catch (error) {
       // Don't fail the rating operation if notification creation fails
