@@ -59,12 +59,13 @@ export class SecurityValidators {
 
   /**
    * Validates username format
+   * Compatible with Clerk's "Latin-based characters" requirement
    */
   static validateUsername(username: string | undefined): string | null {
     return this.validateString(username, {
       minLength: 3,
       maxLength: 30,
-      pattern: /^[a-zA-Z0-9_-]+$/,
+      pattern: /^[\p{Script=Latin}\p{N}_-]+$/u, // Latin script letters, numbers, underscore, hyphen
       fieldName: 'Username',
     });
   }

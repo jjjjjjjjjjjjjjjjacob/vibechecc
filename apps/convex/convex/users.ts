@@ -10,7 +10,7 @@ import {
 import { v, Validator } from 'convex/values';
 import type { UserJSON } from '@clerk/backend';
 import { internal } from './_generated/api';
-import { AuthUtils } from './lib/securityValidators';
+import { AuthUtils, SecurityValidators } from './lib/securityValidators';
 
 // PostHog configuration for server-side tracking
 const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY;
@@ -213,14 +213,12 @@ export const update = mutation({
     const updates: Record<string, string | number> = {};
 
     if (args.username !== undefined) {
-      // SECURITY: Validate username format
-      if (args.username.length < 3 || args.username.length > 30) {
-        throw new Error('Username must be between 3 and 30 characters');
-      }
-      if (!/^[a-zA-Z0-9_-]+$/.test(args.username)) {
-        throw new Error(
-          'Username can only contain letters, numbers, hyphens, and underscores'
-        );
+      // SECURITY: Validate username format using centralized validator
+      const validatedUsername = SecurityValidators.validateUsername(
+        args.username
+      );
+      if (validatedUsername === null) {
+        throw new Error('Invalid username provided');
       }
       updates.username = args.username;
     }
@@ -651,9 +649,25 @@ export const getOnboardingStatus = query({
 export const upsertFromClerk = internalMutation({
   args: { data: v.any() as Validator<UserJSON> }, // no runtime validation, trust Clerk
   async handler(ctx, { data }) {
+    // SECURITY: Validate username from Clerk to ensure consistency
+    let validatedUsername = data.username || undefined;
+    if (validatedUsername) {
+      try {
+        validatedUsername =
+          SecurityValidators.validateUsername(validatedUsername) || undefined;
+      } catch (error) {
+        // Log validation error but don't fail the webhook - use undefined instead
+        console.warn(
+          `Clerk username validation failed for user ${data.id}:`,
+          error
+        );
+        validatedUsername = undefined;
+      }
+    }
+
     const userAttributes = {
       externalId: data.id,
-      username: data.username || undefined,
+      username: validatedUsername,
       first_name: data.first_name || undefined,
       last_name: data.last_name || undefined,
       image_url: data.image_url || undefined,

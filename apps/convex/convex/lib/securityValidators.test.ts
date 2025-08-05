@@ -167,6 +167,62 @@ describe('SecurityValidators', () => {
       expect(result).toContain('<p>Safe content</p>');
     });
   });
+
+  describe('validateUsername', () => {
+    it('should validate valid usernames including Latin characters', () => {
+      expect(SecurityValidators.validateUsername('testuser')).toBe('testuser');
+      expect(SecurityValidators.validateUsername('test_user')).toBe(
+        'test_user'
+      );
+      expect(SecurityValidators.validateUsername('test-user')).toBe(
+        'test-user'
+      );
+      expect(SecurityValidators.validateUsername('user123')).toBe('user123');
+
+      // Test Latin-based characters (Clerk compatibility)
+      expect(SecurityValidators.validateUsername('josé')).toBe('josé');
+      expect(SecurityValidators.validateUsername('andré')).toBe('andré');
+      expect(SecurityValidators.validateUsername('müller')).toBe('müller');
+      expect(SecurityValidators.validateUsername('søren')).toBe('søren');
+      expect(SecurityValidators.validateUsername('françois')).toBe('françois');
+    });
+
+    it('should reject invalid usernames', () => {
+      expect(() => SecurityValidators.validateUsername('ab')).toThrow(
+        'Username must be at least 3 characters long'
+      );
+
+      expect(() => SecurityValidators.validateUsername('a'.repeat(31))).toThrow(
+        'Username must be no more than 30 characters long'
+      );
+
+      expect(() => SecurityValidators.validateUsername('user@name')).toThrow(
+        'Username format is invalid'
+      );
+
+      expect(() => SecurityValidators.validateUsername('user name')).toThrow(
+        'Username format is invalid'
+      );
+
+      expect(() => SecurityValidators.validateUsername('user.name')).toThrow(
+        'Username format is invalid'
+      );
+
+      // Still reject emojis and other non-Latin scripts
+      expect(() => SecurityValidators.validateUsername('user😀')).toThrow(
+        'Username format is invalid'
+      );
+
+      expect(() => SecurityValidators.validateUsername('用户名')).toThrow(
+        'Username format is invalid'
+      );
+    });
+
+    it('should return null for empty/undefined usernames', () => {
+      expect(SecurityValidators.validateUsername(undefined)).toBeNull();
+      expect(SecurityValidators.validateUsername('')).toBeNull();
+    });
+  });
 });
 
 describe('AuthUtils', () => {

@@ -231,6 +231,95 @@ describe('Users Functions', () => {
         t.withIdentity(mockIdentity).mutation(api.users.update, updateData)
       ).rejects.toThrow('User with externalId non_existent_user not found');
     });
+
+    it('should throw error when updating with invalid username format', async () => {
+      const t = convexTest(schema, modules);
+
+      const userData = {
+        externalId: 'test_user_validation',
+        username: 'validname',
+      };
+
+      // Create user
+      await t.mutation(api.users.create, userData);
+
+      const mockIdentity = {
+        subject: 'test_user_validation',
+        tokenIdentifier: 'test_token_validation',
+        hasEmail: true,
+        environment: 'test',
+      };
+
+      // Test invalid username with special characters
+      await expect(
+        t.withIdentity(mockIdentity).mutation(api.users.update, {
+          externalId: 'test_user_validation',
+          username: 'invalid@username!',
+        })
+      ).rejects.toThrow('Username format is invalid');
+
+      // Test username too short
+      await expect(
+        t.withIdentity(mockIdentity).mutation(api.users.update, {
+          externalId: 'test_user_validation',
+          username: 'ab',
+        })
+      ).rejects.toThrow('Username must be at least 3 characters long');
+
+      // Test username too long
+      await expect(
+        t.withIdentity(mockIdentity).mutation(api.users.update, {
+          externalId: 'test_user_validation',
+          username: 'a'.repeat(31),
+        })
+      ).rejects.toThrow('Username must be no more than 30 characters long');
+    });
+
+    it('should allow users with Latin usernames to update their profiles', async () => {
+      const t = convexTest(schema, modules);
+
+      // First, simulate Clerk creating a user with Latin characters
+      const clerkUserData = {
+        id: 'clerk_user_latin_update',
+        username: 'françois-müller',
+        first_name: 'François',
+        last_name: 'Müller',
+        created_at: Date.now(),
+        updated_at: Date.now(),
+      };
+
+      await t.mutation((api.users as any).upsertFromClerk, {
+        data: clerkUserData,
+      });
+
+      // Verify user was created
+      let user = await t.query(api.users.getById, {
+        id: clerkUserData.id,
+      });
+      expect(user?.username).toBe('françois-müller');
+
+      // Now simulate the user updating their own profile with the same username
+      const mockIdentity = {
+        subject: 'clerk_user_latin_update',
+        tokenIdentifier: 'test_token_latin',
+        hasEmail: true,
+        environment: 'test',
+      };
+
+      // This should NOT throw an error - the user should be able to "update" to the same username
+      await expect(
+        t.withIdentity(mockIdentity).mutation(api.users.update, {
+          externalId: 'clerk_user_latin_update',
+          username: 'françois-müller', // Same username with Latin characters
+        })
+      ).resolves.not.toThrow();
+
+      // Verify the username is still there
+      user = await t.query(api.users.getById, {
+        id: clerkUserData.id,
+      });
+      expect(user?.username).toBe('françois-müller');
+    });
   });
 
   describe('User Queries', () => {
@@ -546,6 +635,60 @@ describe('Users Functions', () => {
       expect(user?.externalId).toBe(clerkUserData.id);
       expect(user?.username).toBe(clerkUserData.username);
       expect(user?.first_name).toBe(clerkUserData.first_name);
+    });
+
+    it('should handle clerk user upsert with Latin characters in username', async () => {
+      const t = convexTest(schema, modules);
+
+      const clerkUserData = {
+        id: 'clerk_user_latin',
+        username: 'josé-garcía',
+        first_name: 'José',
+        last_name: 'García',
+        image_url: 'https://clerk.example.com/avatar.jpg',
+        created_at: Date.now(),
+        updated_at: Date.now(),
+      };
+
+      await t.mutation((api.users as any).upsertFromClerk, {
+        data: clerkUserData,
+      });
+
+      // Verify user was created with Latin characters preserved
+      const user = await t.query(api.users.getById, {
+        id: clerkUserData.id,
+      });
+
+      expect(user).toBeDefined();
+      expect(user?.username).toBe('josé-garcía');
+      expect(user?.first_name).toBe('José');
+    });
+
+    it('should handle clerk user upsert with invalid username gracefully', async () => {
+      const t = convexTest(schema, modules);
+
+      const clerkUserData = {
+        id: 'clerk_user_invalid',
+        username: 'invalid@username!', // Invalid characters
+        first_name: 'Test',
+        last_name: 'User',
+        created_at: Date.now(),
+        updated_at: Date.now(),
+      };
+
+      // Should not throw - invalid username gets set to undefined
+      await t.mutation((api.users as any).upsertFromClerk, {
+        data: clerkUserData,
+      });
+
+      // Verify user was created but username was cleared
+      const user = await t.query(api.users.getById, {
+        id: clerkUserData.id,
+      });
+
+      expect(user).toBeDefined();
+      expect(user?.username).toBeUndefined(); // Should be cleared due to validation failure
+      expect(user?.first_name).toBe('Test');
     });
 
     it('should handle clerk user deletion', async () => {
