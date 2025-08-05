@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useConvex } from 'convex/react';
 
 interface ConvexBoundaryProps {
   children: React.ReactNode;
@@ -6,22 +7,21 @@ interface ConvexBoundaryProps {
 }
 
 export function ConvexBoundary({ children, fallback }: ConvexBoundaryProps) {
-  const [hasContext, setHasContext] = React.useState(false);
-
-  React.useEffect(() => {
-    try {
-      // Try to access Convex context
-      setHasContext(true);
-    } catch {
-      setHasContext(false);
+  // Try to access the Convex context
+  try {
+    const convex = useConvex();
+    // If we successfully get the convex client, we have proper context
+    if (!convex) {
+      if (fallback) {
+        return <>{fallback}</>;
+      }
+      return null;
     }
-  }, []);
-
-  if (!hasContext && fallback) {
-    return <>{fallback}</>;
-  }
-
-  if (!hasContext) {
+  } catch {
+    // If useConvex throws, we don't have proper context
+    if (fallback) {
+      return <>{fallback}</>;
+    }
     return null;
   }
 
