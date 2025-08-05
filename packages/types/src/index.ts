@@ -104,7 +104,7 @@ export interface Vibe {
   description: string;
   image?: string; // Legacy: URL string
   imageStorageId?: string; // New: Convex storage ID - using string for compatibility
-  createdBy: User | null;
+  createdBy: User | null | undefined;
   createdById?: string;
   createdAt: string;
   updatedAt?: string;

@@ -441,7 +441,9 @@ describe('Search Functions', () => {
 
       expect(mentionResult.vibes.length).toBeGreaterThanOrEqual(1);
       expect(
-        mentionResult.vibes.some((v) => v.description.includes('@mentions'))
+        mentionResult.vibes.some((v: any) =>
+          v.description.includes('@mentions')
+        )
       ).toBe(true);
     });
 

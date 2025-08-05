@@ -123,10 +123,10 @@ export const createOrUpdateEmojiRating = mutation({
 
     // Create rating notification for the vibe creator (only for new ratings or significant updates)
     try {
-      // Get the vibe to find the creator
+      // PERFORMANCE OPTIMIZED: Use indexed query instead of filter
       const vibe = await ctx.db
         .query('vibes')
-        .filter((q) => q.eq(q.field('id'), args.vibeId))
+        .withIndex('id', (q) => q.eq('id', args.vibeId))
         .first();
 
       if (vibe && vibe.createdById !== identity.subject) {
@@ -168,31 +168,21 @@ export const createOrUpdateEmojiRating = mutation({
     // Create new rating notifications for users who follow the rater (only for new ratings)
     if (!existingRating) {
       try {
-        // Get users who follow the current user (rater)
-        const followers = await ctx.db
-          .query('follows')
-          .withIndex('byFollowing', (q) =>
-            q.eq('followingId', identity.subject)
-          )
-          .collect();
+        // Get the rater's and vibe info in parallel for efficiency
+        const [raterUser, vibe] = await Promise.all([
+          ctx.db
+            .query('users')
+            .withIndex('byExternalId', (q) =>
+              q.eq('externalId', identity.subject)
+            )
+            .first(),
+          ctx.db
+            .query('vibes')
+            .withIndex('id', (q) => q.eq('id', args.vibeId))
+            .first(),
+        ]);
 
-        // Limit to recent followers to avoid performance issues (max 50)
-        const recentFollowers = followers.slice(0, 50);
-
-        // Get the rater's and vibe info (we already have some of this from above)
-        const raterUser = await ctx.db
-          .query('users')
-          .withIndex('byExternalId', (q) =>
-            q.eq('externalId', identity.subject)
-          )
-          .first();
-
-        const vibe = await ctx.db
-          .query('vibes')
-          .filter((q) => q.eq(q.field('id'), args.vibeId))
-          .first();
-
-        if (raterUser && vibe && recentFollowers.length > 0) {
+        if (raterUser && vibe) {
           const raterDisplayName = computeUserDisplayName(raterUser);
 
           // Get vibe creator info
@@ -205,27 +195,26 @@ export const createOrUpdateEmojiRating = mutation({
 
           const vibeCreatorName = computeUserDisplayName(vibeCreator);
 
-          // Create notifications for each follower
-          for (const follow of recentFollowers) {
-            await ctx.scheduler.runAfter(
-              0,
-              internal.notifications.createNotification,
-              {
-                userId: follow.followerId,
-                type: 'new_rating',
-                triggerUserId: identity.subject,
-                targetId: result ? result.toString() : '', // Link to the rating
-                title: `${raterDisplayName} reviewed a vibe`,
-                description: 'see their review',
-                metadata: {
-                  vibeTitle: vibe.title,
-                  vibeCreator: vibeCreatorName,
-                  emoji: args.emoji,
-                  ratingValue: args.value,
-                },
-              }
-            );
-          }
+          // PERFORMANCE OPTIMIZED: Use batch notification system
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.createFollowerNotifications,
+            {
+              triggerUserId: identity.subject,
+              triggerUserDisplayName: raterDisplayName,
+              type: 'new_rating',
+              targetId: result ? result.toString() : '', // Link to the rating
+              title: `${raterDisplayName} reviewed a vibe`,
+              description: 'see their review',
+              metadata: {
+                vibeTitle: vibe.title,
+                vibeCreator: vibeCreatorName,
+                emoji: args.emoji,
+                ratingValue: args.value,
+              },
+              maxFollowers: 50, // Explicit limit for performance
+            }
+          );
         }
       } catch (error) {
         // Don't fail the rating operation if notification creation fails

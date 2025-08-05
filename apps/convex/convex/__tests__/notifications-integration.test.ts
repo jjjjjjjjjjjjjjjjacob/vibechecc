@@ -298,7 +298,7 @@ describe('Notifications Integration', () => {
         .query(api.notifications.getNotifications, { limit: 10 });
 
       const newVibeNotifications = influencerNotifications.notifications.filter(
-        (n) => n.type === 'new_vibe'
+        (n: any) => n.type === 'new_vibe'
       );
       expect(newVibeNotifications).toHaveLength(0);
     });
@@ -388,7 +388,7 @@ describe('Notifications Integration', () => {
         .query(api.notifications.getNotifications, { limit: 10 });
 
       const newRatingNotifications = followerNotifications.notifications.filter(
-        (n) => n.type === 'new_rating'
+        (n: any) => n.type === 'new_rating'
       );
       expect(newRatingNotifications).toHaveLength(1);
       expect(newRatingNotifications[0].triggerUserId).toBe('reviewer');
@@ -405,7 +405,7 @@ describe('Notifications Integration', () => {
         .query(api.notifications.getNotifications, { limit: 10 });
 
       const ratingNotifications = creatorNotifications.notifications.filter(
-        (n) => n.type === 'rating'
+        (n: any) => n.type === 'rating'
       );
       expect(ratingNotifications).toHaveLength(1);
       expect(ratingNotifications[0].triggerUserId).toBe('reviewer');
@@ -481,7 +481,7 @@ describe('Notifications Integration', () => {
       expect(notifications.notifications).toHaveLength(2);
 
       const notificationTypes = notifications.notifications
-        .map((n) => n.type)
+        .map((n: any) => n.type)
         .sort();
       expect(notificationTypes).toEqual(['follow', 'rating']);
 
@@ -586,9 +586,9 @@ describe('Notifications Integration', () => {
         });
 
       expect(followOnly.notifications).toHaveLength(13); // 25/2 rounded up
-      expect(followOnly.notifications.every((n) => n.type === 'follow')).toBe(
-        true
-      );
+      expect(
+        followOnly.notifications.every((n: any) => n.type === 'follow')
+      ).toBe(true);
     });
 
     it('should maintain notification order by creation time', async () => {
@@ -656,7 +656,7 @@ describe('Notifications Integration', () => {
       expect(result.notifications[2].title).toBe('First notification');
 
       // Verify timestamps are in descending order
-      const timestamps = result.notifications.map((n) => n._creationTime!);
+      const timestamps = result.notifications.map((n: any) => n._creationTime!);
       for (let i = 0; i < timestamps.length - 1; i++) {
         expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i + 1]);
       }
