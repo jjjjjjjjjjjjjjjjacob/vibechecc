@@ -1,5 +1,6 @@
 import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
+import { internal } from './_generated/api';
 import { getCurrentUser, getCurrentUserOrThrow } from './users';
 
 // Internal mutation to create a notification
@@ -58,6 +59,122 @@ export const createNotification = internalMutation({
     });
 
     return notificationId;
+  },
+});
+
+// PERFORMANCE OPTIMIZED: Batch notification creation to reduce N+1 queries
+export const createBatchNotifications = internalMutation({
+  args: {
+    notifications: v.array(
+      v.object({
+        userId: v.string(),
+        type: v.union(
+          v.literal('follow'),
+          v.literal('rating'),
+          v.literal('new_vibe'),
+          v.literal('new_rating')
+        ),
+        triggerUserId: v.string(),
+        targetId: v.string(),
+        title: v.string(),
+        description: v.string(),
+        metadata: v.optional(v.any()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    if (args.notifications.length === 0) {
+      return [];
+    }
+
+    const now = Date.now();
+
+    // Get all unique user IDs to batch validate users exist
+    const allUserIds = new Set<string>();
+    args.notifications.forEach((notif) => {
+      allUserIds.add(notif.userId);
+      allUserIds.add(notif.triggerUserId);
+    });
+
+    // Batch query to check all users exist - MAJOR PERFORMANCE IMPROVEMENT
+    const existingUsers = await ctx.db
+      .query('users')
+      .filter((q) =>
+        q.or(
+          ...Array.from(allUserIds).map((id) => q.eq(q.field('externalId'), id))
+        )
+      )
+      .collect();
+
+    const existingUserIds = new Set(existingUsers.map((u) => u.externalId));
+
+    // Filter out notifications where users don't exist or self-notifications
+    const validNotifications = args.notifications.filter(
+      (notif) =>
+        notif.userId !== notif.triggerUserId &&
+        existingUserIds.has(notif.userId) &&
+        existingUserIds.has(notif.triggerUserId)
+    );
+
+    // Batch insert all valid notifications
+    const notificationIds = await Promise.all(
+      validNotifications.map((notif) =>
+        ctx.db.insert('notifications', {
+          ...notif,
+          read: false,
+          createdAt: now,
+        })
+      )
+    );
+
+    return notificationIds;
+  },
+});
+
+// PERFORMANCE OPTIMIZED: Create follower notifications in batches
+export const createFollowerNotifications = internalMutation({
+  args: {
+    triggerUserId: v.string(),
+    triggerUserDisplayName: v.string(),
+    type: v.union(v.literal('new_vibe'), v.literal('new_rating')),
+    targetId: v.string(),
+    title: v.string(),
+    description: v.string(),
+    metadata: v.optional(v.any()),
+    maxFollowers: v.optional(v.number()), // Limit to prevent performance issues
+  },
+  handler: async (ctx, args): Promise<string[]> => {
+    const maxFollowers = args.maxFollowers ?? 50; // Default limit for performance
+
+    // Get followers in one query with limit
+    const followers = await ctx.db
+      .query('follows')
+      .withIndex('byFollowing', (q) => q.eq('followingId', args.triggerUserId))
+      .order('desc') // Get most recent followers first
+      .take(maxFollowers);
+
+    if (followers.length === 0) {
+      return [];
+    }
+
+    // Build batch notifications
+    const notifications = followers.map((follow) => ({
+      userId: follow.followerId,
+      type: args.type,
+      triggerUserId: args.triggerUserId,
+      targetId: args.targetId,
+      title: args.title,
+      description: args.description,
+      metadata: args.metadata,
+    }));
+
+    // Use batch creation (much more efficient)
+    return await ctx.runMutation(
+      internal.notifications.createBatchNotifications,
+      {
+        notifications,
+      }
+    );
   },
 });
 

@@ -147,8 +147,8 @@ describe('emojis', () => {
 
       const result = await t.query(api.emojis.search, { searchTerm: 'hot' });
       expect(result.emojis).toHaveLength(2);
-      expect(result.emojis.map((e) => e.emoji)).toContain('🔥');
-      expect(result.emojis.map((e) => e.emoji)).toContain('🌶️');
+      expect(result.emojis.map((e: any) => e.emoji)).toContain('🔥');
+      expect(result.emojis.map((e: any) => e.emoji)).toContain('🌶️');
     });
 
     it('should filter by category', async () => {
@@ -174,7 +174,9 @@ describe('emojis', () => {
 
       const result = await t.query(api.emojis.search, { category: 'smileys' });
       expect(result.emojis).toHaveLength(2);
-      expect(result.emojis.every((e) => e.category === 'smileys')).toBe(true);
+      expect(result.emojis.every((e: any) => e.category === 'smileys')).toBe(
+        true
+      );
     });
 
     it('should paginate results', async () => {
@@ -204,7 +206,7 @@ describe('emojis', () => {
 
       // Ensure no duplicates
       const allEmojis = [...page1.emojis, ...page2.emojis];
-      const uniqueEmojis = new Set(allEmojis.map((e) => e.emoji));
+      const uniqueEmojis = new Set(allEmojis.map((e: any) => e.emoji));
       expect(uniqueEmojis.size).toBe(10);
     });
   });
@@ -235,9 +237,9 @@ describe('emojis', () => {
         emojis: ['🔥', '💯'],
       });
       expect(result).toHaveLength(2);
-      expect(result.find((e) => e.emoji === '🔥')?.name).toBe('fire');
-      expect(result.find((e) => e.emoji === '💯')?.name).toBe('100');
-      expect(result.find((e) => e.emoji === '😍')).toBeUndefined();
+      expect(result.find((e: any) => e.emoji === '🔥')?.name).toBe('fire');
+      expect(result.find((e: any) => e.emoji === '💯')?.name).toBe('100');
+      expect(result.find((e: any) => e.emoji === '😍')).toBeUndefined();
     });
 
     it('should handle non-existent emojis', async () => {
@@ -281,7 +283,9 @@ describe('emojis', () => {
 
       const result = await t.query(api.emojis.getPopular, { limit: 5 });
       expect(result).toHaveLength(5);
-      expect(result.every((e) => popularEmojis.includes(e.emoji))).toBe(true);
+      expect(result.every((e: any) => popularEmojis.includes(e.emoji))).toBe(
+        true
+      );
     });
 
     it('should return default number of emojis when no limit', async () => {

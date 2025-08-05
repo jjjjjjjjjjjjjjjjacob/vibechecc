@@ -371,16 +371,15 @@ export const getMutualFollows = query({
       .map((f) => f.followingId)
       .slice(0, limit);
 
-    // Get user details for mutual follows
-    const mutualFollows = await Promise.all(
-      mutualFollowIds.map(async (userId) => {
-        const user = await ctx.db
-          .query('users')
-          .withIndex('byExternalId', (q) => q.eq('externalId', userId))
-          .first();
-        return user;
-      })
-    );
+    // PERFORMANCE OPTIMIZED: Batch user queries to eliminate N+1 pattern
+    const mutualUsers = await ctx.db
+      .query('users')
+      .filter((q) =>
+        q.or(...mutualFollowIds.map((id) => q.eq(q.field('externalId'), id)))
+      )
+      .collect();
+
+    const mutualFollows = mutualUsers;
 
     return {
       mutualFollows: mutualFollows.filter((user) => user !== null),

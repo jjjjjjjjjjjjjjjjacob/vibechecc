@@ -3,6 +3,7 @@ import { convexTest, type TestConvex } from 'convex-test';
 import { api, internal } from '../_generated/api';
 import schema from '../schema';
 import { modules } from '../../vitest.setup';
+import type { Notification } from '@viberatr/types';
 
 describe('Notifications', () => {
   let t: TestConvex<typeof schema>;
@@ -445,9 +446,9 @@ describe('Notifications', () => {
         .query(api.notifications.getNotifications, {});
 
       expect(beforeNotifications.notifications).toHaveLength(2);
-      expect(beforeNotifications.notifications.every((n) => !n.read)).toBe(
-        true
-      );
+      expect(
+        beforeNotifications.notifications.every((n: Notification) => !n.read)
+      ).toBe(true);
 
       // Mark all as read
       const result = await t
@@ -462,7 +463,9 @@ describe('Notifications', () => {
         .withIdentity({ subject: 'user1' })
         .query(api.notifications.getNotifications, {});
 
-      expect(afterNotifications.notifications.every((n) => n.read)).toBe(true);
+      expect(
+        afterNotifications.notifications.every((n: Notification) => n.read)
+      ).toBe(true);
     });
 
     it('should mark all notifications of specific type as read', async () => {
@@ -510,10 +513,10 @@ describe('Notifications', () => {
         .query(api.notifications.getNotifications, {});
 
       const followNotification = notifications.notifications.find(
-        (n) => n.type === 'follow'
+        (n: Notification) => n.type === 'follow'
       );
       const ratingNotification = notifications.notifications.find(
-        (n) => n.type === 'rating'
+        (n: Notification) => n.type === 'rating'
       );
 
       expect(followNotification?.read).toBe(true);
@@ -894,7 +897,7 @@ describe('Notifications', () => {
         .query(api.notifications.getNotifications, {});
 
       const newVibeNotifications = notifications.notifications.filter(
-        (n) => n.type === 'new_vibe'
+        (n: Notification) => n.type === 'new_vibe'
       );
       expect(newVibeNotifications).toHaveLength(1);
       expect(newVibeNotifications[0].triggerUserId).toBe('user1');
@@ -985,7 +988,7 @@ describe('Notifications', () => {
         .query(api.notifications.getNotifications, {});
 
       const newRatingNotifications = notifications.notifications.filter(
-        (n) => n.type === 'new_rating'
+        (n: Notification) => n.type === 'new_rating'
       );
       expect(newRatingNotifications).toHaveLength(1);
       expect(newRatingNotifications[0].triggerUserId).toBe('user1');
@@ -1031,7 +1034,7 @@ describe('Notifications', () => {
         .query(api.notifications.getNotifications, {});
 
       const ratingNotifications = notifications.notifications.filter(
-        (n) => n.type === 'rating'
+        (n: Notification) => n.type === 'rating'
       );
       expect(ratingNotifications).toHaveLength(0);
     });
@@ -1205,7 +1208,7 @@ describe('Notifications', () => {
       expect(notifications.notifications).toHaveLength(validTypes.length);
 
       const createdTypes = notifications.notifications
-        .map((n) => n.type)
+        .map((n: Notification) => n.type)
         .sort();
       expect(createdTypes).toEqual([...validTypes].sort());
     });
