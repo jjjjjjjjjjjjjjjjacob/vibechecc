@@ -211,4 +211,52 @@ export const trackEvents = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errorOccurred: (error: string, context?: Record<string, any>) =>
     analytics.capture('error_occurred', { error, ...context }),
+
+  // Survey events
+  surveyTriggered: (
+    surveyType: string,
+    userId: string,
+    context?: Record<string, any>
+  ) =>
+    analytics.capture('survey_triggered', {
+      survey_type: surveyType,
+      user_id: userId,
+      ...context,
+    }),
+
+  surveyShown: (surveyId: string, userId: string, method: string) =>
+    analytics.capture('survey_shown', {
+      survey_id: surveyId,
+      user_id: userId,
+      show_method: method,
+    }),
+
+  surveyCompleted: (
+    surveyType: string,
+    userId: string,
+    responses: Record<string, any>
+  ) =>
+    analytics.capture('survey_completed', {
+      survey_type: surveyType,
+      user_id: userId,
+      responses,
+    }),
+
+  surveyDismissed: (surveyType: string, userId: string, reason: string) =>
+    analytics.capture('survey_dismissed', {
+      survey_type: surveyType,
+      user_id: userId,
+      dismissal_reason: reason,
+    }),
+
+  userDiscoveryChannel: (
+    channel: string,
+    interest: string,
+    experience: string
+  ) =>
+    analytics.capture('user_discovery_channel', {
+      channel,
+      interest,
+      experience,
+    }),
 } as const;
