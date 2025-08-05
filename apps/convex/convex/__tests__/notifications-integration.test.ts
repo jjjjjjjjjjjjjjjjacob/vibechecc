@@ -770,7 +770,9 @@ describe('Notifications Integration', () => {
 
       expect(notifications.notifications).toHaveLength(1);
       expect(notifications.notifications[0].triggerUser).toBeDefined();
-      expect(notifications.notifications[0].title).toBe('Temp user followed you');
+      expect(notifications.notifications[0].title).toBe(
+        'Temp user followed you'
+      );
     });
   });
 });

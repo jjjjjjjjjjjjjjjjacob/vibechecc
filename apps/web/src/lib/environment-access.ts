@@ -1,86 +1,125 @@
-// Environment access control utilities
-// This module provides functionality to restrict access to dev and ephemeral environments
+import { analytics } from './posthog';
+
+/**
+ * Utility functions for environment-based access control
+ */
 
 export interface EnvironmentInfo {
-  subdomain?: string;
-  hostname: string;
-  isProduction: boolean;
-  isDevelopment: boolean;
-  isEphemeral: boolean;
+  subdomain: string | null;
+  isDevEnvironment: boolean;
+  isEphemeralEnvironment: boolean;
+  requiresDevAccess: boolean;
 }
 
 /**
- * Get current environment information
+ * Gets the current subdomain from the window location
  */
-export function getEnvironmentInfo(): EnvironmentInfo {
+export function getCurrentSubdomain(): string | null {
   if (typeof window === 'undefined') {
-    return {
-      hostname: 'localhost',
-      isProduction: false,
-      isDevelopment: true,
-      isEphemeral: false,
-    };
+    return null;
   }
 
   const hostname = window.location.hostname;
-  const isProduction =
-    hostname === 'viberatr.io' || hostname === 'www.viberatr.io';
-  const isDevelopment =
-    hostname.includes('localhost') || hostname.includes('127.0.0.1');
-  const isEphemeral = !isProduction && !isDevelopment;
+  const parts = hostname.split('.');
 
-  let subdomain: string | undefined;
-  if (isEphemeral) {
-    const parts = hostname.split('.');
-    if (parts.length > 2) {
-      subdomain = parts[0];
-    }
+  // For localhost development, subdomain might be in a different format
+  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+    return null; // No subdomain restrictions for localhost
   }
+
+  // For production domains like dev.viberatr.io, pr-123.viberatr.io
+  if (parts.length > 2) {
+    return parts[0];
+  }
+
+  return null;
+}
+
+/**
+ * Analyzes the current environment based on subdomain
+ */
+export function getEnvironmentInfo(): EnvironmentInfo {
+  const subdomain = getCurrentSubdomain();
+
+  const isDevEnvironment = subdomain === 'dev';
+  const isEphemeralEnvironment = subdomain?.startsWith('pr-') ?? false;
+  const requiresDevAccess = isDevEnvironment || isEphemeralEnvironment;
 
   return {
     subdomain,
-    hostname,
-    isProduction,
-    isDevelopment,
-    isEphemeral,
+    isDevEnvironment,
+    isEphemeralEnvironment,
+    requiresDevAccess,
   };
 }
 
 /**
- * Check if current user can access the current environment
- * For now, allow all access - this can be enhanced with PostHog feature flags
+ * Checks if the current user has access to dev environments
+ * Uses PostHog feature flag: 'dev-environment-access'
+ */
+export function hasDevEnvironmentAccess(): boolean {
+  if (!analytics.isInitialized()) {
+    return false;
+  }
+
+  return analytics.isFeatureEnabled('dev-environment-access');
+}
+
+/**
+ * Checks if the user should be allowed to access the current environment
  */
 export function canAccessCurrentEnvironment(): boolean {
-  const env = getEnvironmentInfo();
+  // Always allow access for localhost development
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+      return true;
+    }
+  }
 
-  // Always allow access to production and development
-  if (env.isProduction || env.isDevelopment) {
+  const envInfo = getEnvironmentInfo();
+
+  // If it's not a restricted environment, allow access
+  if (!envInfo.requiresDevAccess) {
     return true;
   }
 
-  // For ephemeral environments, allow access for now
-  // This can be enhanced with PostHog cohort checks
-  return true;
+  // For dev/ephemeral environments, check the feature flag
+  return hasDevEnvironmentAccess();
 }
 
 /**
- * Get access denial message based on environment
+ * Gets a user-friendly message for access denial
  */
-export function getAccessDenialMessage(envInfo: EnvironmentInfo): string {
-  if (envInfo.isEphemeral) {
-    return `access to ${envInfo.subdomain || 'this'} environment is restricted. please sign in with an authorized account.`;
+export function getAccessDenialMessage(envInfo?: EnvironmentInfo): string {
+  const env = envInfo || getEnvironmentInfo();
+
+  if (env.isDevEnvironment) {
+    return 'Access to the development environment is restricted to authorized developers.';
   }
 
-  return 'access to this environment is restricted. please contact an administrator.';
+  if (env.isEphemeralEnvironment) {
+    return 'Access to this preview environment is restricted to authorized developers.';
+  }
+
+  return 'Access to this environment is restricted.';
 }
 
 /**
- * Track environment access attempt
+ * Tracks access attempts for analytics
  */
 export function trackEnvironmentAccess(
   allowed: boolean,
-  envInfo: EnvironmentInfo
-): void {
-  // PostHog tracking can be added here when needed
-  console.log('Environment access:', { allowed, envInfo });
+  envInfo?: EnvironmentInfo
+) {
+  const env = envInfo || getEnvironmentInfo();
+
+  analytics.capture('environment_access_attempt', {
+    subdomain: env.subdomain,
+    is_dev_environment: env.isDevEnvironment,
+    is_ephemeral_environment: env.isEphemeralEnvironment,
+    requires_dev_access: env.requiresDevAccess,
+    access_granted: allowed,
+    has_feature_flag: hasDevEnvironmentAccess(),
+  });
 }

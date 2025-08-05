@@ -23,6 +23,8 @@ import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
 import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
 import { OnboardingGuard } from '@/features/onboarding/components/onboarding-guard';
+import { EnvironmentAccessGuard } from '@/components/environment-access-guard';
+import { NewUserSurvey } from '@/components/new-user-survey';
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
@@ -203,12 +205,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             >
               <PostHogPageTracker />
               <ClerkPostHogIntegration />
-              <OnboardingGuard>
-                <Header />
-                <LoadingIndicator />
+              <EnvironmentAccessGuard>
+                <OnboardingGuard>
+                  <Header />
+                  <LoadingIndicator />
 
-                <main className="flex-1">{children}</main>
-              </OnboardingGuard>
+                  <main className="flex-1">{children}</main>
+                  <NewUserSurvey />
+                </OnboardingGuard>
+              </EnvironmentAccessGuard>
 
               <Footer />
               <Toaster />
