@@ -9,10 +9,19 @@ jobs:
   static-checks:
     uses: ./.github/workflows/static-checks.yml
 
-  deploy:
+  release:
     needs: static-checks
+    uses: ./.github/workflows/release.yml
+    with:
+      prerelease: true
+      branch: dev
+    secrets: inherit
+
+  deploy:
+    needs: [static-checks, release]
     uses: ./.github/workflows/deploy.yml
     with:
       environment: development
       branch: dev
+      version: ${{ needs.release.outputs.version }}
     secrets: inherit
