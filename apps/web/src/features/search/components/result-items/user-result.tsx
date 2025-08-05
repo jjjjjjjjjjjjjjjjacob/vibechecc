@@ -24,8 +24,12 @@ export function UserResult({ result, onSelect }: UserResultProps) {
       className="data-[selected=true]:bg-muted/60 flex items-center gap-3 py-3"
     >
       <Avatar className="h-10 w-10">
-        <AvatarImage src={result.image} />
-        <AvatarFallback>{result.title?.[0] || '?'}</AvatarFallback>
+        <AvatarImage src={result.image} alt={result.title || result.username} />
+        <AvatarFallback className="bg-muted text-muted-foreground">
+          {result.title?.[0]?.toUpperCase() ||
+            result.username?.[0]?.toUpperCase() ||
+            '?'}
+        </AvatarFallback>
       </Avatar>
 
       <div className="flex-1">

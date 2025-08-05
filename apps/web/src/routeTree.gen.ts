@@ -25,6 +25,7 @@ import { Route as VibesCreateRouteImport } from './routes/vibes/create'
 import { Route as VibesVibeIdRouteImport } from './routes/vibes/$vibeId'
 import { Route as UsersUsernameRouteImport } from './routes/users.$username'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
+import { Route as RatingsRatingIdRouteImport } from './routes/ratings/$ratingId'
 import { Route as VibesVibeIdEditRouteImport } from './routes/vibes/$vibeId/edit'
 
 const TermsRoute = TermsRouteImport.update({
@@ -107,6 +108,11 @@ const SitemapXmlRoute = SitemapXmlRouteImport.update({
   path: '/sitemap/xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RatingsRatingIdRoute = RatingsRatingIdRouteImport.update({
+  id: '/ratings/$ratingId',
+  path: '/ratings/$ratingId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VibesVibeIdEditRoute = VibesVibeIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
+  '/ratings/$ratingId': typeof RatingsRatingIdRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
+  '/ratings/$ratingId': typeof RatingsRatingIdRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/terms': typeof TermsRoute
+  '/ratings/$ratingId': typeof RatingsRatingIdRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/terms'
+    | '/ratings/$ratingId'
     | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/terms'
+    | '/ratings/$ratingId'
     | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/terms'
+    | '/ratings/$ratingId'
     | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
@@ -242,6 +254,7 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   TermsRoute: typeof TermsRoute
+  RatingsRatingIdRoute: typeof RatingsRatingIdRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
   UsersUsernameRoute: typeof UsersUsernameRoute
   VibesVibeIdRoute: typeof VibesVibeIdRouteWithChildren
@@ -364,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapXmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ratings/$ratingId': {
+      id: '/ratings/$ratingId'
+      path: '/ratings/$ratingId'
+      fullPath: '/ratings/$ratingId'
+      preLoaderRoute: typeof RatingsRatingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vibes/$vibeId/edit': {
       id: '/vibes/$vibeId/edit'
       path: '/edit'
@@ -397,6 +417,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   TermsRoute: TermsRoute,
+  RatingsRatingIdRoute: RatingsRatingIdRoute,
   SitemapXmlRoute: SitemapXmlRoute,
   UsersUsernameRoute: UsersUsernameRoute,
   VibesVibeIdRoute: VibesVibeIdRouteWithChildren,

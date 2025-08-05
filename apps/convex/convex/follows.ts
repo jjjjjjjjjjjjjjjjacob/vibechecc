@@ -1,7 +1,32 @@
 import { mutation, query, type QueryCtx } from './_generated/server';
 import { v } from 'convex/values';
 import { getCurrentUser, getCurrentUserOrThrow } from './users';
+import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
+
+// Helper function to compute user display name (backend version)
+function computeUserDisplayName(user: Doc<'users'> | null): string {
+  if (!user) {
+    return 'Someone';
+  }
+
+  // Priority 1: username
+  if (user.username?.trim()) {
+    return user.username.trim();
+  }
+
+  // Priority 2: first_name + last_name
+  const firstName = user.first_name?.trim();
+  const lastName = user.last_name?.trim();
+  if (firstName || lastName) {
+    return `${firstName || ''} ${lastName || ''}`.trim();
+  }
+
+  // No legacy name field in Convex schema - skip this step
+
+  // Fallback
+  return 'Someone';
+}
 
 // Follow a user
 export const follow = mutation({
@@ -56,6 +81,26 @@ export const follow = mutation({
     await ctx.db.patch(currentUser._id, {
       followingCount: (currentUser.followingCount ?? 0) + 1,
     });
+
+    // Create follow notification for the user being followed
+    try {
+      const followerDisplayName = computeUserDisplayName(currentUser);
+      await ctx.scheduler.runAfter(
+        0,
+        internal.notifications.createNotification,
+        {
+          userId: args.followingId,
+          type: 'follow',
+          triggerUserId: currentUser.externalId,
+          targetId: currentUser.externalId, // Link to follower's profile
+          title: `${followerDisplayName} followed you`,
+          description: 'check out their profile',
+        }
+      );
+    } catch (error) {
+      // Don't fail the follow operation if notification creation fails
+      console.error('Failed to create follow notification:', error);
+    }
 
     return { success: true, followId };
   },

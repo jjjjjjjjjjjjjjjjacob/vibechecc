@@ -256,9 +256,21 @@ export function UserProfileView({
                     <h1 className="text-foreground text-3xl font-bold lowercase drop-shadow-lg sm:text-4xl">
                       {displayName}
                     </h1>
-                    <p className="text-muted-foreground text-lg font-medium drop-shadow-md sm:text-xl">
-                      @{user.username}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-muted-foreground text-lg font-medium drop-shadow-md sm:text-xl">
+                        @{user.username}
+                      </p>
+                      {/* Follow Button - only show for authenticated users viewing other profiles */}
+                      {clerkUser && !isOwnProfile && (
+                        <FollowButton
+                          targetUserId={user.externalId}
+                          username={user.username}
+                          variant="default"
+                          size="sm"
+                          className="ml-auto sm:ml-0"
+                        />
+                      )}
+                    </div>
                   </div>
 
                   {/* Bio */}
@@ -386,17 +398,6 @@ export function UserProfileView({
                           </Button>
                         )}
                       </>
-                    )}
-
-                    {/* Follow Button - only show for authenticated users viewing other profiles */}
-                    {clerkUser && !isOwnProfile && (
-                      <FollowButton
-                        targetUserId={user.externalId}
-                        username={user.username}
-                        variant="default"
-                        size="sm"
-                        className="ml-auto sm:ml-0"
-                      />
                     )}
                   </div>
                 </div>

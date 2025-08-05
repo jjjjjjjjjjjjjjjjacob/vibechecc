@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
 import type { VibeSearchResult } from '@viberatr/types';
 
 interface VibeResultProps {
@@ -12,6 +13,7 @@ interface VibeResultProps {
 
 export function VibeResult({ result, onSelect }: VibeResultProps) {
   const navigate = useNavigate();
+  const [imageError, setImageError] = useState(false);
 
   const handleSelect = () => {
     navigate({ to: `/vibes/$vibeId`, params: { vibeId: result.id } });
@@ -24,11 +26,12 @@ export function VibeResult({ result, onSelect }: VibeResultProps) {
       onSelect={handleSelect}
       className="data-[selected=true]:bg-muted/60 flex items-start gap-3 py-3"
     >
-      {result.image && (
+      {result.image && !imageError && (
         <img
           src={result.image}
           alt={result.title}
           className="h-12 w-12 rounded-md object-cover"
+          onError={() => setImageError(true)}
         />
       )}
 

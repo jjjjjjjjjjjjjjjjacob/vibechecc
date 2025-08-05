@@ -201,6 +201,27 @@ const schema = defineSchema({
     .index('byFollower', ['followerId'])
     .index('byFollowing', ['followingId'])
     .index('byFollowerAndFollowing', ['followerId', 'followingId']),
+
+  // Notifications table to track user notifications
+  notifications: defineTable({
+    userId: v.string(), // External ID of user receiving notification
+    type: v.union(
+      v.literal('follow'),
+      v.literal('rating'),
+      v.literal('new_vibe'),
+      v.literal('new_rating')
+    ),
+    triggerUserId: v.string(), // External ID of user who triggered notification
+    targetId: v.string(), // ID of the target - vibeId, ratingId, etc.
+    title: v.string(), // e.g., "John followed you"
+    description: v.string(), // e.g., "Check out their profile"
+    metadata: v.optional(v.any()), // Additional data like vibe title, rating emoji
+    read: v.boolean(), // Whether notification has been read
+    createdAt: v.number(), // Timestamp
+  })
+    .index('byUser', ['userId', 'createdAt'])
+    .index('byUserAndRead', ['userId', 'read', 'createdAt'])
+    .index('byUserAndType', ['userId', 'type', 'createdAt']),
 });
 export default schema;
 
@@ -212,6 +233,7 @@ const _searchHistory = schema.tables.searchHistory.validator;
 const _trendingSearches = schema.tables.trendingSearches.validator;
 const _searchMetrics = schema.tables.searchMetrics.validator;
 const _follows = schema.tables.follows.validator;
+const _notification = schema.tables.notifications.validator;
 
 export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
@@ -221,6 +243,7 @@ export type SearchHistory = Infer<typeof _searchHistory>;
 export type TrendingSearches = Infer<typeof _trendingSearches>;
 export type SearchMetrics = Infer<typeof _searchMetrics>;
 export type Follow = Infer<typeof _follows>;
+export type Notification = Infer<typeof _notification>;
 
 export const createVibeSchema = v.object({
   title: vibe.fields.title,

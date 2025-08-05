@@ -97,7 +97,13 @@ export default tseslint.config(
   },
   // Special rules for test files
   {
-    files: ['**/*.test.{js,jsx,ts,tsx}', '**/__tests__/**/*.{js,jsx,ts,tsx}', '**/vitest.setup.ts', '**/test-utils.tsx', '**/mock-*.{js,jsx,ts,tsx}'],
+    files: [
+      '**/*.test.{js,jsx,ts,tsx}',
+      '**/__tests__/**/*.{js,jsx,ts,tsx}',
+      '**/vitest.setup.ts',
+      '**/test-utils.tsx',
+      '**/mock-*.{js,jsx,ts,tsx}',
+    ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       'no-console': 'off',

@@ -11,6 +11,7 @@ export const modules = {
   'convex/tags.ts': () => import('./convex/tags'),
   'convex/follows.ts': () => import('./convex/follows'),
   'convex/files.ts': () => import('./convex/files'),
+  'convex/notifications.ts': () => import('./convex/notifications'),
   'convex/_generated/api.js': () => import('./convex/_generated/api'),
   'convex/_generated/server.js': () => import('./convex/_generated/server'),
 };

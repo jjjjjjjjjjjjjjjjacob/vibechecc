@@ -674,19 +674,23 @@ function VibePage() {
               {vibe.ratings.filter((r) => r.review).length > 0 ? (
                 <div className="space-y-4">
                   {vibe.ratings
-
                     .filter((r) => r.review)
                     .sort(
                       (a, b) =>
                         new Date(b.createdAt).getTime() -
                         new Date(a.createdAt).getTime()
                     )
-
                     .map((rating, index) => (
                       <div
                         key={index}
+                        id={
+                          rating._id
+                            ? `rating-${rating._id}`
+                            : `rating-${index}`
+                        }
                         className="border-b pb-4 last:border-b-0"
                       >
+                        <a href={`#rating-${rating._id}`} className="anchor" />
                         <div className="mb-3 flex items-start gap-3">
                           {rating.user && rating.user.username ? (
                             <Link
