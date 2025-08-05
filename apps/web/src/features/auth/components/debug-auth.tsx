@@ -82,8 +82,14 @@ export function DebugAuth() {
               <li>hasAuth: {String(debugData?.hasAuth)}</li>
               <li>hasIdentity: {String(debugData?.hasIdentity)}</li>
               <li>subject: {debugData?.identity?.subject || 'null'}</li>
-              <li>givenName: {debugData?.identity?.givenName || 'null'}</li>
-              <li>email: {debugData?.identity?.email || 'null'}</li>
+              <li>
+                tokenIdentifier:{' '}
+                {(debugData?.identity as any)?.tokenIdentifier || 'null'}
+              </li>
+              <li>
+                hasEmail:{' '}
+                {String((debugData?.identity as any)?.hasEmail) || 'null'}
+              </li>
             </ul>
           )}
         </div>

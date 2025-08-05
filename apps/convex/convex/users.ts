@@ -10,6 +10,7 @@ import {
 import { v, Validator } from 'convex/values';
 import type { UserJSON } from '@clerk/backend';
 import { internal } from './_generated/api';
+import { AuthUtils, SecurityValidators } from './lib/securityValidators';
 
 // PostHog configuration for server-side tracking
 const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY;
@@ -86,19 +87,58 @@ async function createUserIfNotExistsInternal(
   return user;
 }
 
-// Get all users
+// Get all users - RESTRICTED: Only for authenticated admin users
 export const getAll = query({
   handler: async (ctx) => {
-    return await ctx.db.query('users').collect();
+    // SECURITY: Require admin privileges for user list access
+    await AuthUtils.requireAdmin(ctx);
+
+    // SECURITY: Only return limited public profile data
+    const users = await ctx.db.query('users').collect();
+    return users.map((user) => ({
+      _id: user._id,
+      externalId: user.externalId,
+      username: user.username,
+      image_url: user.image_url,
+      profile_image_url: user.profile_image_url,
+      created_at: user.created_at,
+      // Do not expose sensitive fields like email, interests, etc.
+    }));
   },
 });
 
-// Get a user by externalId (Clerk user ID)
+// Get a user by externalId (Clerk user ID) - SECURITY ENHANCED
 export const getById = query({
   args: { id: v.string() },
   handler: async (ctx, args) => {
-    // Get user by externalId (Clerk user ID)
-    return await userByExternalId(ctx, args.id);
+    const identity = await ctx.auth.getUserIdentity();
+    const user = await userByExternalId(ctx, args.id);
+
+    if (!user) {
+      return null;
+    }
+
+    // SECURITY: Only return full data if accessing own profile or authenticated
+    const isOwnProfile = identity?.subject === args.id;
+
+    if (isOwnProfile) {
+      // Return full profile data for own profile
+      return user;
+    } else {
+      // Return limited public data for other users
+      return {
+        _id: user._id,
+        externalId: user.externalId,
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        image_url: user.image_url,
+        profile_image_url: user.profile_image_url,
+        bio: user.bio,
+        created_at: user.created_at,
+        // Do not expose private fields like interests, socials, etc.
+      };
+    }
   },
 });
 
@@ -145,7 +185,7 @@ export const create = mutation({
   },
 });
 
-// Update a user by externalId (Clerk user ID)
+// Update a user by externalId (Clerk user ID) - SECURITY ENHANCED
 export const update = mutation({
   args: {
     externalId: v.string(),
@@ -153,15 +193,33 @@ export const update = mutation({
     image_url: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // SECURITY: Require authentication
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Authentication required to update user');
+    }
+
+    // SECURITY: Only allow users to update their own profile
+    if (identity.subject !== args.externalId) {
+      throw new Error('You can only update your own profile');
+    }
+
     const user = await userByExternalId(ctx, args.externalId);
 
     if (!user) {
       throw new Error(`User with externalId ${args.externalId} not found`);
     }
 
-    const updates: Record<string, string> = {};
+    const updates: Record<string, string | number> = {};
 
     if (args.username !== undefined) {
+      // SECURITY: Validate username format using centralized validator
+      const validatedUsername = SecurityValidators.validateUsername(
+        args.username
+      );
+      if (validatedUsername === null) {
+        throw new Error('Invalid username provided');
+      }
       updates.username = args.username;
     }
 
@@ -170,6 +228,7 @@ export const update = mutation({
     }
 
     if (Object.keys(updates).length > 0) {
+      updates.updated_at = Date.now();
       return await ctx.db.patch(user._id, updates);
     }
 
@@ -463,45 +522,39 @@ export const updateOnboardingDataInternal = internalMutation({
   },
 });
 
-// Debug authentication (temporary)
+// SECURITY: Debug authentication - RESTRICTED TO DEVELOPMENT ONLY
 export const debugAuth = query({
   handler: async (ctx) => {
-    // console.log('debugAuth called');
+    // SECURITY: Only allow in development environment
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Debug functions are not available in production');
+    }
 
-    // Check if there's any auth context at all
-    // console.log('ctx.auth exists:', !!ctx.auth);
+    // Allow debug access with or without authentication for testing
+    const identity = await ctx.auth.getUserIdentity();
 
     try {
-      const identity = await ctx.auth.getUserIdentity();
-      // console.log('Full identity object:', identity);
-
-      // Note: Raw token access isn't available in Convex queries
-      // console.log('Raw token access not available in queries');
-
       return {
         hasAuth: !!ctx.auth,
         hasIdentity: !!identity,
         hasToken: false, // Not available in queries
+        // SECURITY: Limited identity info only
         identity: identity
           ? {
               subject: identity.subject,
-              tokenIdentifier: identity.tokenIdentifier,
-              givenName: identity.givenName,
-              familyName: identity.familyName,
-              nickname: identity.nickname,
-              pictureUrl: identity.pictureUrl,
-              email: identity.email,
+              tokenIdentifier:
+                identity.tokenIdentifier?.substring(0, 10) + '...', // Truncated
+              hasEmail: !!identity.hasEmail,
+              environment: process.env.NODE_ENV || 'unknown',
             }
           : null,
       };
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error in debugAuth:', error);
+    } catch {
       return {
         hasAuth: !!ctx.auth,
         hasIdentity: false,
         hasToken: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: 'Debug error occurred',
         identity: null,
       };
     }
@@ -596,9 +649,25 @@ export const getOnboardingStatus = query({
 export const upsertFromClerk = internalMutation({
   args: { data: v.any() as Validator<UserJSON> }, // no runtime validation, trust Clerk
   async handler(ctx, { data }) {
+    // SECURITY: Validate username from Clerk to ensure consistency
+    let validatedUsername = data.username || undefined;
+    if (validatedUsername) {
+      try {
+        validatedUsername =
+          SecurityValidators.validateUsername(validatedUsername) || undefined;
+      } catch (error) {
+        // Log validation error but don't fail the webhook - use undefined instead
+        console.warn(
+          `Clerk username validation failed for user ${data.id}:`,
+          error
+        );
+        validatedUsername = undefined;
+      }
+    }
+
     const userAttributes = {
       externalId: data.id,
-      username: data.username || undefined,
+      username: validatedUsername,
       first_name: data.first_name || undefined,
       last_name: data.last_name || undefined,
       image_url: data.image_url || undefined,
@@ -637,7 +706,7 @@ export const deleteFromClerk = internalMutation({
   },
 });
 
-// Create user for seeding purposes (bypasses authentication)
+// Create user for seeding purposes (bypasses authentication) - SECURED
 export const createForSeed = mutation({
   args: {
     externalId: v.string(),
@@ -648,10 +717,17 @@ export const createForSeed = mutation({
     created_at: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    // Security guard: prevent usage in production environment
+    // SECURITY: Strict environment and authentication checks
     if (process.env.NODE_ENV === 'production') {
       throw new Error(
-        'createForSeed is not available in production environment'
+        'Seed functions are not available in production environment'
+      );
+    }
+
+    // SECURITY: Additional check for test/development environment
+    if (!process.env.VITEST && process.env.NODE_ENV !== 'development') {
+      throw new Error(
+        'Seed functions only available in test or development environments'
       );
     }
 

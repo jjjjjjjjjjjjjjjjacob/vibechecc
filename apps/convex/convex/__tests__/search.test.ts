@@ -1,12 +1,25 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { convexTest } from 'convex-test';
 import schema from '../schema';
 import { api } from '../_generated/api';
 import { modules } from '../../vitest.setup';
+import { SecurityValidators } from '../lib/securityValidators';
+
+// Mock console.error to suppress scheduler transaction errors
+let consoleSpy: any;
 
 describe('Search Functions', () => {
   beforeEach(async () => {
     // Tests run in isolation with a fresh database for convex-test
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Mock rate limiting to avoid interference with tests that create many vibes
+    vi.spyOn(SecurityValidators, 'checkRateLimit').mockResolvedValue();
+  });
+
+  afterEach(() => {
+    consoleSpy?.mockRestore();
+    vi.restoreAllMocks();
   });
 
   describe('searchAll', () => {
@@ -245,27 +258,17 @@ describe('Search Functions', () => {
           tags: ['neutral'],
         });
 
-      // Get the actual vibe objects to access the custom id field
-      const vibe1 = await t.run(async (ctx) => {
-        const vibe = (await ctx.db.get(vibe1Id)) as { id?: string } | null;
-        return vibe?.id as string;
-      });
-
-      const vibe2 = await t.run(async (ctx) => {
-        const vibe = (await ctx.db.get(vibe2Id)) as { id?: string } | null;
-        return vibe?.id as string;
-      });
-
+      // vibe1Id and vibe2Id are already the custom ids returned by create
       // Add ratings with authentication using the custom id
       await t.withIdentity(mockIdentity2).mutation(api.vibes.addRating, {
-        vibeId: vibe1!,
+        vibeId: vibe1Id,
         value: 5,
         emoji: '🔥',
         review: 'Great vibe!',
       });
 
       await t.withIdentity(mockIdentity2).mutation(api.vibes.addRating, {
-        vibeId: vibe2!,
+        vibeId: vibe2Id,
         value: 2,
         emoji: '😕',
         review: 'Just okay',
