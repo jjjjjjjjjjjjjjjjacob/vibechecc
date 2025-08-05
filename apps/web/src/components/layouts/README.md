@@ -5,28 +5,34 @@ This directory contains standardized layout components for consistent behavior a
 ## Components
 
 ### BaseLayout
+
 The foundational layout component that provides:
+
 - Responsive container with configurable max-width
 - Consistent padding and spacing
 - Centered content with proper margins
 
 **Usage:**
+
 ```tsx
 import { BaseLayout } from '@/components/layouts';
 
 <BaseLayout maxWidth="4xl" padding="md">
   <YourContent />
-</BaseLayout>
+</BaseLayout>;
 ```
 
 ### FeedLayout
+
 Specialized layout for feed-style pages with sticky navigation support:
+
 - Header section for titles and descriptions
 - Multiple sticky navigation sections (tabs, filters, etc.)
 - Proper z-index and positioning for sticky elements
 - Floating elements support
 
 **Usage:**
+
 ```tsx
 import { FeedLayout } from '@/components/layouts';
 
@@ -34,25 +40,25 @@ const stickyNavigation = [
   {
     id: 'feed-tabs',
     content: <TabNavigation />,
-  }
+  },
 ];
 
-<FeedLayout
-  header={<FeedHeader />}
-  stickyNavigation={stickyNavigation}
->
+<FeedLayout header={<FeedHeader />} stickyNavigation={stickyNavigation}>
   <FeedContent />
-</FeedLayout>
+</FeedLayout>;
 ```
 
 ### ProfileLayout
+
 Layout optimized for user profile pages:
+
 - Profile header/hero section
 - Optional sticky navigation for profile tabs
 - Themed background variants
 - Scoped theme support for viewing other users' profiles
 
 **Usage:**
+
 ```tsx
 import { ProfileLayout } from '@/components/layouts';
 
@@ -64,7 +70,7 @@ import { ProfileLayout } from '@/components/layouts';
   themeStyles={userThemeStyles}
 >
   <ProfileContent />
-</ProfileLayout>
+</ProfileLayout>;
 ```
 
 ## Sticky Navigation System
@@ -91,6 +97,7 @@ Content (z-0)
 ## Configuration Options
 
 ### Max Width Options
+
 - `sm`: max-w-sm (384px)
 - `md`: max-w-md (448px)
 - `lg`: max-w-lg (512px)
@@ -101,12 +108,14 @@ Content (z-0)
 - `full`: max-w-full
 
 ### Padding Options
+
 - `none`: No padding
 - `sm`: px-2 py-4
 - `md`: px-4 py-6 (default)
 - `lg`: px-6 py-8
 
 ### Spacing Options
+
 - `sm`: mb-4
 - `md`: mb-6 (default)
 - `lg`: mb-8
@@ -114,12 +123,14 @@ Content (z-0)
 ## Migration Guide
 
 ### From Manual Layouts
+
 Replace manual container and sticky positioning:
 
 **Before:**
+
 ```tsx
 <div className="container mx-auto px-4 py-8">
-  <div className="sticky top-16 z-40 bg-background/95">
+  <div className="bg-background/95 sticky top-16 z-40">
     <Navigation />
   </div>
   <Content />
@@ -127,15 +138,15 @@ Replace manual container and sticky positioning:
 ```
 
 **After:**
+
 ```tsx
-<FeedLayout
-  stickyNavigation={[{ id: 'nav', content: <Navigation /> }]}
->
+<FeedLayout stickyNavigation={[{ id: 'nav', content: <Navigation /> }]}>
   <Content />
 </FeedLayout>
 ```
 
 ### Benefits
+
 - Consistent sticky behavior across all pages
 - Proper z-index management
 - Mobile-friendly responsive design

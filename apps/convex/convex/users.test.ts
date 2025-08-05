@@ -92,7 +92,7 @@ describe('Users Functions', () => {
       expect(result.hasIdentity).toBe(true);
       expect(result.identity).toBeDefined();
       expect(result.identity?.subject).toBe('debug_test_user_456');
-      expect(result.identity?.email).toBe('debug@example.com');
+      // Note: identity object only has basic properties (subject, tokenIdentifier, hasEmail, environment)
     });
 
     it('should successfully ensure user exists when authenticated', async () => {
@@ -183,7 +183,14 @@ describe('Users Functions', () => {
         image_url: 'https://example.com/new-avatar.jpg',
       };
 
-      await t.mutation(api.users.update, updateData);
+      const mockIdentity = {
+        subject: 'test_user_789',
+        tokenIdentifier: 'test_token_789',
+        hasEmail: true,
+        environment: 'test',
+      };
+
+      await t.withIdentity(mockIdentity).mutation(api.users.update, updateData);
 
       // Verify update
       const updatedUser = await t.query(api.users.getById, {
@@ -202,9 +209,16 @@ describe('Users Functions', () => {
         username: 'newname',
       };
 
-      await expect(t.mutation(api.users.update, updateData)).rejects.toThrow(
-        'User with externalId non_existent_user not found'
-      );
+      const mockIdentity = {
+        subject: 'non_existent_user',
+        tokenIdentifier: 'test_token_nonexistent',
+        hasEmail: true,
+        environment: 'test',
+      };
+
+      await expect(
+        t.withIdentity(mockIdentity).mutation(api.users.update, updateData)
+      ).rejects.toThrow('User with externalId non_existent_user not found');
     });
   });
 
@@ -218,7 +232,16 @@ describe('Users Functions', () => {
         username: 'testall',
       });
 
-      const allUsers = await t.query(api.users.getAll, {});
+      const mockIdentity = {
+        subject: 'test_admin_user',
+        tokenIdentifier: 'test_token_admin',
+        hasEmail: true,
+        environment: 'test',
+      };
+
+      const allUsers = await t
+        .withIdentity(mockIdentity)
+        .query(api.users.getAll, {});
 
       expect(Array.isArray(allUsers)).toBe(true);
       expect(allUsers.length).toBeGreaterThan(0);
@@ -354,7 +377,7 @@ describe('Users Functions', () => {
           title: 'Test Vibe',
           description: 'Test Description',
         })
-      ).rejects.toThrow('You must be logged in to create a vibe');
+      ).rejects.toThrow('Authentication required');
     });
 
     it('should have consistent auth behavior in mutations when AUTHENTICATED', async () => {

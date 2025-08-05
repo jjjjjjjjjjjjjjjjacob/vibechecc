@@ -41,10 +41,15 @@ ${allUrls
 function SitemapXML() {
   const { sitemap } = Route.useLoaderData();
 
+  // SECURITY FIX: Removed dangerouslySetInnerHTML to prevent XSS
   // Set the response headers for XML
   if (typeof window === 'undefined') {
-    // This will be handled by the server
-    return <div dangerouslySetInnerHTML={{ __html: sitemap }} />;
+    // Return pre-escaped XML content safely
+    return (
+      <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+        {sitemap}
+      </pre>
+    );
   }
 
   return null;
