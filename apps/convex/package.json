@@ -22,7 +22,7 @@
     "convex": "^1.24.8",
     "express": "^5.1.0",
     "node-fetch": "^3.3.2",
-    "svix": "^1.67.0",
+    "svix": "^1.69.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {

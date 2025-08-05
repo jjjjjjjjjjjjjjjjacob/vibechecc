@@ -10,6 +10,7 @@ import {
   Sun,
   Moon,
   Bell,
+  Shield,
 } from 'lucide-react';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
@@ -35,6 +36,7 @@ import { ProfileDropdown } from '@/features/profiles/components/profile-dropdown
 import { NotificationDropdown } from '@/features/notifications/components/notification-dropdown';
 import { NotificationAccordion } from '@/features/notifications/components/notification-accordion';
 import { useConvex } from 'convex/react';
+import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 
 type MobileNavState = 'nav' | 'profile' | 'search' | 'notifications' | null;
 
@@ -47,6 +49,7 @@ export function Header() {
   const searchButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
+  const { isAdmin } = useAdminAuth();
 
   // Check if Convex context is available - call useConvex at top level
   const convex = useConvex();
@@ -476,6 +479,17 @@ export function Header() {
                       >
                         settings
                       </button>
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          className="hover:bg-muted/50 hover:text-foreground ml-auto block w-full rounded-lg px-2 py-1.5 text-right lowercase transition-all duration-150"
+                          onClick={() => {
+                            setMobileNavState(null);
+                          }}
+                        >
+                          admin panel
+                        </Link>
+                      )}
                       <div className="my-2 flex items-center justify-end gap-2">
                         {resolvedTheme === 'dark' ? (
                           <Moon className="h-4 w-4" />

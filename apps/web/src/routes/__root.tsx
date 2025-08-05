@@ -191,6 +191,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const location = useRouterState({ select: (s) => s.location });
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <html lang="en" className={cn('font-sans')}>
       <head>
@@ -205,17 +208,25 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             >
               <PostHogPageTracker />
               <ClerkPostHogIntegration />
-              <EnvironmentAccessGuard>
-                <OnboardingGuard>
-                  <Header />
-                  <LoadingIndicator />
+              {isAdminRoute ? (
+                // Admin routes - no header/footer, no guards
+                <>{children}</>
+              ) : (
+                // Regular app routes - with header/footer and guards
+                <>
+                  <EnvironmentAccessGuard>
+                    <OnboardingGuard>
+                      <Header />
+                      <LoadingIndicator />
 
-                  <main className="flex-1">{children}</main>
-                  <NewUserSurvey />
-                </OnboardingGuard>
-              </EnvironmentAccessGuard>
+                      <main className="flex-1">{children}</main>
+                      <NewUserSurvey />
+                    </OnboardingGuard>
+                  </EnvironmentAccessGuard>
 
-              <Footer />
+                  <Footer />
+                </>
+              )}
               <Toaster />
             </div>
           </ThemeProvider>

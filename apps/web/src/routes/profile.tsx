@@ -19,8 +19,9 @@ import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Shield } from 'lucide-react';
 import toast from '@/utils/toast';
+import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 import { DualThemeColorPicker } from '@/features/theming/components/dual-theme-color-picker';
 import {
@@ -66,6 +67,7 @@ export const Route = createFileRoute('/profile')({
 function Profile() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { openUserProfile } = useClerk();
+  const { isAdmin } = useAdminAuth();
   // console.log('clerkUser', clerkUser);
   const {
     data: convexUser,
@@ -611,7 +613,7 @@ function Profile() {
                           preview profile
                         </Button>
                       </div>
-                      <div className="flex justify-center sm:justify-start">
+                      <div className="flex justify-center gap-2 sm:justify-start">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -623,6 +625,19 @@ function Profile() {
                             take tour
                           </Link>
                         </Button>
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className="transition-transform hover:scale-[1.02]"
+                          >
+                            <Link to="/admin">
+                              <Shield className="mr-2 h-4 w-4" />
+                              admin panel
+                            </Link>
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
-import { User, Settings, Heart, LogOut } from 'lucide-react';
+import { User, Settings, Heart, LogOut, Shield } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
 import { useCurrentUser } from '@/queries';
 import { SignOutButton, useUser } from '@clerk/tanstack-react-start';
 import { computeUserDisplayName } from '@/utils/user-utils';
+import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 import {
   Popover,
   PopoverContent,
@@ -24,6 +25,7 @@ export function ProfileDropdown({
   const { user: clerkUser } = useUser();
   const { location } = useRouterState();
   const [open, setOpen] = useState(false);
+  const { isAdmin } = useAdminAuth();
 
   if (!currentUser || !clerkUser) return null;
 
@@ -91,6 +93,25 @@ export function ProfileDropdown({
                 {item.label}
               </Link>
             ))}
+            {isAdmin && (
+              <>
+                <div className="border-border/50 my-2 border-t" />
+                <Link
+                  to="/admin"
+                  className={cn(
+                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+                    'hover:bg-accent hover:text-accent-foreground',
+                    location.pathname.startsWith('/admin')
+                      ? 'bg-accent/50 text-accent-foreground font-medium'
+                      : 'text-foreground/80'
+                  )}
+                  onClick={() => setOpen(false)}
+                >
+                  <Shield className="h-4 w-4" />
+                  admin panel
+                </Link>
+              </>
+            )}
             <div className="border-border/50 my-2 border-t pt-2">
               <SignOutButton>
                 <button

@@ -49,6 +49,16 @@ const schema = defineSchema({
     // Follow count fields for efficient querying
     followerCount: v.optional(v.number()), // Number of users following this user
     followingCount: v.optional(v.number()), // Number of users this user follows
+
+    // Admin moderation fields
+    suspended: v.optional(v.boolean()), // Whether user is suspended
+    suspensionReason: v.optional(v.string()), // Reason for suspension
+    deleted: v.optional(v.boolean()), // Whether user is soft-deleted
+    deletedAt: v.optional(v.number()), // Timestamp of deletion
+    deletionReason: v.optional(v.string()), // Reason for deletion
+    
+    // Admin flag
+    isAdmin: v.optional(v.boolean()), // Whether user has admin privileges
   })
     .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
     .searchIndex('searchUsername', {
@@ -69,6 +79,12 @@ const schema = defineSchema({
     tags: v.optional(v.array(v.string())),
     visibility: v.optional(v.union(v.literal('public'), v.literal('deleted'))), // Default 'public', 'deleted' for soft delete
     updatedAt: v.optional(v.string()), // Track when vibe was last updated
+
+    // Admin moderation fields
+    moderationReason: v.optional(v.string()), // Reason for moderation action
+    moderatedAt: v.optional(v.string()), // Timestamp of moderation
+    deletionReason: v.optional(v.string()), // Reason for deletion
+    deletedAt: v.optional(v.string()), // Timestamp of deletion
   })
     .index('id', ['id'])
     .index('createdBy', ['createdById'])
@@ -93,6 +109,11 @@ const schema = defineSchema({
     tags: v.optional(v.array(v.string())), // Associated tags from emoji metadata
     createdAt: v.string(),
     updatedAt: v.optional(v.string()),
+
+    // Admin moderation fields
+    flagged: v.optional(v.boolean()), // Whether review is flagged
+    moderationReason: v.optional(v.string()), // Reason for moderation
+    moderatedAt: v.optional(v.string()), // Timestamp of moderation
   })
     .index('vibe', ['vibeId'])
     .index('user', ['userId'])
@@ -121,6 +142,9 @@ const schema = defineSchema({
         v.literal('neutral')
       )
     ),
+
+    // Admin management fields
+    disabled: v.optional(v.boolean()), // Whether emoji is disabled
   })
     .index('byEmoji', ['emoji'])
     .index('byCategory', ['category'])

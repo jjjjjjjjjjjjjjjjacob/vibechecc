@@ -13,7 +13,14 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as analytics_search_metrics from "../analytics/search_metrics.js";
+import type * as admin_dashboard from "../admin/dashboard.js";
+import type * as admin_emojis from "../admin/emojis.js";
+import type * as admin_reviews from "../admin/reviews.js";
+import type * as admin_setup from "../admin/setup.js";
+import type * as admin_tags from "../admin/tags.js";
+import type * as admin_users from "../admin/users.js";
+import type * as admin_vibes from "../admin/vibes.js";
+import type * as analytics_searchMetrics from "../analytics/searchMetrics.js";
 import type * as cleanupSearchHistory from "../cleanupSearchHistory.js";
 import type * as debugSearchHistory from "../debugSearchHistory.js";
 import type * as emojiMetadata from "../emojiMetadata.js";
@@ -45,6 +52,7 @@ import type * as seed_emojis_symbols from "../seed/emojis/symbols.js";
 import type * as seed_emojis_travel from "../seed/emojis/travel.js";
 import type * as seed from "../seed.js";
 import type * as tags from "../tags.js";
+import type * as users_admin from "../users/admin.js";
 import type * as users from "../users.js";
 import type * as vibes from "../vibes.js";
 
@@ -57,7 +65,14 @@ import type * as vibes from "../vibes.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  "analytics/search_metrics": typeof analytics_search_metrics;
+  "admin/dashboard": typeof admin_dashboard;
+  "admin/emojis": typeof admin_emojis;
+  "admin/reviews": typeof admin_reviews;
+  "admin/setup": typeof admin_setup;
+  "admin/tags": typeof admin_tags;
+  "admin/users": typeof admin_users;
+  "admin/vibes": typeof admin_vibes;
+  "analytics/searchMetrics": typeof analytics_searchMetrics;
   cleanupSearchHistory: typeof cleanupSearchHistory;
   debugSearchHistory: typeof debugSearchHistory;
   emojiMetadata: typeof emojiMetadata;
@@ -89,6 +104,7 @@ declare const fullApi: ApiFromModules<{
   "seed/emojis/travel": typeof seed_emojis_travel;
   seed: typeof seed;
   tags: typeof tags;
+  "users/admin": typeof users_admin;
   users: typeof users;
   vibes: typeof vibes;
 }>;

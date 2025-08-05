@@ -1,0 +1,207 @@
+import * as React from 'react';
+import { Table } from '@tanstack/react-table';
+import { X, Download, Settings2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+
+interface DataTableToolbarProps<TData> {
+  table: Table<TData>;
+  searchKey?: string;
+  searchPlaceholder?: string;
+  filters?: Array<{
+    key: string;
+    title: string;
+    options: Array<{
+      label: string;
+      value: string;
+    }>;
+  }>;
+  bulkActions?: Array<{
+    label: string;
+    action: (selectedRows: TData[]) => void;
+    variant?: 'default' | 'destructive';
+  }>;
+  onExport?: () => void;
+  exportLabel?: string;
+}
+
+export function DataTableToolbar<TData>({
+  table,
+  searchKey,
+  searchPlaceholder = 'search...',
+  filters = [],
+  bulkActions = [],
+  onExport,
+  exportLabel = 'export',
+}: DataTableToolbarProps<TData>) {
+  const isFiltered = table.getState().columnFilters.length > 0;
+  const selectedRows = table.getFilteredSelectedRowModel().rows;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Top row - Search and Export */}
+      <div className="flex items-center justify-between">
+        <div className="flex flex-1 items-center space-x-2">
+          {searchKey && (
+            <Input
+              placeholder={searchPlaceholder}
+              value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
+              onChange={(event) =>
+                table.getColumn(searchKey)?.setFilterValue(event.target.value)
+              }
+              className="h-8 w-[150px] lg:w-[250px]"
+            />
+          )}
+          
+          {/* Filter dropdowns */}
+          {filters.map((filter) => {
+            const column = table.getColumn(filter.key);
+            if (!column) return null;
+
+            return (
+              <Select
+                key={filter.key}
+                value={(column.getFilterValue() as string) ?? ''}
+                onValueChange={(value) =>
+                  column.setFilterValue(value === 'all' ? '' : value)
+                }
+              >
+                <SelectTrigger className="h-8 w-[180px]">
+                  <SelectValue placeholder={filter.title} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">all {filter.title.toLowerCase()}</SelectItem>
+                  {filter.options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          })}
+
+          {/* Clear filters */}
+          {isFiltered && (
+            <Button
+              variant="ghost"
+              onClick={() => table.resetColumnFilters()}
+              className="h-8 px-2 lg:px-3"
+            >
+              reset
+              <X className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
+        <div className="flex items-center space-x-2">
+          {/* Export button */}
+          {onExport && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onExport}
+              className="h-8"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {exportLabel}
+            </Button>
+          )}
+
+          {/* Column visibility */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto h-8"
+              >
+                <Settings2 className="mr-2 h-4 w-4" />
+                view
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[150px]">
+              <DropdownMenuLabel>toggle columns</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {table
+                .getAllColumns()
+                .filter(
+                  (column) =>
+                    typeof column.accessorFn !== 'undefined' && column.getCanHide()
+                )
+                .map((column) => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Bottom row - Bulk actions and active filters */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {/* Selection counter */}
+          {selectedRows.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <Badge variant="secondary">
+                {selectedRows.length} of {table.getFilteredRowModel().rows.length} row(s) selected
+              </Badge>
+              
+              {/* Bulk actions */}
+              {bulkActions.map((action) => (
+                <Button
+                  key={action.label}
+                  variant={action.variant || 'default'}
+                  size="sm"
+                  onClick={() => action.action(selectedRows.map(row => row.original))}
+                  className="h-8"
+                >
+                  {action.label}
+                </Button>
+              ))}
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => table.resetRowSelection()}
+                className="h-8"
+              >
+                clear selection
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Results counter */}
+        <div className="text-xs text-muted-foreground">
+          {table.getFilteredRowModel().rows.length} result(s)
+        </div>
+      </div>
+    </div>
+  );
+}
