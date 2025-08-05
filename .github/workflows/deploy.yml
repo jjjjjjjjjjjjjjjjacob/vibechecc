@@ -15,6 +15,10 @@ on:
         required: false
         type: string
         description: 'PR number for ephemeral deployments'
+      version:
+        required: false
+        type: string
+        description: 'Version being deployed'
 
 jobs:
   deploy-terraform:
