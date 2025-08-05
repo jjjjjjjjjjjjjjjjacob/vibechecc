@@ -234,7 +234,34 @@ describe('Users Functions', () => {
   });
 
   describe('User Queries', () => {
-    it('should get all users', async () => {
+    it('should throw error when getting all users without authentication', async () => {
+      const t = convexTest(schema, modules);
+
+      // Try to get all users without authentication
+      await expect(t.query(api.users.getAll, {})).rejects.toThrow(
+        'Authentication required'
+      );
+    });
+
+    it('should throw error when getting all users without admin privileges', async () => {
+      const t = convexTest(schema, modules);
+
+      const mockNonAdminIdentity = {
+        subject: 'test_regular_user',
+        tokenIdentifier: 'test_token_regular',
+        hasEmail: true,
+        environment: 'test',
+        org_role: 'member',
+        roles: ['user'],
+      };
+
+      // Try to get all users as regular user
+      await expect(
+        t.withIdentity(mockNonAdminIdentity).query(api.users.getAll, {})
+      ).rejects.toThrow('Admin privileges required');
+    });
+
+    it('should get all users with org:admin role', async () => {
       const t = convexTest(schema, modules);
 
       // Create a test user first
@@ -243,15 +270,17 @@ describe('Users Functions', () => {
         username: 'testall',
       });
 
-      const mockIdentity = {
+      const mockAdminIdentity = {
         subject: 'test_admin_user',
         tokenIdentifier: 'test_token_admin',
         hasEmail: true,
         environment: 'test',
+        org_role: 'org:admin',
+        roles: ['user'],
       };
 
       const allUsers = await t
-        .withIdentity(mockIdentity)
+        .withIdentity(mockAdminIdentity)
         .query(api.users.getAll, {});
 
       expect(Array.isArray(allUsers)).toBe(true);
@@ -259,6 +288,37 @@ describe('Users Functions', () => {
 
       const testUser = allUsers.find(
         (u: { externalId?: string }) => u.externalId === 'test_user_all'
+      );
+      expect(testUser).toBeDefined();
+    });
+
+    it('should get all users with admin in roles array', async () => {
+      const t = convexTest(schema, modules);
+
+      // Create a test user first
+      await t.mutation(api.users.create, {
+        externalId: 'test_user_all_2',
+        username: 'testall2',
+      });
+
+      const mockAdminIdentity = {
+        subject: 'test_admin_user_2',
+        tokenIdentifier: 'test_token_admin_2',
+        hasEmail: true,
+        environment: 'test',
+        org_role: 'member',
+        roles: ['user', 'admin'],
+      };
+
+      const allUsers = await t
+        .withIdentity(mockAdminIdentity)
+        .query(api.users.getAll, {});
+
+      expect(Array.isArray(allUsers)).toBe(true);
+      expect(allUsers.length).toBeGreaterThan(0);
+
+      const testUser = allUsers.find(
+        (u: { externalId?: string }) => u.externalId === 'test_user_all_2'
       );
       expect(testUser).toBeDefined();
     });

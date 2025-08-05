@@ -10,6 +10,7 @@ import {
 import { v, Validator } from 'convex/values';
 import type { UserJSON } from '@clerk/backend';
 import { internal } from './_generated/api';
+import { AuthUtils } from './lib/securityValidators';
 
 // PostHog configuration for server-side tracking
 const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY;
@@ -89,11 +90,8 @@ async function createUserIfNotExistsInternal(
 // Get all users - RESTRICTED: Only for authenticated admin users
 export const getAll = query({
   handler: async (ctx) => {
-    // SECURITY: Require authentication for user list access
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error('Authentication required to access user list');
-    }
+    // SECURITY: Require admin privileges for user list access
+    await AuthUtils.requireAdmin(ctx);
 
     // SECURITY: Only return limited public profile data
     const users = await ctx.db.query('users').collect();

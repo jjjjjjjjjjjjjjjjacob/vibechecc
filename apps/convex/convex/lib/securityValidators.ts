@@ -184,11 +184,44 @@ export class SecurityValidators {
   }
 
   /**
-   * Sanitizes HTML content by removing potentially dangerous elements
+   * ⚠️  SECURITY WARNING: INADEQUATE HTML SANITIZATION ⚠️
+   *
+   * This method uses basic regex replacements that are INSUFFICIENT for secure HTML sanitization
+   * and CAN BE BYPASSED by attackers. This implementation is NOT secure for production use.
+   *
+   * CRITICAL LIMITATIONS:
+   * - Regex-based sanitization can be bypassed with encoding, case variations, or malformed HTML
+   * - Does not handle all dangerous HTML elements, attributes, or CSS injections
+   * - Vulnerable to various XSS attack vectors
+   * - Not compatible with complex HTML parsing requirements
+   *
+   * SAFE USAGE CONTEXTS ONLY:
+   * - Simple display-only text with minimal HTML (e.g., basic formatting)
+   * - Content that will be further processed by secure parsers
+   * - Non-security-critical internal tools with trusted input sources
+   *
+   * STRONGLY RECOMMENDED: Replace with DOMPurify or similar library:
+   *
+   * Example with DOMPurify:
+   * ```typescript
+   * import DOMPurify from 'isomorphic-dompurify';
+   *
+   * static sanitizeHtml(html: string): string {
+   *   return DOMPurify.sanitize(html, {
+   *     ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br'],
+   *     ALLOWED_ATTR: []
+   *   });
+   * }
+   * ```
+   *
+   * DO NOT USE this method for:
+   * - User-generated content that will be displayed to other users
+   * - Any content from untrusted sources
+   * - Security-sensitive applications
+   * - Production systems handling external input
    */
   static sanitizeHtml(html: string): string {
-    // SECURITY: Very basic HTML sanitization
-    // For production, consider using a proper library like DOMPurify
+    // ⚠️  WARNING: This is NOT secure HTML sanitization - see method documentation above
     return html
       .replace(/<script[^>]*>.*?<\/script>/gi, '')
       .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
@@ -196,8 +229,12 @@ export class SecurityValidators {
       .replace(/on\w+\s*=/gi, '');
   }
 
+  // In-memory rate limiting storage (for single-instance deployments)
+  // PRODUCTION NOTE: Use Redis or database for distributed systems
+  private static rateLimitStore = new Map<string, number[]>();
+
   /**
-   * Rate limiting check (basic implementation)
+   * Rate limiting check (functional in-memory implementation)
    */
   static async checkRateLimit(
     userId: string,
@@ -205,20 +242,55 @@ export class SecurityValidators {
     maxRequests: number = 10,
     windowMs: number = 60000 // 1 minute
   ): Promise<void> {
-    // SECURITY: Basic rate limiting implementation
-    // In production, use Redis or similar for distributed rate limiting
-    const key = `rate_limit:${userId}:${action}`;
-    const _now = Date.now();
+    // SECURITY: Functional rate limiting implementation
+    // WARNING: This uses in-memory storage - use Redis for production distributed systems
+    const key = `${userId}:${action}`;
+    const now = Date.now();
+    const windowStart = now - windowMs;
 
-    // This is a simplified version - in production you'd want to use
-    // a proper rate limiting solution with Redis or similar
-    // For now, we'll skip the actual implementation but include the interface
+    // Get existing timestamps for this user/action
+    let timestamps = this.rateLimitStore.get(key) || [];
 
-    // TODO: Implement proper rate limiting with Redis/database storage
-    // eslint-disable-next-line no-console
-    console.log(
-      `Rate limit check for ${key}: ${maxRequests} requests per ${windowMs}ms`
-    );
+    // Remove timestamps outside the current window (sliding window approach)
+    timestamps = timestamps.filter((timestamp) => timestamp > windowStart);
+
+    // Check if the user has exceeded the rate limit
+    if (timestamps.length >= maxRequests) {
+      const oldestRequest = Math.min(...timestamps);
+      const resetTime = Math.ceil((oldestRequest + windowMs - now) / 1000);
+      throw new Error(
+        `Rate limit exceeded for ${action}. Too many requests. Try again in ${resetTime} seconds.`
+      );
+    }
+
+    // Add current timestamp and update store
+    timestamps.push(now);
+    this.rateLimitStore.set(key, timestamps);
+
+    // Cleanup old entries to prevent memory leaks (run occasionally)
+    if (Math.random() < 0.01) {
+      // 1% chance to trigger cleanup
+      this.cleanupRateLimitStore(windowMs * 2); // Clean entries older than 2x window
+    }
+  }
+
+  /**
+   * Cleanup old rate limit entries to prevent memory leaks
+   */
+  private static cleanupRateLimitStore(maxAgeMs: number): void {
+    const cutoff = Date.now() - maxAgeMs;
+
+    for (const [key, timestamps] of this.rateLimitStore.entries()) {
+      const validTimestamps = timestamps.filter(
+        (timestamp) => timestamp > cutoff
+      );
+
+      if (validTimestamps.length === 0) {
+        this.rateLimitStore.delete(key);
+      } else if (validTimestamps.length < timestamps.length) {
+        this.rateLimitStore.set(key, validTimestamps);
+      }
+    }
   }
 }
 
@@ -250,5 +322,32 @@ export class AuthUtils {
       throw new Error('Authentication required');
     }
     return userId;
+  }
+
+  /**
+   * Checks if the authenticated user has admin privileges
+   * Uses Clerk's organization roles to determine admin status
+   */
+  static async requireAdmin(ctx: {
+    auth: { getUserIdentity(): Promise<any> };
+  }): Promise<void> {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Authentication required');
+    }
+
+    // Check for admin role in Clerk's JWT claims
+    // This assumes org:admin role is included in the JWT custom claims
+    const orgRole = identity.org_role;
+    const roles = identity.roles || [];
+
+    const isAdmin =
+      orgRole === 'org:admin' ||
+      roles.includes('admin') ||
+      roles.includes('org:admin');
+
+    if (!isAdmin) {
+      throw new Error('Admin privileges required to access this resource');
+    }
   }
 }

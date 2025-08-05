@@ -3,6 +3,7 @@ import { convexTest } from 'convex-test';
 import schema from '../schema';
 import { api } from '../_generated/api';
 import { modules } from '../../vitest.setup';
+import { SecurityValidators } from '../lib/securityValidators';
 
 // Mock console.error to suppress scheduler transaction errors
 let consoleSpy: any;
@@ -11,10 +12,14 @@ describe('Search Functions', () => {
   beforeEach(async () => {
     // Tests run in isolation with a fresh database for convex-test
     consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Mock rate limiting to avoid interference with tests that create many vibes
+    vi.spyOn(SecurityValidators, 'checkRateLimit').mockResolvedValue();
   });
 
   afterEach(() => {
     consoleSpy?.mockRestore();
+    vi.restoreAllMocks();
   });
 
   describe('searchAll', () => {
