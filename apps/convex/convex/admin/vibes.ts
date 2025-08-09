@@ -106,10 +106,31 @@ export const getAllVibes = query({
           )
           .first();
 
-        const ratingsCount = await ctx.db
+        const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
           .collect();
+        
+        // Filter for emoji ratings (those with emoji field)
+        const emojiRatings = ratings.filter(rating => rating.emoji);
+        
+        // Get user data for emoji ratings
+        const emojiRatingsWithUsers = await Promise.all(
+          emojiRatings.map(async (rating) => {
+            const user = await ctx.db
+              .query('users')
+              .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
+              .first();
+            return {
+              ...rating,
+              user: user ? {
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              } : null,
+            };
+          })
+        );
 
         return {
           ...vibe,
@@ -121,7 +142,9 @@ export const getAllVibes = query({
                 image_url: creator.image_url,
               }
             : null,
-          ratingsCount: ratingsCount.length,
+          ratingsCount: ratings.length,
+          emojiRatings: emojiRatingsWithUsers,
+          starRatings: ratings.filter(r => !r.emoji).length,
         };
       })
     );

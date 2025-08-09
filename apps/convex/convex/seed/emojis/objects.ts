@@ -8,7 +8,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'accessories', 'eyesight'],
     category: 'objects',
     color: '#696969',
-    tags: ['glasses', 'eyewear', 'vision'],
   },
   {
     emoji: '🕶️',
@@ -16,7 +15,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['face', 'cool', 'accessories'],
     category: 'objects',
     color: '#000000',
-    tags: ['sunglasses', 'cool', 'shade'],
   },
   {
     emoji: '🥽',
@@ -24,7 +22,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['eyes', 'protection', 'safety'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['goggles', 'safety', 'swimming'],
   },
   {
     emoji: '🥼',
@@ -32,7 +29,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['doctor', 'experiment', 'scientist'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['lab-coat', 'scientist', 'doctor'],
   },
   {
     emoji: '🦺',
@@ -40,7 +36,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['safety', 'orange', 'warning'],
     category: 'objects',
     color: '#FF8C00',
-    tags: ['safety-vest', 'construction', 'visibility'],
   },
   {
     emoji: '👔',
@@ -48,7 +43,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shirt', 'suitup', 'formal'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['tie', 'formal', 'business'],
   },
   {
     emoji: '👕',
@@ -56,7 +50,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'cloth', 'casual'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['t-shirt', 'casual', 'clothing'],
   },
   {
     emoji: '👖',
@@ -64,7 +57,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'shopping', 'pants'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['jeans', 'pants', 'denim'],
   },
   {
     emoji: '🧣',
@@ -72,7 +64,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['neck', 'winter', 'clothes'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['scarf', 'winter', 'warm'],
   },
   {
     emoji: '🧤',
@@ -80,7 +71,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hands', 'winter', 'clothes'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['gloves', 'winter', 'hands'],
   },
   {
     emoji: '🧥',
@@ -88,7 +78,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['jacket', 'coat', 'clothes'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['coat', 'jacket', 'winter'],
   },
   {
     emoji: '🧦',
@@ -96,7 +85,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stocking', 'clothes', 'feet'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['socks', 'feet', 'clothing'],
   },
   {
     emoji: '👗',
@@ -104,7 +92,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['clothes', 'fashion', 'shopping'],
     category: 'objects',
     color: '#FF69B4',
-    tags: ['dress', 'fashion', 'clothing'],
   },
   {
     emoji: '👘',
@@ -112,7 +99,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dress', 'fashion', 'women'],
     category: 'objects',
     color: '#FF69B4',
-    tags: ['kimono', 'japanese', 'traditional'],
   },
   {
     emoji: '🥻',
@@ -120,7 +106,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dress', 'fashion', 'indian'],
     category: 'objects',
     color: '#FF69B4',
-    tags: ['sari', 'indian', 'traditional'],
   },
   {
     emoji: '🩱',
@@ -128,7 +113,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'swim', 'bathing'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['swimsuit', 'swimming', 'beach'],
   },
   {
     emoji: '🩲',
@@ -136,7 +120,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['clothing', 'underwear', 'pants'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['underwear', 'briefs', 'clothing'],
   },
   {
     emoji: '🩳',
@@ -144,7 +127,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['clothing', 'pants', 'fashion'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['shorts', 'summer', 'clothing'],
   },
   {
     emoji: '👙',
@@ -152,7 +134,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['swimming', 'female', 'woman'],
     category: 'objects',
     color: '#FF69B4',
-    tags: ['bikini', 'swimsuit', 'beach'],
   },
   {
     emoji: '👚',
@@ -160,7 +141,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'shopping', 'female'],
     category: 'objects',
     color: '#FFB6C1',
-    tags: ['blouse', 'woman', 'clothing'],
   },
   {
     emoji: '👛',
@@ -168,7 +148,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'accessories', 'money'],
     category: 'objects',
     color: '#FF69B4',
-    tags: ['purse', 'wallet', 'accessory'],
   },
   {
     emoji: '👜',
@@ -176,7 +155,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'accessory', 'accessories'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['handbag', 'purse', 'fashion'],
   },
   {
     emoji: '👝',
@@ -184,7 +162,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bag', 'accessories', 'shopping'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['clutch', 'bag', 'evening'],
   },
   {
     emoji: '🛍️',
@@ -192,7 +169,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mall', 'buy', 'purchase'],
     category: 'objects',
     color: '#FF69B4',
-    tags: ['shopping', 'bags', 'retail'],
   },
   {
     emoji: '🎒',
@@ -200,7 +176,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['student', 'education', 'bag'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['backpack', 'school', 'bag'],
   },
   {
     emoji: '🩴',
@@ -208,7 +183,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['footwear', 'summer', 'flip flop'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['flip-flop', 'sandal', 'summer'],
   },
   {
     emoji: '👞',
@@ -216,7 +190,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'male', 'formal'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['shoe', 'formal', 'men'],
   },
   {
     emoji: '👟',
@@ -224,7 +197,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shoes', 'sports', 'sneakers'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['sneaker', 'running', 'athletic'],
   },
   {
     emoji: '🥾',
@@ -232,7 +204,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['backpacking', 'camping', 'hiking'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['boot', 'hiking', 'outdoor'],
   },
   {
     emoji: '🥿',
@@ -240,7 +211,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ballet flat', 'slip-on', 'slipper'],
     category: 'objects',
     color: '#FFB6C1',
-    tags: ['flat', 'shoe', 'ballet'],
   },
   {
     emoji: '👠',
@@ -248,7 +218,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'shoes', 'female'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['high-heel', 'shoe', 'fashion'],
   },
   {
     emoji: '👡',
@@ -256,7 +225,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shoes', 'fashion', 'flip flops'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['sandal', 'woman', 'summer'],
   },
   {
     emoji: '🩰',
@@ -264,7 +232,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dance', 'ballet', 'shoes'],
     category: 'objects',
     color: '#FFB6C1',
-    tags: ['ballet', 'dance', 'shoes'],
   },
   {
     emoji: '👢',
@@ -272,7 +239,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shoes', 'fashion', 'boot'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['boot', 'woman', 'fashion'],
   },
   {
     emoji: '👑',
@@ -280,7 +246,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['king', 'kod', 'leader'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['crown', 'royal', 'king'],
   },
   {
     emoji: '👒',
@@ -288,7 +253,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fashion', 'accessories', 'female'],
     category: 'objects',
     color: '#F5DEB3',
-    tags: ['hat', 'woman', 'sun'],
   },
   {
     emoji: '🎩',
@@ -296,7 +260,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['magic', 'gentleman', 'classy'],
     category: 'objects',
     color: '#000000',
-    tags: ['top-hat', 'formal', 'magician'],
   },
   {
     emoji: '🎓',
@@ -304,7 +267,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['school', 'college', 'degree'],
     category: 'objects',
     color: '#000000',
-    tags: ['graduation', 'cap', 'education'],
   },
   {
     emoji: '🧢',
@@ -312,7 +274,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cap', 'baseball', 'hat'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['baseball-cap', 'hat', 'casual'],
   },
   {
     emoji: '🪖',
@@ -320,7 +281,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['army', 'protection', 'soldier'],
     category: 'objects',
     color: '#556B2F',
-    tags: ['helmet', 'military', 'army'],
   },
   {
     emoji: '⛑️',
@@ -328,7 +288,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['construction', 'build', 'safety'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['helmet', 'rescue', 'safety'],
   },
   {
     emoji: '📿',
@@ -336,7 +295,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dhikr', 'religious', 'rosary'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['beads', 'prayer', 'religious'],
   },
   {
     emoji: '💄',
@@ -344,7 +302,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['female', 'girl', 'fashion'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['lipstick', 'makeup', 'cosmetic'],
   },
   {
     emoji: '💍',
@@ -352,7 +309,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wedding', 'propose', 'marriage'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['ring', 'diamond', 'engagement'],
   },
   {
     emoji: '💎',
@@ -360,7 +316,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue', 'ruby', 'diamond'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['diamond', 'gem', 'jewelry'],
   },
 
   // Sound
@@ -370,7 +325,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sound', 'volume', 'silence'],
     category: 'objects',
     color: '#696969',
-    tags: ['mute', 'silent', 'speaker'],
   },
   {
     emoji: '🔈',
@@ -378,7 +332,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sound', 'volume', 'silence'],
     category: 'objects',
     color: '#696969',
-    tags: ['speaker', 'low', 'volume'],
   },
   {
     emoji: '🔉',
@@ -386,7 +339,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['volume', 'speaker', 'broadcast'],
     category: 'objects',
     color: '#696969',
-    tags: ['speaker', 'medium', 'volume'],
   },
   {
     emoji: '🔊',
@@ -394,7 +346,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['volume', 'noise', 'noisy'],
     category: 'objects',
     color: '#696969',
-    tags: ['speaker', 'loud', 'volume'],
   },
   {
     emoji: '📢',
@@ -402,7 +353,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['volume', 'sound', 'announcement'],
     category: 'objects',
     color: '#696969',
-    tags: ['loudspeaker', 'announcement', 'megaphone'],
   },
   {
     emoji: '📣',
@@ -410,7 +360,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sound', 'speaker', 'volume'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['megaphone', 'cheer', 'loud'],
   },
   {
     emoji: '📯',
@@ -418,7 +367,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['instrument', 'music', 'horn'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['horn', 'postal', 'announcement'],
   },
   {
     emoji: '🔔',
@@ -426,7 +374,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sound', 'notification', 'christmas'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['bell', 'ring', 'notification'],
   },
   {
     emoji: '🔕',
@@ -434,7 +381,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sound', 'volume', 'mute'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['bell', 'mute', 'silent'],
   },
 
   // Technology
@@ -444,7 +390,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'apple', 'gadgets'],
     category: 'objects',
     color: '#000000',
-    tags: ['phone', 'mobile', 'smartphone'],
   },
   {
     emoji: '📲',
@@ -452,7 +397,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['iphone', 'incoming', 'call'],
     category: 'objects',
     color: '#000000',
-    tags: ['phone', 'incoming', 'call'],
   },
   {
     emoji: '☎️',
@@ -460,7 +404,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'communication', 'dial'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['telephone', 'phone', 'landline'],
   },
   {
     emoji: '📞',
@@ -468,7 +411,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'communication', 'dial'],
     category: 'objects',
     color: '#000000',
-    tags: ['phone', 'receiver', 'call'],
   },
   {
     emoji: '📟',
@@ -476,7 +418,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bbcall', 'oldschool', '90s'],
     category: 'objects',
     color: '#000000',
-    tags: ['pager', 'beeper', 'retro'],
   },
   {
     emoji: '📠',
@@ -484,7 +425,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['communication', 'technology', 'fax'],
     category: 'objects',
     color: '#696969',
-    tags: ['fax', 'machine', 'office'],
   },
   {
     emoji: '🔋',
@@ -492,7 +432,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['power', 'energy', 'sustain'],
     category: 'objects',
     color: '#90EE90',
-    tags: ['battery', 'power', 'energy'],
   },
   {
     emoji: '🔌',
@@ -500,7 +439,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['charger', 'power', 'electricity'],
     category: 'objects',
     color: '#000000',
-    tags: ['plug', 'electric', 'power'],
   },
   {
     emoji: '💻',
@@ -508,7 +446,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'laptop', 'screen'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['laptop', 'computer', 'technology'],
   },
   {
     emoji: '🖥️',
@@ -516,7 +453,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'computing', 'screen'],
     category: 'objects',
     color: '#696969',
-    tags: ['desktop', 'computer', 'monitor'],
   },
   {
     emoji: '🖨️',
@@ -524,7 +460,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['paper', 'ink', 'office'],
     category: 'objects',
     color: '#696969',
-    tags: ['printer', 'print', 'office'],
   },
   {
     emoji: '⌨️',
@@ -532,7 +467,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'computer', 'type'],
     category: 'objects',
     color: '#696969',
-    tags: ['keyboard', 'typing', 'computer'],
   },
   {
     emoji: '🖱️',
@@ -540,7 +474,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['click', 'button', 'pointer'],
     category: 'objects',
     color: '#696969',
-    tags: ['mouse', 'computer', 'click'],
   },
   {
     emoji: '🖲️',
@@ -548,7 +481,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'trackball', 'computer'],
     category: 'objects',
     color: '#000000',
-    tags: ['trackball', 'mouse', 'computer'],
   },
   {
     emoji: '💽',
@@ -556,7 +488,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'record', 'data'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['minidisc', 'disk', 'storage'],
   },
   {
     emoji: '💾',
@@ -564,7 +495,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['oldschool', 'technology', 'save'],
     category: 'objects',
     color: '#000000',
-    tags: ['floppy', 'save', 'disk'],
   },
   {
     emoji: '💿',
@@ -572,7 +502,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'dvd', 'disk'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['cd', 'dvd', 'disk'],
   },
   {
     emoji: '📀',
@@ -580,7 +509,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cd', 'disk', 'disc'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['dvd', 'disk', 'movie'],
   },
   {
     emoji: '🧮',
@@ -588,7 +516,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['calculation', 'math', 'count'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['abacus', 'calculator', 'math'],
   },
 
   // Media
@@ -598,7 +525,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['film', 'record', 'movie'],
     category: 'objects',
     color: '#000000',
-    tags: ['camera', 'movie', 'film'],
   },
   {
     emoji: '🎞️',
@@ -606,7 +532,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['movie', 'film', 'frames'],
     category: 'objects',
     color: '#000000',
-    tags: ['film', 'frames', 'movie'],
   },
   {
     emoji: '📽️',
@@ -614,7 +539,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['movie', 'film', 'projector'],
     category: 'objects',
     color: '#696969',
-    tags: ['projector', 'film', 'movie'],
   },
   {
     emoji: '📺',
@@ -622,7 +546,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['technology', 'program', 'oldschool'],
     category: 'objects',
     color: '#696969',
-    tags: ['tv', 'television', 'screen'],
   },
   {
     emoji: '📷',
@@ -630,7 +553,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['gadgets', 'photography', 'camera'],
     category: 'objects',
     color: '#000000',
-    tags: ['camera', 'photo', 'photography'],
   },
   {
     emoji: '📸',
@@ -638,7 +560,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photography', 'gadgets', 'flash'],
     category: 'objects',
     color: '#000000',
-    tags: ['camera', 'flash', 'photo'],
   },
   {
     emoji: '📹',
@@ -646,7 +567,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['film', 'record', 'video'],
     category: 'objects',
     color: '#000000',
-    tags: ['video', 'camera', 'record'],
   },
   {
     emoji: '📼',
@@ -654,7 +574,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['record', 'video', 'oldschool'],
     category: 'objects',
     color: '#000000',
-    tags: ['vhs', 'video', 'cassette'],
   },
   {
     emoji: '🔍',
@@ -662,7 +581,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['search', 'zoom', 'find'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['magnifying', 'search', 'zoom'],
   },
   {
     emoji: '🔎',
@@ -670,7 +588,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['search', 'zoom', 'find'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['magnifying', 'search', 'detective'],
   },
   {
     emoji: '🕯️',
@@ -678,7 +595,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fire', 'wax', 'light'],
     category: 'objects',
     color: '#F0E68C',
-    tags: ['candle', 'light', 'flame'],
   },
   {
     emoji: '💡',
@@ -686,7 +602,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['light', 'electricity', 'idea'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['lightbulb', 'idea', 'bright'],
   },
   {
     emoji: '🔦',
@@ -694,7 +609,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dark', 'camping', 'sight'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['flashlight', 'torch', 'light'],
   },
   {
     emoji: '🏮',
@@ -702,7 +616,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['light', 'paper', 'halloween'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['lantern', 'paper', 'chinese'],
   },
   {
     emoji: '🪔',
@@ -710,7 +623,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lighting', 'candle', 'diwali'],
     category: 'objects',
     color: '#FF8C00',
-    tags: ['diya', 'lamp', 'diwali'],
   },
 
   // Books and paper
@@ -720,7 +632,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['classroom', 'notes', 'record'],
     category: 'objects',
     color: '#DEB887',
-    tags: ['notebook', 'journal', 'decorative'],
   },
   {
     emoji: '📕',
@@ -728,7 +639,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['read', 'library', 'knowledge'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['book', 'closed', 'red'],
   },
   {
     emoji: '📖',
@@ -736,7 +646,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['book', 'read', 'open'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['book', 'open', 'reading'],
   },
   {
     emoji: '📗',
@@ -744,7 +653,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['read', 'library', 'knowledge'],
     category: 'objects',
     color: '#90EE90',
-    tags: ['book', 'green', 'textbook'],
   },
   {
     emoji: '📘',
@@ -752,7 +660,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['read', 'library', 'knowledge'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['book', 'blue', 'textbook'],
   },
   {
     emoji: '📙',
@@ -760,7 +667,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['read', 'library', 'knowledge'],
     category: 'objects',
     color: '#FF8C00',
-    tags: ['book', 'orange', 'textbook'],
   },
   {
     emoji: '📚',
@@ -768,7 +674,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['literature', 'library', 'study'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['books', 'library', 'stack'],
   },
   {
     emoji: '📓',
@@ -776,7 +681,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'record', 'notes'],
     category: 'objects',
     color: '#000000',
-    tags: ['notebook', 'notes', 'journal'],
   },
   {
     emoji: '📒',
@@ -784,7 +688,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['notes', 'paper', 'notebook'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['ledger', 'notebook', 'accounting'],
   },
   {
     emoji: '📃',
@@ -792,7 +695,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['documents', 'office', 'paper'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['page', 'document', 'curl'],
   },
   {
     emoji: '📜',
@@ -800,7 +702,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['documents', 'ancient', 'history'],
     category: 'objects',
     color: '#DEB887',
-    tags: ['scroll', 'ancient', 'document'],
   },
   {
     emoji: '📄',
@@ -808,7 +709,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['documents', 'office', 'paper'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['page', 'document', 'paper'],
   },
   {
     emoji: '📰',
@@ -816,7 +716,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['press', 'headline', 'news'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['newspaper', 'news', 'press'],
   },
   {
     emoji: '🗞️',
@@ -824,7 +723,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['press', 'headline', 'delivery'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['newspaper', 'rolled', 'delivery'],
   },
   {
     emoji: '📑',
@@ -832,7 +730,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['favorite', 'save', 'order'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['bookmarks', 'tabs', 'organize'],
   },
   {
     emoji: '🔖',
@@ -840,7 +737,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['favorite', 'label', 'save'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['bookmark', 'save', 'mark'],
   },
   {
     emoji: '🏷️',
@@ -848,7 +744,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sale', 'tag', 'price'],
     category: 'objects',
     color: '#F0E68C',
-    tags: ['label', 'tag', 'price'],
   },
 
   // Money
@@ -858,7 +753,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dollar', 'payment', 'coins'],
     category: 'objects',
     color: '#F0E68C',
-    tags: ['money', 'bag', 'wealth'],
   },
   {
     emoji: '🪙',
@@ -866,7 +760,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['money', 'currency', 'gold'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['coin', 'money', 'currency'],
   },
   {
     emoji: '💴',
@@ -874,7 +767,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['money', 'sales', 'japanese'],
     category: 'objects',
     color: '#F0E68C',
-    tags: ['yen', 'money', 'japanese'],
   },
   {
     emoji: '💵',
@@ -882,7 +774,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['money', 'sales', 'bill'],
     category: 'objects',
     color: '#90EE90',
-    tags: ['dollar', 'money', 'cash'],
   },
   {
     emoji: '💶',
@@ -890,7 +781,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['money', 'sales', 'dollar'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['euro', 'money', 'european'],
   },
   {
     emoji: '💷',
@@ -898,7 +788,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['british', 'sterling', 'money'],
     category: 'objects',
     color: '#DDA0DD',
-    tags: ['pound', 'money', 'british'],
   },
   {
     emoji: '💸',
@@ -906,7 +795,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dollar', 'bills', 'payment'],
     category: 'objects',
     color: '#90EE90',
-    tags: ['money', 'flying', 'spending'],
   },
   {
     emoji: '💳',
@@ -914,7 +802,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['money', 'sales', 'shopping'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['credit-card', 'payment', 'shopping'],
   },
   {
     emoji: '🧾',
@@ -922,7 +809,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['accounting', 'expenses', 'bill'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['receipt', 'bill', 'payment'],
   },
   {
     emoji: '💹',
@@ -930,7 +816,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['green-square', 'graph', 'presentation'],
     category: 'objects',
     color: '#90EE90',
-    tags: ['chart', 'stocks', 'increase'],
   },
 
   // Mail
@@ -940,7 +825,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['letter', 'postal', 'inbox'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['envelope', 'mail', 'letter'],
   },
   {
     emoji: '📧',
@@ -948,7 +832,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['communication', 'inbox', 'email'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['email', 'mail', 'electronic'],
   },
   {
     emoji: '📨',
@@ -956,7 +839,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'inbox', 'mail'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['envelope', 'incoming', 'mail'],
   },
   {
     emoji: '📩',
@@ -964,7 +846,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'communication', 'sent'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['envelope', 'sent', 'mail'],
   },
   {
     emoji: '📤',
@@ -972,7 +853,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['inbox', 'email', 'sent'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['outbox', 'sent', 'mail'],
   },
   {
     emoji: '📥',
@@ -980,7 +860,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'documents', 'inbox'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['inbox', 'received', 'mail'],
   },
   {
     emoji: '📦',
@@ -988,7 +867,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mail', 'gift', 'cardboard'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['package', 'box', 'delivery'],
   },
   {
     emoji: '📫',
@@ -996,7 +874,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'inbox', 'communication'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['mailbox', 'mail', 'full'],
   },
   {
     emoji: '📪',
@@ -1004,7 +881,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'communication', 'inbox'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['mailbox', 'empty', 'mail'],
   },
   {
     emoji: '📬',
@@ -1012,7 +888,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'inbox', 'communication'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['mailbox', 'open', 'mail'],
   },
   {
     emoji: '📭',
@@ -1020,7 +895,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'inbox', 'communication'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['mailbox', 'open', 'empty'],
   },
   {
     emoji: '📮',
@@ -1028,7 +902,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'letter', 'envelope'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['postbox', 'mail', 'letters'],
   },
   {
     emoji: '🗳️',
@@ -1036,7 +909,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['election', 'vote', 'ballot'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['ballot', 'vote', 'election'],
   },
 
   // Writing tools
@@ -1046,7 +918,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'write', 'paper'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['pencil', 'write', 'draw'],
   },
   {
     emoji: '✒️',
@@ -1054,7 +925,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pen', 'stationery', 'writing'],
     category: 'objects',
     color: '#000000',
-    tags: ['nib', 'pen', 'writing'],
   },
   {
     emoji: '🖋️',
@@ -1062,7 +932,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'writing', 'write'],
     category: 'objects',
     color: '#000000',
-    tags: ['fountain-pen', 'writing', 'fancy'],
   },
   {
     emoji: '🖊️',
@@ -1070,7 +939,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'writing', 'write'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['pen', 'ballpoint', 'writing'],
   },
   {
     emoji: '🖌️',
@@ -1078,7 +946,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['drawing', 'creativity', 'art'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['paintbrush', 'art', 'painting'],
   },
   {
     emoji: '🖍️',
@@ -1086,7 +953,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['drawing', 'creativity', 'color'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['crayon', 'drawing', 'coloring'],
   },
   {
     emoji: '📝',
@@ -1094,7 +960,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['write', 'documents', 'stationery'],
     category: 'objects',
     color: '#F0E68C',
-    tags: ['memo', 'note', 'writing'],
   },
 
   // Office supplies
@@ -1104,7 +969,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['business', 'work', 'law'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['briefcase', 'business', 'work'],
   },
   {
     emoji: '📁',
@@ -1112,7 +976,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['documents', 'business', 'office'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['folder', 'file', 'documents'],
   },
   {
     emoji: '📂',
@@ -1120,7 +983,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['documents', 'load', 'folder'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['folder', 'open', 'files'],
   },
   {
     emoji: '🗂️',
@@ -1128,7 +990,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['organizing', 'business', 'stationery'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['dividers', 'organize', 'index'],
   },
   {
     emoji: '📅',
@@ -1136,7 +997,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['calendar', 'schedule', 'date'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['calendar', 'date', 'schedule'],
   },
   {
     emoji: '📆',
@@ -1144,7 +1004,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['schedule', 'date', 'planning'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['calendar', 'tear-off', 'daily'],
   },
   {
     emoji: '🗒️',
@@ -1152,7 +1011,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['memo', 'stationery', 'notes'],
     category: 'objects',
     color: '#F0E68C',
-    tags: ['notepad', 'spiral', 'notes'],
   },
   {
     emoji: '🗓️',
@@ -1160,7 +1018,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['date', 'schedule', 'planning'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['calendar', 'spiral', 'desktop'],
   },
   {
     emoji: '📇',
@@ -1168,7 +1025,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['business', 'stationery', 'rolodex'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['rolodex', 'contacts', 'index'],
   },
   {
     emoji: '📈',
@@ -1176,7 +1032,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['graph', 'presentation', 'stats'],
     category: 'objects',
     color: '#90EE90',
-    tags: ['chart', 'growth', 'increase'],
   },
   {
     emoji: '📉',
@@ -1184,7 +1039,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['graph', 'presentation', 'stats'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['chart', 'decline', 'decrease'],
   },
   {
     emoji: '📊',
@@ -1192,7 +1046,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['graph', 'presentation', 'stats'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['chart', 'bar', 'statistics'],
   },
   {
     emoji: '📋',
@@ -1200,7 +1053,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'documents', 'clipboard'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['clipboard', 'notes', 'checklist'],
   },
   {
     emoji: '📌',
@@ -1208,7 +1060,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'mark', 'here'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['pushpin', 'pin', 'tack'],
   },
   {
     emoji: '📍',
@@ -1216,7 +1067,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'location', 'map'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['pushpin', 'location', 'marker'],
   },
   {
     emoji: '📎',
@@ -1224,7 +1074,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['documents', 'stationery', 'paperclip'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['paperclip', 'attach', 'clip'],
   },
   {
     emoji: '🖇️',
@@ -1232,7 +1081,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['documents', 'stationery', 'link'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['paperclips', 'linked', 'chain'],
   },
   {
     emoji: '📏',
@@ -1240,7 +1088,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'calculate', 'length'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['ruler', 'straight', 'measure'],
   },
   {
     emoji: '📐',
@@ -1248,7 +1095,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'math', 'architect'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['ruler', 'triangle', 'geometry'],
   },
   {
     emoji: '✂️',
@@ -1256,7 +1102,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stationery', 'cut', 'scissors'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['scissors', 'cut', 'tool'],
   },
   {
     emoji: '🗃️',
@@ -1264,7 +1109,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['business', 'stationery', 'index'],
     category: 'objects',
     color: '#696969',
-    tags: ['file-box', 'storage', 'archive'],
   },
   {
     emoji: '🗄️',
@@ -1272,7 +1116,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['filing', 'organizing', 'storage'],
     category: 'objects',
     color: '#696969',
-    tags: ['cabinet', 'filing', 'storage'],
   },
   {
     emoji: '🗑️',
@@ -1280,7 +1123,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bin', 'trash', 'rubbish'],
     category: 'objects',
     color: '#696969',
-    tags: ['trash', 'bin', 'wastebasket'],
   },
 
   // Locks and security
@@ -1290,7 +1132,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['security', 'password', 'padlock'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['lock', 'locked', 'secure'],
   },
   {
     emoji: '🔓',
@@ -1298,7 +1139,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['privacy', 'security', 'unlock'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['unlock', 'open', 'unlocked'],
   },
   {
     emoji: '🔏',
@@ -1306,7 +1146,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['security', 'secret', 'lock'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['lock', 'pen', 'secure'],
   },
   {
     emoji: '🔐',
@@ -1314,7 +1153,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['security', 'privacy', 'lock'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['lock', 'key', 'secure'],
   },
   {
     emoji: '🔑',
@@ -1322,7 +1160,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lock', 'door', 'password'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['key', 'unlock', 'access'],
   },
   {
     emoji: '🗝️',
@@ -1330,7 +1167,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lock', 'door', 'antique'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['key', 'old', 'antique'],
   },
 
   // Tools
@@ -1340,7 +1176,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tools', 'build', 'create'],
     category: 'objects',
     color: '#696969',
-    tags: ['hammer', 'tool', 'build'],
   },
   {
     emoji: '🪓',
@@ -1348,7 +1183,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tool', 'chop', 'cut'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['axe', 'chop', 'tool'],
   },
   {
     emoji: '⛏️',
@@ -1356,7 +1190,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tools', 'dig', 'mine'],
     category: 'objects',
     color: '#696969',
-    tags: ['pickaxe', 'mining', 'tool'],
   },
   {
     emoji: '⚒️',
@@ -1364,7 +1197,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tools', 'build', 'create'],
     category: 'objects',
     color: '#696969',
-    tags: ['tools', 'mining', 'work'],
   },
   {
     emoji: '🛠️',
@@ -1372,7 +1204,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tools', 'build', 'create'],
     category: 'objects',
     color: '#696969',
-    tags: ['tools', 'repair', 'fix'],
   },
   {
     emoji: '🗡️',
@@ -1380,7 +1211,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weapon', 'knife', 'blade'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['dagger', 'knife', 'weapon'],
   },
   {
     emoji: '⚔️',
@@ -1388,7 +1218,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weapon', 'battle', 'fight'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['swords', 'battle', 'crossed'],
   },
   {
     emoji: '🔫',
@@ -1396,7 +1225,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['violence', 'weapon', 'pistol'],
     category: 'objects',
     color: '#90EE90',
-    tags: ['water-gun', 'toy', 'pistol'],
   },
   {
     emoji: '🛡️',
@@ -1404,7 +1232,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['protection', 'security', 'defense'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['shield', 'protection', 'defense'],
   },
   {
     emoji: '🪚',
@@ -1412,7 +1239,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cut', 'tool', 'carpenter'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['saw', 'carpentry', 'tool'],
   },
   {
     emoji: '🔧',
@@ -1420,7 +1246,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tools', 'diy', 'ikea'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['wrench', 'tool', 'fix'],
   },
   {
     emoji: '🪛',
@@ -1428,7 +1253,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tools', 'build', 'fix'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['screwdriver', 'tool', 'fix'],
   },
   {
     emoji: '🔩',
@@ -1436,7 +1260,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['handy', 'tools', 'fix'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['bolt', 'nut', 'hardware'],
   },
   {
     emoji: '⚙️',
@@ -1444,7 +1267,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cog', 'settings', 'machine'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['gear', 'settings', 'cog'],
   },
   {
     emoji: '🗜️',
@@ -1452,7 +1274,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tool', 'compress', 'vice'],
     category: 'objects',
     color: '#696969',
-    tags: ['clamp', 'vice', 'tool'],
   },
   {
     emoji: '⚖️',
@@ -1460,7 +1281,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['law', 'fairness', 'weight'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['scale', 'justice', 'balance'],
   },
   {
     emoji: '🦯',
@@ -1468,7 +1288,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['accessibility', 'blind', 'cane'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['cane', 'blind', 'accessibility'],
   },
   {
     emoji: '🔗',
@@ -1476,7 +1295,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['rings', 'url', 'chain'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['link', 'chain', 'connection'],
   },
   {
     emoji: '⛓️',
@@ -1484,7 +1302,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lock', 'arrest', 'chain'],
     category: 'objects',
     color: '#696969',
-    tags: ['chains', 'linked', 'metal'],
   },
   {
     emoji: '🪝',
@@ -1492,7 +1309,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['catch', 'fishing', 'hang'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['hook', 'fishing', 'catch'],
   },
   {
     emoji: '🧰',
@@ -1500,7 +1316,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tools', 'diy', 'fix'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['toolbox', 'tools', 'repair'],
   },
   {
     emoji: '🧲',
@@ -1508,7 +1323,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['attraction', 'magnetic', 'draw'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['magnet', 'magnetic', 'attract'],
   },
   {
     emoji: '🪜',
@@ -1516,7 +1330,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['climb', 'step', 'tool'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['ladder', 'climb', 'steps'],
   },
 
   // Science
@@ -1526,7 +1339,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['distilling', 'science', 'experiment'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['alembic', 'chemistry', 'distill'],
   },
   {
     emoji: '🧪',
@@ -1534,7 +1346,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chemistry', 'experiment', 'lab'],
     category: 'objects',
     color: '#90EE90',
-    tags: ['test-tube', 'science', 'experiment'],
   },
   {
     emoji: '🧫',
@@ -1542,7 +1353,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bacteria', 'biology', 'culture'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['petri-dish', 'biology', 'lab'],
   },
   {
     emoji: '🧬',
@@ -1550,7 +1360,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['biologist', 'genetics', 'life'],
     category: 'objects',
     color: '#9370DB',
-    tags: ['dna', 'genetics', 'biology'],
   },
   {
     emoji: '🔬',
@@ -1558,7 +1367,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['science', 'laboratory', 'investigate'],
     category: 'objects',
     color: '#696969',
-    tags: ['microscope', 'science', 'research'],
   },
   {
     emoji: '🔭',
@@ -1566,7 +1374,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stars', 'space', 'zoom'],
     category: 'objects',
     color: '#696969',
-    tags: ['telescope', 'astronomy', 'stars'],
   },
   {
     emoji: '📡',
@@ -1574,7 +1381,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['communication', 'future', 'radio'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['satellite', 'antenna', 'communication'],
   },
 
   // Medical
@@ -1584,7 +1390,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['health', 'hospital', 'drugs'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['syringe', 'vaccine', 'medical'],
   },
   {
     emoji: '🩸',
@@ -1592,7 +1397,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['period', 'hurt', 'harm'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['blood', 'drop', 'medical'],
   },
   {
     emoji: '💊',
@@ -1600,7 +1404,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['health', 'medicine', 'doctor'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['pill', 'medicine', 'drug'],
   },
   {
     emoji: '🩹',
@@ -1608,7 +1411,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['heal', 'bandage', 'bandaid'],
     category: 'objects',
     color: '#FDBCB4',
-    tags: ['bandage', 'bandaid', 'heal'],
   },
   {
     emoji: '🩺',
@@ -1616,7 +1418,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['health', 'medical', 'doctor'],
     category: 'objects',
     color: '#000000',
-    tags: ['stethoscope', 'doctor', 'medical'],
   },
 
   // Household
@@ -1626,7 +1427,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['house', 'entry', 'exit'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['door', 'entrance', 'exit'],
   },
   {
     emoji: '🛗',
@@ -1634,7 +1434,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lift', 'elevator', 'up'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['elevator', 'lift', 'building'],
   },
   {
     emoji: '🪞',
@@ -1642,7 +1441,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['reflection', 'reflect', 'magic'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['mirror', 'reflection', 'glass'],
   },
   {
     emoji: '🪟',
@@ -1650,7 +1448,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['view', 'scenery', 'frame'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['window', 'view', 'glass'],
   },
   {
     emoji: '🛏️',
@@ -1658,7 +1455,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sleep', 'rest', 'bedroom'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['bed', 'sleep', 'rest'],
   },
   {
     emoji: '🛋️',
@@ -1666,7 +1462,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['read', 'chill', 'living room'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['couch', 'sofa', 'furniture'],
   },
   {
     emoji: '🪑',
@@ -1674,7 +1469,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sit', 'furniture', 'seat'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['chair', 'seat', 'furniture'],
   },
   {
     emoji: '🚽',
@@ -1682,7 +1476,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['restroom', 'wc', 'washroom'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['toilet', 'bathroom', 'wc'],
   },
   {
     emoji: '🪠',
@@ -1690,7 +1483,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['toilet', 'unclog', 'plumber'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['plunger', 'toilet', 'plumbing'],
   },
   {
     emoji: '🚿',
@@ -1698,7 +1490,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['clean', 'water', 'bathroom'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['shower', 'bathroom', 'clean'],
   },
   {
     emoji: '🛁',
@@ -1706,7 +1497,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['clean', 'shower', 'bathroom'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['bathtub', 'bath', 'bathroom'],
   },
   {
     emoji: '🪤',
@@ -1714,7 +1504,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bait', 'trap', 'cheese'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['mousetrap', 'trap', 'catch'],
   },
   {
     emoji: '🪒',
@@ -1722,7 +1511,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sharp', 'shave', 'blade'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['razor', 'shave', 'blade'],
   },
   {
     emoji: '🧴',
@@ -1730,7 +1518,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['moisturizer', 'sunscreen', 'shampoo'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['lotion', 'bottle', 'cosmetic'],
   },
   {
     emoji: '🧷',
@@ -1738,7 +1525,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['diaper', 'punk rock', 'pin'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['safety-pin', 'pin', 'fasten'],
   },
   {
     emoji: '🧹',
@@ -1746,7 +1532,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cleaning', 'sweeping', 'witch'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['broom', 'sweep', 'clean'],
   },
   {
     emoji: '🧺',
@@ -1754,7 +1539,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['laundry', 'basket', 'picnic'],
     category: 'objects',
     color: '#DEB887',
-    tags: ['basket', 'container', 'picnic'],
   },
   {
     emoji: '🧻',
@@ -1762,7 +1546,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['roll', 'toilet paper', 'tissue'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['toilet-paper', 'tissue', 'roll'],
   },
   {
     emoji: '🪣',
@@ -1770,7 +1553,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cask', 'pail', 'container'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['bucket', 'pail', 'container'],
   },
   {
     emoji: '🧼',
@@ -1778,7 +1560,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bar', 'bathing', 'cleaning'],
     category: 'objects',
     color: '#FFB6C1',
-    tags: ['soap', 'clean', 'wash'],
   },
   {
     emoji: '🫧',
@@ -1786,7 +1567,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['soap', 'champagne', 'carbonation'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['bubbles', 'soap', 'floating'],
   },
   {
     emoji: '🪥',
@@ -1794,7 +1574,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hygiene', 'dental', 'clean'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['toothbrush', 'dental', 'hygiene'],
   },
   {
     emoji: '🧽',
@@ -1802,7 +1581,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['absorbing', 'cleaning', 'kitchen'],
     category: 'objects',
     color: '#FFD700',
-    tags: ['sponge', 'cleaning', 'wash'],
   },
   {
     emoji: '🧯',
@@ -1810,7 +1588,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['quench', 'fire', 'extinguish'],
     category: 'objects',
     color: '#DC143C',
-    tags: ['fire-extinguisher', 'safety', 'fire'],
   },
   {
     emoji: '🛒',
@@ -1818,7 +1595,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['trolley', 'shopping', 'cart'],
     category: 'objects',
     color: '#C0C0C0',
-    tags: ['cart', 'shopping', 'grocery'],
   },
 
   // Smoking
@@ -1828,7 +1604,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kills', 'tobacco', 'cigarette'],
     category: 'objects',
     color: '#F5F5F5',
-    tags: ['cigarette', 'smoking', 'tobacco'],
   },
   {
     emoji: '⚰️',
@@ -1836,7 +1611,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vampire', 'dead', 'die'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['coffin', 'death', 'funeral'],
   },
   {
     emoji: '🪦',
@@ -1844,7 +1618,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tombstone', 'cemetery', 'grave'],
     category: 'objects',
     color: '#696969',
-    tags: ['headstone', 'grave', 'cemetery'],
   },
   {
     emoji: '⚱️',
@@ -1852,7 +1625,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dead', 'die', 'death'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['urn', 'funeral', 'ashes'],
   },
   {
     emoji: '🪧',
@@ -1860,7 +1632,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'protest', 'demonstration'],
     category: 'objects',
     color: '#8B4513',
-    tags: ['sign', 'placard', 'protest'],
   },
 
   // Other objects
@@ -1870,7 +1641,6 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['evil eye', 'bead', 'charm'],
     category: 'objects',
     color: '#4169E1',
-    tags: ['evil-eye', 'amulet', 'protection'],
   },
   {
     emoji: '🪬',
@@ -1878,6 +1648,5 @@ export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['religion', 'protection', 'amulet'],
     category: 'objects',
     color: '#87CEEB',
-    tags: ['hamsa', 'hand', 'protection'],
   },
 ];

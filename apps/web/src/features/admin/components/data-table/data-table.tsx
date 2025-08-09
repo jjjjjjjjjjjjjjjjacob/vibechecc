@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table';
 import { DataTableToolbar } from './data-table-toolbar';
 import { DataTablePagination } from './data-table-pagination';
+import { DataTableServerPagination } from './data-table-server-pagination';
 
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,6 +31,8 @@ export interface DataTableProps<TData, TValue> {
   // Filtering
   searchKey?: string;
   searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchValueChange?: (value: string) => void;
   filters?: Array<{
     key: string;
     title: string;
@@ -37,7 +40,16 @@ export interface DataTableProps<TData, TValue> {
       label: string;
       value: string;
     }>;
+    value?: string;
+    onChange?: (value: string) => void;
   }>;
+  // Server-side pagination
+  totalCount?: number;
+  currentPage?: number;
+  pageCount?: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
   // Actions
   onRowClick?: (row: TData) => void;
   onRowSelect?: (selectedRows: TData[]) => void;
@@ -65,7 +77,15 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   searchPlaceholder = 'search...',
+  searchValue,
+  onSearchValueChange,
   filters = [],
+  totalCount,
+  currentPage,
+  pageCount,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
   onRowClick,
   onRowSelect,
   bulkActions = [],
@@ -82,6 +102,9 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
+  // Use server-side pagination if provided, otherwise use client-side
+  const isServerPagination = onPageChange !== undefined;
+  
   const table = useReactTable({
     data,
     columns,
@@ -98,9 +121,13 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: isServerPagination ? undefined : getFilteredRowModel(),
+    getPaginationRowModel: isServerPagination ? undefined : getPaginationRowModel(),
+    getSortedRowModel: isServerPagination ? undefined : getSortedRowModel(),
+    manualPagination: isServerPagination,
+    manualFiltering: isServerPagination,
+    manualSorting: isServerPagination,
+    pageCount: pageCount || -1,
     filterFns: {
       fuzzy: (row, columnId, value, addMeta) => {
         const itemValue = row.getValue(columnId) as string;
@@ -123,10 +150,13 @@ export function DataTable<TData, TValue>({
         table={table}
         searchKey={searchKey}
         searchPlaceholder={searchPlaceholder}
+        searchValue={searchValue}
+        onSearchValueChange={onSearchValueChange}
         filters={filters}
         bulkActions={bulkActions}
         onExport={onExport}
         exportLabel={exportLabel}
+        totalCount={totalCount}
       />
       
       <div className="rounded-md border bg-card flex-1 min-h-0 flex flex-col">
@@ -198,7 +228,20 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
       
-      <DataTablePagination table={table} />
+      {isServerPagination && totalCount !== undefined && currentPage !== undefined ? (
+        <DataTableServerPagination
+          totalCount={totalCount}
+          currentPage={currentPage}
+          pageCount={pageCount || 1}
+          pageSize={pageSize || 10}
+          onPageChange={onPageChange!}
+          onPageSizeChange={onPageSizeChange!}
+          selectedCount={table.getFilteredSelectedRowModel().rows.length}
+          rowCount={data.length}
+        />
+      ) : (
+        <DataTablePagination table={table} />
+      )}
     </div>
   );
 }

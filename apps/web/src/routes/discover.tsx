@@ -231,7 +231,7 @@ function EmojiCollectionSection({
             variant="secondary"
             className="flex items-center gap-1 border-[hsl(var(--theme-primary))]/20 bg-[hsl(var(--theme-primary))]/10 text-[hsl(var(--theme-primary))]"
           >
-            <span className="font-noto-color">{collection.emoji}</span>
+            <span className="font-sans">{collection.emoji}</span>
             {collection.minValue}+ rating
           </Badge>
         </div>
@@ -272,7 +272,7 @@ function NewSection() {
     <DiscoverSectionWrapper
       title={
         <>
-          <span className="font-noto-color">🆕</span> new vibes
+          <span className="font-sans">🆕</span> new vibes
         </>
       }
       vibes={newVibes}
@@ -298,7 +298,7 @@ function TrendingSection() {
     <DiscoverSectionWrapper
       title={
         <>
-          <span className="font-noto-color">🔥</span> trending now
+          <span className="font-sans">🔥</span> trending now
         </>
       }
       vibes={trendingVibes}
@@ -332,7 +332,7 @@ function RecentArrivalsSection() {
     <DiscoverSectionWrapper
       title={
         <>
-          <span className="font-noto-color">✨</span> fresh arrivals
+          <span className="font-sans">✨</span> fresh arrivals
         </>
       }
       vibes={recentVibes}
@@ -359,7 +359,7 @@ function UnratedSection() {
     <DiscoverSectionWrapper
       title={
         <>
-          <span className="font-noto-color">👀</span> needs love
+          <span className="font-sans">👀</span> needs love
         </>
       }
       vibes={unratedVibes}
@@ -380,7 +380,7 @@ function CommunityFavoritesSection() {
     <DiscoverSectionWrapper
       title={
         <>
-          <span className="font-noto-color">❤️</span> community favorites
+          <span className="font-sans">❤️</span> community favorites
         </>
       }
       vibes={topRatedVibes}
@@ -508,7 +508,7 @@ function FeaturedCollectionVibeList({
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <span className="font-noto-color text-4xl drop-shadow-[0_2px_5px_var(--color-slate-500)]">
+              <span className="font-sans text-4xl drop-shadow-[0_2px_5px_var(--color-slate-500)]">
                 {collection.emoji}
               </span>
               <div>

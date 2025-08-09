@@ -742,7 +742,7 @@ export const create = mutation({
       imageStorageId: imageStorageIdValue,
       createdById: userId,
       createdAt: now,
-      tags,
+      tags: tags || [],
       visibility: 'public', // Default to public visibility
     });
 
@@ -990,9 +990,7 @@ export const addRating = mutation({
       .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
       .first();
 
-    if (emojiData && emojiData.tags) {
-      tags = emojiData.tags;
-    }
+    // Tags come from the rating, not from the emoji metadata
 
     // Check if user already rated this vibe
     const existingRating = await ctx.db
@@ -1140,7 +1138,7 @@ export const quickReact = mutation({
       value: defaultValue,
       review: `Quick reaction: ${args.emoji}`,
       createdAt: new Date().toISOString(),
-      tags: emojiData?.tags,
+      tags: tags || [],
     });
 
     // Add vibe tags to user interests after successful quick reaction
@@ -1747,9 +1745,7 @@ export const addRatingForSeed = internalMutation({
       .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
       .first();
 
-    if (emojiData && emojiData.tags) {
-      tags = emojiData.tags;
-    }
+    // Tags come from the rating, not from the emoji metadata
 
     // Check if user already rated this vibe
     const existingRating = await ctx.db
@@ -1829,7 +1825,7 @@ export const reactToVibeForSeed = internalMutation({
         value: defaultValue,
         review: `Quick reaction: ${args.emoji}`,
         createdAt: new Date().toISOString(),
-        tags: emojiData?.tags,
+        tags: tags || [],
       });
 
       // Add vibe tags to user interests after successful seed rating

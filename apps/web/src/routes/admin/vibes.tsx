@@ -5,12 +5,14 @@ import { convexQuery } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';
 import { AdminLayout } from '@/features/admin/components/admin-layout';
 import { VibesTable } from '@/features/admin/components/tables/vibes-table';
+import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 
 export const Route = createFileRoute('/admin/vibes')({
   component: AdminVibesPage,
 });
 
 function AdminVibesPage() {
+  const { isAdmin, isLoading: authLoading } = useAdminAuth();
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(25);
   const [search, setSearch] = React.useState('');
@@ -27,10 +29,12 @@ function AdminVibesPage() {
       dateFrom,
       dateTo,
     }),
+    enabled: isAdmin && !authLoading,
   });
 
   const { data: stats } = useQuery({
     ...convexQuery(api.admin.vibes.getVibeStats, {}),
+    enabled: isAdmin && !authLoading,
   });
 
   if (error) {
@@ -58,7 +62,8 @@ function AdminVibesPage() {
           data={data?.data?.map((vibe: any) => ({
             ...vibe,
             createdBy: vibe.creator,
-            ratings: [], // Mock empty ratings array since it's not returned by API but expected by component
+            ratings: vibe.emojiRatings || [], // Use emojiRatings from backend
+            emojiRatings: vibe.emojiRatings || [],
           })) || []}
           totalCount={data?.totalCount || 0}
           pageCount={data?.pageCount || 0}

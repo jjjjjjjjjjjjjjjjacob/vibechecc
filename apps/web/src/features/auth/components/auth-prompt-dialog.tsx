@@ -38,7 +38,7 @@ export function AuthPromptDialog({
         <div className="mt-6 space-y-4">
           <div className="space-y-3">
             <SignInButton mode="modal">
-              <Button className="h-12 w-full bg-gradient-to-r from-violet-600 to-pink-600 text-base font-semibold text-white transition-all hover:scale-[1.02] hover:from-violet-700 hover:to-pink-700 hover:shadow-lg hover:shadow-violet-500/25">
+              <Button className="h-12 w-full border-transparent bg-gradient-to-r from-violet-600 to-pink-600 text-base font-semibold text-white transition-all hover:scale-[1.02] hover:border-transparent hover:from-violet-700 hover:to-pink-700 hover:shadow-lg hover:shadow-violet-500/25">
                 <LogIn className="mr-2 h-5 w-5" />
                 sign in to viberatr
               </Button>
@@ -46,9 +46,9 @@ export function AuthPromptDialog({
             <SignUpButton mode="modal">
               <Button
                 variant="outline"
-                className="h-12 w-full border-2 border-violet-200 bg-white/50 text-base font-semibold backdrop-blur-sm transition-all hover:scale-[1.02] hover:border-violet-300 hover:bg-gradient-to-r hover:from-violet-50 hover:to-pink-50"
+                className="bg-secondary/50 h-12 w-full border-2 border-pink-200/20 text-base font-semibold backdrop-blur-sm transition-all hover:scale-[1.02] hover:border-none hover:border-transparent hover:bg-gradient-to-r hover:from-violet-500 hover:to-pink-500"
               >
-                <Sparkles className="mr-2 h-4 w-4 text-violet-600" />
+                <Sparkles className="mr-2 h-4 w-4 text-violet-200" />
                 create new account
               </Button>
             </SignUpButton>

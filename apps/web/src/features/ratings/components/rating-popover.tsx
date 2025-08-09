@@ -10,6 +10,7 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -19,11 +20,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
 import type { EmojiRating, EmojiRatingMetadata } from '@viberatr/types';
-import { Circle, Info } from 'lucide-react';
+import { Circle, Info, ChevronLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { EmojiSearchCommand } from './emoji-search-command';
+// Using v2 emoji-mart component - switch to './emoji-search-command' for rollback
+import { EmojiSearchCommandV2 as EmojiSearchCommand } from './emoji-search-command-v2';
 import { RatingScale } from './rating-scale';
+import { FlipClockDigit } from './flip-clock-digit';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { Separator } from '@/components/ui/separator';
 
 interface RatingPopoverProps {
   children: React.ReactNode;
@@ -52,6 +56,7 @@ const REVIEW_PLACEHOLDERS = [
   `if you think it's only {value} {emoji}s think again`,
   'thinking {value} {emoji}s might be overkill. or underkill?',
   'fuckit {value} {emoji}s',
+  'is it giving {value} {emoji}s?',
 ];
 
 export function RatingPopover({
@@ -100,6 +105,10 @@ export function RatingPopover({
   const [placeholderIndex, setPlaceholderIndex] = React.useState(
     Math.floor(Math.random() * REVIEW_PLACEHOLDERS.length)
   );
+  const [previousLockedValue, setPreviousLockedValue] = React.useState<
+    number | null
+  >(null);
+  const [isLockingIn, setIsLockingIn] = React.useState(false);
 
   // Update when preSelectedEmoji or preSelectedValue changes
   React.useEffect(() => {
@@ -209,91 +218,118 @@ export function RatingPopover({
 
   // Shared form content
   const formContent = (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6">
+    <form
+      onSubmit={handleSubmit}
+      className={cn('flex w-full flex-col space-y-8 p-4')}
+    >
       {showEmojiPicker ? (
-        <div className="space-y-2">
-          <Label>select an emoji</Label>
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="m-auto flex w-full justify-between">
+            <p className="text-muted-foreground text-left text-sm">
+              select an emoji
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowEmojiPicker(false)}
+              className="h-6"
+            >
+              back
+            </Button>
+          </div>
           <EmojiSearchCommand
             searchValue={searchValue}
             onSearchChange={setSearchValue}
             onSelect={handleEmojiSelect}
             showCategories={true}
-            maxHeight="h-[340px]"
             pageSize={200}
-            className="border-0"
+            perLine={isMobile ? 9 : 7}
+            className="pointer-events-auto h-full max-h-[80vh] w-full"
             data-testid="emoji-search-command"
           />
-          <div className="text-muted-foreground flex items-center gap-1 text-xs">
-            <Info className="h-3 w-3" />
-            <span>it's giving {selectedEmoji || '...'}</span>
+          <div className="text-muted-foreground inline text-xs">
+            <span>{getPlaceholderText()}</span>
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label className="text-base">your emoji rating</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowEmojiPicker(true)}
-              >
-                change emoji
-              </Button>
-            </div>
-            <div
-              className="relative flex flex-col items-center justify-center gap-4 py-6"
-              data-rating-container
-            >
-              <div
-                className={cn(
-                  'bg-theme-primary/10 shadow-theme-primary/10 flex items-center justify-between gap-4 rounded-3xl p-4 shadow-lg transition-all duration-300',
-                  hasSelectedRating &&
-                    'animate-pulse-scale bg-theme-primary/20 shadow-theme-primary/30 shadow-3xl',
-                  isMouseDown &&
-                    'bg-theme-primary/15 shadow-theme-secondary/20 shadow-2xl'
-                )}
-              >
-                <span
-                  data-mouse-down={isMouseDown ? 'true' : 'false'}
-                  className="font-noto-color text-7xl drop-shadow-lg transition-transform duration-4000"
-                  style={
-                    isMouseDown
-                      ? {
-                          animation: 'shimmy 0.3s ease-in-out infinite',
-                        }
-                      : hasSelectedRating
-                        ? {
-                            animation: 'bounce 1s ease-in-out 1',
-                          }
-                        : undefined
-                  }
-                >
-                  {selectedEmoji}
-                </span>
-                <span
-                  data-mouse-down={isMouseDown ? 'true' : 'false'}
-                  className={cn(
-                    'font-doto text-primary text-6xl transition-all duration-300',
-                    hasSelectedRating &&
-                      'animate-number-pop drop-shadow-[0_0_20px_var(--theme-primary)]',
-                    isMouseDown &&
-                      'drop-shadow-[0_0_30px_var(--theme-secondary)]'
-                  )}
-                  style={{
-                    textShadow: isMouseDown
-                      ? '0 0 20px var(--theme-secondary), 0 2px 4px rgba(0,0,0,0.2)'
-                      : '0 0 10px var(--theme-primary), 0 2px 4px rgba(0,0,0,0.2)',
+        <div className="flex flex-col justify-center space-y-4">
+          <div className="relative flex flex-col items-center space-y-8">
+            <div className="flex w-fit flex-col items-center justify-center gap-2">
+              <div className="flex w-full items-center justify-between">
+                <Label className="text-base">your rating</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-6"
+                  onClick={() => {
+                    setShowEmojiPicker(true);
                   }}
                 >
-                  {ratingValue.toFixed(1)}
-                </span>
+                  change emoji
+                </Button>
               </div>
-
+              <div
+                className="relative flex flex-col items-center justify-center gap-3 py-4"
+                data-rating-container
+              >
+                <div
+                  className={cn(
+                    'bg-theme-primary/10 shadow-theme-primary/10 flex items-center justify-between gap-4 rounded-3xl px-5 py-4 shadow-lg transition-all duration-300',
+                    hasSelectedRating &&
+                      'animate-pulse-scale bg-theme-primary/20 shadow-theme-primary/30 shadow-3xl',
+                    isMouseDown &&
+                      'bg-theme-primary/15 shadow-theme-secondary/20 shadow-2xl'
+                  )}
+                >
+                  <button
+                    data-mouse-down={isMouseDown ? 'true' : 'false'}
+                    className="flex items-center font-sans text-[5.5rem] leading-none opacity-[0.99] drop-shadow-lg transition-transform duration-4000"
+                    onClick={() => setShowEmojiPicker(true)}
+                    onPointerDown={() => setShowEmojiPicker(true)}
+                    style={
+                      isMouseDown
+                        ? {
+                            animation: 'shimmy 0.3s ease-in-out infinite',
+                          }
+                        : hasSelectedRating
+                          ? {
+                              animation: 'bounce 1s ease-in-out 1',
+                            }
+                          : undefined
+                    }
+                  >
+                    <span>{selectedEmoji}</span>
+                  </button>
+                  <div
+                    data-mouse-down={isMouseDown ? 'true' : 'false'}
+                    className={cn(
+                      'font-doto text-primary text-7xl',
+                      hasSelectedRating &&
+                        'drop-shadow-[0_0_20px_var(--theme-primary)]',
+                      isMouseDown &&
+                        'drop-shadow-[0_0_30px_var(--theme-secondary)]'
+                    )}
+                    style={{
+                      textShadow: isMouseDown
+                        ? '0 0 20px var(--theme-secondary), 0 2px 4px rgba(0,0,0,0.2)'
+                        : '0 0 10px var(--theme-primary), 0 2px 4px rgba(0,0,0,0.2)',
+                      perspective: '300px',
+                      transformStyle: 'preserve-3d',
+                    }}
+                  >
+                    <FlipClockDigit
+                      value={ratingValue.toFixed(1)}
+                      className="inline-block"
+                      onLockIn={isLockingIn}
+                      previousLockedValue={previousLockedValue?.toFixed(1)}
+                    />
+                  </div>
+                </div>
+              </div>
               {/* Rating CTA */}
               {showRatingCTA && (
-                <div className="animate-fade-in-down pointer-events-none absolute -top-2">
+                <div className="animate-fade-in-down pointer-events-none absolute top-9">
                   <div className="relative">
                     <div className="from-theme-primary to-theme-secondary rounded-full bg-gradient-to-r px-4 py-2 text-xs font-semibold text-white shadow-lg">
                       <span className="drop-shadow-sm">rating locked in!</span>
@@ -315,7 +351,7 @@ export function RatingPopover({
                 </div>
               )}
 
-              <div className="font-[500]">
+              <div className="flex flex-col gap-2 font-[500]">
                 {selectedEmoji ? (
                   <div
                     onMouseLeave={() => setRatingValue(selectedRatingValue)}
@@ -326,13 +362,21 @@ export function RatingPopover({
                     <RatingScale
                       emoji={selectedEmoji}
                       value={selectedRatingValue}
-                      variant="gradient"
                       onChange={setRatingValue}
                       onClick={(value) => {
+                        // Store previous value for lock-in animation
+                        setPreviousLockedValue(selectedRatingValue);
+
                         setSelectedRatingValue(value);
-                        setRatingValue(value);
+                        // setRatingValue(value);
                         setHasSelectedRating(true);
                         setShowRatingCTA(true);
+
+                        // Trigger staggered lock-in animation
+                        setIsLockingIn(true);
+                        setTimeout(() => {
+                          setIsLockingIn(false);
+                        }, 250); // Allow time for all digits to animate
 
                         // Randomize placeholder when rating changes
                         setPlaceholderIndex(
@@ -363,7 +407,15 @@ export function RatingPopover({
                       size="lg"
                       showTooltip={false}
                       onPointerDown={() => setIsMouseDown(true)}
-                      onPointerUp={() => setIsMouseDown(false)}
+                      onPointerUp={() => {
+                        setIsMouseDown(false);
+                        // Trigger staggered lock-in animation
+                        setIsLockingIn(true);
+                        setTimeout(() => {
+                          setIsLockingIn(false);
+                        }, 250); // Allow time for all digits to animate
+                      }}
+                      isLockingIn={isLockingIn}
                       mobileSlider={true}
                       className="w-full"
                     />
@@ -401,7 +453,7 @@ export function RatingPopover({
               value={review}
               onChange={handleReviewChange}
               placeholder={getPlaceholderText()}
-              rows={6}
+              rows={4}
               maxLength={MAX_REVIEW_LENGTH}
               className={cn(
                 'resize-none',
@@ -425,16 +477,7 @@ export function RatingPopover({
         </div>
       )}
 
-      <div className="flex gap-3 border-t pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setOpen(false)}
-          disabled={isSubmitting}
-          className="h-12 flex-1"
-        >
-          cancel
-        </Button>
+      <div className={cn('flex gap-2 border-t', 'pt-3')}>
         <Button
           type="submit"
           disabled={
@@ -443,7 +486,7 @@ export function RatingPopover({
             review.length === 0 ||
             showEmojiPicker
           }
-          className="h-12 flex-1"
+          className="h-10 flex-1"
         >
           {isSubmitting ? (
             <>
@@ -465,18 +508,20 @@ export function RatingPopover({
           {children}
         </DrawerTrigger>
         <DrawerContent
-          className="bg-background/90 min-h-[92vh] overflow-y-auto backdrop-blur"
+          className={cn('bg-background/90 min-h-[92vh] backdrop-blur')}
           onClick={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
         >
-          <DrawerHeader className="p-6 pb-0">
-            <DrawerTitle>
-              {existingRating ? 'update emoji rating' : 'rate with emoji'}
+          <DrawerHeader className="relative p-4 pb-0">
+            <DrawerTitle className="flex items-center justify-between">
+              {existingRating ? 'update rating' : 'rating'}
             </DrawerTitle>
-            {vibeTitle && (
-              <p className="text-muted-foreground mt-1 text-sm lowercase">
-                {vibeTitle}
-              </p>
-            )}
+            <DrawerDescription className="text-muted-foreground text-left font-semibold">
+              {vibeTitle
+                ? `"${vibeTitle}"`
+                : 'Share your thoughts with an emoji rating and review'}
+            </DrawerDescription>
+            <Separator className="border-0.5, mt-4 w-full" />
           </DrawerHeader>
           {formContent}
         </DrawerContent>
@@ -490,20 +535,21 @@ export function RatingPopover({
         {children}
       </DialogTrigger>
       <DialogContent
-        className="bg-background/95 border-border max-h-screen max-w-lg overflow-y-auto border backdrop-blur"
+        className="bg-background/95 border-border max-h-[90vh] w-94 gap-0 overflow-y-auto border backdrop-blur"
         onClick={(e) => e.stopPropagation()}
         showCloseButton={false}
         data-testid="dialog-content"
       >
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle>
-            {existingRating ? 'update emoji rating' : 'rate with emoji'}
+        <DialogHeader className="p-4 pb-0 text-center">
+          <DialogTitle className="flex items-center justify-between">
+            {existingRating ? 'update rating' : 'rating'}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground font-semibold">
             {vibeTitle
-              ? `Rate "${vibeTitle}" with an emoji and detailed review`
+              ? `"${vibeTitle}"`
               : 'Share your thoughts with an emoji rating and review'}
           </DialogDescription>
+          <Separator className="border-0.5, mt-4 w-full" />
         </DialogHeader>
         {formContent}
       </DialogContent>

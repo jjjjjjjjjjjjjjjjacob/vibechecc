@@ -12,25 +12,32 @@ import { activityEmojis } from './seed/emojis/activities';
 import { travelEmojis } from './seed/emojis/travel';
 import { objectEmojis } from './seed/emojis/objects';
 import { symbolEmojis } from './seed/emojis/symbols';
+import { flagEmojis } from './seed/emojis/flags';
+
+// Full OpenMoji dataset 
+import { allOpenMojiEmojis } from './seed/emojis/all_openmoji';
+
 import type { Emoji } from './schema';
 
-// Combine all emoji arrays
-const allEmojis = [
-  ...smileyEmojis,
-  ...peopleEmojis,
-  ...animalEmojis,
-  ...foodEmojis,
-  ...activityEmojis,
-  ...travelEmojis,
-  ...objectEmojis,
-  ...symbolEmojis,
-];
+// Use full OpenMoji dataset (3000+ emojis with keywords)
+const allEmojis = allOpenMojiEmojis;
+
+// Helper to get unicode from emoji character
+function getUnicodeFromEmoji(emoji: string): string {
+  return emoji
+    .split('')
+    .map((char) => {
+      const code = char.codePointAt(0);
+      return code ? 'U+' + code.toString(16).toUpperCase().padStart(4, '0') : '';
+    })
+    .filter(Boolean)
+    .join(' ');
+}
 
 // Helper function to determine sentiment based on emoji characteristics
 function getSentiment(emoji: Omit<Emoji, 'sentiment'>): Emoji['sentiment'] {
-  const { name, keywords, tags } = emoji;
-  const text =
-    `${name} ${keywords.join(' ')} ${(tags || []).join(' ')}`.toLowerCase();
+  const { name, keywords } = emoji;
+  const text = `${name} ${keywords.join(' ')}`.toLowerCase();
 
   // Positive indicators
   if (
@@ -207,12 +214,13 @@ export const seedEmojis = internalMutation({
 
     for (const emojiData of allEmojis) {
       // Add sentiment to the emoji data
-      const completeEmoji: Emoji = {
+      const completeEmoji = {
         ...emojiData,
         sentiment: getSentiment(emojiData),
+        unicode: getUnicodeFromEmoji(emojiData.emoji),
       };
 
-      await ctx.db.insert('emojis', completeEmoji);
+      await ctx.db.insert('emojis', completeEmoji as any);
       count++;
     }
 

@@ -23,12 +23,14 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 
 export const Route = createFileRoute('/admin/')({
   component: AdminDashboard,
 });
 
 function AdminDashboard() {
+  const { isAdmin, isLoading: authLoading } = useAdminAuth();
   const [growthDays, setGrowthDays] = React.useState(30);
   const [engagementDays, setEngagementDays] = React.useState(7);
   const [customGrowthDays, setCustomGrowthDays] = React.useState('');
@@ -36,18 +38,22 @@ function AdminDashboard() {
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     ...convexQuery(api.admin.dashboard.getDashboardStats, {}),
+    enabled: isAdmin && !authLoading,
   });
 
   const { data: growth, isLoading: growthLoading } = useQuery({
     ...convexQuery(api.admin.dashboard.getUserGrowth, { days: growthDays }),
+    enabled: isAdmin && !authLoading,
   });
 
   const { data: engagement, isLoading: engagementLoading } = useQuery({
     ...convexQuery(api.admin.dashboard.getEngagementMetrics, { days: engagementDays }),
+    enabled: isAdmin && !authLoading,
   });
 
   const { data: activity, isLoading: activityLoading } = useQuery({
     ...convexQuery(api.admin.dashboard.getRecentActivity, { limit: 20 }),
+    enabled: isAdmin && !authLoading,
   });
 
   return (
@@ -89,20 +95,21 @@ function AdminDashboard() {
         </div>
 
         {/* Charts */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           {/* User Growth Chart */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>user growth ({growthDays} days)</CardTitle>
-                  <CardDescription>daily new user registrations</CardDescription>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="min-w-0">
+                  <CardTitle className="text-sm sm:text-base">user growth ({growthDays} days)</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">daily new user registrations</CardDescription>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex flex-wrap gap-1">
                   <Button
                     variant={growthDays === 1 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setGrowthDays(1)}
+                    className="h-7 px-2 text-xs"
                   >
                     1d
                   </Button>
@@ -110,6 +117,7 @@ function AdminDashboard() {
                     variant={growthDays === 3 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setGrowthDays(3)}
+                    className="h-7 px-2 text-xs"
                   >
                     3d
                   </Button>
@@ -117,6 +125,7 @@ function AdminDashboard() {
                     variant={growthDays === 7 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setGrowthDays(7)}
+                    className="h-7 px-2 text-xs"
                   >
                     7d
                   </Button>
@@ -124,6 +133,7 @@ function AdminDashboard() {
                     variant={growthDays === 10 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setGrowthDays(10)}
+                    className="h-7 px-2 text-xs hidden sm:inline-flex"
                   >
                     10d
                   </Button>
@@ -131,6 +141,7 @@ function AdminDashboard() {
                     variant={growthDays === 30 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setGrowthDays(30)}
+                    className="h-7 px-2 text-xs"
                   >
                     1m
                   </Button>
@@ -139,6 +150,7 @@ function AdminDashboard() {
                       <Button
                         variant={![1, 3, 7, 10, 30].includes(growthDays) ? "default" : "ghost"}
                         size="sm"
+                        className="h-7 px-2"
                       >
                         <Calendar className="h-3 w-3" />
                       </Button>
@@ -187,16 +199,18 @@ function AdminDashboard() {
                       color: "var(--chart-1)",
                     },
                   }}
-                  className="h-[300px]"
+                  className="h-[200px] sm:h-[250px] md:h-[300px] w-full"
                 >
                   <AreaChart data={growth}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                     <XAxis
                       dataKey="date"
-                      tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                      tickFormatter={(value) => new Date(value).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
                       className="text-muted-foreground"
+                      tick={{ fontSize: 12 }}
+                      interval="preserveStartEnd"
                     />
-                    <YAxis className="text-muted-foreground" />
+                    <YAxis className="text-muted-foreground" tick={{ fontSize: 12 }} />
                     <ChartTooltip
                       content={<ChartTooltipContent />}
                       labelFormatter={(value) => new Date(value).toLocaleDateString()}
@@ -217,16 +231,17 @@ function AdminDashboard() {
           {/* Engagement Chart */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>engagement metrics ({engagementDays} days)</CardTitle>
-                  <CardDescription>daily vibes, ratings, and follows</CardDescription>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="min-w-0">
+                  <CardTitle className="text-sm sm:text-base">engagement metrics ({engagementDays} days)</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">daily vibes, ratings, and follows</CardDescription>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex flex-wrap gap-1">
                   <Button
                     variant={engagementDays === 1 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setEngagementDays(1)}
+                    className="h-7 px-2 text-xs"
                   >
                     1d
                   </Button>
@@ -234,6 +249,7 @@ function AdminDashboard() {
                     variant={engagementDays === 3 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setEngagementDays(3)}
+                    className="h-7 px-2 text-xs"
                   >
                     3d
                   </Button>
@@ -241,6 +257,7 @@ function AdminDashboard() {
                     variant={engagementDays === 7 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setEngagementDays(7)}
+                    className="h-7 px-2 text-xs"
                   >
                     7d
                   </Button>
@@ -248,6 +265,7 @@ function AdminDashboard() {
                     variant={engagementDays === 10 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setEngagementDays(10)}
+                    className="h-7 px-2 text-xs hidden sm:inline-flex"
                   >
                     10d
                   </Button>
@@ -255,6 +273,7 @@ function AdminDashboard() {
                     variant={engagementDays === 30 ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setEngagementDays(30)}
+                    className="h-7 px-2 text-xs"
                   >
                     1m
                   </Button>
@@ -263,6 +282,7 @@ function AdminDashboard() {
                       <Button
                         variant={![1, 3, 7, 10, 30].includes(engagementDays) ? "default" : "ghost"}
                         size="sm"
+                        className="h-7 px-2"
                       >
                         <Calendar className="h-3 w-3" />
                       </Button>
@@ -319,16 +339,18 @@ function AdminDashboard() {
                       color: "var(--chart-3)",
                     },
                   }}
-                  className="h-[300px]"
+                  className="h-[200px] sm:h-[250px] md:h-[300px] w-full"
                 >
                   <LineChart data={engagement?.timeline}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                     <XAxis
                       dataKey="date"
-                      tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                      tickFormatter={(value) => new Date(value).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
                       className="text-muted-foreground"
+                      tick={{ fontSize: 12 }}
+                      interval="preserveStartEnd"
                     />
-                    <YAxis className="text-muted-foreground" />
+                    <YAxis className="text-muted-foreground" tick={{ fontSize: 12 }} />
                     <ChartTooltip
                       content={<ChartTooltipContent />}
                       labelFormatter={(value) => new Date(value).toLocaleDateString()}
@@ -365,7 +387,7 @@ function AdminDashboard() {
         </div>
 
         {/* System Health */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
               <CardTitle>user health</CardTitle>

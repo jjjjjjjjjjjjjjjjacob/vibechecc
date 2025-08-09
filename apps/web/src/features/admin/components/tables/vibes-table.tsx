@@ -10,6 +10,7 @@ import { DataTableColumnHeader } from '../data-table/data-table-column-header';
 import { EditableTextCell } from '../cells/editable-text-cell';
 import { SelectCell } from '../cells/select-cell';
 import { TagArrayCell } from '../cells/tag-array-cell';
+import { ExpandableRatingsCell } from '../cells/expandable-ratings-cell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -192,38 +193,17 @@ export function VibesTable({
       },
     },
     {
-      accessorKey: 'rating',
+      accessorKey: 'ratings',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="rating" />
+        <DataTableColumnHeader column={column} title="ratings" />
       ),
       cell: ({ row }) => {
         const vibe = row.original;
-        const avgRating = getAverageRating(vibe);
-        const ratingCount = vibe.ratings?.length || 0;
-        
         return (
-          <div className="space-y-1">
-            <div className="flex items-center space-x-1">
-              <span className="font-medium">{avgRating}★</span>
-              <span className="text-xs text-muted-foreground">
-                ({ratingCount})
-              </span>
-            </div>
-            {ratingCount > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {vibe.ratings.slice(0, 3).map((rating, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {rating.emoji}
-                  </Badge>
-                ))}
-                {ratingCount > 3 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{ratingCount - 3}
-                  </Badge>
-                )}
-              </div>
-            )}
-          </div>
+          <ExpandableRatingsCell 
+            ratings={vibe.ratings || []}
+            previewCount={2}
+          />
         );
       },
     },

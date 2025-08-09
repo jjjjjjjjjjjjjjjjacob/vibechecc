@@ -17,11 +17,6 @@ import { NotificationEmptyState } from './notification-empty-state';
 import { useInView } from 'react-intersection-observer';
 import { useConvex } from 'convex/react';
 
-interface NotificationAccordionProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
 const FILTER_TYPE_MAP = {
   all: undefined,
   likes: 'rating' as const,
@@ -47,10 +42,7 @@ function getEndOfListMessage(filter: NotificationFilterType): string {
   }
 }
 
-export function NotificationAccordion({
-  open,
-  onOpenChange: _onOpenChange,
-}: NotificationAccordionProps) {
+export function NotificationAccordion() {
   const [activeFilter, setActiveFilter] =
     useState<NotificationFilterType>('all');
   const { ref: loadMoreRef, inView } = useInView();
@@ -81,7 +73,7 @@ export function NotificationAccordion({
 
   const notificationQuery = useNotificationsInfinite(
     FILTER_TYPE_MAP[activeFilter],
-    { enabled: open && convexAvailable }
+    { enabled: convexAvailable }
   );
 
   const { data: unreadCountsByType } = useUnreadNotificationCountByType({
@@ -133,17 +125,12 @@ export function NotificationAccordion({
   };
 
   return (
-    <div
-      className={cn(
-        'w-full bg-transparent transition-all duration-300 ease-in-out sm:hidden',
-        open ? 'h-full opacity-100' : 'max-h-0 opacity-0'
-      )}
-    >
-      <div className="border-b shadow-md">
+    <div className={cn('w-full bg-transparent')}>
+      <div className="border-b">
         <div className="container">
           <div className="border-0">
             <div className="flex h-full flex-col">
-              <div className="flex items-center justify-between p-3">
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold lowercase">
                   notifications
                 </h2>
@@ -164,7 +151,7 @@ export function NotificationAccordion({
                 unreadCounts={unreadCounts}
               />
 
-              <ScrollArea className="max-h-96 flex-1 overflow-y-auto">
+              <ScrollArea className="max-h-[70vh] flex-1 overflow-y-auto">
                 <div className="min-h-0">
                   {notificationQuery.isLoading ? (
                     <div className="flex items-center justify-center py-8">

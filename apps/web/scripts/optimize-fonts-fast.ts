@@ -53,12 +53,11 @@ async function generateCSS() {
 `;
   }
 
-  css += `/* Font Stacks - Using native system fonts for emoji */
+  css += `/* Font Stacks */
 :root {
   --font-sans: 'GeistSans', system-ui, -apple-system, sans-serif;
   --font-mono: 'GeistMono', ui-monospace, monospace;
   --font-display: 'Doto', system-ui, sans-serif;
-  --font-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }`;
 
   await Bun.write(CSS_OUTPUT, css);

@@ -8,7 +8,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { EmojiSearchCommand } from './emoji-search-command';
+// Using v2 emoji-mart component - switch to './emoji-search-command' for rollback
+import { EmojiSearchCommandV2 as EmojiSearchCommand } from './emoji-search-command-v2';
 import { RatingPopover } from './rating-popover';
 import { AuthPromptDialog } from '@/features/auth';
 import { api } from '@viberatr/convex';
@@ -97,9 +98,7 @@ export function EmojiReaction({
       }}
       tabIndex={0}
     >
-      <span className="font-noto-color text-base font-medium">
-        {reaction.emoji}
-      </span>
+      <span className="font-sans text-base font-medium">{reaction.emoji}</span>
 
       {isHovered && (
         <span
@@ -359,12 +358,12 @@ function HorizontalEmojiPicker({
         {/* Default suggested emojis (always visible unless search is expanded) */}
         {!isSearchExpanded && (
           <div className="animate-in fade-in slide-in-from-right-4 flex items-center gap-1 duration-300">
-            {suggestedEmojis.slice(0, 6).map((emojiData, index) => (
+            {suggestedEmojis.slice(0, 7).map((emojiData, index) => (
               <button
                 key={emojiData.emoji}
                 onClick={() => handleEmojiClick(emojiData.emoji)}
                 className={cn(
-                  'hover:bg-muted font-noto-color flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
+                  'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md font-sans text-lg transition-colors',
                   'animate-in fade-in zoom-in duration-150'
                 )}
                 style={{
@@ -395,7 +394,7 @@ function HorizontalEmojiPicker({
               key={emojiData.emoji}
               onClick={() => handleEmojiClick(emojiData.emoji)}
               className={cn(
-                'hover:bg-muted font-noto-color flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
+                'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md font-sans text-lg transition-colors',
                 'animate-in fade-in zoom-in duration-150'
               )}
               style={{
@@ -429,7 +428,7 @@ function HorizontalEmojiPicker({
                     key={emojiData.emoji}
                     onClick={() => handleEmojiClick(emojiData.emoji)}
                     className={cn(
-                      'hover:bg-muted font-noto-color flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors',
+                      'hover:bg-muted flex h-8 w-8 items-center justify-center rounded-md font-sans text-lg transition-colors',
                       'animate-in fade-in zoom-in duration-150'
                     )}
                     style={{
@@ -438,7 +437,7 @@ function HorizontalEmojiPicker({
                     }}
                     title={emojiData.name}
                   >
-                    <span className="font-noto-color">{emojiData.emoji}</span>
+                    <span className="font-sans">{emojiData.emoji}</span>
                   </button>
                 ))}
               </div>
@@ -454,16 +453,18 @@ function HorizontalEmojiPicker({
   );
 
   const fullPicker = (
-    <div className="relative h-full w-full">
-      <EmojiSearchCommand
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        onSelect={handleEmojiClick}
-        className="h-full border-0"
-        maxHeight="h-[340px]"
-        pageSize={200}
-        showCategories={true}
-      />
+    <div className="relative flex h-full w-full flex-col">
+      <div className="flex-1 overflow-hidden">
+        <EmojiSearchCommand
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          onSelect={handleEmojiClick}
+          className="h-full"
+          // maxHeight="h-[340px]"
+          pageSize={200}
+          showCategories={true}
+        />
+      </div>
 
       {/* Chevron up in bottom right corner when full picker is shown */}
       <button
@@ -481,11 +482,9 @@ function HorizontalEmojiPicker({
   const pickerContent = (
     <PopoverContent
       className={cn(
-        'h-14 w-80 overflow-hidden p-3 transition-[height]',
-        showFullPicker && 'h-[400px] w-[352px] p-0',
-        (showSearchResults || isSearchExpanded) &&
-          !showFullPicker &&
-          'h-24 pb-6'
+        'w-80 p-3',
+        showFullPicker && 'w-auto max-w-md overflow-hidden p-0',
+        (showSearchResults || isSearchExpanded) && !showFullPicker && 'pb-3'
       )}
       side="top"
       align="center"

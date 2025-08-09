@@ -3,7 +3,6 @@ import { v } from 'convex/values';
 import {
   getEmojiColor,
   getEmojiSentiment,
-  getEmojiTags,
 } from './lib/emojiColors';
 import type { Emoji } from './schema';
 
@@ -39,11 +38,6 @@ export const importBatch = mutation({
         );
 
         const sentiment = getEmojiSentiment(emojiData.name, emojiData.keywords);
-        const tags = getEmojiTags(
-          emojiData.name,
-          emojiData.keywords,
-          emojiData.category
-        );
 
         await ctx.db.insert('emojis', {
           emoji: emojiData.emoji,
@@ -52,7 +46,6 @@ export const importBatch = mutation({
           category: emojiData.category,
           color,
           sentiment,
-          tags,
         });
 
         insertedCount++;
@@ -85,7 +78,6 @@ export const search = query({
         const searchableText = [
           emoji.name,
           ...emoji.keywords,
-          ...(emoji.tags || []),
         ]
           .join(' ')
           .toLowerCase();
@@ -146,32 +138,41 @@ export const getPopular = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { limit = 20 }) => {
-    // For now, return a curated list of popular emojis
-    // In the future, this could be based on usage statistics
-    const popularEmojis = [
-      '🔥',
-      '😍',
-      '💯',
-      '😂',
-      '🤩',
-      '😎',
-      '🥺',
-      '😭',
-      '💀',
-      '👀',
-      '❤️',
-      '✨',
-    ];
+    // First try to get emojis by usage count
+    let results = await ctx.db
+      .query('emojis')
+      .filter((q) => q.neq(q.field('usageCount'), undefined))
+      .order('desc')
+      .take(limit);
+    
+    // If not enough, fall back to curated list
+    if (results.length < limit) {
+      const popularEmojis = [
+        '🔥',
+        '😍',
+        '💯',
+        '😂',
+        '🤩',
+        '😎',
+        '🥺',
+        '😭',
+        '💀',
+        '👀',
+        '❤️',
+        '✨',
+      ];
 
-    const results = [];
-    for (const emoji of popularEmojis) {
-      const emojiData = await ctx.db
-        .query('emojis')
-        .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
-        .first();
+      for (const emoji of popularEmojis) {
+        if (results.length >= limit) break;
+        
+        const emojiData = await ctx.db
+          .query('emojis')
+          .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
+          .first();
 
-      if (emojiData) {
-        results.push(emojiData);
+        if (emojiData && !results.find(r => r.emoji === emoji)) {
+          results.push(emojiData);
+        }
       }
     }
 
@@ -189,6 +190,102 @@ export const getCategories = query({
   },
 });
 
+// Track emoji usage (called when emoji is selected)
+export const trackUsage = mutation({
+  args: {
+    emoji: v.string(),
+  },
+  handler: async (ctx, { emoji }) => {
+    const emojiData = await ctx.db
+      .query('emojis')
+      .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
+      .first();
+    
+    if (emojiData) {
+      await ctx.db.patch(emojiData._id, {
+        usageCount: (emojiData.usageCount || 0) + 1,
+        lastUsed: Date.now(),
+      });
+    }
+  },
+});
+
+// Get frequently used emojis for a user
+export const getFrequentlyUsed = query({
+  args: {
+    userId: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { userId, limit = 8 }) => {
+    // If userId provided, get from their emoji ratings
+    if (userId) {
+      const userRatings = await ctx.db
+        .query('ratings')
+        .withIndex('byUserAndEmoji', (q) => q.eq('userId', userId))
+        .order('desc')
+        .take(limit * 2); // Get more to dedupe
+      
+      const emojiCounts = new Map<string, number>();
+      for (const rating of userRatings) {
+        const count = emojiCounts.get(rating.emoji) || 0;
+        emojiCounts.set(rating.emoji, count + 1);
+      }
+      
+      // Sort by frequency and get top emojis
+      const sortedEmojis = Array.from(emojiCounts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit)
+        .map(([emoji]) => emoji);
+      
+      const results = [];
+      for (const emoji of sortedEmojis) {
+        const emojiData = await ctx.db
+          .query('emojis')
+          .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
+          .first();
+        if (emojiData) {
+          results.push(emojiData);
+        }
+      }
+      
+      return results;
+    }
+    
+    // Otherwise return globally popular emojis
+    const popularResults = await ctx.db
+      .query('emojis')
+      .filter((q) => q.neq(q.field('usageCount'), undefined))
+      .order('desc')
+      .take(limit);
+    
+    if (popularResults.length >= limit) {
+      return popularResults;
+    }
+    
+    // Fall back to curated list
+    const popularEmojis = [
+      '🔥', '😍', '💯', '😂', '🤩', '😎', '🥺', '😭',
+      '💀', '👀', '❤️', '✨',
+    ];
+    
+    const results = [...popularResults];
+    for (const emoji of popularEmojis) {
+      if (results.length >= limit) break;
+      
+      const emojiData = await ctx.db
+        .query('emojis')
+        .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
+        .first();
+
+      if (emojiData && !results.find(r => r.emoji === emoji)) {
+        results.push(emojiData);
+      }
+    }
+    
+    return results.slice(0, limit);
+  },
+});
+
 // Default export for test-setup
 export default {
   importBatch,
@@ -196,4 +293,6 @@ export default {
   getByEmojis,
   getPopular,
   getCategories,
+  trackUsage,
+  getFrequentlyUsed,
 };

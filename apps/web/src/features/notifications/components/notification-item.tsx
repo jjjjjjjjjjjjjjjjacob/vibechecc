@@ -83,7 +83,7 @@ export function NotificationItem({
     <Link to={href} onClick={onClick}>
       <div
         className={cn(
-          'hover:bg-muted/50 flex items-start gap-3 px-4 pt-3 pb-2',
+          'hover:bg-muted/50 flex items-start gap-3 rounded-md px-2 pt-3 pb-2',
           !notification.read && 'bg-muted/20'
         )}
       >

@@ -8,7 +8,6 @@ export const peopleEmojis = [
     keywords: ['wave', 'hello', 'goodbye', 'hi'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['greeting', 'farewell', 'hand'],
   },
   {
     emoji: '🤚',
@@ -16,7 +15,6 @@ export const peopleEmojis = [
     keywords: ['raised', 'hand', 'stop'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['stop', 'halt', 'hand'],
   },
   {
     emoji: '🖐️',
@@ -24,7 +22,6 @@ export const peopleEmojis = [
     keywords: ['hand', 'five', 'splayed'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['five', 'hand', 'stop'],
   },
   {
     emoji: '✋',
@@ -32,7 +29,6 @@ export const peopleEmojis = [
     keywords: ['hand', 'high five', 'stop'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['stop', 'high-five', 'hand'],
   },
   {
     emoji: '🖖',
@@ -40,7 +36,6 @@ export const peopleEmojis = [
     keywords: ['vulcan', 'spock', 'star trek'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['star-trek', 'vulcan', 'greeting'],
   },
   {
     emoji: '👌',
@@ -48,7 +43,6 @@ export const peopleEmojis = [
     keywords: ['ok', 'perfect', 'yes'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['ok', 'perfect', 'approval'],
   },
   {
     emoji: '🤌',
@@ -56,7 +50,6 @@ export const peopleEmojis = [
     keywords: ['italian', 'fingers', 'gesture'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['italian', 'gesture', 'questioning'],
   },
   {
     emoji: '🤏',
@@ -64,7 +57,6 @@ export const peopleEmojis = [
     keywords: ['tiny', 'small', 'pinch'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['small', 'tiny', 'little'],
   },
   {
     emoji: '✌️',
@@ -72,7 +64,6 @@ export const peopleEmojis = [
     keywords: ['peace', 'victory', 'two'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['peace', 'victory', 'v-sign'],
   },
   {
     emoji: '🤞',
@@ -80,7 +71,6 @@ export const peopleEmojis = [
     keywords: ['luck', 'hope', 'cross'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['luck', 'hope', 'wishing'],
   },
   {
     emoji: '🤟',
@@ -88,7 +78,6 @@ export const peopleEmojis = [
     keywords: ['love', 'rock', 'ily'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['love', 'rock-on', 'ily'],
   },
   {
     emoji: '🤘',
@@ -96,7 +85,6 @@ export const peopleEmojis = [
     keywords: ['rock', 'metal', 'horns'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['rock', 'metal', 'concert'],
   },
   {
     emoji: '🤙',
@@ -104,7 +92,6 @@ export const peopleEmojis = [
     keywords: ['call', 'shaka', 'hang loose'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['call-me', 'shaka', 'chill'],
   },
 
   // Pointing hands
@@ -114,7 +101,6 @@ export const peopleEmojis = [
     keywords: ['point', 'left', 'direction'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['pointing', 'left', 'direction'],
   },
   {
     emoji: '👉',
@@ -122,7 +108,6 @@ export const peopleEmojis = [
     keywords: ['point', 'right', 'direction'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['pointing', 'right', 'direction'],
   },
   {
     emoji: '👆',
@@ -130,7 +115,6 @@ export const peopleEmojis = [
     keywords: ['point', 'up', 'direction'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['pointing', 'up', 'direction'],
   },
   {
     emoji: '🖕',
@@ -138,7 +122,6 @@ export const peopleEmojis = [
     keywords: ['middle finger', 'rude', 'flip off'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['rude', 'offensive', 'middle-finger'],
   },
   {
     emoji: '👇',
@@ -146,7 +129,6 @@ export const peopleEmojis = [
     keywords: ['point', 'down', 'direction'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['pointing', 'down', 'direction'],
   },
   {
     emoji: '☝️',
@@ -154,7 +136,6 @@ export const peopleEmojis = [
     keywords: ['point', 'up', 'one'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['one', 'pointing', 'up'],
   },
 
   // Thumbs
@@ -164,7 +145,6 @@ export const peopleEmojis = [
     keywords: ['thumbs up', 'yes', 'approve', 'like'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['approval', 'like', 'yes'],
   },
   {
     emoji: '👎',
@@ -172,7 +152,6 @@ export const peopleEmojis = [
     keywords: ['thumbs down', 'no', 'disapprove', 'dislike'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['disapproval', 'dislike', 'no'],
   },
 
   // Fists and clapping
@@ -182,7 +161,6 @@ export const peopleEmojis = [
     keywords: ['fist', 'punch', 'bump'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['fist-bump', 'punch', 'power'],
   },
   {
     emoji: '✊',
@@ -190,7 +168,6 @@ export const peopleEmojis = [
     keywords: ['fist', 'power', 'solidarity'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['power', 'solidarity', 'resistance'],
   },
   {
     emoji: '🤛',
@@ -198,7 +175,6 @@ export const peopleEmojis = [
     keywords: ['fist', 'left', 'bump'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['fist-bump', 'left', 'greeting'],
   },
   {
     emoji: '🤜',
@@ -206,7 +182,6 @@ export const peopleEmojis = [
     keywords: ['fist', 'right', 'bump'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['fist-bump', 'right', 'greeting'],
   },
   {
     emoji: '👏',
@@ -214,7 +189,6 @@ export const peopleEmojis = [
     keywords: ['clap', 'applause', 'congrats'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['applause', 'congratulations', 'celebration'],
   },
   {
     emoji: '🙌',
@@ -222,7 +196,6 @@ export const peopleEmojis = [
     keywords: ['raise', 'celebration', 'hooray'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['celebration', 'praise', 'hooray'],
   },
   {
     emoji: '🤝',
@@ -230,7 +203,6 @@ export const peopleEmojis = [
     keywords: ['handshake', 'deal', 'agreement'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['agreement', 'deal', 'partnership'],
   },
   {
     emoji: '🙏',
@@ -238,7 +210,6 @@ export const peopleEmojis = [
     keywords: ['pray', 'please', 'thank you', 'namaste'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['prayer', 'thanks', 'please'],
   },
 
   // Writing hands
@@ -248,7 +219,6 @@ export const peopleEmojis = [
     keywords: ['write', 'pen', 'sign'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['writing', 'signing', 'pen'],
   },
 
   // Body parts
@@ -258,7 +228,6 @@ export const peopleEmojis = [
     keywords: ['nails', 'beauty', 'manicure'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['beauty', 'nails', 'self-care'],
   },
   {
     emoji: '🤳',
@@ -266,7 +235,6 @@ export const peopleEmojis = [
     keywords: ['selfie', 'phone', 'camera'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['selfie', 'photo', 'camera'],
   },
 
   // Muscles
@@ -276,7 +244,6 @@ export const peopleEmojis = [
     keywords: ['muscle', 'strong', 'flex', 'workout'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['strength', 'muscle', 'power'],
   },
 
   // Legs and feet
@@ -286,7 +253,6 @@ export const peopleEmojis = [
     keywords: ['leg', 'kick', 'limb'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['leg', 'limb', 'kick'],
   },
   {
     emoji: '🦶',
@@ -294,7 +260,6 @@ export const peopleEmojis = [
     keywords: ['foot', 'kick', 'step'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['foot', 'step', 'walk'],
   },
 
   // Ears and sensory
@@ -304,7 +269,6 @@ export const peopleEmojis = [
     keywords: ['ear', 'hear', 'listen'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['hearing', 'listening', 'ear'],
   },
   {
     emoji: '🦻',
@@ -312,7 +276,6 @@ export const peopleEmojis = [
     keywords: ['ear', 'hearing aid', 'accessibility'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['hearing-aid', 'accessibility', 'deaf'],
   },
   {
     emoji: '👃',
@@ -320,7 +283,6 @@ export const peopleEmojis = [
     keywords: ['nose', 'smell', 'sniff'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['nose', 'smell', 'scent'],
   },
 
   // Internal organs
@@ -330,7 +292,6 @@ export const peopleEmojis = [
     keywords: ['brain', 'smart', 'intelligent'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['brain', 'intelligence', 'thinking'],
   },
   {
     emoji: '🫀',
@@ -338,7 +299,6 @@ export const peopleEmojis = [
     keywords: ['heart', 'organ', 'anatomical'],
     category: 'people',
     color: '#DC143C',
-    tags: ['heart', 'organ', 'medical'],
   },
   {
     emoji: '🫁',
@@ -346,7 +306,6 @@ export const peopleEmojis = [
     keywords: ['lungs', 'breathe', 'organ'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['lungs', 'breathing', 'organ'],
   },
   {
     emoji: '🦷',
@@ -354,7 +313,6 @@ export const peopleEmojis = [
     keywords: ['tooth', 'dentist', 'teeth'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['tooth', 'dental', 'teeth'],
   },
   {
     emoji: '🦴',
@@ -362,7 +320,6 @@ export const peopleEmojis = [
     keywords: ['bone', 'skeleton', 'dog'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['bone', 'skeleton', 'anatomy'],
   },
 
   // Eyes
@@ -372,7 +329,6 @@ export const peopleEmojis = [
     keywords: ['eyes', 'look', 'see', 'watch'],
     category: 'people',
     color: '#4169E1',
-    tags: ['looking', 'watching', 'eyes'],
   },
   {
     emoji: '👁️',
@@ -380,7 +336,6 @@ export const peopleEmojis = [
     keywords: ['eye', 'see', 'watch', 'look'],
     category: 'people',
     color: '#4169E1',
-    tags: ['eye', 'seeing', 'watching'],
   },
 
   // Mouth
@@ -390,7 +345,6 @@ export const peopleEmojis = [
     keywords: ['tongue', 'taste', 'lick'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['tongue', 'taste', 'playful'],
   },
   {
     emoji: '👄',
@@ -398,7 +352,6 @@ export const peopleEmojis = [
     keywords: ['mouth', 'lips', 'kiss'],
     category: 'people',
     color: '#DC143C',
-    tags: ['lips', 'kiss', 'mouth'],
   },
 
   // People
@@ -408,7 +361,6 @@ export const peopleEmojis = [
     keywords: ['baby', 'child', 'infant'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['baby', 'infant', 'child'],
   },
   {
     emoji: '🧒',
@@ -416,7 +368,6 @@ export const peopleEmojis = [
     keywords: ['child', 'kid', 'young'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['child', 'kid', 'youth'],
   },
   {
     emoji: '👦',
@@ -424,7 +375,6 @@ export const peopleEmojis = [
     keywords: ['boy', 'child', 'male'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['boy', 'male', 'child'],
   },
   {
     emoji: '👧',
@@ -432,7 +382,6 @@ export const peopleEmojis = [
     keywords: ['girl', 'child', 'female'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['girl', 'female', 'child'],
   },
   {
     emoji: '🧑',
@@ -440,7 +389,6 @@ export const peopleEmojis = [
     keywords: ['person', 'adult', 'gender neutral'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['person', 'adult', 'neutral'],
   },
   {
     emoji: '👱',
@@ -448,7 +396,6 @@ export const peopleEmojis = [
     keywords: ['blond', 'person', 'hair'],
     category: 'people',
     color: '#FFD700',
-    tags: ['blond', 'person', 'hair'],
   },
   {
     emoji: '👨',
@@ -456,7 +403,6 @@ export const peopleEmojis = [
     keywords: ['man', 'male', 'adult'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['man', 'male', 'adult'],
   },
   {
     emoji: '🧔',
@@ -464,7 +410,6 @@ export const peopleEmojis = [
     keywords: ['beard', 'person', 'bewhiskered'],
     category: 'people',
     color: '#8B4513',
-    tags: ['beard', 'facial-hair', 'person'],
   },
   {
     emoji: '👨‍🦰',
@@ -472,7 +417,6 @@ export const peopleEmojis = [
     keywords: ['man', 'red hair', 'ginger'],
     category: 'people',
     color: '#FF6347',
-    tags: ['redhead', 'man', 'ginger'],
   },
   {
     emoji: '👨‍🦱',
@@ -480,7 +424,6 @@ export const peopleEmojis = [
     keywords: ['man', 'curly', 'hair'],
     category: 'people',
     color: '#8B4513',
-    tags: ['curly-hair', 'man', 'hair'],
   },
   {
     emoji: '👨‍🦳',
@@ -488,7 +431,6 @@ export const peopleEmojis = [
     keywords: ['man', 'white hair', 'old'],
     category: 'people',
     color: '#D3D3D3',
-    tags: ['white-hair', 'man', 'elderly'],
   },
   {
     emoji: '👨‍🦲',
@@ -496,7 +438,6 @@ export const peopleEmojis = [
     keywords: ['man', 'bald', 'no hair'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['bald', 'man', 'hairless'],
   },
   {
     emoji: '👩',
@@ -504,7 +445,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'female', 'adult'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['woman', 'female', 'adult'],
   },
   {
     emoji: '👩‍🦰',
@@ -512,7 +452,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'red hair', 'ginger'],
     category: 'people',
     color: '#FF6347',
-    tags: ['redhead', 'woman', 'ginger'],
   },
   {
     emoji: '🧑‍🦰',
@@ -520,7 +459,6 @@ export const peopleEmojis = [
     keywords: ['person', 'red hair', 'ginger'],
     category: 'people',
     color: '#FF6347',
-    tags: ['redhead', 'person', 'ginger'],
   },
   {
     emoji: '👩‍🦱',
@@ -528,7 +466,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'curly', 'hair'],
     category: 'people',
     color: '#8B4513',
-    tags: ['curly-hair', 'woman', 'hair'],
   },
   {
     emoji: '🧑‍🦱',
@@ -536,7 +473,6 @@ export const peopleEmojis = [
     keywords: ['person', 'curly', 'hair'],
     category: 'people',
     color: '#8B4513',
-    tags: ['curly-hair', 'person', 'hair'],
   },
   {
     emoji: '👩‍🦳',
@@ -544,7 +480,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'white hair', 'old'],
     category: 'people',
     color: '#D3D3D3',
-    tags: ['white-hair', 'woman', 'elderly'],
   },
   {
     emoji: '🧑‍🦳',
@@ -552,7 +487,6 @@ export const peopleEmojis = [
     keywords: ['person', 'white hair', 'old'],
     category: 'people',
     color: '#D3D3D3',
-    tags: ['white-hair', 'person', 'elderly'],
   },
   {
     emoji: '👩‍🦲',
@@ -560,7 +494,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'bald', 'no hair'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['bald', 'woman', 'hairless'],
   },
   {
     emoji: '🧑‍🦲',
@@ -568,7 +501,6 @@ export const peopleEmojis = [
     keywords: ['person', 'bald', 'no hair'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['bald', 'person', 'hairless'],
   },
   {
     emoji: '👱‍♀️',
@@ -576,7 +508,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'blond', 'hair'],
     category: 'people',
     color: '#FFD700',
-    tags: ['blond', 'woman', 'hair'],
   },
   {
     emoji: '👱‍♂️',
@@ -584,7 +515,6 @@ export const peopleEmojis = [
     keywords: ['man', 'blond', 'hair'],
     category: 'people',
     color: '#FFD700',
-    tags: ['blond', 'man', 'hair'],
   },
   {
     emoji: '🧓',
@@ -592,7 +522,6 @@ export const peopleEmojis = [
     keywords: ['old', 'elderly', 'grandparent'],
     category: 'people',
     color: '#D3D3D3',
-    tags: ['elderly', 'old', 'senior'],
   },
   {
     emoji: '👴',
@@ -600,7 +529,6 @@ export const peopleEmojis = [
     keywords: ['old', 'man', 'elderly'],
     category: 'people',
     color: '#D3D3D3',
-    tags: ['elderly', 'grandfather', 'old'],
   },
   {
     emoji: '👵',
@@ -608,7 +536,6 @@ export const peopleEmojis = [
     keywords: ['old', 'woman', 'elderly'],
     category: 'people',
     color: '#D3D3D3',
-    tags: ['elderly', 'grandmother', 'old'],
   },
 
   // Gestures
@@ -618,7 +545,6 @@ export const peopleEmojis = [
     keywords: ['frown', 'sad', 'person'],
     category: 'people',
     color: '#4682B4',
-    tags: ['frowning', 'sad', 'disappointed'],
   },
   {
     emoji: '🙍‍♂️',
@@ -626,7 +552,6 @@ export const peopleEmojis = [
     keywords: ['man', 'frown', 'sad'],
     category: 'people',
     color: '#4682B4',
-    tags: ['frowning', 'man', 'sad'],
   },
   {
     emoji: '🙍‍♀️',
@@ -634,7 +559,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'frown', 'sad'],
     category: 'people',
     color: '#4682B4',
-    tags: ['frowning', 'woman', 'sad'],
   },
   {
     emoji: '🙎',
@@ -642,7 +566,6 @@ export const peopleEmojis = [
     keywords: ['pout', 'person', 'upset'],
     category: 'people',
     color: '#DC143C',
-    tags: ['pouting', 'upset', 'angry'],
   },
   {
     emoji: '🙎‍♂️',
@@ -650,7 +573,6 @@ export const peopleEmojis = [
     keywords: ['man', 'pout', 'upset'],
     category: 'people',
     color: '#DC143C',
-    tags: ['pouting', 'man', 'upset'],
   },
   {
     emoji: '🙎‍♀️',
@@ -658,7 +580,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'pout', 'upset'],
     category: 'people',
     color: '#DC143C',
-    tags: ['pouting', 'woman', 'upset'],
   },
   {
     emoji: '🙅',
@@ -666,7 +587,6 @@ export const peopleEmojis = [
     keywords: ['no', 'stop', 'not'],
     category: 'people',
     color: '#DC143C',
-    tags: ['no', 'stop', 'rejection'],
   },
   {
     emoji: '🙅‍♂️',
@@ -674,7 +594,6 @@ export const peopleEmojis = [
     keywords: ['man', 'no', 'stop'],
     category: 'people',
     color: '#DC143C',
-    tags: ['no', 'man', 'stop'],
   },
   {
     emoji: '🙅‍♀️',
@@ -682,7 +601,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'no', 'stop'],
     category: 'people',
     color: '#DC143C',
-    tags: ['no', 'woman', 'stop'],
   },
   {
     emoji: '🙆',
@@ -690,7 +608,6 @@ export const peopleEmojis = [
     keywords: ['ok', 'yes', 'agree'],
     category: 'people',
     color: '#90EE90',
-    tags: ['ok', 'yes', 'agreement'],
   },
   {
     emoji: '🙆‍♂️',
@@ -698,7 +615,6 @@ export const peopleEmojis = [
     keywords: ['man', 'ok', 'yes'],
     category: 'people',
     color: '#90EE90',
-    tags: ['ok', 'man', 'yes'],
   },
   {
     emoji: '🙆‍♀️',
@@ -706,7 +622,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'ok', 'yes'],
     category: 'people',
     color: '#90EE90',
-    tags: ['ok', 'woman', 'yes'],
   },
   {
     emoji: '💁',
@@ -714,7 +629,6 @@ export const peopleEmojis = [
     keywords: ['sassy', 'information', 'help'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['sassy', 'information', 'helpful'],
   },
   {
     emoji: '💁‍♂️',
@@ -722,7 +636,6 @@ export const peopleEmojis = [
     keywords: ['man', 'sassy', 'information'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['sassy', 'man', 'information'],
   },
   {
     emoji: '💁‍♀️',
@@ -730,7 +643,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'sassy', 'information'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['sassy', 'woman', 'information'],
   },
   {
     emoji: '🙋',
@@ -738,7 +650,6 @@ export const peopleEmojis = [
     keywords: ['raise', 'hand', 'question'],
     category: 'people',
     color: '#FFD700',
-    tags: ['question', 'volunteer', 'raising'],
   },
   {
     emoji: '🙋‍♂️',
@@ -746,7 +657,6 @@ export const peopleEmojis = [
     keywords: ['man', 'raise', 'hand'],
     category: 'people',
     color: '#FFD700',
-    tags: ['question', 'man', 'volunteer'],
   },
   {
     emoji: '🙋‍♀️',
@@ -754,7 +664,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'raise', 'hand'],
     category: 'people',
     color: '#FFD700',
-    tags: ['question', 'woman', 'volunteer'],
   },
   {
     emoji: '🧏',
@@ -762,7 +671,6 @@ export const peopleEmojis = [
     keywords: ['deaf', 'ear', 'hearing'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['deaf', 'accessibility', 'hearing'],
   },
   {
     emoji: '🧏‍♂️',
@@ -770,7 +678,6 @@ export const peopleEmojis = [
     keywords: ['deaf', 'man', 'hearing'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['deaf', 'man', 'accessibility'],
   },
   {
     emoji: '🧏‍♀️',
@@ -778,7 +685,6 @@ export const peopleEmojis = [
     keywords: ['deaf', 'woman', 'hearing'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['deaf', 'woman', 'accessibility'],
   },
   {
     emoji: '🙇',
@@ -786,7 +692,6 @@ export const peopleEmojis = [
     keywords: ['bow', 'respect', 'sorry'],
     category: 'people',
     color: '#4169E1',
-    tags: ['bow', 'respect', 'apology'],
   },
   {
     emoji: '🙇‍♂️',
@@ -794,7 +699,6 @@ export const peopleEmojis = [
     keywords: ['man', 'bow', 'respect'],
     category: 'people',
     color: '#4169E1',
-    tags: ['bow', 'man', 'respect'],
   },
   {
     emoji: '🙇‍♀️',
@@ -802,7 +706,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'bow', 'respect'],
     category: 'people',
     color: '#4169E1',
-    tags: ['bow', 'woman', 'respect'],
   },
   {
     emoji: '🤦',
@@ -810,7 +713,6 @@ export const peopleEmojis = [
     keywords: ['facepalm', 'disbelief', 'exasperation'],
     category: 'people',
     color: '#DEB887',
-    tags: ['facepalm', 'frustrated', 'disbelief'],
   },
   {
     emoji: '🤦‍♂️',
@@ -818,7 +720,6 @@ export const peopleEmojis = [
     keywords: ['man', 'facepalm', 'disbelief'],
     category: 'people',
     color: '#DEB887',
-    tags: ['facepalm', 'man', 'frustrated'],
   },
   {
     emoji: '🤦‍♀️',
@@ -826,7 +727,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'facepalm', 'disbelief'],
     category: 'people',
     color: '#DEB887',
-    tags: ['facepalm', 'woman', 'frustrated'],
   },
   {
     emoji: '🤷',
@@ -834,7 +734,6 @@ export const peopleEmojis = [
     keywords: ['shrug', 'doubt', 'ignorance'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['shrug', 'confused', 'indifferent'],
   },
   {
     emoji: '🤷‍♂️',
@@ -842,7 +741,6 @@ export const peopleEmojis = [
     keywords: ['man', 'shrug', 'doubt'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['shrug', 'man', 'confused'],
   },
   {
     emoji: '🤷‍♀️',
@@ -850,7 +748,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'shrug', 'doubt'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['shrug', 'woman', 'confused'],
   },
 
   // Professions
@@ -860,7 +757,6 @@ export const peopleEmojis = [
     keywords: ['doctor', 'nurse', 'healthcare'],
     category: 'people',
     color: '#F0F8FF',
-    tags: ['healthcare', 'medical', 'doctor'],
   },
   {
     emoji: '👨‍⚕️',
@@ -868,7 +764,6 @@ export const peopleEmojis = [
     keywords: ['man', 'doctor', 'healthcare'],
     category: 'people',
     color: '#F0F8FF',
-    tags: ['doctor', 'man', 'medical'],
   },
   {
     emoji: '👩‍⚕️',
@@ -876,7 +771,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'doctor', 'healthcare'],
     category: 'people',
     color: '#F0F8FF',
-    tags: ['doctor', 'woman', 'medical'],
   },
   {
     emoji: '🧑‍🎓',
@@ -884,7 +778,6 @@ export const peopleEmojis = [
     keywords: ['student', 'graduate', 'learn'],
     category: 'people',
     color: '#000000',
-    tags: ['student', 'education', 'graduate'],
   },
   {
     emoji: '👨‍🎓',
@@ -892,7 +785,6 @@ export const peopleEmojis = [
     keywords: ['man', 'student', 'graduate'],
     category: 'people',
     color: '#000000',
-    tags: ['student', 'man', 'graduate'],
   },
   {
     emoji: '👩‍🎓',
@@ -900,7 +792,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'student', 'graduate'],
     category: 'people',
     color: '#000000',
-    tags: ['student', 'woman', 'graduate'],
   },
   {
     emoji: '🧑‍🏫',
@@ -908,7 +799,6 @@ export const peopleEmojis = [
     keywords: ['teacher', 'professor', 'instructor'],
     category: 'people',
     color: '#8B4513',
-    tags: ['teacher', 'education', 'instructor'],
   },
   {
     emoji: '👨‍🏫',
@@ -916,7 +806,6 @@ export const peopleEmojis = [
     keywords: ['man', 'teacher', 'professor'],
     category: 'people',
     color: '#8B4513',
-    tags: ['teacher', 'man', 'professor'],
   },
   {
     emoji: '👩‍🏫',
@@ -924,7 +813,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'teacher', 'professor'],
     category: 'people',
     color: '#8B4513',
-    tags: ['teacher', 'woman', 'professor'],
   },
   {
     emoji: '🧑‍⚖️',
@@ -932,7 +820,6 @@ export const peopleEmojis = [
     keywords: ['judge', 'justice', 'law'],
     category: 'people',
     color: '#000000',
-    tags: ['judge', 'justice', 'legal'],
   },
   {
     emoji: '👨‍⚖️',
@@ -940,7 +827,6 @@ export const peopleEmojis = [
     keywords: ['man', 'judge', 'justice'],
     category: 'people',
     color: '#000000',
-    tags: ['judge', 'man', 'legal'],
   },
   {
     emoji: '👩‍⚖️',
@@ -948,7 +834,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'judge', 'justice'],
     category: 'people',
     color: '#000000',
-    tags: ['judge', 'woman', 'legal'],
   },
   {
     emoji: '🧑‍🌾',
@@ -956,7 +841,6 @@ export const peopleEmojis = [
     keywords: ['farmer', 'gardener', 'agriculture'],
     category: 'people',
     color: '#228B22',
-    tags: ['farmer', 'agriculture', 'gardening'],
   },
   {
     emoji: '👨‍🌾',
@@ -964,7 +848,6 @@ export const peopleEmojis = [
     keywords: ['man', 'farmer', 'gardener'],
     category: 'people',
     color: '#228B22',
-    tags: ['farmer', 'man', 'agriculture'],
   },
   {
     emoji: '👩‍🌾',
@@ -972,7 +855,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'farmer', 'gardener'],
     category: 'people',
     color: '#228B22',
-    tags: ['farmer', 'woman', 'agriculture'],
   },
   {
     emoji: '🧑‍🍳',
@@ -980,7 +862,6 @@ export const peopleEmojis = [
     keywords: ['cook', 'chef', 'food'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['chef', 'cooking', 'food'],
   },
   {
     emoji: '👨‍🍳',
@@ -988,7 +869,6 @@ export const peopleEmojis = [
     keywords: ['man', 'cook', 'chef'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['chef', 'man', 'cooking'],
   },
   {
     emoji: '👩‍🍳',
@@ -996,7 +876,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'cook', 'chef'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['chef', 'woman', 'cooking'],
   },
   {
     emoji: '🧑‍🔧',
@@ -1004,7 +883,6 @@ export const peopleEmojis = [
     keywords: ['mechanic', 'worker', 'repair'],
     category: 'people',
     color: '#4169E1',
-    tags: ['mechanic', 'repair', 'worker'],
   },
   {
     emoji: '👨‍🔧',
@@ -1012,7 +890,6 @@ export const peopleEmojis = [
     keywords: ['man', 'mechanic', 'worker'],
     category: 'people',
     color: '#4169E1',
-    tags: ['mechanic', 'man', 'repair'],
   },
   {
     emoji: '👩‍🔧',
@@ -1020,7 +897,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'mechanic', 'worker'],
     category: 'people',
     color: '#4169E1',
-    tags: ['mechanic', 'woman', 'repair'],
   },
   {
     emoji: '🧑‍🏭',
@@ -1028,7 +904,6 @@ export const peopleEmojis = [
     keywords: ['factory', 'worker', 'industrial'],
     category: 'people',
     color: '#696969',
-    tags: ['factory', 'worker', 'industrial'],
   },
   {
     emoji: '👨‍🏭',
@@ -1036,7 +911,6 @@ export const peopleEmojis = [
     keywords: ['man', 'factory', 'worker'],
     category: 'people',
     color: '#696969',
-    tags: ['factory', 'man', 'worker'],
   },
   {
     emoji: '👩‍🏭',
@@ -1044,7 +918,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'factory', 'worker'],
     category: 'people',
     color: '#696969',
-    tags: ['factory', 'woman', 'worker'],
   },
   {
     emoji: '🧑‍💼',
@@ -1052,7 +925,6 @@ export const peopleEmojis = [
     keywords: ['office', 'business', 'manager'],
     category: 'people',
     color: '#000080',
-    tags: ['office', 'business', 'professional'],
   },
   {
     emoji: '👨‍💼',
@@ -1060,7 +932,6 @@ export const peopleEmojis = [
     keywords: ['man', 'office', 'business'],
     category: 'people',
     color: '#000080',
-    tags: ['office', 'man', 'business'],
   },
   {
     emoji: '👩‍💼',
@@ -1068,7 +939,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'office', 'business'],
     category: 'people',
     color: '#000080',
-    tags: ['office', 'woman', 'business'],
   },
   {
     emoji: '🧑‍🔬',
@@ -1076,7 +946,6 @@ export const peopleEmojis = [
     keywords: ['scientist', 'biologist', 'researcher'],
     category: 'people',
     color: '#F0F8FF',
-    tags: ['scientist', 'research', 'lab'],
   },
   {
     emoji: '👨‍🔬',
@@ -1084,7 +953,6 @@ export const peopleEmojis = [
     keywords: ['man', 'scientist', 'biologist'],
     category: 'people',
     color: '#F0F8FF',
-    tags: ['scientist', 'man', 'research'],
   },
   {
     emoji: '👩‍🔬',
@@ -1092,7 +960,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'scientist', 'biologist'],
     category: 'people',
     color: '#F0F8FF',
-    tags: ['scientist', 'woman', 'research'],
   },
   {
     emoji: '🧑‍💻',
@@ -1100,7 +967,6 @@ export const peopleEmojis = [
     keywords: ['coder', 'developer', 'software'],
     category: 'people',
     color: '#4169E1',
-    tags: ['developer', 'coding', 'tech'],
   },
   {
     emoji: '👨‍💻',
@@ -1108,7 +974,6 @@ export const peopleEmojis = [
     keywords: ['man', 'coder', 'developer'],
     category: 'people',
     color: '#4169E1',
-    tags: ['developer', 'man', 'coding'],
   },
   {
     emoji: '👩‍💻',
@@ -1116,7 +981,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'coder', 'developer'],
     category: 'people',
     color: '#4169E1',
-    tags: ['developer', 'woman', 'coding'],
   },
   {
     emoji: '🧑‍🎤',
@@ -1124,7 +988,6 @@ export const peopleEmojis = [
     keywords: ['singer', 'rockstar', 'performer'],
     category: 'people',
     color: '#FF1493',
-    tags: ['singer', 'musician', 'performer'],
   },
   {
     emoji: '👨‍🎤',
@@ -1132,7 +995,6 @@ export const peopleEmojis = [
     keywords: ['man', 'singer', 'rockstar'],
     category: 'people',
     color: '#FF1493',
-    tags: ['singer', 'man', 'musician'],
   },
   {
     emoji: '👩‍🎤',
@@ -1140,7 +1002,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'singer', 'rockstar'],
     category: 'people',
     color: '#FF1493',
-    tags: ['singer', 'woman', 'musician'],
   },
   {
     emoji: '🧑‍🎨',
@@ -1148,7 +1009,6 @@ export const peopleEmojis = [
     keywords: ['artist', 'painter', 'palette'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['artist', 'creative', 'painter'],
   },
   {
     emoji: '👨‍🎨',
@@ -1156,7 +1016,6 @@ export const peopleEmojis = [
     keywords: ['man', 'artist', 'painter'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['artist', 'man', 'creative'],
   },
   {
     emoji: '👩‍🎨',
@@ -1164,7 +1023,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'artist', 'painter'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['artist', 'woman', 'creative'],
   },
   {
     emoji: '🧑‍✈️',
@@ -1172,7 +1030,6 @@ export const peopleEmojis = [
     keywords: ['pilot', 'plane', 'captain'],
     category: 'people',
     color: '#000080',
-    tags: ['pilot', 'aviation', 'captain'],
   },
   {
     emoji: '👨‍✈️',
@@ -1180,7 +1037,6 @@ export const peopleEmojis = [
     keywords: ['man', 'pilot', 'plane'],
     category: 'people',
     color: '#000080',
-    tags: ['pilot', 'man', 'aviation'],
   },
   {
     emoji: '👩‍✈️',
@@ -1188,7 +1044,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'pilot', 'plane'],
     category: 'people',
     color: '#000080',
-    tags: ['pilot', 'woman', 'aviation'],
   },
   {
     emoji: '🧑‍🚀',
@@ -1196,7 +1051,6 @@ export const peopleEmojis = [
     keywords: ['astronaut', 'space', 'rocket'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['astronaut', 'space', 'nasa'],
   },
   {
     emoji: '👨‍🚀',
@@ -1204,7 +1058,6 @@ export const peopleEmojis = [
     keywords: ['man', 'astronaut', 'space'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['astronaut', 'man', 'space'],
   },
   {
     emoji: '👩‍🚀',
@@ -1212,7 +1065,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'astronaut', 'space'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['astronaut', 'woman', 'space'],
   },
   {
     emoji: '🧑‍🚒',
@@ -1220,7 +1072,6 @@ export const peopleEmojis = [
     keywords: ['firefighter', 'firetruck', 'rescue'],
     category: 'people',
     color: '#DC143C',
-    tags: ['firefighter', 'rescue', 'hero'],
   },
   {
     emoji: '👨‍🚒',
@@ -1228,7 +1079,6 @@ export const peopleEmojis = [
     keywords: ['man', 'firefighter', 'firetruck'],
     category: 'people',
     color: '#DC143C',
-    tags: ['firefighter', 'man', 'rescue'],
   },
   {
     emoji: '👩‍🚒',
@@ -1236,7 +1086,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'firefighter', 'firetruck'],
     category: 'people',
     color: '#DC143C',
-    tags: ['firefighter', 'woman', 'rescue'],
   },
   {
     emoji: '👮',
@@ -1244,7 +1093,6 @@ export const peopleEmojis = [
     keywords: ['cop', 'police', 'officer'],
     category: 'people',
     color: '#000080',
-    tags: ['police', 'cop', 'law'],
   },
   {
     emoji: '👮‍♂️',
@@ -1252,7 +1100,6 @@ export const peopleEmojis = [
     keywords: ['man', 'cop', 'police'],
     category: 'people',
     color: '#000080',
-    tags: ['police', 'man', 'cop'],
   },
   {
     emoji: '👮‍♀️',
@@ -1260,7 +1107,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'cop', 'police'],
     category: 'people',
     color: '#000080',
-    tags: ['police', 'woman', 'cop'],
   },
   {
     emoji: '🕵️',
@@ -1268,7 +1114,6 @@ export const peopleEmojis = [
     keywords: ['detective', 'sleuth', 'spy'],
     category: 'people',
     color: '#696969',
-    tags: ['detective', 'spy', 'investigate'],
   },
   {
     emoji: '🕵️‍♂️',
@@ -1276,7 +1121,6 @@ export const peopleEmojis = [
     keywords: ['man', 'detective', 'sleuth'],
     category: 'people',
     color: '#696969',
-    tags: ['detective', 'man', 'spy'],
   },
   {
     emoji: '🕵️‍♀️',
@@ -1284,7 +1128,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'detective', 'sleuth'],
     category: 'people',
     color: '#696969',
-    tags: ['detective', 'woman', 'spy'],
   },
   {
     emoji: '💂',
@@ -1292,7 +1135,6 @@ export const peopleEmojis = [
     keywords: ['guard', 'british', 'soldier'],
     category: 'people',
     color: '#DC143C',
-    tags: ['guard', 'british', 'soldier'],
   },
   {
     emoji: '💂‍♂️',
@@ -1300,7 +1142,6 @@ export const peopleEmojis = [
     keywords: ['man', 'guard', 'british'],
     category: 'people',
     color: '#DC143C',
-    tags: ['guard', 'man', 'british'],
   },
   {
     emoji: '💂‍♀️',
@@ -1308,7 +1149,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'guard', 'british'],
     category: 'people',
     color: '#DC143C',
-    tags: ['guard', 'woman', 'british'],
   },
   {
     emoji: '🥷',
@@ -1316,7 +1156,6 @@ export const peopleEmojis = [
     keywords: ['ninja', 'fighter', 'hidden'],
     category: 'people',
     color: '#000000',
-    tags: ['ninja', 'stealth', 'fighter'],
   },
   {
     emoji: '👷',
@@ -1324,7 +1163,6 @@ export const peopleEmojis = [
     keywords: ['construction', 'worker', 'helmet'],
     category: 'people',
     color: '#FFD700',
-    tags: ['construction', 'worker', 'builder'],
   },
   {
     emoji: '👷‍♂️',
@@ -1332,7 +1170,6 @@ export const peopleEmojis = [
     keywords: ['man', 'construction', 'worker'],
     category: 'people',
     color: '#FFD700',
-    tags: ['construction', 'man', 'builder'],
   },
   {
     emoji: '👷‍♀️',
@@ -1340,7 +1177,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'construction', 'worker'],
     category: 'people',
     color: '#FFD700',
-    tags: ['construction', 'woman', 'builder'],
   },
   {
     emoji: '🤴',
@@ -1348,7 +1184,6 @@ export const peopleEmojis = [
     keywords: ['prince', 'crown', 'royal'],
     category: 'people',
     color: '#FFD700',
-    tags: ['prince', 'royalty', 'crown'],
   },
   {
     emoji: '👸',
@@ -1356,7 +1191,6 @@ export const peopleEmojis = [
     keywords: ['princess', 'crown', 'royal'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['princess', 'royalty', 'crown'],
   },
   {
     emoji: '👳',
@@ -1364,7 +1198,6 @@ export const peopleEmojis = [
     keywords: ['turban', 'person', 'muslim'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['turban', 'culture', 'person'],
   },
   {
     emoji: '👳‍♂️',
@@ -1372,7 +1205,6 @@ export const peopleEmojis = [
     keywords: ['man', 'turban', 'muslim'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['turban', 'man', 'culture'],
   },
   {
     emoji: '👳‍♀️',
@@ -1380,7 +1212,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'turban', 'muslim'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['turban', 'woman', 'culture'],
   },
   {
     emoji: '👲',
@@ -1388,7 +1219,6 @@ export const peopleEmojis = [
     keywords: ['hat', 'person', 'chinese'],
     category: 'people',
     color: '#4169E1',
-    tags: ['hat', 'culture', 'chinese'],
   },
   {
     emoji: '🧕',
@@ -1396,7 +1226,6 @@ export const peopleEmojis = [
     keywords: ['hijab', 'headscarf', 'muslim'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['hijab', 'headscarf', 'culture'],
   },
   {
     emoji: '🤵',
@@ -1404,7 +1233,6 @@ export const peopleEmojis = [
     keywords: ['groom', 'person', 'suit'],
     category: 'people',
     color: '#000000',
-    tags: ['tuxedo', 'formal', 'groom'],
   },
   {
     emoji: '🤵‍♂️',
@@ -1412,7 +1240,6 @@ export const peopleEmojis = [
     keywords: ['man', 'groom', 'suit'],
     category: 'people',
     color: '#000000',
-    tags: ['tuxedo', 'man', 'formal'],
   },
   {
     emoji: '🤵‍♀️',
@@ -1420,7 +1247,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'groom', 'suit'],
     category: 'people',
     color: '#000000',
-    tags: ['tuxedo', 'woman', 'formal'],
   },
   {
     emoji: '👰',
@@ -1428,7 +1254,6 @@ export const peopleEmojis = [
     keywords: ['bride', 'person', 'wedding'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['bride', 'wedding', 'veil'],
   },
   {
     emoji: '👰‍♂️',
@@ -1436,7 +1261,6 @@ export const peopleEmojis = [
     keywords: ['man', 'bride', 'wedding'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['veil', 'man', 'wedding'],
   },
   {
     emoji: '👰‍♀️',
@@ -1444,7 +1268,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'bride', 'wedding'],
     category: 'people',
     color: '#F5F5F5',
-    tags: ['bride', 'woman', 'wedding'],
   },
   {
     emoji: '🤰',
@@ -1452,7 +1275,6 @@ export const peopleEmojis = [
     keywords: ['pregnant', 'woman', 'baby'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['pregnant', 'expecting', 'mother'],
   },
   {
     emoji: '🤱',
@@ -1460,7 +1282,6 @@ export const peopleEmojis = [
     keywords: ['nursing', 'baby', 'child'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['breastfeeding', 'baby', 'mother'],
   },
   {
     emoji: '👩‍🍼',
@@ -1468,7 +1289,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'feeding', 'baby'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['feeding', 'baby', 'mother'],
   },
   {
     emoji: '👨‍🍼',
@@ -1476,7 +1296,6 @@ export const peopleEmojis = [
     keywords: ['man', 'feeding', 'baby'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['feeding', 'baby', 'father'],
   },
   {
     emoji: '🧑‍🍼',
@@ -1484,7 +1303,6 @@ export const peopleEmojis = [
     keywords: ['person', 'feeding', 'baby'],
     category: 'people',
     color: '#FDBCB4',
-    tags: ['feeding', 'baby', 'parent'],
   },
 
   // Fantasy characters
@@ -1494,7 +1312,6 @@ export const peopleEmojis = [
     keywords: ['angel', 'cherub', 'face'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['angel', 'baby', 'cherub'],
   },
   {
     emoji: '🎅',
@@ -1502,7 +1319,6 @@ export const peopleEmojis = [
     keywords: ['santa', 'christmas', 'claus'],
     category: 'people',
     color: '#DC143C',
-    tags: ['santa', 'christmas', 'holiday'],
   },
   {
     emoji: '🤶',
@@ -1510,7 +1326,6 @@ export const peopleEmojis = [
     keywords: ['mrs claus', 'christmas', 'mother'],
     category: 'people',
     color: '#DC143C',
-    tags: ['mrs-claus', 'christmas', 'holiday'],
   },
   {
     emoji: '🧑‍🎄',
@@ -1518,7 +1333,6 @@ export const peopleEmojis = [
     keywords: ['mx claus', 'christmas', 'person'],
     category: 'people',
     color: '#DC143C',
-    tags: ['mx-claus', 'christmas', 'holiday'],
   },
   {
     emoji: '🦸',
@@ -1526,7 +1340,6 @@ export const peopleEmojis = [
     keywords: ['superhero', 'superpowers', 'hero'],
     category: 'people',
     color: '#FF0000',
-    tags: ['superhero', 'hero', 'super'],
   },
   {
     emoji: '🦸‍♂️',
@@ -1534,7 +1347,6 @@ export const peopleEmojis = [
     keywords: ['man', 'superhero', 'superpowers'],
     category: 'people',
     color: '#FF0000',
-    tags: ['superhero', 'man', 'hero'],
   },
   {
     emoji: '🦸‍♀️',
@@ -1542,7 +1354,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'superhero', 'superpowers'],
     category: 'people',
     color: '#FF0000',
-    tags: ['superhero', 'woman', 'hero'],
   },
   {
     emoji: '🦹',
@@ -1550,7 +1361,6 @@ export const peopleEmojis = [
     keywords: ['supervillain', 'criminal', 'evil'],
     category: 'people',
     color: '#800080',
-    tags: ['villain', 'evil', 'super'],
   },
   {
     emoji: '🦹‍♂️',
@@ -1558,7 +1368,6 @@ export const peopleEmojis = [
     keywords: ['man', 'supervillain', 'criminal'],
     category: 'people',
     color: '#800080',
-    tags: ['villain', 'man', 'evil'],
   },
   {
     emoji: '🦹‍♀️',
@@ -1566,7 +1375,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'supervillain', 'criminal'],
     category: 'people',
     color: '#800080',
-    tags: ['villain', 'woman', 'evil'],
   },
   {
     emoji: '🧙',
@@ -1574,7 +1382,6 @@ export const peopleEmojis = [
     keywords: ['wizard', 'sorcerer', 'witch'],
     category: 'people',
     color: '#4B0082',
-    tags: ['wizard', 'magic', 'mage'],
   },
   {
     emoji: '🧙‍♂️',
@@ -1582,7 +1389,6 @@ export const peopleEmojis = [
     keywords: ['man', 'wizard', 'sorcerer'],
     category: 'people',
     color: '#4B0082',
-    tags: ['wizard', 'man', 'magic'],
   },
   {
     emoji: '🧙‍♀️',
@@ -1590,7 +1396,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'wizard', 'sorcerer'],
     category: 'people',
     color: '#4B0082',
-    tags: ['wizard', 'woman', 'magic'],
   },
   {
     emoji: '🧚',
@@ -1598,7 +1403,6 @@ export const peopleEmojis = [
     keywords: ['fairy', 'oberon', 'puck'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['fairy', 'magic', 'fantasy'],
   },
   {
     emoji: '🧚‍♂️',
@@ -1606,7 +1410,6 @@ export const peopleEmojis = [
     keywords: ['man', 'fairy', 'oberon'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['fairy', 'man', 'magic'],
   },
   {
     emoji: '🧚‍♀️',
@@ -1614,7 +1417,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'fairy', 'titania'],
     category: 'people',
     color: '#FFB6C1',
-    tags: ['fairy', 'woman', 'magic'],
   },
   {
     emoji: '🧛',
@@ -1622,7 +1424,6 @@ export const peopleEmojis = [
     keywords: ['vampire', 'dracula', 'undead'],
     category: 'people',
     color: '#8B0000',
-    tags: ['vampire', 'dracula', 'undead'],
   },
   {
     emoji: '🧛‍♂️',
@@ -1630,7 +1431,6 @@ export const peopleEmojis = [
     keywords: ['man', 'vampire', 'dracula'],
     category: 'people',
     color: '#8B0000',
-    tags: ['vampire', 'man', 'dracula'],
   },
   {
     emoji: '🧛‍♀️',
@@ -1638,7 +1438,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'vampire', 'undead'],
     category: 'people',
     color: '#8B0000',
-    tags: ['vampire', 'woman', 'undead'],
   },
   {
     emoji: '🧜',
@@ -1646,7 +1445,6 @@ export const peopleEmojis = [
     keywords: ['mermaid', 'merman', 'merwoman'],
     category: 'people',
     color: '#20B2AA',
-    tags: ['mermaid', 'ocean', 'fantasy'],
   },
   {
     emoji: '🧜‍♂️',
@@ -1654,7 +1452,6 @@ export const peopleEmojis = [
     keywords: ['merman', 'triton', 'man'],
     category: 'people',
     color: '#20B2AA',
-    tags: ['merman', 'ocean', 'fantasy'],
   },
   {
     emoji: '🧜‍♀️',
@@ -1662,7 +1459,6 @@ export const peopleEmojis = [
     keywords: ['mermaid', 'ariel', 'woman'],
     category: 'people',
     color: '#20B2AA',
-    tags: ['mermaid', 'ocean', 'fantasy'],
   },
   {
     emoji: '🧝',
@@ -1670,7 +1466,6 @@ export const peopleEmojis = [
     keywords: ['elf', 'magical', 'fantasy'],
     category: 'people',
     color: '#228B22',
-    tags: ['elf', 'fantasy', 'magical'],
   },
   {
     emoji: '🧝‍♂️',
@@ -1678,7 +1473,6 @@ export const peopleEmojis = [
     keywords: ['man', 'elf', 'magical'],
     category: 'people',
     color: '#228B22',
-    tags: ['elf', 'man', 'fantasy'],
   },
   {
     emoji: '🧝‍♀️',
@@ -1686,7 +1480,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'elf', 'magical'],
     category: 'people',
     color: '#228B22',
-    tags: ['elf', 'woman', 'fantasy'],
   },
   {
     emoji: '🧞',
@@ -1694,7 +1487,6 @@ export const peopleEmojis = [
     keywords: ['genie', 'djinn', 'wish'],
     category: 'people',
     color: '#4169E1',
-    tags: ['genie', 'magic', 'wish'],
   },
   {
     emoji: '🧞‍♂️',
@@ -1702,7 +1494,6 @@ export const peopleEmojis = [
     keywords: ['man', 'genie', 'djinn'],
     category: 'people',
     color: '#4169E1',
-    tags: ['genie', 'man', 'magic'],
   },
   {
     emoji: '🧞‍♀️',
@@ -1710,7 +1501,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'genie', 'djinn'],
     category: 'people',
     color: '#4169E1',
-    tags: ['genie', 'woman', 'magic'],
   },
   {
     emoji: '🧟',
@@ -1718,7 +1508,6 @@ export const peopleEmojis = [
     keywords: ['zombie', 'undead', 'walking dead'],
     category: 'people',
     color: '#556B2F',
-    tags: ['zombie', 'undead', 'horror'],
   },
   {
     emoji: '🧟‍♂️',
@@ -1726,7 +1515,6 @@ export const peopleEmojis = [
     keywords: ['man', 'zombie', 'undead'],
     category: 'people',
     color: '#556B2F',
-    tags: ['zombie', 'man', 'undead'],
   },
   {
     emoji: '🧟‍♀️',
@@ -1734,7 +1522,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'zombie', 'undead'],
     category: 'people',
     color: '#556B2F',
-    tags: ['zombie', 'woman', 'undead'],
   },
 
   // Activities
@@ -1744,7 +1531,6 @@ export const peopleEmojis = [
     keywords: ['massage', 'salon', 'face'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['massage', 'relaxation', 'spa'],
   },
   {
     emoji: '💆‍♂️',
@@ -1752,7 +1538,6 @@ export const peopleEmojis = [
     keywords: ['man', 'massage', 'salon'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['massage', 'man', 'spa'],
   },
   {
     emoji: '💆‍♀️',
@@ -1760,7 +1545,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'massage', 'salon'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['massage', 'woman', 'spa'],
   },
   {
     emoji: '💇',
@@ -1768,7 +1552,6 @@ export const peopleEmojis = [
     keywords: ['haircut', 'beauty', 'barber'],
     category: 'people',
     color: '#8B4513',
-    tags: ['haircut', 'salon', 'barber'],
   },
   {
     emoji: '💇‍♂️',
@@ -1776,7 +1559,6 @@ export const peopleEmojis = [
     keywords: ['man', 'haircut', 'barber'],
     category: 'people',
     color: '#8B4513',
-    tags: ['haircut', 'man', 'barber'],
   },
   {
     emoji: '💇‍♀️',
@@ -1784,7 +1566,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'haircut', 'beauty'],
     category: 'people',
     color: '#8B4513',
-    tags: ['haircut', 'woman', 'salon'],
   },
   {
     emoji: '🚶',
@@ -1792,7 +1573,6 @@ export const peopleEmojis = [
     keywords: ['walk', 'hike', 'move'],
     category: 'people',
     color: '#4169E1',
-    tags: ['walking', 'moving', 'exercise'],
   },
   {
     emoji: '🚶‍♂️',
@@ -1800,7 +1580,6 @@ export const peopleEmojis = [
     keywords: ['man', 'walk', 'hike'],
     category: 'people',
     color: '#4169E1',
-    tags: ['walking', 'man', 'exercise'],
   },
   {
     emoji: '🚶‍♀️',
@@ -1808,7 +1587,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'walk', 'hike'],
     category: 'people',
     color: '#4169E1',
-    tags: ['walking', 'woman', 'exercise'],
   },
   {
     emoji: '🧍',
@@ -1816,7 +1594,6 @@ export const peopleEmojis = [
     keywords: ['stand', 'standing', 'person'],
     category: 'people',
     color: '#696969',
-    tags: ['standing', 'still', 'person'],
   },
   {
     emoji: '🧍‍♂️',
@@ -1824,7 +1601,6 @@ export const peopleEmojis = [
     keywords: ['man', 'stand', 'standing'],
     category: 'people',
     color: '#696969',
-    tags: ['standing', 'man', 'still'],
   },
   {
     emoji: '🧍‍♀️',
@@ -1832,7 +1608,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'stand', 'standing'],
     category: 'people',
     color: '#696969',
-    tags: ['standing', 'woman', 'still'],
   },
   {
     emoji: '🧎',
@@ -1840,7 +1615,6 @@ export const peopleEmojis = [
     keywords: ['kneel', 'kneeling', 'person'],
     category: 'people',
     color: '#8B4513',
-    tags: ['kneeling', 'kneel', 'person'],
   },
   {
     emoji: '🧎‍♂️',
@@ -1848,7 +1622,6 @@ export const peopleEmojis = [
     keywords: ['man', 'kneel', 'kneeling'],
     category: 'people',
     color: '#8B4513',
-    tags: ['kneeling', 'man', 'kneel'],
   },
   {
     emoji: '🧎‍♀️',
@@ -1856,7 +1629,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'kneel', 'kneeling'],
     category: 'people',
     color: '#8B4513',
-    tags: ['kneeling', 'woman', 'kneel'],
   },
   {
     emoji: '🧑‍🦯',
@@ -1864,7 +1636,6 @@ export const peopleEmojis = [
     keywords: ['blind', 'accessibility', 'person'],
     category: 'people',
     color: '#696969',
-    tags: ['blind', 'accessibility', 'cane'],
   },
   {
     emoji: '👨‍🦯',
@@ -1872,7 +1643,6 @@ export const peopleEmojis = [
     keywords: ['man', 'blind', 'accessibility'],
     category: 'people',
     color: '#696969',
-    tags: ['blind', 'man', 'cane'],
   },
   {
     emoji: '👩‍🦯',
@@ -1880,7 +1650,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'blind', 'accessibility'],
     category: 'people',
     color: '#696969',
-    tags: ['blind', 'woman', 'cane'],
   },
   {
     emoji: '🧑‍🦼',
@@ -1888,7 +1657,6 @@ export const peopleEmojis = [
     keywords: ['wheelchair', 'accessibility', 'person'],
     category: 'people',
     color: '#4169E1',
-    tags: ['wheelchair', 'accessibility', 'mobility'],
   },
   {
     emoji: '👨‍🦼',
@@ -1896,7 +1664,6 @@ export const peopleEmojis = [
     keywords: ['man', 'wheelchair', 'accessibility'],
     category: 'people',
     color: '#4169E1',
-    tags: ['wheelchair', 'man', 'mobility'],
   },
   {
     emoji: '👩‍🦼',
@@ -1904,7 +1671,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'wheelchair', 'accessibility'],
     category: 'people',
     color: '#4169E1',
-    tags: ['wheelchair', 'woman', 'mobility'],
   },
   {
     emoji: '🧑‍🦽',
@@ -1912,7 +1678,6 @@ export const peopleEmojis = [
     keywords: ['wheelchair', 'accessibility', 'person'],
     category: 'people',
     color: '#696969',
-    tags: ['wheelchair', 'accessibility', 'manual'],
   },
   {
     emoji: '👨‍🦽',
@@ -1920,7 +1685,6 @@ export const peopleEmojis = [
     keywords: ['man', 'wheelchair', 'accessibility'],
     category: 'people',
     color: '#696969',
-    tags: ['wheelchair', 'man', 'manual'],
   },
   {
     emoji: '👩‍🦽',
@@ -1928,7 +1692,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'wheelchair', 'accessibility'],
     category: 'people',
     color: '#696969',
-    tags: ['wheelchair', 'woman', 'manual'],
   },
   {
     emoji: '🏃',
@@ -1936,7 +1699,6 @@ export const peopleEmojis = [
     keywords: ['run', 'exercise', 'marathon'],
     category: 'people',
     color: '#FF4500',
-    tags: ['running', 'exercise', 'jogging'],
   },
   {
     emoji: '🏃‍♂️',
@@ -1944,7 +1706,6 @@ export const peopleEmojis = [
     keywords: ['man', 'run', 'exercise'],
     category: 'people',
     color: '#FF4500',
-    tags: ['running', 'man', 'jogging'],
   },
   {
     emoji: '🏃‍♀️',
@@ -1952,7 +1713,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'run', 'exercise'],
     category: 'people',
     color: '#FF4500',
-    tags: ['running', 'woman', 'jogging'],
   },
   {
     emoji: '💃',
@@ -1960,7 +1720,6 @@ export const peopleEmojis = [
     keywords: ['dance', 'dancer', 'dress'],
     category: 'people',
     color: '#DC143C',
-    tags: ['dancing', 'dancer', 'party'],
   },
   {
     emoji: '🕺',
@@ -1968,7 +1727,6 @@ export const peopleEmojis = [
     keywords: ['dance', 'dancer', 'man'],
     category: 'people',
     color: '#800080',
-    tags: ['dancing', 'dancer', 'party'],
   },
   {
     emoji: '🕴️',
@@ -1976,7 +1734,6 @@ export const peopleEmojis = [
     keywords: ['suit', 'levitate', 'hover'],
     category: 'people',
     color: '#000000',
-    tags: ['levitating', 'business', 'floating'],
   },
   {
     emoji: '👯',
@@ -1984,7 +1741,6 @@ export const peopleEmojis = [
     keywords: ['bunny', 'dancer', 'partying'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['party', 'dancing', 'bunny'],
   },
   {
     emoji: '👯‍♂️',
@@ -1992,7 +1748,6 @@ export const peopleEmojis = [
     keywords: ['men', 'bunny', 'dancer'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['party', 'men', 'dancing'],
   },
   {
     emoji: '👯‍♀️',
@@ -2000,7 +1755,6 @@ export const peopleEmojis = [
     keywords: ['women', 'bunny', 'dancer'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['party', 'women', 'dancing'],
   },
   {
     emoji: '🧖',
@@ -2008,7 +1762,6 @@ export const peopleEmojis = [
     keywords: ['sauna', 'steam', 'spa'],
     category: 'people',
     color: '#FFE4B5',
-    tags: ['sauna', 'spa', 'relaxation'],
   },
   {
     emoji: '🧖‍♂️',
@@ -2016,7 +1769,6 @@ export const peopleEmojis = [
     keywords: ['man', 'sauna', 'steam'],
     category: 'people',
     color: '#FFE4B5',
-    tags: ['sauna', 'man', 'spa'],
   },
   {
     emoji: '🧖‍♀️',
@@ -2024,7 +1776,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'sauna', 'steam'],
     category: 'people',
     color: '#FFE4B5',
-    tags: ['sauna', 'woman', 'spa'],
   },
   {
     emoji: '🧗',
@@ -2032,7 +1783,6 @@ export const peopleEmojis = [
     keywords: ['climb', 'bouldering', 'climber'],
     category: 'people',
     color: '#696969',
-    tags: ['climbing', 'sport', 'boulder'],
   },
   {
     emoji: '🧗‍♂️',
@@ -2040,7 +1790,6 @@ export const peopleEmojis = [
     keywords: ['man', 'climb', 'bouldering'],
     category: 'people',
     color: '#696969',
-    tags: ['climbing', 'man', 'sport'],
   },
   {
     emoji: '🧗‍♀️',
@@ -2048,7 +1797,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'climb', 'bouldering'],
     category: 'people',
     color: '#696969',
-    tags: ['climbing', 'woman', 'sport'],
   },
 
   // Sports people
@@ -2058,7 +1806,6 @@ export const peopleEmojis = [
     keywords: ['fencer', 'fencing', 'sword'],
     category: 'people',
     color: '#C0C0C0',
-    tags: ['fencing', 'sport', 'sword'],
   },
   {
     emoji: '🏇',
@@ -2066,7 +1813,6 @@ export const peopleEmojis = [
     keywords: ['jockey', 'racehorse', 'racing'],
     category: 'people',
     color: '#8B4513',
-    tags: ['racing', 'horse', 'jockey'],
   },
   {
     emoji: '⛷️',
@@ -2074,7 +1820,6 @@ export const peopleEmojis = [
     keywords: ['ski', 'snow', 'winter'],
     category: 'people',
     color: '#4169E1',
-    tags: ['skiing', 'winter', 'sport'],
   },
   {
     emoji: '🏂',
@@ -2082,7 +1827,6 @@ export const peopleEmojis = [
     keywords: ['snowboard', 'snow', 'winter'],
     category: 'people',
     color: '#FF4500',
-    tags: ['snowboarding', 'winter', 'sport'],
   },
   {
     emoji: '🏌️',
@@ -2090,7 +1834,6 @@ export const peopleEmojis = [
     keywords: ['golf', 'ball', 'golfer'],
     category: 'people',
     color: '#228B22',
-    tags: ['golf', 'sport', 'golfer'],
   },
   {
     emoji: '🏌️‍♂️',
@@ -2098,7 +1841,6 @@ export const peopleEmojis = [
     keywords: ['man', 'golf', 'ball'],
     category: 'people',
     color: '#228B22',
-    tags: ['golf', 'man', 'sport'],
   },
   {
     emoji: '🏌️‍♀️',
@@ -2106,7 +1848,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'golf', 'ball'],
     category: 'people',
     color: '#228B22',
-    tags: ['golf', 'woman', 'sport'],
   },
   {
     emoji: '🏄',
@@ -2114,7 +1855,6 @@ export const peopleEmojis = [
     keywords: ['surf', 'surfboard', 'surfer'],
     category: 'people',
     color: '#00CED1',
-    tags: ['surfing', 'ocean', 'sport'],
   },
   {
     emoji: '🏄‍♂️',
@@ -2122,7 +1862,6 @@ export const peopleEmojis = [
     keywords: ['man', 'surf', 'surfboard'],
     category: 'people',
     color: '#00CED1',
-    tags: ['surfing', 'man', 'ocean'],
   },
   {
     emoji: '🏄‍♀️',
@@ -2130,7 +1869,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'surf', 'surfboard'],
     category: 'people',
     color: '#00CED1',
-    tags: ['surfing', 'woman', 'ocean'],
   },
   {
     emoji: '🚣',
@@ -2138,7 +1876,6 @@ export const peopleEmojis = [
     keywords: ['row', 'boat', 'rowboat'],
     category: 'people',
     color: '#8B4513',
-    tags: ['rowing', 'boat', 'sport'],
   },
   {
     emoji: '🚣‍♂️',
@@ -2146,7 +1883,6 @@ export const peopleEmojis = [
     keywords: ['man', 'row', 'boat'],
     category: 'people',
     color: '#8B4513',
-    tags: ['rowing', 'man', 'boat'],
   },
   {
     emoji: '🚣‍♀️',
@@ -2154,7 +1890,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'row', 'boat'],
     category: 'people',
     color: '#8B4513',
-    tags: ['rowing', 'woman', 'boat'],
   },
   {
     emoji: '🏊',
@@ -2162,7 +1897,6 @@ export const peopleEmojis = [
     keywords: ['swim', 'swimmer', 'pool'],
     category: 'people',
     color: '#00CED1',
-    tags: ['swimming', 'pool', 'sport'],
   },
   {
     emoji: '🏊‍♂️',
@@ -2170,7 +1904,6 @@ export const peopleEmojis = [
     keywords: ['man', 'swim', 'swimmer'],
     category: 'people',
     color: '#00CED1',
-    tags: ['swimming', 'man', 'pool'],
   },
   {
     emoji: '🏊‍♀️',
@@ -2178,7 +1911,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'swim', 'swimmer'],
     category: 'people',
     color: '#00CED1',
-    tags: ['swimming', 'woman', 'pool'],
   },
   {
     emoji: '⛹️',
@@ -2186,7 +1918,6 @@ export const peopleEmojis = [
     keywords: ['ball', 'dribble', 'basketball'],
     category: 'people',
     color: '#FF4500',
-    tags: ['basketball', 'sport', 'dribbling'],
   },
   {
     emoji: '⛹️‍♂️',
@@ -2194,7 +1925,6 @@ export const peopleEmojis = [
     keywords: ['man', 'ball', 'basketball'],
     category: 'people',
     color: '#FF4500',
-    tags: ['basketball', 'man', 'sport'],
   },
   {
     emoji: '⛹️‍♀️',
@@ -2202,7 +1932,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'ball', 'basketball'],
     category: 'people',
     color: '#FF4500',
-    tags: ['basketball', 'woman', 'sport'],
   },
   {
     emoji: '🏋️',
@@ -2210,7 +1939,6 @@ export const peopleEmojis = [
     keywords: ['lifter', 'weight', 'weightlifter'],
     category: 'people',
     color: '#696969',
-    tags: ['weightlifting', 'gym', 'sport'],
   },
   {
     emoji: '🏋️‍♂️',
@@ -2218,7 +1946,6 @@ export const peopleEmojis = [
     keywords: ['man', 'lifter', 'weight'],
     category: 'people',
     color: '#696969',
-    tags: ['weightlifting', 'man', 'gym'],
   },
   {
     emoji: '🏋️‍♀️',
@@ -2226,7 +1953,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'lifter', 'weight'],
     category: 'people',
     color: '#696969',
-    tags: ['weightlifting', 'woman', 'gym'],
   },
   {
     emoji: '🚴',
@@ -2234,7 +1960,6 @@ export const peopleEmojis = [
     keywords: ['bike', 'bicycle', 'cyclist'],
     category: 'people',
     color: '#4169E1',
-    tags: ['cycling', 'bike', 'sport'],
   },
   {
     emoji: '🚴‍♂️',
@@ -2242,7 +1967,6 @@ export const peopleEmojis = [
     keywords: ['man', 'bike', 'bicycle'],
     category: 'people',
     color: '#4169E1',
-    tags: ['cycling', 'man', 'bike'],
   },
   {
     emoji: '🚴‍♀️',
@@ -2250,7 +1974,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'bike', 'bicycle'],
     category: 'people',
     color: '#4169E1',
-    tags: ['cycling', 'woman', 'bike'],
   },
   {
     emoji: '🚵',
@@ -2258,7 +1981,6 @@ export const peopleEmojis = [
     keywords: ['bike', 'bicycle', 'mountain'],
     category: 'people',
     color: '#228B22',
-    tags: ['mountain-biking', 'sport', 'extreme'],
   },
   {
     emoji: '🚵‍♂️',
@@ -2266,7 +1988,6 @@ export const peopleEmojis = [
     keywords: ['man', 'bike', 'mountain'],
     category: 'people',
     color: '#228B22',
-    tags: ['mountain-biking', 'man', 'extreme'],
   },
   {
     emoji: '🚵‍♀️',
@@ -2274,7 +1995,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'bike', 'mountain'],
     category: 'people',
     color: '#228B22',
-    tags: ['mountain-biking', 'woman', 'extreme'],
   },
   {
     emoji: '🤸',
@@ -2282,7 +2002,6 @@ export const peopleEmojis = [
     keywords: ['cartwheel', 'gymnast', 'gymnastics'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['gymnastics', 'cartwheel', 'sport'],
   },
   {
     emoji: '🤸‍♂️',
@@ -2290,7 +2009,6 @@ export const peopleEmojis = [
     keywords: ['man', 'cartwheel', 'gymnast'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['gymnastics', 'man', 'cartwheel'],
   },
   {
     emoji: '🤸‍♀️',
@@ -2298,7 +2016,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'cartwheel', 'gymnast'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['gymnastics', 'woman', 'cartwheel'],
   },
   {
     emoji: '🤼',
@@ -2306,7 +2023,6 @@ export const peopleEmojis = [
     keywords: ['wrestle', 'wrestler', 'wrestling'],
     category: 'people',
     color: '#DAA520',
-    tags: ['wrestling', 'sport', 'combat'],
   },
   {
     emoji: '🤼‍♂️',
@@ -2314,7 +2030,6 @@ export const peopleEmojis = [
     keywords: ['men', 'wrestle', 'wrestler'],
     category: 'people',
     color: '#DAA520',
-    tags: ['wrestling', 'men', 'sport'],
   },
   {
     emoji: '🤼‍♀️',
@@ -2322,7 +2037,6 @@ export const peopleEmojis = [
     keywords: ['women', 'wrestle', 'wrestler'],
     category: 'people',
     color: '#DAA520',
-    tags: ['wrestling', 'women', 'sport'],
   },
   {
     emoji: '🤽',
@@ -2330,7 +2044,6 @@ export const peopleEmojis = [
     keywords: ['water', 'polo', 'sport'],
     category: 'people',
     color: '#00CED1',
-    tags: ['water-polo', 'sport', 'swimming'],
   },
   {
     emoji: '🤽‍♂️',
@@ -2338,7 +2051,6 @@ export const peopleEmojis = [
     keywords: ['man', 'water', 'polo'],
     category: 'people',
     color: '#00CED1',
-    tags: ['water-polo', 'man', 'sport'],
   },
   {
     emoji: '🤽‍♀️',
@@ -2346,7 +2058,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'water', 'polo'],
     category: 'people',
     color: '#00CED1',
-    tags: ['water-polo', 'woman', 'sport'],
   },
   {
     emoji: '🤾',
@@ -2354,7 +2065,6 @@ export const peopleEmojis = [
     keywords: ['ball', 'handball', 'sport'],
     category: 'people',
     color: '#FF4500',
-    tags: ['handball', 'sport', 'throwing'],
   },
   {
     emoji: '🤾‍♂️',
@@ -2362,7 +2072,6 @@ export const peopleEmojis = [
     keywords: ['man', 'ball', 'handball'],
     category: 'people',
     color: '#FF4500',
-    tags: ['handball', 'man', 'sport'],
   },
   {
     emoji: '🤾‍♀️',
@@ -2370,7 +2079,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'ball', 'handball'],
     category: 'people',
     color: '#FF4500',
-    tags: ['handball', 'woman', 'sport'],
   },
   {
     emoji: '🤹',
@@ -2378,7 +2086,6 @@ export const peopleEmojis = [
     keywords: ['juggle', 'balance', 'skill'],
     category: 'people',
     color: '#FFD700',
-    tags: ['juggling', 'circus', 'skill'],
   },
   {
     emoji: '🤹‍♂️',
@@ -2386,7 +2093,6 @@ export const peopleEmojis = [
     keywords: ['man', 'juggle', 'balance'],
     category: 'people',
     color: '#FFD700',
-    tags: ['juggling', 'man', 'circus'],
   },
   {
     emoji: '🤹‍♀️',
@@ -2394,7 +2100,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'juggle', 'balance'],
     category: 'people',
     color: '#FFD700',
-    tags: ['juggling', 'woman', 'circus'],
   },
 
   // Yoga and meditation
@@ -2404,7 +2109,6 @@ export const peopleEmojis = [
     keywords: ['yoga', 'meditation', 'serenity'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['yoga', 'meditation', 'zen'],
   },
   {
     emoji: '🧘‍♂️',
@@ -2412,7 +2116,6 @@ export const peopleEmojis = [
     keywords: ['man', 'yoga', 'meditation'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['yoga', 'man', 'meditation'],
   },
   {
     emoji: '🧘‍♀️',
@@ -2420,7 +2123,6 @@ export const peopleEmojis = [
     keywords: ['woman', 'yoga', 'meditation'],
     category: 'people',
     color: '#DDA0DD',
-    tags: ['yoga', 'woman', 'meditation'],
   },
 
   // Couple and family
@@ -2430,7 +2132,6 @@ export const peopleEmojis = [
     keywords: ['couple', 'date', 'dating'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['couple', 'relationship', 'dating'],
   },
   {
     emoji: '👬',
@@ -2438,7 +2139,6 @@ export const peopleEmojis = [
     keywords: ['couple', 'gay', 'men'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['couple', 'gay', 'relationship'],
   },
   {
     emoji: '👭',
@@ -2446,7 +2146,6 @@ export const peopleEmojis = [
     keywords: ['couple', 'lesbian', 'women'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['couple', 'lesbian', 'relationship'],
   },
   {
     emoji: '💏',
@@ -2454,7 +2153,6 @@ export const peopleEmojis = [
     keywords: ['kiss', 'lips', 'couple'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['kiss', 'love', 'romance'],
   },
   {
     emoji: '👨‍❤️‍💋‍👨',
@@ -2462,7 +2160,6 @@ export const peopleEmojis = [
     keywords: ['kiss', 'gay', 'men'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['kiss', 'gay', 'love'],
   },
   {
     emoji: '👩‍❤️‍💋‍👩',
@@ -2470,7 +2167,6 @@ export const peopleEmojis = [
     keywords: ['kiss', 'lesbian', 'women'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['kiss', 'lesbian', 'love'],
   },
   {
     emoji: '💑',
@@ -2478,7 +2174,6 @@ export const peopleEmojis = [
     keywords: ['couple', 'love', 'date'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['couple', 'love', 'relationship'],
   },
   {
     emoji: '👨‍❤️‍👨',
@@ -2486,7 +2181,6 @@ export const peopleEmojis = [
     keywords: ['couple', 'gay', 'love'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['couple', 'gay', 'love'],
   },
   {
     emoji: '👩‍❤️‍👩',
@@ -2494,7 +2188,6 @@ export const peopleEmojis = [
     keywords: ['couple', 'lesbian', 'love'],
     category: 'people',
     color: '#FF69B4',
-    tags: ['couple', 'lesbian', 'love'],
   },
   {
     emoji: '👪',
@@ -2502,7 +2195,6 @@ export const peopleEmojis = [
     keywords: ['home', 'parents', 'child'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'parents', 'children'],
   },
   {
     emoji: '👨‍👩‍👦',
@@ -2510,7 +2202,6 @@ export const peopleEmojis = [
     keywords: ['family', 'man', 'woman', 'boy'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'parents', 'son'],
   },
   {
     emoji: '👨‍👩‍👧',
@@ -2518,7 +2209,6 @@ export const peopleEmojis = [
     keywords: ['family', 'man', 'woman', 'girl'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'parents', 'daughter'],
   },
   {
     emoji: '👨‍👩‍👧‍👦',
@@ -2526,7 +2216,6 @@ export const peopleEmojis = [
     keywords: ['family', 'man', 'woman', 'children'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'parents', 'children'],
   },
   {
     emoji: '👨‍👩‍👦‍👦',
@@ -2534,7 +2223,6 @@ export const peopleEmojis = [
     keywords: ['family', 'man', 'woman', 'boys'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'parents', 'sons'],
   },
   {
     emoji: '👨‍👩‍👧‍👧',
@@ -2542,7 +2230,6 @@ export const peopleEmojis = [
     keywords: ['family', 'man', 'woman', 'girls'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'parents', 'daughters'],
   },
   {
     emoji: '👨‍👨‍👦',
@@ -2550,7 +2237,6 @@ export const peopleEmojis = [
     keywords: ['family', 'gay', 'parents', 'boy'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'gay-parents', 'son'],
   },
   {
     emoji: '👨‍👨‍👧',
@@ -2558,7 +2244,6 @@ export const peopleEmojis = [
     keywords: ['family', 'gay', 'parents', 'girl'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'gay-parents', 'daughter'],
   },
   {
     emoji: '👨‍👨‍👧‍👦',
@@ -2566,7 +2251,6 @@ export const peopleEmojis = [
     keywords: ['family', 'gay', 'parents', 'children'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'gay-parents', 'children'],
   },
   {
     emoji: '👨‍👨‍👦‍👦',
@@ -2574,7 +2258,6 @@ export const peopleEmojis = [
     keywords: ['family', 'gay', 'parents', 'boys'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'gay-parents', 'sons'],
   },
   {
     emoji: '👨‍👨‍👧‍👧',
@@ -2582,7 +2265,6 @@ export const peopleEmojis = [
     keywords: ['family', 'gay', 'parents', 'girls'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'gay-parents', 'daughters'],
   },
   {
     emoji: '👩‍👩‍👦',
@@ -2590,7 +2272,6 @@ export const peopleEmojis = [
     keywords: ['family', 'lesbian', 'parents', 'boy'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'lesbian-parents', 'son'],
   },
   {
     emoji: '👩‍👩‍👧',
@@ -2598,7 +2279,6 @@ export const peopleEmojis = [
     keywords: ['family', 'lesbian', 'parents', 'girl'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'lesbian-parents', 'daughter'],
   },
   {
     emoji: '👩‍👩‍👧‍👦',
@@ -2606,7 +2286,6 @@ export const peopleEmojis = [
     keywords: ['family', 'lesbian', 'parents', 'children'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'lesbian-parents', 'children'],
   },
   {
     emoji: '👩‍👩‍👦‍👦',
@@ -2614,7 +2293,6 @@ export const peopleEmojis = [
     keywords: ['family', 'lesbian', 'parents', 'boys'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'lesbian-parents', 'sons'],
   },
   {
     emoji: '👩‍👩‍👧‍👧',
@@ -2622,7 +2300,6 @@ export const peopleEmojis = [
     keywords: ['family', 'lesbian', 'parents', 'girls'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'lesbian-parents', 'daughters'],
   },
   {
     emoji: '👨‍👦',
@@ -2630,7 +2307,6 @@ export const peopleEmojis = [
     keywords: ['family', 'father', 'son'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'father', 'son'],
   },
   {
     emoji: '👨‍👦‍👦',
@@ -2638,7 +2314,6 @@ export const peopleEmojis = [
     keywords: ['family', 'father', 'sons'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'father', 'sons'],
   },
   {
     emoji: '👨‍👧',
@@ -2646,7 +2321,6 @@ export const peopleEmojis = [
     keywords: ['family', 'father', 'daughter'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'father', 'daughter'],
   },
   {
     emoji: '👨‍👧‍👦',
@@ -2654,7 +2328,6 @@ export const peopleEmojis = [
     keywords: ['family', 'father', 'children'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'father', 'children'],
   },
   {
     emoji: '👨‍👧‍👧',
@@ -2662,7 +2335,6 @@ export const peopleEmojis = [
     keywords: ['family', 'father', 'daughters'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'father', 'daughters'],
   },
   {
     emoji: '👩‍👦',
@@ -2670,7 +2342,6 @@ export const peopleEmojis = [
     keywords: ['family', 'mother', 'son'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'mother', 'son'],
   },
   {
     emoji: '👩‍👦‍👦',
@@ -2678,7 +2349,6 @@ export const peopleEmojis = [
     keywords: ['family', 'mother', 'sons'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'mother', 'sons'],
   },
   {
     emoji: '👩‍👧',
@@ -2686,7 +2356,6 @@ export const peopleEmojis = [
     keywords: ['family', 'mother', 'daughter'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'mother', 'daughter'],
   },
   {
     emoji: '👩‍👧‍👦',
@@ -2694,7 +2363,6 @@ export const peopleEmojis = [
     keywords: ['family', 'mother', 'children'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'mother', 'children'],
   },
   {
     emoji: '👩‍👧‍👧',
@@ -2702,7 +2370,6 @@ export const peopleEmojis = [
     keywords: ['family', 'mother', 'daughters'],
     category: 'people',
     color: '#FFD700',
-    tags: ['family', 'mother', 'daughters'],
   },
 
   // Speech bubble
@@ -2712,7 +2379,6 @@ export const peopleEmojis = [
     keywords: ['user', 'person', 'silhouette'],
     category: 'people',
     color: '#696969',
-    tags: ['speaking', 'talking', 'communication'],
   },
   {
     emoji: '👤',
@@ -2720,7 +2386,6 @@ export const peopleEmojis = [
     keywords: ['user', 'person', 'silhouette'],
     category: 'people',
     color: '#696969',
-    tags: ['profile', 'user', 'silhouette'],
   },
   {
     emoji: '👥',
@@ -2728,7 +2393,6 @@ export const peopleEmojis = [
     keywords: ['users', 'people', 'silhouette'],
     category: 'people',
     color: '#696969',
-    tags: ['group', 'users', 'silhouette'],
   },
   {
     emoji: '🫂',
@@ -2736,7 +2400,6 @@ export const peopleEmojis = [
     keywords: ['hug', 'embrace', 'support'],
     category: 'people',
     color: '#87CEEB',
-    tags: ['hug', 'support', 'comfort'],
   },
   {
     emoji: '👣',
@@ -2744,6 +2407,5 @@ export const peopleEmojis = [
     keywords: ['feet', 'footprints', 'tracks'],
     category: 'people',
     color: '#8B4513',
-    tags: ['footprints', 'tracks', 'walking'],
   },
 ] as const satisfies readonly Omit<Emoji, 'sentiment'>[];

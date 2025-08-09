@@ -8,7 +8,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['happy', 'smile', 'grin', 'joy', 'cheerful'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['positive', 'happy', 'excited'],
   },
   {
     emoji: '😃',
@@ -16,7 +15,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['happy', 'smile', 'grin', 'joy', 'excited'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['positive', 'happy', 'enthusiastic'],
   },
   {
     emoji: '😄',
@@ -24,7 +22,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['happy', 'smile', 'joy', 'pleased'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['positive', 'happy', 'content'],
   },
   {
     emoji: '😁',
@@ -32,7 +29,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['happy', 'smile', 'joy', 'beam'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['positive', 'happy', 'radiant'],
   },
   {
     emoji: '😆',
@@ -40,7 +36,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['happy', 'laugh', 'lol', 'satisfied'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['positive', 'laughing', 'amused'],
   },
   {
     emoji: '😅',
@@ -48,7 +43,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hot', 'happy', 'laugh', 'sweat', 'smile', 'relief'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['nervous', 'relieved', 'awkward'],
   },
   {
     emoji: '🤣',
@@ -56,7 +50,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lol', 'laughing', 'rofl', 'haha', 'lmao'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['positive', 'hilarious', 'joy'],
   },
   {
     emoji: '😂',
@@ -64,7 +57,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tears', 'happy', 'laughing', 'lol', 'haha', 'joy'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['positive', 'crying-laughing', 'amused'],
   },
   {
     emoji: '🙂',
@@ -72,7 +64,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['smile', 'happy', 'slight'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['positive', 'content', 'mild'],
   },
   {
     emoji: '🙃',
@@ -80,7 +71,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['upside down', 'silly', 'sarcasm'],
     category: 'smileys',
     color: '#DDA0DD',
-    tags: ['silly', 'sarcastic', 'playful'],
   },
   {
     emoji: '😉',
@@ -88,7 +78,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wink', 'happy', 'flirt'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['playful', 'flirty', 'knowing'],
   },
   {
     emoji: '😊',
@@ -96,7 +85,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['happy', 'smile', 'blush', 'pleased'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['positive', 'warm', 'friendly'],
   },
   {
     emoji: '😇',
@@ -104,7 +92,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['angel', 'innocent', 'halo'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['innocent', 'angelic', 'pure'],
   },
 
   // Love and affection
@@ -114,7 +101,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'hearts', 'adore', 'crush'],
     category: 'smileys',
     color: '#FF69B4',
-    tags: ['love', 'affection', 'adoring'],
   },
   {
     emoji: '😍',
@@ -122,7 +108,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'heart eyes', 'crush', 'adore'],
     category: 'smileys',
     color: '#FF1493',
-    tags: ['love', 'infatuated', 'smitten'],
   },
   {
     emoji: '🤩',
@@ -130,7 +115,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['star', 'eyes', 'excited', 'amazed'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['amazed', 'impressed', 'wow'],
   },
   {
     emoji: '😘',
@@ -138,7 +122,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kiss', 'love', 'flirt'],
     category: 'smileys',
     color: '#FF69B4',
-    tags: ['love', 'kiss', 'affectionate'],
   },
   {
     emoji: '😗',
@@ -146,7 +129,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kiss', 'pucker'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['kiss', 'affection', 'puckered'],
   },
   {
     emoji: '☺️',
@@ -154,7 +136,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['smile', 'happy', 'pleased'],
     category: 'smileys',
     color: '#FFD700',
-    tags: ['positive', 'content', 'pleased'],
   },
   {
     emoji: '😚',
@@ -162,7 +143,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kiss', 'love', 'blush'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['kiss', 'shy', 'affectionate'],
   },
   {
     emoji: '😙',
@@ -170,7 +150,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kiss', 'smile', 'happy'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['kiss', 'happy', 'whistling'],
   },
 
   // Playful and silly
@@ -180,7 +159,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['yum', 'tasty', 'delicious', 'tongue'],
     category: 'smileys',
     color: '#FF6347',
-    tags: ['hungry', 'yummy', 'tasty'],
   },
   {
     emoji: '😛',
@@ -188,7 +166,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tongue', 'playful', 'prank'],
     category: 'smileys',
     color: '#FF69B4',
-    tags: ['playful', 'silly', 'teasing'],
   },
   {
     emoji: '😜',
@@ -196,7 +173,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wink', 'tongue', 'joke', 'playful'],
     category: 'smileys',
     color: '#FF69B4',
-    tags: ['playful', 'joking', 'silly'],
   },
   {
     emoji: '🤪',
@@ -204,7 +180,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['crazy', 'wild', 'silly', 'goofy'],
     category: 'smileys',
     color: '#9370DB',
-    tags: ['crazy', 'wild', 'goofy'],
   },
   {
     emoji: '😝',
@@ -212,7 +187,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tongue', 'squint', 'prank', 'playful'],
     category: 'smileys',
     color: '#FF69B4',
-    tags: ['playful', 'teasing', 'mischievous'],
   },
   {
     emoji: '🤑',
@@ -220,7 +194,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['money', 'dollar', 'rich'],
     category: 'smileys',
     color: '#228B22',
-    tags: ['money', 'rich', 'greedy'],
   },
 
   // Neutral emotions
@@ -230,7 +203,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hug', 'embrace', 'warm'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['warm', 'welcoming', 'hugging'],
   },
   {
     emoji: '🤭',
@@ -238,7 +210,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['giggle', 'oops', 'shocked', 'surprised'],
     category: 'smileys',
     color: '#DDA0DD',
-    tags: ['surprised', 'oops', 'giggling'],
   },
   {
     emoji: '🤫',
@@ -246,7 +217,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shh', 'quiet', 'silence'],
     category: 'smileys',
     color: '#B0C4DE',
-    tags: ['quiet', 'secret', 'shush'],
   },
   {
     emoji: '🤔',
@@ -254,7 +224,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['think', 'consider', 'ponder', 'hmm'],
     category: 'smileys',
     color: '#DDA0DD',
-    tags: ['thinking', 'pondering', 'considering'],
   },
   {
     emoji: '🤐',
@@ -262,7 +231,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['zip', 'sealed', 'lips', 'secret'],
     category: 'smileys',
     color: '#C0C0C0',
-    tags: ['sealed', 'secret', 'quiet'],
   },
   {
     emoji: '🤨',
@@ -270,7 +238,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['suspicious', 'skeptical', 'disapprove'],
     category: 'smileys',
     color: '#DEB887',
-    tags: ['skeptical', 'suspicious', 'doubtful'],
   },
   {
     emoji: '😐',
@@ -278,7 +245,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['neutral', 'meh', 'deadpan'],
     category: 'smileys',
     color: '#C0C0C0',
-    tags: ['neutral', 'indifferent', 'meh'],
   },
   {
     emoji: '😑',
@@ -286,7 +252,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['expressionless', 'meh', 'blank'],
     category: 'smileys',
     color: '#C0C0C0',
-    tags: ['blank', 'expressionless', 'unimpressed'],
   },
   {
     emoji: '😶',
@@ -294,7 +259,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mouthless', 'silent', 'mute'],
     category: 'smileys',
     color: '#C0C0C0',
-    tags: ['speechless', 'silent', 'no-comment'],
   },
   {
     emoji: '😏',
@@ -302,7 +266,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['smirk', 'smug', 'sly'],
     category: 'smileys',
     color: '#DDA0DD',
-    tags: ['smug', 'knowing', 'sly'],
   },
   {
     emoji: '😒',
@@ -310,7 +273,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['unamused', 'meh', 'skeptical'],
     category: 'smileys',
     color: '#A9A9A9',
-    tags: ['unamused', 'unimpressed', 'skeptical'],
   },
   {
     emoji: '🙄',
@@ -318,7 +280,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['eyeroll', 'frustrated'],
     category: 'smileys',
     color: '#A9A9A9',
-    tags: ['eyeroll', 'annoyed', 'whatever'],
   },
   {
     emoji: '😬',
@@ -326,7 +287,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['grimace', 'awkward', 'teeth'],
     category: 'smileys',
     color: '#D3D3D3',
-    tags: ['awkward', 'nervous', 'uncomfortable'],
   },
 
   // Negative emotions
@@ -336,7 +296,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['exhale', 'sigh', 'relief', 'tired'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['tired', 'relief', 'exhausted'],
   },
   {
     emoji: '🤥',
@@ -344,7 +303,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lie', 'pinocchio', 'dishonest'],
     category: 'smileys',
     color: '#CD853F',
-    tags: ['lying', 'dishonest', 'fibbing'],
   },
   {
     emoji: '😌',
@@ -352,7 +310,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['relieved', 'calm', 'peace'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['relieved', 'calm', 'peaceful'],
   },
   {
     emoji: '😔',
@@ -360,7 +317,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pensive', 'sad', 'depressed'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['sad', 'pensive', 'dejected'],
   },
   {
     emoji: '😪',
@@ -368,7 +324,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sleepy', 'tired', 'snot'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['sleepy', 'tired', 'drowsy'],
   },
   {
     emoji: '🤤',
@@ -376,7 +331,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['drool', 'hungry'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['hungry', 'drooling', 'wanting'],
   },
   {
     emoji: '😴',
@@ -384,7 +338,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sleep', 'zzz', 'tired'],
     category: 'smileys',
     color: '#4169E1',
-    tags: ['sleeping', 'tired', 'zzz'],
   },
   {
     emoji: '😷',
@@ -392,7 +345,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sick', 'mask', 'covid', 'coronavirus'],
     category: 'smileys',
     color: '#90EE90',
-    tags: ['sick', 'medical', 'protected'],
   },
   {
     emoji: '🤒',
@@ -400,7 +352,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sick', 'fever', 'thermometer'],
     category: 'smileys',
     color: '#FF6347',
-    tags: ['sick', 'fever', 'ill'],
   },
   {
     emoji: '🤕',
@@ -408,7 +359,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hurt', 'bandage', 'injured'],
     category: 'smileys',
     color: '#F0E68C',
-    tags: ['injured', 'hurt', 'accident'],
   },
   {
     emoji: '🤢',
@@ -416,7 +366,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sick', 'nausea', 'green'],
     category: 'smileys',
     color: '#90EE90',
-    tags: ['sick', 'nauseous', 'disgusted'],
   },
   {
     emoji: '🤮',
@@ -424,7 +373,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vomit', 'sick', 'puke'],
     category: 'smileys',
     color: '#90EE90',
-    tags: ['sick', 'vomiting', 'ill'],
   },
   {
     emoji: '🤧',
@@ -432,7 +380,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sneeze', 'achoo', 'sick'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['sick', 'sneezing', 'allergies'],
   },
   {
     emoji: '🥵',
@@ -440,7 +387,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hot', 'sweating', 'heat'],
     category: 'smileys',
     color: '#FF4500',
-    tags: ['hot', 'overheated', 'sweating'],
   },
   {
     emoji: '🥶',
@@ -448,7 +394,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cold', 'freezing', 'ice'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['cold', 'freezing', 'chilly'],
   },
   {
     emoji: '🥴',
@@ -456,7 +401,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dizzy', 'drunk', 'woozy'],
     category: 'smileys',
     color: '#DDA0DD',
-    tags: ['dizzy', 'drunk', 'confused'],
   },
   {
     emoji: '😵',
@@ -464,7 +408,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dizzy', 'spiral', 'dead'],
     category: 'smileys',
     color: '#DDA0DD',
-    tags: ['dizzy', 'knocked-out', 'dead'],
   },
   {
     emoji: '😵‍💫',
@@ -472,7 +415,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dizzy', 'hypnotized', 'spiral'],
     category: 'smileys',
     color: '#DDA0DD',
-    tags: ['dizzy', 'hypnotized', 'confused'],
   },
   {
     emoji: '🤯',
@@ -480,7 +422,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mind blown', 'explode', 'shocked'],
     category: 'smileys',
     color: '#FF4500',
-    tags: ['shocked', 'mind-blown', 'amazed'],
   },
 
   // More emotions
@@ -490,7 +431,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cowboy', 'hat', 'western'],
     category: 'smileys',
     color: '#8B4513',
-    tags: ['cowboy', 'western', 'yeehaw'],
   },
   {
     emoji: '🥳',
@@ -498,7 +438,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['party', 'celebration', 'hat'],
     category: 'smileys',
     color: '#FF69B4',
-    tags: ['party', 'celebration', 'festive'],
   },
   {
     emoji: '😎',
@@ -506,7 +445,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cool', 'sunglasses', 'confident'],
     category: 'smileys',
     color: '#000000',
-    tags: ['cool', 'confident', 'awesome'],
   },
   {
     emoji: '🤓',
@@ -514,7 +452,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nerd', 'geek', 'glasses'],
     category: 'smileys',
     color: '#4169E1',
-    tags: ['nerdy', 'smart', 'geeky'],
   },
   {
     emoji: '🧐',
@@ -522,7 +459,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['monocle', 'fancy', 'stuffy'],
     category: 'smileys',
     color: '#DAA520',
-    tags: ['fancy', 'scrutinizing', 'examining'],
   },
 
   // Concerned emotions
@@ -532,7 +468,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['confused', 'puzzled', 'huh'],
     category: 'smileys',
     color: '#DEB887',
-    tags: ['confused', 'puzzled', 'unsure'],
   },
   {
     emoji: '😟',
@@ -540,7 +475,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['worried', 'nervous', 'anxious'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['worried', 'anxious', 'concerned'],
   },
   {
     emoji: '🙁',
@@ -548,7 +482,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['frown', 'sad', 'disappointed'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['sad', 'disappointed', 'unhappy'],
   },
   {
     emoji: '☹️',
@@ -556,7 +489,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['frown', 'sad', 'megafrown'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['sad', 'unhappy', 'frowning'],
   },
   {
     emoji: '😮',
@@ -564,7 +496,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['open', 'mouth', 'surprised'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['surprised', 'shocked', 'wow'],
   },
   {
     emoji: '😯',
@@ -572,7 +503,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hushed', 'surprised', 'wow'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['surprised', 'hushed', 'amazed'],
   },
   {
     emoji: '😲',
@@ -580,7 +510,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['astonished', 'shocked', 'amazed'],
     category: 'smileys',
     color: '#FFB6C1',
-    tags: ['shocked', 'astonished', 'amazed'],
   },
   {
     emoji: '😳',
@@ -588,7 +517,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['flushed', 'embarrassed', 'blush'],
     category: 'smileys',
     color: '#FF69B4',
-    tags: ['embarrassed', 'blushing', 'flustered'],
   },
   {
     emoji: '🥺',
@@ -596,7 +524,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['please', 'puppy eyes', 'beg'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['pleading', 'begging', 'puppy-eyes'],
   },
   {
     emoji: '😦',
@@ -604,7 +531,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['frown', 'open', 'surprised'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['shocked', 'worried', 'concerned'],
   },
   {
     emoji: '😧',
@@ -612,7 +538,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['anguished', 'shocked', 'surprised'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['anguished', 'pained', 'shocked'],
   },
   {
     emoji: '😨',
@@ -620,7 +545,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fear', 'scared', 'nervous'],
     category: 'smileys',
     color: '#9370DB',
-    tags: ['scared', 'fearful', 'frightened'],
   },
   {
     emoji: '😰',
@@ -628,7 +552,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['anxious', 'sweat', 'nervous'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['anxious', 'nervous', 'worried'],
   },
   {
     emoji: '😥',
@@ -636,7 +559,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sad', 'relieved', 'disappointed'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['disappointed', 'relieved', 'sad'],
   },
   {
     emoji: '😢',
@@ -644,7 +566,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cry', 'sad', 'tears'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['sad', 'crying', 'tears'],
   },
   {
     emoji: '😭',
@@ -652,7 +573,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cry', 'sad', 'bawl', 'sob'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['crying', 'sobbing', 'bawling'],
   },
   {
     emoji: '😱',
@@ -660,7 +580,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['scream', 'fear', 'omg'],
     category: 'smileys',
     color: '#9370DB',
-    tags: ['screaming', 'terrified', 'shocked'],
   },
   {
     emoji: '😖',
@@ -668,7 +587,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['confounded', 'confused', 'frustrated'],
     category: 'smileys',
     color: '#DEB887',
-    tags: ['frustrated', 'confounded', 'confused'],
   },
   {
     emoji: '😣',
@@ -676,7 +594,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['persevere', 'struggling', 'no'],
     category: 'smileys',
     color: '#DEB887',
-    tags: ['struggling', 'persevering', 'determined'],
   },
   {
     emoji: '😞',
@@ -684,7 +601,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['disappointed', 'sad', 'depressed'],
     category: 'smileys',
     color: '#4682B4',
-    tags: ['disappointed', 'sad', 'let-down'],
   },
   {
     emoji: '😓',
@@ -692,7 +608,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sweat', 'sad', 'hard work'],
     category: 'smileys',
     color: '#87CEEB',
-    tags: ['tired', 'exhausted', 'hardwork'],
   },
   {
     emoji: '😩',
@@ -700,7 +615,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weary', 'tired', 'groaning'],
     category: 'smileys',
     color: '#DEB887',
-    tags: ['tired', 'weary', 'exhausted'],
   },
   {
     emoji: '😫',
@@ -708,7 +622,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tired', 'exhausted', 'fed up'],
     category: 'smileys',
     color: '#DEB887',
-    tags: ['exhausted', 'tired', 'fed-up'],
   },
   {
     emoji: '🥱',
@@ -716,7 +629,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['yawn', 'tired', 'bored'],
     category: 'smileys',
     color: '#DEB887',
-    tags: ['yawning', 'tired', 'sleepy'],
   },
 
   // Angry emotions
@@ -726,7 +638,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['triumph', 'steam', 'proud'],
     category: 'smileys',
     color: '#FF6347',
-    tags: ['triumphant', 'proud', 'determined'],
   },
   {
     emoji: '😡',
@@ -734,7 +645,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['angry', 'mad', 'rage'],
     category: 'smileys',
     color: '#DC143C',
-    tags: ['angry', 'mad', 'furious'],
   },
   {
     emoji: '😠',
@@ -742,7 +652,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['angry', 'mad', 'annoyed'],
     category: 'smileys',
     color: '#DC143C',
-    tags: ['angry', 'annoyed', 'grumpy'],
   },
   {
     emoji: '🤬',
@@ -750,7 +659,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['curse', 'swear', 'angry'],
     category: 'smileys',
     color: '#DC143C',
-    tags: ['cursing', 'swearing', 'angry'],
   },
 
   // Evil/mischievous
@@ -760,7 +668,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['devil', 'evil', 'horns'],
     category: 'smileys',
     color: '#8B0000',
-    tags: ['devil', 'evil', 'mischievous'],
   },
   {
     emoji: '👿',
@@ -768,7 +675,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['devil', 'angry', 'imp'],
     category: 'smileys',
     color: '#8B0000',
-    tags: ['devil', 'angry', 'evil'],
   },
 
   // Skulls and ghosts
@@ -778,7 +684,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dead', 'skull', 'death'],
     category: 'smileys',
     color: '#F5F5F5',
-    tags: ['death', 'skull', 'spooky'],
   },
   {
     emoji: '☠️',
@@ -786,7 +691,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dead', 'danger', 'pirate'],
     category: 'smileys',
     color: '#F5F5F5',
-    tags: ['danger', 'death', 'pirate'],
   },
 
   // Other faces
@@ -796,7 +700,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['poop', 'shit', 'crap'],
     category: 'smileys',
     color: '#8B4513',
-    tags: ['poop', 'silly', 'funny'],
   },
   {
     emoji: '🤡',
@@ -804,7 +707,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['clown', 'circus', 'joker'],
     category: 'smileys',
     color: '#FF0000',
-    tags: ['clown', 'silly', 'circus'],
   },
   {
     emoji: '👹',
@@ -812,7 +714,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['monster', 'ogre', 'scary'],
     category: 'smileys',
     color: '#DC143C',
-    tags: ['monster', 'scary', 'ogre'],
   },
   {
     emoji: '👺',
@@ -820,7 +721,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['goblin', 'monster', 'scary'],
     category: 'smileys',
     color: '#DC143C',
-    tags: ['goblin', 'scary', 'monster'],
   },
   {
     emoji: '👻',
@@ -828,7 +728,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ghost', 'boo', 'halloween'],
     category: 'smileys',
     color: '#F5F5F5',
-    tags: ['ghost', 'spooky', 'halloween'],
   },
   {
     emoji: '👽',
@@ -836,7 +735,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['alien', 'ufo', 'space'],
     category: 'smileys',
     color: '#90EE90',
-    tags: ['alien', 'space', 'extraterrestrial'],
   },
   {
     emoji: '👾',
@@ -844,7 +742,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['alien', 'monster', 'game'],
     category: 'smileys',
     color: '#9370DB',
-    tags: ['alien', 'game', 'monster'],
   },
   {
     emoji: '🤖',
@@ -852,7 +749,6 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['robot', 'ai', 'machine'],
     category: 'smileys',
     color: '#C0C0C0',
-    tags: ['robot', 'AI', 'technology'],
   },
 ];
 

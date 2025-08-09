@@ -32,6 +32,7 @@ import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { ConvexQueryClient } from '@convex-dev/react-query';
 import { cn } from '@/utils';
+import { HeaderNavProvider } from '@/contexts/header-nav-context';
 
 // Optimized server function with caching and mobile optimizations
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -75,20 +76,6 @@ export const Route = createRootRouteWithContext<{
       {
         rel: 'preload',
         href: '/fonts/optimized/GeistSans-Variable.woff2',
-        as: 'font',
-        type: 'font/woff2',
-        crossOrigin: 'anonymous',
-      },
-      {
-        rel: 'preload',
-        href: '/fonts/optimized/NotoEmoji-VariableFont_wght.woff2',
-        as: 'font',
-        type: 'font/woff2',
-        crossOrigin: 'anonymous',
-      },
-      {
-        rel: 'preload',
-        href: '/fonts/optimized/noto-color-emoji-core.woff2',
         as: 'font',
         type: 'font/woff2',
         crossOrigin: 'anonymous',
@@ -202,33 +189,34 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="bg-background text-foreground">
         <PostHogProvider>
           <ThemeProvider>
-            <div
-              className="relative flex min-h-screen flex-col"
-              data-vaul-drawer-wrapper
-            >
-              <PostHogPageTracker />
-              <ClerkPostHogIntegration />
-              {isAdminRoute ? (
-                // Admin routes - no header/footer, no guards
-                <>{children}</>
-              ) : (
-                // Regular app routes - with header/footer and guards
-                <>
-                  <EnvironmentAccessGuard>
-                    <OnboardingGuard>
-                      <Header />
-                      <LoadingIndicator />
+            <HeaderNavProvider>
+              <div className="relative flex min-h-screen flex-col">
+                <PostHogPageTracker />
+                <ClerkPostHogIntegration />
+                {isAdminRoute ? (
+                  // Admin routes - no header/footer, no guards
+                  <>{children}</>
+                ) : (
+                  // Regular app routes - with header/footer and guards
+                  <>
+                    <EnvironmentAccessGuard>
+                      <OnboardingGuard>
+                        <Header />
+                        <LoadingIndicator />
 
-                      <main className="flex-1">{children}</main>
-                      <NewUserSurvey />
-                    </OnboardingGuard>
-                  </EnvironmentAccessGuard>
+                        <main className="flex-1" data-vaul-drawer-wrapper>
+                          {children}
+                        </main>
+                        <NewUserSurvey />
+                      </OnboardingGuard>
+                    </EnvironmentAccessGuard>
 
-                  <Footer />
-                </>
-              )}
-              <Toaster />
-            </div>
+                    <Footer />
+                  </>
+                )}
+                <Toaster />
+              </div>
+            </HeaderNavProvider>
           </ThemeProvider>
         </PostHogProvider>
         <ReactQueryDevtools />

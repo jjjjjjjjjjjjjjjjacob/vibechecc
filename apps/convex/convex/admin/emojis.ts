@@ -102,19 +102,12 @@ export const getAllEmojis = query({
     const startIndex = (page - 1) * pageSize;
     const data = sortedEmojis.slice(startIndex, startIndex + pageSize);
 
-    const emojisWithUsage = await Promise.all(
-      data.map(async (emoji) => {
-        const ratingsCount = await ctx.db
-          .query('ratings')
-          .filter((q) => q.eq(q.field('emoji'), emoji.emoji))
-          .collect();
-
-        return {
-          ...emoji,
-          usageCount: ratingsCount.length,
-        };
-      })
-    );
+    // For performance, just return 0 for usage count to avoid hitting document limits
+    // In production, consider adding a usage counter field to the emoji table itself
+    const emojisWithUsage = data.map((emoji) => ({
+      ...emoji,
+      usageCount: 0, // Placeholder to avoid document limit issues
+    }));
 
     return {
       data: emojisWithUsage,
@@ -349,25 +342,22 @@ export const bulkUpdateEmojis = mutation({
 
         case 'addTag': {
           if (typeof value !== 'string' || !value.trim()) {
-            throw new Error('Tag must be a non-empty string');
+            throw new Error('Keyword must be a non-empty string');
           }
-          const currentTags = emoji.tags || [];
-          if (!currentTags.includes(value.trim())) {
-            updateData.tags = [...currentTags, value.trim()];
+          const currentKeywords = emoji.keywords || [];
+          if (!currentKeywords.includes(value.trim())) {
+            updateData.keywords = [...currentKeywords, value.trim()];
           }
           break;
         }
 
         case 'removeTag':
           if (typeof value !== 'string' || !value.trim()) {
-            throw new Error('Tag must be a non-empty string');
+            throw new Error('Keyword must be a non-empty string');
           }
-          updateData.tags = (emoji.tags || []).filter(
-            (tag) => tag !== value.trim()
+          updateData.keywords = (emoji.keywords || []).filter(
+            (keyword) => keyword !== value.trim()
           );
-          if (updateData.tags.length === 0) {
-            updateData.tags = undefined;
-          }
           break;
 
         default:

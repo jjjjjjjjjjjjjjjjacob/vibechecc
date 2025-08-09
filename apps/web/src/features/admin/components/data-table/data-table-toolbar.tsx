@@ -24,6 +24,8 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   searchKey?: string;
   searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchValueChange?: (value: string) => void;
   filters?: Array<{
     key: string;
     title: string;
@@ -31,6 +33,8 @@ interface DataTableToolbarProps<TData> {
       label: string;
       value: string;
     }>;
+    value?: string;
+    onChange?: (value: string) => void;
   }>;
   bulkActions?: Array<{
     label: string;
@@ -39,18 +43,25 @@ interface DataTableToolbarProps<TData> {
   }>;
   onExport?: () => void;
   exportLabel?: string;
+  totalCount?: number;
 }
 
 export function DataTableToolbar<TData>({
   table,
   searchKey,
   searchPlaceholder = 'search...',
+  searchValue,
+  onSearchValueChange,
   filters = [],
   bulkActions = [],
   onExport,
   exportLabel = 'export',
+  totalCount,
 }: DataTableToolbarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0;
+  const isServerMode = searchValue !== undefined || filters.some(f => f.value !== undefined);
+  const isFiltered = isServerMode 
+    ? (searchValue || '') !== '' || filters.some(f => f.value && f.value !== 'all')
+    : table.getState().columnFilters.length > 0;
   const selectedRows = table.getFilteredSelectedRowModel().rows;
 
   return (
@@ -58,50 +69,97 @@ export function DataTableToolbar<TData>({
       {/* Top row - Search and Export */}
       <div className="flex items-center justify-between">
         <div className="flex flex-1 items-center space-x-2">
-          {searchKey && (
+          {/* Search input - supports both server and client mode */}
+          {(searchKey || onSearchValueChange) && (
             <Input
               placeholder={searchPlaceholder}
-              value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
-              onChange={(event) =>
-                table.getColumn(searchKey)?.setFilterValue(event.target.value)
+              value={
+                isServerMode && searchValue !== undefined
+                  ? searchValue
+                  : (table.getColumn(searchKey || '')?.getFilterValue() as string) ?? ''
               }
+              onChange={(event) => {
+                if (onSearchValueChange) {
+                  onSearchValueChange(event.target.value);
+                } else if (searchKey) {
+                  table.getColumn(searchKey)?.setFilterValue(event.target.value);
+                }
+              }}
               className="h-8 w-[150px] lg:w-[250px]"
             />
           )}
           
-          {/* Filter dropdowns */}
+          {/* Filter dropdowns - supports both server and client mode */}
           {filters.map((filter) => {
-            const column = table.getColumn(filter.key);
-            if (!column) return null;
+            if (isServerMode) {
+              // Server mode - use provided value and onChange
+              return (
+                <Select
+                  key={filter.key}
+                  value={filter.value || 'all'}
+                  onValueChange={(value) => {
+                    if (filter.onChange) {
+                      filter.onChange(value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[180px]">
+                    <SelectValue placeholder={filter.title} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filter.options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            } else {
+              // Client mode - use table column filters
+              const column = table.getColumn(filter.key);
+              if (!column) return null;
 
-            return (
-              <Select
-                key={filter.key}
-                value={(column.getFilterValue() as string) ?? ''}
-                onValueChange={(value) =>
-                  column.setFilterValue(value === 'all' ? '' : value)
-                }
-              >
-                <SelectTrigger className="h-8 w-[180px]">
-                  <SelectValue placeholder={filter.title} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">all {filter.title.toLowerCase()}</SelectItem>
-                  {filter.options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            );
+              return (
+                <Select
+                  key={filter.key}
+                  value={(column.getFilterValue() as string) ?? ''}
+                  onValueChange={(value) =>
+                    column.setFilterValue(value === 'all' ? '' : value)
+                  }
+                >
+                  <SelectTrigger className="h-8 w-[180px]">
+                    <SelectValue placeholder={filter.title} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">all {filter.title.toLowerCase()}</SelectItem>
+                    {filter.options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            }
           })}
 
           {/* Clear filters */}
           {isFiltered && (
             <Button
               variant="ghost"
-              onClick={() => table.resetColumnFilters()}
+              onClick={() => {
+                if (isServerMode) {
+                  // In server mode, call the onChange handlers with default values
+                  if (onSearchValueChange) onSearchValueChange('');
+                  filters.forEach(filter => {
+                    if (filter.onChange) filter.onChange('all');
+                  });
+                } else {
+                  // In client mode, reset table filters
+                  table.resetColumnFilters();
+                }
+              }}
               className="h-8 px-2 lg:px-3"
             >
               reset
@@ -198,9 +256,11 @@ export function DataTableToolbar<TData>({
         </div>
 
         {/* Results counter */}
-        <div className="text-xs text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} result(s)
-        </div>
+        {totalCount !== undefined && (
+          <div className="text-xs text-muted-foreground">
+            {totalCount} result(s)
+          </div>
+        )}
       </div>
     </div>
   );

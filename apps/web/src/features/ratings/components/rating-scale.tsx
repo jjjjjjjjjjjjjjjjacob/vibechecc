@@ -9,7 +9,6 @@ interface RatingScaleProps {
   size?: 'sm' | 'md' | 'lg';
   showTooltip?: boolean;
   className?: string;
-  variant?: 'color' | 'gradient';
   onPointerDown?: () => void;
   onPointerUp?: () => void;
   emojiColor?: string;
@@ -24,7 +23,6 @@ export function RatingScale({
   size = 'md',
   showTooltip = true,
   className,
-  variant = 'color',
   onPointerDown,
   onPointerUp,
   emojiColor,
@@ -141,10 +139,7 @@ export function RatingScale({
         tabIndex={onClick || onChange ? 0 : -1}
         aria-label={`Rate ${value} out of 5 with ${emoji}`}
       >
-        <div
-          data-variant={variant}
-          className="font-noto-color data-[variant=gradient]:font-noto whitespace-pre opacity-30 brightness-60 grayscale-100"
-        >
+        <div className="font-sans whitespace-pre opacity-30 brightness-60 grayscale-100">
           {[...Array(5)].map((_, i) => (
             <span key={`unfilled-${i}`}>{emoji}</span>
           ))}
@@ -154,17 +149,8 @@ export function RatingScale({
           style={{ width: `${(displayValue / 5) * 100}%` }}
         >
           <div
-            className={cn(
-              'flex',
-              variant === 'gradient'
-                ? 'font-noto from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text whitespace-pre text-transparent opacity-80 brightness-150 transition-all group-active:brightness-150'
-                : 'font-noto-color whitespace-pre opacity-[0.99]'
-            )}
-            style={
-              variant === 'color' && emojiColor
-                ? { color: emojiColor }
-                : undefined
-            }
+            className={cn('flex', 'font-sans whitespace-pre opacity-[0.99]')}
+            style={{ color: emojiColor }}
           >
             {[...Array(5)].map((_, i) => (
               <span key={`filled-${i}`}>{emoji}</span>

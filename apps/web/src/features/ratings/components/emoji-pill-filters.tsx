@@ -101,7 +101,7 @@ function EmojiPill({
     >
       <span
         className={cn(
-          'font-noto-color drop-shadow-sm',
+          'drop-shadow-sm',
           variant === 'compact' ? 'text-lg' : 'text-xl'
         )}
       >

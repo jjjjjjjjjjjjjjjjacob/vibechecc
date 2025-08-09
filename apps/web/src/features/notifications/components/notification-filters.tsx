@@ -62,7 +62,7 @@ export function NotificationFilters({
 }: NotificationFiltersProps) {
   return (
     <div className="border-border/50 border-b">
-      <div className="flex flex-wrap gap-1 px-3 pt-0 pb-3">
+      <div className="flex flex-wrap gap-1 pt-0 pb-3">
         {filterConfig.map(({ id, label, icon: Icon }) => {
           const isActive = activeFilter === id;
           const unreadCount = unreadCounts?.[id] || 0;

@@ -48,8 +48,12 @@ interface EmojisTableProps {
   onPageSizeChange: (pageSize: number) => void;
   onSearchChange: (search: string) => void;
   onCategoryChange: (category: string) => void;
+  onSentimentChange: (sentiment: string) => void;
   onEnabledChange: (enabled: 'all' | 'enabled' | 'disabled') => void;
-  onSortChange: (field: 'unicode' | 'name' | 'category', direction: 'asc' | 'desc') => void;
+  onSortChange: (
+    field: 'unicode' | 'name' | 'category',
+    direction: 'asc' | 'desc'
+  ) => void;
   categories: string[];
   stats?: {
     totalEmojis: number;
@@ -57,6 +61,10 @@ interface EmojisTableProps {
     categoriesCount: number;
     averageUsage: number;
   };
+  searchValue: string;
+  categoryValue: string;
+  sentimentValue: string;
+  enabledValue: 'all' | 'enabled' | 'disabled';
 }
 
 export function EmojisTable({
@@ -70,26 +78,35 @@ export function EmojisTable({
   onPageSizeChange,
   onSearchChange,
   onCategoryChange,
+  onSentimentChange,
   onEnabledChange,
   onSortChange,
   categories,
   stats,
+  searchValue,
+  categoryValue,
+  sentimentValue,
+  enabledValue,
 }: EmojisTableProps) {
   const queryClient = useQueryClient();
 
-  const updateEmojiFieldMutation = useConvexMutation(api.admin.emojis.updateEmojiField);
-  const toggleEmojiStatusMutation = useConvexMutation(api.admin.emojis.toggleEmojiStatus);
+  const updateEmojiFieldMutation = useConvexMutation(
+    api.admin.emojis.updateEmojiField
+  );
+  const toggleEmojiStatusMutation = useConvexMutation(
+    api.admin.emojis.toggleEmojiStatus
+  );
 
   const handleUpdateEmojiField = useMutation({
-    mutationFn: async (params: { 
-      emojiId: string; 
+    mutationFn: async (params: {
+      emojiId: string;
       field: 'name' | 'category' | 'sentiment' | 'keywords';
       value: any;
     }) => {
-      return updateEmojiFieldMutation({ 
-        emojiId: params.emojiId as any, 
+      return updateEmojiFieldMutation({
+        emojiId: params.emojiId as any,
         field: params.field,
-        value: params.value
+        value: params.value,
       });
     },
     onSuccess: () => {
@@ -104,13 +121,10 @@ export function EmojisTable({
   });
 
   const handleToggleEmojiStatus = useMutation({
-    mutationFn: async (params: { 
-      emojiId: string; 
-      disabled: boolean;
-    }) => {
-      return toggleEmojiStatusMutation({ 
-        emojiId: params.emojiId as any, 
-        disabled: params.disabled
+    mutationFn: async (params: { emojiId: string; disabled: boolean }) => {
+      return toggleEmojiStatusMutation({
+        emojiId: params.emojiId as any,
+        disabled: params.disabled,
       });
     },
     onSuccess: () => {
@@ -126,19 +140,27 @@ export function EmojisTable({
 
   const getSentimentBadgeVariant = (sentiment?: string) => {
     switch (sentiment) {
-      case 'positive': return 'default';
-      case 'negative': return 'destructive';
-      case 'neutral': return 'secondary';
-      default: return 'outline';
+      case 'positive':
+        return 'default';
+      case 'negative':
+        return 'destructive';
+      case 'neutral':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
   const getSentimentColor = (sentiment?: string) => {
     switch (sentiment) {
-      case 'positive': return 'text-green-600';
-      case 'negative': return 'text-red-600';
-      case 'neutral': return 'text-gray-600';
-      default: return 'text-muted-foreground';
+      case 'positive':
+        return 'text-green-600';
+      case 'negative':
+        return 'text-red-600';
+      case 'neutral':
+        return 'text-gray-600';
+      default:
+        return 'text-muted-foreground';
     }
   };
 
@@ -169,19 +191,28 @@ export function EmojisTable({
         const emoji = row.original;
         return (
           <div className="space-y-2">
-            {/* Font Previews */}
+            {/* System emoji previews */}
             <div className="flex space-x-2">
               <div className="text-center">
-                <div className="text-2xl font-noto">{emoji.emoji}</div>
-                <div className="text-xs text-muted-foreground">noto</div>
+                <div
+                  className="text-2xl"
+                  style={{
+                    fontFamily:
+                      'Apple Color Emoji, Segoe UI Emoji',
+                  }}
+                >
+                  {emoji.emoji}
+                </div>
+                <div className="text-muted-foreground text-xs">color</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-noto-color">{emoji.emoji}</div>
-                <div className="text-xs text-muted-foreground">color</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl">{emoji.emoji}</div>
-                <div className="text-xs text-muted-foreground">native</div>
+                <div
+                  className="text-2xl"
+                  style={{ fontFamily: '-apple-system, system-ui, sans-serif' }}
+                >
+                  {emoji.emoji}
+                </div>
+                <div className="text-muted-foreground text-xs">native</div>
               </div>
             </div>
           </div>
@@ -196,11 +227,18 @@ export function EmojisTable({
       ),
       cell: ({ row }) => {
         const emoji = row.original;
-        return (
-          <div className="font-mono text-sm">
-            {emoji.unicode}
-          </div>
-        );
+        // Generate Unicode from the actual emoji character
+        const unicode = emoji.emoji
+          .split('')
+          .map((char) => {
+            const code = char.codePointAt(0);
+            return code
+              ? 'U+' + code.toString(16).toUpperCase().padStart(4, '0')
+              : '';
+          })
+          .filter(Boolean)
+          .join(' ');
+        return <div className="font-mono text-sm">{unicode || 'U+0000'}</div>;
       },
     },
     {
@@ -236,7 +274,7 @@ export function EmojisTable({
         return (
           <SelectCell
             value={emoji.category}
-            options={categories.map(cat => ({ label: cat, value: cat }))}
+            options={categories.map((cat) => ({ label: cat, value: cat }))}
             onSave={async (newValue) => {
               await handleUpdateEmojiField.mutateAsync({
                 emojiId: emoji._id,
@@ -331,12 +369,12 @@ export function EmojisTable({
         const emoji = row.original;
         const usageCount = emoji.usageCount || 0;
         const lastUsed = emoji.lastUsed ? new Date(emoji.lastUsed) : null;
-        
+
         return (
           <div className="space-y-1">
             <div className="font-medium">{usageCount.toLocaleString()}</div>
             {lastUsed && (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-muted-foreground text-xs">
                 last: {lastUsed.toLocaleDateString()}
               </div>
             )}
@@ -349,7 +387,7 @@ export function EmojisTable({
       header: 'actions',
       cell: ({ row }) => {
         const emoji = row.original;
-        
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -382,7 +420,10 @@ export function EmojisTable({
               <DropdownMenuItem
                 onClick={() => {
                   // Navigate to search with this emoji
-                  window.open(`/search?emoji=${encodeURIComponent(emoji.emoji)}`, '_blank');
+                  window.open(
+                    `/search?emoji=${encodeURIComponent(emoji.emoji)}`,
+                    '_blank'
+                  );
                 }}
               >
                 <Eye className="mr-2 h-4 w-4" />
@@ -414,30 +455,50 @@ export function EmojisTable({
       data={data}
       searchKey="name"
       searchPlaceholder="search emojis..."
+      searchValue={searchValue}
+      onSearchValueChange={onSearchChange}
       filters={[
         {
           key: 'category',
           title: 'category',
-          options: categories.map(cat => ({ label: cat, value: cat })),
+          options: [
+            { label: 'all', value: 'all' },
+            ...categories.map((cat) => ({ label: cat, value: cat })),
+          ],
+          value: categoryValue,
+          onChange: onCategoryChange,
         },
         {
-          key: 'enabled',
+          key: 'status',
           title: 'status',
           options: [
-            { label: 'enabled', value: 'true' },
-            { label: 'disabled', value: 'false' },
+            { label: 'all', value: 'all' },
+            { label: 'enabled', value: 'enabled' },
+            { label: 'disabled', value: 'disabled' },
           ],
+          value: enabledValue,
+          onChange: (value: string) =>
+            onEnabledChange(value as 'all' | 'enabled' | 'disabled'),
         },
         {
           key: 'sentiment',
           title: 'sentiment',
           options: [
+            { label: 'all', value: 'all' },
             { label: 'positive', value: 'positive' },
             { label: 'neutral', value: 'neutral' },
             { label: 'negative', value: 'negative' },
           ],
+          value: sentimentValue,
+          onChange: onSentimentChange,
         },
       ]}
+      totalCount={totalCount}
+      currentPage={currentPage}
+      pageCount={pageCount}
+      pageSize={pageSize}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
       bulkActions={[
         {
           label: 'enable selected',

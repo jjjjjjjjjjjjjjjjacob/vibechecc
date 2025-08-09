@@ -11,8 +11,6 @@
   --font-geist: 'GeistSans';
   --font-geist-mono: 'GeistMono';
   --font-doto: 'Doto';
-  --font-noto: var(--font-emoji-outline);
-  --font-noto-color: var(--font-emoji);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
@@ -88,7 +86,7 @@
   --theme-primary: hsl(330 81% 50%); /* pink-600 */
   --theme-secondary: hsl(25 95% 48%); /* orange-600 */
   --theme-accent: hsl(173 80% 40%); /* teal-600 */
-  
+
   /* Chart colors - reference theme colors */
   --chart-1: var(--theme-primary);
   --chart-2: var(--theme-secondary);
@@ -117,7 +115,7 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  
+
   /* Chart colors inherit from theme colors */
   --chart-1: var(--theme-primary);
   --chart-2: var(--theme-secondary);
@@ -200,21 +198,25 @@
 
 /* Accordion animations */
 @keyframes accordion-down {
+  /*
   from {
     height: 0;
   }
   to {
     height: var(--radix-accordion-content-height);
   }
+*/
 }
 
 @keyframes accordion-up {
+  /*
   from {
     height: var(--radix-accordion-content-height);
   }
   to {
     height: 0;
   }
+*/
 }
 
 /* Wiggle animation for emojis */
@@ -286,6 +288,18 @@
   0% {
     opacity: 0;
     transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in down animation for CTA */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
   }
   100% {
     opacity: 1;
@@ -396,6 +410,65 @@
   }
 }
 
+/* Flip clock animations */
+@keyframes flip-up-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0px);
+  }
+  50% {
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-15px) rotateX(-45deg);
+    filter: blur(0px);
+  }
+}
+
+@keyframes flip-up-in {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) rotateX(45deg);
+    filter: blur(0px);
+  }
+  50% {
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes flip-down-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(15px) rotateX(45deg);
+    filter: blur(2px);
+  }
+}
+
+@keyframes flip-down-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-15px) rotateX(-45deg);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0px);
+  }
+}
+
 .animate-accordion-down {
   animation: accordion-down 0.2s ease-out;
 }
@@ -408,6 +481,22 @@
   animation: wiggle 0.5s ease-in-out;
 }
 
+.animate-flip-up-out {
+  animation: flip-up-out 0.1s ease-out forwards;
+}
+
+.animate-flip-up-in {
+  animation: flip-up-in 0.1s ease-out forwards;
+}
+
+.animate-flip-down-out {
+  animation: flip-down-out 0.1s ease-out forwards;
+}
+
+.animate-flip-down-in {
+  animation: flip-down-in 0.1s ease-out forwards;
+}
+
 .animate-pulse-scale {
   animation: pulse-scale 0.5s ease-in-out;
 }
@@ -418,6 +507,10 @@
 
 .animate-fade-in-down {
   animation: fade-in-down 0.3s ease-out;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-up 0.3s ease-out;
 }
 
 .animate-emoji-slide-in {
@@ -456,6 +549,7 @@
   .animate-pulse-scale,
   .animate-number-pop,
   .animate-fade-in-down,
+  .animate-fade-in-up,
   .animate-emoji-slide-in,
   .animate-emoji-slide-out,
   .animate-rating-reveal,
@@ -469,6 +563,11 @@
 
   /* Keep opacity transitions for accessibility */
   .animate-fade-in-down {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .animate-fade-in-up {
     opacity: 1 !important;
     transform: none !important;
   }
@@ -524,11 +623,11 @@
 }
 
 .animate-menu-slide-down {
-  animation: menu-slide-down 0.3s ease-out;
+  animation: menu-slide-down 0.5s ease-out;
 }
 
 .animate-menu-slide-up {
-  animation: menu-slide-up 0.3s ease-out;
+  animation: menu-slide-up 0.5s ease-out;
 }
 
 .container {

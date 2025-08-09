@@ -27,7 +27,8 @@ import { useSearchResultsImproved } from '@/features/search/hooks/use-search-res
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { EmojiSearchCommand } from '@/features/ratings/components/emoji-search-command';
+// Using v2 emoji-mart component - switch to '@/features/ratings/components/emoji-search-command' for rollback
+import { EmojiSearchCommandV2 as EmojiSearchCommand } from '@/features/ratings/components/emoji-search-command-v2';
 import { EmojiPillFilters } from '@/features/ratings/components/emoji-pill-filters';
 import { RatingRangeSlider } from '@/features/ratings/components/rating-range-slider';
 import { TagSearchCommand } from '@/components/tag-search-command';

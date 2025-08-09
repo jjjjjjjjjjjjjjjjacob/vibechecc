@@ -477,7 +477,7 @@ export function VibeCard({
                     }}
                     aria-label={`View ${primaryEmojiRating.emoji} rating details`}
                   >
-                    <span className="font-noto-color text-lg">
+                    <span className="text-lg">
                       {primaryEmojiRating.emoji}
                     </span>
                     <div className="flex flex-col">

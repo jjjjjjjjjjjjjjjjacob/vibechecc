@@ -86,9 +86,8 @@ export const createOrUpdateEmojiRating = mutation({
       .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
       .first();
 
-    if (emojiData && emojiData.tags) {
-      tags = emojiData.tags;
-    }
+    // Tags come from the rating data, not from the emoji itself
+    // The emoji metadata contains keywords, not tags
 
     // Check if user already rated this vibe
     const existingRating = await ctx.db

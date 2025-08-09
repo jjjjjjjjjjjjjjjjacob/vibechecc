@@ -21,7 +21,7 @@ export const removeUserAdmin = mutation({
     } else if (args.externalId) {
       user = await ctx.db
         .query('users')
-        .withIndex('byExternalId', (q) => q.eq('externalId', args.externalId))
+        .withIndex('byExternalId', (q) => q.eq('externalId', args.externalId!))
         .first();
     }
     
@@ -55,7 +55,7 @@ export const listAdminUsers = mutation({
     return adminUsers.map(user => ({
       id: user._id,
       username: user.username,
-      email: user.email,
+      externalId: user.externalId,
       isAdmin: user.isAdmin,
     }));
   },

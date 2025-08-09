@@ -384,7 +384,7 @@ export const trackSearchClick = internalMutation({
   handler: async (ctx, args) => {
     await ctx.scheduler.runAfter(
       0,
-      internal.analytics.search_metrics.recordSearchMetric,
+      internal.analytics.searchMetrics.recordSearchMetric,
       {
         type: 'click',
         query: args.query,
@@ -407,7 +407,7 @@ export const trackSearchError = internalMutation({
   handler: async (ctx, args) => {
     await ctx.scheduler.runAfter(
       0,
-      internal.analytics.search_metrics.recordSearchMetric,
+      internal.analytics.searchMetrics.recordSearchMetric,
       {
         type: 'error',
         query: args.query,

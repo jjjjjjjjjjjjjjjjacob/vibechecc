@@ -266,7 +266,7 @@ describe('EmojiReactions', () => {
 
       // Get the emoji text from the clicked button
       const emojiText =
-        firstEmojiButton.querySelector('.font-noto-color')?.textContent;
+        firstEmojiButton.querySelector('.font-sans')?.textContent;
       expect(mockOnReact).toHaveBeenCalledWith(emojiText);
     } else {
       // If no emoji button found, fail the test
