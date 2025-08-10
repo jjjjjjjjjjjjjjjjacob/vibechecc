@@ -1,20 +1,31 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as React from 'react';
 import { HomeFeed } from '@/components/home-feed';
-import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
+import { SignedIn, SignedOut, useUser } from '@clerk/tanstack-react-start';
 import { useCurrentUser } from '@/queries';
 import { useTheme } from '@/features/theming/components/theme-provider';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Sparkles } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
 
+function HeroButtonsSkeleton() {
+  return (
+    <div className="flex gap-3">
+      <Skeleton className="h-10 w-32 rounded-md bg-white/10" />
+      <Skeleton className="h-10 w-36 rounded-md bg-white/10" />
+    </div>
+  );
+}
+
 function Home() {
   // Get current user's theme
-  const { data: currentUser } = useCurrentUser();
+  const { data: currentUser, isLoading: isUserLoading } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
+  const { isLoaded: isClerkLoaded, user } = useUser();
 
   // Apply user's color themes when user data changes
   React.useEffect(() => {
@@ -44,35 +55,43 @@ function Home() {
               welcome to <strong>viberatr</strong>, where you can discover,
               share, and rate vibes from around the world
             </p>
-            <SignedIn>
-              <div className="flex gap-3">
-                <Button
-                  asChild
-                  variant="outline"
-                  className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
-                >
-                  <Link to="/vibes/create">
-                    <Plus className="mr-2 h-4 w-4" />
-                    create vibe
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
-                >
-                  <Link to="/discover">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    discover vibes
-                  </Link>
-                </Button>
-              </div>
-            </SignedIn>
-            <SignedOut>
-              <p className="text-lg opacity-75">
-                sign in to start creating and sharing your own vibes
-              </p>
-            </SignedOut>
+            
+            {/* Show skeleton while Clerk is loading */}
+            {!isClerkLoaded ? (
+              <HeroButtonsSkeleton />
+            ) : (
+              <>
+                <SignedIn>
+                  <div className="flex gap-3">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
+                    >
+                      <Link to="/vibes/create">
+                        <Plus className="mr-2 h-4 w-4" />
+                        create vibe
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
+                    >
+                      <Link to="/discover">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        discover vibes
+                      </Link>
+                    </Button>
+                  </div>
+                </SignedIn>
+                <SignedOut>
+                  <p className="text-lg opacity-75">
+                    sign in to start creating and sharing your own vibes
+                  </p>
+                </SignedOut>
+              </>
+            )}
           </div>
         </div>
       </section>

@@ -39,12 +39,12 @@ import {
 import { GlobalSearchCommand } from '@/features/search/components/global-search-command';
 import { useSearchShortcuts } from '@/features/search/hooks/use-search-shortcuts';
 import { useCurrentUser, useUnreadNotificationCount } from '../queries';
-import { ProfileDropdown } from '@/features/profiles/components/profile-dropdown';
 import { NotificationAccordion as NotificationMenu } from '@/features/notifications/components/notification-accordion';
 import { useConvex } from 'convex/react';
 import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 import { Separator } from '@/components/ui/separator';
-import { AccordionMenu, AccordionMenuContent } from './accordion-menu';
+import { TabAccordion, TabAccordionContent } from './tab-accordion';
+import { ProfileSnapshotCard } from './profile-snapshot-card';
 
 export function Header() {
   const { resolvedTheme, setTheme, setColorTheme, setSecondaryColorTheme } =
@@ -55,7 +55,6 @@ export function Header() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [navHasMounted, setNavHasMounted] = useState(false);
   const searchButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
   const { isAdmin } = useAdminAuth();
@@ -148,7 +147,7 @@ export function Header() {
       // Slide in new content
       return setTimeout(() => {
         setNavHasMounted(true);
-      }, 0);
+      }, 200);
     },
     [headerNavOptional, pageNavState, navState]
   );
@@ -166,20 +165,9 @@ export function Header() {
     const md = window.matchMedia('(min-width: 768px)'); // md and up shows main nav
 
     const handleChange = () => {
-      const isSmUp = sm.matches;
+      // When profile drawer selected and we widen to desktop, close drawer
+      // const isSmUp = sm.matches;
       const isMdUp = md.matches;
-
-      // When profile drawer selected and we widen to desktop, open dropdown and close drawer
-      if (navState === 'profile' && isSmUp) {
-        setNavState(null);
-        setProfileDropdownOpen(true);
-      }
-
-      // When profile dropdown is open and we shrink to mobile, close dropdown and open drawer
-      if (profileDropdownOpen && !isSmUp) {
-        setProfileDropdownOpen(false);
-        handleNavTransition('profile', 'nav');
-      }
 
       // Close hamburger nav when widening to desktop where links are visible
       if (navState === 'nav' && isMdUp) {
@@ -194,7 +182,7 @@ export function Header() {
       sm.removeEventListener('change', handleChange);
       md.removeEventListener('change', handleChange);
     };
-  }, [navState, profileDropdownOpen, handleNavTransition, setNavState]);
+  }, [navState, handleNavTransition, setNavState]);
 
   const { location, matches } = useRouterState();
   const isVibePage = matches.some(
@@ -243,9 +231,18 @@ export function Header() {
             'bg-background/95 supports-[backdrop-filter]:bg-background/70 fixed top-0 z-50 flex w-full flex-shrink-0 flex-col overflow-hidden backdrop-blur'
           )}
         >
+          <TabAccordion
+            value={navState ?? (pageNavState as string | null) ?? undefined}
+            onValueChange={(val) => setNavState((val as NavState) ?? null)}
+            // collapsible={true}
+          >
             <div className="container flex h-16 flex-shrink-0 items-center">
               <div className="flex items-center gap-2 md:gap-4">
-                <Link to="/" className="flex items-center gap-2">
+                <Link
+                  to="/"
+                  className="flex items-center gap-2"
+                  onClick={() => setNavState(null)}
+                >
                   <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent">
                     viberatr
                   </span>
@@ -260,6 +257,7 @@ export function Header() {
                         ? 'text-foreground font-medium'
                         : 'text-foreground/60'
                     )}
+                    onClick={() => setNavState(null)}
                   >
                     home
                   </Link>
@@ -271,6 +269,7 @@ export function Header() {
                         ? 'text-foreground font-medium'
                         : 'text-foreground/60'
                     )}
+                    onClick={() => setNavState(null)}
                   >
                     discover
                   </Link>
@@ -283,6 +282,7 @@ export function Header() {
                           ? 'text-foreground font-medium'
                           : 'text-foreground/60'
                       )}
+                      onClick={() => setNavState(null)}
                     >
                       my vibes
                     </Link>
@@ -294,6 +294,7 @@ export function Header() {
                           ? 'text-foreground font-medium'
                           : 'text-foreground/60'
                       )}
+                      onClick={() => setNavState(null)}
                     >
                       profile
                     </Link>
@@ -407,38 +408,31 @@ export function Header() {
                   <span className="sr-only">toggle menu</span>
                 </Button>
 
-                <div className="hidden sm:block">
-                  <ThemeToggle />
-                </div>
+                <SignedOut>
+                  <div className="hidden sm:block">
+                    <ThemeToggle />
+                  </div>
+                </SignedOut>
 
                 <SignedIn>
-                  <div className="hidden sm:block">
-                    <ProfileDropdown
-                      open={profileDropdownOpen}
-                      onOpenChange={setProfileDropdownOpen}
-                      onItemClick={() => setNavState(null)}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-lg p-0"
+                    onClick={() => {
+                      if (navState === 'profile') {
+                        setNavState(null);
+                        return;
+                      }
+                      handleNavTransition('profile', 'nav');
+                    }}
+                  >
+                    <img
+                      src={clerkUser?.imageUrl}
+                      alt="Profile"
+                      className="h-8 w-8 rounded-full object-cover"
                     />
-                  </div>
-                  <div className="sm:hidden">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-10 w-10 rounded-lg p-0"
-                      onClick={() => {
-                        if (navState === 'profile') {
-                          setNavState(null);
-                          return;
-                        }
-                        handleNavTransition('profile', 'nav');
-                      }}
-                    >
-                      <img
-                        src={clerkUser?.imageUrl}
-                        alt="Profile"
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
-                    </Button>
-                  </div>
+                  </Button>
                 </SignedIn>
 
                 <SignedOut>
@@ -450,25 +444,17 @@ export function Header() {
                 </SignedOut>
               </div>
             </div>
-            <AccordionMenu
-              value={navState ?? (pageNavState as string | null) ?? null}
-              onValueChange={(val) => setNavState((val as NavState) ?? null)}
-              overlayOpen={!!navState}
-              onOverlayClose={() => setNavState(null)}
-            >
-              {/* Accordion items, handles sliding animations */}
-              <AccordionMenuContent value="tabs" className="pb-4">
-                <div className="container">
-                <div
-                  data-has-mounted={navHasMounted}
-                  className="w-fit scale-100 opacity-100 transition delay-180 duration-300 data-[has-mounted=false]:translate-y-5 data-[has-mounted=false]:scale-100 data-[has-mounted=false]:opacity-0"
-                >
-                  <FeedTabs />
-                </div>
+            {/* Accordion items, handles sliding animations */}
+            <TabAccordionContent value="tabs" className="container pb-2">
+              <div
+                data-has-mounted={navHasMounted}
+                className="w-fit scale-100 opacity-100 transition delay-200 duration-300 data-[has-mounted=false]:translate-y-5 data-[has-mounted=false]:scale-100 data-[has-mounted=false]:opacity-0"
+              >
+                <FeedTabs />
               </div>
-              </AccordionMenuContent>
-              <AccordionMenuContent value="vibe" className="pb-0">
-                <div className="container">
+            </TabAccordionContent>
+            <TabAccordionContent value="vibe" className="pb-0">
+              <div className="container">
                 <div className="grid scale-100 grid-cols-3 gap-8">
                   <div
                     data-has-mounted={navHasMounted}
@@ -495,29 +481,30 @@ export function Header() {
                   </div>
                 </div>
               </div>
-              </AccordionMenuContent>
-              <AccordionMenuContent value="search" className="pb-0">
-                <div
-                  data-has-mounted={navHasMounted}
-                className="translate-y-0 opacity-100 transition delay-200 duration-300 data-[has-mounted=false]:translate-y-10 data-[has-mounted=false]:opacity-0"
+            </TabAccordionContent>
+            <TabAccordionContent value="search" className="pb-0">
+              <div
+                data-has-mounted={navHasMounted}
+                className="h-auto max-h-[calc(70vh+84px)] opacity-100 transition delay-200 duration-200 data-[has-mounted=false]:translate-y-10 data-[has-mounted=false]:opacity-0"
               >
                 <GlobalSearchCommand
                   open={true}
                   onOpenChange={(open) => setNavState(open ? 'search' : null)}
                   triggerRef={searchButtonRef as RefObject<HTMLButtonElement>}
+                  commandListClassName="max-h-[70vh]"
                 />
               </div>
-              </AccordionMenuContent>
-              <AccordionMenuContent value="notifications" className="pb-0">
-                <div
-                  data-has-mounted={navHasMounted}
-                className="opacity-100 transition delay-200 duration-300 data-[has-mounted=false]:translate-y-10 data-[has-mounted=false]:opacity-0"
+            </TabAccordionContent>
+            <TabAccordionContent value="notifications" className="pb-0">
+              <div
+                data-has-mounted={navHasMounted}
+                className="translate-y-0 opacity-100 transition delay-200 duration-200 data-[has-mounted=false]:translate-y-10 data-[has-mounted=false]:opacity-0"
               >
                 <NotificationMenu />
               </div>
-              </AccordionMenuContent>
-              <AccordionMenuContent value="nav" className="container !px-2 pb-2">
-                <div className={cn('text-sm')}>
+            </TabAccordionContent>
+            <TabAccordionContent value="nav" className="container !px-2 pb-2">
+              <div className={cn('text-sm')}>
                 <div
                   data-has-mounted={navHasMounted}
                   className={cn(
@@ -583,17 +570,26 @@ export function Header() {
                   </nav>
                 </div>
               </div>
-              </AccordionMenuContent>
-              <AccordionMenuContent
+            </TabAccordionContent>
+            <TabAccordionContent
               value="profile"
               className="container !px-2 pb-2"
             >
-              <div className={cn('text-sm')}>
+              <div className={cn('flex w-full gap-6 text-sm')}>
                 <div
                   data-has-mounted={navHasMounted}
-                  data-nav-state={navState}
                   className={cn(
-                    'opacity-100 transition delay-200 duration-200 ease-in-out data-[has-mounted=false]:opacity-0',
+                    'xs:flex hidden w-full rounded-md',
+                    'opacity-100 transition delay-500 duration-1000 ease-in-out data-[has-mounted=false]:opacity-0'
+                  )}
+                >
+                  <ProfileSnapshotCard />
+                </div>
+                <div
+                  data-has-mounted={navHasMounted}
+                  className={cn(
+                    'xs:min-w-28 xs:w-fit w-full',
+                    'opacity-100 transition delay-100 duration-200 ease-in-out data-[has-mounted=false]:opacity-0',
                     'translate-x-0 data-[has-mounted=false]:translate-x-4'
                   )}
                 >
@@ -633,18 +629,18 @@ export function Header() {
                         <span>admin panel</span>
                       </Link>
                     )}
-                    <div className="my-2 flex items-center justify-end gap-2 pb-2">
-                      {resolvedTheme === 'dark' ? (
-                        <Moon className="h-4 w-4" />
-                      ) : (
-                        <Sun className="h-4 w-4" />
-                      )}
+                    <div className="my-2 flex items-center justify-end gap-2 px-2 pb-2">
                       <Switch
                         checked={resolvedTheme === 'dark'}
                         onCheckedChange={(checked) => {
                           setTheme(checked ? 'dark' : 'light');
                         }}
                       />
+                      {resolvedTheme === 'dark' ? (
+                        <Moon className="h-4 w-4" />
+                      ) : (
+                        <Sun className="h-4 w-4" />
+                      )}
                     </div>
                     <Separator className="w=full" />
                     <SignedIn>
@@ -672,9 +668,9 @@ export function Header() {
                   </nav>
                 </div>
               </div>
-              </AccordionMenuContent>
-            </AccordionMenu>
-          </div>
+            </TabAccordionContent>
+          </TabAccordion>
+        </div>
       </header>
     </>
   );

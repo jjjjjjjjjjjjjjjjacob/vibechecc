@@ -24,6 +24,7 @@ interface GlobalSearchCommandProps {
   open: boolean;
   onOpenChange: (navState?: NavState | null) => void;
   triggerRef?: React.RefObject<HTMLButtonElement>;
+  commandListClassName?: string;
 }
 
 function VibeResultSkeleton() {
@@ -81,6 +82,7 @@ export function GlobalSearchCommand({
   open,
   onOpenChange,
   triggerRef,
+  commandListClassName,
 }: GlobalSearchCommandProps) {
   const [query, setQuery] = useState('');
   const { data, isLoading } = useSearchSuggestions(query);
@@ -88,6 +90,7 @@ export function GlobalSearchCommand({
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Focus input when opened
   useEffect(() => {
@@ -96,6 +99,11 @@ export function GlobalSearchCommand({
         inputRef.current?.focus();
       }, 100);
     }
+    setIsAnimating(true);
+    const timeout = setTimeout(() => {
+      setIsAnimating(false);
+    }, 200);
+    return () => clearTimeout(timeout);
   }, [open]);
 
   const handleSelect = () => {
@@ -187,13 +195,10 @@ export function GlobalSearchCommand({
       : undefined;
 
   return (
-    <div
-      ref={containerRef}
-      className={cn('w-full overflow-hidden bg-transparent')}
-    >
-      <div className="border-b shadow-md">
+    <div ref={containerRef} className={cn('w-full bg-transparent')}>
+      <div className="border-b">
         <div className="container">
-          <Command className="rounded-none border-0 bg-transparent">
+          <Command className="flex h-full rounded-none border-0 bg-transparent">
             <CommandInput
               ref={inputRef}
               placeholder="search vibes, users, or tags..."
@@ -203,7 +208,7 @@ export function GlobalSearchCommand({
               className="placeholder:text-muted-foreground/70 h-12 text-sm"
               onKeyDown={(e) => {
                 if (e.key === 'Escape') {
-                  onOpenChange(false);
+                  onOpenChange(null);
                   triggerRef?.current?.focus();
                 } else if (e.key === 'Enter' && query.trim()) {
                   // If Enter is pressed and no item is selected, automatically search
@@ -215,13 +220,19 @@ export function GlobalSearchCommand({
                 }
               }}
             />
-            <CommandList className="max-h-[70vh] overflow-y-auto border-t">
-              {!query && !isLoading && (
+            <CommandList
+              className={cn(
+                'flex-1 overflow-y-auto border-t',
+                commandListClassName
+              )}
+            >
+              {!query && (
                 <SearchSuggestions
                   recentSearches={formattedRecentSearches}
                   trendingSearches={formattedTrendingSearches}
                   popularTags={formattedPopularTags}
                   onSelect={handleSuggestionSelect}
+                  isLoading={isLoading || isAnimating}
                 />
               )}
 

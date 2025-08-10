@@ -6,9 +6,9 @@ import { XIcon } from 'lucide-react';
 
 import { cn } from '@/utils/tailwind-utils';
 
-function Dialog({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+type DialogProps = React.ComponentProps<typeof DialogPrimitive.Root>;
+
+function Dialog({ ...props }: DialogProps) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
@@ -31,14 +31,82 @@ function DialogClose({
 }
 
 function DialogOverlay({
+  scaleFactor = 1,
+  scaleOffset = '14px',
+  shouldScaleBackground = false,
   className,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+}: React.ComponentProps<typeof DialogPrimitive.Overlay> & {
+  scaleFactor?: number;
+  scaleOffset?: string;
+  shouldScaleBackground?: boolean;
+}) {
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!shouldScaleBackground) return;
+
+    const vaulOpen = !!document.querySelector('[data-vaul-drawer]');
+    const wrapper = document.querySelector(
+      '[data-vaul-drawer-wrapper]'
+    ) as HTMLElement | null;
+    if (vaulOpen || !wrapper) return;
+
+    const TRANSITION = '0.5s cubic-bezier(0.32, 0.72, 0, 1)';
+    const BORDER_RADIUS = 8;
+    const WINDOW_TOP_OFFSET = 26;
+
+    const prev = {
+      transformOrigin: wrapper.style.transformOrigin,
+      transitionProperty: wrapper.style.transitionProperty,
+      transitionDuration: wrapper.style.transitionDuration,
+      transitionTimingFunction: wrapper.style.transitionTimingFunction,
+      borderRadius: wrapper.style.borderRadius,
+      overflow: wrapper.style.overflow,
+      transform: wrapper.style.transform,
+    };
+    const prevBodyBg = document.body.style.background;
+
+    const scale =
+      Math.abs(window.innerWidth - WINDOW_TOP_OFFSET * scaleFactor) /
+      window.innerWidth;
+    wrapper.style.transformOrigin = 'top';
+    wrapper.style.transitionProperty = 'transform, border-radius';
+    wrapper.style.transitionDuration = TRANSITION.split(' ')[0];
+    wrapper.style.transitionTimingFunction = TRANSITION.split(' ')
+      .slice(1)
+      .join(' ');
+    wrapper.style.borderRadius = `${BORDER_RADIUS}px`;
+    wrapper.style.overflow = 'hidden';
+    wrapper.style.transform = `scale(${scale}) translate3d(0, calc(env(safe-area-inset-top) + ${scaleOffset}), 0)`;
+
+    // Darken the page background behind the overlay similarly to drawer behavior
+    try {
+      const root = document.documentElement;
+      const cssBg = getComputedStyle(root)
+        .getPropertyValue('--background')
+        .trim();
+      if (cssBg) {
+        document.body.style.background = cssBg;
+      }
+    } catch {}
+
+    return () => {
+      wrapper.style.transformOrigin = prev.transformOrigin;
+      wrapper.style.transitionProperty = prev.transitionProperty;
+      wrapper.style.transitionDuration = prev.transitionDuration;
+      wrapper.style.transitionTimingFunction = prev.transitionTimingFunction;
+      wrapper.style.borderRadius = prev.borderRadius;
+      wrapper.style.overflow = prev.overflow;
+      wrapper.style.transform = prev.transform;
+      document.body.style.background = prevBodyBg;
+    };
+  }, [shouldScaleBackground, scaleFactor, scaleOffset]);
+
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 backdrop-blur-2xs fixed inset-0 z-50 backdrop-blur-[2px]',
         className
       )}
       {...props}
@@ -49,16 +117,29 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
+  container,
   showCloseButton = true,
+  scaleFactor,
+  scaleOffset,
+  shouldScaleBackground = false,
   dialogOverlayClassName,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  container?: HTMLElement;
   showCloseButton?: boolean;
   dialogOverlayClassName?: string;
+  scaleFactor?: number;
+  scaleOffset?: string;
+  shouldScaleBackground?: boolean;
 }) {
   return (
-    <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay className={dialogOverlayClassName} />
+    <DialogPortal data-slot="dialog-portal" container={container}>
+      <DialogOverlay
+        scaleFactor={scaleFactor}
+        className={dialogOverlayClassName}
+        shouldScaleBackground={shouldScaleBackground}
+        scaleOffset={scaleOffset}
+      />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(

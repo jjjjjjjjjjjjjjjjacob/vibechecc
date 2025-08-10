@@ -34,7 +34,7 @@ export function ProfileSnapshotCard() {
       : 'Unknown';
 
   return (
-    <Card className="backrop-blur-md flex w-full border-none bg-transparent">
+    <Card className="flex w-full border-none !bg-transparent shadow-none">
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">

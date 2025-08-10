@@ -22,7 +22,7 @@ interface HomeFeedProps {
 }
 
 export function HomeFeed({ className }: HomeFeedProps) {
-  const { feedTab, setFeedTab, setPageNavState } = useHeaderNav();
+  const { feedTab, setFeedTab, pageNavState, setPageNavState } = useHeaderNav();
   const { user } = useUser();
   const { data: followStats } = useCurrentUserFollowStats();
 
@@ -34,7 +34,19 @@ export function HomeFeed({ className }: HomeFeedProps) {
 
   // Update header page nav state when tabs go out of view
   React.useEffect(() => {
-    setPageNavState(!tabsInView ? 'tabs' : null);
+    // Only set pageNavState if we're on the homepage
+    // This prevents tabs from appearing when navigating away
+    if (typeof window !== 'undefined' && window.location.pathname === '/') {
+      // Show tabs in header when they're NOT in view
+      setPageNavState(tabsInView ? null : 'tabs');
+    } else {
+      setPageNavState(null);
+    }
+
+    // Clear pageNavState when component unmounts (navigating away)
+    return () => {
+      setPageNavState(null);
+    };
   }, [tabsInView, setPageNavState]);
 
   // Handle tab change
@@ -197,7 +209,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
         <TooltipProvider>
           <div
             className={cn(
-              'flex gap-2 overflow-x-auto pb-2 transition delay-100 duration-300',
+              'flex gap-2 overflow-x-auto pb-2 transition delay-500 duration-300',
               !tabsInView ? '-translate-y-5 opacity-0' : 'opacity-100'
             )}
           >

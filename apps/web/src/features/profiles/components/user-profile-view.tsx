@@ -526,7 +526,7 @@ export function UserProfileView({
                                   rating?._id ||
                                   `rating-${rating?.vibeId}-${rating?.userId}-${index}`
                                 }
-                                className="border-border bg-card rounded-lg border p-4"
+                                className="border-border bg-card/60 rounded-lg border p-4"
                               >
                                 <div className="flex items-start gap-3">
                                   <img
@@ -653,7 +653,7 @@ export function UserProfileView({
                                     rating?._id ||
                                     `received-rating-${rating?.vibeId}-${rating?.userId}-${index}`
                                   }
-                                  className="border-border bg-card rounded-lg border p-4"
+                                  className="border-border bg-card/60 rounded-lg border p-4"
                                 >
                                   <div className="flex items-start gap-3">
                                     <Avatar className="h-8 w-8">
@@ -752,7 +752,7 @@ export function UserProfileView({
                 <div className="grid gap-6 lg:grid-cols-3">
                   {/* Profile Details */}
                   <Card
-                    className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
+                    className={`bg-background/60 border-theme-primary/20 shadow-xl backdrop-blur-md`}
                   >
                     <CardContent className="space-y-6 p-6">
                       {user.bio && (

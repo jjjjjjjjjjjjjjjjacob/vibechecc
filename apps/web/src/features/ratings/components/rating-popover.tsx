@@ -535,10 +535,13 @@ export function RatingPopover({
         {children}
       </DialogTrigger>
       <DialogContent
-        className="bg-background/95 border-border max-h-[90vh] w-94 gap-0 overflow-y-auto border backdrop-blur"
+        className="bg-background/95 border-border max-h-[90vh] w-94 gap-0 overflow-y-auto border backdrop-blur duration-300 data-[state=closed]:translate-y-[calc(-50%_+2rem)]"
         onClick={(e) => e.stopPropagation()}
         showCloseButton={false}
         data-testid="dialog-content"
+        shouldScaleBackground
+        scaleFactor={0.8}
+        scaleOffset={'50px'}
       >
         <DialogHeader className="p-4 pb-0 text-center">
           <DialogTitle className="flex items-center justify-between">

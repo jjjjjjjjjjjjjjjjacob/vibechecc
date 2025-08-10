@@ -4,6 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Custom extra-small breakpoints */
+@custom-variant xs (@media (width >= 475px));
+@custom-variant 2xs (@media (width >= 425px));
+@custom-variant 3xs (@media (width >= 375px));
+@custom-variant 4xs (@media (width >= 320px));
+
 /* Global themes */
 @theme inline {
   --font-family-sans: var(--font-sans);
@@ -198,25 +204,27 @@
 
 /* Accordion animations */
 @keyframes accordion-down {
-  /*
   from {
     height: 0;
   }
   to {
-    height: var(--radix-accordion-content-height);
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
   }
-*/
 }
 
 @keyframes accordion-up {
-  /*
   from {
-    height: var(--radix-accordion-content-height);
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
   }
   to {
     height: 0;
   }
-*/
 }
 
 /* Wiggle animation for emojis */
