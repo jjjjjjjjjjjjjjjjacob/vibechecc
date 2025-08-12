@@ -1,6 +1,12 @@
+/**
+ * exercises search filters component interactions
+ * mocks child filter components to focus on state changes
+ */
 /// <reference lib="dom" />
 
+// vitest helpers for assertions and cleanup
 import { afterEach, describe, expect, it, vi } from 'vitest';
+// testing-library utilities for DOM interaction
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SearchFilters } from '@/features/search/components/search-filters';

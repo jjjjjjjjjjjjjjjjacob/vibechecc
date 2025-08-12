@@ -209,7 +209,7 @@ vi.mock('@/features/ratings/components/emoji-rating-popover', () => ({
                   id="review"
                   value={review}
                   onChange={(e) => setReview(e.target.value)}
-                  placeholder="Share your thoughts"
+                  placeholder="share your thoughts"
                 />
                 {error && <p>{error}</p>}
                 <button type="submit" disabled={isSubmitting}>

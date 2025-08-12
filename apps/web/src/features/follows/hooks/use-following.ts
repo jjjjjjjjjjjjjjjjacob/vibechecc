@@ -8,6 +8,9 @@ interface UseFollowingOptions {
   enabled?: boolean;
 }
 
+/**
+ * Retrieves the list of users that the given user is following.
+ */
 export function useFollowing(
   userId: string,
   options: UseFollowingOptions = {}
@@ -28,6 +31,7 @@ export function useFollowing(
 
   const loadMore = React.useCallback(() => {
     if (data && data.continueCursor && !data.isDone) {
+      // move cursor forward to fetch next set of followed users
       setCursor(data.continueCursor);
     }
   }, [data]);

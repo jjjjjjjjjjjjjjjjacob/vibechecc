@@ -1,3 +1,7 @@
+/**
+ * Wraps an EmojiRatingDisplay with a popover that reveals all ratings when clicked.
+ * Useful for showing a summary score while allowing deeper inspection.
+ */
 import * as React from 'react';
 import {
   Popover,
@@ -35,6 +39,7 @@ export function EmojiRatingDisplayPopover({
   onMouseEnter,
   onMouseLeave,
 }: EmojiRatingDisplayPopoverProps) {
+  // Track popover visibility
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -83,6 +88,7 @@ export function EmojiRatingDisplayPopover({
           <TopEmojiRatingsAccordion
             emojiRatings={allRatings}
             onEmojiClick={(emoji, value) => {
+              // Forward selection to parent and close the popover
               onEmojiClick?.(emoji, value);
               setOpen(false);
             }}

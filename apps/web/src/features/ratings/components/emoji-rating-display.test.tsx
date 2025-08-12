@@ -1,4 +1,9 @@
+/**
+ * snapshot-style tests for the emoji rating display
+ * ensures average rating and counts render for various inputs
+ */
 /// <reference lib="dom" />
+// vitest assertion and mocking helpers
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EmojiRatingDisplay, TopEmojiRatings } from './emoji-rating-display';

@@ -18,7 +18,7 @@ VITE_POSTHOG_REGION=us
 ### Using the Hook
 
 ```tsx
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog } from '@/hooks/use-posthog';
 
 function MyComponent() {
   const { capture, trackEvents, isFeatureEnabled } = usePostHog();
@@ -127,7 +127,7 @@ User identification and authentication events are automatically handled via the 
 
 ```tsx
 // In a vibe card component
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog } from '@/hooks/use-posthog';
 
 function VibeCard({ vibe }) {
   const { trackEvents } = usePostHog();

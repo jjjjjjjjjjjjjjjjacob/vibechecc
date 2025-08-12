@@ -1,20 +1,23 @@
-import * as React from 'react';
-import * as PopoverPrimitive from '@radix-ui/react-popover';
+import * as React from 'react'; // React types
+import * as PopoverPrimitive from '@radix-ui/react-popover'; // radix popover primitives
 
-import { cn } from '@/utils/tailwind-utils';
+import { cn } from '@/utils/tailwind-utils'; // class name helper
 
+/** wrapper for radix popover root */
 function Popover({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
+/** trigger element that opens the popover */
 function PopoverTrigger({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
   return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 }
 
+/** floating content panel */
 function PopoverContent({
   className,
   align = 'center',
@@ -37,6 +40,7 @@ function PopoverContent({
   );
 }
 
+/** anchor positions the popover relative to another element */
 function PopoverAnchor({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {

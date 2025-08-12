@@ -6,12 +6,12 @@
 export type SearchResultType = 'vibe' | 'user' | 'tag' | 'action' | 'review';
 
 export interface BaseSearchResult {
-  id: string;
-  type: SearchResultType;
-  title: string;
-  subtitle?: string;
-  image?: string;
-  score?: number; // Relevance score
+  id: string; // unique identifier of the entity
+  type: SearchResultType; // discriminant used by the UI renderer
+  title: string; // primary display text
+  subtitle?: string; // optional secondary text
+  image?: string; // URL to display alongside the result
+  score?: number; // relevance score from the search engine
 }
 
 export interface VibeSearchResult extends BaseSearchResult {

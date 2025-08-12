@@ -1,4 +1,5 @@
 import { SignInButton, SignUpButton } from '@clerk/tanstack-react-start';
+// Dialog primitives from the shared UI library
 import {
   Dialog,
   DialogContent,
@@ -6,24 +7,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+// Branded button component
 import { Button } from '@/components/ui/button';
+// Icons used within the dialog actions
 import { Sparkles, LogIn } from 'lucide-react';
 
+/** Props accepted by {@link AuthPromptDialog}. */
 interface AuthPromptDialogProps {
+  // whether the dialog is visible
   open: boolean;
+  // handler for closing or opening the dialog
   onOpenChange: (open: boolean) => void;
+  // title text shown at the top of the dialog
   title?: string;
+  // description explaining why sign-in is required
   description?: string;
+  // optional action text, currently unused but reserved for future copy tweaks
   actionText?: string;
 }
 
+/**
+ * Modal prompting anonymous users to sign in or create an account.
+ *
+ * Presented when a gated feature is triggered without authentication.
+ */
 export function AuthPromptDialog({
   open,
   onOpenChange,
   title = 'sign in required',
   description = 'you must sign in to use viberatr',
+  // we accept `actionText` to remain extensible; underscore avoids unused var warnings
   actionText: _actionText = 'this feature',
 }: AuthPromptDialogProps) {
+  // render the dialog only when `open` is true
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-background/60 drop-shadow-primary/30 border-none drop-shadow-xl/50 backdrop-blur sm:max-w-[425px]">
@@ -36,6 +52,7 @@ export function AuthPromptDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="mt-6 space-y-4">
+          {/* primary actions for sign-in or sign-up */}
           <div className="space-y-3">
             <SignInButton mode="modal">
               <Button className="h-12 w-full bg-gradient-to-r from-violet-600 to-pink-600 text-base font-semibold text-white transition-all hover:scale-[1.02] hover:from-violet-700 hover:to-pink-700 hover:shadow-lg hover:shadow-violet-500/25">
@@ -53,6 +70,7 @@ export function AuthPromptDialog({
               </Button>
             </SignUpButton>
           </div>
+          {/* decorative divider with subtle gradient */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="border-gradient-to-r via-primary/20 w-full border-t-2 from-transparent to-transparent" />
@@ -63,6 +81,7 @@ export function AuthPromptDialog({
               </span>
             </div>
           </div>
+          {/* dismiss option for users who want to continue anonymously */}
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}

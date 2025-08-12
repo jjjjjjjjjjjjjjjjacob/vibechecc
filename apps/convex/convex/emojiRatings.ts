@@ -1,3 +1,7 @@
+/**
+ * Convex queries and mutations for emoji-based ratings.
+ * Includes metadata lookups and create/update helpers.
+ */
 import { query, mutation, type QueryCtx } from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';

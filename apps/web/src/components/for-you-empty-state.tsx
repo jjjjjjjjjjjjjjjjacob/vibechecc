@@ -1,22 +1,40 @@
 import * as React from 'react';
+// shadcn card primitives used for visual containers
 import { Card, CardContent } from '@/components/ui/card';
+// primary and outline buttons for navigation actions
 import { Button } from '@/components/ui/button';
+// small badge used to highlight feed features
 import { Badge } from '@/components/ui/badge';
+// assorted icons convey meaning without extra text
 import { Sparkles, Users, Heart, ArrowRight, Star } from 'lucide-react';
+// utility to merge class names conditionally
 import { cn } from '@/utils/tailwind-utils';
+// follow suggestions appear at the bottom of the empty state
 import { CompactSuggestedFollows } from '@/features/follows/components/suggested-follows';
+// hook retrieving how many people the current user follows
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
 
+// minimal props to allow custom styling from callers
 interface ForYouEmptyStateProps {
   className?: string;
 }
 
+/**
+ * Display guidance when a user's "for you" feed lacks content.
+ *
+ * The component branches based on whether the viewer already follows people.
+ * Users with follows see navigation suggestions while brand‑new users receive
+ * onboarding tips and a short list of accounts to follow.
+ */
 export function ForYouEmptyState({ className }: ForYouEmptyStateProps) {
+  // fetch lightweight stats about how many accounts the user follows
   const { data: followStats } = useCurrentUserFollowStats();
+  // track if the user follows anyone to choose which empty state to render
   const hasFollows = followStats.following > 0;
 
+  // when the user already follows people but their feed has no content
   if (hasFollows) {
-    // User follows people but their personalized feed is empty
+    // show a simple message encouraging patience and navigation elsewhere
     return (
       <div className={cn('w-full', className)}>
         <Card className="bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md">
@@ -41,14 +59,17 @@ export function ForYouEmptyState({ className }: ForYouEmptyStateProps) {
               </p>
 
               {/* Actions */}
+              {/* links to other parts of the site so the user can explore */}
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Button asChild>
+                  {/* jump to the "hot" tab to browse trending content */}
                   <a href="/?tab=hot" className="flex items-center gap-2">
                     <Star className="h-4 w-4" />
                     explore hot vibes
                   </a>
                 </Button>
                 <Button variant="outline" asChild>
+                  {/* encourage creating a vibe to populate the feed */}
                   <a href="/vibes/create" className="flex items-center gap-2">
                     <Heart className="h-4 w-4" />
                     create a vibe
@@ -113,9 +134,10 @@ export function ForYouEmptyState({ className }: ForYouEmptyStateProps) {
 
             {/* Get Started Button - scroll to suggestions */}
             <Button
-              size="lg"
+              size="lg" // make the button stand out on mobile
               className="mb-4"
               onClick={() => {
+                // locate the suggestions section and scroll to it smoothly
                 const suggestionsElement =
                   document.querySelector('[data-suggestions]');
                 suggestionsElement?.scrollIntoView({
@@ -141,8 +163,9 @@ export function ForYouEmptyState({ className }: ForYouEmptyStateProps) {
         </CardContent>
       </Card>
 
-      {/* Follow Suggestions */}
+      {/* follow suggestions rendered below the onboarding card */}
       <div data-suggestions>
+        {/* show a small list of suggested users without mutual counts */}
         <CompactSuggestedFollows limit={4} showMutualConnections={false} />
       </div>
 

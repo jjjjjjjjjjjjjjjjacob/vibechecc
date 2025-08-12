@@ -1,3 +1,7 @@
+/**
+ * ProfileLayout decorates pages that display user profiles.
+ * It supports themed backgrounds and optional sticky navigation sections.
+ */
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import { BaseLayout } from './base-layout';
@@ -19,6 +23,7 @@ export interface ProfileLayoutProps {
   themeStyles?: React.CSSProperties;
 }
 
+// background gradients keyed by variant
 const backgroundVariants = {
   default: 'from-background via-background to-muted/10',
   gradient: 'from-background via-background to-theme-primary/10',

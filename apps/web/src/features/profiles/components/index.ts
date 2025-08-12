@@ -1,16 +1,18 @@
-// Profiles Feature Components
-// This barrel export file provides a clean API for importing profile-related components
+/**
+ * Barrel exports for user profile components.
+ * Centralizing exports keeps import paths concise for profile pages.
+ */
 
-// User Profile Display
-export { UserProfileView } from './user-profile-view';
-export { UserProfileHero } from './user-profile-hero';
+// Components that display a user's profile information
+export { UserProfileView } from './user-profile-view'; // full profile page wrapper
+export { UserProfileHero } from './user-profile-hero'; // top banner with avatar and stats
 
-// Profile Management
-export { ProfileContent } from './profile-content';
-export { ManageInterestsSection } from './manage-interests-section';
+// Editing and management widgets
+export { ProfileContent } from './profile-content'; // sections with editable profile fields
+export { ManageInterestsSection } from './manage-interests-section'; // UI to pick interests
 
-// Content Management Sections
-export { UserVibesSection } from './user-vibes-section';
-export { UserReviewsSection } from './user-reviews-section';
-export { UserInterestsSection } from './user-interests-section';
-export { EditableText } from '@/components/editable-text';
+// Subsections for user-generated content
+export { UserVibesSection } from './user-vibes-section'; // user's posted vibes
+export { UserReviewsSection } from './user-reviews-section'; // reviews left by the user
+export { UserInterestsSection } from './user-interests-section'; // list of interests
+export { EditableText } from '@/components/editable-text'; // inline editing helper

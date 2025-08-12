@@ -1,7 +1,6 @@
-// SECURITY: Input validation and sanitization utilities
-
 /**
- * Validates and sanitizes user input to prevent injection attacks
+ * Input validation and sanitization utilities.
+ * Provides helpers to enforce constraints and rate limits.
  */
 export class SecurityValidators {
   /**

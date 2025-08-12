@@ -1,13 +1,22 @@
 import * as React from 'react';
+// card primitives to structure the suggestion list
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// avatar used to preview each suggested user
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+// badge for mutual connections or engagement stats
 import { Badge } from '@/components/ui/badge';
+// skeleton placeholders while suggestions load
 import { Skeleton } from '@/components/ui/skeleton';
+// icons to decorate various states
 import { UserPlus, Users, Sparkles } from 'lucide-react';
+// utility to merge conditional class names
 import { cn } from '@/utils/tailwind-utils';
+// hook fetching suggested users from the backend
 import { useSuggestedFollows } from '../hooks/use-suggested-follows';
+// follow button used within each list item
 import { FollowButton } from './follow-button';
 
+// callers can customize layout and how many suggestions to show
 interface SuggestedFollowsProps {
   limit?: number;
   variant?: 'card' | 'list';
@@ -16,6 +25,12 @@ interface SuggestedFollowsProps {
   showMutualConnections?: boolean;
 }
 
+/**
+ * Render a list of suggested users the current viewer might want to follow.
+ *
+ * The component shows a loading skeleton initially, a friendly empty state when
+ * no suggestions exist, and a styled list/grid of users once data arrives.
+ */
 export function SuggestedFollows({
   limit = 5,
   variant = 'card',
@@ -23,9 +38,11 @@ export function SuggestedFollows({
   title = 'suggested follows',
   showMutualConnections = true,
 }: SuggestedFollowsProps) {
+  // fetch suggestions from the API with the provided limit
   const { data: suggestions, isLoading } = useSuggestedFollows({ limit });
 
   if (isLoading) {
+    // render skeletons mimicking the final layout while fetching
     return (
       <Card
         className={cn(
@@ -63,6 +80,7 @@ export function SuggestedFollows({
   }
 
   if (!suggestions || suggestions.length === 0) {
+    // friendly empty state encouraging the user to engage
     return (
       <Card
         className={cn(
@@ -123,19 +141,22 @@ export function SuggestedFollows({
         </div>
       </CardHeader>
       <CardContent>
+        {/* list or grid of suggested users depending on variant */}
         <div
           className={cn(
             variant === 'list' ? 'space-y-3' : 'grid gap-3 sm:grid-cols-2'
           )}
         >
           {suggestions.map((suggestion: any) => {
+            // skip suggestions missing user data to avoid runtime errors
             if (!suggestion.user) return null;
 
             const user = suggestion.user;
+            // prefer real names, then username, then a generic placeholder
             const displayName =
               `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
               user.username ||
-              'User';
+              'user';
 
             return (
               <div
@@ -210,12 +231,18 @@ export function SuggestedFollows({
   );
 }
 
+// slimmer wrapper that always renders the list variant
 interface CompactSuggestedFollowsProps {
   limit?: number;
   className?: string;
   showMutualConnections?: boolean;
 }
 
+/**
+ * Convenience wrapper that renders a compact list of follows.
+ *
+ * Useful in sidebars where only a handful of suggestions should appear.
+ */
 export function CompactSuggestedFollows({
   limit = 3,
   className,

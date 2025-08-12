@@ -1,4 +1,9 @@
+/**
+ * tests helper functions used by other test suites
+ * ensures custom render and routing utilities behave as expected
+ */
 /// <reference lib="dom" />
+// vitest primitives for assertions
 import { describe, it, expect } from 'vitest';
 import {
   mockUser,

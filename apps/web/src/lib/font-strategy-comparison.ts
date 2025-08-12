@@ -1,5 +1,6 @@
 /**
  * Font loading strategy comparison for mobile performance
+ * Helps determine which approach yields the fastest initial render.
  */
 
 // Current approach: Local full fonts (25MB+)

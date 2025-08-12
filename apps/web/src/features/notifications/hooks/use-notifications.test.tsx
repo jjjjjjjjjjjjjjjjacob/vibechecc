@@ -1,4 +1,9 @@
+/**
+ * tests the use-notifications hook which fetches paginated notifications
+ * verifies loading, error, and success states using mocked convex hooks
+ */
 /// <reference lib="dom" />
+// vitest helpers for assertions and lifecycle
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

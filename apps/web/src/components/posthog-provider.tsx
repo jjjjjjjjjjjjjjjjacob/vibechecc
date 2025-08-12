@@ -3,14 +3,21 @@
 import { useEffect, type ReactNode } from 'react';
 import { analytics, type PostHogConfig } from '@/lib/posthog';
 
+/** props for the posthog provider */
 interface PostHogProviderProps {
+  // children rendered within the analytics context
   children: ReactNode;
 }
 
+/**
+ * component that initializes the posthog analytics library on the client
+ * and exposes the configured instance to descendant components.
+ */
 export function PostHogProvider({ children }: PostHogProviderProps) {
   useEffect(() => {
-    // Initialize PostHog on the client side only
+    // only run initialization in the browser
     if (typeof window !== 'undefined') {
+      // build configuration from environment variables
       const config: PostHogConfig = {
         apiKey: import.meta.env.VITE_POSTHOG_API_KEY || '',
         apiHost:
@@ -19,17 +26,18 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
         region: import.meta.env.VITE_POSTHOG_REGION || 'us',
       };
 
-      // Only initialize if we have the required API key
+      // only initialize if a key exists
       if (config.apiKey) {
         analytics.init(config);
       } else {
         // eslint-disable-next-line no-console
         console.warn(
-          'PostHog API key not found. Analytics will not be initialized.'
+          'posthog api key not found. analytics will not be initialized.'
         );
       }
     }
   }, []);
 
+  // simply render descendants once initialized
   return <>{children}</>;
 }

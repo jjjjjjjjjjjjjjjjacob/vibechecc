@@ -1,3 +1,7 @@
+/**
+ * Filter component offering preset date ranges with a placeholder for custom range selection.
+ * Emits updates via onChange when a preset is chosen.
+ */
 import { Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,16 +19,17 @@ interface DateRangeFilterProps {
 }
 
 export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
+  // Preset ranges the user can quickly select
   const presets = [
-    { value: 'all', label: 'All time' },
-    { value: 'today', label: 'Today' },
-    { value: 'week', label: 'This week' },
-    { value: 'month', label: 'This month' },
-    { value: 'year', label: 'This year' },
+    { value: 'all', label: 'all time' },
+    { value: 'today', label: 'today' },
+    { value: 'week', label: 'this week' },
+    { value: 'month', label: 'this month' },
+    { value: 'year', label: 'this year' },
   ];
 
   const getDateFromPreset = (preset: string): { from?: Date; to?: Date } => {
-    const now = new Date();
+  const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     switch (preset) {
@@ -58,7 +63,7 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
 
   return (
     <div>
-      <h4 className="mb-3 font-medium">Date Posted</h4>
+      <h4 className="mb-3 font-medium">date posted</h4>
       <RadioGroup
         value={value?.preset || 'all'}
         onValueChange={handlePresetChange}

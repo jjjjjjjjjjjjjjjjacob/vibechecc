@@ -1,3 +1,7 @@
+/**
+ * use search results module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';

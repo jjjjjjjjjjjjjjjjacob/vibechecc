@@ -1,5 +1,10 @@
 import { internalMutation } from './_generated/server';
 
+/**
+ * Default emoji metadata used to seed the database. Each entry describes
+ * an emoji's name, keywords, tags, category, color, and sentiment which
+ * powers search and rating features across the app.
+ */
 // Default emoji rating metadata
 const defaultEmojiMetadata = [
   // Positive emotions

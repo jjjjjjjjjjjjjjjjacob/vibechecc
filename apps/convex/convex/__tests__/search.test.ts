@@ -1,9 +1,13 @@
+/**
+ * Tests for search-related queries and mutations.
+ * Ensures empty queries, vibe content search, and user matching behave correctly.
+ */
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { convexTest } from 'convex-test';
 import schema from '../schema';
 import { api } from '../_generated/api';
 import { modules } from '../../vitest.setup';
-import { SecurityValidators } from '../lib/securityValidators';
+import { SecurityValidators } from '../lib/security-validators';
 
 // Mock console.error to suppress scheduler transaction errors
 let consoleSpy: any;
@@ -18,6 +22,7 @@ describe('Search Functions', () => {
   });
 
   afterEach(() => {
+    // Clear spies and mocks to keep tests isolated
     consoleSpy?.mockRestore();
     vi.restoreAllMocks();
   });

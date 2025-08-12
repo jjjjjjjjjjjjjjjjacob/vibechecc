@@ -16,6 +16,9 @@ interface StickySearchBarProps {
   className?: string;
 }
 
+/**
+ * Sticky top search bar that persists on scroll and surfaces filters.
+ */
 export function StickySearchBar({
   defaultQuery = '',
   onQueryChange,
@@ -85,9 +88,10 @@ export function StickySearchBar({
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
             <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+            {/* Search input with lowercase placeholder for consistency */}
             <Input
               type="text"
-              placeholder="Search vibes, users, or tags..."
+              placeholder="search vibes, users, or tags..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className={cn(

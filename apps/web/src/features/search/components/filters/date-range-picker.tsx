@@ -1,3 +1,7 @@
+/**
+ * date range picker module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useState } from 'react';
 import { Calendar, CalendarDays, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';

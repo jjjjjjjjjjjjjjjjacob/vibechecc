@@ -1,5 +1,10 @@
+/**
+ * tests main useSearch hook which coordinates server calls
+ * ensures parameters and results propagate correctly
+ */
 /// <reference lib="dom" />
 
+// vitest helpers for assertions and mock setup
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor, cleanup } from '@testing-library/react';
 import {

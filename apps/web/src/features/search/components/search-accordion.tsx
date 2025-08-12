@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+// Import the shadcn command palette primitives used to build the accordion
 import {
   Command,
   CommandInput,
@@ -8,27 +9,45 @@ import {
   CommandSeparator,
   CommandItem,
 } from '@/components/ui/command';
+// Result renderers for each supported entity type
 import { VibeResult } from './result-items/vibe-result';
 import { UserResult } from './result-items/user-result';
 import { TagResult } from './result-items/tag-result';
 import { ActionResult } from './result-items/action-result';
+// Wrapper for suggestion lists when no query is present
 import { SearchSuggestions } from './search-suggestions';
+// Hooks that fetch suggestions and report analytics
 import { useSearchSuggestions } from '../hooks/use-search';
 import { useSearchTracking } from '../hooks/use-search-tracking';
+// Router helper for navigation
 import { useNavigate } from '@tanstack/react-router';
+// Utility for joining Tailwind classes
 import { cn } from '@/utils/tailwind-utils';
+// Skeleton placeholder used during loading states
 import { Skeleton } from '@/components/ui/skeleton';
 
+/**
+ * Props accepted by {@link SearchAccordion}.
+ */
 interface SearchAccordionProps {
+  /** Whether the accordion should be visible */
   open: boolean;
+  /** Callback to toggle the open state */
   onOpenChange: (open: boolean) => void;
+  /** Optional reference to the button that toggles the accordion */
   triggerRef?: React.RefObject<HTMLButtonElement>;
 }
 
+/**
+ * Placeholder row while vibe results load.
+ */
 function VibeResultSkeleton() {
+  // The structure mirrors a full result but swaps elements for skeletons
   return (
     <div className="flex items-start gap-3 px-2 py-3">
+      {/* Thumbnail placeholder */}
       <Skeleton className="h-12 w-12 rounded-md" />
+      {/* Textual content column */}
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
           <Skeleton className="h-4 w-32" />
@@ -40,6 +59,7 @@ function VibeResultSkeleton() {
             <Skeleton className="h-4 w-4 rounded-full" />
             <Skeleton className="h-3 w-16" />
           </div>
+          {/* Tag and action placeholders */}
           <Skeleton className="h-5 w-12 rounded-full" />
           <Skeleton className="h-5 w-12 rounded-full" />
         </div>
@@ -48,14 +68,20 @@ function VibeResultSkeleton() {
   );
 }
 
+/**
+ * Placeholder row for pending user results.
+ */
 function UserResultSkeleton() {
   return (
     <div className="flex items-center gap-3 px-2 py-3">
+      {/* Circular avatar placeholder */}
       <Skeleton className="h-10 w-10 rounded-full" />
+      {/* Name and username columns */}
       <div className="flex-1 space-y-1">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-3 w-32" />
       </div>
+      {/* Follow and stats placeholders */}
       <div className="flex items-center gap-3">
         <Skeleton className="h-3 w-16" />
         <Skeleton className="h-3 w-12" />
@@ -64,27 +90,45 @@ function UserResultSkeleton() {
   );
 }
 
+/**
+ * Placeholder row representing a tag while suggestions load.
+ */
 function TagResultSkeleton() {
   return (
     <div className="flex items-center gap-3 px-2 py-3">
+      {/* Circle where tag avatar would render */}
       <Skeleton className="h-8 w-8 rounded-full" />
+      {/* Tag name */}
       <div className="flex-1">
         <Skeleton className="h-4 w-20" />
       </div>
+      {/* Usage count */}
       <Skeleton className="h-3 w-16" />
     </div>
   );
 }
 
+/**
+ * Search-as-you-type accordion used in the global header.
+ *
+ * The component displays an input with live suggestions and result previews.
+ * Selecting a result or suggestion navigates to the appropriate route while
+ * recording analytics.
+ */
 export function SearchAccordion({
   open,
   onOpenChange,
   triggerRef,
 }: SearchAccordionProps) {
+  // Text entered by the user
   const [query, setQuery] = useState('');
+  // Suggestions and result previews driven by the current query
   const { data, isLoading } = useSearchSuggestions(query);
+  // Analytics helper for tracking searches
   const { trackSearch } = useSearchTracking();
+  // Router navigation helper
   const navigate = useNavigate();
+  // References to the input and outer container for focus management
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -99,10 +143,11 @@ export function SearchAccordion({
 
   // Handle click outside
   useEffect(() => {
+    // Close the accordion when clicking outside of both the container
+    // and the trigger element that opened it
     const handleClickOutside = (event: MouseEvent) => {
       if (!open) return;
 
-      // Check if the click is outside both the search accordion and the trigger button
       if (
         containerRef.current &&
         !containerRef.current.contains(event.target as Node) &&
@@ -117,47 +162,50 @@ export function SearchAccordion({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open, onOpenChange, triggerRef]);
 
+  // Reset state and close the dropdown after a selection is made
   const handleSelect = () => {
     onOpenChange(false);
     setQuery('');
   };
 
+  // When a result row is chosen, report the event and close the accordion
   const handleResultClick = (
     resultId: string,
     resultType: string,
     category?: string
   ) => {
-    // Track the result click if there was a query
     if (query.trim()) {
       trackSearch(query.trim(), undefined, [resultId], category || resultType);
     }
     handleSelect();
   };
 
+  // Handle clicks on a suggestion chip such as recent or trending terms
   const handleSuggestionSelect = (
     term: string,
     type?: 'tag' | 'search' | 'recent' | 'trending' | 'recommended'
   ) => {
-    // Track the selection with category information
     if (term.trim() && type) {
       trackSearch(term.trim(), undefined, undefined, type);
     }
 
     if (term.startsWith('/')) {
+      // Leading slash indicates direct route navigation (e.g. "/vibes")
       navigate({ to: term as '/vibes' });
       handleSelect();
     } else if (type === 'tag' || term.startsWith('#')) {
-      // For tags, navigate to search page showing vibes with that tag
+      // Tags are passed as filters on the search page
       const tagName = term.replace('#', '');
       navigate({ to: '/search', search: { tab: 'vibes', tags: [tagName] } });
       handleSelect();
     } else {
-      // Navigate to search page with the selected term
+      // Default behavior performs a search for the term
       navigate({ to: '/search', search: { q: term } });
       handleSelect();
     }
   };
 
+  // Determine if any result sections contain data
   const hasResults =
     data &&
     'vibes' in data &&
@@ -178,7 +226,7 @@ export function SearchAccordion({
   const popularTags =
     !query && data && 'popularTags' in data ? data.popularTags : undefined;
 
-  // Convert trending searches to SearchSuggestion format (use from data instead of separate query)
+  // Convert trending searches to SearchSuggestion format
   const formattedTrendingSearches =
     trendingSearchTerms && Array.isArray(trendingSearchTerms)
       ? trendingSearchTerms.map((term: string) => ({
@@ -215,6 +263,7 @@ export function SearchAccordion({
     >
       <div className="border-b shadow-md">
         <div className="container pt-2">
+          {/* Outer command palette wrapper */}
           <Command className="rounded-none border-0 bg-transparent">
             <CommandInput
               ref={inputRef}
@@ -228,15 +277,16 @@ export function SearchAccordion({
                   onOpenChange(false);
                   triggerRef?.current?.focus();
                 } else if (e.key === 'Enter' && query.trim()) {
-                  // If Enter is pressed and no item is selected, automatically search
+                  // When enter is pressed with no item selected, perform a search
                   e.preventDefault();
-                  // Track the enter key search
+                  // Report the search triggered by hitting enter
                   trackSearch(query.trim(), undefined, undefined, 'enter-key');
                   navigate({ to: '/search', search: { q: query.trim() } });
                   handleSelect();
                 }
               }}
             />
+            {/* Scrollable results and suggestions */}
             <CommandList className="max-h-[calc(70vh-3rem)] overflow-y-auto border-t">
               {!query && !isLoading && (
                 <SearchSuggestions
@@ -293,7 +343,7 @@ export function SearchAccordion({
               )}
 
               {query && !hasResults && !isLoading && (
-                <CommandEmpty>No results found for "{query}"</CommandEmpty>
+                <CommandEmpty>no results found for "{query}"</CommandEmpty>
               )}
 
               {query && hasResults && data && 'vibes' in data && (

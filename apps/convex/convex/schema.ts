@@ -1,3 +1,7 @@
+/**
+ * Convex data model schema describing tables and indexes.
+ * This mirrors Clerk user fields and vibe metadata used across the app.
+ */
 import { defineSchema, defineTable } from 'convex/server';
 import { type Infer, v } from 'convex/values';
 

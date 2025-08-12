@@ -10,7 +10,7 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 }));
 
 // Mock PostHog hook
-vi.mock('@/hooks/usePostHog', () => ({
+vi.mock('@/hooks/use-posthog', () => ({
   usePostHog: vi.fn(),
 }));
 
@@ -22,7 +22,7 @@ vi.mock('@/lib/survey-manager', () => ({
 }));
 
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog } from '@/hooks/use-posthog';
 import { trackSurveyEvents } from '@/lib/survey-manager';
 
 const mockUseUser = useUser as any;

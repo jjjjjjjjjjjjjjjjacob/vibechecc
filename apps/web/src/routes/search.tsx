@@ -1,3 +1,8 @@
+/**
+ * TanStack Start file route that renders the search results page. Includes
+ * schema validation for search params and lazy loading of heavy result
+ * components to keep initial bundles small.
+ */
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 import * as React from 'react';

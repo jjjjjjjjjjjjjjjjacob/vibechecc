@@ -1,6 +1,7 @@
  
 /**
  * Generated utilities for implementing server-side Convex query and mutation functions.
+ * Exposes builders and context helpers used by backend modules.
  *
  * THIS CODE IS AUTOMATICALLY GENERATED.
  *

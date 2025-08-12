@@ -1,3 +1,7 @@
+/**
+ * user profile hero module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';

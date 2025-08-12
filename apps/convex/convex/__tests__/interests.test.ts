@@ -1,14 +1,20 @@
 /// <reference lib="dom" />
+/**
+ * Tests how rating a vibe updates a user's interests.
+ * The convex backend adds vibe tags to the rater's profile.
+ */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { convexTest } from 'convex-test';
 import { api } from '../_generated/api';
 import schema from '../schema';
 import { modules } from '../../vitest.setup';
 
+// Verify that rating vibes updates interest lists
 describe('User Interests from Ratings', () => {
   let t: any;
 
   beforeEach(() => {
+    // Create a fresh Convex test environment per test
     t = convexTest(schema, modules);
   });
 

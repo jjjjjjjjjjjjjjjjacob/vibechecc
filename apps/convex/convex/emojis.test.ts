@@ -1,9 +1,14 @@
+/**
+ * Tests for emoji import and search utilities.
+ * Confirms batch imports avoid duplicates and search returns expected sets.
+ */
 import { describe, it, expect } from 'vitest';
 import { convexTest } from 'convex-test';
 import schema from './schema';
 import { modules } from '../vitest.setup';
 import { api } from './_generated/api';
 
+// Validate emoji import and search helpers
 describe('emojis', () => {
   describe('importBatch', () => {
     it('should import new emojis', async () => {

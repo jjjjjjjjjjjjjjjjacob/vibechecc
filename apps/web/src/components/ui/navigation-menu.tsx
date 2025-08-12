@@ -1,3 +1,7 @@
+/**
+ * Navigation menu primitives built on Radix components.
+ * Provides trigger, content, and viewport styling for top-level nav.
+ */
 import * as React from 'react';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
 import { cva } from 'class-variance-authority';

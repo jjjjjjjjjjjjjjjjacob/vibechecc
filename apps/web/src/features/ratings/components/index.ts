@@ -1,7 +1,9 @@
-// Ratings Feature Components
-// This barrel export file provides a clean API for importing rating-related components
+/**
+ * barrel file exporting all rating related components
+ * groups exports so other modules can import from a single location
+ */
 
-// Emoji Rating Components
+// emoji rating components
 export { EmojiRatingDisplay, TopEmojiRatings } from './emoji-rating-display';
 export { EmojiRatingDisplayPopover } from './emoji-rating-display-popover';
 export { EmojiRatingCycleDisplay } from './emoji-rating-cycle-display';
@@ -10,17 +12,17 @@ export { RatingScale } from './rating-scale';
 export { EmojiRatingSelector } from './emoji-rating-selector';
 export { EmojiRatingFilter } from './emoji-rating-filter';
 
-// Emoji Interaction Components
+// emoji interaction components
 export { EmojiReactions } from './emoji-reaction';
 export { EmojiSearchCommand } from './emoji-search-command';
 export { EmojiPillFilters } from './emoji-pill-filters';
 export { EmojiTrends } from './emoji-trends';
 
-// Rating System Components
+// rating system components
 export { StarRating } from './star-rating';
 export { RatingRangeSlider } from './rating-range-slider';
 export { DecimalRatingSelector } from './decimal-rating-selector';
 
-// Aggregate Views
+// aggregate views
 export { AllEmojiRatingsPopover } from './all-emoji-ratings-popover';
 export { TopEmojiRatingsAccordion } from './top-emoji-ratings-accordion';

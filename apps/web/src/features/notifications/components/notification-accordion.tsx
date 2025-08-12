@@ -1,3 +1,7 @@
+/**
+ * Mobile-friendly accordion that lists notifications with infinite scroll and filtering.
+ * Persists filter choice in localStorage and marks items as read on demand.
+ */
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -51,8 +55,10 @@ export function NotificationAccordion({
   open,
   onOpenChange: _onOpenChange,
 }: NotificationAccordionProps) {
+  // Track which filter tab is active
   const [activeFilter, setActiveFilter] =
     useState<NotificationFilterType>('all');
+  // Intersection observer ref to trigger loading more pages
   const { ref: loadMoreRef, inView } = useInView();
 
   // Check if Convex context is available
@@ -79,6 +85,7 @@ export function NotificationAccordion({
     localStorage.setItem('viberatr-notification-filter', activeFilter);
   }, [activeFilter, convexAvailable]);
 
+  // Infinite query for notifications of the selected type
   const notificationQuery = useNotificationsInfinite(
     FILTER_TYPE_MAP[activeFilter],
     { enabled: open && convexAvailable }

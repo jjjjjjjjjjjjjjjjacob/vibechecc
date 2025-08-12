@@ -1,3 +1,7 @@
+/**
+ * user profile view module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 import {
   Card,

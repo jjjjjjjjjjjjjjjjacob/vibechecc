@@ -1,14 +1,20 @@
+/**
+ * Full integration tests for notification flows.
+ * Exercises creation, unread counts, and mark-as-read behavior.
+ */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { convexTest, type TestConvex } from 'convex-test';
 import { api, internal } from '../_generated/api';
 import schema from '../schema';
 import { modules } from '../../vitest.setup';
 
+// Verify notifications across follow lifecycle
 describe('Notifications Integration', () => {
   let t: TestConvex<typeof schema>;
   let consoleSpy: any;
 
   beforeEach(() => {
+    // Use fake timers so scheduled functions can be flushed
     vi.useFakeTimers();
     t = convexTest(schema, modules);
 
@@ -17,6 +23,7 @@ describe('Notifications Integration', () => {
   });
 
   afterEach(() => {
+    // Restore timers and console after each test
     vi.useRealTimers();
     consoleSpy?.mockRestore();
   });

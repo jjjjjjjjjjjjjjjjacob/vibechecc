@@ -1,3 +1,8 @@
+/**
+ * Emoji metadata representing food and drink items for database seeding.
+ * Each object includes descriptive keywords and tags to support search and
+ * categorization in development environments.
+ */
 import type { Emoji } from '../../schema';
 
 export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [

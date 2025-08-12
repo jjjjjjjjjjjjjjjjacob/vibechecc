@@ -1,5 +1,10 @@
+/**
+ * tests useInstantSearch hook for debounced search execution
+ * ensures queries fire after delay and cancel on cleanup
+ */
 /// <reference lib="dom" />
 
+// vitest helpers for assertions and timers
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, cleanup } from '@testing-library/react';
 import {

@@ -1,3 +1,7 @@
+/**
+ * search mock data module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import type {
   SearchResponse,
   VibeSearchResult,

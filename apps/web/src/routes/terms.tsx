@@ -1,8 +1,13 @@
+/**
+ * terms of service route serves static legal text and seo metadata.
+ * it mirrors the privacy page structure to keep legal pages consistent.
+ */
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';
 
 export const Route = createFileRoute('/terms')({
+  // inject standard seo tags for clarity and sharing
   head: () => ({
     meta: [
       ...seo({
@@ -15,6 +20,7 @@ export const Route = createFileRoute('/terms')({
 });
 
 function TermsPage() {
+  // display the terms content in a structured layout
   return (
     <BaseLayout maxWidth="4xl" padding="lg">
       <div className="prose prose-lg max-w-none">
@@ -24,6 +30,7 @@ function TermsPage() {
           <p>effective date: {new Date().toLocaleDateString()}</p>
         </div>
 
+        {/* overview of agreement acceptance */}
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">
             1. acceptance of terms

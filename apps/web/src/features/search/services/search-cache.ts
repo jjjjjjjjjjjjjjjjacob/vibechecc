@@ -1,3 +1,7 @@
+/**
+ * search cache module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { queryOptions, type QueryClient } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';

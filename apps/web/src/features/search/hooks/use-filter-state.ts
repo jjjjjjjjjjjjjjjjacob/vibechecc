@@ -1,3 +1,7 @@
+/**
+ * use filter state module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useCallback, useMemo } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import type { SearchFilters, SearchResultType } from '@viberatr/types';

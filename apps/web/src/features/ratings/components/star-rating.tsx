@@ -1,3 +1,7 @@
+/**
+ * Interactive five-circle rating component that supports decimals and popover mode.
+ * Renders circles that fill based on hover and current rating value.
+ */
 import { Circle } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
 import { useTheme } from '@/features/theming/components/theme-provider';
@@ -27,9 +31,13 @@ export function StarRating({
   step = 0.2,
   showValue = false,
 }: StarRatingProps) {
+  // Track theme so filled circles match user's colors
   const { resolvedTheme } = useTheme();
+  // Flag to avoid hydration mismatch when rendering on client
   const [mounted, setMounted] = useState(false);
+  // Track which circle is hovered for previewing rating
   const [hoverValue, setHoverValue] = useState(0);
+  // Array representing each of the five circles
   const circles = [1, 2, 3, 4, 5];
 
   // Avoid hydration mismatch
@@ -124,6 +132,7 @@ export function StarRating({
       onMouseLeave={handleMouseLeave}
     >
       {circles.map((circle, index) => {
+        // Percent of this circle that should appear filled
         const fillPercentage = Math.min(
           100,
           Math.max(0, (displayValue - (circle - 1)) * 100)
@@ -151,11 +160,13 @@ export function StarRating({
           >
             {isPartiallyFilled && allowDecimals ? (
               <div className="relative">
+                {/* outline circle */}
                 <Circle className={cn(sizeClasses[size])} />
                 <div
                   className="absolute inset-0 overflow-hidden"
                   style={{ width: `${fillPercentage}%` }}
                 >
+                  {/* overlay filled portion */}
                   <Circle
                     className={cn(
                       sizeClasses[size],

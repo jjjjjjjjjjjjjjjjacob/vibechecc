@@ -12,6 +12,11 @@ interface EmojiRatingFilterProps {
   onMinValueChange: (value: number | undefined) => void;
 }
 
+/**
+ * Filter panel allowing users to narrow search results by emoji and minimum
+ * rating value. Emoji metadata is fetched from Convex and a slider controls the
+ * minimum value threshold.
+ */
 export function EmojiRatingFilter({
   selectedEmojis,
   minValue,
@@ -20,15 +25,15 @@ export function EmojiRatingFilter({
 }: EmojiRatingFilterProps) {
   const { data: emojiMetadataArray, isLoading } = useEmojiMetadata();
 
-  // Get emojis from metadata or use defaults
+  // derive list of emojis to display, falling back to defaults
   const availableEmojis = React.useMemo(() => {
-    // Popular rating emojis to show if metadata is not loaded
+    // popular rating emojis to show if metadata is not loaded
     const defaultEmojis = ['😍', '🔥', '😱', '💯', '😂', '🤩', '😭', '🥺'];
 
     if (!emojiMetadataArray || emojiMetadataArray.length === 0) {
       return defaultEmojis;
     }
-    // Get up to 12 emojis from metadata
+    // get up to 12 emojis from metadata
     return emojiMetadataArray.slice(0, 12).map((m) => m.emoji);
   }, [emojiMetadataArray]);
 

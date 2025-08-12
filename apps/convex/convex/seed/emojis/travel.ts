@@ -1,5 +1,10 @@
-import type { Emoji } from '../../schema';
+/**
+ * Travel and location themed emoji seed data.
+ * Used by the seeding script to populate geography and transport icons.
+ */
+import type { Emoji } from '../../schema'; // schema type for verification
 
+// ordered list of travel emojis grouped by place type
 export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
   // Places - Maps
   {
@@ -1720,4 +1725,4 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#FF8C00',
     tags: ['comet', 'space', 'shooting'],
   },
-];
+]; // end of travel emoji dataset

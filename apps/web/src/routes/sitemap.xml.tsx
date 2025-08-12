@@ -1,10 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router';
 
+/**
+ * Generates an XML sitemap for the site.
+ * For now this only lists static routes; dynamic entries
+ * (like individual vibes or profiles) would require server data.
+ */
 export const Route = createFileRoute('/sitemap/xml')({
   loader: async () => {
     const baseUrl = 'https://viberatr.com';
 
-    // Static pages
+    // Static pages that never change and can be hard coded
     const staticUrls = [
       '',
       '/discover',
@@ -14,10 +19,10 @@ export const Route = createFileRoute('/sitemap/xml')({
       '/privacy',
     ];
 
-    // For now, just include static URLs
-    // Dynamic URLs would require server-side data fetching
+    // Dynamic URLs could be fetched here in the future
     const allUrls = staticUrls;
 
+    // Build XML document manually since we only have a few links
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allUrls
@@ -32,19 +37,22 @@ ${allUrls
   .join('\n')}
 </urlset>`;
 
-    // Return sitemap data that the component can render
+    // Loader returns the raw XML string for the component to output
     return { sitemap };
   },
   component: SitemapXML,
 });
 
+/**
+ * Outputs the pre-built XML from the loader.
+ * When rendered server-side we return the string wrapped in a
+ * <pre> tag so no dangerous HTML injection is needed.
+ */
 function SitemapXML() {
   const { sitemap } = Route.useLoaderData();
 
-  // SECURITY FIX: Removed dangerouslySetInnerHTML to prevent XSS
-  // Set the response headers for XML
+  // Only render the content during SSR; clients don't need a sitemap UI
   if (typeof window === 'undefined') {
-    // Return pre-escaped XML content safely
     return (
       <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
         {sitemap}
@@ -52,5 +60,6 @@ function SitemapXML() {
     );
   }
 
+  // Client render just returns nothing so this route doesn't explode
   return null;
 }

@@ -1,3 +1,7 @@
+/**
+ * onboarding interests step module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';

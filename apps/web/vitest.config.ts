@@ -4,6 +4,11 @@ import { resolve } from 'path';
 import react from '@vitejs/plugin-react';
 import tsConfigPaths from 'vite-tsconfig-paths';
 
+/**
+ * Vitest configuration for the web application.
+ * Sets up React, path aliases, and coverage thresholds to keep
+ * frontend code well tested.
+ */
 export default defineConfig({
   plugins: [
     react(),
@@ -12,12 +17,16 @@ export default defineConfig({
     }),
   ],
   test: {
+    // Enable global test APIs like `describe` and `it`
     globals: true,
+    // Run tests in a DOM-like environment for React components
     environment: 'happy-dom',
+    // Register setup to install DOM polyfills and matchers
     setupFiles: ['./vitest.setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
+      // Ignore generated and config files from coverage
       exclude: [
         'coverage/**',
         'dist/**',
@@ -42,6 +51,7 @@ export default defineConfig({
       },
     },
   },
+  // Convenience import aliases shared across tests
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

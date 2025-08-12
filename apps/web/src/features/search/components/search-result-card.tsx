@@ -1,3 +1,7 @@
+/**
+ * search result card module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

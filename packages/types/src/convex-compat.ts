@@ -1,5 +1,8 @@
-// Type compatibility layer for Convex database types
-// This file bridges the gap between Convex types and frontend interfaces
+/**
+ * Type compatibility layer for Convex database documents.
+ * Bridges the gap between Convex's schema-generated types and the
+ * frontend-facing interfaces used in the web app.
+ */
 
 // Base Convex document type with _id and _creationTime
 export interface ConvexDoc {
@@ -100,6 +103,7 @@ export function transformConvexUser(
   };
 }
 
+// Convert a Convex `vibes` document into the shared Vibe interface
 export function transformConvexVibe(
   convexVibe: ConvexVibe,
   createdBy?: import('./index').User | null
@@ -119,6 +123,7 @@ export function transformConvexVibe(
   };
 }
 
+// Convert a Convex rating document into the shared Rating interface
 export function transformConvexRating(
   convexRating: ConvexRating,
   user?: import('./index').User | null
@@ -135,6 +140,7 @@ export function transformConvexRating(
   };
 }
 
+// Convert a Convex follow document into the shared Follow interface
 export function transformConvexFollow(
   convexFollow: ConvexFollow
 ): import('./index').Follow {

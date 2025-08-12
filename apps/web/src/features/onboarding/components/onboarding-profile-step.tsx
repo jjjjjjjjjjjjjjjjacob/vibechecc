@@ -1,3 +1,7 @@
+/**
+ * onboarding profile step module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -41,7 +45,7 @@ export function OnboardingProfileStep({
     e.preventDefault();
 
     if (!user) {
-      toast.error('User not found');
+      toast.error('user not found');
       return;
     }
 
@@ -94,14 +98,14 @@ export function OnboardingProfileStep({
       // Execute all updates in parallel
       if (promises.length > 0) {
         await Promise.all(promises);
-        toast.success('Profile updated successfully!');
+        toast.success('profile updated successfully!');
       }
 
       onNext();
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('(Profile Step) Error updating profile:', error);
-      toast.error('Failed to update profile. Please try again.');
+      toast.error('failed to update profile. please try again.');
     }
   };
 
@@ -133,7 +137,7 @@ export function OnboardingProfileStep({
     `${formData.first_name} ${formData.last_name}`.trim() ||
     formData.username ||
     user?.firstName ||
-    'User';
+    'user';
 
   return (
     <div className="mx-auto max-w-md">
@@ -218,14 +222,16 @@ export function OnboardingProfileStep({
                   onClick={onNext}
                   className="flex-1"
                 >
-                  Skip for Now
+                  {/* allow user to skip profile details for now */}
+                  skip for now
                 </Button>
                 <Button
                   type="submit"
                   disabled={isLoading}
                   className="from-theme-primary to-theme-secondary text-primary-foreground hover:from-theme-primary/90 hover:to-theme-secondary/90 flex-1 bg-gradient-to-r"
                 >
-                  {isLoading ? 'Saving...' : 'Continue'}
+                  {/* show saving state or continue action */}
+                  {isLoading ? 'saving...' : 'continue'}
                 </Button>
               </div>
             </form>

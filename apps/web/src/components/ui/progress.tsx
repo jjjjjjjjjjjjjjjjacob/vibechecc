@@ -3,6 +3,9 @@ import * as ProgressPrimitive from '@radix-ui/react-progress';
 
 import { cn } from '@/utils/tailwind-utils';
 
+/**
+ * Thin progress bar that fills based on a numeric value.
+ */
 function Progress({
   className,
   value,
@@ -12,6 +15,7 @@ function Progress({
     <ProgressPrimitive.Root
       data-slot="progress"
       className={cn(
+        // background track for the progress indicator
         'bg-primary/20 relative h-2 w-full overflow-hidden rounded-full',
         className
       )}

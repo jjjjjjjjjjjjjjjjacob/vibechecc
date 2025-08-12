@@ -1,3 +1,7 @@
+/**
+ * use instant search module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useState, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';

@@ -1,3 +1,9 @@
+/**
+ * Route component for `/users/$username`.
+ * Fetches profile data based on the dynamic username segment and
+ * renders either the profile view, a loading skeleton, or an error
+ * state when the user cannot be found.
+ */
 import { createFileRoute } from '@tanstack/react-router';
 import * as React from 'react';
 import {
@@ -47,10 +53,12 @@ function UserProfile() {
 
   // Early returns after all hooks have been called
   if (userLoading) {
+    // Show skeleton while profile data loads
     return <UserProfileSkeleton />;
   }
 
   if (userError || !user) {
+    // Render a friendly not-found state when user lookup fails
     return (
       <div className="from-background via-background to-muted/20 min-h-screen bg-gradient-to-br">
         <div className="container mx-auto px-4 py-8">

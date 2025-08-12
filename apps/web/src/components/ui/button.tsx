@@ -1,22 +1,19 @@
-import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
-import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react'; // React utilities for ref/forwarding
+import { Slot } from '@radix-ui/react-slot'; // allows rendering as child element
+import { cva, type VariantProps } from 'class-variance-authority'; // variant styling helper
 
-import { cn } from '@/utils/tailwind-utils';
+import { cn } from '@/utils/tailwind-utils'; // tailwind class merger
 
+// define visual variants for different button styles and sizes
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        default:
-          'bg-primary text-primary-foreground shadow hover:bg-primary/90',
-        destructive:
-          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
-        outline:
-          'border border-input bg-transparent border-border text-primary/80 hover:bg-accent/20 hover:text-accent-foreground',
-        secondary:
-          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
+        default: 'bg-primary text-primary-foreground shadow hover:bg-primary/90',
+        destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
+        outline: 'border border-input bg-transparent border-border text-primary/80 hover:bg-accent/20 hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
       },
@@ -34,15 +31,20 @@ const buttonVariants = cva(
   }
 );
 
+/**
+ * Props for the reusable Button component.
+ * Supports style variants and optional "asChild" rendering.
+ */
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
+  asChild?: boolean; // render the button styles on a child element
 }
 
+// Forward ref so parent components can access the underlying button element
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button';
+    const Comp = asChild ? Slot : 'button'; // allow polymorphic rendering
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}

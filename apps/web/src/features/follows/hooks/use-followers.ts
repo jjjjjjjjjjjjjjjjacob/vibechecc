@@ -8,6 +8,9 @@ interface UseFollowersOptions {
   enabled?: boolean;
 }
 
+/**
+ * Fetches followers for a given user with client-side pagination support.
+ */
 export function useFollowers(
   userId: string,
   options: UseFollowersOptions = {}
@@ -28,6 +31,7 @@ export function useFollowers(
 
   const loadMore = React.useCallback(() => {
     if (data && data.continueCursor && !data.isDone) {
+      // advance cursor to fetch next page
       setCursor(data.continueCursor);
     }
   }, [data]);

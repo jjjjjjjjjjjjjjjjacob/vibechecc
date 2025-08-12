@@ -3,7 +3,7 @@
  * Reduces font size from 25MB+ to ~3-4MB while maintaining full functionality
  */
 
-// Core emojis that should be loaded immediately (most commonly used)
+// core emoji ranges loaded immediately for basic experience
 export const CORE_EMOJI_UNICODE_RANGES = [
   // Basic Latin emojis and symbols
   'U+1F600-1F64F', // Emoticons
@@ -16,7 +16,7 @@ export const CORE_EMOJI_UNICODE_RANGES = [
   'U+1F900-1F9FF', // Supplemental Symbols and Pictographs
 ];
 
-// Extended emojis loaded on-demand
+// extended emoji ranges fetched lazily to save bandwidth
 export const EXTENDED_EMOJI_UNICODE_RANGES = [
   'U+1F780-1F7FF', // Geometric Shapes Extended
   'U+1F800-1F8FF', // Supplemental Arrows-C

@@ -1,3 +1,8 @@
+/**
+ * Integration tests for Convex file operations. These tests verify
+ * that authenticated users can generate upload URLs and that the
+ * storage endpoints behave as expected.
+ */
 import { convexTest } from 'convex-test';
 import { describe, test, expect, beforeEach } from 'vitest';
 import { api } from '../_generated/api';

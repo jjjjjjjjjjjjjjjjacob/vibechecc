@@ -1,6 +1,11 @@
+/**
+ * Tests for security-related validators like rate limiting.
+ * Ensures abuse prevention utilities work as intended.
+ */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { SecurityValidators, AuthUtils } from './securityValidators';
+import { SecurityValidators, AuthUtils } from './security-validators';
 
+// Group validator behaviour tests
 describe('SecurityValidators', () => {
   describe('checkRateLimit', () => {
     beforeEach(() => {

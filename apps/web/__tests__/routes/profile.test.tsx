@@ -1,5 +1,10 @@
 /// <reference lib="dom" />
 
+/**
+ * Tests for the profile route component. These tests verify that the profile
+ * page renders user data and handles loading and error states using mocked
+ * Clerk and Convex hooks.
+ */
 import {
   afterEach,
   describe,

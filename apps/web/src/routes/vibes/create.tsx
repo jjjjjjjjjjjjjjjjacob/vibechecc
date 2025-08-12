@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+// Wrapper around PostHog analytics for tracking vibe creation events
+import { usePostHog } from '@/hooks/use-posthog';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
@@ -21,7 +22,7 @@ import '@/styles/create-vibe.css';
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
-  if (!request) throw new Error('No request found');
+  if (!request) throw new Error('no request found');
   const { userId } = await getAuth(request);
 
   if (!userId) {
@@ -38,6 +39,10 @@ export const Route = createFileRoute('/vibes/create')({
   beforeLoad: async () => await requireAuth(),
 });
 
+/**
+ * Form for composing a new vibe. Handles file uploads, tag entry, and
+ * submission to the Convex backend while tracking relevant analytics events.
+ */
 function CreateVibe() {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -55,14 +60,14 @@ function CreateVibe() {
     e.preventDefault();
 
     if (!title.trim() || !description.trim()) {
-      setError('Title and description are required');
+      setError('title and description are required');
       return;
     }
 
-    if (!user?.id) {
-      setError('You must be signed in to create a vibe');
-      return;
-    }
+      if (!user?.id) {
+        setError('you must be signed in to create a vibe');
+        return;
+      }
 
     setIsSubmitting(true);
     setError('');
@@ -82,7 +87,7 @@ function CreateVibe() {
       toast.success('vibe created successfully!', {
         duration: 5000,
         action: {
-          label: 'Go to Vibe',
+            label: 'go to vibe',
           onClick: () =>
             navigate({
               to: '/vibes/$vibeId',
@@ -97,7 +102,7 @@ function CreateVibe() {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError('An error occurred while creating your vibe');
+          setError('an error occurred while creating your vibe');
       }
       setIsSubmitting(false);
     }

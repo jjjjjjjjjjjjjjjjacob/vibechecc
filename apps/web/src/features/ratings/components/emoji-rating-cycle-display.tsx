@@ -1,3 +1,7 @@
+/**
+ * Cycles through a set of emojis until the user hovers, then lets them rate via a popover.
+ * Provides an inviting call-to-action for first-time ratings.
+ */
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import { RatingPopover } from './rating-popover';
@@ -19,6 +23,7 @@ interface EmojiRatingCycleDisplayProps {
   delay?: number;
 }
 
+// Emojis shown while cycling through options
 const DEFAULT_EMOJIS = [
   '❓',
   '😍',
@@ -42,8 +47,11 @@ export function EmojiRatingCycleDisplay({
   delay = 0,
   // variant = 'color',
 }: EmojiRatingCycleDisplayProps) {
+  // Index into the emoji array for the currently displayed symbol
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
+  // Pause cycling when user hovers so they can click a specific emoji
   const [isHovered, setIsHovered] = React.useState(false);
+  // Track transition state for CSS animations
   const [emojiTransition, setEmojiTransition] = React.useState<
     'in' | 'out' | 'idle'
   >('idle');

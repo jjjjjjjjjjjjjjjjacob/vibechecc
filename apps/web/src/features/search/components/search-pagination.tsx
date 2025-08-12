@@ -1,18 +1,23 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Route } from '@/routes/search';
+/**
+ * Renders pagination controls for the search results page.
+ * Uses tanstack router navigation and keeps query params intact.
+ */
+import { ChevronLeft, ChevronRight } from 'lucide-react'; // arrow icons
+import { Button } from '@/components/ui/button'; // styled button component
+import { Route } from '@/routes/search'; // access to search route for navigation
 
 interface SearchPaginationProps {
-  currentPage: number;
-  totalPages: number;
+  currentPage: number; // currently selected page
+  totalPages: number; // total number of pages available
 }
 
 export function SearchPagination({
   currentPage,
   totalPages,
 }: SearchPaginationProps) {
-  const navigate = Route.useNavigate();
+  const navigate = Route.useNavigate(); // router hook for programmatic navigation
 
+  // helper to update url and scroll position
   const goToPage = (page: number) => {
     navigate({
       search: (prev) => ({
@@ -21,17 +26,17 @@ export function SearchPagination({
       }),
     });
 
-    // Scroll to top when changing pages
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (totalPages <= 1) {
-    return null;
+    return null; // hide when pagination unnecessary
   }
 
+  // create an array of page buttons with ellipsis when needed
   const renderPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
+    const pages = [] as React.ReactNode[];
+    const maxVisible = 5; // max number of page buttons to show
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     const end = Math.min(totalPages, start + maxVisible - 1);
 

@@ -1,20 +1,24 @@
-import * as React from 'react';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { cn } from '@/utils/tailwind-utils';
-import { Badge } from '@/components/ui/badge';
+import * as React from 'react'; // React primitives
+import { Label } from '@/components/ui/label'; // text label helper
+import { Slider } from '@/components/ui/slider'; // range slider component
+import { cn } from '@/utils/tailwind-utils'; // conditional classnames
+import { Badge } from '@/components/ui/badge'; // pill style badge for values
 
+/**
+ * Props controlling the rating range selector.
+ * Allows callers to configure bounds, display, and appearance.
+ */
 interface RatingRangeSliderProps {
-  value: [number, number];
-  onChange: (value: [number, number]) => void;
-  min?: number;
-  max?: number;
-  step?: number;
-  disabled?: boolean;
-  className?: string;
-  label?: string;
-  showValues?: boolean;
-  variant?: 'default' | 'compact';
+  value: [number, number]; // current [min,max] values
+  onChange: (value: [number, number]) => void; // emit updates to parent
+  min?: number; // lowest allowed rating
+  max?: number; // highest allowed rating
+  step?: number; // precision for adjustments
+  disabled?: boolean; // disables interaction
+  className?: string; // optional container classes
+  label?: string; // header text when variant is default
+  showValues?: boolean; // toggle value display next to label
+  variant?: 'default' | 'compact'; // layout style
 }
 
 export function RatingRangeSlider({
@@ -29,16 +33,17 @@ export function RatingRangeSlider({
   showValues = true,
   variant = 'default',
 }: RatingRangeSliderProps) {
-  const [minValue, maxValue] = value;
+  const [minValue, maxValue] = value; // destructure for clarity
 
+  // update state only when lower bound not exceeding upper bound
   const handleValueChange = (newValue: number[]) => {
     const [newMin, newMax] = newValue;
-    // Ensure min is never greater than max
     if (newMin <= newMax) {
       onChange([newMin, newMax]);
     }
   };
 
+  // turn numeric values into nice strings
   const formatValue = (val: number) => {
     if (val === undefined || val === null || isNaN(val)) {
       return '0';
@@ -49,10 +54,10 @@ export function RatingRangeSlider({
   return (
     <div className={cn('space-y-3', className)}>
       {variant === 'default' && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">{/* header row */}
           <Label className="text-sm font-medium lowercase">{label}</Label>
           {showValues && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">{/* current range display */}
               <Badge
                 variant="secondary"
                 className="border-[hsl(var(--theme-primary))]/20 bg-[hsl(var(--theme-primary))]/10 text-xs text-[hsl(var(--theme-primary))]"
@@ -65,7 +70,7 @@ export function RatingRangeSlider({
       )}
 
       {variant === 'compact' && showValues && (
-        <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center justify-between text-xs">{/* compact values */}
           <span className="text-muted-foreground">
             min: {formatValue(minValue)}
           </span>
@@ -75,7 +80,7 @@ export function RatingRangeSlider({
         </div>
       )}
 
-      <div className="px-3 py-2">
+      <div className="px-3 py-2">{/* interactive slider */}
         <Slider
           value={[minValue, maxValue]}
           onValueChange={handleValueChange}
@@ -96,7 +101,7 @@ export function RatingRangeSlider({
       </div>
 
       {variant === 'default' && (
-        <div className="text-muted-foreground flex items-center justify-between px-3 text-xs">
+        <div className="text-muted-foreground flex items-center justify-between px-3 text-xs">{/* slider bounds */}
           <span>{min}</span>
           <span>{max}</span>
         </div>

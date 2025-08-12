@@ -1,3 +1,6 @@
+/**
+ * Tests for user utility helpers that format names and initials.
+ */
 import { describe, it, expect } from 'vitest';
 import { computeUserDisplayName, getUserInitials } from './user-utils';
 import type { User } from '../types';
@@ -46,16 +49,16 @@ describe('User Utils', () => {
       expect(computeUserDisplayName(user)).toBe('John Smith');
     });
 
-    it('should return Unknown User as fallback when no fields are available', () => {
+    it('should return unknown user as fallback when no fields are available', () => {
       const user: User = {
         externalId: '123',
       };
 
-      expect(computeUserDisplayName(user)).toBe('Unknown User');
+      expect(computeUserDisplayName(user)).toBe('unknown user');
     });
 
     it('should handle null user', () => {
-      expect(computeUserDisplayName(null)).toBe('Unknown User');
+      expect(computeUserDisplayName(null)).toBe('unknown user');
     });
 
     it('should trim whitespace from fields', () => {

@@ -4,10 +4,24 @@ import { internal } from './_generated/api';
 import type { WebhookEvent } from '@clerk/backend';
 import { Webhook } from 'svix';
 
+/**
+ * Central HTTP router for Convex.
+ *
+ * Currently it only exposes an endpoint for Clerk webhooks but additional
+ * routes can be registered on this object.
+ */
 const http = httpRouter();
 
+/**
+ * Handle webhook callbacks sent by Clerk.
+ *
+ * The request is validated for basic headers and the Svix signature before
+ * dispatching to internal Convex functions. Each branch of the switch handles
+ * a particular Clerk event type.
+ */
 const handleClerkWebhook = httpAction(async (ctx, request) => {
   // SECURITY: Rate limiting and basic request validation
+  // Extract identifying headers from the request to ensure it came from Svix
   const userAgent = request.headers.get('user-agent');
   const contentType = request.headers.get('content-type');
 
@@ -23,13 +37,18 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
     return new Response('Invalid request', { status: 400 });
   }
 
+  // Parse and verify the incoming event signature. Validation failure returns
+  // early with a 400 response to stop further processing.
   const event = await validateRequest(request);
   if (!event) {
     return new Response('Webhook validation failed', { status: 400 });
   }
+
+  // Branch on the specific Clerk event type so each case can focus on its
+  // dedicated side effects in Convex.
   switch (event.type) {
     case 'user.created':
-      // Create user in database
+      // Persist the new user details in our database
       await ctx.runMutation(internal.users.upsertFromClerk, {
         data: event.data,
       });
@@ -50,12 +69,14 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
       );
       break;
     case 'user.updated':
+      // Synchronize any updates coming from Clerk into Convex
       await ctx.runMutation(internal.users.upsertFromClerk, {
         data: event.data,
       });
       break;
 
     case 'user.deleted': {
+      // Extract the user id and remove the user record from Convex
       const clerkUserId = event.data.id!;
       // console.log('Deleting user', clerkUserId);
       await ctx.runMutation(internal.users.deleteFromClerk, { clerkUserId });
@@ -68,14 +89,26 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
   return new Response(null, { status: 200 });
 });
 
+// Register the Clerk webhook endpoint with the HTTP router. Convex will call
+// `handleClerkWebhook` whenever a POST request hits this path.
 http.route({
   path: '/webhooks/clerk',
   method: 'POST',
   handler: handleClerkWebhook,
 });
 
+/**
+ * Validate a raw webhook request and return the parsed event when successful.
+ *
+ * Svix headers are checked for existence, a short time window prevents replay
+ * attacks, and the configured Clerk signing secret is used to verify the
+ * payload signature. Any failure results in `null` so callers can abort early.
+ */
 async function validateRequest(req: Request): Promise<WebhookEvent | null> {
+  // Read the raw request body for signature verification
   const payloadString = await req.text();
+
+  // Gather the Svix headers that contain the signature and timestamp
   const svixHeaders = {
     'svix-id': req.headers.get('svix-id')!,
     'svix-timestamp': req.headers.get('svix-timestamp')!,
@@ -113,6 +146,7 @@ async function validateRequest(req: Request): Promise<WebhookEvent | null> {
     return null;
   }
 
+  // Create the verifier and attempt to check the payload signature
   const wh = new Webhook(webhookSecret);
   try {
     return wh.verify(payloadString, svixHeaders) as unknown as WebhookEvent;

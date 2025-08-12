@@ -1,3 +1,7 @@
+/**
+ * Unit tests for notification helper functions and mutations.
+ * Validates creation rules and read/unread state transitions.
+ */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { convexTest, type TestConvex } from 'convex-test';
 import { api, internal } from '../_generated/api';
@@ -5,15 +9,18 @@ import schema from '../schema';
 import { modules } from '../../vitest.setup';
 import type { Notification } from '@viberatr/types';
 
+// Group basic notification behaviors
 describe('Notifications', () => {
   let t: TestConvex<typeof schema>;
 
   beforeEach(() => {
+    // Fake timers help simulate scheduled tasks
     vi.useFakeTimers();
     t = convexTest(schema, modules);
   });
 
   afterEach(() => {
+    // Restore real timers after each test
     vi.useRealTimers();
   });
 

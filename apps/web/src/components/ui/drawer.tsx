@@ -1,32 +1,37 @@
-import * as React from 'react';
-import { Drawer as DrawerPrimitive, Handle as DrawerHandle } from 'vaul';
+import * as React from 'react'; // React helpers
+import { Drawer as DrawerPrimitive, Handle as DrawerHandle } from 'vaul'; // drawer component from vaul
 
-import { cn } from '@/utils/tailwind-utils';
+import { cn } from '@/utils/tailwind-utils'; // class name helper
 
+/** root component controlling drawer state */
 function Drawer({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
+/** element that toggles the drawer */
 function DrawerTrigger({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
   return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
 }
 
+/** portal to render drawer outside normal flow */
 function DrawerPortal({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
   return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
 }
 
+/** close button wrapper */
 function DrawerClose({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
   return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
+/** backdrop behind the drawer */
 function DrawerOverlay({
   className,
   ...props
@@ -43,6 +48,7 @@ function DrawerOverlay({
   );
 }
 
+/** actual sliding panel */
 function DrawerContent({
   className,
   children,
@@ -75,6 +81,7 @@ function DrawerContent({
   );
 }
 
+/** header region */
 function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -88,6 +95,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+/** footer area for actions */
 function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -98,6 +106,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+/** heading text */
 function DrawerTitle({
   className,
   ...props
@@ -111,6 +120,7 @@ function DrawerTitle({
   );
 }
 
+/** supporting description text */
 function DrawerDescription({
   className,
   ...props

@@ -1,4 +1,4 @@
-import { fuzzyScore } from './fuzzy_search';
+import { fuzzyScore } from './fuzzy-search';
 import type {
   VibeSearchResult,
   UserSearchResult,
@@ -9,6 +9,10 @@ import type {
  * Advanced relevance scoring system for search results
  */
 
+/**
+ * Tuneable weights that influence the overall relevance score. Higher
+ * numbers increase the contribution of that factor to the final score.
+ */
 interface ScoringWeights {
   exactMatch: number;
   fuzzyMatch: number;

@@ -1,4 +1,9 @@
-// Core viberatr types that can be shared across applications
+/**
+ * Core viberatr types shared across applications.
+ * This file re-exports domain models and compatibility helpers so
+ * both the web app and Convex backend can rely on a single source
+ * of truth for shared interfaces.
+ */
 
 // Re-export search types
 export * from './search';

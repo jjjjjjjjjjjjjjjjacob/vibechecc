@@ -1,10 +1,16 @@
+/**
+ * exercises the survey manager utilities which interface with posthog
+ * ensures we set user properties, capture events, and gracefully
+ * handle error paths for new user onboarding surveys
+ */
 /// <reference lib="dom" />
 
+// vitest testing helpers used throughout
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { surveyManager, trackSurveyEvents } from '@/lib/survey-manager';
 import { analytics } from '@/lib/posthog';
 
-// Mock PostHog analytics
+// mock posthog analytics to control feature flags and captures
 vi.mock('@/lib/posthog', () => ({
   analytics: {
     isInitialized: vi.fn(),

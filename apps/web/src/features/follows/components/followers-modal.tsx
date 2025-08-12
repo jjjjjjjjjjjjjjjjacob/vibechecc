@@ -1,4 +1,10 @@
+/**
+ * followers modal shows a searchable list of users who follow the target user.
+ * it opens as a dialog and allows navigating to follower profiles or following
+ * them back.
+ */
 import * as React from 'react';
+// dialog primitives compose the modal shell
 import {
   Dialog,
   DialogContent,
@@ -9,13 +15,16 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+// icons for search field, follower list, and clear action
 import { Search, Users, X } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+// hook to fetch followers for a given user
 import { useFollowers } from '../hooks/use-followers';
 import { FollowButton } from './follow-button';
 import type { User } from '@viberatr/types';
 import { trackEvents } from '@/lib/posthog';
 
+// internal shape representing a follower relationship including when it started
 interface _Follower {
   user: User | null;
   followedAt: number;
@@ -36,12 +45,14 @@ export function FollowersModal({
   username,
 }: FollowersModalProps) {
   const navigate = useNavigate();
+  // local text input state for searching within the followers list
   const [searchQuery, setSearchQuery] = React.useState('');
+  // fetch followers when modal is opened
   const { data, isLoading, loadMore, hasMore } = useFollowers(userId, {
     enabled: isOpen,
   });
 
-  // Filter followers based on search query
+  // filter followers based on search query
   const filteredFollowers = React.useMemo(() => {
     if (!searchQuery.trim()) return data.followers;
 
@@ -65,18 +76,20 @@ export function FollowersModal({
     setSearchQuery(e.target.value);
   };
 
+  // clear the search field
   const clearSearch = () => {
     setSearchQuery('');
   };
 
+  // navigate to selected user's profile when clicked
   const handleUserClick = (user: User) => {
     if (user.username) {
-      onClose(); // Close modal first
+      onClose(); // close modal first
       navigate({ to: '/users/$username', params: { username: user.username } });
     }
   };
 
-  // Track modal open/close
+  // track modal open/close events for analytics
   React.useEffect(() => {
     if (isOpen) {
       trackEvents.modalOpened('followers', { user_id: userId, username });

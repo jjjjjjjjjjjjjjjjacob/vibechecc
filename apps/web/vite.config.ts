@@ -4,22 +4,32 @@ import tsConfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 
+/**
+ * Vite configuration for the web frontend. Combines TanStack Start,
+ * React, Tailwind, and path alias plugins. Build options mirror the
+ * Nitro config to ensure optimal deployment on Cloudflare.
+ */
 export default defineConfig({
   server: {
+    // Run dev server on port 3000 with less intrusive HMR overlay
     port: 3000,
     hmr: {
       overlay: false,
     },
   },
   plugins: [
+    // Resolve TS path aliases
     tsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
+    // Inject Tailwind's Vite plugin for faster builds
     tailwindcss(),
+    // Enable TanStack Start support targeting Cloudflare workers
     tanstackStart({
       target: 'cloudflare-module',
       customViteReactPlugin: true,
     }),
+    // React plugin last so it can process resulting JSX
     react(),
   ],
   build: {
@@ -46,10 +56,10 @@ export default defineConfig({
     target: 'es2020',
     minify: 'esbuild',
     sourcemap: false,
-    // Optimize asset handling
+    // Inline small assets to reduce requests
     assetsInlineLimit: 4096, // Inline assets smaller than 4kb
   },
-  // Optimize dependencies
+  // Pre-bundle commonly used dependencies
   optimizeDeps: {
     include: [
       'react',

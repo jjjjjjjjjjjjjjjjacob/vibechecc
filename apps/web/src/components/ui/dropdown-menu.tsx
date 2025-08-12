@@ -1,3 +1,7 @@
+/**
+ * Dropdown menu primitives wrapping Radix UI components.
+ * Provides styled menu, item, and sub-menu elements.
+ */
 import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';

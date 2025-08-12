@@ -14,17 +14,32 @@ import {
   CommandList,
 } from '@/components/ui/command';
 
+/**
+ * Props accepted by {@link TagInput}. The component keeps track of a list of
+ * tag strings and surfaces completions from Convex as the user types.
+ */
 interface TagInputProps {
+  /** Current list of tag strings displayed as badges */
   tags: string[];
+  /** Callback fired whenever the tag array changes */
   onTagsChange: (tags: string[]) => void;
+  /** Optional placeholder for the input field */
   placeholder?: string;
 }
 
+/**
+ * Autocomplete-enabled input that lets users search for existing tags or create
+ * new ones. Suggestions are fetched from Convex and displayed in a command
+ * menu. Selected tags appear as removable badges above the input.
+ */
 export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
+  // Track the raw input value the user is typing
   const [inputValue, setInputValue] = React.useState('');
+  // Control whether the suggestion dropdown is visible
   const [showSuggestions, setShowSuggestions] = React.useState(false);
 
-  // Search for tags
+  // Query Convex for tags matching the current input. We disable the query when
+  // the input is empty to avoid unnecessary network calls.
   const { data: searchResults } = useQuery({
     ...convexQuery(api.tags.searchTags, {
       query: inputValue,
@@ -33,14 +48,18 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
     enabled: inputValue.length > 0,
   });
 
-  // Get popular tags when no search term
+  // When there's no search term, fall back to a list of popular tags so users
+  // can discover common topics.
   const { data: popularTags } = useQuery({
     ...convexQuery(api.tags.getPopularTags, { limit: 8 }),
     enabled: inputValue.length === 0 && showSuggestions,
   });
 
+  // Decide which list of suggestions to show based on whether the user typed a
+  // query.
   const suggestions = inputValue ? searchResults : popularTags;
 
+  // Normalize and add a tag to the list, preventing duplicates.
   const handleAddTag = (tag: string) => {
     const normalizedTag = tag.toLowerCase().trim();
     if (normalizedTag && !tags.includes(normalizedTag)) {
@@ -49,10 +68,13 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
     }
   };
 
+  // Remove a tag by name from the current array.
   const handleRemoveTag = (tagToRemove: string) => {
     onTagsChange(tags.filter((tag) => tag !== tagToRemove));
   };
 
+  // Keyboard shortcuts: pressing Enter adds the typed tag, Backspace removes
+  // the last tag when the input is empty.
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && inputValue) {
       e.preventDefault();

@@ -26,7 +26,7 @@ export async function getOptimizedAuth(
 ): Promise<OptimizedAuthResult> {
   const startTime = Date.now();
 
-  // Try cache first
+  // first attempt to satisfy auth from in-memory cache
   const cacheKey = generateAuthCacheKey(request);
   const cached = getCachedAuth(cacheKey);
 

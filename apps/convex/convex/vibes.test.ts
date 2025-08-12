@@ -1,16 +1,23 @@
-import { convexTest } from 'convex-test';
-import { modules } from '../vitest.setup';
+/**
+ * Tests for Convex vibe mutations.
+ * Verifies that creating and fetching vibes works with authentication
+ * and that scheduler errors are silenced during tests.
+ */
+import { convexTest } from 'convex-test'; // helper to run Convex in memory
+import { modules } from '../vitest.setup'; // modules to load test handlers
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import schema from './schema'; // Your schema definition
-import { api } from './_generated/api'; // Typed API methods
+import schema from './schema'; // Convex schema definition
+import { api } from './_generated/api'; // typed API methods
 
 // Mock console.error to suppress scheduler transaction errors
 let consoleSpy: any;
 
+// silence console error before each test to keep output clean
 beforeEach(() => {
   consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
+// restore console once test completes
 afterEach(() => {
   consoleSpy?.mockRestore();
 });
@@ -18,11 +25,12 @@ afterEach(() => {
 describe('Vibes Mutations', () => {
   describe('create', () => {
     it('should create a new vibe and store it in the database', async () => {
+      // instantiate a test runner with the schema and modules
       const t = convexTest(schema, modules);
 
       const mockVibeData = {
-        title: 'Test Vibe',
-        description: 'This is a test vibe description.',
+        title: 'test vibe',
+        description: 'this is a test vibe description.',
         image: 'https://example.com/test-image.jpg',
         tags: ['test', 'convex'],
       };
@@ -32,8 +40,8 @@ describe('Vibes Mutations', () => {
         subject: 'user_test_id_123',
         tokenIdentifier: 'test_token_123',
         email: 'test@example.com',
-        givenName: 'Test',
-        familyName: 'User',
+        givenName: 'test',
+        familyName: 'user',
       };
 
       // Create the vibe using the real mutation with authentication

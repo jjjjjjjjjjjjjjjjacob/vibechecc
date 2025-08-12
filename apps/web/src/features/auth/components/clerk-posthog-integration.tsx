@@ -2,9 +2,14 @@
 
 import { useEffect, useRef } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+// Analytics wrapper used to bridge Clerk auth events with PostHog
+import { usePostHog } from '@/hooks/use-posthog';
 import { trackSurveyEvents } from '@/lib/survey-manager';
 
+/**
+ * Bridges Clerk authentication events with PostHog analytics and survey
+ * tracking. Identifies users and sends profile properties after sign in.
+ */
 export function ClerkPostHogIntegration() {
   const { user, isSignedIn } = useUser();
   const { identify, setPersonProperties, reset, trackEvents } = usePostHog();

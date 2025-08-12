@@ -1,4 +1,7 @@
 /// <reference lib="dom" />
+/**
+ * Helper factories and datasets for generating consistent mock objects in tests.
+ */
 
 // Type definitions for mock data
 type MockId<T extends string> = `${T}_${string}`;

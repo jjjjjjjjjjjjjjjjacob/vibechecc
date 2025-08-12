@@ -1,3 +1,8 @@
+/**
+ * Emoji metadata for inanimate objects used to seed the database. These
+ * entries help the development environment demonstrate search results across
+ * common household and technology items.
+ */
 import type { Emoji } from '../../schema';
 
 export const objectEmojis: Omit<Emoji, 'sentiment'>[] = [

@@ -1,5 +1,11 @@
-import type { Emoji } from '../../schema';
+/**
+ * People and body related emoji seed data.
+ * Each entry excludes the derived `sentiment` field and is used to
+ * populate the `emojis` table during database seeding.
+ */
+import type { Emoji } from '../../schema'; // enforce shape of each seed object
 
+// collection of entries grouped by gesture and activity type
 export const peopleEmojis = [
   // Hand gestures
   {
@@ -2746,4 +2752,5 @@ export const peopleEmojis = [
     color: '#8B4513',
     tags: ['footprints', 'tracks', 'walking'],
   },
+// treat the list as immutable and type-checked
 ] as const satisfies readonly Omit<Emoji, 'sentiment'>[];

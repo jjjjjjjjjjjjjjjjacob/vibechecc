@@ -1,3 +1,7 @@
+/**
+ * Command palette primitives built on top of `cmdk` and Radix Dialog.
+ * These components power the application's searchable command menu.
+ */
 import * as React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { SearchIcon } from 'lucide-react';
@@ -28,8 +32,8 @@ function Command({
 }
 
 function CommandDialog({
-  title = 'Command Palette',
-  description = 'Search for a command to run...',
+  title = 'command palette',
+  description = 'search for a command to run...',
   children,
   className,
   showCloseButton = true,

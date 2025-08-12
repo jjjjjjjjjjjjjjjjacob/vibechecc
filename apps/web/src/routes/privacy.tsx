@@ -1,8 +1,13 @@
+/**
+ * privacy policy route renders static legal content with appropriate meta tags.
+ * it wraps the text in the shared base layout for consistent spacing.
+ */
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';
 
 export const Route = createFileRoute('/privacy')({
+  // populate the document head for search engines and sharing previews
   head: () => ({
     meta: [
       ...seo({
@@ -16,6 +21,7 @@ export const Route = createFileRoute('/privacy')({
 });
 
 function PrivacyPage() {
+  // render the policy text using semantic html elements
   return (
     <BaseLayout maxWidth="4xl" padding="lg">
       <div className="prose prose-lg max-w-none">
@@ -25,6 +31,7 @@ function PrivacyPage() {
           <p>effective date: {new Date().toLocaleDateString()}</p>
         </div>
 
+        {/* intro describing the platform's privacy stance */}
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">1. introduction</h2>
           <p className="mb-4">

@@ -1,3 +1,7 @@
+/**
+ * Central export barrel for all reusable UI primitives.
+ * Keeps imports terse across the app.
+ */
 export { Alert, AlertTitle, AlertDescription } from './alert';
 export { Avatar, AvatarFallback, AvatarImage } from './avatar';
 export { Badge, badgeVariants } from './badge';

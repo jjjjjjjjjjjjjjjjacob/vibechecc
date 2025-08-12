@@ -1,3 +1,7 @@
+/**
+ * search filters module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {

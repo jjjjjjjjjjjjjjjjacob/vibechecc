@@ -1,6 +1,7 @@
 /* eslint-disable */
 /**
  * Generated `api` utility.
+ * Provides typed helpers for calling Convex functions.
  *
  * THIS CODE IS AUTOMATICALLY GENERATED.
  *
@@ -13,28 +14,28 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as analytics_search_metrics from "../analytics/search_metrics.js";
-import type * as cleanupSearchHistory from "../cleanupSearchHistory.js";
-import type * as debugSearchHistory from "../debugSearchHistory.js";
-import type * as emojiMetadata from "../emojiMetadata.js";
+import type * as analytics_search_metrics from "../analytics/search-metrics.js";
+import type * as cleanup_search_history from "../cleanup-search-history.js";
+import type * as debug_search_history from "../debug-search-history.js";
+import type * as emoji_metadata from "../emoji-metadata.js";
 import type * as emojiRatings from "../emojiRatings.js";
 import type * as emojis from "../emojis.js";
 import type * as files from "../files.js";
 import type * as follows from "../follows.js";
 import type * as http from "../http.js";
-import type * as importEmojis from "../importEmojis.js";
-import type * as lib_emojiColors from "../lib/emojiColors.js";
-import type * as lib_securityValidators from "../lib/securityValidators.js";
+import type * as import_emojis from "../import-emojis.js";
+import type * as lib_emoji_colors from "../lib/emoji-colors.js";
+import type * as lib_security_validators from "../lib/security-validators.js";
 import type * as notifications from "../notifications.js";
 import type * as ratings from "../ratings.js";
-import type * as search_fuzzy_search from "../search/fuzzy_search.js";
+import type * as search_fuzzy_search from "../search/fuzzy-search.js";
 import type * as search_search_scorer from "../search/search_scorer.js";
-import type * as search_search_utils from "../search/search_utils.js";
+import type * as search_search_utils from "../search/search-utils.js";
 import type * as search from "../search.js";
-import type * as searchImproved from "../searchImproved.js";
-import type * as searchOptimized from "../searchOptimized.js";
-import type * as searchV2 from "../searchV2.js";
-import type * as search_backup from "../search_backup.js";
+import type * as search_improved from "../search-improved.js";
+import type * as search_optimized from "../search-optimized.js";
+import type * as search_v2 from "../search-v2.js";
+import type * as search_backup from "../search-backup.js";
 import type * as seed_emojis_activities from "../seed/emojis/activities.js";
 import type * as seed_emojis_animals from "../seed/emojis/animals.js";
 import type * as seed_emojis_food from "../seed/emojis/food.js";
@@ -57,28 +58,28 @@ import type * as vibes from "../vibes.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  "analytics/search_metrics": typeof analytics_search_metrics;
-  cleanupSearchHistory: typeof cleanupSearchHistory;
-  debugSearchHistory: typeof debugSearchHistory;
-  emojiMetadata: typeof emojiMetadata;
+  "analytics/search-metrics": typeof analytics_search_metrics;
+  "cleanup-search-history": typeof cleanup_search_history;
+  "debug-search-history": typeof debug_search_history;
+  "emoji-metadata": typeof emoji_metadata;
   emojiRatings: typeof emojiRatings;
   emojis: typeof emojis;
   files: typeof files;
   follows: typeof follows;
   http: typeof http;
-  importEmojis: typeof importEmojis;
-  "lib/emojiColors": typeof lib_emojiColors;
-  "lib/securityValidators": typeof lib_securityValidators;
+  "import-emojis": typeof import_emojis;
+  "lib/emoji-colors": typeof lib_emoji_colors;
+  "lib/security-validators": typeof lib_security_validators;
   notifications: typeof notifications;
   ratings: typeof ratings;
-  "search/fuzzy_search": typeof search_fuzzy_search;
+  "search/fuzzy-search": typeof search_fuzzy_search;
   "search/search_scorer": typeof search_search_scorer;
-  "search/search_utils": typeof search_search_utils;
+  "search/search-utils": typeof search_search_utils;
   search: typeof search;
-  searchImproved: typeof searchImproved;
-  searchOptimized: typeof searchOptimized;
-  searchV2: typeof searchV2;
-  search_backup: typeof search_backup;
+  "search-improved": typeof search_improved;
+  "search-optimized": typeof search_optimized;
+  "search-v2": typeof search_v2;
+  "search-backup": typeof search_backup;
   "seed/emojis/activities": typeof seed_emojis_activities;
   "seed/emojis/animals": typeof seed_emojis_animals;
   "seed/emojis/food": typeof seed_emojis_food;

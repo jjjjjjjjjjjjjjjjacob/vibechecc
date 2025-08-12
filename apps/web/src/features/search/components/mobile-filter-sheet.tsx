@@ -1,3 +1,7 @@
+/**
+ * mobile filter sheet module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 import {
   Sheet,

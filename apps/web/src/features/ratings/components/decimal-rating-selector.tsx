@@ -1,21 +1,21 @@
-import * as React from 'react';
-import { cn } from '@/utils/tailwind-utils';
-import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { StarRating } from './star-rating';
+import * as React from 'react'; // React hooks and types
+import { cn } from '@/utils/tailwind-utils'; // class name merger
+import { Slider } from '@/components/ui/slider'; // range input for numeric value
+import { Input } from '@/components/ui/input'; // numeric text field
+import { Label } from '@/components/ui/label'; // accessible label component
+import { StarRating } from './star-rating'; // interactive star rating display
 
 interface DecimalRatingSelectorProps {
-  value: number;
-  onChange: (value: number) => void;
-  min?: number;
-  max?: number;
-  step?: number;
-  showStars?: boolean;
-  showSlider?: boolean;
-  showInput?: boolean;
-  label?: string;
-  className?: string;
+  value: number; // current rating value
+  onChange: (value: number) => void; // notify parent when value changes
+  min?: number; // minimum allowed rating
+  max?: number; // maximum allowed rating
+  step?: number; // increment precision
+  showStars?: boolean; // toggle star visualization
+  showSlider?: boolean; // toggle slider control
+  showInput?: boolean; // toggle manual input field
+  label?: string; // optional label text
+  className?: string; // additional container classes
 }
 
 export function DecimalRatingSelector({
@@ -30,10 +30,12 @@ export function DecimalRatingSelector({
   label = 'Rating',
   className,
 }: DecimalRatingSelectorProps) {
+  // when slider moves, forward the first value in the array
   const handleSliderChange = (values: number[]) => {
     onChange(values[0]);
   };
 
+  // parse and validate numeric input from text field
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
     if (!isNaN(newValue) && newValue >= min && newValue <= max) {
@@ -41,8 +43,8 @@ export function DecimalRatingSelector({
     }
   };
 
+  // clamp and snap to step when leaving the input field
   const handleInputBlur = () => {
-    // Ensure value is within bounds and rounded to step
     const roundedValue = Math.round(value / step) * step;
     const clampedValue = Math.max(min, Math.min(max, roundedValue));
     if (clampedValue !== value) {
@@ -55,7 +57,7 @@ export function DecimalRatingSelector({
       {label && <Label className="text-sm font-medium">{label}</Label>}
 
       {showStars && (
-        <div className="flex justify-center">
+        <div className="flex justify-center">{/* star visualization */}
           <StarRating
             value={value}
             onChange={onChange}
@@ -68,7 +70,7 @@ export function DecimalRatingSelector({
       )}
 
       {showSlider && (
-        <div className="px-3">
+        <div className="px-3">{/* numeric slider */}
           <Slider
             value={[value]}
             onValueChange={handleSliderChange}
@@ -85,7 +87,7 @@ export function DecimalRatingSelector({
       )}
 
       {showInput && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">{/* manual numeric entry */}
           <Input
             type="number"
             value={value}

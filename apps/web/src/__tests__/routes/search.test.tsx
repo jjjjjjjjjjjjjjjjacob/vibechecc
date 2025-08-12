@@ -1,5 +1,11 @@
+/**
+ * exercises the search route component end to end
+ * renders the route with mocked data to validate default output
+ */
 /// <reference lib="dom" />
+// vitest testing primitives and vi mocking helper
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// testing library utilities to render and query the component
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

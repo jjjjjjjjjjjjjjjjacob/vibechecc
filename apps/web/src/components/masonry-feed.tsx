@@ -1,3 +1,7 @@
+/**
+ * MasonryFeed renders a grid of vibe cards with optional infinite scrolling.
+ * It switches between masonry and single-column layouts based on viewport.
+ */
 import * as React from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -43,9 +47,11 @@ export function MasonryFeed({
   // Intersection observer for infinite scroll
   React.useEffect(() => {
     const loadMoreElement = loadMoreRef.current;
+    // bail out if there's nothing to observe or we shouldn't load more
     if (!loadMoreElement || !hasMore || !onLoadMore || !showLoadMoreTarget)
       return;
 
+    // trigger onLoadMore when sentinel enters viewport
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -60,6 +66,7 @@ export function MasonryFeed({
   }, [hasMore, onLoadMore, showLoadMoreTarget]);
 
   // Get vibe card variant based on feed variant
+  // resolve vibe card variant based on feed context
   const getVibeCardVariant = () => {
     if (variant === 'search') {
       return shouldUseMasonry ? 'feed-masonry' : 'feed-single';

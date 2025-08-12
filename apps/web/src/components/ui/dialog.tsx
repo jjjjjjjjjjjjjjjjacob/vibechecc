@@ -1,35 +1,40 @@
 'use client';
 
-import * as React from 'react';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { XIcon } from 'lucide-react';
+import * as React from 'react'; // React utilities
+import * as DialogPrimitive from '@radix-ui/react-dialog'; // radix dialog primitives
+import { XIcon } from 'lucide-react'; // close icon
 
-import { cn } from '@/utils/tailwind-utils';
+import { cn } from '@/utils/tailwind-utils'; // class name helper
 
+/** root dialog component */
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
+/** element that opens the dialog */
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
+/** portal wrapper to render dialog at root */
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
+/** convenience wrapper around Close primitive */
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+/** backdrop behind the dialog */
 function DialogOverlay({
   className,
   ...props
@@ -46,6 +51,7 @@ function DialogOverlay({
   );
 }
 
+/** dialog content including overlay and optional close button */
 function DialogContent({
   className,
   children,
@@ -72,7 +78,7 @@ function DialogContent({
             className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">close</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -80,6 +86,7 @@ function DialogContent({
   );
 }
 
+/** header section with title/description */
 function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -90,6 +97,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+/** footer area usually for buttons */
 function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -103,6 +111,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+/** heading text */
 function DialogTitle({
   className,
   ...props
@@ -116,6 +125,7 @@ function DialogTitle({
   );
 }
 
+/** optional supporting text */
 function DialogDescription({
   className,
   ...props

@@ -1,3 +1,7 @@
+/**
+ * search results grid module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { SearchResultCard } from './search-result-card';
 import { SearchEmptyState } from './search-empty-state';
 import { SearchLoading } from './search-loading';

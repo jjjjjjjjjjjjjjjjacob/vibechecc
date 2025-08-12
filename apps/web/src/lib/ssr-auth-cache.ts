@@ -10,13 +10,13 @@ interface AuthCacheEntry {
   expiresAt: number;
 }
 
-// In-memory cache for development (replace with Redis in production)
+// in-memory cache for development (replace with redis in production)
 const authCache = new Map<string, AuthCacheEntry>();
 
-// Cache TTL: 5 minutes for auth tokens
+// cache ttl: 5 minutes for auth tokens
 const CACHE_TTL = 5 * 60 * 1000;
 
-// Cache TTL for failed auth: 30 seconds
+// cache ttl for failed auth: 30 seconds
 const FAILED_AUTH_TTL = 30 * 1000;
 
 /**

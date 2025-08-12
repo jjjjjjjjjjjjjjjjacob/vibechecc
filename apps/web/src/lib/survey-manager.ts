@@ -1,3 +1,6 @@
+/**
+ * SurveyManager orchestrates PostHog surveys and tracks user responses.
+ */
 import { analytics } from './posthog';
 
 export interface NewUserSurveyData {

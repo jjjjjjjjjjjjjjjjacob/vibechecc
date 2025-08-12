@@ -1,3 +1,7 @@
+/**
+ * Accordion that shows top emoji ratings with an expandable section for the rest.
+ * Useful in popovers where only a few ratings should be visible by default.
+ */
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import type { EmojiRating } from '@/types';
@@ -27,6 +31,7 @@ export function TopEmojiRatingsAccordion({
   vibeId,
   variant = 'color',
 }: TopEmojiRatingsAccordionProps) {
+  // Show first four ratings and hide remainder behind accordion
   const topRatings = emojiRatings.slice(0, 4);
   const remainingRatings = emojiRatings.slice(4);
 

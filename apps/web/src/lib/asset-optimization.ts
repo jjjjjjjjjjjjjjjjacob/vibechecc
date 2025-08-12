@@ -3,7 +3,8 @@
  * Handles image optimization, caching headers, and responsive loading
  */
 
-// Supported image formats in order of preference
+// Supported image formats in order of preference; earlier entries are
+// tried first when building optimized URLs
 export const SUPPORTED_FORMATS = [
   'avif',
   'webp',

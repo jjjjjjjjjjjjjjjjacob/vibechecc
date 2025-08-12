@@ -1,3 +1,7 @@
+/**
+ * Full page view for a single vibe with rating and reaction controls.
+ * Loads the vibe, related metadata and handles rating submissions.
+ */
 import {
   createFileRoute,
   Link,

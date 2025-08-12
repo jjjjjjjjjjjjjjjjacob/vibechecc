@@ -1,32 +1,38 @@
-import { query } from './_generated/server';
-import { v } from 'convex/values';
+import { query } from './_generated/server'; // import Convex helper to define server-side queries
+import { v } from 'convex/values'; // runtime validators ensure arguments match expected types
 
-// Get a rating by its ID
+/**
+ * Fetch a rating document by its Convex document identifier.
+ * This is primarily used by web clients to dereference ratings embedded
+ * in other documents without performing a full query.
+ */
 export const getById = query({
+  // every query should validate its arguments to avoid unexpected runtime errors
   args: {
-    ratingId: v.string(),
+    ratingId: v.string(), // caller must provide the rating's document id as a string
   },
   handler: async (ctx, args) => {
-    // Try to find the rating by document ID in the ratings table
     try {
+      // attempt to load the document; Convex throws if the id is malformed
       const doc = await ctx.db.get(args.ratingId as any);
-      if (!doc) return null;
+      if (!doc) return null; // return early when the id does not exist
 
-      // Check if it's a rating by looking for rating-specific fields
+      // ensure the retrieved document actually looks like a rating since get()
+      // may resolve any collection when given a valid id
       if (
-        'vibeId' in doc &&
-        'userId' in doc &&
-        'emoji' in doc &&
-        'value' in doc
+        'vibeId' in doc && // the vibe being rated
+        'userId' in doc && // who submitted the rating
+        'emoji' in doc && // which emoji was used for the rating
+        'value' in doc // numeric weight for the emoji
       ) {
-        return doc as any; // Type assertion for rating document
+        return doc as any; // cast to the rating type once validated
       }
     } catch (error) {
-      // Rating ID is not a valid document ID format
-      console.error('Invalid rating ID format:', args.ratingId, error);
+      // non-existent or malformed ids throw; log for debugging but don't crash
+      console.error('invalid rating id format:', args.ratingId, error);
     }
 
-    // If not found, return null
+    // if we reach here the id was invalid or not a rating document
     return null;
   },
 });

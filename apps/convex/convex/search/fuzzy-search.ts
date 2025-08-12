@@ -14,7 +14,9 @@ export function levenshteinDistance(str1: string, str2: string): number {
 
   // Create a 2D array for dynamic programming
   const dp: number[][] = Array(len1 + 1)
+    // Initialize rows for each character of the first string plus empty prefix
     .fill(null)
+    // Each row contains len2+1 columns representing prefixes of the second string
     .map(() => Array(len2 + 1).fill(0));
 
   // Initialize base cases

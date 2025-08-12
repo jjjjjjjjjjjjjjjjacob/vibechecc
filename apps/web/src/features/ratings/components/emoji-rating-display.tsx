@@ -18,6 +18,18 @@ interface EmojiRatingDisplayProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * Render a single emoji rating. When `showScale` is true a full rating scale
+ * is displayed, otherwise a compact pill showing the current value.
+ *
+ * @param rating base rating data including emoji and value
+ * @param showScale whether to render interactive scale instead of pill
+ * @param className optional tailwind classes for the wrapper
+ * @param onEmojiClick callback fired when user clicks the emoji or scale
+ * @param variant determines color treatment of the scale
+ * @param emojiColor explicit color to apply to the emoji glyph
+ * @param size size of the scale or emoji
+ */
 export function EmojiRatingDisplay({
   rating,
   showScale = false,
@@ -30,10 +42,12 @@ export function EmojiRatingDisplay({
   const [isHovered, setIsHovered] = React.useState(false);
   const [localValue, setLocalValue] = React.useState(rating.value);
 
+  // keep local state in sync when rating changes externally
   React.useEffect(() => {
     setLocalValue(rating.value);
   }, [rating.value]);
 
+  // proxy scale selections back to parent component
   const handleScaleClick = (value: number) => {
     onEmojiClick?.(rating.emoji, value);
   };
@@ -132,6 +146,19 @@ interface TopEmojiRatingsProps {
 
 export { type EmojiRating };
 
+/**
+ * Display a list of top emoji ratings, optionally expandable to reveal all
+ * ratings. Colors for each emoji are retrieved via a Convex query.
+ *
+ * @param emojiRatings array of rating objects to show
+ * @param expanded whether the full list is shown
+ * @param className optional wrapper classes
+ * @param onExpandToggle handler to expand or collapse the list
+ * @param onEmojiClick callback when an emoji rating is clicked
+ * @param vibeId optional vibe id passed to the popover for context
+ * @param size scale size passed to child displays
+ * @param variant color variant used by children
+ */
 export function TopEmojiRatings({
   emojiRatings,
   expanded = false,
@@ -144,15 +171,16 @@ export function TopEmojiRatings({
 }: TopEmojiRatingsProps) {
   const [showAllRatingsPopover, setShowAllRatingsPopover] =
     React.useState(false);
+  // choose which ratings to show based on expand state
   const displayRatings = expanded ? emojiRatings : emojiRatings.slice(0, 3);
 
-  // Fetch emoji metadata for colors
+  // fetch emoji metadata for colors
   const emojis = displayRatings.map((r) => r.emoji);
   const emojiDataQuery = useQuery({
     ...convexQuery(api.emojis.getByEmojis, { emojis }),
     enabled: emojis.length > 0,
   });
-  // Convert array to map for easy lookup
+  // convert array result into a map for quick lookup by emoji
   const emojiDataMap = React.useMemo(() => {
     const emojiDataArray = emojiDataQuery.data || [];
     const map: Record<string, { color?: string }> = {};

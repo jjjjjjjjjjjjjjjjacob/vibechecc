@@ -1,3 +1,7 @@
+/**
+ * AvatarPicker renders an interactive profile-image selector used during
+ * onboarding. Each section below is heavily commented to make intent clear.
+ */
 import * as React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,13 +19,17 @@ interface AvatarPickerProps {
 export function AvatarPicker({
   currentImageUrl,
   onImageChange,
-  userName = 'User',
+  // default name is lowercase to keep any fallback text consistent
+  userName = 'user',
   size = 'md',
   className,
 }: AvatarPickerProps) {
+  // store a data URL for the preview; starts with provided current image if any
   const [previewUrl, setPreviewUrl] = React.useState(currentImageUrl || '');
+  // hidden file input is referenced so we can trigger it programmatically
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // map size variants to specific height/width classes
   const sizeClasses = {
     sm: 'h-16 w-16',
     md: 'h-20 w-20',
@@ -31,18 +39,19 @@ export function AvatarPicker({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (limit to 5MB)
+      // ensure file is under 5mb to keep uploads lightweight
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        alert('file size must be less than 5mb');
         return;
       }
 
-      // Check file type
+      // only allow image mime types so avatars aren't arbitrary files
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        alert('please select an image file');
         return;
       }
 
+      // read the image locally to present an immediate preview
       const reader = new FileReader();
       reader.onload = (e) => {
         const url = e.target?.result as string;
@@ -54,10 +63,11 @@ export function AvatarPicker({
   };
 
   const triggerFileInput = () => {
+    // expose the hidden file picker when the avatar or button is pressed
     fileInputRef.current?.click();
   };
 
-  // Generate avatar from user initials
+  // derive a two-letter fallback from the user's name in case no image exists
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -80,9 +90,9 @@ export function AvatarPicker({
         }}
         tabIndex={0}
         role="button"
-        aria-label="Change avatar"
+        aria-label="change avatar"
       >
-        {/* Gradient border wrapper */}
+        {/* gradient border wrapper */}
         <div
           className={cn(
             'from-theme-primary to-theme-secondary rounded-full bg-gradient-to-r p-1 transition-transform hover:scale-105',
@@ -107,7 +117,7 @@ export function AvatarPicker({
           </Avatar>
         </div>
 
-        {/* Edit button overlay */}
+        {/* edit button overlay */}
         <Button
           type="button"
           size="sm"

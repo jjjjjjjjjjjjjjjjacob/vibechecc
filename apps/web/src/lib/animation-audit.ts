@@ -13,6 +13,7 @@ export interface AnimationUsage {
   notes?: string;
 }
 
+// catalogue of components still relying on framer-motion
 export const FRAMER_MOTION_AUDIT: AnimationUsage[] = [
   // Emoji Rating Components
   {

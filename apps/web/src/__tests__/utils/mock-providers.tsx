@@ -1,8 +1,12 @@
+/**
+ * supplies mock clerk components for tests without hitting real auth
+ * allows tests to simulate signed-in or signed-out states
+ */
 /// <reference lib="dom" />
 import React from 'react';
 import { vi, beforeEach } from 'vitest';
 
-// Mock Clerk authentication
+// factory generating mocked clerk context components
 export const createMockClerkProvider = (isSignedIn = true, user = null) => {
   const mockUser = user || {
     id: 'user_123',

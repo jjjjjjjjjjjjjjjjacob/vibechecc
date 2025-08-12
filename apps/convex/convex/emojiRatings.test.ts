@@ -1,9 +1,14 @@
+/**
+ * Tests for emoji rating mutations.
+ * Verifies creation, validation, and update paths.
+ */
 import { convexTest } from 'convex-test';
 import { expect, test, describe } from 'vitest';
 import schema from './schema';
 import { api } from './_generated/api';
 import { modules } from '../vitest.setup';
 
+// Suite for all emoji rating operations
 describe('emoji ratings', () => {
   describe('createOrUpdateEmojiRating', () => {
     test('should create a new rating with emoji', async () => {

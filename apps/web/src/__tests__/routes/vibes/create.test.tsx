@@ -49,7 +49,8 @@ vi.mock('@tanstack/react-start', () => ({
   }),
 }));
 
-vi.mock('@/hooks/usePostHog', () => ({
+// Mock PostHog analytics hook used in the route component
+vi.mock('@/hooks/use-posthog', () => ({
   usePostHog: () => ({
     trackEvents: mockTrackEvents,
   }),

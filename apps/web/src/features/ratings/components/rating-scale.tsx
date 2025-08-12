@@ -1,3 +1,7 @@
+/**
+ * Horizontal 0-5 emoji rating scale used for precise rating input.
+ * Supports mouse and touch interactions with live preview.
+ */
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 
@@ -30,7 +34,9 @@ export function RatingScale({
   emojiColor,
   mobileSlider = false,
 }: RatingScaleProps) {
+  // Value the user is currently hovering over
   const [hoverValue, setHoverValue] = React.useState<number | null>(null);
+  // Ref to measure pointer position within the scale
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const displayValue = hoverValue ?? value;

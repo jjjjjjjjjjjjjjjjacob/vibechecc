@@ -1,3 +1,8 @@
+/**
+ * Emoji metadata for sports and leisure activities used when seeding the
+ * database. Each entry captures the character, descriptive keywords and
+ * categorization to provide rich search and filtering options.
+ */
 import type { Emoji } from '../../schema';
 
 export const activityEmojis = [

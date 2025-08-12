@@ -1,4 +1,9 @@
 /// <reference lib="dom" />
+/**
+ * Global Vitest setup for the web app. Provides DOM assertions, cleans up
+ * rendered components after each test, and defines common mocks used across
+ * test suites.
+ */
 import '@testing-library/jest-dom/vitest';
 import { vi, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
@@ -309,8 +314,8 @@ vi.mock('@viberatr/convex', () => ({
       getAllEmojiMetadata: 'api.emojiRatings.getAllEmojiMetadata',
       getEmojiByCategory: 'api.emojiRatings.getEmojiByCategory',
     },
-    searchOptimized: {
-      searchAllOptimized: 'api.searchOptimized.searchAllOptimized',
+    'search-optimized': {
+      searchAllOptimized: 'api["search-optimized"].searchAllOptimized',
     },
     search: {
       trackSearch: 'api.search.trackSearch',

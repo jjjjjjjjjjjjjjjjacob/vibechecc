@@ -1,3 +1,7 @@
+/**
+ * BaseLayout centers children inside a responsive container.
+ * Width and padding options keep content readable at various screen sizes.
+ */
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 
@@ -9,6 +13,7 @@ export interface BaseLayoutProps {
   padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
+// map width tokens to tailwind max-width utility classes
 const maxWidthClasses = {
   sm: 'max-w-sm',
   md: 'max-w-md',
@@ -20,6 +25,7 @@ const maxWidthClasses = {
   full: 'max-w-full',
 };
 
+// translate padding tokens into horizontal and vertical spacing
 const paddingClasses = {
   none: '',
   sm: 'px-2 py-4',
@@ -35,7 +41,9 @@ export function BaseLayout({
   padding = 'md',
 }: BaseLayoutProps) {
   return (
+    // outer wrapper provides full-height background
     <div className={cn('min-h-screen', className)}>
+      {/* inner container constrains width and applies spacing */}
       <div
         className={cn(
           'container mx-auto',

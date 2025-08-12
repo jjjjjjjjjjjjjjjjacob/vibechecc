@@ -1,3 +1,7 @@
+/**
+ * rating slider module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';

@@ -1,3 +1,7 @@
+/**
+ * onboarding theme step module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { DualThemeColorPicker } from '@/features/theming/components/dual-theme-color-picker';

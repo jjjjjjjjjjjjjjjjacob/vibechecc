@@ -1,6 +1,12 @@
+/**
+ * mobile filter drawer module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { Filter } from 'lucide-react';
+// standard button and badge primitives for trigger and count display
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+// drawer primitives compose the slide-up filter panel
 import {
   Drawer,
   DrawerClose,
@@ -25,6 +31,7 @@ export function MobileFilterDrawer({
   onChange,
   availableTags,
 }: MobileFilterDrawerProps) {
+  // count how many filter categories are currently active
   const activeFilterCount = [
     filters.tags?.length || 0,
     filters.minRating ? 1 : 0,
@@ -37,7 +44,7 @@ export function MobileFilterDrawer({
       <DrawerTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Filter className="h-4 w-4" />
-          Filters
+          filters
           {activeFilterCount > 0 && (
             <Badge variant="secondary" className="ml-1">
               {activeFilterCount}
@@ -47,9 +54,9 @@ export function MobileFilterDrawer({
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Filter Results</DrawerTitle>
+          <DrawerTitle>filter results</DrawerTitle>
           <DrawerDescription>
-            Narrow down your search results by applying filters
+            narrow down your search results by applying filters
           </DrawerDescription>
         </DrawerHeader>
         <div className="max-h-[60vh] overflow-y-auto px-4 pb-4">
@@ -64,10 +71,12 @@ export function MobileFilterDrawer({
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button>Apply Filters</Button>
+            {/* confirm filter selection and close drawer */}
+            <Button>apply filters</Button>
           </DrawerClose>
           <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
+            {/* discard changes and close drawer */}
+            <Button variant="outline">cancel</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

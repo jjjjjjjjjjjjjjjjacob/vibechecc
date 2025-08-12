@@ -16,6 +16,9 @@ import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { trackEvents } from '@/lib/posthog';
 
+/**
+ * Interactive emoji reaction component that supports adding or rating.
+ */
 interface EmojiReactionProps {
   reaction: EmojiReactionType;
   onReact?: (emoji: string) => void;
@@ -325,17 +328,18 @@ function HorizontalEmojiPicker({
             <button
               onClick={handleSearchClick}
               className="bg-muted hover:bg-muted-foreground/20 text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-              aria-label="Search emojis"
+              aria-label="search emojis"
             >
               <Search className="h-4 w-4" />
             </button>
           ) : (
             <div className="relative">
               <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 transform" />
+              {/* Expanded search field with lowercase placeholder */}
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search emojis..."
+                placeholder="search emojis..."
                 value={searchValue}
                 onChange={(e) => handleSearchInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -348,7 +352,7 @@ function HorizontalEmojiPicker({
               <button
                 onClick={handleCollapseSearch}
                 className="hover:bg-background/80 animate-in fade-in absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 transform items-center justify-center rounded-full transition-colors duration-500"
-                aria-label="Close search"
+                aria-label="close search"
               >
                 <X className="h-3 w-3" />
               </button>

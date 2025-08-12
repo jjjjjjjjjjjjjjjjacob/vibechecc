@@ -1,6 +1,13 @@
+/**
+ * verifies environment access helpers across many domain scenarios
+ * we mock window.location and posthog to simulate production, dev,
+ * and ephemeral deployments and assert correct gating behavior
+ */
 /// <reference lib="dom" />
 
+// vitest testing primitives
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+// functions under test from environment access module
 import {
   getCurrentSubdomain,
   getEnvironmentInfo,
@@ -10,7 +17,7 @@ import {
 } from '@/lib/environment-access';
 import { analytics } from '@/lib/posthog';
 
-// Mock PostHog analytics
+// stub posthog analytics so feature flags can be controlled
 vi.mock('@/lib/posthog', () => ({
   analytics: {
     isInitialized: vi.fn(),
@@ -20,7 +27,7 @@ vi.mock('@/lib/posthog', () => ({
 
 const mockAnalytics = analytics as any;
 
-// Mock window.location
+// helper to swap window.location host for each test
 const mockLocation = (hostname: string) => {
   Object.defineProperty(window, 'location', {
     value: {

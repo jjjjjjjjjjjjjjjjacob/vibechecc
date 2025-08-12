@@ -2,12 +2,22 @@ import { useTheme } from '@/features/theming/components/theme-provider';
 import { cn } from '@/utils/tailwind-utils';
 import { useEffect, useState } from 'react';
 
+/**
+ * Props for {@link SimpleVibePlaceholder}. Allows customizing the displayed
+ * title, additional classes, and whether the title text should be hidden.
+ */
 interface SimplePlaceholderProps {
   title?: string;
   className?: string;
   hideText?: boolean;
 }
 
+/**
+ * Renders a deterministic gradient placeholder when a vibe doesn't have an
+ * image. The background color is hashed from the title so it stays consistent
+ * between renders. Optionally displays the title text centered over the
+ * gradient.
+ */
 export function SimpleVibePlaceholder({
   title,
   className,
@@ -16,33 +26,32 @@ export function SimpleVibePlaceholder({
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch by only rendering after mount
+  // Wait until the component has mounted on the client to avoid hydration
+  // mismatches from theme-based gradients.
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Generate a consistent color based on the title
+  // Derive a color index from the title using a basic hash. The index maps to
+  // one of six gradient pairs.
   const getColorIndex = (title?: string) => {
     if (!title) return 0;
     let hash = 0;
     for (let i = 0; i < title.length; i++) {
       hash = title.charCodeAt(i) + ((hash << 5) - hash);
     }
-    return Math.abs(hash % 6); // 0-5 for our color palette
+    // Constrain the hash into the available gradient range
+    return Math.abs(hash % 6);
   };
 
   const colorIndex = getColorIndex(title);
 
-  // If not mounted yet, return a simple placeholder to avoid hydration mismatch
+  // Render a plain block before mounting so server and client markup match.
   if (!mounted) {
-    return (
-      <div
-        className={cn('relative h-full w-full bg-zinc-800', className)}
-      ></div>
-    );
+    return <div className={cn('relative h-full w-full bg-zinc-800', className)} />;
   }
 
-  // Define background classes based on color index and theme
+  // Choose a gradient class based on the hashed index and current theme.
   const getBgClass = () => {
     const isDark = resolvedTheme === 'dark';
 
@@ -96,3 +105,4 @@ export function SimpleVibePlaceholder({
     </div>
   );
 }
+

@@ -1,3 +1,7 @@
+/**
+ * theme provider module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 
 type Theme = 'light' | 'dark' | 'system';

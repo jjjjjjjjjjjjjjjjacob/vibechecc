@@ -1,3 +1,7 @@
+/**
+ * search suggestions module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { CommandGroup, CommandItem } from '@/components/ui/command';
 import { Clock, TrendingUp, Search, Hash } from 'lucide-react';
 import type { SearchSuggestion } from '@viberatr/types';

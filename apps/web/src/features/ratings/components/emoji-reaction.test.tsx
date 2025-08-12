@@ -1,4 +1,9 @@
+/**
+ * unit tests for emoji reaction component
+ * confirm click handlers and selection state updates
+ */
 /// <reference lib="dom" />
+// vitest helpers for mocks and assertions
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import {

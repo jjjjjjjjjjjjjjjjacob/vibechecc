@@ -1,3 +1,7 @@
+/**
+ * onboarding flow module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { OnboardingLayout } from './onboarding-layout';

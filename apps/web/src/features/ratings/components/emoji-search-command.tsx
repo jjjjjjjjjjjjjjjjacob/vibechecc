@@ -1,4 +1,9 @@
+/**
+ * command palette for searching and selecting emojis
+ * loads popular emojis and supports paginated search results
+ */
 import * as React from 'react';
+// react-query fetches emoji data from convex endpoints
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@viberatr/convex';
 import { convexQuery } from '@convex-dev/react-query';
@@ -11,6 +16,7 @@ import {
   CommandItem,
 } from '@/components/ui/command';
 import { cn } from '@/utils/tailwind-utils';
+// local fallback set for offline or empty states
 import { BASIC_EMOJIS } from '@/lib/basic-emojis';
 
 interface EmojiSearchCommandProps {
@@ -49,12 +55,14 @@ export function EmojiSearchCommand({
   const [isLoading, setIsLoading] = React.useState(false);
 
   // Get categories for navigation
+  // query available emoji categories when showing sidebar
   const _categoriesQuery = useQuery({
     ...convexQuery(api.emojis.getCategories, {}),
     enabled: showCategories && !searchValue,
   });
 
   // Search emojis from database
+  // main search query hitting convex endpoint
   const searchResults = useQuery({
     ...convexQuery(api.emojis.search, {
       searchTerm: searchValue || undefined,
@@ -64,6 +72,7 @@ export function EmojiSearchCommand({
   });
 
   // Get popular emojis when no search
+  // popular emojis shown when no search term
   const popularEmojis = useQuery({
     ...convexQuery(api.emojis.getPopular, { limit: 12 }),
     enabled: !searchValue,

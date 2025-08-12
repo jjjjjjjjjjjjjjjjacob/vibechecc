@@ -95,14 +95,14 @@ export function getAccessDenialMessage(envInfo?: EnvironmentInfo): string {
   const env = envInfo || getEnvironmentInfo();
 
   if (env.isDevEnvironment) {
-    return 'Access to the development environment is restricted to authorized developers.';
+    return 'access to the development environment is restricted to authorized developers.';
   }
 
   if (env.isEphemeralEnvironment) {
-    return 'Access to this preview environment is restricted to authorized developers.';
+    return 'access to this preview environment is restricted to authorized developers.';
   }
 
-  return 'Access to this environment is restricted.';
+  return 'access to this environment is restricted.';
 }
 
 /**

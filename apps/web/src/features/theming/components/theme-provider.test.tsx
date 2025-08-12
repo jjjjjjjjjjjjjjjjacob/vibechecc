@@ -1,3 +1,7 @@
+/**
+ * theme provider.test module.
+ * enhanced documentation for clarity and maintenance.
+ */
 /// <reference lib="dom" />
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';

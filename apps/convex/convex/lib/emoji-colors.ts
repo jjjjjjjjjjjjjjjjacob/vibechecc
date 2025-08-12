@@ -119,18 +119,22 @@ const KEYWORD_COLORS: Record<string, string> = {
   game: '#4ECDC4',
 };
 
+/**
+ * Determine a representative color for an emoji based on several heuristics.
+ * The priority order is overrides, keyword hints, category defaults, then gray.
+ */
 export function getEmojiColor(
   emoji: string,
   name: string,
   keywords: string[],
   category: string
 ): string {
-  // 1. Check specific emoji overrides first
+  // 1. check specific emoji overrides first
   if (EMOJI_SPECIFIC_COLORS[emoji]) {
     return EMOJI_SPECIFIC_COLORS[emoji];
   }
 
-  // 2. Check keywords for color hints
+  // 2. search provided keywords for color hints
   const allKeywords = [...keywords, name.toLowerCase()];
   for (const keyword of allKeywords) {
     for (const [colorKeyword, color] of Object.entries(KEYWORD_COLORS)) {
@@ -140,16 +144,16 @@ export function getEmojiColor(
     }
   }
 
-  // 3. Use category-based color
+  // 3. fall back to category-based color mapping
   if (CATEGORY_COLORS[category]) {
     return CATEGORY_COLORS[category];
   }
 
-  // 4. Default fallback
-  return '#6B7280'; // Gray
+  // 4. default gray when no other rule applies
+  return '#6B7280'; // gray
 }
 
-// Helper to determine sentiment from emoji data
+/** Infer high level sentiment from the emoji name and keyword metadata. */
 export function getEmojiSentiment(
   name: string,
   keywords: string[]
@@ -212,12 +216,13 @@ export function getEmojiSentiment(
     if (allText.includes(word)) negativeScore++;
   });
 
+  // choose the higher score to classify the sentiment
   if (positiveScore > negativeScore) return 'positive';
   if (negativeScore > positiveScore) return 'negative';
   return 'neutral';
 }
 
-// Helper to get tags based on emoji characteristics
+/** Build a list of descriptive tags for an emoji. */
 export function getEmojiTags(
   name: string,
   keywords: string[],
@@ -225,18 +230,18 @@ export function getEmojiTags(
 ): string[] {
   const tags: Set<string> = new Set();
 
-  // Add category as a tag
+  // add category as a base tag
   tags.add(category);
 
-  // Extract meaningful tags from keywords
+  // extract meaningful tags from keywords
   const meaningfulKeywords = keywords.filter(
     (k) => k.length > 2 && !['the', 'and', 'or', 'a', 'an'].includes(k)
   );
 
-  // Add top 5 most relevant keywords as tags
+  // add top 5 most relevant keywords as tags
   meaningfulKeywords.slice(0, 5).forEach((k) => tags.add(k));
 
-  // Add sentiment-based tags
+  // add sentiment-based tags
   const sentiment = getEmojiSentiment(name, keywords);
   if (sentiment === 'positive') {
     tags.add('positive');

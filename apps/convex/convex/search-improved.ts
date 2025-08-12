@@ -1,6 +1,9 @@
+/**
+ * Legacy search implementation kept for comparison with the current version.
+ * Handles basic filtering and manual scoring logic.
+ */
 import { query } from './_generated/server';
 import { v } from 'convex/values';
-import { paginationOptsValidator } from 'convex/server';
 import type {
   VibeSearchResult,
   UserSearchResult,
@@ -8,22 +11,23 @@ import type {
   ActionSearchResult,
   ReviewSearchResult,
 } from '@viberatr/types';
-import { fuzzyMatch } from './search/fuzzy_search';
+import { fuzzyMatch } from './search/fuzzy-search';
 import { scoreVibe, scoreUser, scoreTag } from './search/search_scorer';
-import { parseSearchQuery } from './search/search_utils';
+import { parseSearchQuery } from './search/search-utils';
 
 // Constants for pagination
-const MAX_RESULTS_PER_PAGE = 50;
-const DEFAULT_RESULTS_PER_PAGE = 20;
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 50;
 
-// Helper to check if a string contains search terms (case-insensitive partial match)
+// Helper to check if text contains search terms (case-insensitive partial match)
 function containsSearchTerms(text: string, searchTerms: string[]): boolean {
+  if (searchTerms.length === 0) return true;
   const lowerText = text.toLowerCase();
   return searchTerms.some((term) => lowerText.includes(term.toLowerCase()));
 }
 
-// Main search function with proper filtering
-export const searchAll = query({
+// Improved search with proper pagination and total counts
+export const searchAllImproved = query({
   args: {
     query: v.string(),
     filters: v.optional(
@@ -60,18 +64,23 @@ export const searchAll = query({
         ),
       })
     ),
-    paginationOpts: paginationOptsValidator,
+    page: v.optional(v.number()),
+    pageSize: v.optional(v.number()),
     includeTypes: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const { query: searchQuery, filters, paginationOpts, includeTypes } = args;
+    const { query: searchQuery, filters, includeTypes } = args;
+    const page = args.page ?? 1;
+    const pageSize = Math.min(
+      args.pageSize ?? DEFAULT_PAGE_SIZE,
+      MAX_PAGE_SIZE
+    );
 
     // Parse the query for search terms
     const parsedQuery = parseSearchQuery(searchQuery);
     const searchTerms = parsedQuery.terms.concat(parsedQuery.exactPhrases);
-    const hasSearchTerms = searchTerms.length > 0;
 
-    // Initialize results
+    // Initialize accumulators for all results
     const allResults = {
       vibes: [] as VibeSearchResult[],
       users: [] as UserSearchResult[],
@@ -80,41 +89,25 @@ export const searchAll = query({
       reviews: [] as ReviewSearchResult[],
     };
 
-    // Determine if we have filters that require fetching all results
-    const hasFilters = !!(
-      filters?.tags?.length ||
-      filters?.minRating !== undefined ||
-      filters?.maxRating !== undefined ||
-      filters?.emojiRatings?.emojis?.length ||
-      filters?.emojiRatings?.minValue !== undefined ||
-      filters?.dateRange ||
-      filters?.creators?.length
-    );
-
-    // For filtered searches or when we need total count, we need to fetch all matching results
-    const needsAllResults = hasFilters || !hasSearchTerms;
-
     // Search VIBES
     if (!includeTypes || includeTypes.includes('vibe')) {
-      const vibes = needsAllResults
-        ? await ctx.db.query('vibes').collect()
-        : await ctx.db.query('vibes').take(100); // Limit for performance when just searching
+      const allVibes = await ctx.db.query('vibes').collect();
 
-      for (const vibe of vibes) {
+      for (const vibe of allVibes) {
         // Check text match
-        if (hasSearchTerms) {
-          const matchesText = containsSearchTerms(
+        if (
+          !containsSearchTerms(
             `${vibe.title} ${vibe.description} ${(vibe.tags || []).join(' ')}`,
             searchTerms
-          );
-          if (!matchesText) continue;
-        }
+          )
+        )
+          continue;
 
-        // Apply filters (only for vibes)
+        // Apply filters
         let passesFilters = true;
 
         // Tag filter
-        if (filters?.tags?.length && passesFilters) {
+        if (filters?.tags?.length) {
           const hasMatchingTag = vibe.tags?.some((tag) =>
             filters.tags!.includes(tag)
           );
@@ -135,20 +128,19 @@ export const searchAll = query({
             passesFilters = false;
         }
 
-        // Rating filters
+        // Rating and emoji filters
         if (
           (filters?.minRating !== undefined ||
             filters?.maxRating !== undefined ||
             filters?.emojiRatings) &&
           passesFilters
         ) {
-          // Get all ratings for this vibe
           const ratings = await ctx.db
             .query('ratings')
             .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
             .collect();
 
-          // Check general rating filter
+          // General rating filter
           if (
             filters?.minRating !== undefined ||
             filters?.maxRating !== undefined
@@ -172,7 +164,7 @@ export const searchAll = query({
             }
           }
 
-          // Check emoji rating filter
+          // Emoji rating filter
           if (filters?.emojiRatings && passesFilters) {
             const { emojis, minValue } = filters.emojiRatings;
 
@@ -189,19 +181,19 @@ export const searchAll = query({
 
         if (!passesFilters) continue;
 
-        // Get creator info
-        const creator = await ctx.db
-          .query('users')
-          .withIndex('byExternalId', (q) =>
-            q.eq('externalId', vibe.createdById)
-          )
-          .first();
-
-        // Get rating info for display
-        const ratings = await ctx.db
-          .query('ratings')
-          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .collect();
+        // Get additional info for display
+        const [creator, ratings] = await Promise.all([
+          ctx.db
+            .query('users')
+            .withIndex('byExternalId', (q) =>
+              q.eq('externalId', vibe.createdById)
+            )
+            .first(),
+          ctx.db
+            .query('ratings')
+            .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+            .collect(),
+        ]);
 
         const avgRating =
           ratings.length > 0
@@ -218,19 +210,17 @@ export const searchAll = query({
           rating: avgRating,
           ratingCount: ratings.length,
           tags: vibe.tags,
-          score: hasSearchTerms
-            ? scoreVibe(
-                {
-                  title: vibe.title,
-                  description: vibe.description,
-                  tags: vibe.tags,
-                  createdAt: vibe.createdAt,
-                  rating: avgRating,
-                  ratingCount: ratings.length,
-                },
-                searchTerms.join(' ')
-              )
-            : 1,
+          score: scoreVibe(
+            {
+              title: vibe.title,
+              description: vibe.description,
+              tags: vibe.tags,
+              createdAt: vibe.createdAt,
+              rating: avgRating,
+              ratingCount: ratings.length,
+            },
+            searchTerms.join(' ')
+          ),
           createdBy: creator
             ? {
                 id: creator.externalId,
@@ -242,20 +232,52 @@ export const searchAll = query({
       }
     }
 
+    // When there's no search query but filters, collect related user IDs from vibes
+    const relatedUserIds = new Set<string>();
+    const relatedTags = new Set<string>();
+    const relatedVibeIds = new Set<string>();
+
+    if (!searchTerms.length && filters) {
+      // Collect all user IDs and tags from filtered vibes
+      allResults.vibes.forEach((vibe) => {
+        relatedVibeIds.add(vibe.id);
+        if (vibe.createdBy?.id) {
+          relatedUserIds.add(vibe.createdBy.id);
+        }
+        if (vibe.tags) {
+          vibe.tags.forEach((tag) => relatedTags.add(tag));
+        }
+      });
+
+      // Also collect user IDs from reviews of these vibes
+      const vibeRatings = await ctx.db.query('ratings').collect();
+
+      vibeRatings.forEach((rating) => {
+        if (relatedVibeIds.has(rating.vibeId)) {
+          relatedUserIds.add(rating.userId);
+        }
+      });
+    }
+
     // Search USERS
     if (!includeTypes || includeTypes.includes('user')) {
-      const users = await ctx.db.query('users').take(100);
+      const allUsers = await ctx.db.query('users').collect();
 
-      for (const user of users) {
-        if (hasSearchTerms) {
-          const matchesText = containsSearchTerms(
-            `${user.username || ''} ${user.first_name || ''} ${user.last_name || ''} ${user.bio || ''}`,
-            searchTerms
-          );
-          if (!matchesText) continue;
+      for (const user of allUsers) {
+        // If no search query but filters exist, only include users related to filtered vibes
+        if (!searchTerms.length && filters) {
+          if (!relatedUserIds.has(user.externalId)) continue;
+        } else if (searchTerms.length > 0) {
+          // Normal search behavior when there's a query
+          if (
+            !containsSearchTerms(
+              `${user.username || ''} ${user.first_name || ''} ${user.last_name || ''} ${user.bio || ''}`,
+              searchTerms
+            )
+          )
+            continue;
         }
 
-        // No filters apply to users
         const vibeCount = await ctx.db
           .query('vibes')
           .withIndex('createdBy', (q) => q.eq('createdById', user.externalId))
@@ -272,38 +294,27 @@ export const searchAll = query({
           image: user.image_url,
           username: user.username || 'unknown',
           vibeCount,
-          score: hasSearchTerms
-            ? scoreUser(
-                {
-                  username: user.username || '',
-                  fullName: `${user.first_name || ''} ${user.last_name || ''}`,
-                  bio: user.bio || '',
-                  vibeCount,
-                },
-                searchTerms.join(' ')
-              )
-            : 1,
+          score: scoreUser(
+            {
+              username: user.username || '',
+              fullName: `${user.first_name || ''} ${user.last_name || ''}`,
+              bio: user.bio || '',
+              vibeCount,
+            },
+            searchTerms.join(' ')
+          ),
         });
       }
     }
 
     // Search REVIEWS
     if (!includeTypes || includeTypes.includes('review')) {
-      const reviews = await ctx.db.query('ratings').take(200);
+      const allRatings = await ctx.db.query('ratings').collect();
 
-      for (const rating of reviews) {
+      for (const rating of allRatings) {
         if (!rating.review) continue;
 
-        // Check text match
-        if (hasSearchTerms) {
-          const matchesText = containsSearchTerms(rating.review, searchTerms);
-          if (!matchesText) continue;
-        }
-
-        // Apply filters to reviews (same as vibes)
-        let passesFilters = true;
-
-        // Get the vibe this review is for
+        // Get the vibe for filter checking
         const vibe = await ctx.db
           .query('vibes')
           .filter((q) => q.eq(q.field('id'), rating.vibeId))
@@ -311,8 +322,19 @@ export const searchAll = query({
 
         if (!vibe) continue;
 
+        // If no search query but filters exist, only include reviews for filtered vibes
+        if (!searchTerms.length && filters) {
+          if (!relatedVibeIds.has(vibe.id)) continue;
+        } else if (searchTerms.length > 0) {
+          // Normal search behavior when there's a query
+          if (!containsSearchTerms(rating.review, searchTerms)) continue;
+        }
+
+        // Apply filters to reviews
+        let passesFilters = true;
+
         // Tag filter (based on vibe's tags)
-        if (filters?.tags?.length && passesFilters) {
+        if (filters?.tags?.length) {
           const hasMatchingTag = vibe.tags?.some((tag) =>
             filters.tags!.includes(tag)
           );
@@ -347,7 +369,6 @@ export const searchAll = query({
 
         if (!passesFilters) continue;
 
-        // Get reviewer info
         const reviewer = await ctx.db
           .query('users')
           .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
@@ -370,44 +391,52 @@ export const searchAll = query({
           reviewerName: reviewer?.username || 'Unknown',
           reviewerAvatar: reviewer?.image_url,
           createdAt: rating._creationTime,
-          score: hasSearchTerms
-            ? fuzzyMatch(rating.review, searchTerms.join(' '))
-              ? 0.8
-              : 0.3
-            : 1,
+          score: fuzzyMatch(rating.review, searchTerms.join(' ')) ? 0.8 : 0.3,
         });
       }
     }
 
     // Search TAGS
     if (!includeTypes || includeTypes.includes('tag')) {
-      const tags = await ctx.db.query('tags').take(100);
+      const allTags = await ctx.db.query('tags').collect();
 
-      for (const tag of tags) {
-        if (hasSearchTerms) {
-          const matchesText = containsSearchTerms(tag.name, searchTerms);
-          if (!matchesText) continue;
+      for (const tag of allTags) {
+        // If no search query but filters exist, only include tags from filtered vibes
+        if (!searchTerms.length && filters) {
+          if (!relatedTags.has(tag.name)) continue;
+        } else if (searchTerms.length > 0) {
+          // Normal search behavior when there's a query
+          if (!containsSearchTerms(tag.name, searchTerms)) continue;
         }
 
-        // No filters apply to tags
+        // If filtering, update tag count to reflect filtered vibes only
+        let displayCount = tag.count;
+        if (!searchTerms.length && filters) {
+          // Count how many filtered vibes have this tag
+          displayCount = allResults.vibes.filter((vibe) =>
+            vibe.tags?.includes(tag.name)
+          ).length;
+        }
+
         allResults.tags.push({
           id: tag.name,
           type: 'tag',
           title: tag.name,
-          subtitle: `${tag.count} vibe${tag.count !== 1 ? 's' : ''}`,
-          count: tag.count,
-          score: hasSearchTerms
-            ? scoreTag(
-                { name: tag.name, count: tag.count },
-                searchTerms.join(' ')
-              )
-            : 1,
+          subtitle: `${displayCount} vibe${displayCount !== 1 ? 's' : ''}`,
+          count: displayCount,
+          score: scoreTag(
+            { name: tag.name, count: displayCount },
+            searchTerms.join(' ')
+          ),
         });
       }
     }
 
-    // Add action suggestions
-    if (!includeTypes || includeTypes.includes('action')) {
+    // Add action suggestions (only when there's a search query)
+    if (
+      searchTerms.length > 0 &&
+      (!includeTypes || includeTypes.includes('action'))
+    ) {
       addActionSuggestions(searchQuery, allResults);
     }
 
@@ -415,37 +444,40 @@ export const searchAll = query({
     const sortOption = filters?.sort || 'relevance';
     applySorting(allResults, sortOption);
 
-    // Calculate total count BEFORE pagination
-    const totalCount =
-      allResults.vibes.length +
-      allResults.users.length +
-      allResults.tags.length +
-      allResults.actions.length +
-      allResults.reviews.length;
+    // Calculate TOTAL counts before pagination
+    const totalCounts = {
+      vibes: allResults.vibes.length,
+      users: allResults.users.length,
+      tags: allResults.tags.length,
+      actions: allResults.actions.length,
+      reviews: allResults.reviews.length,
+      total:
+        allResults.vibes.length +
+        allResults.users.length +
+        allResults.tags.length +
+        allResults.actions.length +
+        allResults.reviews.length,
+    };
 
     // Apply pagination
-    const pageSize = Math.min(
-      paginationOpts.numItems || DEFAULT_RESULTS_PER_PAGE,
-      MAX_RESULTS_PER_PAGE
-    );
-
-    const startIndex = paginationOpts.cursor
-      ? parseInt(paginationOpts.cursor)
-      : 0;
+    const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
 
-    // Paginate results
-    const paginatedResults = {
+    // Return paginated results with total counts
+    return {
       vibes: allResults.vibes.slice(startIndex, endIndex),
       users: allResults.users.slice(startIndex, endIndex),
       tags: allResults.tags.slice(startIndex, endIndex),
       actions: allResults.actions.slice(startIndex, endIndex),
       reviews: allResults.reviews.slice(startIndex, endIndex),
-      totalCount,
-      nextCursor: endIndex < totalCount ? endIndex.toString() : null,
+      totalCount: totalCounts.total,
+      totalCounts, // Include breakdown by type
+      page,
+      pageSize,
+      totalPages: Math.ceil(totalCounts.total / pageSize),
+      hasNextPage: endIndex < totalCounts.total,
+      hasPreviousPage: page > 1,
     };
-
-    return paginatedResults;
   },
 });
 
@@ -566,6 +598,10 @@ function applySorting(results: SearchResults, sortOption: string): void {
           (b.ratingCount || 0) - (a.ratingCount || 0)
       );
       break;
+    case 'recent':
+    case 'creation_date':
+      // Add proper date sorting if createdAt is available
+      break;
     case 'name':
       results.vibes.sort((a: VibeSearchResult, b: VibeSearchResult) =>
         a.title.localeCompare(b.title)
@@ -580,7 +616,7 @@ function applySorting(results: SearchResults, sortOption: string): void {
   }
 }
 
-// Keep the other queries from the original file
+// Re-export other functions from the original search module
 export {
   getSearchSuggestions,
   getTrendingSearches,

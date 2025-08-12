@@ -1,3 +1,7 @@
+/**
+ * Root layout route that sets up providers, global head tags, and shared UI.
+ * Wraps all pages with authentication, theming, analytics, and error boundaries.
+ */
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools/production';
 import {
   Outlet,

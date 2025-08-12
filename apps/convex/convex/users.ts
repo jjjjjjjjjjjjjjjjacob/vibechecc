@@ -1,3 +1,7 @@
+/**
+ * Convex functions for working with user documents. Each helper, query, and mutation
+ * is documented to clarify authentication requirements and security considerations.
+ */
 import {
   mutation,
   query,
@@ -10,7 +14,7 @@ import {
 import { v, Validator } from 'convex/values';
 import type { UserJSON } from '@clerk/backend';
 import { internal } from './_generated/api';
-import { AuthUtils, SecurityValidators } from './lib/securityValidators';
+import { AuthUtils, SecurityValidators } from './lib/security-validators';
 
 // PostHog configuration for server-side tracking
 const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY;
@@ -21,6 +25,7 @@ async function userByExternalId(
   ctx: QueryCtx | MutationCtx,
   externalId: string
 ) {
+  // Leverage the byExternalId index to avoid full table scans
   return await ctx.db
     .query('users')
     .withIndex('byExternalId', (q) => q.eq('externalId', externalId))
@@ -29,18 +34,23 @@ async function userByExternalId(
 
 // Helper function to get current user
 export async function getCurrentUser(ctx: QueryCtx | MutationCtx) {
+  // Pull Clerk identity from the auth context
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
+    // No signed-in user, return null for callers to handle
     return null;
   }
+  // Map the external Clerk subject to our internal user document
   return await userByExternalId(ctx, identity.subject);
 }
 
 // Helper function to get current user or throw
 export async function getCurrentUserOrThrow(ctx: QueryCtx | MutationCtx) {
+  // Reuse helper and enforce presence
   const user = await getCurrentUser(ctx);
   if (!user) {
-    throw new Error('User not authenticated');
+    // Throw to signal protected operations
+    throw new Error('user not authenticated');
   }
   return user;
 }

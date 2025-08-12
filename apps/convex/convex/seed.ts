@@ -1,3 +1,11 @@
+/**
+ * Utilities for populating a development database with predictable fixtures.
+ *
+ * The seed action orchestrates a series of internal mutations that wipe all
+ * existing tables and then insert sample emojis, users, vibes, ratings, tags
+ * and search data. This allows local development and testing with realistic
+ * content without manually crafting records each time.
+ */
 import { action, internalMutation } from './_generated/server';
 import { internal } from './_generated/api';
 import { v } from 'convex/values';
@@ -26,7 +34,10 @@ const allEmojis = [
   ...symbolEmojis,
 ];
 
-// Helper function to determine sentiment based on emoji characteristics
+/**
+ * Heuristically determine the sentiment for a given emoji by scanning its
+ * name and keywords for positive or negative cues.
+ */
 function getSentiment(emoji: Omit<Emoji, 'sentiment'>): Emoji['sentiment'] {
   const { name, keywords, tags } = emoji;
   const text =
@@ -69,7 +80,10 @@ function getSentiment(emoji: Omit<Emoji, 'sentiment'>): Emoji['sentiment'] {
   return 'neutral';
 }
 
-// Main seed action - comprehensive development data
+/**
+ * Public entry point that clears the database and repopulates it with a full
+ * set of sample data for development.
+ */
 export const seed = action({
   handler: async (ctx): Promise<void> => {
     // eslint-disable-next-line no-console
@@ -174,7 +188,10 @@ export const seed = action({
   },
 });
 
-// Clear all data from all tables
+/**
+ * Internal mutation that deletes every record from all Convex tables so the
+ * seed process starts with a clean slate.
+ */
 export const clearAllData = internalMutation({
   handler: async (ctx) => {
     const tables = [
@@ -200,7 +217,10 @@ export const clearAllData = internalMutation({
   },
 });
 
-// Seed emojis mutation
+/**
+ * Insert every emoji definition, computing sentiment for each entry before
+ * storing it in the database.
+ */
 export const seedEmojis = internalMutation({
   handler: async (ctx) => {
     let count = 0;

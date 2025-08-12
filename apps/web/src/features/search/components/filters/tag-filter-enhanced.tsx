@@ -14,6 +14,9 @@ interface TagFilterEnhancedProps {
   className?: string;
 }
 
+/**
+ * Tag selection list with search and popularity sorting.
+ */
 export function TagFilterEnhanced({
   selected,
   available,
@@ -60,7 +63,7 @@ export function TagFilterEnhanced({
   return (
     <div className={className}>
       <div className="mb-3 flex items-center justify-between">
-        <h4 className="font-medium">Tags</h4>
+        <h4 className="font-medium">tags</h4>
         {selected.length > 0 && (
           <Button
             variant="ghost"
@@ -68,7 +71,8 @@ export function TagFilterEnhanced({
             onClick={handleClearSelection}
             className="h-auto px-2 py-1 text-xs"
           >
-            Clear ({selected.length})
+            {/* lowercase clear label for consistency */}
+            clear ({selected.length})
           </Button>
         )}
       </div>
@@ -76,9 +80,10 @@ export function TagFilterEnhanced({
       {/* Search input */}
       <div className="relative mb-3">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+        {/* Lowercase placeholder to match global style */}
         <Input
           type="text"
-          placeholder="Search tags..."
+          placeholder="search tags..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pr-10 pl-10"
@@ -148,8 +153,8 @@ export function TagFilterEnhanced({
           ) : (
             <p className="text-muted-foreground py-4 text-center text-sm">
               {searchQuery
-                ? `No tags found matching "${searchQuery}"`
-                : 'No tags available'}
+                ? `no tags found matching "${searchQuery}"`
+                : 'no tags available'}
             </p>
           )}
         </div>

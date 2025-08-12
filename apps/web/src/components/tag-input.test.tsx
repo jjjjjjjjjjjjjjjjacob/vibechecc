@@ -43,10 +43,10 @@ describe('TagInput', () => {
   });
 
   it('renders with placeholder text', () => {
-    render(<TagInput {...defaultProps} placeholder="Custom placeholder" />);
+    render(<TagInput {...defaultProps} placeholder="custom placeholder" />);
 
     expect(
-      screen.getByPlaceholderText('Custom placeholder')
+      screen.getByPlaceholderText('custom placeholder')
     ).toBeInTheDocument();
     expect(
       screen.getByText(

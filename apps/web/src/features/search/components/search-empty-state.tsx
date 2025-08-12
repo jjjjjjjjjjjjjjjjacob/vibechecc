@@ -1,3 +1,7 @@
+/**
+ * search empty state module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { Search, TrendingUp, Sparkles, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

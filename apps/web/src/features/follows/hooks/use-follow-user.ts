@@ -1,3 +1,7 @@
+/**
+ * Hook that exposes follow and unfollow mutations with optimistic updates.
+ * Handles cache updates, analytics tracking, and user-facing toasts.
+ */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@viberatr/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
@@ -10,10 +14,13 @@ interface UseFollowUserOptions {
 }
 
 export function useFollowUser(options: UseFollowUserOptions = {}) {
+  // React Query cache for manual updates
   const queryClient = useQueryClient();
+  // Convex mutations for follow/unfollow
   const followMutation = useConvexMutation(api.follows.follow);
   const unfollowMutation = useConvexMutation(api.follows.unfollow);
 
+  // Mutation for following a user
   const followUser = useMutation({
     mutationFn: async ({
       targetUserId,
@@ -22,6 +29,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       targetUserId: string;
       username?: string;
     }) => {
+      // Execute Convex mutation to create follow
       return await followMutation({ followingId: targetUserId });
     },
     onMutate: async ({
@@ -30,7 +38,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       targetUserId: string;
       username?: string;
     }) => {
-      // Optimistically update follow status
+      // Optimistically update follow status in cache
       await queryClient.cancelQueries({
         queryKey: ['isCurrentUserFollowing', targetUserId],
       });
@@ -42,7 +50,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
 
       queryClient.setQueryData(['isCurrentUserFollowing', targetUserId], true);
 
-      // Optimistically update follow stats
+      // Also bump the follower count so UI feels snappy
       queryClient.setQueryData(
         ['followStats', targetUserId],
         (old: { followers: number; following: number } | undefined) => {
@@ -57,7 +65,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       return { previousData, targetUserId };
     },
     onError: (err, { targetUserId, username }, context) => {
-      // Revert optimistic updates
+      // Revert optimistic updates if mutation failed
       if (context?.previousData !== undefined) {
         queryClient.setQueryData(
           ['isCurrentUserFollowing', targetUserId],
@@ -65,7 +73,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
         );
       }
 
-      // Revert follow stats
+      // Roll back follower count
       queryClient.setQueryData(
         ['followStats', targetUserId],
         (old: { followers: number; following: number } | undefined) => {
@@ -81,7 +89,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       options.onError?.(err as Error);
     },
     onSuccess: (data, { targetUserId, username }) => {
-      // Track follow event
+      // Track follow event for analytics
       trackEvents.followUser(targetUserId, username);
 
       toast.success(
@@ -90,7 +98,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       options.onSuccess?.();
     },
     onSettled: (data, error, targetUserId) => {
-      // Invalidate related queries
+      // Ensure caches reflect server state
       queryClient.invalidateQueries({
         queryKey: ['isCurrentUserFollowing', targetUserId],
       });
@@ -109,6 +117,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
     },
   });
 
+  // Mutation for unfollowing a user
   const unfollowUser = useMutation({
     mutationFn: async ({
       targetUserId,
@@ -117,6 +126,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       targetUserId: string;
       username?: string;
     }) => {
+      // Execute Convex mutation to remove follow
       return await unfollowMutation({ followingId: targetUserId });
     },
     onMutate: async ({
@@ -125,7 +135,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       targetUserId: string;
       username?: string;
     }) => {
-      // Optimistically update follow status
+      // Optimistically set following status to false
       await queryClient.cancelQueries({
         queryKey: ['isCurrentUserFollowing', targetUserId],
       });
@@ -137,7 +147,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
 
       queryClient.setQueryData(['isCurrentUserFollowing', targetUserId], false);
 
-      // Optimistically update follow stats
+      // Decrement follower count optimistically
       queryClient.setQueryData(
         ['followStats', targetUserId],
         (old: { followers: number; following: number } | undefined) => {
@@ -152,7 +162,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       return { previousData, targetUserId };
     },
     onError: (err, { targetUserId, username }, context) => {
-      // Revert optimistic updates
+      // Restore caches if the mutation fails
       if (context?.previousData !== undefined) {
         queryClient.setQueryData(
           ['isCurrentUserFollowing', targetUserId],
@@ -160,7 +170,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
         );
       }
 
-      // Revert follow stats
+      // Re-add follower count that we optimistically decremented
       queryClient.setQueryData(
         ['followStats', targetUserId],
         (old: { followers: number; following: number } | undefined) => {
@@ -176,7 +186,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       options.onError?.(err as Error);
     },
     onSuccess: (data, { targetUserId, username }) => {
-      // Track unfollow event
+      // Track the unfollow event
       trackEvents.unfollowUser(targetUserId, username);
 
       toast.success(
@@ -185,7 +195,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
       options.onSuccess?.();
     },
     onSettled: (data, error, { targetUserId }) => {
-      // Invalidate related queries
+      // Invalidate caches after mutation settles
       queryClient.invalidateQueries({
         queryKey: ['isCurrentUserFollowing', targetUserId],
       });
@@ -205,6 +215,7 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
   });
 
   return {
+    // expose mutate functions and loading state
     followUser: followUser.mutate,
     unfollowUser: unfollowUser.mutate,
     isFollowing: followUser.isPending,

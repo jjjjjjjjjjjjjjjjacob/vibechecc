@@ -1,12 +1,14 @@
-// Vibes Feature Components
-// This barrel export file provides a clean API for importing vibe-related components
+/**
+ * Barrel exports for vibe-related UI components.
+ * Grouping exports here allows consumers to import from a single location.
+ */
 
-// Core Vibe Display
-export { VibeCard } from './vibe-card';
-export { VibeGrid } from './vibe-grid';
+// Core components that render vibes
+export { VibeCard } from './vibe-card'; // individual vibe presentation
+export { VibeGrid } from './vibe-grid'; // responsive grid of vibes
 
-// Vibe Creation
-export { CreateVibeButton } from './create-vibe-button';
+// Trigger for creating a new vibe
+export { CreateVibeButton } from './create-vibe-button'; // navigates to the creation form
 
-// Vibe Placeholders
+// Placeholder shown when vibe content has yet to load
 export { SimpleVibePlaceholder } from './simple-vibe-placeholder';

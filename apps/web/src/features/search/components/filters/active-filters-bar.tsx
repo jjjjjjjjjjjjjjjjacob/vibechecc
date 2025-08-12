@@ -1,3 +1,7 @@
+/**
+ * Displays currently applied search filters as removable badges.
+ * Supports tags, rating range, date range and sort options.
+ */
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X, Star, Calendar, Tag } from 'lucide-react';
@@ -14,6 +18,7 @@ export function ActiveFiltersBar({
   onChange,
   className,
 }: ActiveFiltersBarProps) {
+  // Internal array describing each active filter to render
   const activeFilters: Array<{
     type: string;
     label: string;

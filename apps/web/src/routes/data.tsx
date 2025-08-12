@@ -1,3 +1,6 @@
+/**
+ * Static route describing the platform's data handling policy.
+ */
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';

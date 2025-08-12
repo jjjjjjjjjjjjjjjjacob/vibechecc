@@ -12,14 +12,28 @@ import { Hash, X } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
 import { useAllTags } from '@/queries';
 
+/**
+ * Props for {@link TagSearchCommand}. The component presents a search box with
+ * autocomplete suggestions for existing tags and allows selecting/removing
+ * multiple tags.
+ */
 interface TagSearchCommandProps {
+  /** tags that are already selected */
   selectedTags?: string[];
+  /** callback fired when a tag is chosen from the list */
   onTagSelect: (tag: string) => void;
+  /** callback fired when a selected tag is removed */
   onTagRemove: (tag: string) => void;
+  /** additional classes applied to the wrapper */
   className?: string;
+  /** placeholder text displayed in the input */
   placeholder?: string;
 }
 
+/**
+ * Search component for selecting and removing tags. Uses a command palette
+ * style UI for quick keyboard-driven navigation.
+ */
 export function TagSearchCommand({
   selectedTags = [],
   onTagSelect,
@@ -27,10 +41,12 @@ export function TagSearchCommand({
   className,
   placeholder = 'search tags...',
 }: TagSearchCommandProps) {
+  // local search query state for filtering tags as user types
   const [searchValue, setSearchValue] = useState('');
+  // fetch all available tags from the backend
   const { data: allTags, isLoading } = useAllTags();
 
-  // Filter tags based on search
+  // compute list of tags that match the query and aren't selected yet
   const filteredTags = allTags?.filter(
     (tag) =>
       tag.tag.toLowerCase().includes(searchValue.toLowerCase()) &&
@@ -40,16 +56,18 @@ export function TagSearchCommand({
   return (
     <div className={cn('space-y-3', className)}>
       <Command className="ring-border rounded-lg border-0 ring-1">
+      {/* search input driving the command palette */}
         <CommandInput
           placeholder={placeholder}
           value={searchValue}
           onValueChange={setSearchValue}
           className="h-9"
         />
+        {/* scrollable suggestion list */}
         <CommandList className="max-h-40 overflow-y-auto">
-          {isLoading && <CommandEmpty>Loading tags...</CommandEmpty>}
+          {isLoading && <CommandEmpty>loading tags...</CommandEmpty>}
           {!isLoading && filteredTags?.length === 0 && (
-            <CommandEmpty>No tags found.</CommandEmpty>
+            <CommandEmpty>no tags found.</CommandEmpty>
           )}
           {filteredTags && filteredTags.length > 0 && (
             <CommandGroup>
@@ -58,6 +76,7 @@ export function TagSearchCommand({
                   key={tag.tag}
                   value={tag.tag}
                   onSelect={() => {
+                    // emit the selected tag and clear the search box
                     onTagSelect(tag.tag);
                     setSearchValue('');
                   }}
@@ -77,7 +96,7 @@ export function TagSearchCommand({
         </CommandList>
       </Command>
 
-      {/* Selected tags */}
+      {/* render currently selected tags as removable badges */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {selectedTags.map((tag) => (

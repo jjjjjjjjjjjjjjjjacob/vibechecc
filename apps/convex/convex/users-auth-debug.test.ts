@@ -1,26 +1,34 @@
-import { convexTest } from 'convex-test';
-import { modules } from '../vitest.setup';
-import { describe, it, expect, beforeEach } from 'vitest';
-import schema from './schema';
-import { api } from './_generated/api';
+/**
+ * Tests for authentication debugging utilities.
+ * Each case exercises Convex user queries with and without credentials
+ * to verify behavior of the `debugAuth` helper.
+ */
+import { convexTest } from 'convex-test'; // spins up in-memory Convex instance
+import { modules } from '../vitest.setup'; // shared test modules
+import { describe, it, expect, beforeEach } from 'vitest'; // test helpers
+import schema from './schema'; // Convex schema definition
+import { api } from './_generated/api'; // typed API routes
 
+// group of tests covering debug information returned by auth queries
 describe('Authentication Debug Tests', () => {
+  // Convex test harness instance created fresh for every test
   let t: ReturnType<typeof convexTest>;
 
+  // reset the test harness before each test for isolation
   beforeEach(() => {
     t = convexTest(schema, modules);
   });
 
   describe('ctx.auth.getUserIdentity() Debugging', () => {
+    // when no auth context is attached, current should resolve to null
     it('should return null when no authentication context is provided', async () => {
-      // Test the current query without any authentication
       const result = await t.query(api.users.current, {});
 
       expect(result).toBeNull();
     });
 
+    // debugAuth should outline missing identity and token when unauthenticated
     it('should return detailed debug info when no authentication is provided', async () => {
-      // Test the debugAuth query without authentication
       const debugResult = await t.query(api.users.debugAuth, {});
 
       expect(debugResult).toEqual({
@@ -31,8 +39,8 @@ describe('Authentication Debug Tests', () => {
       });
     });
 
+    // providing a mock identity should yield populated auth fields
     it('should return user identity when proper authentication is provided', async () => {
-      // Create a comprehensive mock identity
       const mockIdentity = {
         subject: 'user_auth_test_123',
         tokenIdentifier: 'test_token_identifier_123',
@@ -48,7 +56,6 @@ describe('Authentication Debug Tests', () => {
         exp: Math.floor(Date.now() / 1000) + 3600,
       };
 
-      // Test debugAuth with authentication
       const debugResult = await t
         .withIdentity(mockIdentity)
         .query(api.users.debugAuth, {});
@@ -57,11 +64,6 @@ describe('Authentication Debug Tests', () => {
       expect(debugResult.hasIdentity).toBe(true);
       expect(debugResult.identity).toBeDefined();
       expect(debugResult.identity?.subject).toBe(mockIdentity.subject);
-      // Note: identity object only has basic properties
-      // Note: identity object only has basic properties
-      // Note: identity object only has basic properties
-      // Note: identity object only has basic properties
-      // Note: identity object only has basic properties
     });
 
     it('should return user when authenticated and user exists in database', async () => {

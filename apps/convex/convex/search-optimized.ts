@@ -1,3 +1,7 @@
+/**
+ * Experimental search variant emphasizing indexed queries and per-type caps.
+ * Provides a basis for benchmarking against other search implementations.
+ */
 import { query } from './_generated/server';
 import { v } from 'convex/values';
 import type {
@@ -7,9 +11,9 @@ import type {
   ActionSearchResult,
   ReviewSearchResult,
 } from '@viberatr/types';
-import { fuzzyMatch } from './search/fuzzy_search';
+import { fuzzyMatch } from './search/fuzzy-search';
 import { scoreVibe, scoreUser, scoreTag } from './search/search_scorer';
-import { parseSearchQuery } from './search/search_utils';
+import { parseSearchQuery } from './search/search-utils';
 
 // Constants for pagination and limits
 const DEFAULT_PAGE_SIZE = 20;

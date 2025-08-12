@@ -502,7 +502,7 @@ export function RatingPopover({
           <DialogDescription>
             {vibeTitle
               ? `Rate "${vibeTitle}" with an emoji and detailed review`
-              : 'Share your thoughts with an emoji rating and review'}
+              : 'share your thoughts with an emoji rating and review'}
           </DialogDescription>
         </DialogHeader>
         {formContent}

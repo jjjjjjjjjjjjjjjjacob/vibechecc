@@ -1,3 +1,7 @@
+/**
+ * FeedLayout composes BaseLayout with optional header, sticky navigation, and floating UI.
+ * It arranges scrollable content for feed pages while keeping navigation pinned.
+ */
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import { BaseLayout } from './base-layout';
@@ -25,6 +29,7 @@ export interface FeedLayoutProps {
   contentSpacing?: 'sm' | 'md' | 'lg';
 }
 
+// translate spacing tokens to bottom margin utilities
 const spacingClasses = {
   sm: 'mb-4',
   md: 'mb-6',
@@ -52,7 +57,8 @@ export function FeedLayout({
 
       {/* Sticky Navigation Sections */}
       {stickyNavigation.map((section, index) => {
-        const topOffset = 64 + index * 60; // Header height + previous sticky sections
+        // offset stacks each sticky section below the previous one
+        const topOffset = 64 + index * 60;
 
         return (
           <div

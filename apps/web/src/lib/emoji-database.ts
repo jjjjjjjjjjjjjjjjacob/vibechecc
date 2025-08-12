@@ -1,3 +1,8 @@
+/**
+ * Static emoji dataset used for offline search and display.
+ * Each entry captures the glyph, a human-readable name, keywords and
+ * a lowercase category.
+ */
 export interface EmojiData {
   emoji: string;
   name: string;

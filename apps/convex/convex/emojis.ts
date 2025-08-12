@@ -4,33 +4,37 @@ import {
   getEmojiColor,
   getEmojiSentiment,
   getEmojiTags,
-} from './lib/emojiColors';
+} from './lib/emoji-colors';
 import type { Emoji } from './schema';
 
-// Import emoji batch (public endpoint for seeding)
+/**
+ * Import a batch of emoji records. This is typically used during initial
+ * seeding and is exposed as a mutation so it can be called from scripts.
+ */
 export const importBatch = mutation({
   args: {
+    // Array of emoji objects to insert
     emojis: v.array(
       v.object({
-        emoji: v.string(),
-        name: v.string(),
-        keywords: v.array(v.string()),
-        category: v.string(),
+        emoji: v.string(), // literal emoji character
+        name: v.string(), // human readable name
+        keywords: v.array(v.string()), // search keywords
+        category: v.string(), // category such as "food" or "emotion"
       })
     ),
   },
   handler: async (ctx, { emojis }) => {
-    let insertedCount = 0;
+    let insertedCount = 0; // track how many new emojis we add
 
     for (const emojiData of emojis) {
-      // Check if emoji already exists
+      // Check if emoji already exists to avoid duplicates
       const existing = await ctx.db
         .query('emojis')
         .withIndex('byEmoji', (q) => q.eq('emoji', emojiData.emoji))
         .first();
 
       if (!existing) {
-        // Get color and metadata
+        // Derive color and other metadata from the helper library
         const color = getEmojiColor(
           emojiData.emoji,
           emojiData.name,
@@ -45,6 +49,7 @@ export const importBatch = mutation({
           emojiData.category
         );
 
+        // Insert the enriched emoji record
         await ctx.db.insert('emojis', {
           emoji: emojiData.emoji,
           name: emojiData.name,
@@ -55,31 +60,34 @@ export const importBatch = mutation({
           tags,
         });
 
-        insertedCount++;
+        insertedCount++; // increment count when a new emoji is stored
       }
     }
 
+    // Return how many entries were inserted for logging/feedback
     return { count: insertedCount };
   },
 });
 
-// Search emojis with pagination
+/**
+ * Search emojis with optional text and category filters. Results are paginated
+ * to keep responses small for clients.
+ */
 export const search = query({
   args: {
-    searchTerm: v.optional(v.string()),
-    category: v.optional(v.string()),
-    page: v.optional(v.number()),
-    pageSize: v.optional(v.number()),
+    searchTerm: v.optional(v.string()), // free text search
+    category: v.optional(v.string()), // restrict to a category
+    page: v.optional(v.number()), // page number (0-indexed)
+    pageSize: v.optional(v.number()), // results per page
   },
   handler: async (ctx, { searchTerm, category, page = 0, pageSize = 50 }) => {
-    // Get all emojis or by category
-    let allEmojis;
+    let allEmojis; // collection to apply filters on
 
     if (searchTerm) {
-      // For search, get all emojis for filtering
+      // When searching by term we need to load all emojis then filter
       allEmojis = await ctx.db.query('emojis').collect();
 
-      // Filter by search term
+      // Perform case-insensitive search across name, keywords, and tags
       const searchLower = searchTerm.toLowerCase();
       allEmojis = allEmojis.filter((emoji) => {
         const searchableText = [
@@ -92,17 +100,17 @@ export const search = query({
         return searchableText.includes(searchLower);
       });
     } else if (category) {
-      // For category browsing, use index
+      // For category filtering we can leverage the indexed query
       allEmojis = await ctx.db
         .query('emojis')
         .withIndex('byCategory', (q) => q.eq('category', category))
         .collect();
     } else {
-      // For general browsing, get all emojis
+      // Default to fetching all emojis for browsing
       allEmojis = await ctx.db.query('emojis').collect();
     }
 
-    // Paginate results
+    // Calculate pagination window
     const start = page * pageSize;
     const end = start + pageSize;
     const paginatedEmojis = allEmojis.slice(start, end);
@@ -117,22 +125,26 @@ export const search = query({
   },
 });
 
-// Get emojis by specific emojis (for metadata enrichment)
+/**
+ * Look up metadata for a provided list of emoji characters. This is used when
+ * enriching user-provided emoji lists with color and sentiment information.
+ */
 export const getByEmojis = query({
   args: {
-    emojis: v.array(v.string()),
+    emojis: v.array(v.string()), // list of emoji characters to fetch
   },
   handler: async (ctx, { emojis }) => {
     const results: Array<Emoji> = [];
 
     for (const emoji of emojis) {
+      // Indexed lookup for each emoji to avoid full table scans
       const emojiData = await ctx.db
         .query('emojis')
         .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
         .first();
 
       if (emojiData) {
-        results.push(emojiData);
+        results.push(emojiData); // include only found entries
       }
     }
 
@@ -140,14 +152,15 @@ export const getByEmojis = query({
   },
 });
 
-// Get popular emojis for quick selection
+/**
+ * Return a curated list of popular emojis. In the future this could be based
+ * on actual usage stats; for now the list is hard coded.
+ */
 export const getPopular = query({
   args: {
-    limit: v.optional(v.number()),
+    limit: v.optional(v.number()), // max results to return
   },
   handler: async (ctx, { limit = 20 }) => {
-    // For now, return a curated list of popular emojis
-    // In the future, this could be based on usage statistics
     const popularEmojis = [
       '🔥',
       '😍',
@@ -179,17 +192,20 @@ export const getPopular = query({
   },
 });
 
-// Get emoji categories
+/**
+ * Return a sorted list of all available emoji categories for filtering.
+ */
 export const getCategories = query({
   args: {},
   handler: async (ctx) => {
+    // Load all emojis then gather their categories into a set
     const allEmojis = await ctx.db.query('emojis').collect();
     const categories = new Set(allEmojis.map((e) => e.category));
     return Array.from(categories).sort();
   },
 });
 
-// Default export for test-setup
+// Default export for test setup convenience
 export default {
   importBatch,
   search,

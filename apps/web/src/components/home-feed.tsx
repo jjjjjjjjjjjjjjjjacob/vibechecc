@@ -1,3 +1,8 @@
+/**
+ * Home page feed component that switches between "for you", "hot", "new" and
+ * "unrated" tabs. Each section is documented to describe how queries and UI
+ * elements respond to authentication and tab changes.
+ */
 import * as React from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';

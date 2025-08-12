@@ -1,6 +1,13 @@
-import * as React from 'react';
-import { cn } from '@/utils/tailwind-utils';
+import * as React from 'react'; // react primitives for state and effects
+import { cn } from '@/utils/tailwind-utils'; // helper to conditionally join tailwind class names
 
+/**
+ * Shared props for both masonry layout implementations.
+ * - `children`: the items to position in the masonry grid
+ * - `columns`: responsive column counts keyed by breakpoint
+ * - `gap`: tailwind gap utility controlling space between items
+ * - `className`: additional classes applied to the container
+ */
 interface MasonryLayoutProps {
   children: React.ReactNode[];
   columns?: {
@@ -14,13 +21,17 @@ interface MasonryLayoutProps {
   className?: string;
 }
 
+/**
+ * Masonry layout implemented purely with CSS columns.
+ * This is lightweight but offers less control over item placement.
+ */
 export function MasonryLayout({
   children,
-  columns = { default: 1, sm: 2, md: 2, lg: 3, xl: 4 },
-  gap = 'gap-4',
+  columns = { default: 1, sm: 2, md: 2, lg: 3, xl: 4 }, // default responsive column counts
+  gap = 'gap-4', // tailwind class controlling vertical and horizontal gaps
   className,
 }: MasonryLayoutProps) {
-  // CSS-only masonry layout using CSS columns
+  // Build a string of responsive `columns-*` utilities based on provided config
   const columnClasses = [
     `columns-${columns.default}`,
     columns.sm && `sm:columns-${columns.sm}`,
@@ -28,20 +39,20 @@ export function MasonryLayout({
     columns.lg && `lg:columns-${columns.lg}`,
     columns.xl && `xl:columns-${columns.xl}`,
   ]
-    .filter(Boolean)
-    .join(' ');
+    .filter(Boolean) // remove undefined entries
+    .join(' '); // join into a single string that cn can consume
 
   return (
     <div
-      className={cn(columnClasses, gap, 'w-full', className)}
+      className={cn(columnClasses, gap, 'w-full', className)} // apply layout and spacing classes
       style={{
-        columnFill: 'balance',
+        columnFill: 'balance', // let browser balance column heights automatically
       }}
     >
       {children.map((child, index) => (
         <div
-          key={index}
-          className="mb-4 inline-block w-full break-inside-avoid"
+          key={index} // key each child for React reconciliation
+          className="mb-4 inline-block w-full break-inside-avoid" // prevent items from splitting across columns
         >
           {child}
         </div>
@@ -56,17 +67,17 @@ export function MasonryLayout({
  */
 export function JSMasonryLayout({
   children,
-  columns = { default: 1, sm: 2, md: 2, lg: 3, xl: 4 },
-  gap = '16px',
+  columns = { default: 1, sm: 2, md: 2, lg: 3, xl: 4 }, // same responsive defaults as CSS version
+  gap = '16px', // pixel gap between items
   className,
 }: MasonryLayoutProps & { gap?: string | number }) {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [columnCount, setColumnCount] = React.useState(columns.default);
+  const containerRef = React.useRef<HTMLDivElement>(null); // reference to the flex container
+  const [columnCount, setColumnCount] = React.useState(columns.default); // track how many columns to render
 
-  // Update column count based on screen size
+  // adjust column count whenever the viewport width changes
   React.useEffect(() => {
     const updateColumns = () => {
-      const width = window.innerWidth;
+      const width = window.innerWidth; // current viewport width
 
       if (width >= 1280 && columns.xl) {
         setColumnCount(columns.xl);
@@ -81,47 +92,44 @@ export function JSMasonryLayout({
       }
     };
 
-    updateColumns();
-    window.addEventListener('resize', updateColumns);
-    return () => window.removeEventListener('resize', updateColumns);
+    updateColumns(); // initialize on mount
+    window.addEventListener('resize', updateColumns); // listen for resizes
+    return () => window.removeEventListener('resize', updateColumns); // clean up listener
   }, [columns]);
 
-  // Distribute children across columns using height-aware algorithm
+  // distribute children among columns in a balanced way
   const columnArrays = React.useMemo(() => {
     const cols: React.ReactNode[][] = Array(columnCount)
-      .fill(null)
+      .fill(null) // create empty buckets for each column
       .map(() => []);
 
-    // For better distribution, we'll use a height-based algorithm
-    // Since we can't measure actual heights in this context, we'll use
-    // a more sophisticated round-robin that accounts for content variation
+    // choose the column with the fewest items for each child
     children.forEach((child, _index) => {
-      // Find the column with the least items to balance better
       const columnSizes = cols.map((col) => col.length);
       const minSize = Math.min(...columnSizes);
       const targetColumnIndex = columnSizes.findIndex(
         (size) => size === minSize
       );
 
-      cols[targetColumnIndex].push(child);
+      cols[targetColumnIndex].push(child); // place child into the shortest column
     });
 
-    return cols;
+    return cols; // array of columns each containing its children
   }, [children, columnCount]);
 
   return (
     <div
-      ref={containerRef}
+      ref={containerRef} // expose container for potential future measurements
       className={cn('flex', className)}
-      style={{ gap: typeof gap === 'number' ? `${gap}px` : gap }}
+      style={{ gap: typeof gap === 'number' ? `${gap}px` : gap }} // apply configurable gap between columns
     >
       {columnArrays.map((column, columnIndex) => (
         <div
           key={columnIndex}
-          className="flex min-w-0 flex-1 flex-col"
+          className="flex min-w-0 flex-1 flex-col" // each column is a flex column that can shrink
           style={{
             gap: typeof gap === 'number' ? `${gap}px` : gap,
-            width: `${100 / columnCount}%`,
+            width: `${100 / columnCount}%`, // split container width evenly between columns
           }}
         >
           {column.map((child, index) => (
@@ -139,18 +147,18 @@ export function JSMasonryLayout({
  * Hook to detect if we should use masonry layout
  */
 export function useMasonryLayout() {
-  const [shouldUseMasonry, setShouldUseMasonry] = React.useState(false);
+  const [shouldUseMasonry, setShouldUseMasonry] = React.useState(false); // whether caller should render masonry version
 
   React.useEffect(() => {
     const checkSupport = () => {
-      // Use masonry on medium screens and larger (768px+) for better layout
+      // enable masonry layout on medium screens and larger (768px+)
       setShouldUseMasonry(window.innerWidth >= 768);
     };
 
-    checkSupport();
-    window.addEventListener('resize', checkSupport);
-    return () => window.removeEventListener('resize', checkSupport);
+    checkSupport(); // run once on mount
+    window.addEventListener('resize', checkSupport); // update on viewport changes
+    return () => window.removeEventListener('resize', checkSupport); // clean up listener on unmount
   }, []);
 
-  return shouldUseMasonry;
+  return shouldUseMasonry; // expose boolean flag to caller
 }

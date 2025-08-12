@@ -1,3 +1,8 @@
+/**
+ * discover route renders curated vibe collections for exploration.
+ * it lazy-loads heavy components for performance and applies user theme
+ * preferences to maintain a personalized experience.
+ */
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { lazy, Suspense, useMemo } from 'react';
 import * as React from 'react';
@@ -21,7 +26,7 @@ import {
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 
-// Skeleton for lazy-loaded components
+// fallback skeleton while vibe categories load asynchronously
 function VibeCategoryRowSkeleton() {
   return (
     <div className="space-y-4">
@@ -43,7 +48,7 @@ function VibeCategoryRowSkeleton() {
   );
 }
 
-// Lazy load heavy category component
+// load the full category row only when needed to reduce initial bundle size
 const VibeCategoryRow = lazy(() =>
   import('@/components/vibe-category-row').then((m) => ({
     default: m.VibeCategoryRow,
@@ -54,6 +59,7 @@ export const Route = createFileRoute('/discover')({
   component: DiscoverPage,
 });
 
+// descriptor for each featured emoji-based collection
 interface EmojiCollection {
   id: string;
   emoji: string;
@@ -64,12 +70,13 @@ interface EmojiCollection {
   ratingDisplayMode?: 'most-rated' | 'top-rated';
 }
 
+// curated sets of vibes grouped by notable emoji reactions
 const FEATURED_COLLECTIONS: EmojiCollection[] = [
   {
     id: 'on-fire',
     emoji: '🔥',
-    title: 'On Fire',
-    description: 'Vibes rated 5 🔥 - The hottest content',
+    title: 'on fire',
+    description: 'vibes rated 5 🔥 - the hottest content',
     minValue: 5,
     icon: <Flame className="h-4 w-4" />,
     ratingDisplayMode: 'top-rated',
@@ -77,8 +84,8 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
   {
     id: 'perfect-score',
     emoji: '💯',
-    title: 'Perfect Score',
-    description: 'Vibes rated 5 💯 - Absolutely perfect',
+    title: 'perfect score',
+    description: 'vibes rated 5 💯 - absolutely perfect',
     minValue: 5,
     icon: <Sparkles className="h-4 w-4" />,
     ratingDisplayMode: 'top-rated',
@@ -86,46 +93,47 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
   {
     id: 'love-it',
     emoji: '😍',
-    title: 'Love It',
-    description: 'Vibes rated 4+ 😍 - Crowd favorites',
+    title: 'love it',
+    description: 'vibes rated 4+ 😍 - crowd favorites',
     minValue: 4,
     icon: <TrendingUp className="h-4 w-4" />,
   },
   {
     id: 'mind-blown',
     emoji: '😱',
-    title: 'Mind Blown',
-    description: 'Vibes rated 4+ 😱 - Shocking content',
+    title: 'mind blown',
+    description: 'vibes rated 4+ 😱 - shocking content',
     minValue: 4,
   },
   {
     id: 'star-struck',
     emoji: '🤩',
-    title: 'Star Struck',
-    description: 'Vibes rated 4+ 🤩 - Amazing finds',
+    title: 'star struck',
+    description: 'vibes rated 4+ 🤩 - amazing finds',
     minValue: 4,
   },
   {
     id: 'hilarious',
     emoji: '😂',
-    title: 'Hilarious',
-    description: 'Vibes rated 4+ 😂 - Comedy gold',
+    title: 'hilarious',
+    description: 'vibes rated 4+ 😂 - comedy gold',
     minValue: 4,
   },
 ];
 
 function DiscoverPage() {
-  // Get current user's theme
+  // grab user data to sync their saved theme selections
   const { data: currentUser } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
 
-  // Apply user's color themes when user data changes
+  // whenever the user record changes, apply their preferred colors
   React.useEffect(() => {
     if (currentUser) {
       const primaryColor =
         currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
 
+      // map user-selected names to css variables expected by the theme provider
       setColorTheme(`${primaryColor}-primary` as PrimaryColorTheme);
       setSecondaryColorTheme(
         `${secondaryColor}-secondary` as SecondaryColorTheme

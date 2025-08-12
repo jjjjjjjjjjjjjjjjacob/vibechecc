@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+// use PostHog to determine when to show onboarding surveys
+import { usePostHog } from '@/hooks/use-posthog';
 import {
   surveyManager,
   trackSurveyEvents,
@@ -31,8 +32,8 @@ interface NewUserSurveyProps {
 }
 
 /**
- * Survey component for new users to gather onboarding insights
- * Integrates with PostHog for analytics and user targeting
+ * Survey component for new users to gather onboarding insights.
+ * Integrates with PostHog for analytics and user targeting.
  */
 export function NewUserSurvey({ onComplete, onDismiss }: NewUserSurveyProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');

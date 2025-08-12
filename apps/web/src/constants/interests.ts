@@ -1,3 +1,9 @@
+/**
+ * Canonical list of interests presented during onboarding.
+ *
+ * Keeping this array centralized ensures that multiple features—such as search
+ * suggestions and profile preferences—reference the same curated vocabulary.
+ */
 export const DEFAULT_INTERESTS = [
   'music',
   'travel',

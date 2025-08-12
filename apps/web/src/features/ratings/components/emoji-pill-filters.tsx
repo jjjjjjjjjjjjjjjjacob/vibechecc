@@ -1,3 +1,7 @@
+/**
+ * Renders a list of selected emoji filters as removable pills.
+ * Includes an optional "clear all" action and compact variant.
+ */
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,10 +27,12 @@ export function EmojiPillFilters({
   showClearAll = true,
   maxDisplay,
 }: EmojiPillFiltersProps) {
+  // Nothing to show if no emojis are selected
   if (!emojis || emojis.length === 0) {
     return null;
   }
 
+  // Limit how many emojis are shown and track remaining count
   const displayEmojis = maxDisplay ? emojis.slice(0, maxDisplay) : emojis;
   const hiddenCount =
     maxDisplay && emojis.length > maxDisplay ? emojis.length - maxDisplay : 0;
@@ -81,6 +87,7 @@ interface EmojiPillProps {
   className?: string;
 }
 
+// Single pill representing one emoji filter
 function EmojiPill({
   emoji,
   onRemove,

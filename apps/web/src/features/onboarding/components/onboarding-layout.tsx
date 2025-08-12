@@ -1,3 +1,8 @@
+/**
+ * OnboardingLayout wraps each onboarding step with consistent chrome such as
+ * progress indicators and navigation actions. Comments throughout explain the
+ * structure so future edits remain straightforward.
+ */
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -26,12 +31,13 @@ export function OnboardingLayout({
   title,
   subtitle,
 }: OnboardingLayoutProps) {
+  // compute percentage for progress bar display
   const progress = (currentStep / totalSteps) * 100;
 
   return (
     <div className="from-theme-primary/5 to-theme-secondary/5 dark:from-background dark:to-muted/50 min-h-screen bg-gradient-to-br">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+        {/* header with back button, title, and optional skip */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {showBack && onBack && currentStep > 1 && (
@@ -47,7 +53,7 @@ export function OnboardingLayout({
             <div>
               <h1 className="text-foreground text-2xl font-bold">viberatr</h1>
               <p className="text-muted-foreground text-sm">
-                Step {currentStep} of {totalSteps}
+                step {currentStep} of {totalSteps}
               </p>
             </div>
           </div>
@@ -59,17 +65,17 @@ export function OnboardingLayout({
               className="text-muted-foreground hover:text-foreground"
             >
               <X className="mr-2 h-4 w-4" />
-              Skip
+              skip
             </Button>
           )}
         </div>
 
-        {/* Progress Bar */}
+        {/* progress bar conveys step completion */}
         <div className="mb-8">
           <Progress value={progress} className="h-2" />
         </div>
 
-        {/* Content */}
+        {/* main content area centers step body */}
         <div className="mx-auto max-w-2xl">
           {title && (
             <div className="animate-fade-in-down mb-6 text-center">

@@ -1,5 +1,8 @@
 /// <reference lib="dom" />
 
+/**
+ * Unit tests for the Button component to ensure rendering and interaction work.
+ */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { Button } from './button';
@@ -9,7 +12,7 @@ afterEach(() => {
 });
 describe('Button component', () => {
   it('renders correctly with children', () => {
-    render(<Button>Click Me</Button>);
+    render(<Button>click me</Button>);
     const buttonElement = screen.getByRole('button', { name: /click me/i });
 
     expect(buttonElement).toBeInTheDocument();
@@ -17,7 +20,7 @@ describe('Button component', () => {
 
   it('calls onClick handler when clicked', () => {
     const handleClick = vi.fn();
-    render(<Button onClick={handleClick}>Click Me</Button>);
+    render(<Button onClick={handleClick}>click me</Button>);
     const buttonElement = screen.getByRole('button', { name: /click me/i });
     fireEvent.click(buttonElement);
     expect(handleClick).toHaveBeenCalledTimes(1);
@@ -26,7 +29,7 @@ describe('Button component', () => {
   it('applies variant and size classes correctly', () => {
     render(
       <Button variant="destructive" size="lg">
-        Destructive LG
+        destructive lg
       </Button>
     );
     const buttonElement = screen.getByRole('button', {
@@ -44,7 +47,7 @@ describe('Button component', () => {
   it('renders as a Slot when asChild is true', () => {
     render(
       <Button asChild>
-        <a href="/">I am a link</a>
+        <a href="/">i am a link</a>
       </Button>
     );
     // Check if it renders an anchor tag instead of a button
@@ -59,7 +62,7 @@ describe('Button component', () => {
     const handleClick = vi.fn();
     render(
       <Button onClick={handleClick} disabled>
-        Disabled Button
+        disabled button
       </Button>
     );
     const buttonElement = screen.getByRole('button', {

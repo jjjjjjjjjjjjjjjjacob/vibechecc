@@ -1,3 +1,7 @@
+/**
+ * use search results improved module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';
@@ -60,7 +64,7 @@ export function useSearchResultsImproved({
 
   // Use the optimized search API with proper pagination
   const searchQuery = useQuery({
-    ...convexQuery(api.searchOptimized.searchAllOptimized, {
+    ...convexQuery(api['search-optimized'].searchAllOptimized, {
       query: debouncedQuery,
       filters: filterForConvex(filters),
       page,

@@ -1,4 +1,8 @@
 /// <reference lib="dom" />
+/**
+ * Unit tests for the {@link HomeFeed} component. Mocks network hooks and
+ * layout helpers to assert tab behavior, empty states, and pagination.
+ */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

@@ -16,34 +16,34 @@ import { useSearchTracking } from '../hooks/use-search-tracking';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
 interface SearchDropdownProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  triggerRef?: React.RefObject<HTMLButtonElement>;
+  open: boolean; // whether the dropdown is visible
+  onOpenChange: (open: boolean) => void; // callback to toggle visibility
+  triggerRef?: React.RefObject<HTMLButtonElement>; // reference to the button opening the dropdown
 }
 
+/**
+ * Floating search interface that displays results and suggestions.
+ */
 export function SearchDropdown({
   open,
   onOpenChange,
   triggerRef,
 }: SearchDropdownProps) {
-  const [query, setQuery] = useState('');
-  const debouncedQuery = useDebouncedValue(query, 300);
-  const { data, isLoading } = useSearchSuggestions(debouncedQuery);
-  const { trackSearch } = useSearchTracking();
-  const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Focus input when dropdown opens
+  const [query, setQuery] = useState(''); // raw input from user
+  const debouncedQuery = useDebouncedValue(query, 300); // debounce typing
+  const { data, isLoading } = useSearchSuggestions(debouncedQuery); // fetch suggestions
+  const { trackSearch } = useSearchTracking(); // analytics hook
+  const navigate = useNavigate(); // navigation helper
+  const inputRef = useRef<HTMLInputElement>(null); // ref to input element
+  const dropdownRef = useRef<HTMLDivElement>(null); // ref to container
   useEffect(() => {
     if (open && inputRef.current) {
+      // focus the input shortly after opening for better UX
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
-
-  // Handle click outside
   useEffect(() => {
-    if (!open) return;
+    if (!open) return; // no listeners when closed
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -52,22 +52,20 @@ export function SearchDropdown({
         triggerRef?.current &&
         !triggerRef.current.contains(event.target as Node)
       ) {
-        onOpenChange(false);
+        onOpenChange(false); // close when clicking outside
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open, onOpenChange, triggerRef]);
-
-  // Handle escape key
   useEffect(() => {
-    if (!open) return;
+    if (!open) return; // skip if hidden
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onOpenChange(false);
-        triggerRef?.current?.focus();
+        onOpenChange(false); // close dropdown
+        triggerRef?.current?.focus(); // return focus to trigger
       }
     };
 
@@ -76,8 +74,8 @@ export function SearchDropdown({
   }, [open, onOpenChange, triggerRef]);
 
   const handleSelect = () => {
-    onOpenChange(false);
-    setQuery('');
+    onOpenChange(false); // hide dropdown
+    setQuery(''); // reset input field
   };
 
   const handleResultSelect = (
@@ -85,17 +83,17 @@ export function SearchDropdown({
     resultType: string,
     category?: string
   ) => {
-    // Track result click with clicked result info for analytics
     if (query.trim()) {
+      // track the selected result for analytics
       trackSearch(query.trim(), undefined, [resultId], category || resultType);
     }
-    handleSelect();
+    handleSelect(); // close dropdown after selection
   };
 
   const handleSearch = (searchQuery?: string) => {
     const finalQuery = searchQuery || query;
     if (finalQuery.trim()) {
-      // Navigate to search page (tracking is handled automatically by search hooks)
+      // navigate to the search page with the query
       navigate({ to: '/search', search: { q: finalQuery } });
       handleSelect();
     }
@@ -103,10 +101,11 @@ export function SearchDropdown({
 
   const handleSuggestionSelect = (term: string) => {
     if (term.startsWith('/')) {
+      // Suggestion is a path; navigate directly
       navigate({ to: term as '/vibes' });
       handleSelect();
     } else {
-      // Navigate to search page (tracking is handled automatically by search hooks)
+      // Otherwise treat suggestion as search term
       navigate({ to: '/search', search: { q: term } });
       handleSelect();
     }
@@ -119,8 +118,6 @@ export function SearchDropdown({
       (data.users && data.users.length > 0) ||
       (data.tags && data.tags.length > 0) ||
       (data.actions && data.actions.length > 0));
-
-  // Extract suggestions data
   const recentSearches =
     !query && data && 'recentSearches' in data
       ? data.recentSearches
@@ -131,8 +128,6 @@ export function SearchDropdown({
       : undefined;
   const popularTags =
     !query && data && 'popularTags' in data ? data.popularTags : undefined;
-
-  // Format suggestions
   const formattedTrendingSearches = trendingSearchTerms?.map(
     (term: string) => ({
       term,
@@ -147,18 +142,16 @@ export function SearchDropdown({
     term: tag,
     type: 'recommended' as const,
   }));
-
-  // Calculate position based on trigger button
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
 
   useEffect(() => {
     if (open && triggerRef?.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      const headerHeight = 64; // Height of the header
+      const headerHeight = 64;
       setPosition({
         top: headerHeight,
-        left: Math.max(0, rect.left - 200), // Offset to make it wider than button
-        width: Math.min(600, window.innerWidth - 32), // Max width 600px with padding
+        left: Math.max(0, rect.left - 200),
+        width: Math.min(600, window.innerWidth - 32),
       });
     }
   }, [open, triggerRef]);
@@ -167,13 +160,10 @@ export function SearchDropdown({
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="animate-in fade-in-0 fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
         aria-hidden="true"
       />
-
-      {/* Dropdown */}
       <div
         ref={dropdownRef}
         className={cn(
@@ -187,13 +177,13 @@ export function SearchDropdown({
           maxHeight: 'calc(100vh - 80px)',
         }}
       >
-        {/* Search Input */}
         <div className="flex items-center gap-2 border-b p-3">
           <Search className="text-muted-foreground h-5 w-5" />
+          {/* Text input uses lowercase placeholder per style guide */}
           <Input
             ref={inputRef}
             type="text"
-            placeholder="Search vibes, users, or tags..."
+            placeholder="search vibes, users, or tags..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -215,8 +205,6 @@ export function SearchDropdown({
             <X className="h-4 w-4" />
           </Button>
         </div>
-
-        {/* Results */}
         <ScrollArea className="max-h-[60vh]">
           <div className="p-2">
             {!query && (
@@ -231,18 +219,17 @@ export function SearchDropdown({
             {query && !hasResults && !isLoading && (
               <div className="py-8 text-center">
                 <p className="text-muted-foreground">
-                  No results found for "{query}"
+                  no results found for "{query}"
                 </p>
               </div>
             )}
 
             {query && hasResults && data && 'vibes' in data && (
               <div className="space-y-4">
-                {/* Vibes */}
                 {data.vibes && data.vibes.length > 0 && (
                   <div>
-                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
-                      Vibes
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider">
+vibes
                     </h3>
                     <div className="space-y-1">
                       {data.vibes.map((vibe) => (
@@ -257,12 +244,10 @@ export function SearchDropdown({
                     </div>
                   </div>
                 )}
-
-                {/* Users */}
                 {data.users && data.users.length > 0 && (
                   <div>
-                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
-                      Users
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider">
+users
                     </h3>
                     <div className="space-y-1">
                       {data.users.map((user) => (
@@ -277,12 +262,10 @@ export function SearchDropdown({
                     </div>
                   </div>
                 )}
-
-                {/* Tags */}
                 {data.tags && data.tags.length > 0 && (
                   <div>
-                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
-                      Tags
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider">
+tags
                     </h3>
                     <div className="space-y-1">
                       {data.tags.map((tag) => (
@@ -297,12 +280,10 @@ export function SearchDropdown({
                     </div>
                   </div>
                 )}
-
-                {/* Actions */}
                 {data.actions && data.actions.length > 0 && (
                   <div>
-                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
-                      Actions
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider">
+actions
                     </h3>
                     <div className="space-y-1">
                       {data.actions.map((action) => (
@@ -319,8 +300,6 @@ export function SearchDropdown({
                 )}
               </div>
             )}
-
-            {/* View all results */}
             {query && query.length > 2 && (
               <div className="mt-4 border-t pt-2">
                 <button
@@ -328,9 +307,9 @@ export function SearchDropdown({
                   onClick={() => handleSearch()}
                 >
                   <span className="flex items-center justify-between">
-                    <span>View all results for "{query}"</span>
+                    <span>view all results for "{query}"</span>
                     <span className="text-muted-foreground text-xs">
-                      Press Enter
+                      press enter
                     </span>
                   </span>
                 </button>

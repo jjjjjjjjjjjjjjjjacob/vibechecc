@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import * as React from 'react';
 import {
-  useUserVibes,
+  useuserVibes,
   useUserReactedVibes,
   useUpdateProfileMutation,
   useCurrentUser,
@@ -21,15 +21,17 @@ import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 import { ThemeColorPicker } from '@/features/theming/components/theme-color-picker';
 
+/**
+ * Comprehensive profile management view that loads the current user, renders
+ * their vibes, and provides an editor for updating personal details.
+ */
 export function ProfileContent() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
-  // console.log('clerkUser', clerkUser);
   const {
     data: convexUser,
     isLoading: convexUserLoading,
     refetch: refetchUser,
   } = useCurrentUser();
-  // console.log('convexUser', convexUser);
   const { mutate: ensureUserExists, isPending: isCreatingUser } =
     useEnsureUserExistsMutation();
   const { data: vibes, isLoading: vibesLoading } = useUserVibes(
@@ -58,8 +60,6 @@ export function ProfileContent() {
     null
   );
   const [themeColor, setThemeColor] = React.useState('pink');
-
-  // Initialize form with user data when loaded
   React.useEffect(() => {
     if (convexUser) {
       setUsername(convexUser.username || '');
@@ -77,8 +77,6 @@ export function ProfileContent() {
       });
     }
   }, [convexUser]);
-
-  // Handle case where user is authenticated but doesn't exist in Convex
   React.useEffect(() => {
     if (
       clerkLoaded &&
@@ -87,19 +85,12 @@ export function ProfileContent() {
       !convexUser &&
       !isCreatingUser
     ) {
-      // console.log(
-      //   'User authenticated but not found in Convex, creating user...'
-      // );
       ensureUserExists(undefined, {
         onSuccess: () => {
-          // console.log('User created successfully, refetching...');
           refetchUser();
         },
-        onError: (error) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to create user:', error);
-          toast.error(
-            'Failed to initialize user profile. Please refresh the page.'
+        onError: (error) => {          toast.error(
+            'failed to initialize user profile. please refresh the page.'
           );
         },
       });
@@ -151,7 +142,6 @@ export function ProfileContent() {
       </div>
     );
   }
-  // console.log('convexUser', convexUser);
 
   if (!clerkUser || !convexUser) {
     return (
@@ -169,15 +159,12 @@ export function ProfileContent() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
+        toast.error('file size must be less than 5mb');
         return;
       }
-
-      // Check file type
       if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file');
+        toast.error('please select an image file');
         return;
       }
 
@@ -196,57 +183,39 @@ export function ProfileContent() {
     setIsSaving(true);
 
     if (!clerkUser) {
-      toast.error('User not found');
+      toast.error('user not found');
       setIsSaving(false);
       return;
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const promises: Promise<any>[] = [];
-
-      // Prepare Convex updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const convexUpdates: any = {};
+      const promises: Promise<unknown>[] = [];
+      const convexUpdates: Record<string, unknown> = {};
       if (username) convexUpdates.username = username;
       if (firstName) convexUpdates.first_name = firstName;
       if (lastName) convexUpdates.last_name = lastName;
       if (imageUrl) convexUpdates.image_url = imageUrl;
       if (themeColor) convexUpdates.themeColor = themeColor;
-
-      // Add Convex update to promises
       if (Object.keys(convexUpdates).length > 0) {
         promises.push(updateProfileMutation.mutateAsync(convexUpdates));
       }
-
-      // Prepare Clerk updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const clerkUpdates: any = {};
+      const clerkUpdates: Record<string, unknown> = {};
       if (username) clerkUpdates.username = username;
       if (firstName) clerkUpdates.firstName = firstName;
       if (lastName) clerkUpdates.lastName = lastName;
-
-      // Add Clerk user update to promises if there are field updates
       if (Object.keys(clerkUpdates).length > 0) {
         promises.push(clerkUser.update(clerkUpdates));
       }
-
-      // Add Clerk avatar update to promises if there's an uploaded image
       if (uploadedImageFile) {
         promises.push(clerkUser.setProfileImage({ file: uploadedImageFile }));
       }
-
-      // Execute all updates in parallel
       if (promises.length > 0) {
         await Promise.all(promises);
-        toast.success('Profile updated successfully!');
+        toast.success('profile updated successfully!');
       }
 
       setIsEditing(false);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('(Profile Page) Failed to update profile:', error);
-      toast.error('Failed to update profile. Please try again.');
+    } catch (error) {      toast.error('failed to update profile. please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -258,14 +227,14 @@ export function ProfileContent() {
     clerkUser.fullName ||
     clerkUser.firstName ||
     clerkUser.emailAddresses[0]?.emailAddress ||
-    'User';
+    'user';
 
   const userEmail = clerkUser.emailAddresses[0]?.emailAddress;
   const userJoinDate = convexUser.created_at
     ? new Date(convexUser.created_at).toLocaleDateString()
     : clerkUser.createdAt
       ? new Date(clerkUser.createdAt).toLocaleDateString()
-      : 'Unknown';
+      : 'unknown';
 
   return (
     <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
@@ -337,40 +306,43 @@ export function ProfileContent() {
                         id="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter username"
+                        placeholder="enter username"
                       />
                     </div>
 
                     <div>
+                      {/* first name field with lowercase placeholder for accessibility */}
                       <Label htmlFor="firstName">first name</Label>
                       <Input
                         type="text"
                         id="firstName"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Enter first name"
+                        placeholder="enter first name"
                       />
                     </div>
 
                     <div>
+                      {/* surname input mirrors style of first name */}
                       <Label htmlFor="lastName">last name</Label>
                       <Input
                         type="text"
                         id="lastName"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Enter last name"
+                        placeholder="enter last name"
                       />
                     </div>
 
                     <div>
+                      {/* allow the user to paste a profile picture link */}
                       <Label htmlFor="imageUrl">image url</Label>
                       <Input
                         type="url"
                         id="imageUrl"
                         value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="Enter image URL"
+                        placeholder="enter image url"
                       />
                     </div>
 

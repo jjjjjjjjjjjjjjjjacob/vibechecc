@@ -1,3 +1,7 @@
+/**
+ * Route showing the authenticated user's own vibes.
+ * Redirects to sign-in if the user is not authenticated on the server.
+ */
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import { useUserVibes } from '@/queries';
@@ -31,6 +35,7 @@ export const Route = createFileRoute('/vibes/my-vibes')({
 });
 
 function MyVibes() {
+  // Grab current user and fetch their vibes
   const { user, isLoaded } = useUser();
   const { data: vibes, isLoading, error } = useUserVibes(user?.id || '');
 

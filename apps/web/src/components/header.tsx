@@ -1,3 +1,7 @@
+/**
+ * Site-wide header component providing navigation, search, notifications,
+ * and user-specific theme controls. Handles mobile menu state and keyboard shortcuts.
+ */
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
@@ -39,12 +43,18 @@ import { useConvex } from 'convex/react';
 type MobileNavState = 'nav' | 'profile' | 'search' | 'notifications' | null;
 
 export function Header() {
+    // theme utilities to read current theme and update colors
   const { resolvedTheme, setTheme, setColorTheme, setSecondaryColorTheme } =
     useTheme();
+    // current mobile navigation section being displayed
   const [mobileNavState, setMobileNavState] = useState<MobileNavState>(null);
+    // track when the component has hydrated on the client
   const [isHydrated, setIsHydrated] = useState(false);
+    // animate transitions between mobile panels
   const [isTransitioning, setIsTransitioning] = useState(false);
+    // store a ref to the search button for returning focus
   const searchButtonRef = React.useRef<HTMLButtonElement | null>(null);
+    // Clerk hooks for reading current user and opening the profile modal
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
 
@@ -349,7 +359,7 @@ export function Header() {
                   >
                     <img
                       src={clerkUser?.imageUrl}
-                      alt="Profile"
+                      alt="profile"
                       className="h-8 w-8 rounded-full object-cover"
                     />
                   </Button>

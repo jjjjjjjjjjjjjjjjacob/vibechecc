@@ -1,3 +1,7 @@
+/**
+ * use search module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';

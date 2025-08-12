@@ -6,7 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+// Analytics hook to record interactions with individual vibes
+import { usePostHog } from '@/hooks/use-posthog';
 import { Badge } from '@/components/ui/badge';
 import {
   useTopEmojiRatings,
@@ -49,6 +50,9 @@ interface VibeCardProps {
   layout?: 'masonry' | 'grid' | 'single';
 }
 
+/**
+ * Renders a single vibe card with optional rating controls and layout variants.
+ */
 export function VibeCard({
   vibe,
   variant = 'default',
@@ -512,7 +516,7 @@ export function VibeCard({
                         }
                       }
                     }}
-                    aria-label="Add emoji rating"
+                    aria-label="add emoji rating"
                   >
                     rate this
                   </button>
@@ -808,6 +812,9 @@ export interface FeedVibeCardProps {
   className?: string;
 }
 
+/**
+ * Compatibility wrapper that forwards props to {@link VibeCard}.
+ */
 export function FeedVibeCard(props: FeedVibeCardProps) {
   return <VibeCard {...props} />;
 }

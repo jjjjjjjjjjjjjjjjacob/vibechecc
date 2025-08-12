@@ -1,3 +1,7 @@
+/**
+ * onboarding guard module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
 import { useNavigate, useLocation } from '@tanstack/react-router';
 import { useOnboardingStatus, useEnsureUserExistsMutation } from '@/queries';

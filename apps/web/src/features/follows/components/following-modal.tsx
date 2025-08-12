@@ -1,3 +1,8 @@
+/**
+ * following modal lists users that the target user is following with an optional
+ * search field. it provides quick navigation to user profiles and follow/unfollow
+ * actions.
+ */
 import * as React from 'react';
 import {
   Dialog,
@@ -9,13 +14,16 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+// icon set for search field, modal title, and clear button
 import { Search, UserPlus, X } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+// hook fetching users that the target user follows
 import { useFollowing } from '../hooks/use-following';
 import { FollowButton } from './follow-button';
 import type { User } from '@viberatr/types';
 import { trackEvents } from '@/lib/posthog';
 
+// internal representation of a "following" relationship
 interface _Following {
   user: User | null;
   followedAt: number;
@@ -36,12 +44,14 @@ export function FollowingModal({
   username,
 }: FollowingModalProps) {
   const navigate = useNavigate();
+  // local state for text input filtering
   const [searchQuery, setSearchQuery] = React.useState('');
+  // fetch list of users that the target user follows
   const { data, isLoading, loadMore, hasMore } = useFollowing(userId, {
     enabled: isOpen,
   });
 
-  // Filter following based on search query
+  // filter following list based on search query
   const filteredFollowing = React.useMemo(() => {
     if (!searchQuery.trim()) return data.following;
 
@@ -65,18 +75,20 @@ export function FollowingModal({
     setSearchQuery(e.target.value);
   };
 
+  // clear search field
   const clearSearch = () => {
     setSearchQuery('');
   };
 
+  // open selected user's profile
   const handleUserClick = (user: User) => {
     if (user.username) {
-      onClose(); // Close modal first
+      onClose(); // close modal first
       navigate({ to: '/users/$username', params: { username: user.username } });
     }
   };
 
-  // Track modal open/close
+  // track modal open/close events
   React.useEffect(() => {
     if (isOpen) {
       trackEvents.modalOpened('following', { user_id: userId, username });

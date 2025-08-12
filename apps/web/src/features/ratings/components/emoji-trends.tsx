@@ -1,3 +1,7 @@
+/**
+ * Displays trending emoji ratings over the last seven days with loading states.
+ * Each trend links to the search page filtered by that emoji.
+ */
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +12,8 @@ import { useTrendingEmojiRatings } from '@/queries';
 import { cn } from '@/utils/tailwind-utils';
 
 export function EmojiTrends({ className }: { className?: string }) {
-  const { data: trends, isLoading } = useTrendingEmojiRatings(7); // Last 7 days
+  // Fetch trending emojis for the last 7 days
+  const { data: trends, isLoading } = useTrendingEmojiRatings(7);
 
   if (isLoading) {
     return (
@@ -16,7 +21,7 @@ export function EmojiTrends({ className }: { className?: string }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <TrendingUp className="h-4 w-4" />
-            Trending Emoji Ratings
+            trending emoji ratings
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -42,11 +47,11 @@ export function EmojiTrends({ className }: { className?: string }) {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-lg">
           <TrendingUp className="h-4 w-4" />
-          Trending Emoji Ratings
+          trending emoji ratings
         </CardTitle>
         <Badge variant="outline" className="text-xs">
           <Sparkles className="mr-1 h-3 w-3" />
-          Last 7 days
+          last 7 days
         </Badge>
       </CardHeader>
       <CardContent>
@@ -71,7 +76,7 @@ export function EmojiTrends({ className }: { className?: string }) {
                     {trend.count} rating{trend.count !== 1 ? 's' : ''}
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    Avg: {trend.averageValue.toFixed(1)}
+                    avg: {trend.averageValue.toFixed(1)}
                   </p>
                 </div>
               </div>
@@ -89,7 +94,7 @@ export function EmojiTrends({ className }: { className?: string }) {
           to="/discover"
           className="text-muted-foreground hover:text-foreground mt-4 block text-center text-sm transition-colors"
         >
-          Explore all emoji collections →
+          explore all emoji collections →
         </Link>
       </CardContent>
     </Card>

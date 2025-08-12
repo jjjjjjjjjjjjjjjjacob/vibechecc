@@ -1,3 +1,7 @@
+/**
+ * Edit form for a single vibe. Loads existing data, tracks unsaved changes,
+ * and validates input before calling the update mutation.
+ */
 import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import { useVibe, useUpdateVibeMutation } from '@/queries';

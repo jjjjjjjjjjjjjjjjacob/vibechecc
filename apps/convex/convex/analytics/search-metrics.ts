@@ -2,48 +2,84 @@ import { internalMutation, query } from '../_generated/server';
 import { v } from 'convex/values';
 import { internal } from '../_generated/api';
 
-// Schema types for analytics
+/**
+ * Raw metric stored for each search related event. Metrics are appended via
+ * internal mutations and later aggregated for analytics dashboards.
+ */
 export type SearchMetric = {
+  /** document identifier assigned by Convex */
   _id: string;
+  /** unix timestamp when the event occurred */
   timestamp: number;
+  /** type of metric being recorded */
   type: 'search' | 'click' | 'error';
+  /** original search query text */
   query: string;
+  /** optional user who performed the action */
   userId?: string;
+  /** number of results returned for a search event */
   resultCount?: number;
+  /** identifier of the clicked result when type is `click` */
   clickedResultId?: string;
+  /** category of the clicked result */
   clickedResultType?: 'vibe' | 'user' | 'tag';
+  /** position within the result list for clicks */
   clickPosition?: number;
+  /** response time reported by the search handler */
   responseTime?: number;
+  /** error message when the search failed */
   error?: string;
+  /** additional filtering options applied during the search */
   filters?: Record<string, unknown>;
 };
 
+/**
+ * Aggregated metrics for a search term, used when reporting popular queries
+ * and their performance characteristics.
+ */
 export type SearchAggregate = {
+  /** normalized search term */
   term: string;
+  /** number of times the term was searched */
   count: number;
+  /** average number of results returned */
   avgResultCount: number;
+  /** average search handler response time */
   avgResponseTime: number;
+  /** percentage of searches that resulted in a click */
   clickThroughRate: number;
+  /** timestamp of the most recent search for this term */
   lastSearched: number;
 };
 
-// Track a search event
+/**
+ * Internal helper to persist a single search metric. The mutation accepts a
+ * union of fields for search events, result clicks, and errors. A timestamp is
+ * automatically added before writing to the `searchMetrics` table.
+ */
 export const recordSearchMetric = internalMutation({
   args: {
+    // event type being recorded
     type: v.union(v.literal('search'), v.literal('click'), v.literal('error')),
+    // search query text
     query: v.string(),
+    // optional authenticated user id
     userId: v.optional(v.string()),
+    // numeric details primarily used for search events
     resultCount: v.optional(v.number()),
+    // identifiers describing the clicked result
     clickedResultId: v.optional(v.string()),
     clickedResultType: v.optional(
       v.union(v.literal('vibe'), v.literal('user'), v.literal('tag'))
     ),
     clickPosition: v.optional(v.number()),
+    // additional metadata
     responseTime: v.optional(v.number()),
     error: v.optional(v.string()),
     filters: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
+    // append the metric with a server-side timestamp
     await ctx.db.insert('searchMetrics', {
       ...args,
       timestamp: Date.now(),
@@ -51,9 +87,13 @@ export const recordSearchMetric = internalMutation({
   },
 });
 
-// Get search performance metrics
+/**
+ * Return aggregate performance metrics for searches in an optional time range.
+ * Used by dashboards to display overall search health and responsiveness.
+ */
 export const getSearchPerformanceMetrics = query({
   args: {
+    // optional start/end range in milliseconds since epoch
     timeRange: v.optional(
       v.object({
         start: v.number(),
@@ -63,9 +103,11 @@ export const getSearchPerformanceMetrics = query({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const start = args.timeRange?.start || now - 24 * 60 * 60 * 1000; // Default: last 24 hours
+    // default to the last 24 hours if no range is provided
+    const start = args.timeRange?.start || now - 24 * 60 * 60 * 1000;
     const end = args.timeRange?.end || now;
 
+    // retrieve all metrics within the time window using an indexed query
     const metrics = await ctx.db
       .query('searchMetrics')
       .withIndex('by_timestamp', (q) =>
@@ -73,11 +115,12 @@ export const getSearchPerformanceMetrics = query({
       )
       .collect();
 
-    // Calculate aggregated metrics
+    // partition metrics by type for easier calculations
     const searches = metrics.filter((m) => m.type === 'search');
     const clicks = metrics.filter((m) => m.type === 'click');
     const errors = metrics.filter((m) => m.type === 'error');
 
+    // compute averages, guarding against empty datasets
     const avgResponseTime =
       searches.length > 0
         ? searches.reduce((sum, s) => sum + (s.responseTime || 0), 0) /
@@ -96,7 +139,7 @@ export const getSearchPerformanceMetrics = query({
     const errorRate =
       searches.length > 0 ? (errors.length / searches.length) * 100 : 0;
 
-    // Response time distribution
+    // bucket response times to highlight performance distribution
     const responseTimeRanges = {
       fast: searches.filter((s) => (s.responseTime || 0) < 100).length,
       medium: searches.filter(
@@ -119,10 +162,15 @@ export const getSearchPerformanceMetrics = query({
   },
 });
 
-// Get popular search terms with aggregated metrics
+/**
+ * Retrieve the most common search terms within a period along with statistics
+ * such as average result counts and click-through rates.
+ */
 export const getPopularSearchTerms = query({
   args: {
+    // limit the number of terms returned
     limit: v.optional(v.number()),
+    // optional time range to constrain the query
     timeRange: v.optional(
       v.object({
         start: v.number(),
@@ -133,9 +181,11 @@ export const getPopularSearchTerms = query({
   handler: async (ctx, args) => {
     const limit = args.limit || 20;
     const now = Date.now();
-    const start = args.timeRange?.start || now - 7 * 24 * 60 * 60 * 1000; // Default: last 7 days
+    // default window is the last 7 days
+    const start = args.timeRange?.start || now - 7 * 24 * 60 * 60 * 1000;
     const end = args.timeRange?.end || now;
 
+    // gather search events in the time range
     const metrics = await ctx.db
       .query('searchMetrics')
       .withIndex('by_timestamp', (q) =>
@@ -144,7 +194,7 @@ export const getPopularSearchTerms = query({
       .filter((q) => q.eq(q.field('type'), 'search'))
       .collect();
 
-    // Group by search term
+    // group metrics by normalized search term
     const termMap = new Map<
       string,
       {
@@ -161,7 +211,7 @@ export const getPopularSearchTerms = query({
       termMap.get(term)!.searches.push(metric);
     }
 
-    // Get click data for CTR calculation
+    // fetch click events to compute click-through rates
     const clickMetrics = await ctx.db
       .query('searchMetrics')
       .withIndex('by_timestamp', (q) =>
@@ -177,7 +227,7 @@ export const getPopularSearchTerms = query({
       }
     }
 
-    // Calculate aggregates
+    // convert grouped data into aggregates for the caller
     const aggregates: SearchAggregate[] = [];
 
     for (const [term, data] of termMap.entries()) {
@@ -202,13 +252,16 @@ export const getPopularSearchTerms = query({
       });
     }
 
-    // Sort by count and limit
+    // order by popularity and enforce limit
     aggregates.sort((a, b) => b.count - a.count);
     return aggregates.slice(0, limit);
   },
 });
 
-// Get search metrics for a specific query
+/**
+ * Detailed analytics for a single normalized query string, including time
+ * series breakdowns and click positions.
+ */
 export const getSearchMetricsForQuery = query({
   args: {
     query: v.string(),
@@ -221,10 +274,13 @@ export const getSearchMetricsForQuery = query({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const start = args.timeRange?.start || now - 30 * 24 * 60 * 60 * 1000; // Default: last 30 days
+    // default to last 30 days
+    const start = args.timeRange?.start || now - 30 * 24 * 60 * 60 * 1000;
     const end = args.timeRange?.end || now;
+    // normalize query for case-insensitive matching
     const normalizedQuery = args.query.toLowerCase().trim();
 
+    // load all metrics for the normalized query in the time range
     const metrics = await ctx.db
       .query('searchMetrics')
       .withIndex('by_timestamp', (q) =>
@@ -237,7 +293,7 @@ export const getSearchMetricsForQuery = query({
     const clicks = metrics.filter((m) => m.type === 'click');
     const errors = metrics.filter((m) => m.type === 'error');
 
-    // Time series data (daily buckets)
+    // bucket metrics per day for a time series chart
     const dailyBuckets = new Map<
       string,
       {
@@ -263,7 +319,7 @@ export const getSearchMetricsForQuery = query({
       .map(([date, data]) => ({ date, ...data }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    // Click position analysis
+    // analyze which result positions receive clicks
     const clickPositions = clicks
       .filter((c) => c.clickPosition !== undefined)
       .map((c) => c.clickPosition!);
@@ -296,7 +352,10 @@ export const getSearchMetricsForQuery = query({
   },
 });
 
-// Get failed searches (searches with no results or errors)
+/**
+ * List queries that frequently return no results or errors to help improve
+ * search relevance.
+ */
 export const getFailedSearches = query({
   args: {
     limit: v.optional(v.number()),
@@ -373,6 +432,10 @@ export const getFailedSearches = query({
 });
 
 // Track search result click
+/**
+ * Record a click on a search result. The event is scheduled as an internal
+ * mutation to avoid blocking the user interaction.
+ */
 export const trackSearchClick = internalMutation({
   args: {
     query: v.string(),
@@ -397,7 +460,10 @@ export const trackSearchClick = internalMutation({
   },
 });
 
-// Track search error
+/**
+ * Record a search error event for analytics. Like clicks, the write is
+ * scheduled so the calling request can return immediately.
+ */
 export const trackSearchError = internalMutation({
   args: {
     query: v.string(),

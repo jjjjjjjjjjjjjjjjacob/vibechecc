@@ -1,17 +1,26 @@
+/**
+ * dual theme color picker module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
+// card and tabs primitives form the picker layout
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// tooltip components provide color name hints on hover
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+// icons differentiate primary (layers) and secondary (palette) options
 import { Check, Palette, Layers } from 'lucide-react';
+// available theme colors and related types
 import {
   THEME_COLORS,
   type ThemeColor,
   type UserTheme,
 } from '@/utils/theme-colors';
+// helper for merging tailwind classes
 import { cn } from '@/utils/tailwind-utils';
 
 interface DualThemeColorPickerProps {
@@ -25,7 +34,7 @@ export function DualThemeColorPicker({
   onThemeChange,
   className,
 }: DualThemeColorPickerProps) {
-  // Apply theme for preview using CSS variables
+  // apply theme for preview using css variables
   React.useEffect(() => {
     document.documentElement.setAttribute(
       'data-theme-primary',
@@ -53,7 +62,7 @@ export function DualThemeColorPicker({
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Gradient Preview - Always Visible */}
+        {/* gradient preview - always visible */}
         <div className="space-y-3">
           <div className="themed-gradient-button relative h-16 overflow-hidden rounded-xl">
             <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-white/5 to-transparent" />
@@ -63,7 +72,7 @@ export function DualThemeColorPicker({
           </div>
         </div>
 
-        {/* Color Selection Tabs */}
+        {/* color selection tabs */}
         <Tabs defaultValue="primary" className="w-full">
           <TabsList className="bg-background/60 grid w-full grid-cols-2 backdrop-blur">
             <TabsTrigger
@@ -155,7 +164,7 @@ function ColorOption({
   size = 'medium',
 }: ColorOptionProps) {
   const sizeClasses = size === 'small' ? 'w-8 h-8 p-0' : 'w-12 h-12 p-2';
-
+  // inner preview circle scales with size option
   const circleSize = size === 'small' ? 'w-full h-full' : 'w-8 h-8';
 
   return (
@@ -174,14 +183,14 @@ function ColorOption({
           )}
           data-theme-primary={theme.id}
         >
-          {/* Background color layer */}
+          {/* background color layer */}
           <div
             className="absolute inset-0 opacity-10"
             style={{
               backgroundColor: `var(--color-${theme.id})`,
             }}
           />
-          {/* Color preview circle */}
+          {/* color preview circle */}
           <div
             className={cn('relative overflow-hidden rounded-full', circleSize)}
             style={{
@@ -199,10 +208,19 @@ function ColorOption({
               </div>
             )}
           </div>
+          {/* selection ring */}
+          {isSelected && (
+            <div
+              className="ring-offset-background/50 absolute inset-0 rounded-lg ring-2 ring-white/30 ring-offset-2"
+              style={{
+                boxShadow: `0 0 0 1px var(--color-${theme.id})`,
+              }}
+            />
+          )}
         </button>
       </TooltipTrigger>
-      <TooltipContent>
-        <p className="capitalize">{theme.name}</p>
+      <TooltipContent className="text-xs lowercase" side="top">
+        {theme.name}
       </TooltipContent>
     </Tooltip>
   );

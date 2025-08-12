@@ -1,7 +1,14 @@
+/**
+ * shared testing utilities for rendering components with providers
+ * exposes custom render wrapped with optional theme provider
+ */
 /// <reference lib="dom" />
 import React from 'react';
+// re-export testing-library render with typed options
 import { render, type RenderOptions } from '@testing-library/react';
+// vitest utilities for test setup and assertions
 import { vi, beforeEach, afterEach, expect, describe, it } from 'vitest';
+// theme provider to supply design tokens during tests
 import { ThemeProvider } from '@/features/theming/components/theme-provider';
 
 // Mock data for consistent testing

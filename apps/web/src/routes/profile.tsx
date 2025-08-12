@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import {
   useUpdateProfileMutation,
-  useCurrentUser,
+  useCurrentuser,
   useEnsureUserExistsMutation,
   useUserVibes,
   useUserRatings,
@@ -39,11 +39,9 @@ import {
   type PrimaryColorTheme,
   type SecondaryColorTheme,
 } from '@/features/theming/components/theme-provider';
-
-// Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
-  if (!request) throw new Error('No request found');
+  if (!request) throw new Error('no request found');
   const { userId } = await getAuth(request);
 
   if (!userId) {
@@ -66,18 +64,14 @@ export const Route = createFileRoute('/profile')({
 function Profile() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { openUserProfile } = useClerk();
-  // console.log('clerkUser', clerkUser);
   const {
     data: convexUser,
     isLoading: convexUserLoading,
     refetch: refetchUser,
   } = useCurrentUser();
-  // console.log('convexUser', convexUser);
   const { mutate: ensureUserExists, isPending: isCreatingUser } =
     useEnsureUserExistsMutation();
   const updateProfileMutation = useUpdateProfileMutation();
-
-  // Fetch user data for the profile view
   const { data: userVibes, isLoading: vibesLoading } = useUserVibes(
     convexUser?.externalId || ''
   );
@@ -85,7 +79,7 @@ function Profile() {
     convexUser?.externalId || ''
   );
   const { data: receivedRatings, isLoading: receivedRatingsLoading } =
-    useUserReceivedRatings(convexUser?.externalId || '') as any;
+    useUserReceivedRatings(convexUser?.externalId || '') as unknown;
   const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
     convexUser?.externalId || ''
   );
@@ -113,23 +107,15 @@ function Profile() {
     primaryColor: string;
     secondaryColor: string;
   }>({ primaryColor: 'pink', secondaryColor: 'orange' });
-
-  // Follow modal states
   const [isFollowersModalOpen, setIsFollowersModalOpen] = React.useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = React.useState(false);
-
-  // User interests state
   const [userInterests, setUserInterests] = React.useState<string[]>([]);
-
-  // Initialize form with user data when loaded
   React.useEffect(() => {
     if (convexUser) {
       setUsername(convexUser.username || '');
       setFirstName(convexUser.first_name || '');
       setLastName(convexUser.last_name || '');
       setImageUrl(convexUser.image_url || '');
-
-      // Initialize dual-color theme (with backward compatibility)
       const primaryColor =
         convexUser.primaryColor || convexUser.themeColor || 'pink';
       const secondaryColor = convexUser.secondaryColor || 'orange';
@@ -146,8 +132,6 @@ function Profile() {
       setUserInterests(convexUser.interests || []);
     }
   }, [convexUser]);
-
-  // Handle case where user is authenticated but doesn't exist in Convex
   React.useEffect(() => {
     if (
       clerkLoaded &&
@@ -156,19 +140,12 @@ function Profile() {
       !convexUser &&
       !isCreatingUser
     ) {
-      // console.log(
-      //   'User authenticated but not found in Convex, creating user...'
-      // );
       ensureUserExists(undefined, {
         onSuccess: () => {
-          // console.log('User created successfully, refetching...');
           refetchUser();
         },
-        onError: (error) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to create user:', error);
-          toast.error(
-            'Failed to initialize user profile. Please refresh the page.'
+        onError: (error) => {          toast.error(
+            'failed to initialize user profile. please refresh the page.'
           );
         },
       });
@@ -184,8 +161,6 @@ function Profile() {
   ]);
 
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
-
-  // Apply theme when in preview mode
   React.useEffect(() => {
     if (isPreviewMode || isEditing || isFullPreview) {
       setColorTheme(`${userTheme.primaryColor}-primary` as PrimaryColorTheme);
@@ -241,7 +216,6 @@ function Profile() {
       </div>
     );
   }
-  // console.log('convexUser', convexUser);
 
   if (!clerkUser || !convexUser) {
     return (
@@ -259,15 +233,12 @@ function Profile() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
+        toast.error('file size must be less than 5mb');
         return;
       }
-
-      // Check file type
       if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file');
+        toast.error('please select an image file');
         return;
       }
 
@@ -286,59 +257,40 @@ function Profile() {
     setIsSaving(true);
 
     if (!clerkUser) {
-      toast.error('User not found');
+      toast.error('user not found');
       setIsSaving(false);
       return;
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const promises: Promise<any>[] = [];
-
-      // Prepare Convex updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const convexUpdates: any = {};
+      const promises: Promise<unknown>[] = [];
+      const convexUpdates: Record<string, unknown> = {};
       if (username) convexUpdates.username = username;
       if (firstName) convexUpdates.first_name = firstName;
       if (lastName) convexUpdates.last_name = lastName;
       if (imageUrl) convexUpdates.image_url = imageUrl;
-      // Save dual-color theme
       convexUpdates.primaryColor = userTheme.primaryColor;
       convexUpdates.secondaryColor = userTheme.secondaryColor;
-
-      // Add Convex update to promises
       if (Object.keys(convexUpdates).length > 0) {
         promises.push(updateProfileMutation.mutateAsync(convexUpdates));
       }
-
-      // Prepare Clerk updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const clerkUpdates: any = {};
+      const clerkUpdates: Record<string, unknown> = {};
       if (username) clerkUpdates.username = username;
       if (firstName) clerkUpdates.firstName = firstName;
       if (lastName) clerkUpdates.lastName = lastName;
-
-      // Add Clerk user update to promises if there are field updates
       if (Object.keys(clerkUpdates).length > 0) {
         promises.push(clerkUser.update(clerkUpdates));
       }
-
-      // Add Clerk avatar update to promises if there's an uploaded image
       if (uploadedImageFile) {
         promises.push(clerkUser.setProfileImage({ file: uploadedImageFile }));
       }
-
-      // Execute all updates in parallel
       if (promises.length > 0) {
         await Promise.all(promises);
-        toast.success('Profile updated successfully!');
+        toast.success('profile updated successfully!');
       }
 
       setIsEditing(false);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('(Profile Page) Failed to update profile:', error);
-      toast.error('Failed to update profile. Please try again.');
+    } catch (error) {      toast.error('failed to update profile. please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -354,18 +306,15 @@ function Profile() {
     clerkUser.fullName ||
     clerkUser.firstName ||
     clerkUser.emailAddresses[0]?.emailAddress ||
-    'User';
+    'user';
 
   const userEmail = clerkUser.emailAddresses[0]?.emailAddress;
   const userJoinDate = convexUser.created_at
     ? new Date(convexUser.created_at).toLocaleDateString()
     : clerkUser.createdAt
       ? new Date(clerkUser.createdAt).toLocaleDateString()
-      : 'Unknown';
-
-  // Full preview mode - render like the user profile page
+      : 'unknown';
   if (isFullPreview && convexUser) {
-    // Create a compatible user object for the shared component
     const previewUser = {
       ...convexUser,
       first_name: firstName || convexUser.first_name,
@@ -381,15 +330,15 @@ function Profile() {
         user={previewUser}
         userVibes={userVibes}
         vibesLoading={vibesLoading}
-        userRatings={userRatings as any}
+        userRatings={userRatings as unknown}
         ratingsLoading={ratingsLoading}
-        receivedRatings={receivedRatings as any}
+        receivedRatings={receivedRatings as unknown}
         receivedRatingsLoading={receivedRatingsLoading}
         emojiStats={emojiStats}
         showBackButton={true}
         onBackClick={() => setIsFullPreview(false)}
         backButtonText="back to profile"
-        scopedTheme={false} // Use global theme for preview since we're already injecting theme above
+        scopedTheme={false}
         currentUserId={clerkUser?.id}
       />
     );
@@ -548,7 +497,6 @@ function Profile() {
                           setFirstName(convexUser.first_name || '');
                           setLastName(convexUser.last_name || '');
                           setImageUrl(convexUser.image_url || '');
-                          // Reset dual-color theme
                           const primaryColor =
                             convexUser.primaryColor ||
                             convexUser.themeColor ||

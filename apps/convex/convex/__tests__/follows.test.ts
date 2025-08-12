@@ -1,14 +1,20 @@
+/**
+ * Integration tests for the follow mutations.
+ * Each case exercises edge conditions like self-follows and duplicates.
+ */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { convexTest, type TestConvex } from 'convex-test';
 import { api } from '../_generated/api';
 import schema from '../schema';
 import { modules } from '../../vitest.setup';
 
+// Group all follow/unfollow behavior checks together
 describe('Follows', () => {
   let t: TestConvex<typeof schema>;
   let consoleSpy: any;
 
   beforeEach(() => {
+    // Spin up a fresh Convex test instance for isolation
     t = convexTest(schema, modules);
 
     // Suppress console.error from scheduler failures in tests
@@ -16,6 +22,7 @@ describe('Follows', () => {
   });
 
   afterEach(() => {
+    // Restore console state after each test run
     consoleSpy?.mockRestore();
   });
 

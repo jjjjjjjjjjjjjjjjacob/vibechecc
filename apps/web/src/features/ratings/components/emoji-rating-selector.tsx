@@ -31,6 +31,17 @@ const DEFAULT_EMOJIS = [
   '🤔',
 ];
 
+/**
+ * Button that cycles through emojis and opens a rating popover when clicked.
+ * Users can choose an emoji, rate on a scale, and submit an optional review.
+ *
+ * @param topEmojis list of emojis already rated for the vibe
+ * @param onSubmit async handler called with rating data
+ * @param isSubmitting disables interaction while true
+ * @param vibeTitle optional title of the vibe for display inside the popover
+ * @param emojiMetadata metadata map keyed by emoji for color/tag info
+ * @param className optional wrapper classes
+ */
 export function EmojiRatingSelector({
   topEmojis = [],
   onSubmit,
@@ -42,17 +53,17 @@ export function EmojiRatingSelector({
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);
 
-  // Create emoji options for cycling animation
+  // create emoji options for cycling animation
   const emojiOptions = React.useMemo(() => {
     if (topEmojis.length > 0) {
-      // Mix top emojis with question marks
+      // mix top emojis with question marks
       const emojis = topEmojis.map((r) => r.emoji);
       return [...emojis, '❓', '❓'].slice(0, 10);
     }
     return DEFAULT_EMOJIS;
   }, [topEmojis]);
 
-  // Get current emoji data
+  // get current emoji data to render in the button
   const currentEmojiData = React.useMemo(() => {
     const emoji = emojiOptions[currentEmojiIndex];
     const topEmojiData = topEmojis.find((e) => e.emoji === emoji);
@@ -65,15 +76,15 @@ export function EmojiRatingSelector({
       };
     }
 
-    // Return random rating for non-top emojis
+    // return random rating for non-top emojis
     return {
       emoji,
-      value: Math.random() * 4 + 1, // Random between 1-5
+      value: Math.random() * 4 + 1, // random between 1-5
       count: 0,
     };
   }, [currentEmojiIndex, emojiOptions, topEmojis]);
 
-  // Cycle through emojis
+  // cycle through emojis while not hovered to create animation
   React.useEffect(() => {
     if (isHovered) return;
 

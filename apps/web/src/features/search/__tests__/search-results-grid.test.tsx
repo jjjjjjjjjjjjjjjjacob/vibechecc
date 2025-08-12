@@ -1,7 +1,13 @@
+/**
+ * validates the search results grid component
+ * ensures grid renders items and handles empty states
+ */
 /// <reference lib="dom" />
 
 import React from 'react';
+// vitest helpers for lifecycle and assertions
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+// testing-library utilities for rendering and cleanup
 import { render, screen, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SearchResultsGrid } from '@/features/search/components/search-results-grid';

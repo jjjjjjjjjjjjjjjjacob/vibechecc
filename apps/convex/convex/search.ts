@@ -1,3 +1,7 @@
+/**
+ * Primary search queries and mutations for vibes, users, and tags.
+ * Handles filter parsing and relevance scoring.
+ */
 import { query, mutation, type QueryCtx } from './_generated/server';
 import { v } from 'convex/values';
 import { paginationOptsValidator } from 'convex/server';
@@ -9,13 +13,13 @@ import type {
   ActionSearchResult,
   ReviewSearchResult,
 } from '@viberatr/types';
-import { fuzzyMatch } from './search/fuzzy_search';
+import { fuzzyMatch } from './search/fuzzy-search';
 import { scoreVibe, scoreUser, scoreTag } from './search/search_scorer';
 import {
   parseSearchQuery,
   matchesParsedQuery,
   type ParsedQuery,
-} from './search/search_utils';
+} from './search/search-utils';
 
 // Constants for pagination
 const MAX_RESULTS_PER_PAGE = 50;

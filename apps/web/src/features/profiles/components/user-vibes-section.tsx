@@ -1,3 +1,8 @@
+/**
+ * user vibes section renders a preview of a user's created vibes with an option
+ * to view all. it fetches vibes for the provided user and displays them in a
+ * masonry layout with a fallback for empty states.
+ */
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { MasonryFeed } from '@/components/masonry-feed';
@@ -18,15 +23,18 @@ export function UserVibesSection({
   showViewAllButton = true,
   className,
 }: UserVibesSectionProps) {
+  // fetch vibes authored by the given user id
   const { data: vibes, isLoading: vibesLoading } = useUserVibes(
     user.externalId
   );
 
+  // show only a subset and compute whether additional vibes exist
   const displayedVibes = vibes?.slice(0, maxDisplay) || [];
   const hasMoreVibes = vibes && vibes.length > maxDisplay;
 
   return (
     <div className={className}>
+      {/* section title */}
       <h2 className="from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase sm:mb-4 sm:text-2xl">
         your vibes
       </h2>
@@ -49,6 +57,7 @@ export function UserVibesSection({
 
       {showViewAllButton && !vibesLoading && hasMoreVibes && (
         <div className="mt-4 text-center sm:mt-6">
+          {/* link to full vibe list */}
           <Button
             variant="outline"
             asChild

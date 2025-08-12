@@ -1,6 +1,11 @@
+// Re-use the root Vitest setup to share globals across packages
 export * from '../../vitest.setup';
 
-// Export modules for convex-test
+/**
+ * Module map required by `convex-test` to dynamically import server code
+ * during tests. Each entry mirrors a Convex module path and returns a
+ * promise that resolves to the module implementation.
+ */
 export const modules = {
   'convex/users.ts': () => import('./convex/users'),
   'convex/vibes.ts': () => import('./convex/vibes'),

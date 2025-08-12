@@ -1,3 +1,7 @@
+/**
+ * Button component that toggles following state for a user.
+ * Shows different icons and text depending on current status and hover.
+ */
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { UserPlus, UserMinus, Loader2 } from 'lucide-react';
@@ -30,23 +34,30 @@ export function FollowButton({
   followingText = 'following',
   unfollowText = 'unfollow',
 }: FollowButtonProps) {
+  // Track when the user hovers so we can swap to "unfollow" text
   const [isHovered, setIsHovered] = React.useState(false);
 
+  // Query Convex to determine if the current user already follows target
   const { data: isFollowing, isLoading: isCheckingStatus } =
     useIsCurrentUserFollowing(targetUserId);
 
+  // Mutation hooks to follow or unfollow the user
   const { followUser, unfollowUser, isLoading } = useFollowUser({
     onSuccess: () => {
+      // Inform parent component about the new state
       onFollowChange?.(!isFollowing);
     },
   });
 
+  // Handle button click depending on current follow state
   const handleClick = React.useCallback(() => {
     if (isLoading || isCheckingStatus) return;
 
     if (isFollowing) {
+      // Already following so perform unfollow mutation
       unfollowUser({ targetUserId, username });
     } else {
+      // Not following so send follow request
       followUser({ targetUserId, username });
     }
   }, [
@@ -59,6 +70,7 @@ export function FollowButton({
     username,
   ]);
 
+  // Resolve the text displayed in the button
   const getButtonText = () => {
     if (isLoading) return '';
     if (isFollowing) {
@@ -67,6 +79,7 @@ export function FollowButton({
     return followText;
   };
 
+  // Choose which icon to show for each state
   const getButtonIcon = () => {
     if (!showIcon) return null;
 

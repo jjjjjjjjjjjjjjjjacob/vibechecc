@@ -1,3 +1,8 @@
+/**
+ * Convex queries and mutations that manage vibe documents. The helpers below
+ * are thoroughly commented to describe filtering logic, pagination, and
+ * authentication requirements for each operation.
+ */
 import {
   mutation,
   query,
@@ -7,12 +12,12 @@ import {
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
-import { SecurityValidators, AuthUtils } from './lib/securityValidators';
+import { SecurityValidators, AuthUtils } from './lib/security-validators';
 
 // Helper function to compute user display name (backend version)
 function computeUserDisplayName(user: Doc<'users'> | null): string {
   if (!user) {
-    return 'Someone';
+    return 'someone';
   }
 
   // Priority 1: username
@@ -30,7 +35,7 @@ function computeUserDisplayName(user: Doc<'users'> | null): string {
   // No legacy name field in Convex schema - skip this step
 
   // Fallback
-  return 'Someone';
+  return 'someone';
 }
 
 // Type definitions for extended vibe objects

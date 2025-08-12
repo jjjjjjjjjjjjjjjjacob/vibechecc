@@ -1,3 +1,8 @@
+/**
+ * Integration tests exercising the Convex {@link api.users} module.
+ * Each test documents expected authentication behavior and CRUD flows
+ * so future contributors understand why specific states are asserted.
+ */
 import { convexTest } from 'convex-test';
 import { modules } from '../vitest.setup';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';

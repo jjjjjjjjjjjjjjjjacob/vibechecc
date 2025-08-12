@@ -57,12 +57,23 @@ export const DEFAULT_USER_THEME: UserTheme = {
   secondaryColor: 'orange',
 };
 
+/**
+ * Retrieve a theme color definition by its identifier.
+ *
+ * Falls back to the "pink" theme if the requested `id` is unknown to ensure
+ * callers always receive a valid color configuration.
+ */
 export function getThemeById(id: string): ThemeColor {
-  return THEME_COLORS.find((theme) => theme.id === id) || THEME_COLORS[14]; // fallback to pink
+  // look for a matching theme; default to index 14 (pink) when not found
+  return THEME_COLORS.find((theme) => theme.id === id) || THEME_COLORS[14];
 }
 
 // Convert old theme color ID to new CSS class name
+/**
+ * Convert a legacy color identifier to the new `*-primary` class name.
+ */
 export function getColorThemeClass(colorId: string): ColorTheme {
+  // mapping from historical identifiers to current theme class names
   const mapping: Record<string, ColorTheme> = {
     purple: 'purple-primary',
     pink: 'pink-primary',
@@ -82,15 +93,25 @@ export function getColorThemeClass(colorId: string): ColorTheme {
     yellow: 'yellow-primary',
   };
 
+  // return mapped class name or fall back to default theme
   return mapping[colorId] || DEFAULT_COLOR_THEME;
 }
 
 // Extract color ID from CSS class name
+/**
+ * Extract the plain color identifier from a `*-primary` theme class.
+ */
 export function getColorIdFromThemeClass(themeClass: ColorTheme): string {
   return themeClass.replace('-primary', '');
 }
 
 // Legacy functions for backward compatibility (deprecated - use theme provider instead)
+/**
+ * Produce a collection of gradient-based class names for legacy theming.
+ *
+ * New code should rely on the theme provider, but this utility remains for
+ * backward compatibility with older components.
+ */
 export function getThemeGradientClasses() {
   return {
     background: `bg-background`,
@@ -128,7 +149,11 @@ export function injectUserThemeCSS(_userTheme: UserTheme) {
 }
 
 // Get the actual HSL color value for a theme color
+/**
+ * Resolve the HSL color value associated with a theme identifier.
+ */
 export function getThemeColorValue(colorId: string): string {
+  // mapping from identifier to actual CSS HSL color values
   const colorValues: Record<string, string> = {
     purple: 'hsl(262 83% 48%)',
     pink: 'hsl(330 81% 50%)',
@@ -148,5 +173,6 @@ export function getThemeColorValue(colorId: string): string {
     yellow: 'hsl(54 92% 50%)',
   };
 
+  // return specific color or fall back to pink if unknown
   return colorValues[colorId] || colorValues.pink;
 }

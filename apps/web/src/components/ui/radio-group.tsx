@@ -1,9 +1,10 @@
-import * as React from 'react';
-import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
-import { CircleIcon } from 'lucide-react';
+import * as React from 'react'; // React types
+import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'; // radix radio group primitives
+import { CircleIcon } from 'lucide-react'; // icon for selected state
 
-import { cn } from '@/utils/tailwind-utils';
+import { cn } from '@/utils/tailwind-utils'; // class name helper
 
+/** container that groups radio items */
 function RadioGroup({
   className,
   ...props
@@ -17,6 +18,7 @@ function RadioGroup({
   );
 }
 
+/** individual selectable item */
 function RadioGroupItem({
   className,
   ...props

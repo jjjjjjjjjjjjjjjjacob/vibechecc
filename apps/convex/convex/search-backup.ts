@@ -1,3 +1,7 @@
+/**
+ * Legacy search implementation combining fuzzy matching with parsed filters.
+ * Kept for comparison against newer search algorithms.
+ */
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
 import type {
@@ -7,9 +11,9 @@ import type {
   ActionSearchResult,
   ReviewSearchResult,
 } from '@viberatr/types';
-import { fuzzyMatch } from './search/fuzzy_search';
+import { fuzzyMatch } from './search/fuzzy-search';
 import { scoreVibe, scoreUser, scoreTag } from './search/search_scorer';
-import { parseSearchQuery } from './search/search_utils';
+import { parseSearchQuery } from './search/search-utils';
 
 // Main search function
 export const searchAll = query({
@@ -593,7 +597,7 @@ export const searchAll = query({
         actions.push({
           id: 'create-vibe',
           type: 'action',
-          title: 'Create a new vibe',
+          title: 'create a new vibe',
           subtitle: 'Share your experience with the community',
           action: 'create',
           icon: 'plus',
@@ -610,7 +614,7 @@ export const searchAll = query({
         actions.push({
           id: 'view-profile',
           type: 'action',
-          title: 'View your profile',
+          title: 'view your profile',
           subtitle: 'See your vibes and stats',
           action: 'profile',
           icon: 'user',
@@ -627,7 +631,7 @@ export const searchAll = query({
         actions.push({
           id: 'open-settings',
           type: 'action',
-          title: 'Open settings',
+          title: 'open settings',
           subtitle: 'Manage your account preferences',
           action: 'settings',
           icon: 'settings',
@@ -997,7 +1001,7 @@ export const getSearchSuggestions = query({
       results.actions.push({
         id: 'create-vibe',
         type: 'action',
-        title: 'Create a new vibe',
+        title: 'create a new vibe',
         subtitle: 'Share your experience with the community',
         action: 'create',
         icon: 'plus',
@@ -1014,7 +1018,7 @@ export const getSearchSuggestions = query({
       results.actions.push({
         id: 'view-profile',
         type: 'action',
-        title: 'View your profile',
+        title: 'view your profile',
         subtitle: 'See your vibes and stats',
         action: 'profile',
         icon: 'user',
@@ -1031,7 +1035,7 @@ export const getSearchSuggestions = query({
       results.actions.push({
         id: 'open-settings',
         type: 'action',
-        title: 'Open settings',
+        title: 'open settings',
         subtitle: 'Manage your account preferences',
         action: 'settings',
         icon: 'settings',
@@ -1074,7 +1078,7 @@ export const trackSearch = mutation({
     const identity = await ctx.auth.getUserIdentity();
 
     if (!identity) {
-      throw new Error('User must be authenticated to track searches');
+      throw new Error('user must be authenticated to track searches');
     }
 
     // Record search history

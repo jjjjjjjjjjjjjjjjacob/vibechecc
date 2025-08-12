@@ -1,3 +1,7 @@
+/**
+ * Displays follower and following counts with optional click handlers.
+ * Shows loading skeletons until stats are fetched from Convex.
+ */
 import * as React from 'react';
 import { Users, UserPlus } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
@@ -21,8 +25,10 @@ export function FollowStats({
   className,
   showLabels = true,
 }: FollowStatsProps) {
+  // Load stats for the given user
   const { data: stats, isLoading } = useFollowStats(userId);
 
+  // Show placeholder pills while loading
   if (isLoading) {
     return (
       <div className={cn('flex gap-3', className)}>
@@ -32,17 +38,20 @@ export function FollowStats({
     );
   }
 
+  // Shared styling for follower/following pills
   const pillClasses = cn(
     'border-border bg-card/50 rounded-full border backdrop-blur transition-all duration-200',
     variant === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5',
     'hover:bg-card/70 hover:scale-105'
   );
 
+  // Text formatting for counts
   const textClasses = cn(
     'text-foreground flex items-center gap-2',
     variant === 'compact' ? 'text-xs' : 'text-xs'
   );
 
+  // Icon size adapts to compact variant
   const iconSize = variant === 'compact' ? 'h-3 w-3' : 'h-3.5 w-3.5';
 
   return (

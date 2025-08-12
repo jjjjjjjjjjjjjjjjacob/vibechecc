@@ -8,7 +8,9 @@
  */
 
 // Constants
+// expose limit constants so apps can enforce shared bounds
 export * from './constants/limits';
 
 // Date formatting utilities
+// re-export date helpers for unified imports
 export * from './format/date';

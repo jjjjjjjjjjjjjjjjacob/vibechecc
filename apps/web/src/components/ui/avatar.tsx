@@ -3,12 +3,17 @@ import * as AvatarPrimitive from '@radix-ui/react-avatar';
 
 import { cn } from '@/utils/tailwind-utils';
 
+/**
+ * Circular container that masks its children and ensures consistent sizing.
+ * Exposes all props of Radix's `Avatar` root component.
+ */
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
+    // Size and shape styles are fixed to maintain a perfect circle.
     className={cn(
       'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full',
       className
@@ -18,18 +23,27 @@ const Avatar = React.forwardRef<
 ));
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
+/**
+ * Displays the avatar image. Falls back to `AvatarFallback` if the image
+ * cannot be loaded.
+ */
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
+    // Ensure the image fills the circular root without stretching.
     className={cn('aspect-square h-full w-full', className)}
     {...props}
   />
 ));
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
+/**
+ * Fallback content shown when no avatar image is provided or it fails to load.
+ * Typically used to render initials or an icon.
+ */
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
@@ -46,3 +60,4 @@ const AvatarFallback = React.forwardRef<
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
 export { Avatar, AvatarImage, AvatarFallback };
+

@@ -1,3 +1,7 @@
+/**
+ * Thin React Query wrappers around Convex functions. Documented hooks clarify
+ * parameters, cache keys and invalidation behavior for frontend data access.
+ */
 import {
   useMutation,
   useQuery,
@@ -14,8 +18,7 @@ import type { FunctionReference, FunctionArgs } from 'convex/server';
 import { api } from '@viberatr/convex';
 // import { useAuth } from '@clerk/tanstack-react-start';
 
-// CONVEX INFINITE QUERY HELPER
-
+// Helper to adapt Convex paginated queries to React Query's useInfiniteQuery
 const _convexInfiniteQuery = <
   ConvexQueryReference extends FunctionReference<'query'>,
   Args extends FunctionArgs<ConvexQueryReference>,
@@ -24,9 +27,11 @@ const _convexInfiniteQuery = <
   queryArgs: Args
 ) => {
   return {
+    // Unique key so pages are cached per function + args
     queryKey: ['convexQuery', JSON.stringify(funcRef), queryArgs],
     staleTime: Infinity,
     initialPageParam: null as string | null,
+    // Use Convex continue cursor as the next page token
     getNextPageParam: (lastPage: { continueCursor?: string }) =>
       lastPage?.continueCursor || undefined,
   };

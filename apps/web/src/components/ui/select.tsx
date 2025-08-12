@@ -1,3 +1,7 @@
+/**
+ * Select menu primitives wrapping Radix Select with Tailwind styling.
+ * Includes trigger, content, and scroll button helpers.
+ */
 import * as React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';

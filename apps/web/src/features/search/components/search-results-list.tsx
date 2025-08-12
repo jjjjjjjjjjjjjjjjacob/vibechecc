@@ -1,3 +1,7 @@
+/**
+ * search results list module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { SearchResultListCard } from './search-result-list-card';
 import { SearchEmptyState } from './search-empty-state';
 import { SearchLoading } from './search-loading';

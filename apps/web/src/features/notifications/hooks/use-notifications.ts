@@ -1,3 +1,7 @@
+/**
+ * use notifications module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useConvex } from 'convex/react';
 import { api } from '@viberatr/convex';

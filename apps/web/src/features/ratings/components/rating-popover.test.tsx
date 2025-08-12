@@ -1,4 +1,9 @@
+/**
+ * basic render test for the rating popover component
+ * ensures dropdown shows provided children when open
+ */
 /// <reference lib="dom" />
+// vitest helpers for mocks and assertions
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

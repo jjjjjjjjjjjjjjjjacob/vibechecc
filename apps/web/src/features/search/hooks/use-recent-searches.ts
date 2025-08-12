@@ -1,3 +1,7 @@
+/**
+ * use recent searches module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { useState, useCallback, useEffect } from 'react';
 import type { SearchSuggestion } from '@viberatr/types';
 

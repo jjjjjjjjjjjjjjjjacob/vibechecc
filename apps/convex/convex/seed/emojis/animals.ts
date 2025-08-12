@@ -1,3 +1,8 @@
+/**
+ * Emoji metadata for animals and nature used in development seeding. These
+ * definitions supply names, keyword tags and colors so the seed script can
+ * populate the database with rich animal-related emojis.
+ */
 import type { Emoji } from '../../schema';
 
 export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [

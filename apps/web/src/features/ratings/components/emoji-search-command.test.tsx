@@ -233,12 +233,12 @@ describe('EmojiSearchCommand', () => {
         onSelect={mockOnSelect}
         searchValue=""
         onSearchChange={mockOnSearchChange}
-        placeholder="Find an emoji..."
+        placeholder="find an emoji..."
       />,
       { wrapper: createWrapper() }
     );
 
-    expect(screen.getByPlaceholderText('Find an emoji...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('find an emoji...')).toBeInTheDocument();
   });
 
   it('applies custom className', () => {

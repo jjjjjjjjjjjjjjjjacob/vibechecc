@@ -1,7 +1,15 @@
+/**
+ * theme color picker module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import * as React from 'react';
+// card primitive provides bordered container with optional header/content
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// check icon marks the currently selected theme option
 import { Check } from 'lucide-react';
+// available theme color definitions and type helpers
 import { THEME_COLORS, type ThemeColor } from '@/utils/theme-colors';
+// utility for conditional class merging
 import { cn } from '@/utils/tailwind-utils';
 
 interface ThemeColorPickerProps {
@@ -16,6 +24,7 @@ export function ThemeColorPicker({
   className,
 }: ThemeColorPickerProps) {
   return (
+    // outer card gives translucent panel styling
     <Card
       className={cn(
         'bg-background/80 border border-white/10 shadow-xl backdrop-blur-md',
@@ -23,9 +32,11 @@ export function ThemeColorPicker({
       )}
     >
       <CardHeader className="pb-4">
+        {/* title introduces the purpose of the picker */}
         <CardTitle className="bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-lg font-bold text-transparent lowercase">
           profile theme
         </CardTitle>
+        {/* hint encourages users to personalize their profile */}
         <p className="text-muted-foreground/80 text-sm">
           choose your signature color theme
         </p>
@@ -57,6 +68,7 @@ function ThemeColorOption({
   isSelected,
   onSelect,
 }: ThemeColorOptionProps) {
+  // build gradient classes dynamically from theme id
   const gradientClass = `bg-gradient-to-br from-${theme.id}-500 to-${theme.id}-700`;
 
   return (
@@ -71,7 +83,7 @@ function ThemeColorOption({
           : 'border-white/20 hover:border-white/40'
       )}
     >
-      {/* Color preview circle */}
+      {/* color preview circle */}
       <div
         className={cn(
           'relative mx-auto mb-2 h-8 w-8 overflow-hidden rounded-full',
@@ -85,7 +97,7 @@ function ThemeColorOption({
         )}
       </div>
 
-      {/* Selection ring */}
+      {/* selection ring appears only for the active theme */}
       {isSelected && (
         <div
           className={cn(

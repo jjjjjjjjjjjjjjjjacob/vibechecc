@@ -1,5 +1,10 @@
-import type { Emoji } from '../../schema';
+/**
+ * Symbol and icon oriented emoji seed data.
+ * Used during seeding to enrich the `symbols` category in the database.
+ */
+import type { Emoji } from '../../schema'; // type guarantees correct fields
 
+// symbols grouped by thematic sections like hearts or arrows
 export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
   // Hearts
   {
@@ -2102,4 +2107,4 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#4169E1',
     tags: ['asterisk', 'star', 'keycap'],
   },
-];
+]; // end of symbol emoji collection

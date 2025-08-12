@@ -2,7 +2,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { SignInButton } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
 import { LogIn } from 'lucide-react';
-import { usePostHog } from '@/hooks/usePostHog';
+// analytics hook informs feature flag readiness for gating access
+import { usePostHog } from '@/hooks/use-posthog';
 import {
   canAccessCurrentEnvironment,
   getEnvironmentInfo,
@@ -17,7 +18,7 @@ interface EnvironmentAccessGuardProps {
 
 /**
  * Component that restricts access to dev and ephemeral environments
- * based on PostHog feature flags and user cohorts
+ * based on PostHog feature flags and user cohorts.
  */
 export function EnvironmentAccessGuard({
   children,

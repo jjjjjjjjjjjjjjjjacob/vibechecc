@@ -1,5 +1,6 @@
 /**
- * Search utilities for parsing queries and operators
+ * Search utilities for parsing queries and operators.
+ * Exposes helpers to turn free-form strings into structured filters.
  */
 
 export interface ParsedQuery {

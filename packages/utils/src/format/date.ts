@@ -8,15 +8,18 @@
  * @returns Formatted date string
  */
 export function formatDate(date: string | number | Date): string {
+  // convert primitive inputs into a Date instance
   const dateObj =
     typeof date === 'string' || typeof date === 'number'
       ? new Date(date)
       : date;
 
+  // guard against invalid date values
   if (isNaN(dateObj.getTime())) {
     return 'Invalid date';
   }
 
+  // format into a concise month/day/year string
   return dateObj.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -30,15 +33,18 @@ export function formatDate(date: string | number | Date): string {
  * @returns Relative time string
  */
 export function formatRelativeTime(date: string | number | Date): string {
+  // standardize input into a Date instance
   const dateObj =
     typeof date === 'string' || typeof date === 'number'
       ? new Date(date)
       : date;
 
+  // bail out on invalid dates
   if (isNaN(dateObj.getTime())) {
     return 'Invalid date';
   }
 
+  // compute elapsed time between now and the given date
   const now = new Date();
   const diffMs = now.getTime() - dateObj.getTime();
   const diffSeconds = Math.floor(diffMs / 1000);
@@ -46,6 +52,7 @@ export function formatRelativeTime(date: string | number | Date): string {
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
 
+  // choose appropriate unit for relative description
   if (diffSeconds < 60) {
     return 'just now';
   } else if (diffMinutes < 60) {
@@ -55,6 +62,7 @@ export function formatRelativeTime(date: string | number | Date): string {
   } else if (diffDays < 30) {
     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
   } else {
+    // fall back to absolute formatting for older dates
     return formatDate(date);
   }
 }
@@ -65,6 +73,7 @@ export function formatRelativeTime(date: string | number | Date): string {
  * @returns ISO string
  */
 export function toISOString(date: Date | string): string {
+  // normalize string inputs to Date before converting
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return dateObj.toISOString();
 }

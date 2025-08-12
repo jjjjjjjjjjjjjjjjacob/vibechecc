@@ -1,3 +1,7 @@
+/**
+ * Sidebar wrapper that renders the SearchFilters component inside a card.
+ * Used on desktop layouts to expose filter controls.
+ */
 import { Card } from '@/components/ui/card';
 import { SearchFilters } from './search-filters';
 import type { SearchFilters as SearchFiltersType } from '@viberatr/types';

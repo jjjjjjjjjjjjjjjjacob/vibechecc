@@ -1,4 +1,7 @@
 /// <reference lib="dom" />
+/**
+ * Tests the header component's navigation, theming, and accessibility behavior.
+ */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 

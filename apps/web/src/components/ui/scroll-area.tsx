@@ -3,6 +3,9 @@ import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 
 import { cn } from '@/utils/tailwind-utils';
 
+/**
+ * Scrollable container with custom styled scrollbar.
+ */
 function ScrollArea({
   className,
   children,
@@ -20,12 +23,16 @@ function ScrollArea({
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
+      {/* custom scroll bar */}
       <ScrollBar />
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   );
 }
 
+/**
+ * Styled scrollbar that works for both vertical and horizontal orientations.
+ */
 function ScrollBar({
   className,
   orientation = 'vertical',

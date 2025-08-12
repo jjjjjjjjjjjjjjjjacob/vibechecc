@@ -1,5 +1,10 @@
-import type { Emoji } from '../../schema';
+/**
+ * Smiley and emotion emoji seed list used to bootstrap the database.
+ * Entries include metadata like keywords and tags but omit sentiment.
+ */
+import type { Emoji } from '../../schema'; // schema type ensures correct shape
 
+// ordered collection of smiley faces grouped by emotion
 export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
   // Positive emotions
   {
@@ -854,12 +859,13 @@ export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
     color: '#C0C0C0',
     tags: ['robot', 'AI', 'technology'],
   },
-];
+]; // full collection ends before sentiment helper
 
-// Helper function to determine sentiment based on emoji
+// Helper function to determine sentiment for a given emoji
 export function getEmojiSentiment(
   emoji: string
 ): 'positive' | 'negative' | 'neutral' {
+  // optimistic set of emojis that convey positive tone
   const positiveEmojis = [
     '😀',
     '😃',
@@ -882,6 +888,7 @@ export function getEmojiSentiment(
     '😎',
     '🥳',
   ];
+  // emojis associated with negative or angry reactions
   const negativeEmojis = [
     '😔',
     '😕',
@@ -912,7 +919,9 @@ export function getEmojiSentiment(
     '😫',
   ];
 
+  // map emoji presence to sentiment classification
   if (positiveEmojis.includes(emoji)) return 'positive';
   if (negativeEmojis.includes(emoji)) return 'negative';
+  // fallback when emoji not categorized above
   return 'neutral';
 }

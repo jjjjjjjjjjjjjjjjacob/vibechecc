@@ -1,3 +1,7 @@
+/**
+ * rating filter module.
+ * enhanced documentation for clarity and maintenance.
+ */
 import { Star } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';

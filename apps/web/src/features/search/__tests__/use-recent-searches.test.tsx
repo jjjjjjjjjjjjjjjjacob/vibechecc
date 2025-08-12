@@ -1,5 +1,10 @@
+/**
+ * tests the useRecentSearches hook's local storage integration
+ * verifies adding, retrieving, and deduping of search terms
+ */
 /// <reference lib="dom" />
 
+// vitest helpers for assertions and cleanup
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, cleanup } from '@testing-library/react';
 import { useRecentSearches } from '../hooks/use-recent-searches';

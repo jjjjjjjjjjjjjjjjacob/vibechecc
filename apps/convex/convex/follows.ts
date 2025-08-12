@@ -1,3 +1,7 @@
+/**
+ * Convex queries and mutations for following relationships.
+ * Supports follow/unfollow logic and follower/following lookups.
+ */
 import { mutation, query, type QueryCtx } from './_generated/server';
 import { v } from 'convex/values';
 import { getCurrentUser, getCurrentUserOrThrow } from './users';

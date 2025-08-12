@@ -1,7 +1,11 @@
 import { action } from './_generated/server';
 import { api } from './_generated/api';
 
-// Basic emojis to import for testing
+/**
+ * Small hard-coded collection of emoji metadata used to seed the database
+ * during development or testing. Each object mirrors the fields expected by
+ * the `emojis` table so that the import mutation can insert them directly.
+ */
 const BASIC_EMOJIS = [
   {
     emoji: '😀',
@@ -287,32 +291,46 @@ const BASIC_EMOJIS = [
   },
 ];
 
+/**
+ * Seed the Convex database with a predefined set of emoji rows.
+ *
+ * The action simply forwards the hard-coded `BASIC_EMOJIS` array to the
+ * `emojis.importBatch` mutation. While primarily intended for local
+ * development, the handler returns a structured response indicating whether the
+ * import succeeded and how many records were inserted.
+ */
 export const importBasicEmojis = action({
   handler: async (
     ctx
   ): Promise<{ success: boolean; count?: number; message: string }> => {
+    // Inform developers how many emojis will be inserted; useful when running
+    // the action manually from the dashboard.
     // eslint-disable-next-line no-console
-    console.log(`Importing ${BASIC_EMOJIS.length} basic emojis...`);
+    console.log(`importing ${BASIC_EMOJIS.length} basic emojis...`);
 
     try {
+      // Execute the batch import mutation. The cast reflects the shape returned
+      // by the mutation which includes a count of inserted rows.
       const result = (await ctx.runMutation(api.emojis.importBatch, {
         emojis: BASIC_EMOJIS,
       })) as { count: number };
 
+      // Log a success message so it's visible in Convex logs.
       // eslint-disable-next-line no-console
-      console.log(`Import complete! Imported ${result.count} new emojis`);
+      console.log(`import complete! imported ${result.count} new emojis`);
       return {
         success: true,
         count: result.count,
-        message: `Successfully imported ${result.count} emojis`,
+        message: `successfully imported ${result.count} emojis`,
       };
     } catch (error) {
+      // Capture and surface any errors so callers know the import failed.
       // eslint-disable-next-line no-console
-      console.error('Error importing emojis:', error);
+      console.error('error importing emojis:', error);
       return {
         success: false,
         count: 0,
-        message: `Error importing emojis: ${error instanceof Error ? error.message : String(error)}`,
+        message: `error importing emojis: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   },

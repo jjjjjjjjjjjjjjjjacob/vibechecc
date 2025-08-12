@@ -1,9 +1,19 @@
+/**
+ * Lightweight wrapper around the PostHog analytics client.
+ * Provides guarded helpers that only send events when initialized
+ * and keeps all usage behind a single exported instance.
+ */
 import posthog from 'posthog-js';
 
+// Configuration values needed to connect to a PostHog project
 export interface PostHogConfig {
+  /** public api key from PostHog project */
   apiKey: string;
+  /** url of the PostHog server to send events to */
   apiHost: string;
+  /** project identifier used in console links */
   projectId: string;
+  /** data residency region (eu/us) */
   region: string;
 }
 
@@ -11,29 +21,35 @@ class PostHogService {
   private initialized = false;
   private config: PostHogConfig | null = null;
 
+  /** Initialize the PostHog client once on the browser. */
   init(config: PostHogConfig) {
+    // Avoid reinitializing or running on the server during SSR
     if (this.initialized || typeof window === 'undefined') {
       return;
     }
 
+    // Stash the config so other helpers can reference it later
     this.config = config;
 
+    // Boot PostHog with minimal options; we capture page views manually
     posthog.init(config.apiKey, {
       api_host: config.apiHost,
       person_profiles: 'identified_only',
-      capture_pageview: false, // We'll handle page views manually
+      capture_pageview: false, // manual pageview tracking keeps routing lightweight
       capture_pageleave: true,
       loaded: (_posthog) => {
         if (process.env.NODE_ENV === 'development') {
-          // console.log('PostHog loaded successfully');
+          // console.log('posthog loaded successfully');
         }
       },
     });
 
+    // Mark instance as ready so helpers emit events
     this.initialized = true;
   }
 
   // Page tracking
+  /** Send a pageview event with an optional override url. */
   capturePageView(path?: string) {
     if (!this.initialized) return;
     posthog.capture('$pageview', {
@@ -45,6 +61,7 @@ class PostHogService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   identify(userId: string, properties?: Record<string, any>) {
     if (!this.initialized) return;
+    // Link subsequent events to a specific user id
     posthog.identify(userId, properties);
   }
 
@@ -52,6 +69,7 @@ class PostHogService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   capture(event: string, properties?: Record<string, any>) {
     if (!this.initialized) return;
+    // Forward arbitrary event name and properties
     posthog.capture(event, properties);
   }
 
@@ -59,18 +77,21 @@ class PostHogService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setPersonProperties(properties: Record<string, any>) {
     if (!this.initialized) return;
+    // Update traits on the identified user
     posthog.setPersonProperties(properties);
   }
 
   // Reset user (logout)
   reset() {
     if (!this.initialized) return;
+    // Clears user identification and feature flags
     posthog.reset();
   }
 
   // Feature flags
   isFeatureEnabled(flag: string): boolean {
     if (!this.initialized) return false;
+    // Coerce undefined to false so consumers get a boolean
     return posthog.isFeatureEnabled(flag) ?? false;
   }
 
@@ -81,6 +102,7 @@ class PostHogService {
 
   // Get the PostHog instance for advanced usage
   getInstance() {
+    // expose raw client for advanced scenarios
     return posthog;
   }
 
@@ -89,7 +111,7 @@ class PostHogService {
   }
 }
 
-// Export a singleton instance
+// Export a singleton instance so modules share the same client
 export const analytics = new PostHogService();
 
 // Utility functions for common tracking events

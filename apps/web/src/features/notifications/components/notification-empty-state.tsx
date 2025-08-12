@@ -1,19 +1,28 @@
-import { Bell, Heart, MessageCircle, UserPlus, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Link } from '@tanstack/react-router';
+import { Bell, Heart, MessageCircle, UserPlus, Sparkles } from 'lucide-react'; // icons for different empty states
+import { Button } from '@/components/ui/button'; // shared button component
+import { Link } from '@tanstack/react-router'; // client-side navigation helper
 
+/**
+ * Props for {@link NotificationEmptyState}.
+ * @property filter - which notification filter is active
+ */
 interface NotificationEmptyStateProps {
   filter: 'all' | 'likes' | 'comments' | 'mentions' | 'followers';
 }
 
+/**
+ * Displays a friendly message when there are no notifications for the
+ * currently selected filter.
+ */
 export function NotificationEmptyState({
   filter,
 }: NotificationEmptyStateProps) {
+  // compute copy and icon based on active filter
   const getEmptyStateContent = () => {
     switch (filter) {
       case 'likes':
         return {
-          icon: Heart,
+          icon: Heart, // heart icon for reactions
           title: 'no likes yet',
           description: "when someone rates your vibes, you'll see them here",
           action: 'share a vibe',
@@ -21,7 +30,7 @@ export function NotificationEmptyState({
         };
       case 'comments':
         return {
-          icon: MessageCircle,
+          icon: MessageCircle, // speech bubble for comments
           title: 'no comments yet',
           description:
             "when someone leaves a rating comment on your vibes, you'll see them here",
@@ -30,7 +39,7 @@ export function NotificationEmptyState({
         };
       case 'mentions':
         return {
-          icon: Sparkles,
+          icon: Sparkles, // sparkle icon for mentions/tags
           title: 'no mentions yet',
           description: 'mentions and tags will appear here in the future',
           action: 'explore vibes',
@@ -38,7 +47,7 @@ export function NotificationEmptyState({
         };
       case 'followers':
         return {
-          icon: UserPlus,
+          icon: UserPlus, // plus-user for follows
           title: 'no new followers',
           description: "when someone follows you, you'll see them here",
           action: 'discover people',
@@ -46,7 +55,7 @@ export function NotificationEmptyState({
         };
       default:
         return {
-          icon: Bell,
+          icon: Bell, // generic bell for all other cases
           title: 'no notifications yet',
           description:
             "when you get likes, comments, or new followers, they'll appear here",
@@ -62,12 +71,12 @@ export function NotificationEmptyState({
     description,
     action,
     href,
-  } = getEmptyStateContent();
+  } = getEmptyStateContent(); // destructure chosen content
 
   return (
     <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
       <div className="from-theme-primary to-theme-secondary mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r">
-        <Icon className="text-primary-foreground h-6 w-6" />
+        <Icon className="text-primary-foreground h-6 w-6" /> {/* themed icon */}
       </div>
       <h3 className="text-muted-foreground mb-2 text-lg font-medium">
         {title}

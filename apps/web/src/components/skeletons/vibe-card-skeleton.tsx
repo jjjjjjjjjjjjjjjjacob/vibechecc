@@ -1,26 +1,32 @@
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { cn } from '@/utils/tailwind-utils';
+import { Skeleton } from '@/components/ui/skeleton'; // block element for loading states
+import { Card, CardContent, CardFooter } from '@/components/ui/card'; // reuse card structure for consistent layout
+import { cn } from '@/utils/tailwind-utils'; // utility for conditional class names
 
+/**
+ * Displays a placeholder card while vibe data is loading.
+ * Mirrors the structure of a real vibe card so pages don't shift.
+ */
 interface VibeCardSkeletonProps {
-  compact?: boolean;
+  compact?: boolean; // toggles between full and compact layouts
 }
 
 export function VibeCardSkeleton({ compact }: VibeCardSkeletonProps) {
+  // outer card container uses same styling as real card
   return (
     <Card className={cn('overflow-hidden', !compact && 'h-full')}>
-      {/* Image skeleton */}
+      {/* reserve space for the vibe image */}
       <div className="relative">
         <Skeleton
           className={cn('w-full', compact ? 'aspect-[4/3]' : 'aspect-video')}
         />
       </div>
 
+      {/* text content area */}
       <CardContent className={cn('p-4', compact && 'p-3')}>
-        {/* Title skeleton */}
+        {/* placeholder for the vibe title */}
         <Skeleton className={cn('mb-2', compact ? 'h-5' : 'h-6')} />
 
-        {/* Description skeleton (only for non-compact) */}
+        {/* show fake description lines only when not compact */}
         {!compact && (
           <div className="space-y-2">
             <Skeleton className="h-4" />
@@ -29,6 +35,7 @@ export function VibeCardSkeleton({ compact }: VibeCardSkeletonProps) {
         )}
       </CardContent>
 
+      {/* footer mimics author and rating row */}
       <CardFooter
         className={cn(
           'flex flex-col items-start gap-2 p-4 pt-0',
@@ -36,13 +43,13 @@ export function VibeCardSkeleton({ compact }: VibeCardSkeletonProps) {
         )}
       >
         <div className="flex w-full items-center justify-between">
-          {/* Author info skeleton */}
+          {/* avatar and author name placeholders */}
           <div className="flex items-center gap-2">
             <Skeleton className="h-6 w-6 rounded-full" />
             <Skeleton className="h-3 w-16" />
           </div>
 
-          {/* Rating skeleton */}
+          {/* star rating placeholder */}
           <div className="flex items-center gap-1">
             <div className="flex gap-1">
               {[...Array(5)].map((_, i) => (

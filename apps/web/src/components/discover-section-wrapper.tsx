@@ -8,7 +8,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import type { Vibe } from '@/types';
 
-// Skeleton for lazy-loaded components
+/**
+ * Simple placeholder used while lazily loaded sections fetch their data.
+ * Displays a heading skeleton and a handful of generic card placeholders.
+ */
 function VibeCategoryRowSkeleton() {
   return (
     <div className="mb-10">
@@ -28,12 +31,23 @@ function VibeCategoryRowSkeleton() {
   );
 }
 
+/**
+ * Props for {@link DiscoverSectionWrapper}. The wrapper adds loading, empty, and
+ * error states around a {@link VibeCategoryRow} to keep section behavior
+ * consistent across pages.
+ */
 interface DiscoverSectionWrapperProps {
+  /** Section heading displayed above the vibe row */
   title: string | React.ReactNode;
+  /** Array of vibes to render. When undefined, the section is loading. */
   vibes: Vibe[] | undefined;
+  /** Whether data is currently being fetched */
   isLoading: boolean;
+  /** Error object returned from data fetching, if any */
   error: Error | null;
+  /** Increase spacing and font sizes when true */
   priority?: boolean;
+  /** How emoji ratings should be displayed within each vibe card */
   ratingDisplayMode?: RatingDisplayMode;
   // Infinite scroll props
   hasNextPage?: boolean;
@@ -43,6 +57,11 @@ interface DiscoverSectionWrapperProps {
   hideWhenEmpty?: boolean;
 }
 
+/**
+ * Wrapper component that renders a titled vibe section with built-in loading,
+ * error, and empty states. It delegates the actual list rendering to
+ * {@link VibeCategoryRow}.
+ */
 export function DiscoverSectionWrapper({
   title,
   vibes,
@@ -73,7 +92,7 @@ export function DiscoverSectionWrapper({
 
   // Show error state with title
   if (error) {
-    const errorMessage = error?.message || 'Failed to load content';
+    const errorMessage = error?.message || 'failed to load content';
     const errorCode = (error as { code?: string })?.code || 'UNKNOWN_ERROR';
 
     return (
