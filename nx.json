@@ -53,5 +53,22 @@
   },
   "tui": {
     "enabled": true
+  },
+  "release": {
+    "version": {
+      "conventionalCommits": true
+    },
+    "changelog": {
+      "workspaceChangelog": {
+        "createRelease": "github"
+      }
+    },
+    "git": {
+      "commit": true,
+      "commitMessage": "chore(release): v{version} [skip ci]",
+      "tag": true,
+      "tagMessage": "v{version}"
+    },
+    "projects": ["*", "!@viberatr/e2e"]
   }
 }
