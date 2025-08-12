@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const travelEmojis: Emoji[] = [
   // Places - Maps
   {
     emoji: '🗾',

@@ -30,6 +30,7 @@ import type * as files from "../files.js";
 import type * as follows from "../follows.js";
 import type * as http from "../http.js";
 import type * as importEmojis from "../importEmojis.js";
+import type * as internal_ from "../internal.js";
 import type * as lib_emojiColors from "../lib/emojiColors.js";
 import type * as lib_securityValidators from "../lib/securityValidators.js";
 import type * as migrations_addOpenMojiEmojis from "../migrations/addOpenMojiEmojis.js";
@@ -96,6 +97,7 @@ declare const fullApi: ApiFromModules<{
   follows: typeof follows;
   http: typeof http;
   importEmojis: typeof importEmojis;
+  internal: typeof internal_;
   "lib/emojiColors": typeof lib_emojiColors;
   "lib/securityValidators": typeof lib_securityValidators;
   "migrations/addOpenMojiEmojis": typeof migrations_addOpenMojiEmojis;

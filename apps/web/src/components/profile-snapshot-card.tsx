@@ -2,14 +2,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
-import { useUser, useClerk } from '@clerk/tanstack-react-start';
+import { useUser } from '@clerk/tanstack-react-start';
 import { useCurrentUser } from '../queries';
 import { FollowStats } from '@/features/follows/components';
+import { useHeaderNavStore } from '@/stores/header-nav-store';
 
 export function ProfileSnapshotCard() {
   const { user: clerkUser } = useUser();
-  const { openUserProfile } = useClerk();
   const { data: convexUser } = useCurrentUser();
+  const setNavState = useHeaderNavStore((state) => state.setNavState);
 
   if (!clerkUser || !convexUser) return null;
 
@@ -76,15 +77,20 @@ export function ProfileSnapshotCard() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button asChild variant="secondary" size="sm">
-                <Link to="/profile">view profile</Link>
-              </Button>
               <Button
-                variant="outline"
+                asChild
+                variant="secondary"
                 size="sm"
-                onClick={() => openUserProfile?.()}
+                className="bg-muted/80"
               >
-                settings
+                <Link to="/profile/preview" onClick={() => setNavState(null)}>
+                  view profile
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/profile/edit" onClick={() => setNavState(null)}>
+                  edit profile
+                </Link>
               </Button>
             </div>
           </div>

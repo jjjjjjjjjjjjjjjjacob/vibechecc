@@ -30,8 +30,8 @@ export function ToggleCell({
     try {
       setIsLoading(true);
       await onSave(newValue);
-    } catch (error) {
-      console.error('Failed to save:', error);
+    } catch {
+      // Error handling - silently fail
     } finally {
       setIsLoading(false);
     }
@@ -40,26 +40,23 @@ export function ToggleCell({
   const commonProps = {
     checked: value,
     disabled: disabled || isLoading,
-    className: cn(
-      isOptimistic && 'opacity-60',
-      isLoading && 'cursor-wait'
-    ),
+    className: cn(isOptimistic && 'opacity-60', isLoading && 'cursor-wait'),
   };
 
   if (variant === 'checkbox') {
     return (
-      <div className={cn(
-        'flex items-center space-x-2',
-        disabled && 'cursor-not-allowed opacity-50',
-        className
-      )}>
+      <div
+        className={cn(
+          'flex items-center space-x-2',
+          disabled && 'cursor-not-allowed opacity-50',
+          className
+        )}
+      >
         <Checkbox
           {...commonProps}
           onCheckedChange={(checked) => handleToggle(checked === true)}
         />
-        {label && (
-          <span className="text-sm">{label}</span>
-        )}
+        {label && <span className="text-sm">{label}</span>}
         {isLoading && (
           <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
         )}
@@ -68,18 +65,15 @@ export function ToggleCell({
   }
 
   return (
-    <div className={cn(
-      'flex items-center space-x-2',
-      disabled && 'cursor-not-allowed opacity-50',
-      className
-    )}>
-      <Switch
-        {...commonProps}
-        onCheckedChange={handleToggle}
-      />
-      {label && (
-        <span className="text-sm">{label}</span>
+    <div
+      className={cn(
+        'flex items-center space-x-2',
+        disabled && 'cursor-not-allowed opacity-50',
+        className
       )}
+    >
+      <Switch {...commonProps} onCheckedChange={handleToggle} />
+      {label && <span className="text-sm">{label}</span>}
       {isLoading && (
         <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
       )}

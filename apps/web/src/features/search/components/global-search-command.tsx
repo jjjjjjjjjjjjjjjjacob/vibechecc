@@ -18,7 +18,7 @@ import { useSearchTracking } from '../hooks/use-search-tracking';
 import { useNavigate } from '@tanstack/react-router';
 import { cn } from '@/utils/tailwind-utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { NavState } from '@/contexts/header-nav-context';
+import { type NavState } from '@/stores/header-nav-store';
 
 interface GlobalSearchCommandProps {
   open: boolean;
@@ -196,7 +196,7 @@ export function GlobalSearchCommand({
 
   return (
     <div ref={containerRef} className={cn('w-full bg-transparent')}>
-      <div className="border-b">
+      <div className="">
         <div className="container">
           <Command className="flex h-full rounded-none border-0 bg-transparent">
             <CommandInput

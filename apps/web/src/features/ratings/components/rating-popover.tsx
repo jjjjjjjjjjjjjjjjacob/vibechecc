@@ -20,14 +20,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
 import type { EmojiRating, EmojiRatingMetadata } from '@viberatr/types';
-import { Circle, Info, ChevronLeft } from 'lucide-react';
+import { Circle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 // Using v2 emoji-mart component - switch to './emoji-search-command' for rollback
-import { EmojiSearchCommandV2 as EmojiSearchCommand } from './emoji-search-command-v2';
+import { EmojiSearchCollapsible as EmojiSearchCommand } from './emoji-search-collapsible';
 import { RatingScale } from './rating-scale';
 import { FlipClockDigit } from './flip-clock-digit';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui';
 
 interface RatingPopoverProps {
   children: React.ReactNode;
@@ -239,6 +240,7 @@ export function RatingPopover({
           </div>
           <EmojiSearchCommand
             searchValue={searchValue}
+            open={true}
             onSearchChange={setSearchValue}
             onSelect={handleEmojiSelect}
             showCategories={true}
@@ -246,6 +248,7 @@ export function RatingPopover({
             perLine={isMobile ? 9 : 7}
             className="pointer-events-auto h-full max-h-[80vh] w-full"
             data-testid="emoji-search-command"
+            expandButtonVariant="circle"
           />
           <div className="text-muted-foreground inline text-xs">
             <span>{getPlaceholderText()}</span>
@@ -322,7 +325,9 @@ export function RatingPopover({
                       value={ratingValue.toFixed(1)}
                       className="inline-block"
                       onLockIn={isLockingIn}
-                      previousLockedValue={previousLockedValue?.toFixed(1)}
+                      previousLockedValue={
+                        previousLockedValue?.toFixed(1) || '0.0'
+                      }
                     />
                   </div>
                 </div>
@@ -415,7 +420,6 @@ export function RatingPopover({
                           setIsLockingIn(false);
                         }, 250); // Allow time for all digits to animate
                       }}
-                      isLockingIn={isLockingIn}
                       mobileSlider={true}
                       className="w-full"
                     />
@@ -510,7 +514,12 @@ export function RatingPopover({
         <DrawerContent
           className={cn('bg-background/90 min-h-[92vh] backdrop-blur')}
           onClick={(e) => e.stopPropagation()}
-          onWheel={(e) => e.stopPropagation()}
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+          }}
         >
           <DrawerHeader className="relative p-4 pb-0">
             <DrawerTitle className="flex items-center justify-between">
@@ -523,7 +532,9 @@ export function RatingPopover({
             </DrawerDescription>
             <Separator className="border-0.5, mt-4 w-full" />
           </DrawerHeader>
-          {formContent}
+          <ScrollArea className="max-h-[92vh] overflow-y-auto">
+            {formContent}
+          </ScrollArea>
         </DrawerContent>
       </Drawer>
     );
@@ -535,13 +546,14 @@ export function RatingPopover({
         {children}
       </DialogTrigger>
       <DialogContent
-        className="bg-background/95 border-border max-h-[90vh] w-94 gap-0 overflow-y-auto border backdrop-blur duration-300 data-[state=closed]:translate-y-[calc(-50%_+2rem)]"
+        className="bg-background/95 border-border max-h-[90vh] w-94 gap-0 overflow-y-auto border backdrop-blur-md duration-300 data-[state=closed]:translate-y-[calc(-50%_+2rem)]"
         onClick={(e) => e.stopPropagation()}
         showCloseButton={false}
         data-testid="dialog-content"
         shouldScaleBackground
-        scaleFactor={0.8}
-        scaleOffset={'50px'}
+        scaleFactor={0.5}
+        scaleOffset={'5px'}
+        onWheel={(e) => e.stopPropagation()}
       >
         <DialogHeader className="p-4 pb-0 text-center">
           <DialogTitle className="flex items-center justify-between">

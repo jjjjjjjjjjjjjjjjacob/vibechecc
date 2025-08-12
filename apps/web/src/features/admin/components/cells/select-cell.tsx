@@ -39,37 +39,43 @@ export function SelectCell({
     try {
       setIsLoading(true);
       await onSave(newValue);
-    } catch (error) {
-      console.error('Failed to save:', error);
+    } catch {
+      // Error handling - silently fail
     } finally {
       setIsLoading(false);
     }
   };
 
-  const selectedOption = options.find(option => option.value === value);
+  const selectedOption = options.find((option) => option.value === value);
 
   return (
-    <div className={cn(
-      'group',
-      disabled && 'cursor-not-allowed opacity-50',
-      isOptimistic && 'opacity-60',
-      className
-    )}>
+    <div
+      className={cn(
+        'group',
+        disabled && 'cursor-not-allowed opacity-50',
+        isOptimistic && 'opacity-60',
+        className
+      )}
+    >
       <Select
         value={value}
         onValueChange={handleValueChange}
         disabled={disabled || isLoading}
       >
-        <SelectTrigger className={cn(
-          'h-8 w-full border-0 bg-transparent px-2 hover:bg-muted/50 focus:bg-muted',
-          isLoading && 'cursor-wait'
-        )}>
+        <SelectTrigger
+          className={cn(
+            'hover:bg-muted/50 focus:bg-muted h-8 w-full border-0 bg-transparent px-2',
+            isLoading && 'cursor-wait'
+          )}
+        >
           <SelectValue placeholder={placeholder}>
-            <div className="flex items-center justify-between w-full">
-              <span className={cn(
-                'text-sm',
-                !selectedOption && 'text-muted-foreground italic'
-              )}>
+            <div className="flex w-full items-center justify-between">
+              <span
+                className={cn(
+                  'text-sm',
+                  !selectedOption && 'text-muted-foreground italic'
+                )}
+              >
                 {selectedOption?.label || placeholder}
               </span>
               {isLoading ? (
@@ -86,7 +92,7 @@ export function SelectCell({
               <div className="flex items-center space-x-2">
                 <span>{option.label}</span>
                 {option.value === value && (
-                  <Check className="h-3 w-3 text-primary" />
+                  <Check className="text-primary h-3 w-3" />
                 )}
               </div>
             </SelectItem>

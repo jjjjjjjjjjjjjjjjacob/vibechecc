@@ -3,7 +3,7 @@ import * as React from 'react';
 import { HomeFeed } from '@/components/home-feed';
 import { SignedIn, SignedOut, useUser } from '@clerk/tanstack-react-start';
 import { useCurrentUser } from '@/queries';
-import { useTheme } from '@/features/theming/components/theme-provider';
+import { useTheme } from '@/stores/theme-initializer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Sparkles } from 'lucide-react';
@@ -23,9 +23,9 @@ function HeroButtonsSkeleton() {
 
 function Home() {
   // Get current user's theme
-  const { data: currentUser, isLoading: isUserLoading } = useCurrentUser();
+  const { data: currentUser, isLoading: _isUserLoading } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
-  const { isLoaded: isClerkLoaded, user } = useUser();
+  const { isLoaded: isClerkLoaded, user: _user } = useUser();
 
   // Apply user's color themes when user data changes
   React.useEffect(() => {
@@ -55,7 +55,7 @@ function Home() {
               welcome to <strong>viberatr</strong>, where you can discover,
               share, and rate vibes from around the world
             </p>
-            
+
             {/* Show skeleton while Clerk is loading */}
             {!isClerkLoaded ? (
               <HeroButtonsSkeleton />

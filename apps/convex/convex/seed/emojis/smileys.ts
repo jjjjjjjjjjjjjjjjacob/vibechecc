@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const smileyEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const smileyEmojis: Emoji[] = [
   // Positive emotions
   {
     emoji: '😀',

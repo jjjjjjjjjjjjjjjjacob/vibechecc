@@ -11,7 +11,6 @@ import { SelectCell } from '../cells/select-cell';
 import { TagArrayCell } from '../cells/tag-array-cell';
 import { ToggleCell } from '../cells/toggle-cell';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -21,7 +20,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/utils/tailwind-utils';
 import { toast } from '@/utils/toast';
 
 interface Emoji {
@@ -80,9 +78,9 @@ export function EmojisTable({
   onCategoryChange,
   onSentimentChange,
   onEnabledChange,
-  onSortChange,
+  onSortChange: _onSortChange,
   categories,
-  stats,
+  stats: _stats,
   searchValue,
   categoryValue,
   sentimentValue,
@@ -114,9 +112,8 @@ export function EmojisTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'emoji-stats'] });
       toast.success('emoji updated');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to update emoji');
-      console.error('Update emoji error:', error);
     },
   });
 
@@ -132,13 +129,12 @@ export function EmojisTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'emoji-stats'] });
       toast.success('emoji status updated');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to update emoji status');
-      console.error('Update emoji status error:', error);
     },
   });
 
-  const getSentimentBadgeVariant = (sentiment?: string) => {
+  const _getSentimentBadgeVariant = (sentiment?: string) => {
     switch (sentiment) {
       case 'positive':
         return 'default';
@@ -151,7 +147,7 @@ export function EmojisTable({
     }
   };
 
-  const getSentimentColor = (sentiment?: string) => {
+  const _getSentimentColor = (sentiment?: string) => {
     switch (sentiment) {
       case 'positive':
         return 'text-green-600';
@@ -197,8 +193,7 @@ export function EmojisTable({
                 <div
                   className="text-2xl"
                   style={{
-                    fontFamily:
-                      'Apple Color Emoji, Segoe UI Emoji',
+                    fontFamily: 'Apple Color Emoji, Segoe UI Emoji',
                   }}
                 >
                   {emoji.emoji}
@@ -526,7 +521,7 @@ export function EmojisTable({
       ]}
       onExport={() => {
         // Implement CSV export
-        console.log('Export emojis');
+        // console.log('Export emojis');
       }}
       exportLabel="export emojis"
       isLoading={isLoading}

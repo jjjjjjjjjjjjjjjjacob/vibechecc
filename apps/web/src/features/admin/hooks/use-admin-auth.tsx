@@ -34,11 +34,12 @@ export function useAdminAuth(): UseAdminAuthResult {
     }
 
     // Check if user has org:admin role
-    const hasAdminRole = user.organizationMemberships?.some(
-      (membership) => 
-        membership.role === 'org:admin' ||
-        membership.publicMetadata?.role === 'admin'
-    ) || false;
+    const hasAdminRole =
+      user.organizationMemberships?.some(
+        (membership) =>
+          membership.role === 'org:admin' ||
+          membership.publicMetadata?.role === 'admin'
+      ) || false;
 
     // Also check user's public metadata for admin role
     const hasAdminMetadata = user.publicMetadata?.role === 'admin' || false;

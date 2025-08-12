@@ -30,12 +30,12 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
   switch (event.type) {
     case 'user.created':
       // Create user in database
-      await ctx.runMutation(internal.users.upsertFromClerk, {
+      await (ctx as any).runMutation(internal.users.upsertFromClerk, {
         data: event.data,
       });
 
       // Track signup to PostHog
-      await ctx.runAction(internal.users.trackUserSignup, {
+      await (ctx as any).runAction(internal.users.trackUserSignup, {
         userId: event.data.id,
         email: event.data.email_addresses?.[0]?.email_address,
         username: event.data.username || undefined,
@@ -50,8 +50,8 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
       );
       break;
 
-    case 'user.updated':
-      await ctx.runMutation(internal.users.upsertFromClerk, {
+    case 'user.updated': {
+      await (ctx as any).runMutation(internal.users.upsertFromClerk, {
         data: event.data,
       });
 
@@ -64,17 +64,20 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
             membership.role === 'org:admin' || membership.role === 'admin'
         );
 
-        await ctx.runMutation(internal.users.admin.updateAdminStatus, {
+        await (ctx as any).runMutation(internal.users.admin.updateAdminStatus, {
           externalId: event.data.id,
           isAdmin: hasAdminRole,
         });
       }
       break;
+    }
 
     case 'user.deleted': {
       const clerkUserId = event.data.id!;
       // console.log('Deleting user', clerkUserId);
-      await ctx.runMutation(internal.users.deleteFromClerk, { clerkUserId });
+      await (ctx as any).runMutation(internal.users.deleteFromClerk, {
+        clerkUserId,
+      });
       break;
     }
 
@@ -90,7 +93,7 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
           `Updating admin status for user ${userId}: role=${role}, isAdmin=${isAdmin}`
         );
 
-        await ctx.runMutation(internal.users.admin.updateAdminStatus, {
+        await (ctx as any).runMutation(internal.users.admin.updateAdminStatus, {
           externalId: userId,
           isAdmin,
         });
@@ -107,7 +110,7 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
           `Removing admin status for user ${userId} (membership deleted)`
         );
 
-        await ctx.runMutation(internal.users.admin.updateAdminStatus, {
+        await (ctx as any).runMutation(internal.users.admin.updateAdminStatus, {
           externalId: userId,
           isAdmin: false,
         });

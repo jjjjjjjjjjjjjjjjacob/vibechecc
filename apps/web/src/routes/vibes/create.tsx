@@ -16,7 +16,6 @@ import { cn } from '@/utils/tailwind-utils';
 import { Circle, Sparkles } from 'lucide-react';
 import type { Id } from '@viberatr/convex/dataModel';
 import toast from '@/utils/toast';
-import '@/styles/create-vibe.css';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -117,7 +116,7 @@ function CreateVibe() {
         <div className="mx-auto max-w-2xl">
           {/* Header with gradient text */}
           <div className="my-6 text-center">
-            <h1 className="animate-gradient-text drop-shadow-theme-secondary/50 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
+            <h1 className="animate-gradient-text drop-shadow-theme-secondary/10 from-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-lg sm:text-4xl">
               create a new vibe
             </h1>
             <p className="text-muted-foreground mt-2 text-sm">

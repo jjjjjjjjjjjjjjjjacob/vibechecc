@@ -6,6 +6,8 @@ import { cn } from '@/utils/tailwind-utils';
 import { formatDistanceToNow } from 'date-fns';
 import { useMarkNotificationAsReadMutation } from '@/queries';
 import type { Notification } from '@viberatr/types';
+import { useHeaderNavStore } from '@/stores/header-nav-store';
+import { usePostHog } from '@/hooks/usePostHog';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -17,16 +19,41 @@ export function NotificationItem({
   onClick,
 }: NotificationItemProps) {
   const markAsReadMutation = useMarkNotificationAsReadMutation();
+  const setNavState = useHeaderNavStore((state) => state.setNavState);
+  const { trackEvents } = usePostHog();
 
-  const handleMarkAsRead = () => {
+  const handleMarkAsRead = (method: 'click' | 'button' = 'button') => {
     if (!notification.read && notification._id) {
       markAsReadMutation.mutate({ notificationId: notification._id as any });
+      trackEvents.notificationMarkedAsRead(notification._id as string, method);
     }
+  };
+
+  const handleNotificationClick = () => {
+    // Track the notification click
+    trackEvents.notificationClicked(
+      notification._id as string,
+      notification.type,
+      notification.targetId
+    );
+
+    // Mark as read if not already read
+    if (!notification.read) {
+      handleMarkAsRead('click');
+    }
+
+    // Close the nav state
+    setNavState(null);
+
+    // Call the passed onClick handler if provided
+    onClick?.();
   };
 
   const getNotificationContent = () => {
     const user = notification.triggerUser;
-    const userName = user?.first_name || user?.username || 'someone';
+    // Fallback chain for user display name
+    const userName =
+      user?.username || user?.first_name || user?.full_name || 'someone';
 
     switch (notification.type) {
       case 'rating':
@@ -54,7 +81,7 @@ export function NotificationItem({
           icon: <UserPlus className="h-4 w-4" />,
           text: `${userName} started following you`,
           actionText: 'see profile',
-          href: `/users/${user?.username || user?._id}`,
+          href: user?.username ? `/users/${user.username}` : '#',
         };
       case 'new_vibe':
         return {
@@ -80,7 +107,7 @@ export function NotificationItem({
   const user = notification.triggerUser;
 
   return (
-    <Link to={href} onClick={onClick}>
+    <Link to={href} onClick={handleNotificationClick}>
       <div
         className={cn(
           'hover:bg-muted/50 flex items-start gap-3 rounded-md px-2 pt-3 pb-2',
@@ -90,13 +117,15 @@ export function NotificationItem({
         <div className="relative">
           <Avatar className="h-10 w-10">
             <AvatarImage
-              src={user?.image_url}
+              src={user?.image_url || user?.profile_image_url}
               alt={user?.first_name || user?.username || 'User'}
+              className="object-cover"
             />
             <AvatarFallback className="text-sm">
               {(
-                user?.first_name?.[0] ||
                 user?.username?.[0] ||
+                user?.first_name?.[0] ||
+                user?.full_name?.[0] ||
                 '?'
               ).toUpperCase()}
             </AvatarFallback>
@@ -120,7 +149,11 @@ export function NotificationItem({
               variant="ghost"
               size="sm"
               className="h-7 text-xs lowercase"
-              onClick={handleMarkAsRead}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // The main link click will handle navigation and marking as read
+              }}
             >
               {actionText}
             </Button>

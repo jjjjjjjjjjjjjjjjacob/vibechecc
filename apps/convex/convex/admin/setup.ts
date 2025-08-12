@@ -12,7 +12,7 @@ export const removeUserAdmin = mutation({
   },
   handler: async (ctx, args) => {
     let user;
-    
+
     if (args.username) {
       user = await ctx.db
         .query('users')
@@ -24,17 +24,17 @@ export const removeUserAdmin = mutation({
         .withIndex('byExternalId', (q) => q.eq('externalId', args.externalId!))
         .first();
     }
-    
+
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     await ctx.db.patch(user._id, {
       isAdmin: false,
     });
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       userId: user._id,
       username: user.username,
       externalId: user.externalId,
@@ -51,8 +51,8 @@ export const listAdminUsers = mutation({
       .query('users')
       .filter((q) => q.eq(q.field('isAdmin'), true))
       .collect();
-    
-    return adminUsers.map(user => ({
+
+    return adminUsers.map((user) => ({
       id: user._id,
       username: user.username,
       externalId: user.externalId,

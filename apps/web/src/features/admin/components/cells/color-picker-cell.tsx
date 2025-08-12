@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as React from 'react';
 import { Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,10 +20,26 @@ interface ColorPickerCellProps {
 }
 
 const DEFAULT_COLORS = [
-  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
-  '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
-  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-  '#ec4899', '#f43f5e', '#6b7280', '#374151', '#111827',
+  '#ef4444',
+  '#f97316',
+  '#f59e0b',
+  '#eab308',
+  '#84cc16',
+  '#22c55e',
+  '#10b981',
+  '#14b8a6',
+  '#06b6d4',
+  '#0ea5e9',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#d946ef',
+  '#ec4899',
+  '#f43f5e',
+  '#6b7280',
+  '#374151',
+  '#111827',
 ];
 
 export function ColorPickerCell({
@@ -74,29 +91,31 @@ export function ColorPickerCell({
   };
 
   return (
-    <div className={cn(
-      'group',
-      disabled && 'cursor-not-allowed opacity-50',
-      isOptimistic && 'opacity-60',
-      className
-    )}>
+    <div
+      className={cn(
+        'group',
+        disabled && 'cursor-not-allowed opacity-50',
+        isOptimistic && 'opacity-60',
+        className
+      )}
+    >
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
             disabled={disabled || isLoading}
-            className="h-8 w-full justify-start px-2 hover:bg-muted/50"
+            className="hover:bg-muted/50 h-8 w-full justify-start px-2"
           >
-            <div className="flex items-center space-x-2 w-full">
+            <div className="flex w-full items-center space-x-2">
               <div
-                className="h-4 w-4 rounded border border-border"
+                className="border-border h-4 w-4 rounded border"
                 style={{ backgroundColor: value }}
               />
-              <span className="text-sm font-mono">{value}</span>
+              <span className="font-mono text-sm">{value}</span>
               {isLoading ? (
-                <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent ml-auto" />
+                <div className="ml-auto h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
               ) : (
-                <Palette className="h-3 w-3 opacity-50 ml-auto" />
+                <Palette className="ml-auto h-3 w-3 opacity-50" />
               )}
             </div>
           </Button>
@@ -137,8 +156,8 @@ export function ColorPickerCell({
                     onClick={() => handleColorChange(color)}
                     disabled={isLoading}
                     className={cn(
-                      'h-8 w-8 p-0 border-2',
-                      color === value && 'ring-2 ring-primary ring-offset-2'
+                      'h-8 w-8 border-2 p-0',
+                      color === value && 'ring-primary ring-2 ring-offset-2'
                     )}
                     style={{ backgroundColor: color }}
                   >

@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { useAdminAuth } from '../hooks/use-admin-auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Home } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
@@ -22,7 +28,7 @@ export function AdminGuard({ children, fallback }: AdminGuardProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+          <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
           <p className="text-muted-foreground">checking permissions...</p>
         </div>
       </div>
@@ -39,7 +45,7 @@ export function AdminGuard({ children, fallback }: AdminGuardProps) {
       <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-2" />
+            <AlertTriangle className="text-destructive mx-auto mb-2 h-12 w-12" />
             <CardTitle className="text-xl">access denied</CardTitle>
             <CardDescription>
               {error || 'you need admin privileges to access this area.'}
@@ -48,7 +54,7 @@ export function AdminGuard({ children, fallback }: AdminGuardProps) {
           <CardContent className="text-center">
             <Button asChild variant="default">
               <Link to="/">
-                <Home className="h-4 w-4 mr-2" />
+                <Home className="mr-2 h-4 w-4" />
                 back to home
               </Link>
             </Button>

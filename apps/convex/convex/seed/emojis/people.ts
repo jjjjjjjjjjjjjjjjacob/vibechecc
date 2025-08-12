@@ -2408,4 +2408,4 @@ export const peopleEmojis = [
     category: 'people',
     color: '#8B4513',
   },
-] as const satisfies readonly Omit<Emoji, 'sentiment'>[];
+] as const satisfies readonly Emoji[];

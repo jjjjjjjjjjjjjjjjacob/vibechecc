@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, User as UserIcon, Shield, Ban, Trash2 } from 'lucide-react';
+import {
+  MoreHorizontal,
+  User as UserIcon,
+  Shield,
+  Ban,
+  Trash2,
+} from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';
@@ -21,7 +27,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/utils/tailwind-utils';
 import { toast } from '@/utils/toast';
 
 interface UsersTableProps {
@@ -50,28 +55,34 @@ interface UsersTableProps {
 
 export function UsersTable({
   data,
-  totalCount,
-  pageCount,
-  currentPage,
-  pageSize,
+  totalCount: _totalCount,
+  pageCount: _pageCount,
+  currentPage: _currentPage,
+  pageSize: _pageSize,
   isLoading,
-  onPageChange,
-  onPageSizeChange,
-  onSearchChange,
-  onStatusChange,
-  onDateRangeChange,
-  stats,
+  onPageChange: _onPageChange,
+  onPageSizeChange: _onPageSizeChange,
+  onSearchChange: _onSearchChange,
+  onStatusChange: _onStatusChange,
+  onDateRangeChange: _onDateRangeChange,
+  stats: _stats,
 }: UsersTableProps) {
   const queryClient = useQueryClient();
 
-  const updateUserMutation = useConvexMutation(api.admin.users.updateUserStatus);
+  const updateUserMutation = useConvexMutation(
+    api.admin.users.updateUserStatus
+  );
   const deleteUserMutation = useConvexMutation(api.admin.users.deleteUser);
 
   const handleUpdateUser = useMutation({
-    mutationFn: async ({ userId, suspended, reason }: { 
-      userId: string; 
-      suspended: boolean; 
-      reason?: string; 
+    mutationFn: async ({
+      userId,
+      suspended,
+      reason,
+    }: {
+      userId: string;
+      suspended: boolean;
+      reason?: string;
     }) => {
       return updateUserMutation({ userId: userId as any, suspended, reason });
     },
@@ -80,14 +91,19 @@ export function UsersTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'user-stats'] });
       toast.success('user status updated');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to update user status');
-      console.error('Update user error:', error);
     },
   });
 
   const handleDeleteUser = useMutation({
-    mutationFn: async ({ userId, reason }: { userId: string; reason?: string }) => {
+    mutationFn: async ({
+      userId,
+      reason,
+    }: {
+      userId: string;
+      reason?: string;
+    }) => {
       return deleteUserMutation({ userId: userId as any, reason });
     },
     onSuccess: () => {
@@ -95,9 +111,8 @@ export function UsersTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'user-stats'] });
       toast.success('user deleted');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to delete user');
-      console.error('Delete user error:', error);
     },
   });
 
@@ -124,7 +139,10 @@ export function UsersTable({
       header: '',
       cell: ({ row }) => {
         const user = row.original;
-        const displayName = user.username || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'anonymous';
+        const displayName =
+          user.username ||
+          `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
+          'anonymous';
         return (
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.image_url || user.profile_image_url} />
@@ -143,12 +161,15 @@ export function UsersTable({
       ),
       cell: ({ row }) => {
         const user = row.original;
-        const displayName = user.username || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'anonymous';
+        const displayName =
+          user.username ||
+          `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
+          'anonymous';
         return (
           <div className="space-y-1">
             <div className="font-medium">{displayName}</div>
             {user.first_name && user.last_name && (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 {user.first_name} {user.last_name}
               </div>
             )}
@@ -166,9 +187,8 @@ export function UsersTable({
         return (
           <EditableTextCell
             value={user.bio || ''}
-            onSave={async (newValue) => {
+            onSave={async (_newValue) => {
               // This would need a separate mutation for updating user bio
-              console.log('Update bio:', newValue);
             }}
             multiline
             placeholder="no bio..."
@@ -185,7 +205,7 @@ export function UsersTable({
       cell: ({ row }) => {
         const user = row.original;
         const isSuspended = (user as any).suspended === true;
-        
+
         return (
           <div className="space-y-2">
             <ToggleCell
@@ -194,7 +214,9 @@ export function UsersTable({
                 await handleUpdateUser.mutateAsync({
                   userId: user._id!,
                   suspended: !enabled,
-                  reason: enabled ? 'unsuspended by admin' : 'suspended by admin',
+                  reason: enabled
+                    ? 'unsuspended by admin'
+                    : 'suspended by admin',
                 });
               }}
               label={isSuspended ? 'suspended' : 'active'}
@@ -232,9 +254,11 @@ export function UsersTable({
       ),
       cell: ({ row }) => {
         const user = row.original;
-        const date = user.last_sign_in_at ? new Date(user.last_sign_in_at) : null;
+        const date = user.last_sign_in_at
+          ? new Date(user.last_sign_in_at)
+          : null;
         return (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             {date ? date.toLocaleDateString() : 'never'}
           </div>
         );
@@ -249,7 +273,10 @@ export function UsersTable({
         const user = row.original;
         const completed = (user as any).onboardingCompleted === true;
         return (
-          <Badge variant={completed ? 'default' : 'secondary'} className="text-xs">
+          <Badge
+            variant={completed ? 'default' : 'secondary'}
+            className="text-xs"
+          >
             {completed ? 'yes' : 'no'}
           </Badge>
         );
@@ -261,7 +288,7 @@ export function UsersTable({
       cell: ({ row }) => {
         const user = row.original;
         const isSuspended = (user as any).suspended === true;
-        
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -284,7 +311,9 @@ export function UsersTable({
                   handleUpdateUser.mutate({
                     userId: user._id!,
                     suspended: !isSuspended,
-                    reason: isSuspended ? 'unsuspended by admin' : 'suspended by admin',
+                    reason: isSuspended
+                      ? 'unsuspended by admin'
+                      : 'suspended by admin',
                   });
                 }}
                 disabled={handleUpdateUser.isPending}
@@ -304,7 +333,11 @@ export function UsersTable({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  if (confirm('are you sure you want to delete this user? this action cannot be undone.')) {
+                  if (
+                    confirm(
+                      'are you sure you want to delete this user? this action cannot be undone.'
+                    )
+                  ) {
                     handleDeleteUser.mutate({
                       userId: user._id!,
                       reason: 'deleted by admin',
@@ -357,7 +390,6 @@ export function UsersTable({
       ]}
       onExport={() => {
         // Implement CSV export
-        console.log('Export users');
       }}
       exportLabel="export users"
       isLoading={isLoading}

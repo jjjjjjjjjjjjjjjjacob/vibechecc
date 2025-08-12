@@ -59,8 +59,8 @@ export function TagArrayCell({
     try {
       setIsLoading(true);
       await onSave(newTags);
-    } catch (error) {
-      console.error('Failed to save:', error);
+    } catch {
+      // Error handling - silently fail
       setTags(value); // Reset on error
     } finally {
       setIsLoading(false);
@@ -68,14 +68,14 @@ export function TagArrayCell({
   };
 
   const handleRemoveTag = async (tagToRemove: string) => {
-    const newTags = tags.filter(tag => tag !== tagToRemove);
+    const newTags = tags.filter((tag) => tag !== tagToRemove);
     setTags(newTags);
 
     try {
       setIsLoading(true);
       await onSave(newTags);
-    } catch (error) {
-      console.error('Failed to save:', error);
+    } catch {
+      // Error handling - silently fail
       setTags(value); // Reset on error
     } finally {
       setIsLoading(false);
@@ -93,19 +93,21 @@ export function TagArrayCell({
   };
 
   return (
-    <div className={cn(
-      'space-y-2',
-      disabled && 'cursor-not-allowed opacity-50',
-      isOptimistic && 'opacity-60',
-      className
-    )}>
+    <div
+      className={cn(
+        'space-y-2',
+        disabled && 'cursor-not-allowed opacity-50',
+        isOptimistic && 'opacity-60',
+        className
+      )}
+    >
       {/* Tags display */}
       <div className="flex flex-wrap gap-1">
         {tags.map((tag) => (
           <Badge
             key={tag}
             variant="secondary"
-            className="text-xs flex items-center space-x-1"
+            className="flex items-center space-x-1 text-xs"
           >
             <span>{tag}</span>
             {!disabled && (
@@ -114,7 +116,7 @@ export function TagArrayCell({
                 variant="ghost"
                 onClick={() => handleRemoveTag(tag)}
                 disabled={isLoading}
-                className="h-3 w-3 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                className="hover:bg-destructive hover:text-destructive-foreground h-3 w-3 p-0"
               >
                 <X className="h-2 w-2" />
               </Button>
@@ -169,9 +171,9 @@ export function TagArrayCell({
               variant="ghost"
               onClick={() => setIsEditing(true)}
               disabled={isLoading}
-              className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground h-6 px-2 text-xs"
             >
-              <Plus className="h-2 w-2 mr-1" />
+              <Plus className="mr-1 h-2 w-2" />
               add tag
             </Button>
           )}
@@ -180,7 +182,7 @@ export function TagArrayCell({
 
       {/* Max tags indicator */}
       {maxTags && (
-        <div className="text-xs text-muted-foreground">
+        <div className="text-muted-foreground text-xs">
           {tags.length}/{maxTags} tags
         </div>
       )}

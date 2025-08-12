@@ -13,7 +13,6 @@ import { TagArrayCell } from '../cells/tag-array-cell';
 import { ExpandableRatingsCell } from '../cells/expandable-ratings-cell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -23,7 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/utils/tailwind-utils';
 import { toast } from '@/utils/toast';
 
 interface VibesTableProps {
@@ -49,17 +47,17 @@ interface VibesTableProps {
 
 export function VibesTable({
   data,
-  totalCount,
-  pageCount,
-  currentPage,
-  pageSize,
+  totalCount: _totalCount,
+  pageCount: _pageCount,
+  currentPage: _currentPage,
+  pageSize: _pageSize,
   isLoading,
-  onPageChange,
-  onPageSizeChange,
-  onSearchChange,
-  onStatusChange,
-  onDateRangeChange,
-  stats,
+  onPageChange: _onPageChange,
+  onPageSizeChange: _onPageSizeChange,
+  onSearchChange: _onSearchChange,
+  onStatusChange: _onStatusChange,
+  onDateRangeChange: _onDateRangeChange,
+  stats: _stats,
 }: VibesTableProps) {
   const queryClient = useQueryClient();
 
@@ -67,26 +65,39 @@ export function VibesTable({
   const deleteVibeMutation = useConvexMutation(api.admin.vibes.deleteVibe);
 
   const handleModerateVibe = useMutation({
-    mutationFn: async ({ vibeId, visibility, reason }: { 
-      vibeId: string; 
-      visibility: 'public' | 'deleted'; 
-      reason?: string; 
+    mutationFn: async ({
+      vibeId,
+      visibility,
+      reason,
+    }: {
+      vibeId: string;
+      visibility: 'public' | 'deleted';
+      reason?: string;
     }) => {
-      return moderateVibeMutation({ vibeId: vibeId as any, visibility, reason });
+      return moderateVibeMutation({
+        vibeId: vibeId as any,
+        visibility,
+        reason,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'vibes'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'vibe-stats'] });
       toast.success('vibe updated');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to update vibe');
-      console.error('Update vibe error:', error);
     },
   });
 
   const handleDeleteVibe = useMutation({
-    mutationFn: async ({ vibeId, reason }: { vibeId: string; reason?: string }) => {
+    mutationFn: async ({
+      vibeId,
+      reason,
+    }: {
+      vibeId: string;
+      reason?: string;
+    }) => {
       return deleteVibeMutation({ vibeId: vibeId as any, reason });
     },
     onSuccess: () => {
@@ -94,13 +105,12 @@ export function VibesTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'vibe-stats'] });
       toast.success('vibe deleted');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to delete vibe');
-      console.error('Delete vibe error:', error);
     },
   });
 
-  const getAverageRating = (vibe: Vibe) => {
+  const _getAverageRating = (vibe: Vibe) => {
     if (!vibe.ratings || vibe.ratings.length === 0) return 0;
     const sum = vibe.ratings.reduce((acc, rating) => acc + rating.value, 0);
     return Math.round((sum / vibe.ratings.length) * 10) / 10;
@@ -132,16 +142,15 @@ export function VibesTable({
       cell: ({ row }) => {
         const vibe = row.original;
         return (
-          <div className="space-y-1 max-w-[300px]">
+          <div className="max-w-[300px] space-y-1">
             <EditableTextCell
               value={vibe.title}
-              onSave={async (newValue) => {
+              onSave={async (_newValue) => {
                 // This would need a mutation for updating vibe title
-                console.log('Update title:', newValue);
               }}
               placeholder="no title..."
             />
-            <div className="text-xs text-muted-foreground truncate">
+            <div className="text-muted-foreground truncate text-xs">
               {vibe.description}
             </div>
           </div>
@@ -156,10 +165,14 @@ export function VibesTable({
       cell: ({ row }) => {
         const vibe = row.original;
         const author = vibe.createdBy;
-        if (!author) return <span className="text-muted-foreground">unknown</span>;
-        
-        const displayName = author.username || `${author.first_name || ''} ${author.last_name || ''}`.trim() || 'anonymous';
-        
+        if (!author)
+          return <span className="text-muted-foreground">unknown</span>;
+
+        const displayName =
+          author.username ||
+          `${author.first_name || ''} ${author.last_name || ''}`.trim() ||
+          'anonymous';
+
         return (
           <div className="flex items-center space-x-2">
             <Avatar className="h-6 w-6">
@@ -183,9 +196,8 @@ export function VibesTable({
         return (
           <TagArrayCell
             value={vibe.tags || []}
-            onSave={async (newTags) => {
+            onSave={async (_newTags) => {
               // This would need a mutation for updating vibe tags
-              console.log('Update tags:', newTags);
             }}
             maxTags={10}
           />
@@ -200,7 +212,7 @@ export function VibesTable({
       cell: ({ row }) => {
         const vibe = row.original;
         return (
-          <ExpandableRatingsCell 
+          <ExpandableRatingsCell
             ratings={vibe.ratings || []}
             previewCount={2}
           />
@@ -215,7 +227,7 @@ export function VibesTable({
       cell: ({ row }) => {
         const vibe = row.original;
         const visibility = vibe.visibility || 'public';
-        
+
         return (
           <SelectCell
             value={visibility}
@@ -243,11 +255,7 @@ export function VibesTable({
       cell: ({ row }) => {
         const vibe = row.original;
         const date = new Date(vibe.createdAt);
-        return (
-          <div className="text-sm">
-            {date.toLocaleDateString()}
-          </div>
-        );
+        return <div className="text-sm">{date.toLocaleDateString()}</div>;
       },
     },
     {
@@ -270,7 +278,7 @@ export function VibesTable({
       cell: ({ row }) => {
         const vibe = row.original;
         const isDeleted = vibe.visibility === 'deleted';
-        
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -322,7 +330,11 @@ export function VibesTable({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  if (confirm('are you sure you want to permanently delete this vibe? this action cannot be undone.')) {
+                  if (
+                    confirm(
+                      'are you sure you want to permanently delete this vibe? this action cannot be undone.'
+                    )
+                  ) {
                     handleDeleteVibe.mutate({
                       vibeId: vibe._id!,
                       reason: 'permanently deleted by admin',
@@ -375,7 +387,6 @@ export function VibesTable({
       ]}
       onExport={() => {
         // Implement CSV export
-        console.log('Export vibes');
       }}
       exportLabel="export vibes"
       isLoading={isLoading}

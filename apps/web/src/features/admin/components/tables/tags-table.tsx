@@ -39,7 +39,10 @@ interface TagsTableProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onSearchChange: (search: string) => void;
-  onSortChange: (field: 'name' | 'usage' | 'lastUsed', direction: 'asc' | 'desc') => void;
+  onSortChange: (
+    field: 'name' | 'usage' | 'lastUsed',
+    direction: 'asc' | 'desc'
+  ) => void;
   stats?: {
     totalTags: number;
     activeTags: number;
@@ -50,16 +53,16 @@ interface TagsTableProps {
 
 export function TagsTable({
   data,
-  totalCount,
-  pageCount,
-  currentPage,
-  pageSize,
+  totalCount: _totalCount,
+  pageCount: _pageCount,
+  currentPage: _currentPage,
+  pageSize: _pageSize,
   isLoading,
-  onPageChange,
-  onPageSizeChange,
-  onSearchChange,
-  onSortChange,
-  stats,
+  onPageChange: _onPageChange,
+  onPageSizeChange: _onPageSizeChange,
+  onSearchChange: _onSearchChange,
+  onSortChange: _onSortChange,
+  stats: _stats,
 }: TagsTableProps) {
   const queryClient = useQueryClient();
 
@@ -76,9 +79,8 @@ export function TagsTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'tag-stats'] });
       toast.success('tag updated');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to update tag');
-      console.error('Update tag error:', error);
     },
   });
 
@@ -91,24 +93,31 @@ export function TagsTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'tag-stats'] });
       toast.success('tag deleted');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to delete tag');
-      console.error('Delete tag error:', error);
     },
   });
 
   const handleMergeTags = useMutation({
-    mutationFn: async ({ sourceTagId, targetTagId }: { sourceTagId: string; targetTagId: string }) => {
-      return mergeTagsMutation({ sourceTagId: sourceTagId as any, targetTagId: targetTagId as any });
+    mutationFn: async ({
+      sourceTagId,
+      targetTagId,
+    }: {
+      sourceTagId: string;
+      targetTagId: string;
+    }) => {
+      return mergeTagsMutation({
+        sourceTagId: sourceTagId as any,
+        targetTagId: targetTagId as any,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'tags'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'tag-stats'] });
       toast.success('tags merged');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to merge tags');
-      console.error('Merge tags error:', error);
     },
   });
 
@@ -121,11 +130,16 @@ export function TagsTable({
 
   const getUsageBadgeVariant = (level: string) => {
     switch (level) {
-      case 'unused': return 'secondary';
-      case 'low': return 'outline';
-      case 'medium': return 'default';
-      case 'high': return 'default';
-      default: return 'secondary';
+      case 'unused':
+        return 'secondary';
+      case 'low':
+        return 'outline';
+      case 'medium':
+        return 'default';
+      case 'high':
+        return 'default';
+      default:
+        return 'secondary';
     }
   };
 
@@ -156,7 +170,7 @@ export function TagsTable({
         const tag = row.original;
         return (
           <div className="flex items-center space-x-2">
-            <Hash className="h-4 w-4 text-muted-foreground" />
+            <Hash className="text-muted-foreground h-4 w-4" />
             <EditableTextCell
               value={tag.name}
               onSave={async (newValue) => {
@@ -180,11 +194,16 @@ export function TagsTable({
       cell: ({ row }) => {
         const tag = row.original;
         const usageLevel = getUsageLevel(tag.usageCount);
-        
+
         return (
           <div className="flex items-center space-x-2">
-            <span className="font-medium">{tag.usageCount.toLocaleString()}</span>
-            <Badge variant={getUsageBadgeVariant(usageLevel)} className="text-xs">
+            <span className="font-medium">
+              {tag.usageCount.toLocaleString()}
+            </span>
+            <Badge
+              variant={getUsageBadgeVariant(usageLevel)}
+              className="text-xs"
+            >
               {usageLevel}
             </Badge>
           </div>
@@ -200,22 +219,31 @@ export function TagsTable({
         const tag = row.original;
         const date = tag.lastUsed ? new Date(tag.lastUsed) : null;
         const now = Date.now();
-        const daysSince = date ? Math.floor((now - date.getTime()) / (1000 * 60 * 60 * 24)) : null;
-        
+        const daysSince = date
+          ? Math.floor((now - date.getTime()) / (1000 * 60 * 60 * 24))
+          : null;
+
         return (
           <div className="space-y-1">
             <div className="text-sm">
               {date ? date.toLocaleDateString() : 'never'}
             </div>
             {daysSince !== null && (
-              <div className={cn(
-                'text-xs',
-                daysSince > 30 ? 'text-destructive' : 
-                daysSince > 7 ? 'text-yellow-600' : 'text-muted-foreground'
-              )}>
-                {daysSince === 0 ? 'today' : 
-                 daysSince === 1 ? 'yesterday' : 
-                 `${daysSince} days ago`}
+              <div
+                className={cn(
+                  'text-xs',
+                  daysSince > 30
+                    ? 'text-destructive'
+                    : daysSince > 7
+                      ? 'text-yellow-600'
+                      : 'text-muted-foreground'
+                )}
+              >
+                {daysSince === 0
+                  ? 'today'
+                  : daysSince === 1
+                    ? 'yesterday'
+                    : `${daysSince} days ago`}
               </div>
             )}
           </div>
@@ -230,11 +258,7 @@ export function TagsTable({
       cell: ({ row }) => {
         const tag = row.original;
         const date = new Date(tag.createdAt);
-        return (
-          <div className="text-sm">
-            {date.toLocaleDateString()}
-          </div>
-        );
+        return <div className="text-sm">{date.toLocaleDateString()}</div>;
       },
     },
     {
@@ -242,7 +266,7 @@ export function TagsTable({
       header: 'actions',
       cell: ({ row }) => {
         const tag = row.original;
-        
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -262,7 +286,10 @@ export function TagsTable({
               <DropdownMenuItem
                 onClick={() => {
                   // Navigate to search with this tag
-                  window.open(`/search?tags=${encodeURIComponent(tag.name)}`, '_blank');
+                  window.open(
+                    `/search?tags=${encodeURIComponent(tag.name)}`,
+                    '_blank'
+                  );
                 }}
               >
                 <Hash className="mr-2 h-4 w-4" />
@@ -271,10 +298,14 @@ export function TagsTable({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  const targetTag = prompt('enter the name of the tag to merge into:');
+                  const targetTag = prompt(
+                    'enter the name of the tag to merge into:'
+                  );
                   if (targetTag) {
                     // Find the target tag ID (this would need to be improved)
-                    const targetTagData = data.find(t => t.name.toLowerCase() === targetTag.toLowerCase());
+                    const targetTagData = data.find(
+                      (t) => t.name.toLowerCase() === targetTag.toLowerCase()
+                    );
                     if (targetTagData) {
                       handleMergeTags.mutate({
                         sourceTagId: tag._id,
@@ -293,7 +324,11 @@ export function TagsTable({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  if (confirm(`are you sure you want to delete the tag "${tag.name}"? this will remove it from ${tag.usageCount} vibes.`)) {
+                  if (
+                    confirm(
+                      `are you sure you want to delete the tag "${tag.name}"? this will remove it from ${tag.usageCount} vibes.`
+                    )
+                  ) {
                     handleDeleteTag.mutate({
                       tagId: tag._id,
                     });
@@ -334,7 +369,11 @@ export function TagsTable({
         {
           label: 'delete selected',
           action: (selectedTags) => {
-            if (confirm(`are you sure you want to delete ${selectedTags.length} tags? this action cannot be undone.`)) {
+            if (
+              confirm(
+                `are you sure you want to delete ${selectedTags.length} tags? this action cannot be undone.`
+              )
+            ) {
               selectedTags.forEach((tag) => {
                 handleDeleteTag.mutate({
                   tagId: tag._id,
@@ -347,7 +386,6 @@ export function TagsTable({
       ]}
       onExport={() => {
         // Implement CSV export
-        console.log('Export tags');
       }}
       exportLabel="export tags"
       isLoading={isLoading}

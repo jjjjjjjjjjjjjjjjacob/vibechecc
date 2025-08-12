@@ -29,6 +29,23 @@ vi.mock('date-fns', () => ({
   formatDistanceToNow: vi.fn(() => '2 hours ago'),
 }));
 
+// Mock header nav store
+vi.mock('@/stores/header-nav-store', () => ({
+  useHeaderNavStore: () => ({
+    setNavState: vi.fn(),
+  }),
+}));
+
+// Mock PostHog hook
+vi.mock('@/hooks/usePostHog', () => ({
+  usePostHog: () => ({
+    trackEvents: {
+      notificationMarkedAsRead: vi.fn(),
+      notificationClicked: vi.fn(),
+    },
+  }),
+}));
+
 // Mock UI components
 vi.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, className, ...props }: any) => (
@@ -123,7 +140,7 @@ describe('NotificationItem', () => {
       );
 
       expect(
-        screen.getByText('Test started following you')
+        screen.getByText('testuser started following you')
       ).toBeInTheDocument();
       expect(screen.getByText('see profile')).toBeInTheDocument();
       expect(screen.getByText('2 hours ago')).toBeInTheDocument();
@@ -147,7 +164,7 @@ describe('NotificationItem', () => {
       expect(profileLink).toHaveAttribute('href', '/users/johndoe');
     });
 
-    it('falls back to user ID when username is missing', () => {
+    it('falls back to # when username is missing', () => {
       const followNotification: Notification = {
         ...baseNotification,
         type: 'follow',
@@ -163,7 +180,7 @@ describe('NotificationItem', () => {
       );
 
       const profileLink = screen.getByText('see profile').closest('a');
-      expect(profileLink).toHaveAttribute('href', '/users/user123');
+      expect(profileLink).toHaveAttribute('href', '#');
     });
   });
 
@@ -184,7 +201,9 @@ describe('NotificationItem', () => {
         <NotificationItem notification={ratingNotification} />
       );
 
-      expect(screen.getByText('Test reacted to your vibe')).toBeInTheDocument();
+      expect(
+        screen.getByText('testuser reacted to your vibe')
+      ).toBeInTheDocument();
       expect(screen.getByText('see rating')).toBeInTheDocument();
       expect(screen.getByText('😍')).toBeInTheDocument();
     });
@@ -204,7 +223,7 @@ describe('NotificationItem', () => {
         <NotificationItem notification={ratingNotification} />
       );
 
-      expect(screen.getByText('Test liked your vibe')).toBeInTheDocument();
+      expect(screen.getByText('testuser liked your vibe')).toBeInTheDocument();
       expect(screen.getByText('see rating')).toBeInTheDocument();
       // Should show heart icon instead of emoji
       expect(screen.queryByText('😍')).not.toBeInTheDocument();
@@ -239,7 +258,7 @@ describe('NotificationItem', () => {
       );
 
       expect(
-        screen.getByText('Test left a comment on your vibe')
+        screen.getByText('testuser left a comment on your vibe')
       ).toBeInTheDocument();
       expect(screen.getByText('see comment')).toBeInTheDocument();
     });
@@ -257,7 +276,7 @@ describe('NotificationItem', () => {
         <NotificationItem notification={newVibeNotification} />
       );
 
-      expect(screen.getByText("Test shared 'a vibe'")).toBeInTheDocument();
+      expect(screen.getByText("testuser shared 'a vibe'")).toBeInTheDocument();
       expect(screen.getByText('see vibe')).toBeInTheDocument();
     });
   });
@@ -277,6 +296,7 @@ describe('NotificationItem', () => {
         triggerUser: {
           ...baseNotification.triggerUser!,
           image_url: undefined,
+          username: undefined, // Remove username so first_name takes priority
           first_name: 'John',
         },
       };
@@ -404,8 +424,8 @@ describe('NotificationItem', () => {
         <NotificationItem notification={unreadNotification} />
       );
 
-      const actionButton = screen.getByText('see profile');
-      fireEvent.click(actionButton);
+      const notificationLink = screen.getByText('see profile').closest('a');
+      fireEvent.click(notificationLink!);
 
       expect(mockMutate).toHaveBeenCalledWith({
         notificationId: 'notif123',
@@ -506,7 +526,7 @@ describe('NotificationItem', () => {
   });
 
   describe('User name handling', () => {
-    it('prefers first_name over username', () => {
+    it('prefers username over first_name', () => {
       const notification: Notification = {
         ...baseNotification,
         type: 'follow',
@@ -520,7 +540,7 @@ describe('NotificationItem', () => {
       renderWithProviders(<NotificationItem notification={notification} />);
 
       expect(
-        screen.getByText('Johnny started following you')
+        screen.getByText('john123 started following you')
       ).toBeInTheDocument();
     });
 

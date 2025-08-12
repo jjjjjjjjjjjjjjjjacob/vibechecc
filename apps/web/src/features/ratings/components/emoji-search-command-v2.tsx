@@ -6,7 +6,7 @@ import { useUser } from '@clerk/tanstack-react-start';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '@viberatr/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
-import { useTheme } from '@/features/theming/components/theme-provider';
+import { useTheme } from '@/stores/theme-initializer';
 
 interface EmojiSearchCommandV2Props {
   onSelect: (emoji: string) => void;

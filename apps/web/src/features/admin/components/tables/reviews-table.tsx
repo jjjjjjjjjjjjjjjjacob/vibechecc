@@ -11,7 +11,6 @@ import { EditableTextCell } from '../cells/editable-text-cell';
 import { ToggleCell } from '../cells/toggle-cell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -21,7 +20,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/utils/tailwind-utils';
 import { toast } from '@/utils/toast';
 
 interface ReviewsTableProps {
@@ -46,44 +44,61 @@ interface ReviewsTableProps {
 
 export function ReviewsTable({
   data,
-  totalCount,
-  pageCount,
-  currentPage,
-  pageSize,
+  totalCount: _totalCount,
+  pageCount: _pageCount,
+  currentPage: _currentPage,
+  pageSize: _pageSize,
   isLoading,
-  onPageChange,
-  onPageSizeChange,
-  onSearchChange,
-  onStatusChange,
-  onDateRangeChange,
-  stats,
+  onPageChange: _onPageChange,
+  onPageSizeChange: _onPageSizeChange,
+  onSearchChange: _onSearchChange,
+  onStatusChange: _onStatusChange,
+  onDateRangeChange: _onDateRangeChange,
+  stats: _stats,
 }: ReviewsTableProps) {
   const queryClient = useQueryClient();
 
-  const moderateReviewMutation = useConvexMutation(api.admin.reviews.moderateReview);
-  const deleteReviewMutation = useConvexMutation(api.admin.reviews.deleteReview);
+  const moderateReviewMutation = useConvexMutation(
+    api.admin.reviews.moderateReview
+  );
+  const deleteReviewMutation = useConvexMutation(
+    api.admin.reviews.deleteReview
+  );
 
   const handleModerateReview = useMutation({
-    mutationFn: async ({ reviewId, flagged, reason }: { 
-      reviewId: string; 
-      flagged: boolean; 
-      reason?: string; 
+    mutationFn: async ({
+      reviewId,
+      flagged,
+      reason,
+    }: {
+      reviewId: string;
+      flagged: boolean;
+      reason?: string;
     }) => {
-      return moderateReviewMutation({ reviewId: reviewId as any, flagged, reason });
+      return moderateReviewMutation({
+        reviewId: reviewId as any,
+        flagged,
+        reason,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'reviews'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'review-stats'] });
       toast.success('review updated');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to update review');
-      console.error('Update review error:', error);
     },
   });
 
   const handleDeleteReview = useMutation({
-    mutationFn: async ({ reviewId, reason }: { reviewId: string; reason?: string }) => {
+    mutationFn: async ({
+      reviewId,
+      reason,
+    }: {
+      reviewId: string;
+      reason?: string;
+    }) => {
       return deleteReviewMutation({ reviewId: reviewId as any, reason });
     },
     onSuccess: () => {
@@ -91,9 +106,8 @@ export function ReviewsTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'review-stats'] });
       toast.success('review deleted');
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast.error('failed to delete review');
-      console.error('Delete review error:', error);
     },
   });
 
@@ -123,10 +137,14 @@ export function ReviewsTable({
       cell: ({ row }) => {
         const rating = row.original;
         const user = rating.user || rating.rater;
-        if (!user) return <span className="text-muted-foreground">unknown</span>;
-        
-        const displayName = user.username || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'anonymous';
-        
+        if (!user)
+          return <span className="text-muted-foreground">unknown</span>;
+
+        const displayName =
+          user.username ||
+          `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
+          'anonymous';
+
         return (
           <div className="flex items-center space-x-2">
             <Avatar className="h-6 w-6">
@@ -148,12 +166,13 @@ export function ReviewsTable({
       cell: ({ row }) => {
         const rating = row.original;
         const vibe = rating.vibe;
-        if (!vibe) return <span className="text-muted-foreground">unknown</span>;
-        
+        if (!vibe)
+          return <span className="text-muted-foreground">unknown</span>;
+
         return (
           <div className="max-w-[200px]">
-            <div className="font-medium truncate">{vibe.title}</div>
-            <div className="text-xs text-muted-foreground truncate">
+            <div className="truncate font-medium">{vibe.title}</div>
+            <div className="text-muted-foreground truncate text-xs">
               {vibe.description}
             </div>
           </div>
@@ -184,7 +203,7 @@ export function ReviewsTable({
         return (
           <div className="flex items-center space-x-1">
             <span className="font-medium">{rating.value}</span>
-            <span className="text-xs text-muted-foreground">★</span>
+            <span className="text-muted-foreground text-xs">★</span>
           </div>
         );
       },
@@ -200,9 +219,8 @@ export function ReviewsTable({
           <div className="max-w-[300px]">
             <EditableTextCell
               value={rating.review}
-              onSave={async (newValue) => {
+              onSave={async (_newValue) => {
                 // This would need a mutation for updating review text
-                console.log('Update review:', newValue);
               }}
               multiline
               placeholder="no review..."
@@ -219,7 +237,7 @@ export function ReviewsTable({
       cell: ({ row }) => {
         const rating = row.original;
         const isFlagged = (rating as any).flagged === true;
-        
+
         return (
           <ToggleCell
             value={isFlagged}
@@ -245,11 +263,7 @@ export function ReviewsTable({
       cell: ({ row }) => {
         const rating = row.original;
         const date = new Date(rating.createdAt);
-        return (
-          <div className="text-sm">
-            {date.toLocaleDateString()}
-          </div>
-        );
+        return <div className="text-sm">{date.toLocaleDateString()}</div>;
       },
     },
     {
@@ -258,7 +272,7 @@ export function ReviewsTable({
       cell: ({ row }) => {
         const rating = row.original;
         const isFlagged = (rating as any).flagged === true;
-        
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -291,7 +305,9 @@ export function ReviewsTable({
                   handleModerateReview.mutate({
                     reviewId: rating._id!,
                     flagged: !isFlagged,
-                    reason: isFlagged ? 'unflagged by admin' : 'flagged by admin',
+                    reason: isFlagged
+                      ? 'unflagged by admin'
+                      : 'flagged by admin',
                   });
                 }}
                 disabled={handleModerateReview.isPending}
@@ -311,7 +327,11 @@ export function ReviewsTable({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  if (confirm('are you sure you want to delete this review? this action cannot be undone.')) {
+                  if (
+                    confirm(
+                      'are you sure you want to delete this review? this action cannot be undone.'
+                    )
+                  ) {
                     handleDeleteReview.mutate({
                       reviewId: rating._id!,
                       reason: 'deleted by admin',
@@ -376,7 +396,6 @@ export function ReviewsTable({
       ]}
       onExport={() => {
         // Implement CSV export
-        console.log('Export reviews');
       }}
       exportLabel="export reviews"
       isLoading={isLoading}

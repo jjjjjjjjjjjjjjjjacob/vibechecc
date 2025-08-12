@@ -18,17 +18,16 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Heart, 
-  MessageSquare, 
-  Tag, 
+import {
+  LayoutDashboard,
+  Users,
+  Heart,
+  MessageSquare,
+  Tag,
   Smile,
   Home,
   ChevronRight,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 export interface AdminLayoutProps {
@@ -95,28 +94,31 @@ function AdminSidebarContent() {
     <>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1.5">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-theme-primary to-theme-secondary text-primary-foreground">
+          <div className="from-theme-primary to-theme-secondary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br">
             <LayoutDashboard className="size-4" />
           </div>
           {!isCollapsed && (
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-semibold">admin panel</span>
-              <span className="text-xs text-muted-foreground">viberatr management</span>
+              <span className="text-muted-foreground text-xs">
+                viberatr management
+              </span>
             </div>
           )}
         </div>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className={cn(isCollapsed && "sr-only")}>
+          <SidebarGroupLabel className={cn(isCollapsed && 'sr-only')}>
             navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = currentPath === item.href || 
+                const isActive =
+                  currentPath === item.href ||
                   (item.href !== '/admin' && currentPath.startsWith(item.href));
 
                 return (
@@ -151,7 +153,7 @@ function AdminSidebarContent() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              tooltip={isCollapsed ? "back to viberatr" : undefined}
+              tooltip={isCollapsed ? 'back to viberatr' : undefined}
             >
               <Link to="/">
                 <Home className="size-4" />
@@ -184,10 +186,10 @@ export function AdminLayout({
           <Sidebar>
             <AdminSidebarContent />
           </Sidebar>
-          
-          <SidebarInset className="flex flex-col h-screen overflow-hidden">
+
+          <SidebarInset className="flex h-screen flex-col overflow-hidden">
             {/* Header with Sidebar Trigger */}
-            <header className="flex h-14 items-center gap-4 border-b bg-background px-6 flex-shrink-0">
+            <header className="bg-background flex h-14 flex-shrink-0 items-center gap-4 border-b px-6">
               <SidebarTrigger />
               <Separator orientation="vertical" className="h-6" />
               <div className="flex-1">
@@ -197,7 +199,9 @@ export function AdminLayout({
                     {description && (
                       <>
                         <span className="text-muted-foreground">·</span>
-                        <p className="text-sm text-muted-foreground lowercase">{description}</p>
+                        <p className="text-muted-foreground text-sm lowercase">
+                          {description}
+                        </p>
                       </>
                     )}
                   </div>
@@ -206,14 +210,14 @@ export function AdminLayout({
             </header>
 
             {/* Main Content */}
-            <main className={cn(
-              'flex-1 overflow-y-auto overflow-x-hidden min-h-0',
-              contentClassName
-            )}>
+            <main
+              className={cn(
+                'min-h-0 flex-1 overflow-x-hidden overflow-y-auto',
+                contentClassName
+              )}
+            >
               <div className="h-full p-6">
-                <div className="h-full max-w-7xl mx-auto">
-                  {children}
-                </div>
+                <div className="mx-auto h-full max-w-7xl">{children}</div>
               </div>
             </main>
           </SidebarInset>
@@ -236,7 +240,7 @@ export function AdminSimpleLayout({
 }) {
   return (
     <AdminGuard>
-      <div className={cn('min-h-screen bg-background', className)}>
+      <div className={cn('bg-background min-h-screen', className)}>
         {children}
       </div>
     </AdminGuard>

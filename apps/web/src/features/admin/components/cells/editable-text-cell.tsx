@@ -58,8 +58,8 @@ export function EditableTextCell({
       setIsLoading(true);
       await onSave(editValue);
       setIsEditing(false);
-    } catch (error) {
-      console.error('Failed to save:', error);
+    } catch {
+      // Error handling - silently fail
       setEditValue(value); // Reset to original value on error
     } finally {
       setIsLoading(false);
@@ -141,21 +141,32 @@ export function EditableTextCell({
   return (
     <div
       className={cn(
-        'group flex items-center space-x-2 cursor-pointer rounded px-2 py-1 hover:bg-muted/50',
+        'group hover:bg-muted/50 flex cursor-pointer items-center space-x-2 rounded px-2 py-1',
         disabled && 'cursor-not-allowed opacity-50',
         isOptimistic && 'opacity-60',
         className
       )}
       onClick={() => !disabled && setIsEditing(true)}
+      onKeyDown={(e) => {
+        if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          setIsEditing(true);
+        }
+      }}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-label="Click to edit"
     >
-      <span className={cn(
-        'flex-1 truncate text-sm',
-        !value && 'text-muted-foreground italic'
-      )}>
+      <span
+        className={cn(
+          'flex-1 truncate text-sm',
+          !value && 'text-muted-foreground italic'
+        )}
+      >
         {value || placeholder}
       </span>
       {!disabled && (
-        <Edit2 className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Edit2 className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
       )}
     </div>
   );

@@ -1,6 +1,12 @@
-import { useEffect, useRef, useState, ReactNode, createRef } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+  ReactElement,
+  createRef,
+} from 'react';
 import { cn } from '@/utils/tailwind-utils';
-import { DialogPortal } from '@/components/ui/dialog';
 
 interface AccordionMenuProps {
   value?: string | null;
@@ -26,23 +32,23 @@ interface PanelProps {
 export function AccordionMenu({
   value,
   defaultValue = null,
-  onValueChange,
-  collapsible = true,
+  onValueChange: _onValueChange,
+  collapsible: _collapsible = true,
   className,
   durationMs = 250,
   children,
   overlayOpen = false,
-  onOverlayClose,
-  overlayClassName,
+  onOverlayClose: _onOverlayClose,
+  overlayClassName: _overlayClassName,
   scaleBackgroundOnOverlay = true,
   darkenBackgroundOnOverlay = false,
 }: AccordionMenuProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number>(0);
-  const registry = useRef<Map<string, React.RefObject<HTMLDivElement>>>(
+  const registry = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(
     new Map()
   );
-  const [internalValue, setInternalValue] = useState<string | null>(
+  const [internalValue, _setInternalValue] = useState<string | null>(
     defaultValue ?? null
   );
   const activeValue = value !== undefined ? value : internalValue;
@@ -112,7 +118,9 @@ export function AccordionMenu({
         if (cssBg) {
           document.body.style.background = cssBg;
         }
-      } catch {}
+      } catch {
+        // Ignore CSS extraction errors
+      }
     }
 
     return () => {
@@ -143,15 +151,21 @@ export function AccordionMenu({
           {ChildrenMapper(children, (child) => {
             if (!child) return null;
             if (typeof child !== 'object' || !('props' in child)) return child;
-            // @ts-expect-error runtime tag
-            if (child.type?.displayName !== 'AccordionMenuContent')
+            const childElement = child as ReactElement;
+            if (
+              (childElement.type as any)?.displayName !== 'AccordionMenuContent'
+            )
               return child;
 
-            const val = (child.props as PanelProps).value;
+            const val = (childElement.props as PanelProps).value;
             if (!registry.current.has(val)) {
               registry.current.set(
                 val,
-                (child.props as any)._ref ?? createRef()
+                (
+                  childElement.props as PanelProps & {
+                    _ref?: React.RefObject<HTMLDivElement | null>;
+                  }
+                )._ref ?? createRef<HTMLDivElement | null>()
               );
             }
             const ref = registry.current.get(val)!;
@@ -176,7 +190,7 @@ export function AccordionMenu({
                     isActive ? 'translate-y-0' : 'translate-y-1'
                   )}
                 >
-                  {child.props.children}
+                  {(childElement.props as PanelProps).children}
                 </div>
               </div>
             );
@@ -209,14 +223,17 @@ export function AccordionMenuContent({
 
 AccordionMenuContent.displayName = 'AccordionMenuContent';
 
-function ChildrenMapper(children: ReactNode, map: (child: any) => any) {
-  const out: any[] = [];
-  const it = (Array.isArray(children) ? children : [children]) as any[];
+function ChildrenMapper(
+  children: ReactNode,
+  map: (child: ReactElement) => ReactNode
+) {
+  const out: ReactNode[] = [];
+  const it = (Array.isArray(children) ? children : [children]) as ReactNode[];
   for (const child of it) {
     if (Array.isArray(child)) {
-      for (const c of child) out.push(map(c));
+      for (const c of child) out.push(map(c as ReactElement));
     } else {
-      out.push(map(child));
+      out.push(map(child as ReactElement));
     }
   }
   return out;

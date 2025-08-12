@@ -26,7 +26,7 @@ interface DataTableServerPaginationProps {
 }
 
 export function DataTableServerPagination({
-  totalCount,
+  totalCount: _totalCount,
   currentPage,
   pageCount,
   pageSize,
@@ -37,7 +37,7 @@ export function DataTableServerPagination({
 }: DataTableServerPaginationProps) {
   return (
     <div className="flex items-center justify-between px-2">
-      <div className="flex-1 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex-1 text-sm">
         {selectedCount} of {rowCount} row(s) selected.
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">

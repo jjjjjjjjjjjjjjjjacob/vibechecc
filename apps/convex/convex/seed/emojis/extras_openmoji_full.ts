@@ -2,7 +2,7 @@ import type { Emoji } from '../../schema';
 
 // Generated from OpenMoji dataset - 511 emojis
 // Unicode versions up to 15.1 + OpenMoji extras
-export const extrasEmojisAll: Omit<Emoji, 'sentiment'>[] = [
+export const extrasEmojisAll: Emoji[] = [
   {
     emoji: '🏻',
     name: 'light skin tone',
@@ -5623,5 +5623,5 @@ export const extrasEmojisAll: Omit<Emoji, 'sentiment'>[] = [
     version: '11',
     color: '#9370DB',
     sentiment: 'positive' as const,
-  }
+  },
 ];

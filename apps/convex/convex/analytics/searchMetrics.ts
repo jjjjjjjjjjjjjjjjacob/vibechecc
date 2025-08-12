@@ -1,6 +1,5 @@
 import { internalMutation, query } from '../_generated/server';
 import { v } from 'convex/values';
-import { internal } from '../_generated/api';
 
 // Schema types for analytics
 export type SearchMetric = {
@@ -382,18 +381,21 @@ export const trackSearchClick = internalMutation({
     userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.scheduler.runAfter(
-      0,
-      internal.analytics.searchMetrics.recordSearchMetric,
-      {
+    // Directly insert the metric instead of scheduling
+    try {
+      await ctx.db.insert('searchMetrics', {
         type: 'click',
         query: args.query,
         userId: args.userId,
         clickedResultId: args.resultId,
         clickedResultType: args.resultType,
         clickPosition: args.position,
-      }
-    );
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to record search metric:', error);
+    }
   },
 });
 
@@ -405,15 +407,18 @@ export const trackSearchError = internalMutation({
     userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.scheduler.runAfter(
-      0,
-      internal.analytics.searchMetrics.recordSearchMetric,
-      {
+    // Directly insert the metric instead of scheduling
+    try {
+      await ctx.db.insert('searchMetrics', {
         type: 'error',
         query: args.query,
         userId: args.userId,
         error: args.error,
-      }
-    );
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to record search error metric:', error);
+    }
   },
 });

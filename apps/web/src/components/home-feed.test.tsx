@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from '@/features/theming/components/theme-provider';
+import { ThemeInitializer } from '@/stores/theme-initializer';
 import { HomeFeed } from './home-feed';
 
 // Mock hooks
@@ -13,6 +13,7 @@ const mockUseTopRatedVibes = vi.fn();
 const mockUsePersonalizedVibes = vi.fn();
 const mockUseVibesInfinite = vi.fn();
 const mockUseMasonryLayout = vi.fn();
+const _mockUseHeaderNavStore = vi.fn();
 
 // Import the actual useMasonryLayout from the mock
 import { useMasonryLayout } from './masonry-layout';
@@ -38,6 +39,35 @@ vi.mock('@/features/follows/hooks/use-follow-stats', () => ({
     error: null,
   }),
 }));
+
+// Create a React-based stateful mock for header nav store
+let mockFeedTab = 'for-you';
+const mockSetFeedTab = vi.fn((newTab: string) => {
+  mockFeedTab = newTab;
+});
+
+vi.mock('@/stores/header-nav-store', () => ({
+  useHeaderNavStore: (selector: any) => {
+    const state = {
+      feedTab: mockFeedTab,
+      setFeedTab: mockSetFeedTab,
+      pageNavState: null,
+      setPageNavState: vi.fn(),
+    };
+    return selector ? selector(state) : state;
+  },
+}));
+
+// Export for test manipulation
+(globalThis as any).mockHeaderNavStore = {
+  getFeedTab: () => mockFeedTab,
+  setFeedTab: (tab: string) => {
+    mockFeedTab = tab;
+  },
+  reset: () => {
+    mockFeedTab = 'for-you';
+  },
+};
 
 vi.mock('./masonry-layout', () => ({
   JSMasonryLayout: ({ children }: { children: React.ReactNode }) => (
@@ -180,7 +210,21 @@ describe('HomeFeed', () => {
       },
     });
     user = userEvent.setup();
+
+    // Reset header nav store to default state
+    const headerNavMockStore = (globalThis as any).mockHeaderNavStore;
+    headerNavMockStore.reset();
+
+    // Clear specific mocks
     vi.clearAllMocks();
+
+    // Reset specific mock functions
+    mockUseUser.mockReset();
+    mockUseMasonryLayout.mockReset();
+    mockUseVibesPaginated.mockReset();
+    mockUseTopRatedVibes.mockReset();
+    mockUsePersonalizedVibes.mockReset();
+    mockUseVibesInfinite.mockReset();
 
     // Default mock implementations
     mockUseUser.mockReturnValue({ user: { id: 'test-user' } });
@@ -223,9 +267,9 @@ describe('HomeFeed', () => {
   const renderComponent = () => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
+        <ThemeInitializer>
           <HomeFeed />
-        </ThemeProvider>
+        </ThemeInitializer>
       </QueryClientProvider>
     );
   };
@@ -287,10 +331,8 @@ describe('HomeFeed', () => {
     const hotTab = screen.getByText('hot');
     await user.click(hotTab);
 
-    await waitFor(() => {
-      // Check that the tab has the active styling (primary background)
-      expect(hotTab).toHaveClass('bg-primary');
-    });
+    // Check that setFeedTab was called with the correct tab
+    expect(mockSetFeedTab).toHaveBeenCalledWith('hot');
   });
 
   it('displays vibes in single column layout when masonry is disabled', async () => {
@@ -394,6 +436,10 @@ describe('HomeFeed', () => {
   });
 
   it('shows load more button when there are more pages', async () => {
+    // Set up "new" tab as active to test pagination
+    const headerNavMockStore = (globalThis as any).mockHeaderNavStore;
+    headerNavMockStore.setFeedTab('new');
+
     mockUseVibesInfinite.mockReturnValue({
       data: { pages: [{ vibes: mockVibes }] },
       fetchNextPage: vi.fn(),
@@ -405,10 +451,6 @@ describe('HomeFeed', () => {
 
     renderComponent();
 
-    // Switch to "new" tab to test pagination
-    const newTab = screen.getByText('new');
-    await user.click(newTab);
-
     await waitFor(() => {
       // Check that pagination is working (hasMore is true)
       expect(screen.getByText('loading more...')).toBeInTheDocument();
@@ -416,6 +458,9 @@ describe('HomeFeed', () => {
   });
 
   it('calls correct query based on active tab', async () => {
+    // Test default "for you" tab behavior
+    mockUseUser.mockReturnValue({ user: { id: 'test-user' } });
+
     renderComponent();
 
     // Check that useForYouFeedInfinite is called for "for you" tab (default)
@@ -435,12 +480,17 @@ describe('HomeFeed', () => {
         queryKeyName: 'for-you',
       })
     );
+  });
 
-    // Switch to "hot" tab
-    const hotTab = screen.getByText('hot');
-    await user.click(hotTab);
+  it('calls correct query for hot tab when active', async () => {
+    // Set up hot tab as active
+    const headerNavMockStore = (globalThis as any).mockHeaderNavStore;
+    headerNavMockStore.setFeedTab('hot');
 
-    // Check that useVibesInfinite is called with same filters for hot tab (also top_rated)
+    mockUseUser.mockReturnValue({ user: { id: 'test-user' } });
+    renderComponent();
+
+    // Check that useVibesInfinite is called with hot tab filters
     expect(mockUseVibesInfinite).toHaveBeenCalledWith(
       expect.objectContaining({ sort: 'top_rated', limit: 20 }),
       expect.objectContaining({
@@ -449,12 +499,17 @@ describe('HomeFeed', () => {
         queryKeyName: 'hot',
       })
     );
+  });
 
-    // Switch to "new" tab
-    const newTab = screen.getByText('new');
-    await user.click(newTab);
+  it('calls correct query for new tab when active', async () => {
+    // Set up new tab as active
+    const headerNavMockStore = (globalThis as any).mockHeaderNavStore;
+    headerNavMockStore.setFeedTab('new');
 
-    // Check that useVibesInfinite is called with different filters for new tab
+    mockUseUser.mockReturnValue({ user: { id: 'test-user' } });
+    renderComponent();
+
+    // Check that useVibesInfinite is called with new tab filters
     expect(mockUseVibesInfinite).toHaveBeenCalledWith(
       expect.objectContaining({ sort: 'recent', limit: 20 }),
       expect.objectContaining({
@@ -507,6 +562,10 @@ describe('HomeFeed', () => {
   });
 
   it('resets page to 1 when switching tabs', async () => {
+    // Set up hot tab as active to test query behavior
+    const headerNavMockStore = (globalThis as any).mockHeaderNavStore;
+    headerNavMockStore.setFeedTab('hot');
+
     // Set up infinite scroll with hasNextPage true initially
     mockUseVibesInfinite.mockReturnValue({
       data: { pages: [{ vibes: mockVibes }] },
@@ -518,10 +577,6 @@ describe('HomeFeed', () => {
     });
 
     renderComponent();
-
-    // Switch to hot tab
-    const hotTab = screen.getByText('hot');
-    await user.click(hotTab);
 
     // Verify useVibesInfinite is called with hot tab filters
     expect(mockUseVibesInfinite).toHaveBeenCalledWith(

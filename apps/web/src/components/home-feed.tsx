@@ -14,7 +14,7 @@ import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-s
 import { ForYouEmptyState } from '@/components/for-you-empty-state';
 import { Flame, Sparkles, Clock, TrendingUp, Star } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
-import { useHeaderNav } from '@/contexts/header-nav-context';
+import { useHeaderNavStore } from '@/stores/header-nav-store';
 import { cn } from '@/utils/tailwind-utils';
 
 interface HomeFeedProps {
@@ -22,32 +22,25 @@ interface HomeFeedProps {
 }
 
 export function HomeFeed({ className }: HomeFeedProps) {
-  const { feedTab, setFeedTab, pageNavState, setPageNavState } = useHeaderNav();
+  const feedTab = useHeaderNavStore((state) => state.feedTab);
+  const setFeedTab = useHeaderNavStore((state) => state.setFeedTab);
+  const _pageNavState = useHeaderNavStore((state) => state.pageNavState);
+  const setPageNavState = useHeaderNavStore((state) => state.setPageNavState);
   const { user } = useUser();
   const { data: followStats } = useCurrentUserFollowStats();
 
+  // Track initial mount to prevent dipping on navigation
+  const [hasInitialized, setHasInitialized] = React.useState(false);
+
   // Set up intersection observer for sticky tabs
-  const { ref: tabsRef, inView: tabsInView } = useInView({
+  const {
+    ref: tabsRef,
+    inView: tabsInView,
+    entry,
+  } = useInView({
     threshold: 0,
     rootMargin: '-120px 0px 0px 0px', // Account for header height
   });
-
-  // Update header page nav state when tabs go out of view
-  React.useEffect(() => {
-    // Only set pageNavState if we're on the homepage
-    // This prevents tabs from appearing when navigating away
-    if (typeof window !== 'undefined' && window.location.pathname === '/') {
-      // Show tabs in header when they're NOT in view
-      setPageNavState(tabsInView ? null : 'tabs');
-    } else {
-      setPageNavState(null);
-    }
-
-    // Clear pageNavState when component unmounts (navigating away)
-    return () => {
-      setPageNavState(null);
-    };
-  }, [tabsInView, setPageNavState]);
 
   // Handle tab change
   const handleTabChange = (tab: 'for-you' | 'hot' | 'new' | 'unrated') => {
@@ -99,7 +92,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
     if (!user?.id && feedTab === 'for-you') {
       setFeedTab('hot');
     }
-  }, [user?.id, feedTab]);
+  }, [user?.id, feedTab, setFeedTab]);
 
   // Get query configuration for current tab
   const getQueryConfig = () => {
@@ -197,6 +190,37 @@ export function HomeFeed({ className }: HomeFeedProps) {
     if (!hasNextPage || isFetchingNextPage) return;
     fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Initialize after first intersection observer measurement
+  React.useEffect(() => {
+    if (entry && !hasInitialized) {
+      setHasInitialized(true);
+    }
+  }, [entry, hasInitialized]);
+
+  // Update header page nav state when tabs go out of view
+  React.useEffect(() => {
+    // Only set pageNavState if we're on the homepage
+    // This prevents tabs from appearing when navigating away
+    if (typeof window !== 'undefined' && window.location.pathname === '/') {
+      // Show tabs in header when:
+      // 1. They're not in view AND observer has initialized
+      // We ignore loading state to prevent tabs from disappearing during queries
+      if (!tabsInView && hasInitialized) {
+        setPageNavState('tabs');
+      } else if (tabsInView) {
+        // Hide tabs when they're visible in the main content
+        setPageNavState(null);
+      }
+    } else {
+      setPageNavState(null);
+    }
+
+    // Clear pageNavState when component unmounts (navigating away)
+    return () => {
+      setPageNavState(null);
+    };
+  }, [tabsInView, hasInitialized, setPageNavState]);
 
   // Prepare header content
   const headerContent = (

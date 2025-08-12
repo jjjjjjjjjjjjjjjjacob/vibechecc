@@ -93,6 +93,7 @@ export function NewUserSurvey({ onComplete, onDismiss }: NewUserSurveyProps) {
       setShowSurvey(false);
       onComplete?.();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit survey:', error);
     } finally {
       setIsSubmitting(false);

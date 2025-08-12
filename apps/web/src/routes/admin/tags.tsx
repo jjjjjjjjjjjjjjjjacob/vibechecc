@@ -14,9 +14,13 @@ function AdminTagsPage() {
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(25);
   const [search, setSearch] = React.useState('');
-  const [sortBy, setSortBy] = React.useState<'name' | 'usage' | 'lastUsed'>('usage');
-  const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('desc');
-  
+  const [sortBy, setSortBy] = React.useState<'name' | 'usage' | 'lastUsed'>(
+    'usage'
+  );
+  const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>(
+    'desc'
+  );
+
   const { data, isLoading, error } = useQuery({
     ...convexQuery(api.admin.tags.getAllTags, {
       page,
@@ -33,11 +37,14 @@ function AdminTagsPage() {
 
   if (error) {
     return (
-      <AdminLayout title="tags" description="manage content tags and categories">
+      <AdminLayout
+        title="tags"
+        description="manage content tags and categories"
+      >
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
             <p className="text-destructive">failed to load tags</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               {error instanceof Error ? error.message : 'unknown error'}
             </p>
           </div>
@@ -51,26 +58,28 @@ function AdminTagsPage() {
       title="tags"
       description={`manage ${stats?.totalTags || 0} content tags and categories`}
     >
-      <div className="h-full flex flex-col">
+      <div className="flex h-full flex-col">
         <TagsTable
-        data={data?.data?.map((tag: any) => ({
-          ...tag,
-          usageCount: tag.count || 0,
-        })) || []}
-        totalCount={data?.totalCount || 0}
-        pageCount={data?.pageCount || 0}
-        currentPage={page}
-        pageSize={pageSize}
-        isLoading={isLoading}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-        onSearchChange={setSearch}
-        onSortChange={(field, direction) => {
-          setSortBy(field);
-          setSortDirection(direction);
-        }}
-        stats={stats}
-      />
+          data={
+            data?.data?.map((tag: any) => ({
+              ...tag,
+              usageCount: tag.count || 0,
+            })) || []
+          }
+          totalCount={data?.totalCount || 0}
+          pageCount={data?.pageCount || 0}
+          currentPage={page}
+          pageSize={pageSize}
+          isLoading={isLoading}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          onSearchChange={setSearch}
+          onSortChange={(field, direction) => {
+            setSortBy(field);
+            setSortDirection(direction);
+          }}
+          stats={stats}
+        />
       </div>
     </AdminLayout>
   );

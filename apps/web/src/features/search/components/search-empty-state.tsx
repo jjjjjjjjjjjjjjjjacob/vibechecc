@@ -53,7 +53,7 @@ export function SearchEmptyState({
 
       {/* Suggestions for improving search */}
       {query && (
-        <Card className="bg-muted/50 mb-6 w-full max-w-md p-4">
+        <Card className="bg-card/30 mb-6 w-full max-w-md p-4">
           <div className="mb-3 flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-yellow-500" />
             <span className="text-sm font-medium">Search tips</span>
@@ -78,7 +78,7 @@ export function SearchEmptyState({
 
       {/* Recent searches */}
       {recentSearches.length > 0 && (
-        <Card className="mb-4 w-full max-w-md p-6">
+        <Card className="bg-card/30 mb-4 w-full max-w-md p-6">
           <div className="mb-4 flex items-center gap-2">
             <Clock className="h-5 w-5" />
             <h3 className="font-semibold">Recent searches</h3>
@@ -101,7 +101,7 @@ export function SearchEmptyState({
       )}
 
       {/* Trending searches */}
-      <Card className="w-full max-w-md p-6">
+      <Card className="bg-card/30 w-full max-w-md p-6">
         <div className="mb-4 flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
           <h3 className="font-semibold">Trending searches</h3>

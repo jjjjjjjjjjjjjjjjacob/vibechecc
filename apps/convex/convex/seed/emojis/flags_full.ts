@@ -2,11 +2,22 @@ import type { Emoji } from '../../schema';
 
 // Generated from OpenMoji dataset - 270 emojis
 // Unicode versions up to 15.1 + OpenMoji extras
-export const flagsEmojisAll: Omit<Emoji, 'sentiment'>[] = [
+export const flagsEmojisAll: Emoji[] = [
   {
     emoji: '🏁',
     name: 'chequered flag',
-    keywords: ['checkered', 'chequered', 'finish', 'flag', 'flags', 'game', 'race', 'racing', 'sport', 'win'],
+    keywords: [
+      'checkered',
+      'chequered',
+      'finish',
+      'flag',
+      'flags',
+      'game',
+      'race',
+      'racing',
+      'sport',
+      'win',
+    ],
     category: 'flags',
     subcategory: 'flag',
     unicode: '1F3C1',
@@ -61,7 +72,23 @@ export const flagsEmojisAll: Omit<Emoji, 'sentiment'>[] = [
   {
     emoji: '🏳️‍🌈',
     name: 'rainbow flag',
-    keywords: ['bisexual', 'flag', 'gay', 'genderqueer', 'glbt', 'glbtq', 'lesbian', 'lgbt', 'lgbtq', 'lgbtqia', 'pride', 'queer', 'rainbow', 'trans', 'transgender'],
+    keywords: [
+      'bisexual',
+      'flag',
+      'gay',
+      'genderqueer',
+      'glbt',
+      'glbtq',
+      'lesbian',
+      'lgbt',
+      'lgbtq',
+      'lgbtqia',
+      'pride',
+      'queer',
+      'rainbow',
+      'trans',
+      'transgender',
+    ],
     category: 'flags',
     subcategory: 'flag',
     unicode: '1F3F3 FE0F 200D 1F308',
@@ -2972,5 +2999,5 @@ export const flagsEmojisAll: Omit<Emoji, 'sentiment'>[] = [
     version: '5',
     color: '#008000',
     sentiment: 'neutral' as const,
-  }
+  },
 ];

@@ -62,7 +62,6 @@ export function RatingScale({
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault();
     const touch = e.touches[0];
     if (!touch) return;
 
@@ -131,7 +130,6 @@ export function RatingScale({
         onTouchEnd={onClick ? handleTouchEnd : undefined}
         onKeyDown={(e) => {
           if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault();
             handleClick(e as unknown as React.MouseEvent<HTMLDivElement>);
           }
         }}

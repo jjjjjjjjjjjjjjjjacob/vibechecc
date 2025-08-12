@@ -58,9 +58,11 @@ export function DataTableToolbar<TData>({
   exportLabel = 'export',
   totalCount,
 }: DataTableToolbarProps<TData>) {
-  const isServerMode = searchValue !== undefined || filters.some(f => f.value !== undefined);
-  const isFiltered = isServerMode 
-    ? (searchValue || '') !== '' || filters.some(f => f.value && f.value !== 'all')
+  const isServerMode =
+    searchValue !== undefined || filters.some((f) => f.value !== undefined);
+  const isFiltered = isServerMode
+    ? (searchValue || '') !== '' ||
+      filters.some((f) => f.value && f.value !== 'all')
     : table.getState().columnFilters.length > 0;
   const selectedRows = table.getFilteredSelectedRowModel().rows;
 
@@ -76,19 +78,23 @@ export function DataTableToolbar<TData>({
               value={
                 isServerMode && searchValue !== undefined
                   ? searchValue
-                  : (table.getColumn(searchKey || '')?.getFilterValue() as string) ?? ''
+                  : ((table
+                      .getColumn(searchKey || '')
+                      ?.getFilterValue() as string) ?? '')
               }
               onChange={(event) => {
                 if (onSearchValueChange) {
                   onSearchValueChange(event.target.value);
                 } else if (searchKey) {
-                  table.getColumn(searchKey)?.setFilterValue(event.target.value);
+                  table
+                    .getColumn(searchKey)
+                    ?.setFilterValue(event.target.value);
                 }
               }}
               className="h-8 w-[150px] lg:w-[250px]"
             />
           )}
-          
+
           {/* Filter dropdowns - supports both server and client mode */}
           {filters.map((filter) => {
             if (isServerMode) {
@@ -132,7 +138,9 @@ export function DataTableToolbar<TData>({
                     <SelectValue placeholder={filter.title} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">all {filter.title.toLowerCase()}</SelectItem>
+                    <SelectItem value="all">
+                      all {filter.title.toLowerCase()}
+                    </SelectItem>
                     {filter.options.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -152,7 +160,7 @@ export function DataTableToolbar<TData>({
                 if (isServerMode) {
                   // In server mode, call the onChange handlers with default values
                   if (onSearchValueChange) onSearchValueChange('');
-                  filters.forEach(filter => {
+                  filters.forEach((filter) => {
                     if (filter.onChange) filter.onChange('all');
                   });
                 } else {
@@ -185,11 +193,7 @@ export function DataTableToolbar<TData>({
           {/* Column visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto h-8"
-              >
+              <Button variant="outline" size="sm" className="ml-auto h-8">
                 <Settings2 className="mr-2 h-4 w-4" />
                 view
               </Button>
@@ -201,7 +205,8 @@ export function DataTableToolbar<TData>({
                 .getAllColumns()
                 .filter(
                   (column) =>
-                    typeof column.accessorFn !== 'undefined' && column.getCanHide()
+                    typeof column.accessorFn !== 'undefined' &&
+                    column.getCanHide()
                 )
                 .map((column) => (
                   <DropdownMenuCheckboxItem
@@ -227,22 +232,25 @@ export function DataTableToolbar<TData>({
           {selectedRows.length > 0 && (
             <div className="flex items-center space-x-2">
               <Badge variant="secondary">
-                {selectedRows.length} of {table.getFilteredRowModel().rows.length} row(s) selected
+                {selectedRows.length} of{' '}
+                {table.getFilteredRowModel().rows.length} row(s) selected
               </Badge>
-              
+
               {/* Bulk actions */}
               {bulkActions.map((action) => (
                 <Button
                   key={action.label}
                   variant={action.variant || 'default'}
                   size="sm"
-                  onClick={() => action.action(selectedRows.map(row => row.original))}
+                  onClick={() =>
+                    action.action(selectedRows.map((row) => row.original))
+                  }
                   className="h-8"
                 >
                   {action.label}
                 </Button>
               ))}
-              
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -257,7 +265,7 @@ export function DataTableToolbar<TData>({
 
         {/* Results counter */}
         {totalCount !== undefined && (
-          <div className="text-xs text-muted-foreground">
+          <div className="text-muted-foreground text-xs">
             {totalCount} result(s)
           </div>
         )}

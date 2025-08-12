@@ -7,12 +7,17 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Flame, Sparkles, Clock, Star } from 'lucide-react';
-import { useHeaderNav } from '@/contexts/header-nav-context';
+import { useHeaderNavStore } from '@/stores/header-nav-store';
 import { useUser } from '@clerk/tanstack-react-start';
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
 
-export function FeedTabs() {
-  const { feedTab, setFeedTab } = useHeaderNav();
+interface FeedTabsProps {
+  tooltipSide?: 'top' | 'bottom';
+}
+
+export function FeedTabs({ tooltipSide = 'top' }: FeedTabsProps) {
+  const feedTab = useHeaderNavStore((state) => state.feedTab);
+  const setFeedTab = useHeaderNavStore((state) => state.setFeedTab);
   const { user } = useUser();
   const { data: followStats } = useCurrentUserFollowStats();
 
@@ -72,7 +77,7 @@ export function FeedTabs() {
                 {tab.label}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent side={tooltipSide}>
               <p>{tab.description}</p>
             </TooltipContent>
           </Tooltip>

@@ -2,7 +2,6 @@
  * Font optimization utilities for system fonts
  */
 
-
 // Check if browser supports font loading API
 export function supportsFontLoading(): boolean {
   return 'fonts' in document;

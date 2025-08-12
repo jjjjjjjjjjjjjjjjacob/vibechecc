@@ -41,6 +41,9 @@ function DialogOverlay({
   scaleOffset?: string;
   shouldScaleBackground?: boolean;
 }) {
+  const wrapperRef = React.useRef<HTMLElement | null>(null);
+  const cleanupRef = React.useRef<(() => void) | null>(null);
+
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!shouldScaleBackground) return;
@@ -50,6 +53,8 @@ function DialogOverlay({
       '[data-vaul-drawer-wrapper]'
     ) as HTMLElement | null;
     if (vaulOpen || !wrapper) return;
+
+    wrapperRef.current = wrapper;
 
     const TRANSITION = '0.5s cubic-bezier(0.32, 0.72, 0, 1)';
     const BORDER_RADIUS = 8;
@@ -88,25 +93,64 @@ function DialogOverlay({
       if (cssBg) {
         document.body.style.background = cssBg;
       }
-    } catch {}
+    } catch {
+      // Ignore DOM errors
+    }
+
+    cleanupRef.current = () => {
+      // Clean up the rest after the animation completes
+      const timeout = setTimeout(() => {
+        wrapper.style.transformOrigin = prev.transformOrigin;
+        wrapper.style.transitionProperty = prev.transitionProperty;
+        wrapper.style.transitionDuration = prev.transitionDuration;
+        wrapper.style.transitionTimingFunction = prev.transitionTimingFunction;
+        wrapper.style.overflow = prev.overflow;
+        wrapper.style.transform = prev.transform;
+        wrapper.style.borderRadius = prev.borderRadius;
+        document.body.style.background = prevBodyBg;
+      }, 500); // Match the transition duration
+
+      return () => clearTimeout(timeout);
+    };
 
     return () => {
-      wrapper.style.transformOrigin = prev.transformOrigin;
-      wrapper.style.transitionProperty = prev.transitionProperty;
-      wrapper.style.transitionDuration = prev.transitionDuration;
-      wrapper.style.transitionTimingFunction = prev.transitionTimingFunction;
-      wrapper.style.borderRadius = prev.borderRadius;
-      wrapper.style.overflow = prev.overflow;
-      wrapper.style.transform = prev.transform;
-      document.body.style.background = prevBodyBg;
+      if (cleanupRef.current) {
+        cleanupRef.current();
+      }
     };
   }, [shouldScaleBackground, scaleFactor, scaleOffset]);
+
+  // Handle the closing animation when state changes
+  React.useEffect(() => {
+    const handleStateChange = () => {
+      if (wrapperRef.current && shouldScaleBackground) {
+        const overlay = document.querySelector('[data-slot="dialog-overlay"]');
+        if (overlay && overlay.getAttribute('data-state') === 'closed') {
+          // Reset the transform immediately when closing starts
+          wrapperRef.current.style.transform = '';
+          wrapperRef.current.style.borderRadius = '';
+        }
+      }
+    };
+
+    // Use MutationObserver to detect state changes
+    const overlay = document.querySelector('[data-slot="dialog-overlay"]');
+    if (overlay) {
+      const observer = new MutationObserver(handleStateChange);
+      observer.observe(overlay, {
+        attributes: true,
+        attributeFilter: ['data-state'],
+      });
+
+      return () => observer.disconnect();
+    }
+  }, [shouldScaleBackground]);
 
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 backdrop-blur-2xs fixed inset-0 z-50 backdrop-blur-[2px]',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 backdrop-blur-2xs fixed inset-0 z-50 backdrop-blur-md',
         className
       )}
       {...props}

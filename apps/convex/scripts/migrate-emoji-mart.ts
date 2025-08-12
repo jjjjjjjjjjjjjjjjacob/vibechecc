@@ -7,7 +7,8 @@
 
 import { ConvexClient } from 'convex/browser';
 
-const CONVEX_URL = process.env.VITE_CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL;
+const CONVEX_URL =
+  process.env.VITE_CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL;
 
 if (!CONVEX_URL) {
   console.error('❌ CONVEX_URL environment variable is not set');
@@ -18,11 +19,14 @@ const client = new ConvexClient(CONVEX_URL);
 
 async function runMigration() {
   console.log('🚀 Starting emoji-mart data migration...');
-  
+
   try {
     // Run the internal migration function
-    const result = await client.mutation('internal:migrations/import-emoji-mart-data:importEmojiMartData', {});
-    
+    const result = await (client.mutation as any)(
+      'internal:migrations/import-emoji-mart-data:importEmojiMartData',
+      {}
+    );
+
     console.log('✅ Migration completed successfully!');
     console.log(`   Imported: ${result.imported} emojis`);
     console.log(`   Skipped: ${result.skipped} existing emojis`);

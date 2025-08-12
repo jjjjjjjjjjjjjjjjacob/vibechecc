@@ -38,7 +38,10 @@ export function HeaderNavProvider({ children }: { children: React.ReactNode }) {
       // Homepage will manage its own state via HomeFeed component
       // Don't set anything here to avoid conflicts
       return;
-    } else if (location.pathname.startsWith('/vibes/') && location.pathname.split('/').length === 3) {
+    } else if (
+      location.pathname.startsWith('/vibes/') &&
+      location.pathname.split('/').length === 3
+    ) {
       // This is a vibe detail page (/vibes/[vibeId])
       setPageNavState('vibe');
     } else {

@@ -8,27 +8,11 @@ import {
   waitFor,
   cleanup,
 } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { EmojiSearchCommand } from './emoji-search-command';
-
-// Mock the Convex client
-const mockConvexClient = {} as unknown as ConvexReactClient;
-
-// Helper function to create test wrapper
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-
-  return ({ children }: { children: React.ReactNode }) => (
-    <ConvexProvider client={mockConvexClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </ConvexProvider>
-  );
-};
+import {
+  createTestWrapper,
+  resetMockData,
+} from '@/test-utils/convex-test-utils';
 
 describe('EmojiSearchCommand', () => {
   const mockOnSelect = vi.fn();
@@ -36,6 +20,7 @@ describe('EmojiSearchCommand', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetMockData();
   });
 
   afterEach(() => {
@@ -43,26 +28,28 @@ describe('EmojiSearchCommand', () => {
   });
 
   it('renders with search input', () => {
+    const Wrapper = createTestWrapper();
     render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
         searchValue=""
         onSearchChange={mockOnSearchChange}
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     expect(screen.getByPlaceholderText('search emojis...')).toBeInTheDocument();
   });
 
   it('displays popular emojis when no search value', async () => {
+    const Wrapper = createTestWrapper();
     render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
         searchValue=""
         onSearchChange={mockOnSearchChange}
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     await waitFor(() => {
@@ -74,13 +61,14 @@ describe('EmojiSearchCommand', () => {
   });
 
   it('calls onSelect when emoji is clicked', async () => {
+    const Wrapper = createTestWrapper();
     render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
         searchValue=""
         onSearchChange={mockOnSearchChange}
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     await waitFor(() => {
@@ -92,13 +80,14 @@ describe('EmojiSearchCommand', () => {
   });
 
   it('searches emojis when search value is provided', async () => {
+    const Wrapper = createTestWrapper();
     render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
         searchValue="fire"
         onSearchChange={mockOnSearchChange}
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     await waitFor(() => {
@@ -108,6 +97,7 @@ describe('EmojiSearchCommand', () => {
   });
 
   it('displays categories when showCategories is true', async () => {
+    const Wrapper = createTestWrapper();
     render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
@@ -116,7 +106,7 @@ describe('EmojiSearchCommand', () => {
         showCategories={true}
         pageSize={200}
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     await waitFor(() => {
@@ -128,6 +118,7 @@ describe('EmojiSearchCommand', () => {
   });
 
   it('groups emojis by category correctly', async () => {
+    const Wrapper = createTestWrapper();
     render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
@@ -136,7 +127,7 @@ describe('EmojiSearchCommand', () => {
         showCategories={true}
         pageSize={200}
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     // Wait for emojis to load
@@ -152,6 +143,7 @@ describe('EmojiSearchCommand', () => {
   });
 
   it('triggers infinite scroll when scrolling near bottom', async () => {
+    const Wrapper = createTestWrapper();
     const { container } = render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
@@ -161,7 +153,7 @@ describe('EmojiSearchCommand', () => {
         pageSize={200}
         maxHeight="h-40"
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     await waitFor(() => {
@@ -202,14 +194,14 @@ describe('EmojiSearchCommand', () => {
   it('displays "no emojis found" when search returns empty results', async () => {
     // For this test, we'll need to use a search term that returns no results
     // The mock is set up to return empty results for any searchTerm other than the ones we've specifically handled
-
+    const Wrapper = createTestWrapper();
     render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
         searchValue="xyzabc123notfound"
         onSearchChange={mockOnSearchChange}
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     // Wait for the component to load and show the empty state
@@ -228,6 +220,7 @@ describe('EmojiSearchCommand', () => {
   });
 
   it('respects custom placeholder text', () => {
+    const Wrapper = createTestWrapper();
     render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
@@ -235,13 +228,14 @@ describe('EmojiSearchCommand', () => {
         onSearchChange={mockOnSearchChange}
         placeholder="Find an emoji..."
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     expect(screen.getByPlaceholderText('Find an emoji...')).toBeInTheDocument();
   });
 
   it('applies custom className', () => {
+    const Wrapper = createTestWrapper();
     const { container } = render(
       <EmojiSearchCommand
         onSelect={mockOnSelect}
@@ -249,7 +243,7 @@ describe('EmojiSearchCommand', () => {
         onSearchChange={mockOnSearchChange}
         className="custom-class"
       />,
-      { wrapper: createWrapper() }
+      { wrapper: Wrapper }
     );
 
     expect(container.querySelector('.custom-class')).toBeInTheDocument();

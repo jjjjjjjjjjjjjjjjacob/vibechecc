@@ -9,7 +9,6 @@ export const Route = createFileRoute('/ratings/$ratingId')({
     const rating = await context.convexClient.query(api.ratings.getById, {
       ratingId,
     });
-    console.log('rating', rating);
 
     if (!rating?.vibeId) {
       // Rating not found, redirect to home
@@ -20,7 +19,6 @@ export const Route = createFileRoute('/ratings/$ratingId')({
         },
       });
     }
-    console.log('rating vibe id', rating.vibeId);
 
     // Redirect to the vibe page with the rating anchor
     throw redirect({

@@ -34,7 +34,10 @@ function AdminEmojisPage() {
       pageSize,
       search: search || undefined,
       category: category === 'all' ? undefined : category,
-      sentiment: sentiment === 'all' ? undefined : sentiment as 'positive' | 'negative' | 'neutral' | undefined,
+      sentiment:
+        sentiment === 'all'
+          ? undefined
+          : (sentiment as 'positive' | 'negative' | 'neutral' | undefined),
       status:
         enabled === 'all'
           ? undefined
@@ -138,4 +141,3 @@ function AdminEmojisPage() {
     </AdminLayout>
   );
 }
-

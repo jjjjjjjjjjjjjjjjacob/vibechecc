@@ -18,24 +18,6 @@ interface SearchSuggestionsProps {
 function SearchSuggestionsSkeleton() {
   return (
     <>
-      <CommandGroup heading="recent searches">
-        {[...Array(3)].map((_, i) => (
-          <CommandItem
-            key={`skeleton-recent-${i}`}
-            disabled
-            className="h-9 animate-pulse"
-            style={{
-              animationDelay: `${i * 50}ms`,
-            }}
-          >
-            <div className="flex w-full items-center gap-2">
-              <Skeleton className="h-4 w-4 rounded" />
-              <Skeleton className="h-4 w-24" />
-            </div>
-          </CommandItem>
-        ))}
-      </CommandGroup>
-
       <CommandGroup heading="trending">
         {[...Array(5)].map((_, i) => (
           <CommandItem
@@ -43,7 +25,7 @@ function SearchSuggestionsSkeleton() {
             disabled
             className="h-9 animate-pulse"
             style={{
-              animationDelay: `${(3 + i) * 50}ms`,
+              animationDelay: `${i * 50}ms`,
             }}
           >
             <div className="flex w-full items-center gap-2">
@@ -61,7 +43,7 @@ function SearchSuggestionsSkeleton() {
             disabled
             className="h-9 animate-pulse"
             style={{
-              animationDelay: `${(8 + i) * 50}ms`,
+              animationDelay: `${(5 + i) * 50}ms`,
             }}
           >
             <div className="flex w-full items-center gap-2">
@@ -77,7 +59,7 @@ function SearchSuggestionsSkeleton() {
           disabled
           className="h-9 animate-pulse"
           style={{
-            animationDelay: `${16 * 50}ms`,
+            animationDelay: `${13 * 50}ms`,
           }}
         >
           <div className="flex w-full items-center gap-2">
@@ -101,21 +83,23 @@ export function SearchSuggestions({
     return <SearchSuggestionsSkeleton />;
   }
 
-  // Fixed heights for each section
-  const RECENT_ITEMS = 3;
+  // Dynamic display - only show what exists, up to the max
+  const MAX_RECENT_ITEMS = 5;
   const TRENDING_ITEMS = 5;
   const TAGS_ITEMS = 8;
+
+  // Only take up to MAX_RECENT_ITEMS recent searches
+  const displayRecentSearches = recentSearches.slice(0, MAX_RECENT_ITEMS);
 
   let itemIndex = 0;
 
   return (
     <>
-      <CommandGroup heading="recent searches">
-        {[...Array(RECENT_ITEMS)].map((_, i) => {
-          const search = recentSearches[i];
-          const currentIndex = itemIndex++;
-
-          if (search) {
+      {/* Only show recent searches section if there are recent searches */}
+      {displayRecentSearches.length > 0 && (
+        <CommandGroup heading="recent searches">
+          {displayRecentSearches.map((search) => {
+            const currentIndex = itemIndex++;
             return (
               <CommandItem
                 key={`suggestion-recent-${search.term}`}
@@ -133,17 +117,9 @@ export function SearchSuggestions({
                 <span className="truncate">{search.term}</span>
               </CommandItem>
             );
-          }
-
-          return (
-            <div
-              key={`recent-empty-${i}`}
-              className="h-9 px-2 py-1.5"
-              aria-hidden="true"
-            />
-          );
-        })}
-      </CommandGroup>
+          })}
+        </CommandGroup>
+      )}
 
       <CommandGroup heading="trending">
         {[...Array(TRENDING_ITEMS)].map((_, i) => {
@@ -235,4 +211,3 @@ export function SearchSuggestions({
     </>
   );
 }
-

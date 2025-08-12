@@ -335,6 +335,12 @@ describe('Users Functions', () => {
     it('should throw error when getting all users without admin privileges', async () => {
       const t = convexTest(schema, modules);
 
+      // Create a regular user first
+      await t.mutation(api.users.create, {
+        externalId: 'test_regular_user',
+        username: 'regularuser',
+      });
+
       const mockNonAdminIdentity = {
         subject: 'test_regular_user',
         tokenIdentifier: 'test_token_regular',
@@ -357,6 +363,12 @@ describe('Users Functions', () => {
       await t.mutation(api.users.create, {
         externalId: 'test_user_all',
         username: 'testall',
+      });
+
+      // Create an admin user (for database fallback check if needed)
+      await t.mutation(api.users.create, {
+        externalId: 'test_admin_user',
+        username: 'adminuser',
       });
 
       const mockAdminIdentity = {
@@ -388,6 +400,12 @@ describe('Users Functions', () => {
       await t.mutation(api.users.create, {
         externalId: 'test_user_all_2',
         username: 'testall2',
+      });
+
+      // Create an admin user for potential database fallback
+      await t.mutation(api.users.create, {
+        externalId: 'test_admin_user_2',
+        username: 'adminuser2',
       });
 
       const mockAdminIdentity = {

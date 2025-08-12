@@ -1,6 +1,6 @@
 import { Circle } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
-import { useTheme } from '@/features/theming/components/theme-provider';
+import { useTheme } from '@/stores/theme-initializer';
 import { useEffect, useState } from 'react';
 import toast from '@/utils/toast';
 

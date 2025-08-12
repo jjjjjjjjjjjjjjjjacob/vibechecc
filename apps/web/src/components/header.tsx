@@ -1,4 +1,4 @@
-import { Link, useRouterState, useLocation } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import {
@@ -18,11 +18,10 @@ import { cn } from '../utils/tailwind-utils';
 import { ThemeToggle } from '@/features/theming/components/theme-toggle';
 import { FeedTabs } from './feed-tabs';
 import {
-  useOptionalHeaderNav,
-  useHeaderNav,
+  useHeaderNavStore,
   type NavState,
-  PageNavState,
-} from '@/contexts/header-nav-context';
+  type PageNavState,
+} from '@/stores/header-nav-store';
 import {
   SignedIn,
   SignedOut,
@@ -31,11 +30,11 @@ import {
   useUser,
   useClerk,
 } from '@clerk/tanstack-react-start';
-import {
-  useTheme,
-  type PrimaryColorTheme,
-  type SecondaryColorTheme,
-} from '@/features/theming/components/theme-provider';
+import { useTheme } from '@/stores/theme-initializer';
+import type {
+  PrimaryColorTheme,
+  SecondaryColorTheme,
+} from '@/stores/theme-store';
 import { GlobalSearchCommand } from '@/features/search/components/global-search-command';
 import { useSearchShortcuts } from '@/features/search/hooks/use-search-shortcuts';
 import { useCurrentUser, useUnreadNotificationCount } from '../queries';
@@ -45,23 +44,22 @@ import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 import { Separator } from '@/components/ui/separator';
 import { TabAccordion, TabAccordionContent } from './tab-accordion';
 import { ProfileSnapshotCard } from './profile-snapshot-card';
+import { usePostHog } from '@/hooks/usePostHog';
 
 export function Header() {
   const { resolvedTheme, setTheme, setColorTheme, setSecondaryColorTheme } =
     useTheme();
-  const headerNav = useHeaderNav();
-  const navState = headerNav.navState;
-  const setNavState = headerNav.setNavState;
+  const navState = useHeaderNavStore((state) => state.navState);
+  const setNavState = useHeaderNavStore((state) => state.setNavState);
+  const pageNavState = useHeaderNavStore((state) => state.pageNavState);
+  const setPageNavState = useHeaderNavStore((state) => state.setPageNavState);
   const [isHydrated, setIsHydrated] = useState(false);
   const [navHasMounted, setNavHasMounted] = useState(false);
   const searchButtonRef = useRef<HTMLButtonElement | null>(null);
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
   const { isAdmin } = useAdminAuth();
-  const currentLocation = useLocation();
-  const headerNavOptional = useOptionalHeaderNav();
-  const pageNavState = headerNavOptional?.pageNavState ?? null;
-  const isHomePage = currentLocation.pathname === '/';
+  const { trackEvents } = usePostHog();
 
   // Check if Convex context is available - call useConvex at top level
   const convex = useConvex();
@@ -110,53 +108,146 @@ export function Header() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [navState]);
+  }, [navState, setNavState]);
 
-  // Disable background scrolling when a mobile overlay is open
+  // Store refs for scaling state
+  const scalingAppliedRef = useRef(false);
+  const originalStylesRef = useRef<Record<string, string> | null>(null);
+
+  // Handle background scaling and scrolling when navigation is open
   useEffect(() => {
-    if (!navState) return;
     const { documentElement } = document;
-    const previousOverflow = documentElement.style.overflow;
-    const previousPaddingRight = documentElement.style.paddingRight;
-    const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+    const mainContent =
+      document.querySelector('main') ||
+      document.querySelector('#__root > div:not(header)');
 
-    documentElement.style.overflow = 'hidden';
-    if (scrollbarWidth > 0) {
-      documentElement.style.paddingRight = `${scrollbarWidth}px`;
+    if (navState && !scalingAppliedRef.current) {
+      // Apply scaling when navState becomes truthy
+      const previousOverflow = documentElement.style.overflow;
+      const previousPaddingRight = documentElement.style.paddingRight;
+      const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+
+      documentElement.style.overflow = 'hidden';
+      if (scrollbarWidth > 0) {
+        documentElement.style.paddingRight = `${scrollbarWidth}px`;
+      }
+
+      if (mainContent && mainContent instanceof HTMLElement) {
+        const TRANSITION = '0.5s cubic-bezier(0.32, 0.72, 0, 1)';
+        const BORDER_RADIUS = 8;
+        const WINDOW_TOP_OFFSET = 26;
+        const scale =
+          Math.abs(window.innerWidth - WINDOW_TOP_OFFSET) / window.innerWidth;
+
+        // Store original styles only once
+        if (!originalStylesRef.current) {
+          originalStylesRef.current = {
+            transformOrigin: mainContent.style.transformOrigin,
+            transitionProperty: mainContent.style.transitionProperty,
+            transitionDuration: mainContent.style.transitionDuration,
+            transitionTimingFunction:
+              mainContent.style.transitionTimingFunction,
+            borderRadius: mainContent.style.borderRadius,
+            overflow: mainContent.style.overflow,
+            transform: mainContent.style.transform,
+            documentOverflow: previousOverflow,
+            documentPaddingRight: previousPaddingRight,
+          };
+        }
+
+        mainContent.style.transformOrigin = 'top';
+        mainContent.style.transitionProperty = 'transform, border-radius';
+        mainContent.style.transitionDuration = TRANSITION.split(' ')[0];
+        mainContent.style.transitionTimingFunction = TRANSITION.split(' ')
+          .slice(1)
+          .join(' ');
+        mainContent.style.borderRadius = `${BORDER_RADIUS}px`;
+        mainContent.style.overflow = 'hidden';
+        mainContent.style.transform = `scale(${scale}) translate3d(0, calc(env(safe-area-inset-top) - 4px), 0)`;
+
+        scalingAppliedRef.current = true;
+      }
+    } else if (!navState && scalingAppliedRef.current) {
+      // Remove scaling only when navState becomes null/false
+      if (
+        mainContent &&
+        mainContent instanceof HTMLElement &&
+        originalStylesRef.current
+      ) {
+        mainContent.style.transform = '';
+        mainContent.style.borderRadius = '';
+
+        // Restore original styles after animation
+        setTimeout(() => {
+          if (originalStylesRef.current && mainContent) {
+            mainContent.style.transformOrigin =
+              originalStylesRef.current.transformOrigin;
+            mainContent.style.transitionProperty =
+              originalStylesRef.current.transitionProperty;
+            mainContent.style.transitionDuration =
+              originalStylesRef.current.transitionDuration;
+            mainContent.style.transitionTimingFunction =
+              originalStylesRef.current.transitionTimingFunction;
+            mainContent.style.overflow = originalStylesRef.current.overflow;
+            documentElement.style.overflow =
+              originalStylesRef.current.documentOverflow;
+            documentElement.style.paddingRight =
+              originalStylesRef.current.documentPaddingRight;
+
+            originalStylesRef.current = null;
+            scalingAppliedRef.current = false;
+          }
+        }, 500);
+      }
     }
-
-    return () => {
-      documentElement.style.overflow = previousOverflow;
-      documentElement.style.paddingRight = previousPaddingRight;
-    };
   }, [navState]);
 
   // Handle graceful transition between menu states
   const handleNavTransition = useCallback(
     (newState: NavState | PageNavState, context: 'page' | 'nav') => {
-      if (!headerNavOptional) return;
       if (newState === navState && context == 'page') return;
       if (newState === pageNavState && context == 'nav') return;
 
       setNavHasMounted(false);
       if (context === 'page') {
-        headerNavOptional.setPageNavState(newState as PageNavState);
+        setPageNavState(newState as PageNavState);
       } else if (context === 'nav') {
-        headerNavOptional.setNavState(newState as NavState);
+        // Track when notifications are opened
+        if (newState === 'notifications' && unreadCount !== undefined) {
+          trackEvents.notificationsOpened(unreadCount);
+        }
+        setNavState(newState as NavState);
       }
       // Slide in new content
       return setTimeout(() => {
         setNavHasMounted(true);
       }, 200);
     },
-    [headerNavOptional, pageNavState, navState]
+    [
+      pageNavState,
+      navState,
+      setPageNavState,
+      setNavState,
+      trackEvents,
+      unreadCount,
+    ]
   );
 
   // Block mounting during transitions for consistent animations
   useEffect(() => {
-    const t = handleNavTransition(pageNavState, 'page');
-    return () => clearTimeout(t);
-  }, [pageNavState, handleNavTransition]);
+    // For any accordion value change (nav or page states), trigger the animation
+    const currentValue = navState || pageNavState;
+    if (currentValue) {
+      setNavHasMounted(false);
+      // Slide in new content
+      const t = setTimeout(() => {
+        setNavHasMounted(true);
+      }, 50);
+      return () => clearTimeout(t);
+    } else {
+      setNavHasMounted(false);
+    }
+  }, [navState, pageNavState]);
 
   // Sync nav/profile states with responsive breakpoints
   useEffect(() => {
@@ -191,13 +282,12 @@ export function Header() {
 
   // Handle graceful transition into vibe page state
   useEffect(() => {
-    if (!headerNavOptional) return;
     if (isVibePage && pageNavState !== 'vibe') {
-      headerNavOptional.setPageNavState('vibe');
+      setPageNavState('vibe');
     } else if (!isVibePage && pageNavState === 'vibe') {
-      headerNavOptional.setPageNavState(null);
+      setPageNavState(null);
     }
-  }, [headerNavOptional, isVibePage]);
+  }, [isVibePage, pageNavState, setPageNavState]);
 
   const profileItems = [
     {
@@ -224,6 +314,16 @@ export function Header() {
           data-is-vibe-page={isVibePage}
           className="transition-height h-12 duration-300 data-[is-vibe-page=true]:h-32"
         ></div>
+
+        {/* Background overlay - positioned behind header */}
+        {navState && (
+          <div
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-md"
+            onClick={() => setNavState(null)}
+            aria-hidden="true"
+          />
+        )}
+
         <div
           data-page-nav-state={!navState && pageNavState}
           data-mobile-nav-state={navState}
@@ -232,8 +332,16 @@ export function Header() {
           )}
         >
           <TabAccordion
-            value={navState ?? (pageNavState as string | null) ?? undefined}
-            onValueChange={(val) => setNavState((val as NavState) ?? null)}
+            value={
+              navState ?? (!navState ? pageNavState : undefined) ?? undefined
+            }
+            onValueChange={(val) => {
+              // Only set navState for actual nav items, not page states
+              if (['search', 'notifications', 'nav', 'profile'].includes(val)) {
+                setNavState((val as NavState) ?? null);
+              }
+            }}
+            className="gap-0"
             // collapsible={true}
           >
             <div className="container flex h-16 flex-shrink-0 items-center">
@@ -355,7 +463,7 @@ export function Header() {
                           <>
                             <Bell className="h-4 w-4" />
                             {unreadCount && unreadCount > 0 ? (
-                              <span className="bg-theme-primary text-primary-foreground absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-xs font-medium">
+                              <span className="bg-theme-primary/80 text-primary-foreground absolute -top-2 -right-2 flex h-3.5 w-3.5 items-center justify-center rounded-full text-xs font-medium">
                                 {unreadCount > 9 ? '9+' : unreadCount}
                               </span>
                             ) : null}
@@ -448,9 +556,9 @@ export function Header() {
             <TabAccordionContent value="tabs" className="container pb-2">
               <div
                 data-has-mounted={navHasMounted}
-                className="w-fit scale-100 opacity-100 transition delay-200 duration-300 data-[has-mounted=false]:translate-y-5 data-[has-mounted=false]:scale-100 data-[has-mounted=false]:opacity-0"
+                className="w-fit transition delay-200 duration-300 data-[has-mounted=false]:translate-y-5 data-[has-mounted=false]:opacity-0 data-[has-mounted=true]:translate-y-0 data-[has-mounted=true]:opacity-100"
               >
-                <FeedTabs />
+                <FeedTabs tooltipSide="bottom" />
               </div>
             </TabAccordionContent>
             <TabAccordionContent value="vibe" className="pb-0">
@@ -548,15 +656,17 @@ export function Header() {
                       >
                         my vibes
                       </Link>
-                      <button
-                        data-selected={location.pathname === '/profile'}
-                        className="hover:bg-muted/50 hover:text-foreground data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 text-left lowercase transition-all duration-150"
+                      <Link
+                        to="/profile"
+                        className={cn(
+                          'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
+                        )}
                         onClick={() => {
-                          handleNavTransition('profile', 'nav');
+                          setNavState(null);
                         }}
                       >
                         profile
-                      </button>
+                      </Link>
                     </SignedIn>
                     <button
                       className="hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left lowercase transition-all duration-150"
@@ -580,7 +690,7 @@ export function Header() {
                   data-has-mounted={navHasMounted}
                   className={cn(
                     'xs:flex hidden w-full rounded-md',
-                    'opacity-100 transition delay-500 duration-1000 ease-in-out data-[has-mounted=false]:opacity-0'
+                    'opacity-100 transition delay-200 duration-1000 ease-in-out data-[has-mounted=false]:opacity-0'
                   )}
                 >
                   <ProfileSnapshotCard />

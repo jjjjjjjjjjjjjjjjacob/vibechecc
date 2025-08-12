@@ -1,22 +1,9 @@
 import * as React from 'react';
-import { ChevronDown, ChevronUp, Star } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/tailwind-utils';
-
-interface Rating {
-  _id?: string;
-  userId: string;
-  user?: {
-    username?: string;
-    first_name?: string;
-    last_name?: string;
-  };
-  emoji: string;
-  value: number;
-  review: string;
-  createdAt: string;
-}
+import type { Rating } from '@viberatr/types';
 
 interface ExpandableRatingsCellProps {
   ratings: Rating[];
@@ -30,16 +17,15 @@ export function ExpandableRatingsCell({
   previewCount = 3,
 }: ExpandableRatingsCellProps) {
   const [isExpanded, setIsExpanded] = React.useState(false);
-  
+
   if (!ratings || ratings.length === 0) {
-    return (
-      <span className="text-sm text-muted-foreground">no ratings</span>
-    );
+    return <span className="text-muted-foreground text-sm">no ratings</span>;
   }
 
-  const avgRating = Math.round(
-    (ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length) * 10
-  ) / 10;
+  const avgRating =
+    Math.round(
+      (ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length) * 10
+    ) / 10;
 
   const displayRatings = isExpanded ? ratings : ratings.slice(0, previewCount);
   const hasMore = ratings.length > previewCount;
@@ -49,8 +35,8 @@ export function ExpandableRatingsCell({
       {/* Summary */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className="font-medium text-sm">{avgRating}★</span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm font-medium">{avgRating}★</span>
+          <span className="text-muted-foreground text-xs">
             ({ratings.length} rating{ratings.length !== 1 ? 's' : ''})
           </span>
         </div>
@@ -63,12 +49,12 @@ export function ExpandableRatingsCell({
           >
             {isExpanded ? (
               <>
-                <ChevronUp className="h-3 w-3 mr-1" />
+                <ChevronUp className="mr-1 h-3 w-3" />
                 collapse
               </>
             ) : (
               <>
-                <ChevronDown className="h-3 w-3 mr-1" />
+                <ChevronDown className="mr-1 h-3 w-3" />
                 expand
               </>
             )}
@@ -79,30 +65,29 @@ export function ExpandableRatingsCell({
       {/* Ratings list */}
       <div className="space-y-1">
         {displayRatings.map((rating, index) => {
-          const userName = rating.user?.username || 
-            `${rating.user?.first_name || ''} ${rating.user?.last_name || ''}`.trim() || 
+          const userName =
+            rating.user?.username ||
+            `${rating.user?.first_name || ''} ${rating.user?.last_name || ''}`.trim() ||
             'anonymous';
-          
+
           return (
             <div
               key={rating._id || index}
-              className="flex flex-col space-y-1 p-2 rounded bg-muted/30 text-xs"
+              className="bg-muted/30 flex flex-col space-y-1 rounded p-2 text-xs"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Badge variant="outline" className="text-xs px-1.5 py-0">
+                  <Badge variant="outline" className="px-1.5 py-0 text-xs">
                     {rating.emoji} {rating.value}★
                   </Badge>
-                  <span className="text-muted-foreground">
-                    by {userName}
-                  </span>
+                  <span className="text-muted-foreground">by {userName}</span>
                 </div>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {new Date(rating.createdAt).toLocaleDateString()}
                 </span>
               </div>
               {rating.review && (
-                <p className="text-xs text-muted-foreground line-clamp-2">
+                <p className="text-muted-foreground line-clamp-2 text-xs">
                   {rating.review}
                 </p>
               )}
@@ -113,8 +98,9 @@ export function ExpandableRatingsCell({
 
       {/* Show more indicator when collapsed */}
       {!isExpanded && ratings.length > previewCount && (
-        <div className="text-xs text-muted-foreground text-center">
-          +{ratings.length - previewCount} more rating{ratings.length - previewCount !== 1 ? 's' : ''}
+        <div className="text-muted-foreground text-center text-xs">
+          +{ratings.length - previewCount} more rating
+          {ratings.length - previewCount !== 1 ? 's' : ''}
         </div>
       )}
     </div>

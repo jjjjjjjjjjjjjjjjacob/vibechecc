@@ -3,12 +3,6 @@ import { Link } from '@tanstack/react-router';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip';
-import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { api } from '@viberatr/convex';
@@ -88,7 +82,7 @@ function VibeResultListCard({
   return (
     <VibeCard
       vibe={vibe}
-      variant="search-result"
+      variant={'search-result'}
       ratingDisplayMode="most-rated"
     />
   );
@@ -108,7 +102,7 @@ function UserResultListCard({ result }: { result: UserSearchResult }) {
   return (
     <div className="space-y-1">
       {/* Main User Card */}
-      <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+      <Card className="bg-card/30 overflow-hidden transition-all duration-200 hover:shadow-md">
         <CardContent className="p-0">
           <Link to="/users/$username" params={{ username: result.username }}>
             <div className="flex items-center gap-4 p-4 pb-2">
@@ -264,11 +258,11 @@ function TagResultListCard({ result }: { result: TagSearchResult }) {
 }
 
 function ReviewResultListCard({ result }: { result: ReviewSearchResult }) {
-  const usePlaceholder = !result.vibeImage;
+  const _usePlaceholder = !result.vibeImage;
 
   return (
     <Link to="/vibes/$vibeId" params={{ vibeId: result.vibeId }}>
-      <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+      <Card className="bg-card/30 overflow-hidden transition-all duration-200 hover:shadow-md">
         <CardContent className="p-0">
           <div className="flex gap-3 p-4">
             {/* Reviewer Avatar */}
@@ -286,17 +280,19 @@ function ReviewResultListCard({ result }: { result: ReviewSearchResult }) {
             {/* Content */}
             <div className="min-w-0 flex-1">
               {/* Header */}
-              <div className="mb-1 flex items-center gap-2">
-                <span className="truncate text-sm font-medium">
-                  @{result.reviewerName}
-                </span>
-                <span className="text-muted-foreground flex-shrink-0 text-xs">
+              <div className="mb-2 flex flex-col gap-0">
+                <div className="flex w-full items-center justify-between gap-0">
+                  <span className="truncate text-sm font-medium">
+                    @{result.reviewerName}
+                  </span>
+                  <Badge variant="outline" className="text-xs">
+                    <MessageSquare className="mr-1 h-3 w-3" />
+                    review
+                  </Badge>
+                </div>
+                <span className="text-muted-foreground text-xs">
                   on "{result.vibeTitle}"
                 </span>
-                <Badge variant="outline" className="ml-auto text-xs">
-                  <MessageSquare className="mr-1 h-3 w-3" />
-                  review
-                </Badge>
               </div>
 
               {/* Review Text */}
@@ -304,8 +300,8 @@ function ReviewResultListCard({ result }: { result: ReviewSearchResult }) {
                 <p className="text-sm leading-relaxed">{result.reviewText}</p>
               </div>
 
-              {/* Rating and Vibe Image */}
-              <div className="flex items-center justify-between">
+              {/* Rating */}
+              <div className="flex items-center">
                 <EmojiRatingDisplay
                   rating={{
                     emoji: result.emoji,
@@ -315,43 +311,6 @@ function ReviewResultListCard({ result }: { result: ReviewSearchResult }) {
                   showScale={false}
                   size="sm"
                 />
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="relative h-8 w-8 cursor-pointer overflow-hidden rounded">
-                      {usePlaceholder ? (
-                        <SimpleVibePlaceholder title={result.vibeTitle} />
-                      ) : (
-                        <img
-                          src={result.vibeImage}
-                          alt={result.vibeTitle}
-                          className="h-full w-full object-cover"
-                        />
-                      )}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-background max-w-xs border p-0"
-                  >
-                    <div className="space-y-2">
-                      {!usePlaceholder && (
-                        <div className="relative h-48 w-full overflow-hidden rounded-t">
-                          <img
-                            src={result.vibeImage}
-                            alt={result.vibeTitle}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="p-3">
-                        <p className="text-foreground text-sm font-medium">
-                          {result.vibeTitle}
-                        </p>
-                      </div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
               </div>
             </div>
           </div>

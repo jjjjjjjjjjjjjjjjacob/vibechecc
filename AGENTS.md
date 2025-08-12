@@ -98,13 +98,13 @@ export function UserCard(props: UserCardProps) {
 const rows = await ctx.db
   .query('messages')
   .withIndex('by_channel', (q) => q.eq('channel', channel))
-  .collect()
+  .collect();
 
 // Avoid
 const rows = await ctx.db
   .query('messages')
   .filter((q) => q.eq(q.field('channel'), channel))
-  .collect()
+  .collect();
 ```
 
 - Organize by function type: queries (read), mutations (write), actions (external), HTTP actions.
@@ -141,8 +141,7 @@ const rows = await ctx.db
 
 ## When In Doubt
 
-1) Check `.agent/` files for an existing pattern
-2) Mirror the closest neighbor implementation
-3) Prefer additive changes and propose deltas before refactors
-4) Confirm with maintainers for deviations from established patterns
-
+1. Check `.agent/` files for an existing pattern
+2. Mirror the closest neighbor implementation
+3. Prefer additive changes and propose deltas before refactors
+4. Confirm with maintainers for deviations from established patterns

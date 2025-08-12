@@ -232,6 +232,7 @@ describe('AuthUtils', () => {
         auth: {
           getUserIdentity: vi.fn().mockResolvedValue(null),
         },
+        db: {} as any,
       };
 
       await expect(AuthUtils.requireAdmin(mockCtx)).rejects.toThrow(
@@ -246,6 +247,17 @@ describe('AuthUtils', () => {
             subject: 'user123',
             org_role: 'member',
             roles: ['user'],
+          }),
+        },
+        db: {
+          query: vi.fn().mockReturnValue({
+            withIndex: vi.fn().mockReturnValue({
+              first: vi.fn().mockResolvedValue({
+                externalId: 'user123',
+                username: 'testuser',
+                isAdmin: false,
+              }),
+            }),
           }),
         },
       };
@@ -264,6 +276,7 @@ describe('AuthUtils', () => {
             roles: ['user'],
           }),
         },
+        db: {} as any,
       };
 
       await expect(AuthUtils.requireAdmin(mockCtx)).resolves.toBeUndefined();
@@ -278,6 +291,7 @@ describe('AuthUtils', () => {
             roles: ['user', 'admin'],
           }),
         },
+        db: {} as any,
       };
 
       await expect(AuthUtils.requireAdmin(mockCtx)).resolves.toBeUndefined();
@@ -292,6 +306,7 @@ describe('AuthUtils', () => {
             roles: ['user', 'org:admin'],
           }),
         },
+        db: {} as any,
       };
 
       await expect(AuthUtils.requireAdmin(mockCtx)).resolves.toBeUndefined();
@@ -304,6 +319,17 @@ describe('AuthUtils', () => {
             subject: 'user123',
             org_role: 'member',
             // roles array is missing
+          }),
+        },
+        db: {
+          query: vi.fn().mockReturnValue({
+            withIndex: vi.fn().mockReturnValue({
+              first: vi.fn().mockResolvedValue({
+                externalId: 'user123',
+                username: 'testuser',
+                isAdmin: false,
+              }),
+            }),
           }),
         },
       };

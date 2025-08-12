@@ -85,7 +85,7 @@ export const follow = mutation({
     // Create follow notification for the user being followed
     try {
       const followerDisplayName = computeUserDisplayName(currentUser);
-      await ctx.scheduler.runAfter(
+      await (ctx.scheduler as any).runAfter(
         0,
         internal.notifications.createNotification,
         {

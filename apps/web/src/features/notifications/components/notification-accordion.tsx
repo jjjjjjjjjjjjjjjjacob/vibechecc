@@ -126,7 +126,7 @@ export function NotificationAccordion() {
 
   return (
     <div className={cn('w-full bg-transparent')}>
-      <div className="border-b">
+      <div>
         <div className="container">
           <div className="border-0">
             <div className="flex h-full flex-col">

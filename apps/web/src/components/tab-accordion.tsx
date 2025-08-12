@@ -77,4 +77,3 @@ export {
   TabAccordionTrigger,
   TabAccordionContent,
 };
-

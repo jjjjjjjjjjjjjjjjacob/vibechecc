@@ -18,7 +18,7 @@ import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
 import { NotFound } from '@/components/not-found';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { ThemeProvider } from '@/features/theming/components/theme-provider';
+import { ThemeInitializer } from '@/stores/theme-initializer';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
 import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
@@ -32,7 +32,7 @@ import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { ConvexQueryClient } from '@convex-dev/react-query';
 import { cn } from '@/utils';
-import { HeaderNavProvider } from '@/contexts/header-nav-context';
+import { useHeaderNavStore } from '@/stores/header-nav-store';
 
 // Optimized server function with caching and mobile optimizations
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -180,6 +180,28 @@ function RootComponent() {
 function RootDocument({ children }: { children: React.ReactNode }) {
   const location = useRouterState({ select: (s) => s.location });
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const setPageNavState = useHeaderNavStore((state) => state.setPageNavState);
+
+  // Clear or set appropriate pageNavState based on route
+  React.useEffect(() => {
+    // Only homepage manages its own pageNavState (for tabs)
+    // Vibe detail pages get 'vibe' state
+    // All other pages clear the pageNavState
+    if (location.pathname === '/') {
+      // Homepage will manage its own state via HomeFeed component
+      // Don't set anything here to avoid conflicts
+      return;
+    } else if (
+      location.pathname.startsWith('/vibes/') &&
+      location.pathname.split('/').length === 3
+    ) {
+      // This is a vibe detail page (/vibes/[vibeId])
+      setPageNavState('vibe');
+    } else {
+      // Any other page should clear the pageNavState
+      setPageNavState(null);
+    }
+  }, [location.pathname, setPageNavState]);
 
   return (
     <html lang="en" className={cn('font-sans')}>
@@ -188,36 +210,34 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="bg-background text-foreground">
         <PostHogProvider>
-          <ThemeProvider>
-            <HeaderNavProvider>
-              <div className="relative flex min-h-screen flex-col">
-                <PostHogPageTracker />
-                <ClerkPostHogIntegration />
-                {isAdminRoute ? (
-                  // Admin routes - no header/footer, no guards
-                  <>{children}</>
-                ) : (
-                  // Regular app routes - with header/footer and guards
-                  <>
-                    <EnvironmentAccessGuard>
-                      <OnboardingGuard>
-                        <Header />
-                        <LoadingIndicator />
+          <ThemeInitializer>
+            <div className="relative flex min-h-screen flex-col">
+              <PostHogPageTracker />
+              <ClerkPostHogIntegration />
+              {isAdminRoute ? (
+                // Admin routes - no header/footer, no guards
+                <>{children}</>
+              ) : (
+                // Regular app routes - with header/footer and guards
+                <>
+                  <EnvironmentAccessGuard>
+                    <OnboardingGuard>
+                      <Header />
+                      <LoadingIndicator />
 
-                        <main className="flex-1" data-vaul-drawer-wrapper>
-                          {children}
-                        </main>
-                        <NewUserSurvey />
-                      </OnboardingGuard>
-                    </EnvironmentAccessGuard>
+                      <main className="flex-1" data-vaul-drawer-wrapper>
+                        {children}
+                      </main>
+                      <NewUserSurvey />
+                    </OnboardingGuard>
+                  </EnvironmentAccessGuard>
 
-                    <Footer />
-                  </>
-                )}
-                <Toaster />
-              </div>
-            </HeaderNavProvider>
-          </ThemeProvider>
+                  <Footer />
+                </>
+              )}
+              <Toaster />
+            </div>
+          </ThemeInitializer>
         </PostHogProvider>
         <ReactQueryDevtools />
         <TanStackRouterDevtools position="bottom-right" />

@@ -21,6 +21,7 @@ import { Route as DataRouteImport } from './routes/data'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibesIndexRouteImport } from './routes/vibes/index'
+import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VibesMyVibesRouteImport } from './routes/vibes/my-vibes'
 import { Route as VibesCreateRouteImport } from './routes/vibes/create'
@@ -28,6 +29,8 @@ import { Route as VibesVibeIdRouteImport } from './routes/vibes/$vibeId'
 import { Route as UsersUsernameRouteImport } from './routes/users.$username'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as RatingsRatingIdRouteImport } from './routes/ratings/$ratingId'
+import { Route as ProfilePreviewRouteImport } from './routes/profile/preview'
+import { Route as ProfileEditRouteImport } from './routes/profile/edit'
 import { Route as AdminVibesRouteImport } from './routes/admin/vibes'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
@@ -95,6 +98,11 @@ const VibesIndexRoute = VibesIndexRouteImport.update({
   path: '/vibes/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileIndexRoute = ProfileIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProfileRoute,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -129,6 +137,16 @@ const RatingsRatingIdRoute = RatingsRatingIdRouteImport.update({
   id: '/ratings/$ratingId',
   path: '/ratings/$ratingId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilePreviewRoute = ProfilePreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
+  getParentRoute: () => ProfileRoute,
+} as any)
+const ProfileEditRoute = ProfileEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => ProfileRoute,
 } as any)
 const AdminVibesRoute = AdminVibesRouteImport.update({
   id: '/vibes',
@@ -168,7 +186,7 @@ export interface FileRoutesByFullPath {
   '/discover': typeof DiscoverRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
-  '/profile': typeof ProfileRoute
+  '/profile': typeof ProfileRouteWithChildren
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -178,6 +196,8 @@ export interface FileRoutesByFullPath {
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vibes': typeof AdminVibesRoute
+  '/profile/edit': typeof ProfileEditRoute
+  '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
@@ -185,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
   '/admin/': typeof AdminIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/vibes': typeof VibesIndexRoute
   '/vibes/$vibeId/edit': typeof VibesVibeIdEditRoute
 }
@@ -194,7 +215,6 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
-  '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -204,6 +224,8 @@ export interface FileRoutesByTo {
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vibes': typeof AdminVibesRoute
+  '/profile/edit': typeof ProfileEditRoute
+  '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
@@ -211,6 +233,7 @@ export interface FileRoutesByTo {
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
   '/admin': typeof AdminIndexRoute
+  '/profile': typeof ProfileIndexRoute
   '/vibes': typeof VibesIndexRoute
   '/vibes/$vibeId/edit': typeof VibesVibeIdEditRoute
 }
@@ -222,7 +245,7 @@ export interface FileRoutesById {
   '/discover': typeof DiscoverRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
-  '/profile': typeof ProfileRoute
+  '/profile': typeof ProfileRouteWithChildren
   '/search': typeof SearchRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -232,6 +255,8 @@ export interface FileRoutesById {
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vibes': typeof AdminVibesRoute
+  '/profile/edit': typeof ProfileEditRoute
+  '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
@@ -239,6 +264,7 @@ export interface FileRoutesById {
   '/vibes/create': typeof VibesCreateRoute
   '/vibes/my-vibes': typeof VibesMyVibesRoute
   '/admin/': typeof AdminIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/vibes/': typeof VibesIndexRoute
   '/vibes/$vibeId/edit': typeof VibesVibeIdEditRoute
 }
@@ -261,6 +287,8 @@ export interface FileRouteTypes {
     | '/admin/tags'
     | '/admin/users'
     | '/admin/vibes'
+    | '/profile/edit'
+    | '/profile/preview'
     | '/ratings/$ratingId'
     | '/sitemap/xml'
     | '/users/$username'
@@ -268,6 +296,7 @@ export interface FileRouteTypes {
     | '/vibes/create'
     | '/vibes/my-vibes'
     | '/admin/'
+    | '/profile/'
     | '/vibes'
     | '/vibes/$vibeId/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -277,7 +306,6 @@ export interface FileRouteTypes {
     | '/discover'
     | '/onboarding'
     | '/privacy'
-    | '/profile'
     | '/search'
     | '/sign-in'
     | '/sign-up'
@@ -287,6 +315,8 @@ export interface FileRouteTypes {
     | '/admin/tags'
     | '/admin/users'
     | '/admin/vibes'
+    | '/profile/edit'
+    | '/profile/preview'
     | '/ratings/$ratingId'
     | '/sitemap/xml'
     | '/users/$username'
@@ -294,6 +324,7 @@ export interface FileRouteTypes {
     | '/vibes/create'
     | '/vibes/my-vibes'
     | '/admin'
+    | '/profile'
     | '/vibes'
     | '/vibes/$vibeId/edit'
   id:
@@ -314,6 +345,8 @@ export interface FileRouteTypes {
     | '/admin/tags'
     | '/admin/users'
     | '/admin/vibes'
+    | '/profile/edit'
+    | '/profile/preview'
     | '/ratings/$ratingId'
     | '/sitemap/xml'
     | '/users/$username'
@@ -321,6 +354,7 @@ export interface FileRouteTypes {
     | '/vibes/create'
     | '/vibes/my-vibes'
     | '/admin/'
+    | '/profile/'
     | '/vibes/'
     | '/vibes/$vibeId/edit'
   fileRoutesById: FileRoutesById
@@ -332,7 +366,7 @@ export interface RootRouteChildren {
   DiscoverRoute: typeof DiscoverRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
-  ProfileRoute: typeof ProfileRoute
+  ProfileRoute: typeof ProfileRouteWithChildren
   SearchRoute: typeof SearchRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
@@ -432,6 +466,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VibesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/': {
+      id: '/profile/'
+      path: '/'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof ProfileRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -480,6 +521,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/ratings/$ratingId'
       preLoaderRoute: typeof RatingsRatingIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/profile/preview': {
+      id: '/profile/preview'
+      path: '/preview'
+      fullPath: '/profile/preview'
+      preLoaderRoute: typeof ProfilePreviewRouteImport
+      parentRoute: typeof ProfileRoute
+    }
+    '/profile/edit': {
+      id: '/profile/edit'
+      path: '/edit'
+      fullPath: '/profile/edit'
+      preLoaderRoute: typeof ProfileEditRouteImport
+      parentRoute: typeof ProfileRoute
     }
     '/admin/vibes': {
       id: '/admin/vibes'
@@ -546,6 +601,21 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface ProfileRouteChildren {
+  ProfileEditRoute: typeof ProfileEditRoute
+  ProfilePreviewRoute: typeof ProfilePreviewRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
+}
+
+const ProfileRouteChildren: ProfileRouteChildren = {
+  ProfileEditRoute: ProfileEditRoute,
+  ProfilePreviewRoute: ProfilePreviewRoute,
+  ProfileIndexRoute: ProfileIndexRoute,
+}
+
+const ProfileRouteWithChildren =
+  ProfileRoute._addFileChildren(ProfileRouteChildren)
+
 interface VibesVibeIdRouteChildren {
   VibesVibeIdEditRoute: typeof VibesVibeIdEditRoute
 }
@@ -565,7 +635,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverRoute: DiscoverRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
-  ProfileRoute: ProfileRoute,
+  ProfileRoute: ProfileRouteWithChildren,
   SearchRoute: SearchRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,

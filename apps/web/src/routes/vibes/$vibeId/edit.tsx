@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import type { Id } from '@viberatr/convex/dataModel';
 import toast from '@/utils/toast';
-import '@/styles/create-vibe.css';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {

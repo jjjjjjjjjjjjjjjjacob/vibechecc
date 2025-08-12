@@ -98,13 +98,16 @@ export function DataTable<TData, TValue>({
   enableMultiRowSelection = true,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   // Use server-side pagination if provided, otherwise use client-side
   const isServerPagination = onPageChange !== undefined;
-  
+
   const table = useReactTable({
     data,
     columns,
@@ -122,14 +125,16 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: isServerPagination ? undefined : getFilteredRowModel(),
-    getPaginationRowModel: isServerPagination ? undefined : getPaginationRowModel(),
+    getPaginationRowModel: isServerPagination
+      ? undefined
+      : getPaginationRowModel(),
     getSortedRowModel: isServerPagination ? undefined : getSortedRowModel(),
     manualPagination: isServerPagination,
     manualFiltering: isServerPagination,
     manualSorting: isServerPagination,
     pageCount: pageCount || -1,
     filterFns: {
-      fuzzy: (row, columnId, value, addMeta) => {
+      fuzzy: (row, columnId, value, _addMeta) => {
         const itemValue = row.getValue(columnId) as string;
         return itemValue?.toLowerCase().includes(value.toLowerCase()) ?? false;
       },
@@ -139,13 +144,15 @@ export function DataTable<TData, TValue>({
   // Notify parent of row selection changes
   React.useEffect(() => {
     if (onRowSelect) {
-      const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+      const selectedRows = table
+        .getFilteredSelectedRowModel()
+        .rows.map((row) => row.original);
       onRowSelect(selectedRows);
     }
   }, [rowSelection, onRowSelect, table]);
 
   return (
-    <div className={cn('flex flex-col h-full space-y-4', className)}>
+    <div className={cn('flex h-full flex-col space-y-4', className)}>
       <DataTableToolbar
         table={table}
         searchKey={searchKey}
@@ -158,9 +165,9 @@ export function DataTable<TData, TValue>({
         exportLabel={exportLabel}
         totalCount={totalCount}
       />
-      
-      <div className="rounded-md border bg-card flex-1 min-h-0 flex flex-col">
-        <div className="relative overflow-auto flex-1">
+
+      <div className="bg-card flex min-h-0 flex-1 flex-col rounded-md border">
+        <div className="relative flex-1 overflow-auto">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -186,7 +193,7 @@ export function DataTable<TData, TValue>({
                     className="h-24 text-center"
                   >
                     <div className="flex items-center justify-center space-x-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
                       <span className="text-muted-foreground">loading...</span>
                     </div>
                   </TableCell>
@@ -197,7 +204,7 @@ export function DataTable<TData, TValue>({
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     className={cn(
-                      onRowClick && 'cursor-pointer hover:bg-muted/50',
+                      onRowClick && 'hover:bg-muted/50 cursor-pointer'
                     )}
                     onClick={() => onRowClick && onRowClick(row.original)}
                   >
@@ -217,7 +224,7 @@ export function DataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
+                    <div className="text-muted-foreground flex flex-col items-center justify-center space-y-2">
                       <p>{emptyMessage}</p>
                     </div>
                   </TableCell>
@@ -227,8 +234,10 @@ export function DataTable<TData, TValue>({
           </Table>
         </div>
       </div>
-      
-      {isServerPagination && totalCount !== undefined && currentPage !== undefined ? (
+
+      {isServerPagination &&
+      totalCount !== undefined &&
+      currentPage !== undefined ? (
         <DataTableServerPagination
           totalCount={totalCount}
           currentPage={currentPage}

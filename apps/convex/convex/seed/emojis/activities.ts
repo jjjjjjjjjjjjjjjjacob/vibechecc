@@ -966,4 +966,4 @@ export const activityEmojis = [
     category: 'activities',
     color: '#DC143C',
   },
-] as const satisfies readonly Omit<Emoji, 'sentiment'>[];
+] as const satisfies readonly Emoji[];

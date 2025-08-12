@@ -16,10 +16,12 @@ function AdminVibesPage() {
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(25);
   const [search, setSearch] = React.useState('');
-  const [status, setStatus] = React.useState<'all' | 'public' | 'deleted'>('all');
+  const [status, setStatus] = React.useState<'all' | 'public' | 'deleted'>(
+    'all'
+  );
   const [dateFrom, setDateFrom] = React.useState<number | undefined>();
   const [dateTo, setDateTo] = React.useState<number | undefined>();
-  
+
   const { data, isLoading, error } = useQuery({
     ...convexQuery(api.admin.vibes.getAllVibes, {
       page,
@@ -43,7 +45,7 @@ function AdminVibesPage() {
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
             <p className="text-destructive">failed to load vibes</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               {error instanceof Error ? error.message : 'unknown error'}
             </p>
           </div>
@@ -57,14 +59,16 @@ function AdminVibesPage() {
       title="vibes"
       description={`manage ${stats?.totalVibes || 0} vibes and content moderation`}
     >
-      <div className="h-full flex flex-col">
+      <div className="flex h-full flex-col">
         <VibesTable
-          data={data?.data?.map((vibe: any) => ({
-            ...vibe,
-            createdBy: vibe.creator,
-            ratings: vibe.emojiRatings || [], // Use emojiRatings from backend
-            emojiRatings: vibe.emojiRatings || [],
-          })) || []}
+          data={
+            data?.data?.map((vibe: any) => ({
+              ...vibe,
+              createdBy: vibe.creator,
+              ratings: vibe.emojiRatings || [], // Use emojiRatings from backend
+              emojiRatings: vibe.emojiRatings || [],
+            })) || []
+          }
           totalCount={data?.totalCount || 0}
           pageCount={data?.pageCount || 0}
           currentPage={page}

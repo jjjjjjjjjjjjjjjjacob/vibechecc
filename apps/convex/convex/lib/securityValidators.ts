@@ -338,11 +338,24 @@ export class AuthUtils {
       throw new Error('Authentication required');
     }
 
-    // For now, we'll check if the user exists in the database and has admin flag
-    // In production, you should configure Clerk to pass org:admin role in JWT custom claims
+    // First check JWT roles from Clerk
+    const hasJWTAdminRole =
+      identity.org_role === 'org:admin' ||
+      identity.org_role === 'admin' ||
+      (Array.isArray(identity.roles) &&
+        (identity.roles.includes('admin') ||
+          identity.roles.includes('org:admin')));
+
+    if (hasJWTAdminRole) {
+      return; // User has admin role in JWT, allow access
+    }
+
+    // Fall back to database check if JWT doesn't have admin role
     const user = await ctx.db
       .query('users')
-      .withIndex('byExternalId', (q: any) => q.eq('externalId', identity.subject))
+      .withIndex('byExternalId', (q: any) =>
+        q.eq('externalId', identity.subject)
+      )
       .first();
 
     if (!user) {

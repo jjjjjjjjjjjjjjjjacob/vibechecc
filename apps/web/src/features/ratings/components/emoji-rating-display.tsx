@@ -23,7 +23,7 @@ export function EmojiRatingDisplay({
   showScale = false,
   className,
   onEmojiClick,
-  variant = 'color',
+  variant: _variant = 'color',
   emojiColor,
   size = 'md',
 }: EmojiRatingDisplayProps) {
@@ -73,7 +73,6 @@ export function EmojiRatingDisplay({
               emoji={rating.emoji}
               value={localValue}
               size={size}
-              variant={variant}
               showTooltip={true}
               onChange={setLocalValue}
               emojiColor={emojiColor}

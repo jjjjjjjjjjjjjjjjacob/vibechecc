@@ -2,6 +2,7 @@ import {
   mutation,
   query,
   internalMutation,
+  internalQuery,
   action,
   internalAction,
   QueryCtx,
@@ -17,7 +18,7 @@ const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY;
 const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://app.posthog.com';
 
 // Helper function to get user by externalId
-async function userByExternalId(
+export async function userByExternalId(
   ctx: QueryCtx | MutationCtx,
   externalId: string
 ) {
@@ -71,7 +72,7 @@ export async function getCurrentUserOrCreate(ctx: MutationCtx) {
 }
 
 // Helper function to create user if not exists (internal)
-async function createUserIfNotExistsInternal(
+export async function createUserIfNotExistsInternal(
   ctx: MutationCtx,
   externalId: string
 ) {
@@ -266,10 +267,13 @@ export const updateProfile = action({
     }
 
     // Update Convex only - Clerk will be updated from frontend
-    return await ctx.runMutation(internal.users.updateProfileInternal, {
-      externalId: identity.subject,
-      ...args,
-    });
+    return await (ctx as any).runMutation(
+      internal.internal.updateProfileInternal,
+      {
+        externalId: identity.subject,
+        ...args,
+      }
+    );
   },
 });
 
@@ -362,10 +366,13 @@ export const completeOnboarding = action({
     }
 
     // Update Convex only - Clerk will be updated from frontend
-    return await ctx.runMutation(internal.users.completeOnboardingInternal, {
-      externalId: identity.subject,
-      ...args,
-    });
+    return await (ctx as any).runMutation(
+      internal.internal.completeOnboardingInternal,
+      {
+        externalId: identity.subject,
+        ...args,
+      }
+    );
   },
 });
 
@@ -422,25 +429,19 @@ export const updateOnboardingData = action({
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: async (ctx, args): Promise<any> => {
-    // console.log('updateOnboardingData called with args:', args);
-
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('User not authenticated');
     }
 
-    // console.log('Auth identity:', {
-    //   subject: identity.subject,
-    //   tokenIdentifier: identity.tokenIdentifier,
-    //   givenName: identity.givenName,
-    //   familyName: identity.familyName,
-    // });
-
     // Update Convex only - Clerk will be updated from frontend
-    return await ctx.runMutation(internal.users.updateOnboardingDataInternal, {
-      externalId: identity.subject,
-      ...args,
-    });
+    return await (ctx as any).runMutation(
+      internal.internal.updateOnboardingDataInternal,
+      {
+        externalId: identity.subject,
+        ...args,
+      }
+    );
   },
 });
 
@@ -640,6 +641,13 @@ export const getOnboardingStatus = query({
     // });
 
     return result;
+  },
+});
+
+// Internal query to list all users - for testing purposes only
+export const listAll = internalQuery({
+  handler: async (ctx) => {
+    return await ctx.db.query('users').collect();
   },
 });
 

@@ -716,20 +716,34 @@ export const create = mutation({
     let imageStorageIdValue: Id<'_storage'> | undefined;
 
     if (args.image) {
-      if (typeof args.image === 'string') {
-        // SECURITY: Validate URL format
-        imageValue = SecurityValidators.validateUrl(args.image) || undefined;
-      } else {
-        // Store storage ID directly - more reliable than converting to URL
-        imageStorageIdValue = args.image;
-        // Try to get URL for backward compatibility, but don't block if it fails
+      // Check if it looks like a storage ID (32 char alphanumeric string)
+      const isStorageId =
+        typeof args.image === 'string' && /^[a-z0-9]{32}$/.test(args.image);
+
+      if (isStorageId) {
+        // Treat as storage ID
+        imageStorageIdValue = args.image as Id<'_storage'>;
+        // Get URL for backward compatibility - storage URLs are trusted, no validation needed
+        const imageUrl = await ctx.storage.getUrl(imageStorageIdValue);
+        if (imageUrl) {
+          imageValue = imageUrl;
+        }
+      } else if (typeof args.image === 'string') {
+        // For string URLs, validate them
+        // But be lenient - if validation fails, just skip the image rather than throwing
         try {
-          const imageUrl = await ctx.storage.getUrl(args.image);
-          if (imageUrl) {
-            imageValue = imageUrl;
-          }
-        } catch {
-          // Failed to get URL for storage ID - image will remain undefined
+          imageValue = SecurityValidators.validateUrl(args.image) || undefined;
+        } catch (error) {
+          console.warn('Image URL validation failed, skipping image:', error);
+          // Don't throw - just don't set the image
+          imageValue = undefined;
+        }
+      } else {
+        // This shouldn't happen with current types, but handle it just in case
+        imageStorageIdValue = args.image;
+        const imageUrl = await ctx.storage.getUrl(args.image);
+        if (imageUrl) {
+          imageValue = imageUrl;
         }
       }
     }
@@ -748,7 +762,7 @@ export const create = mutation({
 
     // Update tag usage counts
     if (args.tags && args.tags.length > 0) {
-      await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
+      await (ctx.scheduler as any).runAfter(0, internal.tags.updateTagCounts, {
         tagsToAdd: args.tags,
       });
     }
@@ -982,10 +996,10 @@ export const addRating = mutation({
     }
 
     const now = new Date().toISOString();
-    let tags: string[] = [];
+    const tags: string[] = [];
 
     // Get emoji metadata for tags
-    const emojiData = await ctx.db
+    const _emojiData = await ctx.db
       .query('emojis')
       .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
       .first();
@@ -1120,6 +1134,7 @@ export const quickReact = mutation({
 
     // Determine default value based on emoji sentiment
     let defaultValue = 3;
+    const tags: string[] = [];
     const emojiData = await ctx.db
       .query('emojis')
       .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
@@ -1737,10 +1752,10 @@ export const addRatingForSeed = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = new Date().toISOString();
-    let tags: string[] = [];
+    const tags: string[] = [];
 
     // Get emoji metadata for tags
-    const emojiData = await ctx.db
+    const _emojiData = await ctx.db
       .query('emojis')
       .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
       .first();
@@ -1825,7 +1840,6 @@ export const reactToVibeForSeed = internalMutation({
         value: defaultValue,
         review: `Quick reaction: ${args.emoji}`,
         createdAt: new Date().toISOString(),
-        tags: tags || [],
       });
 
       // Add vibe tags to user interests after successful seed rating
@@ -2532,7 +2546,18 @@ export const updateVibe = mutation({
 
     // Handle image updates
     if (args.image !== undefined) {
-      if (typeof args.image === 'string') {
+      // Check if it looks like a storage ID (32 char alphanumeric string)
+      const isStorageId =
+        typeof args.image === 'string' && /^[a-z0-9]{32}$/.test(args.image);
+
+      if (isStorageId) {
+        // Treat as storage ID
+        updateData.imageStorageId = args.image as Id<'_storage'>;
+        const imageUrl = await ctx.storage.getUrl(updateData.imageStorageId);
+        if (imageUrl) {
+          updateData.image = imageUrl;
+        }
+      } else if (typeof args.image === 'string') {
         // Legacy string URL support
         updateData.image = args.image;
       } else {
@@ -2558,15 +2583,23 @@ export const updateVibe = mutation({
       const tagsToRemove = oldTags.filter((tag) => !newTags.includes(tag));
 
       if (tagsToAdd.length > 0) {
-        await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
-          tagsToAdd,
-        });
+        await (ctx.scheduler as any).runAfter(
+          0,
+          internal.tags.updateTagCounts,
+          {
+            tagsToAdd,
+          }
+        );
       }
 
       if (tagsToRemove.length > 0) {
-        await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
-          tagsToRemove,
-        });
+        await (ctx.scheduler as any).runAfter(
+          0,
+          internal.tags.updateTagCounts,
+          {
+            tagsToRemove,
+          }
+        );
       }
     }
 
@@ -2614,7 +2647,7 @@ export const deleteVibe = mutation({
 
     // Remove tags from count (since the vibe is no longer visible)
     if (vibe.tags && vibe.tags.length > 0) {
-      await ctx.scheduler.runAfter(0, internal.tags.updateTagCounts, {
+      await (ctx.scheduler as any).runAfter(0, internal.tags.updateTagCounts, {
         tagsToRemove: vibe.tags,
       });
     }

@@ -56,7 +56,7 @@ const schema = defineSchema({
     deleted: v.optional(v.boolean()), // Whether user is soft-deleted
     deletedAt: v.optional(v.number()), // Timestamp of deletion
     deletionReason: v.optional(v.string()), // Reason for deletion
-    
+
     // Admin flag
     isAdmin: v.optional(v.boolean()), // Whether user has admin privileges
   })

@@ -20,7 +20,7 @@ interface EmojiRatingCycleDisplayProps {
 }
 
 const DEFAULT_EMOJIS = [
-  '❓',
+  '👀',
   '😍',
   '🔥',
   '😱',
@@ -42,7 +42,10 @@ export function EmojiRatingCycleDisplay({
   delay = 0,
   // variant = 'color',
 }: EmojiRatingCycleDisplayProps) {
-  const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
+  // Start at a random emoji index for visual variety
+  const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(() =>
+    Math.floor(Math.random() * DEFAULT_EMOJIS.length)
+  );
   const [isHovered, setIsHovered] = React.useState(false);
   const [emojiTransition, setEmojiTransition] = React.useState<
     'in' | 'out' | 'idle'
@@ -52,6 +55,12 @@ export function EmojiRatingCycleDisplay({
 
   // Get current emoji
   const currentEmoji = emojiOptions[currentEmojiIndex];
+
+  // Generate a random initial delay between 0-2000ms for staggering
+  const randomInitialDelay = React.useMemo(
+    () => Math.floor(Math.random() * 2000),
+    []
+  );
 
   // Cycle through emojis with CSS transitions
   React.useEffect(() => {
@@ -74,18 +83,21 @@ export function EmojiRatingCycleDisplay({
       return interval;
     };
 
-    if (delay > 0) {
+    // Use the combined delay (prop delay + random initial delay)
+    const totalDelay = delay + randomInitialDelay;
+
+    if (totalDelay > 0) {
       const delayTimeout = setTimeout(() => {
         const interval = startCycling();
         return () => clearInterval(interval);
-      }, delay);
+      }, totalDelay);
 
       return () => clearTimeout(delayTimeout);
     } else {
       const interval = startCycling();
       return () => clearInterval(interval);
     }
-  }, [emojiOptions.length, isHovered, delay]);
+  }, [emojiOptions.length, isHovered, delay, randomInitialDelay]);
 
   return (
     <RatingPopover

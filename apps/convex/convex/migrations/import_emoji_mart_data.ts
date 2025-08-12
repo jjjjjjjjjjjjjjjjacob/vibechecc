@@ -1,8 +1,9 @@
 import { internalMutation } from '../_generated/server';
 import { getEmojiColor, getEmojiSentiment } from '../lib/emojiColors';
+import * as emojiMartDataImport from '@emoji-mart/data';
 
-// Import emoji-mart data - it's a default export with the actual data
-const emojiMartData = require('@emoji-mart/data');
+// Cast to any to bypass type checking for JSON data
+const emojiMartData = emojiMartDataImport as any;
 
 // Internal migration to import emoji-mart data
 export const importEmojiMartData = internalMutation({
@@ -115,4 +116,3 @@ export const getEmojiMartCategories = internalMutation({
     );
   },
 });
-

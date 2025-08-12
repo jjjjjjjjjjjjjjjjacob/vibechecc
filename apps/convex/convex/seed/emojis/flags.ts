@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const flagEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const flagEmojis: Emoji[] = [
   // Common country flags
   {
     emoji: '🇺🇸',
@@ -604,7 +604,7 @@ export const flagEmojis: Omit<Emoji, 'sentiment'>[] = [
     category: 'flags',
     color: '#0000FF',
   },
-  
+
   // Special flags
   {
     emoji: '🏳️',

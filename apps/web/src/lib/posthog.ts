@@ -187,6 +187,30 @@ export const trackEvents = {
       username,
     }),
 
+  // Notification events
+  notificationClicked: (
+    notificationId: string,
+    notificationType: string,
+    targetId?: string
+  ) =>
+    analytics.capture('notification_clicked', {
+      notification_id: notificationId,
+      notification_type: notificationType,
+      target_id: targetId,
+    }),
+
+  notificationMarkedAsRead: (
+    notificationId: string,
+    method: 'click' | 'button' | 'bulk'
+  ) =>
+    analytics.capture('notification_marked_as_read', {
+      notification_id: notificationId,
+      method,
+    }),
+
+  notificationsOpened: (unreadCount: number) =>
+    analytics.capture('notifications_opened', { unread_count: unreadCount }),
+
   // UI interactions
   emojiPopoverOpened: (vibeId?: string, context?: string) =>
     analytics.capture('emoji_popover_opened', { vibe_id: vibeId, context }),

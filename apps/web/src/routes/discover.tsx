@@ -13,11 +13,11 @@ import {
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from 'lucide-react';
-import {
-  useTheme,
-  type PrimaryColorTheme,
-  type SecondaryColorTheme,
-} from '@/features/theming/components/theme-provider';
+import { useTheme } from '@/stores/theme-initializer';
+import type {
+  PrimaryColorTheme,
+  SecondaryColorTheme,
+} from '@/stores/theme-store';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 
