@@ -196,11 +196,6 @@ export function preloadCriticalAssets() {
 
   const criticalAssets = [
     // Core fonts
-    {
-      href: '/fonts/noto-color-emoji-core.woff2',
-      as: 'font',
-      type: 'font/woff2',
-    },
     { href: '/fonts/GeistSans-Variable.woff2', as: 'font', type: 'font/woff2' },
   ];
 

@@ -55,6 +55,7 @@ export function EnvironmentAccessGuard({
     if (!isInitialized) {
       // Set a timeout to prevent infinite loading
       const timeout = setTimeout(() => {
+        // eslint-disable-next-line no-console
         console.warn('PostHog initialization timeout, allowing access');
         setHasAccess(true);
         setIsLoading(false);

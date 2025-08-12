@@ -33,6 +33,23 @@ vi.mock('@tanstack/react-router', () => ({
   )),
 }));
 
+// Mock header nav store
+vi.mock('@/stores/header-nav-store', () => ({
+  useHeaderNavStore: () => ({
+    setNavState: vi.fn(),
+  }),
+}));
+
+// Mock PostHog hook
+vi.mock('@/hooks/usePostHog', () => ({
+  usePostHog: () => ({
+    trackEvents: {
+      notificationMarkedAsRead: vi.fn(),
+      notificationClicked: vi.fn(),
+    },
+  }),
+}));
+
 // Mock intersection observer
 const mockIntersectionObserver = vi.fn();
 mockIntersectionObserver.mockReturnValue({
@@ -152,7 +169,7 @@ const mockNotifications: Notification[] = [
     type: 'follow',
     triggerUserId: 'user2',
     targetId: 'user2',
-    title: 'John followed you',
+    title: 'John started following you',
     description: 'check out their profile',
     read: false,
     createdAt: Date.now() - 3600000, // 1 hour ago
@@ -335,21 +352,25 @@ describe('NotificationDropdown', () => {
   });
 
   it('renders notification items correctly', () => {
+    useNotificationsInfinite.mockReturnValue({
+      data: {
+        pages: [{ notifications: mockNotifications, nextCursor: null }],
+      },
+      isLoading: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
+    });
+
     renderWithQueryClient(
       <NotificationDropdown open={true} onOpenChange={vi.fn()}>
         <button>Notifications</button>
       </NotificationDropdown>
     );
 
-    // Check that notification items are rendered (text is split across spans)
-    expect(screen.getByText('John started following you')).toBeInTheDocument();
-    expect(screen.getByText('Jane reacted to your vibe')).toBeInTheDocument();
-    // Both notifications should be rendered
-    expect(
-      screen.getAllByText(
-        /John started following you|Jane reacted to your vibe/
-      )
-    ).toHaveLength(2);
+    // Check that notification items are rendered
+    expect(screen.getByText(/john started following you/)).toBeInTheDocument();
+    expect(screen.getByText(/jane reacted to your vibe/)).toBeInTheDocument();
   });
 
   it('handles mark all as read', async () => {
@@ -609,8 +630,8 @@ describe('NotificationDropdown', () => {
     );
 
     // Both notifications from different pages should be visible
-    expect(screen.getByText('John started following you')).toBeInTheDocument();
-    expect(screen.getByText('Jane reacted to your vibe')).toBeInTheDocument();
+    expect(screen.getByText(/john started following you/)).toBeInTheDocument();
+    expect(screen.getByText(/jane reacted to your vibe/)).toBeInTheDocument();
   });
 
   it('handles empty pages in notification data', () => {
@@ -635,8 +656,8 @@ describe('NotificationDropdown', () => {
     );
 
     // Should handle null pages gracefully and show available notifications
-    expect(screen.getByText('John started following you')).toBeInTheDocument();
-    expect(screen.getByText('Jane reacted to your vibe')).toBeInTheDocument();
+    expect(screen.getByText(/john started following you/)).toBeInTheDocument();
+    expect(screen.getByText(/jane reacted to your vibe/)).toBeInTheDocument();
   });
 
   it('calculates unread counts correctly', () => {

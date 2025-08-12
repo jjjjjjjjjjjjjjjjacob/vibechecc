@@ -257,7 +257,7 @@ export function VibeCard({
   if (finalVariant === 'search-result') {
     return (
       <>
-        <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+        <Card className="bg-card/30 border-border/50 overflow-hidden transition-all duration-200 hover:shadow-md">
           <CardContent className="p-0">
             <div className="flex gap-4 p-4">
               {/* Image - Takes up 2/3 of the card */}
@@ -265,9 +265,9 @@ export function VibeCard({
                 to="/vibes/$vibeId"
                 params={{ vibeId: vibe.id }}
                 onClick={() => trackEvents.vibeViewed(vibe.id)}
-                className="relative block flex-1 overflow-hidden rounded-lg"
+                className="relative flex-1 overflow-hidden rounded-lg"
               >
-                <div className="aspect-[4/3] w-full">
+                <div className="h-full w-full md:aspect-[4/3]">
                   {usePlaceholder ? (
                     <SimpleVibePlaceholder
                       title={vibe.title}
@@ -477,9 +477,7 @@ export function VibeCard({
                     }}
                     aria-label={`View ${primaryEmojiRating.emoji} rating details`}
                   >
-                    <span className="font-noto-color text-lg">
-                      {primaryEmojiRating.emoji}
-                    </span>
+                    <span className="text-lg">{primaryEmojiRating.emoji}</span>
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-white">
                         {primaryEmojiRating.value.toFixed(1)}
@@ -557,7 +555,7 @@ export function VibeCard({
     <>
       <Card
         className={cn(
-          'relative overflow-hidden transition-all duration-200 hover:shadow-md',
+          'bg-popover/20 border-border/50 relative overflow-hidden transition-all duration-200 hover:shadow-md',
           'h-full',
           finalVariant === 'feed-masonry' && 'break-inside-avoid',
           className
@@ -643,7 +641,7 @@ export function VibeCard({
                     : (() => {
                         switch (finalVariant) {
                           case 'feed-single':
-                            return 'aspect-video';
+                            return 'sm:aspect-video';
                           case 'feed-masonry':
                           case 'feed-grid':
                             return 'aspect-[3/4]';

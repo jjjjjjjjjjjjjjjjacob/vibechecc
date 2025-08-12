@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/utils/tailwind-utils';
 import { RatingPopover } from './rating-popover';
 import type { EmojiRating, EmojiRatingMetadata } from '@viberatr/types';
@@ -19,7 +18,7 @@ interface EmojiRatingSelectorProps {
 }
 
 const DEFAULT_EMOJIS = [
-  '❓',
+  '👀',
   '😍',
   '🔥',
   '😱',
@@ -46,8 +45,21 @@ export function EmojiRatingSelector({
   const emojiOptions = React.useMemo(() => {
     if (topEmojis.length > 0) {
       // Mix top emojis with question marks
-      const emojis = topEmojis.map((r) => r.emoji);
-      return [...emojis, '❓', '❓'].slice(0, 10);
+      const emojis = topEmojis
+        .map((r) => r.emoji)
+        .concat(
+          topEmojis.length > 5
+            ? []
+            : Array(5 - topEmojis.length)
+                .fill(null)
+                .map(
+                  () =>
+                    DEFAULT_EMOJIS[
+                      Math.floor(Math.random() * DEFAULT_EMOJIS.length)
+                    ]
+                )
+        );
+      return emojis.slice(0, 10);
     }
     return DEFAULT_EMOJIS;
   }, [topEmojis]);
@@ -101,106 +113,101 @@ export function EmojiRatingSelector({
             : undefined
         }
       >
-        <motion.button
+        <button
           className={cn(
             'relative flex items-center gap-3 rounded-lg',
             'bg-secondary/50 hover:bg-secondary',
             'w-full px-4 py-3',
             'transition-all duration-200',
-            'hover:scale-[1.02] active:scale-[0.98]',
+            'hover:-translate-y-0.5 hover:scale-[1.02] active:scale-[0.98]',
             'group cursor-pointer'
           )}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          whileHover={{ y: -1 }}
-          whileTap={{ scale: 0.98 }}
         >
           <div className="flex flex-1 items-center gap-3">
             {/* Emoji Container */}
             <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden">
-              <AnimatePresence mode="popLayout">
-                <motion.span
-                  key={currentEmojiData.emoji}
-                  className="absolute text-3xl"
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -30 }}
-                  transition={{
-                    duration: 0.3,
-                    ease: 'easeInOut',
-                  }}
-                >
-                  {currentEmojiData.emoji}
-                </motion.span>
-              </AnimatePresence>
+              <span
+                key={currentEmojiData.emoji}
+                className={cn(
+                  'absolute text-3xl',
+                  'animate-in fade-in-0 slide-in-from-right-8',
+                  'duration-300'
+                )}
+              >
+                {currentEmojiData.emoji}
+              </span>
             </div>
 
             {/* Rating Display */}
             <div className="flex-1 text-left">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${currentEmojiData.emoji}-${currentEmojiData.value}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-1"
-                >
-                  {currentEmojiData.emoji === '❓' ? (
-                    <p className="text-muted-foreground text-sm">
-                      click to rate with an emoji
-                    </p>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">
-                          {currentEmojiData.value.toFixed(1)}
-                        </span>
+              <div
+                key={`${currentEmojiData.emoji}-${currentEmojiData.value}`}
+                className={cn(
+                  'space-y-1',
+                  'animate-in fade-in-0 slide-in-from-bottom-2',
+                  'duration-200'
+                )}
+              >
+                {currentEmojiData.emoji === '❓' ||
+                currentEmojiData.count === 0 ? (
+                  <p className="text-muted-foreground text-sm">
+                    {currentEmojiData.count === 0
+                      ? `be the first to rate with ${currentEmojiData.emoji}`
+                      : 'click to rate with an emoji'}
+                  </p>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">
+                        {currentEmojiData.value.toFixed(1)}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        out of 5
+                      </span>
+                      {currentEmojiData.count && currentEmojiData.count > 0 && (
                         <span className="text-muted-foreground text-xs">
-                          out of 5
+                          ({currentEmojiData.count} rating
+                          {currentEmojiData.count &&
+                          currentEmojiData.count !== 1
+                            ? 's'
+                            : ''}
+                          )
                         </span>
-                        {currentEmojiData.count &&
-                          currentEmojiData.count > 0 && (
-                            <span className="text-muted-foreground text-xs">
-                              ({currentEmojiData.count} rating
-                              {currentEmojiData.count &&
-                              currentEmojiData.count !== 1
-                                ? 's'
-                                : ''}
-                              )
-                            </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={cn(
+                            'text-xs',
+                            'animate-in zoom-in-50 duration-200',
+                            i < Math.floor(currentEmojiData.value)
+                              ? 'opacity-100'
+                              : 'opacity-30'
                           )}
-                      </div>
-                      <div className="flex items-center gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <motion.span
-                            key={i}
-                            className={cn(
-                              'text-xs',
-                              i < Math.floor(currentEmojiData.value)
-                                ? 'opacity-100'
-                                : 'opacity-30'
-                            )}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: i * 0.05 }}
-                          >
-                            {currentEmojiData.emoji}
-                          </motion.span>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              </AnimatePresence>
+                          style={{
+                            animationDelay: `${i * 50}ms`,
+                          }}
+                        >
+                          {currentEmojiData.emoji}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Hover indicator */}
-          <motion.div
-            className="text-muted-foreground"
-            animate={{ x: isHovered ? 5 : 0 }}
-            transition={{ duration: 0.2 }}
+          <div
+            className={cn(
+              'text-muted-foreground transition-transform duration-200',
+              isHovered && 'translate-x-1'
+            )}
           >
             <svg
               width="16"
@@ -217,8 +224,8 @@ export function EmojiRatingSelector({
                 strokeLinejoin="round"
               />
             </svg>
-          </motion.div>
-        </motion.button>
+          </div>
+        </button>
       </RatingPopover>
 
       {topEmojis.length === 0 && (

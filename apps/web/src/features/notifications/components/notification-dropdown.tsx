@@ -149,13 +149,13 @@ export function NotificationDropdown({
   };
 
   const content = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between p-3">
+    <div className="flex h-full flex-col p-3">
+      <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold lowercase">notifications</h2>
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 px-2 text-xs lowercase"
+          className="h-8 text-xs lowercase"
           onClick={handleMarkAllAsRead}
           disabled={!unreadCounts?.all}
         >
@@ -180,7 +180,7 @@ export function NotificationDropdown({
           ) : notifications.length === 0 ? (
             <NotificationEmptyState filter={activeFilter} />
           ) : (
-            <div className="divide-border/50 divide-y">
+            <div className="divide-border/50 mt-1 divide-y">
               {notifications.map((notification) => (
                 <NotificationItem
                   key={notification._id}
@@ -253,7 +253,11 @@ export function NotificationDropdown({
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent className="w-96 p-0" align="end" sideOffset={8}>
+      <DropdownMenuContent
+        className="bg-background/60 w-96 p-0 backdrop-blur-md"
+        align="end"
+        sideOffset={8}
+      >
         <div className="h-96">{content}</div>
       </DropdownMenuContent>
     </DropdownMenu>

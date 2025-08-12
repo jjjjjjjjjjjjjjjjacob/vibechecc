@@ -19,6 +19,7 @@ describe('emoji ratings', () => {
 
       const result = await t
         .withIdentity(mockIdentity)
+        // @ts-expect-error - TypeScript depth issue with mutation
         .mutation(api.emojiRatings.createOrUpdateEmojiRating, {
           vibeId: 'test-vibe-123',
           value: 4,

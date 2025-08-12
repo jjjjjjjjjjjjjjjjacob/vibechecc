@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Moon, Sun, Laptop } from 'lucide-react';
-import { useTheme } from './theme-provider';
+import { useTheme } from '@/stores/theme-initializer';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -39,7 +39,10 @@ export function ThemeToggle() {
           <span className="sr-only">toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent
+        align="end"
+        className="bg-background/60 backdrop-blur-md"
+      >
         <DropdownMenuItem
           onClick={() => setTheme('light')}
           className="lowercase"

@@ -2,7 +2,13 @@
 @import 'tw-animate-css';
 @import './fonts.css';
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Custom extra-small breakpoints */
+@custom-variant xs (@media (width >= 475px));
+@custom-variant 2xs (@media (width >= 425px));
+@custom-variant 3xs (@media (width >= 375px));
+@custom-variant 4xs (@media (width >= 320px));
 
 /* Global themes */
 @theme inline {
@@ -11,11 +17,11 @@
   --font-geist: 'GeistSans';
   --font-geist-mono: 'GeistMono';
   --font-doto: 'Doto';
-  --font-noto: var(--font-emoji-outline);
-  --font-noto-color: var(--font-emoji);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --text-3xs: 0.5rem;
+  --text-2xs: 0.625rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -75,11 +81,6 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -92,6 +93,14 @@
   /* Default theme colors (pink-orange gradient) */
   --theme-primary: hsl(330 81% 50%); /* pink-600 */
   --theme-secondary: hsl(25 95% 48%); /* orange-600 */
+  --theme-accent: hsl(173 80% 40%); /* teal-600 */
+
+  /* Chart colors - reference theme colors */
+  --chart-1: var(--theme-primary);
+  --chart-2: var(--theme-secondary);
+  --chart-3: var(--theme-accent);
+  --chart-4: var(--theme-primary);
+  --chart-5: var(--theme-secondary);
 }
 
 .dark {
@@ -114,11 +123,13 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Chart colors inherit from theme colors */
+  --chart-1: var(--theme-primary);
+  --chart-2: var(--theme-secondary);
+  --chart-3: var(--theme-accent);
+  --chart-4: var(--theme-primary);
+  --chart-5: var(--theme-secondary);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -134,7 +145,7 @@
     @apply border-border outline-ring/50 cursor-default;
   }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply text-foreground font-sans;
   }
 }
 
@@ -199,13 +210,19 @@
     height: 0;
   }
   to {
-    height: var(--radix-accordion-content-height);
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
   }
 }
 
 @keyframes accordion-up {
   from {
-    height: var(--radix-accordion-content-height);
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
   }
   to {
     height: 0;
@@ -288,6 +305,18 @@
   }
 }
 
+/* Fade in down animation for CTA */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Smooth emoji transitions for rating selector */
 @keyframes emoji-slide-in {
   0% {
@@ -297,6 +326,7 @@
   50% {
     opacity: 0.5;
     transform: translateX(15px) scale(0.9);
+    filter: blur(5px);
   }
   100% {
     opacity: 1;
@@ -312,6 +342,7 @@
   50% {
     opacity: 0.5;
     transform: translateX(-15px) scale(0.9);
+    filter: blur(5px);
   }
   100% {
     opacity: 0;
@@ -391,6 +422,65 @@
   }
 }
 
+/* Flip clock animations */
+@keyframes flip-up-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0px);
+  }
+  50% {
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-15px) rotateX(-45deg);
+    filter: blur(0px);
+  }
+}
+
+@keyframes flip-up-in {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) rotateX(45deg);
+    filter: blur(0px);
+  }
+  50% {
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes flip-down-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(15px) rotateX(45deg);
+    filter: blur(2px);
+  }
+}
+
+@keyframes flip-down-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-15px) rotateX(-45deg);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0px);
+  }
+}
+
 .animate-accordion-down {
   animation: accordion-down 0.2s ease-out;
 }
@@ -403,6 +493,22 @@
   animation: wiggle 0.5s ease-in-out;
 }
 
+.animate-flip-up-out {
+  animation: flip-up-out 0.1s ease-out forwards;
+}
+
+.animate-flip-up-in {
+  animation: flip-up-in 0.1s ease-out forwards;
+}
+
+.animate-flip-down-out {
+  animation: flip-down-out 0.1s ease-out forwards;
+}
+
+.animate-flip-down-in {
+  animation: flip-down-in 0.1s ease-out forwards;
+}
+
 .animate-pulse-scale {
   animation: pulse-scale 0.5s ease-in-out;
 }
@@ -413,6 +519,10 @@
 
 .animate-fade-in-down {
   animation: fade-in-down 0.3s ease-out;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-up 0.3s ease-out;
 }
 
 .animate-emoji-slide-in {
@@ -451,6 +561,7 @@
   .animate-pulse-scale,
   .animate-number-pop,
   .animate-fade-in-down,
+  .animate-fade-in-up,
   .animate-emoji-slide-in,
   .animate-emoji-slide-out,
   .animate-rating-reveal,
@@ -464,6 +575,11 @@
 
   /* Keep opacity transitions for accessibility */
   .animate-fade-in-down {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .animate-fade-in-up {
     opacity: 1 !important;
     transform: none !important;
   }
@@ -519,46 +635,16 @@
 }
 
 .animate-menu-slide-down {
-  animation: menu-slide-down 0.3s ease-out;
+  animation: menu-slide-down 0.5s ease-out;
 }
 
 .animate-menu-slide-up {
-  animation: menu-slide-up 0.3s ease-out;
+  animation: menu-slide-up 0.5s ease-out;
 }
 
 .container {
   @apply mx-auto w-full px-4;
-  max-width: 100%;
-}
-
-@media (min-width: 640px) {
-  .container {
-    max-width: 640px;
-  }
-}
-
-@media (min-width: 768px) {
-  .container {
-    max-width: 768px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container {
-    max-width: 1024px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .container {
-    max-width: 1280px;
-  }
-}
-
-@media (min-width: 1536px) {
-  .container {
-    max-width: 1536px;
-  }
+  max-width: 1536px;
 }
 
 .cl-formButtonPrimary,
@@ -1112,4 +1198,22 @@ h1[data-localization-key='userProfile.navbar.title'] {
 
 [data-theme-secondary='yellow'] {
   --theme-secondary: hsl(54 92% 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+em-emoji-picker {
+  background: transparent;
+  background-color: transparent;
+  height: 100%;
+  min-height: 2rem;
+  max-height: 100%;
+  box-shadow: none;
 }

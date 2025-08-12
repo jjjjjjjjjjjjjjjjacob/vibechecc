@@ -3,34 +3,32 @@ import { internal } from './_generated/api';
 import { v } from 'convex/values';
 import { nanoid } from 'nanoid';
 
-// Import emojis from organized files
-import { smileyEmojis } from './seed/emojis/smileys';
-import { peopleEmojis } from './seed/emojis/people';
-import { animalEmojis } from './seed/emojis/animals';
-import { foodEmojis } from './seed/emojis/food';
-import { activityEmojis } from './seed/emojis/activities';
-import { travelEmojis } from './seed/emojis/travel';
-import { objectEmojis } from './seed/emojis/objects';
-import { symbolEmojis } from './seed/emojis/symbols';
+// Full OpenMoji dataset - using consolidated emoji list
+import { allOpenMojiEmojis } from './seed/emojis/all_openmoji';
+
 import type { Emoji } from './schema';
 
-// Combine all emoji arrays
-const allEmojis = [
-  ...smileyEmojis,
-  ...peopleEmojis,
-  ...animalEmojis,
-  ...foodEmojis,
-  ...activityEmojis,
-  ...travelEmojis,
-  ...objectEmojis,
-  ...symbolEmojis,
-];
+// Use full OpenMoji dataset (3000+ emojis with keywords)
+const allEmojis = allOpenMojiEmojis;
+
+// Helper to get unicode from emoji character
+function getUnicodeFromEmoji(emoji: string): string {
+  return emoji
+    .split('')
+    .map((char) => {
+      const code = char.codePointAt(0);
+      return code
+        ? 'U+' + code.toString(16).toUpperCase().padStart(4, '0')
+        : '';
+    })
+    .filter(Boolean)
+    .join(' ');
+}
 
 // Helper function to determine sentiment based on emoji characteristics
 function getSentiment(emoji: Omit<Emoji, 'sentiment'>): Emoji['sentiment'] {
-  const { name, keywords, tags } = emoji;
-  const text =
-    `${name} ${keywords.join(' ')} ${(tags || []).join(' ')}`.toLowerCase();
+  const { name, keywords } = emoji;
+  const text = `${name} ${keywords.join(' ')}`.toLowerCase();
 
   // Positive indicators
   if (
@@ -79,12 +77,14 @@ export const seed = action({
       // Step 1: Clear all existing data
       // eslint-disable-next-line no-console
       console.log('Step 1: Clearing existing data...');
-      await ctx.runMutation(internal.seed.clearAllData);
+      await (ctx as any).runMutation(internal.seed.clearAllData);
 
       // Step 2: Seed emoji database
       // eslint-disable-next-line no-console
       console.log('Step 2: Seeding emoji database...');
-      const emojiResult = (await ctx.runMutation(internal.seed.seedEmojis)) as {
+      const emojiResult = (await (ctx as any).runMutation(
+        internal.seed.seedEmojis
+      )) as {
         count: number;
       };
       // eslint-disable-next-line no-console
@@ -93,18 +93,24 @@ export const seed = action({
       // Step 3: Create users (20 for good development data)
       // eslint-disable-next-line no-console
       console.log('Step 3: Creating users...');
-      const userResult = (await ctx.runMutation(internal.seed.seedUsers, {
-        count: 20,
-      })) as { count: number };
+      const userResult = (await (ctx as any).runMutation(
+        internal.seed.seedUsers,
+        {
+          count: 20,
+        }
+      )) as { count: number };
       // eslint-disable-next-line no-console
       console.log(`Created ${userResult.count} users`);
 
       // Step 4: Create vibes (25 for variety)
       // eslint-disable-next-line no-console
       console.log('Step 4: Creating vibes...');
-      const vibeResult = (await ctx.runMutation(internal.seed.seedVibes, {
-        count: 100,
-      })) as { count: number };
+      const vibeResult = (await (ctx as any).runMutation(
+        internal.seed.seedVibes,
+        {
+          count: 100,
+        }
+      )) as { count: number };
       // eslint-disable-next-line no-console
       console.log(`Created ${vibeResult.count} vibes`);
 
@@ -120,7 +126,9 @@ export const seed = action({
       // Step 6: Create tags from vibes
       // eslint-disable-next-line no-console
       console.log('Step 6: Creating tags...');
-      const tagResult = (await ctx.runMutation(internal.seed.seedTags)) as {
+      const tagResult = (await (ctx as any).runMutation(
+        internal.seed.seedTags
+      )) as {
         count: number;
       };
       // eslint-disable-next-line no-console
@@ -207,12 +215,13 @@ export const seedEmojis = internalMutation({
 
     for (const emojiData of allEmojis) {
       // Add sentiment to the emoji data
-      const completeEmoji: Emoji = {
+      const completeEmoji = {
         ...emojiData,
         sentiment: getSentiment(emojiData),
+        unicode: getUnicodeFromEmoji(emojiData.emoji),
       };
 
-      await ctx.db.insert('emojis', completeEmoji);
+      await ctx.db.insert('emojis', completeEmoji as any);
       count++;
     }
 

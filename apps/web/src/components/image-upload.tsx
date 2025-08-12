@@ -67,6 +67,7 @@ export function ImageUpload({
         onImageUpload(result.storageId, result.url);
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Upload failed:', error);
       alert('Failed to upload image. Please try again.');
       setPreviewUrl('');

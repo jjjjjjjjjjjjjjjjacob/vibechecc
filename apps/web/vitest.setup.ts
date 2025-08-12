@@ -1,423 +1,523 @@
 /// <reference lib="dom" />
-import '@testing-library/jest-dom/vitest';
 import { vi, afterEach } from 'vitest';
-import { cleanup } from '@testing-library/react';
-import * as React from 'react';
+import React from 'react';
 
-// Mock data
-const mockPopularEmojis = [
-  { emoji: '🔥', name: 'fire', color: '#FF6B6B', keywords: ['hot', 'flame'] },
-  {
-    emoji: '😍',
-    name: 'heart eyes',
-    color: '#FF6B9D',
-    keywords: ['love', 'crush'],
-  },
-  {
-    emoji: '💯',
-    name: '100',
-    color: '#4ECDC4',
-    keywords: ['perfect', 'score'],
-  },
-];
+// Mock all external modules before anything else
+vi.mock('lucide-react', () => {
+  const MockIcon = React.forwardRef((props: any, ref: any) =>
+    React.createElement('svg', { ...props, ref }, null)
+  );
+  MockIcon.displayName = 'MockIcon';
 
-// Mock file URL data
-const mockFileUrl = 'https://example.com/mock-image.jpg';
+  // List of all icons used in the codebase
+  const iconNames = [
+    'AlertCircle',
+    'AlertTriangle',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'ArrowUp',
+    'ArrowUpDown',
+    'Bell',
+    'Calendar',
+    'CalendarDays',
+    'Camera',
+    'Check',
+    'CheckCircle',
+    'CheckIcon',
+    'ChevronDown',
+    'ChevronDownIcon',
+    'ChevronLeft',
+    'ChevronRight',
+    'ChevronUp',
+    'ChevronUpIcon',
+    'Circle',
+    'CircleIcon',
+    'Clock',
+    'Copy',
+    'Download',
+    'Edit',
+    'Edit2',
+    'Eye',
+    'Filter',
+    'Flag',
+    'Flame',
+    'Hash',
+    'Heart',
+    'Home',
+    'Image',
+    'ImageIcon',
+    'Info',
+    'Laptop',
+    'Layers',
+    'LayoutGrid',
+    'List',
+    'Loader2',
+    'LogIn',
+    'LogOut',
+    'MessageCircle',
+    'MessageSquare',
+    'Moon',
+    'MoreHorizontal',
+    'Palette',
+    'PanelLeftIcon',
+    'Plus',
+    'PlusCircle',
+    'Search',
+    'SearchIcon',
+    'Settings',
+    'Settings2',
+    'Shield',
+    'SlidersHorizontal',
+    'Sparkles',
+    'Star',
+    'Sun',
+    'Tag',
+    'Trash2',
+    'TrendingUp',
+    'User',
+    'UserMinus',
+    'UserPlus',
+    'Users',
+    'X',
+    'XIcon',
+    'Zap',
+  ];
 
-const mockCategoryEmojis = [
-  {
-    emoji: '😀',
-    name: 'grinning face',
-    color: '#FFD93D',
-    keywords: ['smile', 'happy'],
-    category: 'smileys',
-  },
-  {
-    emoji: '😃',
-    name: 'grinning face with big eyes',
-    color: '#FFD93D',
-    keywords: ['smile', 'happy'],
-    category: 'smileys',
-  },
-  {
-    emoji: '😄',
-    name: 'grinning face with smiling eyes',
-    color: '#FFD93D',
-    keywords: ['smile', 'happy'],
-    category: 'smileys',
-  },
-  {
-    emoji: '👋',
-    name: 'waving hand',
-    color: '#FFCB6B',
-    keywords: ['hello', 'goodbye'],
-    category: 'people',
-  },
-  {
-    emoji: '👍',
-    name: 'thumbs up',
-    color: '#FFCB6B',
-    keywords: ['like', 'approve'],
-    category: 'people',
-  },
-];
+  // Create exports object with all icon names mapped to MockIcon
+  const mockExports: Record<string, any> = {};
+  iconNames.forEach((iconName) => {
+    mockExports[iconName] = MockIcon;
+  });
 
-const mockSearchResults = [
-  { emoji: '🔥', name: 'fire', color: '#FF6B6B', keywords: ['hot', 'flame'] },
-  {
-    emoji: '🔴',
-    name: 'red circle',
-    color: '#FF0000',
-    keywords: ['red', 'circle'],
-  },
-];
+  return mockExports;
+});
 
-// Mock @convex-dev/react-query to return mock data immediately
-const mockConvexQuery = vi.fn((query: unknown, args: any) => {
-  // Default structure for all queries
-  const baseQuery = {
-    queryKey: ['convexQuery', query, args],
-    queryFn: async (): Promise<any> => {
-      // Default return for unknown queries
-      return [];
+vi.mock('@clerk/tanstack-react-start', () => ({
+  ClerkProvider: ({ children }: any) => children,
+  useUser: () => ({
+    user: {
+      id: 'test-user-123',
+      username: 'testuser',
+      emailAddresses: [{ emailAddress: 'test@example.com' }],
     },
-    enabled: args?.enabled !== false,
-    staleTime: 0,
-  };
+    isSignedIn: true,
+    isLoaded: true,
+  }),
+  useAuth: () => ({
+    isSignedIn: true,
+    isLoaded: true,
+    userId: 'test-user-123',
+    sessionId: 'test-session',
+    getToken: vi.fn().mockResolvedValue('test-token'),
+  }),
+  SignInButton: ({ children }: any) =>
+    React.createElement('div', null, children),
+  SignUpButton: ({ children }: any) =>
+    React.createElement('div', null, children),
+  SignOutButton: ({ children }: any) =>
+    React.createElement('div', null, children),
+  UserButton: () => React.createElement('div', null, 'User Button'),
+}));
 
-  // Log for debugging
-  // console.log('convexQuery called with:', { query, args });
+// Create a simpler API mock structure
+const api = {
+  emojis: {
+    getPopular: 'emojis.getPopular',
+    search: 'emojis.search',
+    getCategories: 'emojis.getCategories',
+  },
+  users: {
+    current: 'users.current',
+    getAll: 'users.getAll',
+    getById: 'users.getById',
+    create: 'users.create',
+    update: 'users.update',
+  },
+  vibes: {
+    getAll: 'vibes.getAll',
+    getAllSimple: 'vibes.getAllSimple',
+    getById: 'vibes.getById',
+    create: 'vibes.create',
+    update: 'vibes.update',
+    quickReact: 'vibes.quickReact',
+  },
+  notifications: {
+    getNotifications: 'notifications.getNotifications',
+    markAsRead: 'notifications.markAsRead',
+  },
+  emojiRatings: {
+    createOrUpdateEmojiRating: 'emojiRatings.createOrUpdateEmojiRating',
+  },
+  files: {
+    getUrl: 'files.getUrl',
+  },
+};
 
-  // Try to identify the query function name from various possible structures
-  let functionName = '';
+vi.mock('@viberatr/convex', () => ({
+  api,
+}));
 
-  try {
-    // Safely extract function name from query object
-    if (query) {
-      // Try JSON stringify to see the structure, handling circular references
-      let queryStr = '';
-      try {
-        queryStr = JSON.stringify(query);
-      } catch {
-        // Handle circular reference or other stringify errors
-        if (query.toString) {
-          queryStr = query.toString();
-        }
+vi.mock('@convex-dev/react-query', () => ({
+  convexQuery: (query: any, args: any) => ({
+    queryKey: ['convexQuery', String(query), args],
+    queryFn: async () => {
+      const queryString = String(query);
+
+      // Mock emoji queries
+      if (queryString.includes('getPopular')) {
+        return [
+          { _id: '1', emoji: '🔥', category: 'popular', description: 'Fire' },
+          {
+            _id: '2',
+            emoji: '😍',
+            category: 'popular',
+            description: 'Heart Eyes',
+          },
+          {
+            _id: '3',
+            emoji: '💯',
+            category: 'popular',
+            description: 'Hundred',
+          },
+        ];
       }
 
-      // Look for function names in the stringified version
-      if (queryStr && typeof queryStr === 'string') {
-        if (queryStr.includes('getPopular')) {
-          functionName = 'getPopular';
-        } else if (queryStr.includes('getCategories')) {
-          functionName = 'getCategories';
-        } else if (queryStr.includes('searchAllOptimized')) {
-          functionName = 'searchAllOptimized';
-        } else if (queryStr.includes('getCurrentUserFollowStats')) {
-          functionName = 'getCurrentUserFollowStats';
-        } else if (queryStr.includes('getFollowStats')) {
-          functionName = 'getFollowStats';
-        } else if (queryStr.includes('getForYouFeed')) {
-          functionName = 'getForYouFeed';
-        } else if (queryStr.includes('search')) {
-          functionName = 'search';
-        } else if (queryStr.includes('getUrl')) {
-          functionName = 'getUrl';
+      if (queryString.includes('search')) {
+        if (args?.searchTerm === 'fire') {
+          return {
+            emojis: [
+              {
+                _id: '1',
+                emoji: '🔥',
+                category: 'objects',
+                description: 'Fire',
+              },
+              {
+                _id: '4',
+                emoji: '🔴',
+                category: 'symbols',
+                description: 'Red Circle',
+              },
+            ],
+            hasMore: false,
+          };
         }
-      }
-
-      // Check if query is a string (from our mock)
-      if (typeof query === 'string') {
-        if (query.includes('getPopular')) {
-          functionName = 'getPopular';
-        } else if (query.includes('getCategories')) {
-          functionName = 'getCategories';
-        } else if (query.includes('searchAllOptimized')) {
-          functionName = 'searchAllOptimized';
-        } else if (query.includes('getCurrentUserFollowStats')) {
-          functionName = 'getCurrentUserFollowStats';
-        } else if (query.includes('getFollowStats')) {
-          functionName = 'getFollowStats';
-        } else if (query.includes('getForYouFeed')) {
-          functionName = 'getForYouFeed';
-        } else if (query.includes('search')) {
-          functionName = 'search';
-        } else if (query.includes('getUrl')) {
-          functionName = 'getUrl';
-        }
-      }
-
-      // Also try direct property access
-      if (!functionName && typeof query === 'object' && query !== null) {
-        // First check direct properties
-        const queryObj = query as any;
-        functionName =
-          queryObj._name || queryObj.name || queryObj.functionName || '';
-
-        // Check nested properties if still no function name
-        if (!functionName) {
-          try {
-            const queryKeys = Object.keys(query);
-            for (const key of queryKeys) {
-              const value = (query as any)[key];
-              if (value && typeof value === 'object') {
-                if (value._name || value.name) {
-                  functionName = value._name || value.name;
-                  break;
-                }
-                // Check if the key itself might be the function name
-                if (
-                  key === 'getPopular' ||
-                  key === 'getCategories' ||
-                  key === 'searchAllOptimized' ||
-                  key === 'search' ||
-                  key === 'getUrl'
-                ) {
-                  functionName = key;
-                  break;
-                }
-              }
-            }
-          } catch {
-            // Ignore errors when accessing properties
-          }
-        }
-      }
-    }
-  } catch {
-    // If any error occurs during extraction, just use empty string
-    functionName = '';
-  }
-
-  // Ensure functionName is always a string
-  if (typeof functionName !== 'string') {
-    functionName = '';
-  }
-
-  // Match against our expected function names
-  const fnStr = String(functionName || '');
-  if (fnStr === 'getPopular' || fnStr.includes('getPopular')) {
-    // Return the array directly for getPopular
-    baseQuery.queryFn = async (): Promise<any[]> => mockPopularEmojis;
-  } else if (fnStr === 'getCategories' || fnStr.includes('getCategories')) {
-    baseQuery.queryFn = async (): Promise<string[]> => [
-      'smileys',
-      'people',
-      'animals',
-      'food',
-    ];
-  } else if (
-    fnStr === 'searchAllOptimized' ||
-    fnStr.includes('searchAllOptimized')
-  ) {
-    // Handle searchAllOptimized specifically
-    baseQuery.queryFn = async (): Promise<any> => {
-      return {
-        vibes: [],
-        users: [],
-        tags: [],
-        actions: [],
-        reviews: [],
-        totalCount: 0,
-        hasMore: false,
-        page: args?.page || 0,
-        continueCursor: null,
-      };
-    };
-  } else if (
-    fnStr === 'getCurrentUserFollowStats' ||
-    fnStr.includes('getCurrentUserFollowStats')
-  ) {
-    baseQuery.queryFn = async (): Promise<any> => {
-      return {
-        followers: 5,
-        following: 10,
-      };
-    };
-  } else if (fnStr === 'getFollowStats' || fnStr.includes('getFollowStats')) {
-    baseQuery.queryFn = async (): Promise<any> => {
-      return {
-        followers: 3,
-        following: 7,
-      };
-    };
-  } else if (fnStr === 'getForYouFeed' || fnStr.includes('getForYouFeed')) {
-    baseQuery.queryFn = async (): Promise<any> => {
-      return {
-        results: [],
-        isDone: true,
-        continueCursor: null,
-      };
-    };
-  } else if (fnStr === 'search' || fnStr.includes('search')) {
-    baseQuery.queryFn = async (): Promise<any> => {
-      if (args?.searchTerm) {
-        if (args.searchTerm === 'xyzabc123notfound') {
+        if (args?.searchTerm === 'xyzabc123notfound') {
           return {
             emojis: [],
             hasMore: false,
-            page: 0,
-            pageSize: 50,
-            totalCount: 0,
           };
         }
-
         return {
-          emojis: mockSearchResults,
+          emojis: [
+            {
+              _id: '5',
+              emoji: '😀',
+              category: 'smileys',
+              description: 'Grinning Face',
+            },
+            {
+              _id: '10',
+              emoji: '😃',
+              category: 'smileys',
+              description: 'Grinning Face with Big Eyes',
+            },
+            {
+              _id: '6',
+              emoji: '👋',
+              category: 'hands',
+              description: 'Waving Hand',
+            },
+            {
+              _id: '7',
+              emoji: '👍',
+              category: 'hands',
+              description: 'Thumbs Up',
+            },
+            { _id: '8', emoji: '👨', category: 'people', description: 'Man' },
+            { _id: '9', emoji: '👩', category: 'people', description: 'Woman' },
+          ],
           hasMore: false,
-          page: args.page || 0,
-          pageSize: args.pageSize || 50,
-          totalCount: mockSearchResults.length,
         };
       }
 
-      // Category browsing
+      if (queryString.includes('getCategories')) {
+        return ['popular', 'smileys', 'people', 'hands', 'objects', 'symbols'];
+      }
+
+      // Mock user queries
+      if (queryString.includes('current')) {
+        return {
+          id: 'test-user-123',
+          username: 'testuser',
+          emailAddresses: [{ emailAddress: 'test@example.com' }],
+        };
+      }
+
+      // Mock vibes queries
+      if (queryString.includes('vibes')) {
+        return {
+          vibes: [],
+          continueCursor: null,
+          hasMore: false,
+        };
+      }
+
+      // Mock notifications
+      if (queryString.includes('notifications')) {
+        return {
+          notifications: [],
+          hasMore: false,
+          nextCursor: null,
+        };
+      }
+
+      return undefined;
+    },
+  }),
+  useConvexQuery: (query: any, _args: any) => {
+    const queryString = String(query);
+
+    if (queryString.includes('emojis')) {
       return {
-        emojis: args?.page === 0 ? mockCategoryEmojis : [],
-        hasMore: args?.page === 0,
-        page: args.page || 0,
-        pageSize: args.pageSize || 200,
-        totalCount: mockCategoryEmojis.length,
+        data: [],
+        isLoading: false,
+        error: null,
       };
-    };
-  } else if (fnStr === 'getUrl' || fnStr.includes('getUrl')) {
-    baseQuery.queryFn = async (): Promise<string | null> => {
-      // Return mock file URL
-      return mockFileUrl;
-    };
-  }
+    }
 
-  return baseQuery;
-});
-
-vi.mock('@convex-dev/react-query', () => ({
-  convexQuery: mockConvexQuery,
-  useConvexMutation: (fn: any) => fn, // Just return the function as-is for mocking
+    return {
+      data: undefined,
+      isLoading: false,
+      error: null,
+    };
+  },
+  useConvexMutation: () => vi.fn(),
+  useConvexAction: () => vi.fn(),
 }));
 
-// Also mock the api import to provide consistent function references
-vi.mock('@viberatr/convex', () => ({
-  api: {
-    emojis: {
-      getPopular: 'api.emojis.getPopular',
-      getCategories: 'api.emojis.getCategories',
-      search: 'api.emojis.search',
-      getByEmojis: 'api.emojis.getByEmojis',
-    },
-    emojiRatings: {
-      getEmojiMetadata: 'api.emojiRatings.getEmojiMetadata',
-      getAllEmojiMetadata: 'api.emojiRatings.getAllEmojiMetadata',
-      getEmojiByCategory: 'api.emojiRatings.getEmojiByCategory',
-    },
-    searchOptimized: {
-      searchAllOptimized: 'api.searchOptimized.searchAllOptimized',
-    },
-    search: {
-      trackSearch: 'api.search.trackSearch',
-    },
-    vibes: {
-      getAllSimple: 'api.vibes.getAllSimple',
-      getAll: 'api.vibes.getAll',
-      getFilteredVibes: 'api.vibes.getFilteredVibes',
-      getById: 'api.vibes.getById',
-      getByUser: 'api.vibes.getByUser',
-      getForYouFeed: 'api.vibes.getForYouFeed',
-    },
-    users: {
-      current: 'api.users.current',
-    },
-    follows: {
-      getFollowStats: 'api.follows.getFollowStats',
-      getCurrentUserFollowStats: 'api.follows.getCurrentUserFollowStats',
-    },
-    files: {
-      getUrl: 'api.files.getUrl',
-    },
+vi.mock('@/features/theming/components/theme-provider', () => ({
+  useTheme: () => ({
+    resolvedTheme: 'light',
+    theme: 'light',
+    setTheme: vi.fn(),
+  }),
+  ThemeProvider: ({ children }: any) => children,
+}));
+
+vi.mock('@/stores/theme-store', () => ({
+  useTheme: () => ({
+    resolvedTheme: 'light',
+    theme: 'light',
+    setTheme: vi.fn(),
+  }),
+  useThemeStore: (selector: any) => {
+    const mockStore = {
+      theme: 'light',
+      mode: 'light',
+      primaryColor: 'blue',
+      accentColor: 'purple',
+      setPrimaryColor: vi.fn(),
+      setAccentColor: vi.fn(),
+      setTheme: vi.fn(),
+      setMode: vi.fn(),
+      resolvedTheme: 'light',
+      initializeTheme: vi.fn(),
+      colorTheme: 'blue',
+      secondaryColorTheme: 'purple',
+      setColorTheme: vi.fn(),
+      setSecondaryColorTheme: vi.fn(),
+    };
+    return selector ? selector(mockStore) : mockStore;
   },
 }));
 
-// Mock @/queries module
-vi.mock('@/queries', () => ({
-  useVibes: () => ({
-    data: [],
-    isLoading: false,
-    error: null,
+// Create a mock for route search params that can be customized per test
+let mockSearchParams = {};
+let mockRouteParams = {};
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => vi.fn(),
+  useParams: () => mockRouteParams,
+  useSearch: () => mockSearchParams,
+  useLocation: () => ({
+    pathname: '/',
+    search: '',
+    hash: '',
   }),
-  useVibesInfinite: () => ({
-    data: {
-      pages: [{ results: [], isDone: true, continueCursor: null }],
+  useRouter: () => ({
+    navigate: vi.fn(),
+    history: {
+      push: vi.fn(),
+      replace: vi.fn(),
+      go: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
     },
-    isLoading: false,
-    error: null,
-    hasNextPage: false,
-    isFetchingNextPage: false,
-    fetchNextPage: vi.fn(),
   }),
-  useForYouFeedInfinite: () => ({
-    data: {
-      pages: [{ results: [], isDone: true, continueCursor: null }],
+  Link: ({ children, ...props }: any) =>
+    React.createElement('a', props, children),
+  Outlet: () => null,
+  RouterProvider: ({ children }: any) => children,
+  createFileRoute: (_path: string) => {
+    // Return a function that accepts route options and returns the Route object
+    return (options: any = {}) => ({
+      useSearch: () => mockSearchParams,
+      useParams: () => mockRouteParams,
+      useNavigate: () => vi.fn(),
+      component: options.component,
+      options: {
+        component: options.component,
+      },
+    });
+  },
+  createRootRoute: () => ({
+    options: {
+      component: vi.fn(),
     },
-    isLoading: false,
-    error: null,
-    hasNextPage: false,
-    isFetchingNextPage: false,
-    fetchNextPage: vi.fn(),
+    addChildren: vi.fn().mockReturnValue({}),
   }),
-  useVibesPaginated: () => ({
-    data: [],
-    isLoading: false,
-    error: null,
+  createRoute: vi.fn().mockReturnValue({
+    options: {
+      component: vi.fn(),
+    },
   }),
-  useDeleteVibeMutation: () => ({
-    mutate: vi.fn(),
-    isLoading: false,
-    error: null,
-  }),
-  useCreateEmojiRatingMutation: () => ({
-    mutate: vi.fn(),
-    isLoading: false,
-    error: null,
-  }),
-  useTopEmojiRatings: () => ({
-    data: [],
-    isLoading: false,
-    error: null,
+  createRouter: vi.fn().mockReturnValue({
+    navigate: vi.fn(),
+    history: {
+      push: vi.fn(),
+      replace: vi.fn(),
+      go: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+    },
   }),
 }));
 
-// Mock @clerk/tanstack-react-start
-vi.mock('@clerk/tanstack-react-start', () => ({
-  ClerkProvider: ({ children }: { children: React.ReactNode }) => children,
-  useUser: () => ({
-    user: { id: 'user123', firstName: 'Test', lastName: 'User' },
-    isLoaded: true,
-    isSignedIn: true,
+// Export function to set mock search params for tests
+(globalThis as any).setMockSearchParams = (params: any) => {
+  mockSearchParams = params;
+};
+
+// Export function to set mock route params for tests
+(globalThis as any).setMockRouteParams = (params: any) => {
+  mockRouteParams = params;
+};
+
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) =>
+      React.createElement('div', props, children),
+    span: ({ children, ...props }: any) =>
+      React.createElement('span', props, children),
+    button: ({ children, ...props }: any) =>
+      React.createElement('button', props, children),
+    a: ({ children, ...props }: any) =>
+      React.createElement('a', props, children),
+  },
+  AnimatePresence: ({ children }: any) => children,
+  useAnimation: () => ({
+    start: vi.fn(),
+    set: vi.fn(),
+    stop: vi.fn(),
+    mount: vi.fn(),
   }),
-  SignInButton: ({ children, ...props }: any) =>
-    React.createElement(
-      'button',
-      { ...props, 'data-testid': 'sign-in-button' },
-      children || 'Sign In'
-    ),
-  SignOutButton: ({ children, ...props }: any) =>
-    React.createElement(
-      'button',
-      { ...props, 'data-testid': 'sign-out-button' },
-      children || 'Sign Out'
-    ),
-  SignUpButton: ({ children, ...props }: any) =>
-    React.createElement(
-      'button',
-      { ...props, 'data-testid': 'sign-up-button' },
-      children || 'Sign Up'
-    ),
-  UserButton: ({ ...props }: any) =>
-    React.createElement(
-      'button',
-      { ...props, 'data-testid': 'user-button' },
-      'User'
-    ),
+  useMotionValue: () => ({
+    get: () => 0,
+    set: vi.fn(),
+  }),
+  useTransform: () => 0,
+  useSpring: () => 0,
+  useScroll: () => ({
+    scrollY: { get: () => 0 },
+    scrollX: { get: () => 0 },
+    scrollYProgress: { get: () => 0 },
+    scrollXProgress: { get: () => 0 },
+  }),
+  useInView: () => true,
 }));
+
+vi.mock('@/lib/posthog', () => ({
+  trackEvents: {
+    pageViewed: vi.fn(),
+    emojiReactionClicked: vi.fn(),
+    emojiRatingOpened: vi.fn(),
+    emojiPopoverOpened: vi.fn(),
+    emojiPopoverClosed: vi.fn(),
+    searchPerformed: vi.fn(),
+    filterApplied: vi.fn(),
+    vibeCreated: vi.fn(),
+    vibeDeleted: vi.fn(),
+    userFollowed: vi.fn(),
+    userUnfollowed: vi.fn(),
+  },
+  posthog: {
+    capture: vi.fn(),
+    identify: vi.fn(),
+    reset: vi.fn(),
+  },
+  analytics: {
+    init: vi.fn(),
+    capturePageView: vi.fn(),
+    identify: vi.fn(),
+    reset: vi.fn(),
+    capture: vi.fn(),
+    isInitialized: vi.fn().mockReturnValue(true),
+  },
+}));
+
+vi.mock('convex/react', () => ({
+  ConvexProvider: ({ children }: any) => children,
+  ConvexReactClient: class {
+    constructor() {}
+    setAuth() {}
+    clearAuth() {}
+  },
+  useConvex: () => ({
+    query: vi.fn(),
+    mutation: vi.fn(),
+    action: vi.fn(),
+  }),
+}));
+
+vi.mock('vaul', () => ({
+  Drawer: {
+    Root: ({ children }: any) => children,
+    Trigger: ({ children }: any) =>
+      React.createElement('button', null, children),
+    Portal: ({ children }: any) => children,
+    Overlay: ({ children }: any) => React.createElement('div', null, children),
+    Content: ({ children }: any) => React.createElement('div', null, children),
+    Handle: () => React.createElement('div', null),
+    Title: ({ children }: any) => React.createElement('h2', null, children),
+    Description: ({ children }: any) =>
+      React.createElement('p', null, children),
+  },
+}));
+
+vi.mock('@/hooks/use-mobile', () => ({
+  useIsMobile: () => false,
+}));
+
+vi.mock('@/hooks/use-tablet', () => ({
+  useIsTablet: () => false,
+}));
+
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    loading: vi.fn(),
+  },
+  Toaster: () => null,
+}));
+
+// Now import jest-dom and cleanup
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
 
 // Cleanup after each test
 afterEach(() => {

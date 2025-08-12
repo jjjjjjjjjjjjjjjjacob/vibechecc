@@ -99,7 +99,7 @@ export function MasonryFeed({
     return (
       <div className={cn('py-16 text-center', className)}>
         <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-          <span className="text-muted-foreground font-noto text-2xl">🔍</span>
+          <span className="text-muted-foreground text-2xl">🔍</span>
         </div>
         <h3 className="mb-2 text-lg font-semibold">{emptyStateTitle}</h3>
         <p className="text-muted-foreground mx-auto mb-6 max-w-md">

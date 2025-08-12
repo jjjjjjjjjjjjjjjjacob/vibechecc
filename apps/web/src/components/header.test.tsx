@@ -97,6 +97,10 @@ vi.mock('lucide-react', () => ({
   Star: () => <span data-testid="star-icon">⭐</span>,
   Bell: () => <span data-testid="bell-icon">🔔</span>,
   Sparkles: () => <span data-testid="sparkles-icon">✨</span>,
+  Plus: () => <span data-testid="plus-icon">➕</span>,
+  User: () => <span data-testid="user-icon">👤</span>,
+  Settings: () => <span data-testid="settings-icon">⚙️</span>,
+  LogOut: () => <span data-testid="logout-icon">🚪</span>,
 }));
 
 // Import the component after mocking dependencies

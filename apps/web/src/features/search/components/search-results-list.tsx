@@ -2,7 +2,6 @@ import { SearchResultListCard } from './search-result-list-card';
 import { SearchEmptyState } from './search-empty-state';
 import { SearchLoading } from './search-loading';
 import { SearchError } from './search-error';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import type { SearchResult, VibeSearchResult } from '@viberatr/types';
 import type { Vibe } from '@/types';
@@ -16,7 +15,7 @@ interface SearchResultsListProps {
 }
 
 // Helper function to convert VibeSearchResult to Vibe for VibeCard component
-function convertVibeSearchResultToVibe(result: VibeSearchResult): Vibe {
+function _convertVibeSearchResultToVibe(result: VibeSearchResult): Vibe {
   return {
     id: result.id,
     title: result.title,
@@ -54,29 +53,18 @@ export function SearchResultsList({
   }
 
   if (!results || results.length === 0) {
-    return <SearchEmptyState />;
+    return (
+      <div className="w-full">
+        <SearchEmptyState />
+      </div>
+    );
   }
 
   // On mobile, use VibeCard for vibe results and SearchResultListCard for others
   if (isMobile) {
     return (
-      <div className="flex flex-col gap-y-2">
+      <div className="flex w-full flex-col gap-y-2">
         {results.map((result) => {
-          // For vibe results on mobile, use VibeCard with list variant
-          if (result.type === 'vibe') {
-            const vibeResult = result as VibeSearchResult;
-            const vibeData = convertVibeSearchResultToVibe(vibeResult);
-            return (
-              <VibeCard
-                key={result.id}
-                vibe={vibeData}
-                variant="feed-single"
-                ratingDisplayMode="most-rated"
-              />
-            );
-          }
-
-          // For non-vibe results, use the regular search result card
           return (
             <SearchResultListCard
               key={result.id}
@@ -91,7 +79,7 @@ export function SearchResultsList({
 
   // On desktop, use SearchResultListCard for all results
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex w-full flex-col gap-y-4">
       {results.map((result) => (
         <SearchResultListCard
           key={result.id}

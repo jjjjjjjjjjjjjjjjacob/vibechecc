@@ -49,6 +49,16 @@ const schema = defineSchema({
     // Follow count fields for efficient querying
     followerCount: v.optional(v.number()), // Number of users following this user
     followingCount: v.optional(v.number()), // Number of users this user follows
+
+    // Admin moderation fields
+    suspended: v.optional(v.boolean()), // Whether user is suspended
+    suspensionReason: v.optional(v.string()), // Reason for suspension
+    deleted: v.optional(v.boolean()), // Whether user is soft-deleted
+    deletedAt: v.optional(v.number()), // Timestamp of deletion
+    deletionReason: v.optional(v.string()), // Reason for deletion
+
+    // Admin flag
+    isAdmin: v.optional(v.boolean()), // Whether user has admin privileges
   })
     .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
     .searchIndex('searchUsername', {
@@ -69,6 +79,12 @@ const schema = defineSchema({
     tags: v.optional(v.array(v.string())),
     visibility: v.optional(v.union(v.literal('public'), v.literal('deleted'))), // Default 'public', 'deleted' for soft delete
     updatedAt: v.optional(v.string()), // Track when vibe was last updated
+
+    // Admin moderation fields
+    moderationReason: v.optional(v.string()), // Reason for moderation action
+    moderatedAt: v.optional(v.string()), // Timestamp of moderation
+    deletionReason: v.optional(v.string()), // Reason for deletion
+    deletedAt: v.optional(v.string()), // Timestamp of deletion
   })
     .index('id', ['id'])
     .index('createdBy', ['createdById'])
@@ -93,6 +109,11 @@ const schema = defineSchema({
     tags: v.optional(v.array(v.string())), // Associated tags from emoji metadata
     createdAt: v.string(),
     updatedAt: v.optional(v.string()),
+
+    // Admin moderation fields
+    flagged: v.optional(v.boolean()), // Whether review is flagged
+    moderationReason: v.optional(v.string()), // Reason for moderation
+    moderatedAt: v.optional(v.string()), // Timestamp of moderation
   })
     .index('vibe', ['vibeId'])
     .index('user', ['userId'])
@@ -109,11 +130,13 @@ const schema = defineSchema({
   // Emojis table to store all available emojis with metadata
   emojis: defineTable({
     emoji: v.string(),
+    unicode: v.optional(v.string()), // Normalized unicode representation (e.g., "U+1F600")
     name: v.string(),
     keywords: v.array(v.string()),
     category: v.string(),
+    subcategory: v.optional(v.string()), // For OpenMoji subcategories
+    version: v.optional(v.string()), // Emoji version (e.g., "15.0")
     color: v.string(), // Hex color for UI theming
-    tags: v.optional(v.array(v.string())),
     sentiment: v.optional(
       v.union(
         v.literal('positive'),
@@ -121,12 +144,22 @@ const schema = defineSchema({
         v.literal('neutral')
       )
     ),
+    // emoji-mart specific fields
+    shortcodes: v.optional(v.array(v.string())), // Alternative shortcodes like :smile:
+    emoticons: v.optional(v.array(v.string())), // Text emoticons like :) or :-D
+    aliases: v.optional(v.array(v.string())), // Alternative names
+    skins: v.optional(v.array(v.string())), // Skin tone variations
+    // Admin management fields
+    disabled: v.optional(v.boolean()), // Whether emoji is disabled
+    usageCount: v.optional(v.number()), // Track popularity for sorting
+    lastUsed: v.optional(v.number()), // Timestamp of last use
   })
     .index('byEmoji', ['emoji'])
+    .index('byUnicode', ['unicode'])
     .index('byCategory', ['category'])
     .searchIndex('search', {
       searchField: 'name',
-      filterFields: ['category', 'keywords'],
+      filterFields: ['keywords'],
     }),
 
   // Deprecated - will be removed after migration
@@ -185,6 +218,7 @@ const schema = defineSchema({
     count: v.number(), // Number of vibes using this tag
     createdAt: v.number(), // Timestamp when first created
     lastUsed: v.number(), // Timestamp when last used
+    createdById: v.optional(v.string()), // User who created the tag (admin if not specified)
   })
     .index('byName', ['name'])
     .index('byCount', ['count'])

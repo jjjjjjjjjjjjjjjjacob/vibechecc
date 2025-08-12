@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const symbolEmojis: Emoji[] = [
   // Hearts
   {
     emoji: '💋',
@@ -8,7 +8,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['face', 'lips', 'love'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['kiss', 'lips', 'lipstick'],
   },
   {
     emoji: '💌',
@@ -16,7 +15,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['email', 'like', 'affection'],
     category: 'symbols',
     color: '#FFB6C1',
-    tags: ['love-letter', 'heart', 'envelope'],
   },
   {
     emoji: '💘',
@@ -24,7 +22,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'heart'],
     category: 'symbols',
     color: '#FF69B4',
-    tags: ['cupid', 'love', 'arrow'],
   },
   {
     emoji: '💝',
@@ -32,7 +29,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'valentines', 'gift'],
     category: 'symbols',
     color: '#FF69B4',
-    tags: ['gift', 'heart', 'ribbon'],
   },
   {
     emoji: '💖',
@@ -40,7 +36,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#FF69B4',
-    tags: ['sparkle', 'heart', 'shiny'],
   },
   {
     emoji: '💗',
@@ -48,7 +43,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['like', 'love', 'affection'],
     category: 'symbols',
     color: '#FF69B4',
-    tags: ['growing', 'heart', 'pulse'],
   },
   {
     emoji: '💓',
@@ -56,7 +50,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#FF69B4',
-    tags: ['beating', 'heart', 'pulse'],
   },
   {
     emoji: '💞',
@@ -64,7 +57,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#FF69B4',
-    tags: ['revolving', 'hearts', 'spinning'],
   },
   {
     emoji: '💕',
@@ -72,7 +64,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#FF69B4',
-    tags: ['two-hearts', 'love', 'couple'],
   },
   {
     emoji: '💟',
@@ -80,7 +71,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['purple-square', 'love', 'like'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['heart', 'decoration', 'ornament'],
   },
   {
     emoji: '❣️',
@@ -88,7 +78,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['decoration', 'love', 'exclamation'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['heart', 'exclamation', 'emphasis'],
   },
   {
     emoji: '💔',
@@ -96,7 +85,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sad', 'sorry', 'break'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['broken-heart', 'sad', 'heartbreak'],
   },
   {
     emoji: '❤️‍🔥',
@@ -104,7 +92,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['passionate', 'ardent', 'burning'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['heart', 'fire', 'passionate'],
   },
   {
     emoji: '❤️‍🩹',
@@ -112,7 +99,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['broken heart', 'bandage', 'wounded'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['heart', 'healing', 'mending'],
   },
   {
     emoji: '❤️',
@@ -120,7 +106,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'valentines'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['heart', 'love', 'red'],
   },
   {
     emoji: '🧡',
@@ -128,7 +113,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['heart', 'orange', 'warm'],
   },
   {
     emoji: '💛',
@@ -136,7 +120,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['heart', 'yellow', 'friendship'],
   },
   {
     emoji: '💚',
@@ -144,7 +127,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['heart', 'green', 'nature'],
   },
   {
     emoji: '💙',
@@ -152,7 +134,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['heart', 'blue', 'trust'],
   },
   {
     emoji: '💜',
@@ -160,7 +141,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['heart', 'purple', 'bts'],
   },
   {
     emoji: '🤎',
@@ -168,7 +148,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['coffee', 'love', 'like'],
     category: 'symbols',
     color: '#8B4513',
-    tags: ['heart', 'brown', 'chocolate'],
   },
   {
     emoji: '🖤',
@@ -176,7 +155,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['evil', 'dark', 'love'],
     category: 'symbols',
     color: '#000000',
-    tags: ['heart', 'black', 'dark'],
   },
   {
     emoji: '🤍',
@@ -184,7 +162,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pure', 'love', 'like'],
     category: 'symbols',
     color: '#FFFFFF',
-    tags: ['heart', 'white', 'pure'],
   },
 
   // Emotion symbols
@@ -194,7 +171,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['score', 'perfect', 'numbers'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['100', 'perfect', 'score'],
   },
   {
     emoji: '💢',
@@ -202,7 +178,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['angry', 'violence', 'red'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['anger', 'mad', 'comic'],
   },
   {
     emoji: '💥',
@@ -210,7 +185,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bomb', 'explode', 'explosion'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['explosion', 'boom', 'collision'],
   },
   {
     emoji: '💫',
@@ -218,7 +192,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['star', 'sparkle', 'shoot'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['dizzy', 'stars', 'spinning'],
   },
   {
     emoji: '💦',
@@ -226,7 +199,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['water', 'drip', 'oops'],
     category: 'symbols',
     color: '#87CEEB',
-    tags: ['sweat', 'water', 'droplets'],
   },
   {
     emoji: '💨',
@@ -234,7 +206,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wind', 'air', 'fast'],
     category: 'symbols',
     color: '#87CEEB',
-    tags: ['dash', 'wind', 'speed'],
   },
   {
     emoji: '🕳️',
@@ -242,7 +213,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['embarrassing', 'hole', 'pit'],
     category: 'symbols',
     color: '#000000',
-    tags: ['hole', 'pit', 'void'],
   },
   {
     emoji: '💣',
@@ -250,7 +220,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['boom', 'explode', 'explosion'],
     category: 'symbols',
     color: '#000000',
-    tags: ['bomb', 'explosive', 'danger'],
   },
   {
     emoji: '💬',
@@ -258,7 +227,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bubble', 'words', 'message'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['speech', 'bubble', 'chat'],
   },
   {
     emoji: '👁️‍🗨️',
@@ -266,7 +234,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['info', 'feedback', 'witness'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['witness', 'anti-bullying', 'feedback'],
   },
   {
     emoji: '🗨️',
@@ -274,7 +241,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['words', 'message', 'talk'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['speech', 'left', 'bubble'],
   },
   {
     emoji: '🗯️',
@@ -282,7 +248,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['caption', 'speech', 'thinking'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['anger', 'bubble', 'comic'],
   },
   {
     emoji: '💭',
@@ -290,7 +255,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bubble', 'cloud', 'speech'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['thought', 'thinking', 'bubble'],
   },
   {
     emoji: '💤',
@@ -298,7 +262,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sleepy', 'tired', 'dream'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['sleep', 'zzz', 'tired'],
   },
 
   // Cards
@@ -308,7 +271,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['poker', 'cards', 'suits'],
     category: 'symbols',
     color: '#000000',
-    tags: ['spades', 'cards', 'suit'],
   },
   {
     emoji: '♥️',
@@ -316,7 +278,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['poker', 'cards', 'suits'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['hearts', 'cards', 'suit'],
   },
   {
     emoji: '♦️',
@@ -324,7 +285,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['poker', 'cards', 'suits'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['diamonds', 'cards', 'suit'],
   },
   {
     emoji: '♣️',
@@ -332,7 +292,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['poker', 'cards', 'suits'],
     category: 'symbols',
     color: '#000000',
-    tags: ['clubs', 'cards', 'suit'],
   },
   {
     emoji: '🃏',
@@ -340,7 +299,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['poker', 'cards', 'game'],
     category: 'symbols',
     color: '#000000',
-    tags: ['joker', 'cards', 'wild'],
   },
   {
     emoji: '🎴',
@@ -348,7 +306,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['game', 'sunset', 'red'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['hanafuda', 'cards', 'japanese'],
   },
   {
     emoji: '🀄',
@@ -356,7 +313,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['game', 'play', 'chinese'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['mahjong', 'dragon', 'tile'],
   },
 
   // Time and cycles
@@ -366,7 +322,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '1:00', 'time'],
   },
   {
     emoji: '🕑',
@@ -374,7 +329,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '2:00', 'time'],
   },
   {
     emoji: '🕒',
@@ -382,7 +336,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '3:00', 'time'],
   },
   {
     emoji: '🕓',
@@ -390,7 +343,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '4:00', 'time'],
   },
   {
     emoji: '🕔',
@@ -398,7 +350,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '5:00', 'time'],
   },
   {
     emoji: '🕕',
@@ -406,7 +357,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '6:00', 'time'],
   },
   {
     emoji: '🕖',
@@ -414,7 +364,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '7:00', 'time'],
   },
   {
     emoji: '🕗',
@@ -422,7 +371,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '8:00', 'time'],
   },
   {
     emoji: '🕘',
@@ -430,7 +378,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '9:00', 'time'],
   },
   {
     emoji: '🕙',
@@ -438,7 +385,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '10:00', 'time'],
   },
   {
     emoji: '🕚',
@@ -446,7 +392,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '11:00', 'time'],
   },
   {
     emoji: '🕛',
@@ -454,7 +399,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'noon', 'midnight'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['clock', '12:00', 'time'],
   },
 
   // Geometric shapes
@@ -464,7 +408,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'error', 'danger'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['circle', 'red', 'stop'],
   },
   {
     emoji: '🟠',
@@ -472,7 +415,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['round', 'orange', 'circle'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['circle', 'orange', 'round'],
   },
   {
     emoji: '🟡',
@@ -480,7 +422,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['round', 'yellow', 'circle'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['circle', 'yellow', 'round'],
   },
   {
     emoji: '🟢',
@@ -488,7 +429,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['round', 'green', 'circle'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['circle', 'green', 'go'],
   },
   {
     emoji: '🔵',
@@ -496,7 +436,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'icon', 'button'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['circle', 'blue', 'round'],
   },
   {
     emoji: '🟣',
@@ -504,7 +443,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['round', 'purple', 'circle'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['circle', 'purple', 'round'],
   },
   {
     emoji: '🟤',
@@ -512,7 +450,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['round', 'brown', 'circle'],
     category: 'symbols',
     color: '#8B4513',
-    tags: ['circle', 'brown', 'round'],
   },
   {
     emoji: '⚫',
@@ -520,7 +457,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'button', 'round'],
     category: 'symbols',
     color: '#000000',
-    tags: ['circle', 'black', 'round'],
   },
   {
     emoji: '⚪',
@@ -528,7 +464,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'round', 'circle'],
     category: 'symbols',
     color: '#FFFFFF',
-    tags: ['circle', 'white', 'round'],
   },
   {
     emoji: '🟥',
@@ -536,7 +471,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'red', 'square'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['square', 'red', 'box'],
   },
   {
     emoji: '🟧',
@@ -544,7 +478,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'orange', 'square'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['square', 'orange', 'box'],
   },
   {
     emoji: '🟨',
@@ -552,7 +485,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'yellow', 'square'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['square', 'yellow', 'box'],
   },
   {
     emoji: '🟩',
@@ -560,7 +492,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'green', 'square'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['square', 'green', 'box'],
   },
   {
     emoji: '🟦',
@@ -568,7 +499,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'blue', 'square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['square', 'blue', 'box'],
   },
   {
     emoji: '🟪',
@@ -576,7 +506,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'purple', 'square'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['square', 'purple', 'box'],
   },
   {
     emoji: '🟫',
@@ -584,7 +513,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'brown', 'square'],
     category: 'symbols',
     color: '#8B4513',
-    tags: ['square', 'brown', 'box'],
   },
   {
     emoji: '⬛',
@@ -592,7 +520,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'icon', 'button'],
     category: 'symbols',
     color: '#000000',
-    tags: ['square', 'black', 'large'],
   },
   {
     emoji: '⬜',
@@ -600,7 +527,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'icon', 'button'],
     category: 'symbols',
     color: '#FFFFFF',
-    tags: ['square', 'white', 'large'],
   },
   {
     emoji: '◼️',
@@ -608,7 +534,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'button', 'icon'],
     category: 'symbols',
     color: '#000000',
-    tags: ['square', 'black', 'medium'],
   },
   {
     emoji: '◻️',
@@ -616,7 +541,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'stone', 'icon'],
     category: 'symbols',
     color: '#FFFFFF',
-    tags: ['square', 'white', 'medium'],
   },
   {
     emoji: '◾',
@@ -624,7 +548,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['icon', 'shape', 'button'],
     category: 'symbols',
     color: '#000000',
-    tags: ['square', 'black', 'small'],
   },
   {
     emoji: '◽',
@@ -632,7 +555,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'stone', 'icon'],
     category: 'symbols',
     color: '#FFFFFF',
-    tags: ['square', 'white', 'small'],
   },
   {
     emoji: '▪️',
@@ -640,7 +562,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'icon', 'button'],
     category: 'symbols',
     color: '#000000',
-    tags: ['square', 'black', 'tiny'],
   },
   {
     emoji: '▫️',
@@ -648,7 +569,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'icon', 'button'],
     category: 'symbols',
     color: '#FFFFFF',
-    tags: ['square', 'white', 'tiny'],
   },
   {
     emoji: '🔶',
@@ -656,7 +576,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'jewel', 'gem'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['diamond', 'orange', 'large'],
   },
   {
     emoji: '🔷',
@@ -664,7 +583,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'jewel', 'gem'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['diamond', 'blue', 'large'],
   },
   {
     emoji: '🔸',
@@ -672,7 +590,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'jewel', 'gem'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['diamond', 'orange', 'small'],
   },
   {
     emoji: '🔹',
@@ -680,7 +597,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'jewel', 'gem'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['diamond', 'blue', 'small'],
   },
   {
     emoji: '🔺',
@@ -688,7 +604,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'direction', 'up'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['triangle', 'red', 'up'],
   },
   {
     emoji: '🔻',
@@ -696,7 +611,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'direction', 'bottom'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['triangle', 'red', 'down'],
   },
   {
     emoji: '💠',
@@ -704,7 +618,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['jewel', 'blue', 'gem'],
     category: 'symbols',
     color: '#87CEEB',
-    tags: ['diamond', 'dot', 'kawaii'],
   },
   {
     emoji: '🔘',
@@ -712,7 +625,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['input', 'old', 'music'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['radio', 'button', 'selected'],
   },
   {
     emoji: '🔳',
@@ -720,7 +632,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'input', 'button'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['button', 'square', 'white'],
   },
   {
     emoji: '🔲',
@@ -728,7 +639,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'input', 'frame'],
     category: 'symbols',
     color: '#000000',
-    tags: ['button', 'square', 'black'],
   },
 
   // UI symbols
@@ -738,7 +648,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['green-square', 'ok', 'yes'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['check', 'done', 'complete'],
   },
   {
     emoji: '☑️',
@@ -746,7 +655,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ok', 'agree', 'vote'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['checkbox', 'checked', 'done'],
   },
   {
     emoji: '✔️',
@@ -754,7 +662,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ok', 'nike', 'answer'],
     category: 'symbols',
     color: '#000000',
-    tags: ['check', 'mark', 'done'],
   },
   {
     emoji: '❌',
@@ -762,7 +669,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['no', 'delete', 'remove'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['x', 'wrong', 'no'],
   },
   {
     emoji: '❎',
@@ -770,7 +676,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['x', 'green-square', 'no'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['x', 'button', 'negative'],
   },
   {
     emoji: '➕',
@@ -778,7 +683,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['math', 'calculation', 'addition'],
     category: 'symbols',
     color: '#000000',
-    tags: ['plus', 'add', 'positive'],
   },
   {
     emoji: '➖',
@@ -786,7 +690,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['math', 'calculation', 'subtract'],
     category: 'symbols',
     color: '#000000',
-    tags: ['minus', 'subtract', 'negative'],
   },
   {
     emoji: '➗',
@@ -794,7 +697,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['math', 'calculation', 'divide'],
     category: 'symbols',
     color: '#000000',
-    tags: ['divide', 'division', 'math'],
   },
   {
     emoji: '✖️',
@@ -802,7 +704,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['math', 'calculation', 'multiply'],
     category: 'symbols',
     color: '#000000',
-    tags: ['multiply', 'x', 'times'],
   },
   {
     emoji: '♾️',
@@ -810,7 +711,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['forever', 'unbounded', 'universal'],
     category: 'symbols',
     color: '#000000',
-    tags: ['infinity', 'forever', 'endless'],
   },
   {
     emoji: '💲',
@@ -818,7 +718,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['money', 'sales', 'payment'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['dollar', 'money', 'currency'],
   },
   {
     emoji: '💱',
@@ -826,7 +725,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['money', 'sales', 'dollar'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['exchange', 'currency', 'money'],
   },
   {
     emoji: '™️',
@@ -834,7 +732,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['trademark', 'brand', 'law'],
     category: 'symbols',
     color: '#000000',
-    tags: ['trademark', 'tm', 'brand'],
   },
   {
     emoji: '©️',
@@ -842,7 +739,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ip', 'license', 'circle'],
     category: 'symbols',
     color: '#000000',
-    tags: ['copyright', 'c', 'rights'],
   },
   {
     emoji: '®️',
@@ -850,7 +746,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['alphabet', 'circle', 'registered'],
     category: 'symbols',
     color: '#000000',
-    tags: ['registered', 'r', 'trademark'],
   },
 
   // Arrows
@@ -860,7 +755,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'continue', 'top'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'up', 'north'],
   },
   {
     emoji: '↗️',
@@ -868,7 +762,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'diagonal'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'northeast', 'diagonal'],
   },
   {
     emoji: '➡️',
@@ -876,7 +769,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'next', 'forward'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'right', 'east'],
   },
   {
     emoji: '↘️',
@@ -884,7 +776,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'diagonal'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'southeast', 'diagonal'],
   },
   {
     emoji: '⬇️',
@@ -892,7 +783,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'bottom'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'down', 'south'],
   },
   {
     emoji: '↙️',
@@ -900,7 +790,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'diagonal'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'southwest', 'diagonal'],
   },
   {
     emoji: '⬅️',
@@ -908,7 +797,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'previous', 'back'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'left', 'west'],
   },
   {
     emoji: '↖️',
@@ -916,7 +804,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'diagonal'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'northwest', 'diagonal'],
   },
   {
     emoji: '↕️',
@@ -924,7 +811,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'vertical'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'vertical', 'up-down'],
   },
   {
     emoji: '↔️',
@@ -932,7 +818,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shape', 'direction', 'horizontal'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'horizontal', 'left-right'],
   },
   {
     emoji: '↩️',
@@ -940,7 +825,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['back', 'return', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'return', 'back'],
   },
   {
     emoji: '↪️',
@@ -948,7 +832,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'return', 'forward'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'forward', 'enter'],
   },
   {
     emoji: '⤴️',
@@ -956,7 +839,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'up'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'up', 'curve'],
   },
   {
     emoji: '⤵️',
@@ -964,7 +846,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'bottom'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['arrow', 'down', 'curve'],
   },
   {
     emoji: '🔃',
@@ -972,7 +853,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sync', 'cycle', 'round'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['refresh', 'clockwise', 'sync'],
   },
   {
     emoji: '🔄',
@@ -980,7 +860,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'sync', 'cycle'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['refresh', 'counter', 'sync'],
   },
   {
     emoji: '🔙',
@@ -988,7 +867,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['arrow', 'words', 'return'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['back', 'arrow', 'return'],
   },
   {
     emoji: '🔚',
@@ -996,7 +874,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['words', 'arrow', 'end'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['end', 'arrow', 'finish'],
   },
   {
     emoji: '🔛',
@@ -1004,7 +881,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['arrow', 'words', 'on'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['on', 'arrow', 'exclamation'],
   },
   {
     emoji: '🔜',
@@ -1012,7 +888,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['arrow', 'words', 'soon'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['soon', 'arrow', 'coming'],
   },
   {
     emoji: '🔝',
@@ -1020,7 +895,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['words', 'blue-square', 'top'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['top', 'arrow', 'up'],
   },
 
   // Religious symbols
@@ -1030,7 +904,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['religion', 'church', 'temple'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['worship', 'pray', 'religion'],
   },
   {
     emoji: '⚛️',
@@ -1038,7 +911,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['science', 'physics', 'chemistry'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['atom', 'science', 'nuclear'],
   },
   {
     emoji: '🕉️',
@@ -1046,7 +918,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hinduism', 'buddhism', 'sikhism'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['om', 'hindu', 'sacred'],
   },
   {
     emoji: '✡️',
@@ -1054,7 +925,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['judaism', 'jewish', 'star'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['jewish', 'star', 'david'],
   },
   {
     emoji: '☸️',
@@ -1062,7 +932,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hinduism', 'buddhism', 'sikhism'],
     category: 'symbols',
     color: '#DAA520',
-    tags: ['dharma', 'buddhist', 'wheel'],
   },
   {
     emoji: '☯️',
@@ -1070,7 +939,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['balance', 'opposites', 'harmony'],
     category: 'symbols',
     color: '#000000',
-    tags: ['yin-yang', 'balance', 'tao'],
   },
   {
     emoji: '✝️',
@@ -1078,7 +946,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['christianity', 'cross', 'religion'],
     category: 'symbols',
     color: '#000000',
-    tags: ['cross', 'christian', 'latin'],
   },
   {
     emoji: '☦️',
@@ -1086,7 +953,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['suppedaneum', 'religion', 'cross'],
     category: 'symbols',
     color: '#000000',
-    tags: ['cross', 'orthodox', 'christian'],
   },
   {
     emoji: '☪️',
@@ -1094,7 +960,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['islam', 'muslim', 'religion'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['islam', 'muslim', 'crescent'],
   },
   {
     emoji: '☮️',
@@ -1102,7 +967,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hippie', 'peace', 'sign'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['peace', 'symbol', 'hippie'],
   },
   {
     emoji: '🕎',
@@ -1110,7 +974,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hanukkah', 'candles', 'jewish'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['menorah', 'jewish', 'hanukkah'],
   },
   {
     emoji: '🔯',
@@ -1118,7 +981,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['purple-square', 'religion', 'jewish'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['star', 'six-pointed', 'hexagram'],
   },
 
   // Zodiac
@@ -1128,7 +990,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['aries', 'zodiac', 'ram'],
   },
   {
     emoji: '♉',
@@ -1136,7 +997,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['purple-square', 'sign', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['taurus', 'zodiac', 'bull'],
   },
   {
     emoji: '♊',
@@ -1144,7 +1004,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['gemini', 'zodiac', 'twins'],
   },
   {
     emoji: '♋',
@@ -1152,7 +1011,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['cancer', 'zodiac', 'crab'],
   },
   {
     emoji: '♌',
@@ -1160,7 +1018,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['leo', 'zodiac', 'lion'],
   },
   {
     emoji: '♍',
@@ -1168,7 +1025,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['virgo', 'zodiac', 'maiden'],
   },
   {
     emoji: '♎',
@@ -1176,7 +1032,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['libra', 'zodiac', 'scales'],
   },
   {
     emoji: '♏',
@@ -1184,7 +1039,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['scorpio', 'zodiac', 'scorpion'],
   },
   {
     emoji: '♐',
@@ -1192,7 +1046,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['sagittarius', 'zodiac', 'archer'],
   },
   {
     emoji: '♑',
@@ -1200,7 +1053,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['capricorn', 'zodiac', 'goat'],
   },
   {
     emoji: '♒',
@@ -1208,7 +1060,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['aquarius', 'zodiac', 'water'],
   },
   {
     emoji: '♓',
@@ -1216,7 +1067,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['purple-square', 'sign', 'zodiac'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['pisces', 'zodiac', 'fish'],
   },
   {
     emoji: '⛎',
@@ -1224,7 +1074,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sign', 'purple-square', 'constellation'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['ophiuchus', 'zodiac', 'serpent'],
   },
 
   // Audio/Video controls
@@ -1234,7 +1083,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'shuffle', 'music'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['shuffle', 'random', 'music'],
   },
   {
     emoji: '🔁',
@@ -1242,7 +1090,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['loop', 'record', 'repeat'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['repeat', 'loop', 'music'],
   },
   {
     emoji: '🔂',
@@ -1250,7 +1097,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'loop', 'repeat'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['repeat-one', 'loop', 'single'],
   },
   {
     emoji: '▶️',
@@ -1258,7 +1104,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'right', 'direction'],
     category: 'symbols',
     color: '#000000',
-    tags: ['play', 'start', 'arrow'],
   },
   {
     emoji: '⏩',
@@ -1266,7 +1111,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'play', 'speed'],
     category: 'symbols',
     color: '#000000',
-    tags: ['fast-forward', 'speed', 'skip'],
   },
   {
     emoji: '⏭️',
@@ -1274,7 +1118,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['forward', 'next', 'blue-square'],
     category: 'symbols',
     color: '#000000',
-    tags: ['next', 'skip', 'track'],
   },
   {
     emoji: '⏯️',
@@ -1282,7 +1125,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'play', 'pause'],
     category: 'symbols',
     color: '#000000',
-    tags: ['play-pause', 'toggle', 'media'],
   },
   {
     emoji: '◀️',
@@ -1290,7 +1132,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'left', 'direction'],
     category: 'symbols',
     color: '#000000',
-    tags: ['reverse', 'back', 'arrow'],
   },
   {
     emoji: '⏪',
@@ -1298,7 +1139,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['play', 'blue-square', 'rewind'],
     category: 'symbols',
     color: '#000000',
-    tags: ['rewind', 'fast', 'back'],
   },
   {
     emoji: '⏮️',
@@ -1306,7 +1146,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['backward', 'previous', 'blue-square'],
     category: 'symbols',
     color: '#000000',
-    tags: ['previous', 'back', 'track'],
   },
   {
     emoji: '🔼',
@@ -1314,7 +1153,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'triangle', 'direction'],
     category: 'symbols',
     color: '#000000',
-    tags: ['up', 'triangle', 'button'],
   },
   {
     emoji: '⏫',
@@ -1322,7 +1160,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'top'],
     category: 'symbols',
     color: '#000000',
-    tags: ['fast-up', 'double', 'arrow'],
   },
   {
     emoji: '🔽',
@@ -1330,7 +1167,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'bottom'],
     category: 'symbols',
     color: '#000000',
-    tags: ['down', 'triangle', 'button'],
   },
   {
     emoji: '⏬',
@@ -1338,7 +1174,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'direction', 'bottom'],
     category: 'symbols',
     color: '#000000',
-    tags: ['fast-down', 'double', 'arrow'],
   },
   {
     emoji: '⏸️',
@@ -1346,7 +1181,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pause', 'blue-square', 'stop'],
     category: 'symbols',
     color: '#000000',
-    tags: ['pause', 'stop', 'media'],
   },
   {
     emoji: '⏹️',
@@ -1354,7 +1188,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'stop', 'square'],
     category: 'symbols',
     color: '#000000',
-    tags: ['stop', 'square', 'end'],
   },
   {
     emoji: '⏺️',
@@ -1362,7 +1195,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'record', 'circle'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['record', 'circle', 'capture'],
   },
   {
     emoji: '⏏️',
@@ -1370,7 +1202,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'eject', 'up'],
     category: 'symbols',
     color: '#000000',
-    tags: ['eject', 'remove', 'out'],
   },
   {
     emoji: '🎦',
@@ -1378,7 +1209,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'record', 'film'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['cinema', 'movie', 'film'],
   },
   {
     emoji: '🔅',
@@ -1386,7 +1216,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sun', 'afternoon', 'warm'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['brightness', 'dim', 'low'],
   },
   {
     emoji: '🔆',
@@ -1394,7 +1223,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sun', 'light', 'brightness'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['brightness', 'bright', 'high'],
   },
   {
     emoji: '📶',
@@ -1402,7 +1230,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'reception', 'phone'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['signal', 'bars', 'reception'],
   },
   {
     emoji: '📳',
@@ -1410,7 +1237,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['orange-square', 'phone', 'vibrate'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['vibrate', 'phone', 'mode'],
   },
   {
     emoji: '📴',
@@ -1418,7 +1244,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mute', 'orange-square', 'silence'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['phone-off', 'mute', 'airplane'],
   },
 
   // Gender symbols
@@ -1428,7 +1253,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['woman', 'female', 'girl'],
     category: 'symbols',
     color: '#FF69B4',
-    tags: ['female', 'venus', 'woman'],
   },
   {
     emoji: '♂️',
@@ -1436,7 +1260,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['man', 'boy', 'male'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['male', 'mars', 'man'],
   },
   {
     emoji: '⚧️',
@@ -1444,7 +1267,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transgender', 'trans', 'gender'],
     category: 'symbols',
     color: '#87CEEB',
-    tags: ['transgender', 'trans', 'gender'],
   },
 
   // Other symbols
@@ -1454,7 +1276,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['math', 'equality', 'equal'],
     category: 'symbols',
     color: '#000000',
-    tags: ['equals', 'equal', 'math'],
   },
   {
     emoji: '‼️',
@@ -1462,7 +1283,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['exclamation', 'surprise', 'bangbang'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['exclamation', 'double', 'emphasis'],
   },
   {
     emoji: '⁉️',
@@ -1470,7 +1290,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wat', 'punctuation', 'surprise'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['interrobang', 'question', 'exclamation'],
   },
   {
     emoji: '❓',
@@ -1478,7 +1297,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['doubt', 'confused', 'question'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['question', 'confused', 'ask'],
   },
   {
     emoji: '❔',
@@ -1486,7 +1304,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['doubts', 'gray', 'huh'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['question', 'white', 'confused'],
   },
   {
     emoji: '❕',
@@ -1494,7 +1311,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['surprise', 'punctuation', 'gray'],
     category: 'symbols',
     color: '#F5F5F5',
-    tags: ['exclamation', 'white', 'mild'],
   },
   {
     emoji: '❗',
@@ -1502,7 +1318,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['heavy_exclamation_mark', 'danger', 'surprise'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['exclamation', 'danger', 'alert'],
   },
   {
     emoji: '〰️',
@@ -1510,7 +1325,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['draw', 'line', 'moustache'],
     category: 'symbols',
     color: '#000000',
-    tags: ['wavy', 'line', 'dash'],
   },
   {
     emoji: '⚕️',
@@ -1518,7 +1332,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['health', 'hospital', 'medical'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['medical', 'health', 'caduceus'],
   },
   {
     emoji: '♻️',
@@ -1526,7 +1339,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['arrow', 'environment', 'garbage'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['recycle', 'environment', 'green'],
   },
   {
     emoji: '⚜️',
@@ -1534,7 +1346,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['decorative', 'scout', 'french'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['fleur-de-lis', 'french', 'royal'],
   },
   {
     emoji: '🔱',
@@ -1542,7 +1353,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weapon', 'spear', 'poseidon'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['trident', 'poseidon', 'weapon'],
   },
   {
     emoji: '📛',
@@ -1550,7 +1360,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fire', 'forbid', 'tag'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['name-badge', 'tag', 'identification'],
   },
   {
     emoji: '🔰',
@@ -1558,7 +1367,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['badge', 'shield', 'beginner'],
     category: 'symbols',
     color: '#FFFF00',
-    tags: ['beginner', 'japanese', 'new'],
   },
   {
     emoji: '⭕',
@@ -1566,7 +1374,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['circle', 'round', 'correct'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['circle', 'correct', 'hollow'],
   },
   {
     emoji: '➰',
@@ -1574,7 +1381,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['scribble', 'draw', 'shape'],
     category: 'symbols',
     color: '#000000',
-    tags: ['loop', 'curly', 'squiggle'],
   },
   {
     emoji: '➿',
@@ -1582,7 +1388,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tape', 'cassette', 'loop'],
     category: 'symbols',
     color: '#000000',
-    tags: ['loop', 'double', 'voicemail'],
   },
   {
     emoji: '〽️',
@@ -1590,7 +1395,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['graph', 'presentation', 'stats'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['alternation', 'mark', 'chart'],
   },
   {
     emoji: '✳️',
@@ -1598,7 +1402,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['star', 'sparkle', 'green-square'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['asterisk', 'star', 'eight'],
   },
   {
     emoji: '✴️',
@@ -1606,7 +1409,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['orange-square', 'shape', 'polygon'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['star', 'eight-pointed', 'shape'],
   },
   {
     emoji: '❇️',
@@ -1614,7 +1416,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stars', 'green-square', 'awesome'],
     category: 'symbols',
     color: '#90EE90',
-    tags: ['sparkle', 'star', 'shine'],
   },
 
   // Warning signs
@@ -1624,7 +1425,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['exclamation', 'wip', 'alert'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['warning', 'caution', 'alert'],
   },
   {
     emoji: '🚸',
@@ -1632,7 +1432,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['school', 'warning', 'danger'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['children', 'crossing', 'school'],
   },
 
   // Restriction signs
@@ -1642,7 +1441,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['forbid', 'stop', 'limit'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['prohibited', 'no', 'forbidden'],
   },
   {
     emoji: '🚳',
@@ -1650,7 +1448,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cyclist', 'prohibited', 'circle'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['no-bicycles', 'prohibited', 'bikes'],
   },
   {
     emoji: '🚭',
@@ -1658,7 +1455,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cigarette', 'blue-square', 'smell'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['no-smoking', 'prohibited', 'cigarette'],
   },
   {
     emoji: '🚯',
@@ -1666,7 +1462,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['trash', 'bin', 'garbage'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['no-littering', 'trash', 'prohibited'],
   },
   {
     emoji: '🚱',
@@ -1674,7 +1469,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['drink', 'faucet', 'tap'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['non-potable', 'water', 'no-drinking'],
   },
   {
     emoji: '🚷',
@@ -1682,7 +1476,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['rules', 'crossing', 'walking'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['no-pedestrians', 'prohibited', 'walking'],
   },
   {
     emoji: '📵',
@@ -1690,7 +1483,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['iphone', 'mute', 'circle'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['no-phones', 'prohibited', 'mobile'],
   },
   {
     emoji: '🔞',
@@ -1698,7 +1490,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['18', 'drink', 'pub'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['18+', 'adult', 'restricted'],
   },
   {
     emoji: '☢️',
@@ -1706,7 +1497,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nuclear', 'danger', 'radiation'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['radioactive', 'nuclear', 'danger'],
   },
   {
     emoji: '☣️',
@@ -1714,7 +1504,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['danger', 'biological', 'virus'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['biohazard', 'danger', 'biological'],
   },
 
   // Decorative symbols
@@ -1724,7 +1513,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['japanese', 'spring', 'blossom'],
     category: 'symbols',
     color: '#FFB6C1',
-    tags: ['flower', 'white', 'stamp'],
   },
   {
     emoji: '🉐',
@@ -1732,7 +1520,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chinese', 'kanji', 'obtain'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['bargain', 'japanese', 'deal'],
   },
   {
     emoji: '㊙️',
@@ -1740,7 +1527,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['privacy', 'chinese', 'sshh'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['secret', 'japanese', 'confidential'],
   },
   {
     emoji: '㊗️',
@@ -1748,7 +1534,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chinese', 'kanji', 'japanese'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['congratulations', 'japanese', 'celebration'],
   },
   {
     emoji: '🈴',
@@ -1756,7 +1541,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['japanese', 'chinese', 'pass'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['pass', 'japanese', 'grade'],
   },
   {
     emoji: '🈵',
@@ -1764,7 +1548,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['full', 'chinese', 'japanese'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['full', 'japanese', 'no-vacancy'],
   },
   {
     emoji: '🈹',
@@ -1772,7 +1555,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cut', 'divide', 'chinese'],
     category: 'symbols',
     color: '#FF8C00',
-    tags: ['discount', 'japanese', 'sale'],
   },
   {
     emoji: '🈲',
@@ -1780,7 +1562,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kanji', 'japanese', 'chinese'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['prohibited', 'japanese', 'forbidden'],
   },
   {
     emoji: '🅰️',
@@ -1788,7 +1569,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['red-square', 'alphabet', 'letter'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['a', 'blood-type', 'letter'],
   },
   {
     emoji: '🅱️',
@@ -1796,7 +1576,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['red-square', 'alphabet', 'letter'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['b', 'blood-type', 'letter'],
   },
   {
     emoji: '🆎',
@@ -1804,7 +1583,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['red-square', 'alphabet', 'medical'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['ab', 'blood-type', 'medical'],
   },
   {
     emoji: '🆑',
@@ -1812,7 +1590,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['alphabet', 'words', 'red-square'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['cl', 'clear', 'button'],
   },
   {
     emoji: '🅾️',
@@ -1820,7 +1597,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['alphabet', 'red-square', 'letter'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['o', 'blood-type', 'letter'],
   },
   {
     emoji: '🆘',
@@ -1828,7 +1604,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['help', 'red-square', 'words'],
     category: 'symbols',
     color: '#DC143C',
-    tags: ['sos', 'help', 'emergency'],
   },
   {
     emoji: '🚼',
@@ -1836,7 +1611,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['orange-square', 'child', 'baby'],
     category: 'symbols',
     color: '#FFD700',
-    tags: ['baby', 'changing', 'symbol'],
   },
   {
     emoji: '🚾',
@@ -1844,7 +1618,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['toilet', 'restroom', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['wc', 'toilet', 'restroom'],
   },
   {
     emoji: '🅿️',
@@ -1852,7 +1625,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cars', 'blue-square', 'alphabet'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['parking', 'p', 'car'],
   },
   {
     emoji: '♿',
@@ -1860,7 +1632,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'disabled', 'accessibility'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['wheelchair', 'accessible', 'disability'],
   },
   {
     emoji: '🚹',
@@ -1868,7 +1639,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['toilet', 'restroom', 'wc'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['mens', 'restroom', 'male'],
   },
   {
     emoji: '🚺',
@@ -1876,7 +1646,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['purple-square', 'woman', 'female'],
     category: 'symbols',
     color: '#9370DB',
-    tags: ['womens', 'restroom', 'female'],
   },
   {
     emoji: '🚻',
@@ -1884,7 +1653,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'toilet', 'refresh'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['restroom', 'bathroom', 'toilet'],
   },
   {
     emoji: '🚮',
@@ -1892,7 +1660,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'sign', 'human'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['litter', 'trash', 'bin'],
   },
   {
     emoji: '🈁',
@@ -1900,7 +1667,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'here', 'katakana'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['here', 'japanese', 'koko'],
   },
   {
     emoji: '🔣',
@@ -1908,7 +1674,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'music', 'note'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['symbols', 'input', 'characters'],
   },
   {
     emoji: 'ℹ️',
@@ -1916,7 +1681,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'alphabet', 'letter'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['info', 'information', 'i'],
   },
   {
     emoji: '🔤',
@@ -1924,7 +1688,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'alphabet', 'abc'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['abc', 'letters', 'alphabet'],
   },
   {
     emoji: '🔡',
@@ -1932,7 +1695,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'alphabet', 'abc'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['abc', 'lowercase', 'letters'],
   },
   {
     emoji: '🔠',
@@ -1940,7 +1702,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['alphabet', 'words', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['ABC', 'uppercase', 'letters'],
   },
   {
     emoji: '🆖',
@@ -1948,7 +1709,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'words', 'shape'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['ng', 'no-good', 'button'],
   },
   {
     emoji: '🆗',
@@ -1956,7 +1716,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['good', 'agree', 'yes'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['ok', 'okay', 'button'],
   },
   {
     emoji: '🆙',
@@ -1964,7 +1723,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'above', 'high'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['up', 'level-up', 'button'],
   },
   {
     emoji: '🆒',
@@ -1972,7 +1730,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['words', 'blue-square', 'awesome'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['cool', 'awesome', 'button'],
   },
   {
     emoji: '🆕',
@@ -1980,7 +1737,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'words', 'start'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['new', 'fresh', 'button'],
   },
   {
     emoji: '🆓',
@@ -1988,7 +1744,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'words', 'gratis'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['free', 'gratis', 'button'],
   },
   {
     emoji: '0️⃣',
@@ -1996,7 +1751,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['numbers', 'blue-square', 'null'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['zero', '0', 'number'],
   },
   {
     emoji: '1️⃣',
@@ -2004,7 +1758,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'numbers', 'one'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['one', '1', 'number'],
   },
   {
     emoji: '2️⃣',
@@ -2012,7 +1765,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['numbers', 'prime', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['two', '2', 'number'],
   },
   {
     emoji: '3️⃣',
@@ -2020,7 +1772,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['three', 'numbers', 'prime'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['three', '3', 'number'],
   },
   {
     emoji: '4️⃣',
@@ -2028,7 +1779,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['four', 'numbers', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['four', '4', 'number'],
   },
   {
     emoji: '5️⃣',
@@ -2036,7 +1786,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['five', 'numbers', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['five', '5', 'number'],
   },
   {
     emoji: '6️⃣',
@@ -2044,7 +1793,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['six', 'numbers', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['six', '6', 'number'],
   },
   {
     emoji: '7️⃣',
@@ -2052,7 +1800,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['seven', 'numbers', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['seven', '7', 'number'],
   },
   {
     emoji: '8️⃣',
@@ -2060,7 +1807,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['eight', 'blue-square', 'numbers'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['eight', '8', 'number'],
   },
   {
     emoji: '9️⃣',
@@ -2068,7 +1814,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blue-square', 'numbers', 'nine'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['nine', '9', 'number'],
   },
   {
     emoji: '🔟',
@@ -2076,7 +1821,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['numbers', '10', 'blue-square'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['ten', '10', 'number'],
   },
   {
     emoji: '🔢',
@@ -2084,7 +1828,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['numbers', 'blue-square', '1234'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['numbers', '1234', 'input'],
   },
   {
     emoji: '#️⃣',
@@ -2092,7 +1835,6 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['symbol', 'blue-square', 'hash'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['hash', 'pound', 'number'],
   },
   {
     emoji: '*️⃣',
@@ -2100,6 +1842,5 @@ export const symbolEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['star', 'keycap', 'asterisk'],
     category: 'symbols',
     color: '#4169E1',
-    tags: ['asterisk', 'star', 'keycap'],
   },
 ];

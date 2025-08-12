@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const travelEmojis: Emoji[] = [
   // Places - Maps
   {
     emoji: '🗾',
@@ -8,7 +8,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nation', 'country', 'japanese'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['japan', 'map', 'island'],
   },
   {
     emoji: '🏔️',
@@ -16,7 +15,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'nature', 'environment'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['mountain', 'snow', 'peak'],
   },
   {
     emoji: '⛰️',
@@ -24,7 +22,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'nature', 'environment'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['mountain', 'hiking', 'nature'],
   },
   {
     emoji: '🌋',
@@ -32,7 +29,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'nature', 'disaster'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['volcano', 'eruption', 'lava'],
   },
   {
     emoji: '🗻',
@@ -40,7 +36,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'mountain', 'nature'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['fuji', 'japan', 'mountain'],
   },
   {
     emoji: '🏕️',
@@ -48,7 +43,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'outdoors', 'tent'],
     category: 'travel',
     color: '#228B22',
-    tags: ['camping', 'tent', 'outdoors'],
   },
   {
     emoji: '🏖️',
@@ -56,7 +50,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'summer', 'sunny'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['beach', 'vacation', 'umbrella'],
   },
   {
     emoji: '🏜️',
@@ -64,7 +57,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'warm', 'saharah'],
     category: 'travel',
     color: '#DEB887',
-    tags: ['desert', 'dry', 'cactus'],
   },
   {
     emoji: '🏝️',
@@ -72,7 +64,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'tropical', 'mojito'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['island', 'tropical', 'palm'],
   },
   {
     emoji: '🏞️',
@@ -80,7 +71,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'environment', 'nature'],
     category: 'travel',
     color: '#228B22',
-    tags: ['park', 'nature', 'landscape'],
   },
 
   // Buildings
@@ -90,7 +80,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'place', 'sports'],
     category: 'travel',
     color: '#696969',
-    tags: ['stadium', 'sports', 'arena'],
   },
   {
     emoji: '🏛️',
@@ -98,7 +87,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['art', 'culture', 'history'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['building', 'classical', 'museum'],
   },
   {
     emoji: '🏗️',
@@ -106,7 +94,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wip', 'working', 'progress'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['construction', 'building', 'crane'],
   },
   {
     emoji: '🧱',
@@ -114,7 +101,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bricks', 'wall', 'construction'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['brick', 'wall', 'building'],
   },
   {
     emoji: '🪨',
@@ -122,7 +108,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stone', 'boulder', 'heavy'],
     category: 'travel',
     color: '#696969',
-    tags: ['rock', 'stone', 'boulder'],
   },
   {
     emoji: '🪵',
@@ -130,7 +115,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['log', 'timber', 'lumber'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['wood', 'log', 'timber'],
   },
   {
     emoji: '🛖',
@@ -138,7 +122,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['house', 'structure', 'roundhouse'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['hut', 'shelter', 'primitive'],
   },
   {
     emoji: '🏘️',
@@ -146,7 +129,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['buildings', 'photo', 'neighborhood'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['houses', 'neighborhood', 'suburb'],
   },
   {
     emoji: '🏚️',
@@ -154,7 +136,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['abandon', 'evict', 'broken'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['abandoned', 'house', 'derelict'],
   },
   {
     emoji: '🏠',
@@ -162,7 +143,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'home', 'house'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['house', 'home', 'building'],
   },
   {
     emoji: '🏡',
@@ -170,7 +150,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['home', 'plant', 'nature'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['house', 'garden', 'home'],
   },
   {
     emoji: '🏢',
@@ -178,7 +157,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'work', 'enterprise'],
     category: 'travel',
     color: '#696969',
-    tags: ['office', 'building', 'work'],
   },
   {
     emoji: '🏣',
@@ -186,7 +164,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'envelope', 'communication'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['post-office', 'japanese', 'mail'],
   },
   {
     emoji: '🏤',
@@ -194,7 +171,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'email', 'communication'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['post-office', 'mail', 'building'],
   },
   {
     emoji: '🏥',
@@ -202,7 +178,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'health', 'surgery'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['hospital', 'medical', 'health'],
   },
   {
     emoji: '🏦',
@@ -210,7 +185,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'money', 'sales'],
     category: 'travel',
     color: '#696969',
-    tags: ['bank', 'money', 'building'],
   },
   {
     emoji: '🏨',
@@ -218,7 +192,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'accommodation', 'checkin'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['hotel', 'accommodation', 'building'],
   },
   {
     emoji: '🏩',
@@ -226,7 +199,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['like', 'affection', 'dating'],
     category: 'travel',
     color: '#FF69B4',
-    tags: ['love-hotel', 'romance', 'heart'],
   },
   {
     emoji: '🏪',
@@ -234,7 +206,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'shopping', 'groceries'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['store', 'convenience', '24-7'],
   },
   {
     emoji: '🏫',
@@ -242,7 +213,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'student', 'education'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['school', 'education', 'building'],
   },
   {
     emoji: '🏬',
@@ -250,7 +220,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'shopping', 'mall'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['store', 'department', 'shopping'],
   },
   {
     emoji: '🏭',
@@ -258,7 +227,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'industry', 'pollution'],
     category: 'travel',
     color: '#696969',
-    tags: ['factory', 'industrial', 'smoke'],
   },
   {
     emoji: '🏯',
@@ -266,7 +234,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'building', 'castle'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['castle', 'japanese', 'building'],
   },
   {
     emoji: '🏰',
@@ -274,7 +241,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'royalty', 'history'],
     category: 'travel',
     color: '#D3D3D3',
-    tags: ['castle', 'european', 'fairytale'],
   },
   {
     emoji: '💒',
@@ -282,7 +248,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['love', 'like', 'affection'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['wedding', 'chapel', 'marriage'],
   },
   {
     emoji: '🗼',
@@ -290,7 +255,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'japanese', 'tokyo'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['tokyo-tower', 'japan', 'landmark'],
   },
   {
     emoji: '🗽',
@@ -298,7 +262,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['american', 'newyork', 'liberty'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['liberty', 'statue', 'america'],
   },
 
   // Religious buildings
@@ -308,7 +271,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['building', 'religion', 'christ'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['church', 'christian', 'religion'],
   },
   {
     emoji: '🕌',
@@ -316,7 +278,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['islam', 'worship', 'minaret'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['mosque', 'islam', 'religion'],
   },
   {
     emoji: '🛕',
@@ -324,7 +285,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['temple', 'hindu', 'worship'],
     category: 'travel',
     color: '#FF8C00',
-    tags: ['temple', 'hindu', 'religion'],
   },
   {
     emoji: '🕍',
@@ -332,7 +292,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['judaism', 'worship', 'temple'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['synagogue', 'jewish', 'religion'],
   },
   {
     emoji: '⛩️',
@@ -340,7 +299,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['temple', 'japan', 'kyoto'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['shrine', 'shinto', 'japanese'],
   },
   {
     emoji: '🕋',
@@ -348,7 +306,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mecca', 'mosque', 'islam'],
     category: 'travel',
     color: '#000000',
-    tags: ['kaaba', 'mecca', 'islam'],
   },
 
   // Other structures
@@ -358,7 +315,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'summer', 'water'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['fountain', 'water', 'park'],
   },
   {
     emoji: '⛺',
@@ -366,7 +322,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'camping', 'outdoors'],
     category: 'travel',
     color: '#FF8C00',
-    tags: ['tent', 'camping', 'outdoors'],
   },
   {
     emoji: '🌁',
@@ -374,7 +329,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'mountain', 'bridge'],
     category: 'travel',
     color: '#B0C4DE',
-    tags: ['fog', 'bridge', 'misty'],
   },
   {
     emoji: '🌃',
@@ -382,7 +336,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['evening', 'city', 'downtown'],
     category: 'travel',
     color: '#191970',
-    tags: ['night', 'city', 'stars'],
   },
   {
     emoji: '🏙️',
@@ -390,7 +343,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'night life', 'urban'],
     category: 'travel',
     color: '#696969',
-    tags: ['city', 'skyline', 'urban'],
   },
   {
     emoji: '🌄',
@@ -398,7 +350,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['view', 'vacation', 'photo'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['sunrise', 'mountains', 'morning'],
   },
   {
     emoji: '🌅',
@@ -406,7 +357,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['morning', 'view', 'vacation'],
     category: 'travel',
     color: '#FF8C00',
-    tags: ['sunrise', 'morning', 'sun'],
   },
   {
     emoji: '🌆',
@@ -414,7 +364,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'evening', 'sky'],
     category: 'travel',
     color: '#FF69B4',
-    tags: ['dusk', 'city', 'evening'],
   },
   {
     emoji: '🌇',
@@ -422,7 +371,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'good morning', 'dawn'],
     category: 'travel',
     color: '#FF8C00',
-    tags: ['sunset', 'evening', 'sun'],
   },
   {
     emoji: '🌉',
@@ -430,7 +378,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'sanfrancisco', 'bridge'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['bridge', 'night', 'lights'],
   },
   {
     emoji: '♨️',
@@ -438,7 +385,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bath', 'warm', 'relax'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['hot-springs', 'onsen', 'steam'],
   },
   {
     emoji: '🎠',
@@ -446,7 +392,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'carnival', 'ride'],
     category: 'travel',
     color: '#FF69B4',
-    tags: ['carousel', 'horse', 'carnival'],
   },
   {
     emoji: '🎡',
@@ -454,7 +399,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'carnival', 'londoneye'],
     category: 'travel',
     color: '#9370DB',
-    tags: ['ferris-wheel', 'carnival', 'ride'],
   },
   {
     emoji: '🎢',
@@ -462,7 +406,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['carnival', 'playground', 'photo'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['roller-coaster', 'amusement', 'ride'],
   },
   {
     emoji: '💈',
@@ -470,7 +413,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hair', 'salon', 'style'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['barber', 'pole', 'haircut'],
   },
   {
     emoji: '🎪',
@@ -478,7 +420,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['festival', 'carnival', 'party'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['circus', 'tent', 'carnival'],
   },
 
   // Transportation - Ground
@@ -488,7 +429,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'train'],
     category: 'travel',
     color: '#696969',
-    tags: ['train', 'locomotive', 'steam'],
   },
   {
     emoji: '🚃',
@@ -496,7 +436,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'train'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['train', 'car', 'railway'],
   },
   {
     emoji: '🚄',
@@ -504,7 +443,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'speed'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['train', 'bullet', 'fast'],
   },
   {
     emoji: '🚅',
@@ -512,7 +450,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'speed'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['train', 'shinkansen', 'fast'],
   },
   {
     emoji: '🚆',
@@ -520,7 +457,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'train'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['train', 'railway', 'transport'],
   },
   {
     emoji: '🚇',
@@ -528,7 +464,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'blue-square', 'mrt'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['metro', 'subway', 'underground'],
   },
   {
     emoji: '🚈',
@@ -536,7 +471,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'train'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['rail', 'light', 'tram'],
   },
   {
     emoji: '🚉',
@@ -544,7 +478,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'building'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['station', 'train', 'platform'],
   },
   {
     emoji: '🚊',
@@ -552,7 +485,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'trolley'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['tram', 'trolley', 'streetcar'],
   },
   {
     emoji: '🚝',
@@ -560,7 +492,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'train'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['monorail', 'train', 'elevated'],
   },
   {
     emoji: '🚞',
@@ -568,7 +499,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'train'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['railway', 'mountain', 'cable-car'],
   },
   {
     emoji: '🚋',
@@ -576,7 +506,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'carriage'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['tram', 'car', 'trolley'],
   },
   {
     emoji: '🚌',
@@ -584,7 +513,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['car', 'vehicle', 'transportation'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['bus', 'transport', 'public'],
   },
   {
     emoji: '🚍',
@@ -592,7 +520,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'transportation', 'bus'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['bus', 'oncoming', 'front'],
   },
   {
     emoji: '🚎',
@@ -600,7 +527,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bart', 'transportation', 'vehicle'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['trolleybus', 'electric', 'bus'],
   },
   {
     emoji: '🚐',
@@ -608,7 +534,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'car', 'transportation'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['minibus', 'van', 'shuttle'],
   },
   {
     emoji: '🚑',
@@ -616,7 +541,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['health', '911', 'hospital'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['ambulance', 'emergency', 'medical'],
   },
   {
     emoji: '🚒',
@@ -624,7 +548,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'cars', 'vehicle'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['fire-truck', 'emergency', 'rescue'],
   },
   {
     emoji: '🚓',
@@ -632,7 +555,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'cars', 'transportation'],
     category: 'travel',
     color: '#000000',
-    tags: ['police', 'car', 'cop'],
   },
   {
     emoji: '🚔',
@@ -640,7 +562,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'law', 'legal'],
     category: 'travel',
     color: '#000000',
-    tags: ['police', 'oncoming', 'lights'],
   },
   {
     emoji: '🚕',
@@ -648,7 +569,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['uber', 'vehicle', 'cars'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['taxi', 'cab', 'transport'],
   },
   {
     emoji: '🚖',
@@ -656,7 +576,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'cars', 'uber'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['taxi', 'oncoming', 'cab'],
   },
   {
     emoji: '🚗',
@@ -664,7 +583,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['red', 'transportation', 'vehicle'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['car', 'automobile', 'vehicle'],
   },
   {
     emoji: '🚘',
@@ -672,7 +590,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['car', 'vehicle', 'transportation'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['car', 'oncoming', 'driving'],
   },
   {
     emoji: '🚙',
@@ -680,7 +597,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'suv'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['suv', 'car', 'vehicle'],
   },
   {
     emoji: '🛻',
@@ -688,7 +604,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['car', 'transportation', 'pick-up'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['truck', 'pickup', 'vehicle'],
   },
   {
     emoji: '🚚',
@@ -696,7 +611,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cars', 'transportation', 'truck'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['truck', 'delivery', 'transport'],
   },
   {
     emoji: '🚛',
@@ -704,7 +618,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'cars', 'transportation'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['truck', 'lorry', 'semi'],
   },
   {
     emoji: '🚜',
@@ -712,7 +625,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'car', 'farming'],
     category: 'travel',
     color: '#228B22',
-    tags: ['tractor', 'farm', 'agriculture'],
   },
   {
     emoji: '🏎️',
@@ -720,7 +632,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sports', 'race', 'fast'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['race-car', 'f1', 'fast'],
   },
   {
     emoji: '🏍️',
@@ -728,7 +639,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['race', 'sports', 'fast'],
     category: 'travel',
     color: '#000000',
-    tags: ['motorcycle', 'bike', 'motorbike'],
   },
   {
     emoji: '🛵',
@@ -736,7 +646,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'vespa', 'sasha'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['scooter', 'vespa', 'moped'],
   },
   {
     emoji: '🦽',
@@ -744,7 +653,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['accessibility', 'wheelchair', 'manual'],
     category: 'travel',
     color: '#696969',
-    tags: ['wheelchair', 'manual', 'accessibility'],
   },
   {
     emoji: '🦼',
@@ -752,7 +660,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['accessibility', 'wheelchair', 'electric'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['wheelchair', 'electric', 'accessibility'],
   },
   {
     emoji: '🛺',
@@ -760,7 +667,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['move', 'transportation', 'tuk tuk'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['rickshaw', 'tuk-tuk', 'transport'],
   },
   {
     emoji: '🚲',
@@ -768,7 +674,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sports', 'bicycle', 'exercise'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['bicycle', 'bike', 'cycling'],
   },
   {
     emoji: '🛴',
@@ -776,7 +681,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'kick', 'razor'],
     category: 'travel',
     color: '#C0C0C0',
-    tags: ['scooter', 'kick', 'ride'],
   },
   {
     emoji: '🛹',
@@ -784,7 +688,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['board', 'skateboard', 'sport'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['skateboard', 'skating', 'board'],
   },
   {
     emoji: '🛼',
@@ -792,7 +695,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['footwear', 'sports', 'skate'],
     category: 'travel',
     color: '#FF69B4',
-    tags: ['roller-skate', 'skating', 'retro'],
   },
   {
     emoji: '🚏',
@@ -800,7 +702,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'wait', 'stop'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['bus-stop', 'waiting', 'public'],
   },
   {
     emoji: '🛣️',
@@ -808,7 +709,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['road', 'cupertino', 'interstate'],
     category: 'travel',
     color: '#696969',
-    tags: ['highway', 'road', 'motorway'],
   },
   {
     emoji: '🛤️',
@@ -816,7 +716,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['train', 'transportation', 'track'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['tracks', 'railway', 'railroad'],
   },
   {
     emoji: '🛢️',
@@ -824,7 +723,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['barrell', 'oil', 'petroleum'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['oil', 'drum', 'barrel'],
   },
   {
     emoji: '⛽',
@@ -832,7 +730,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['gas station', 'petroleum', 'fuel'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['gas', 'fuel', 'pump'],
   },
   {
     emoji: '🚨',
@@ -840,7 +737,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['police', 'ambulance', '911'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['siren', 'emergency', 'light'],
   },
   {
     emoji: '🚥',
@@ -848,7 +744,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'signal', 'traffic'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['traffic-light', 'horizontal', 'signal'],
   },
   {
     emoji: '🚦',
@@ -856,7 +751,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'driving', 'signal'],
     category: 'travel',
     color: '#90EE90',
-    tags: ['traffic-light', 'vertical', 'signal'],
   },
   {
     emoji: '🛑',
@@ -864,7 +758,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stop', 'sign', 'octagonal'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['stop', 'sign', 'traffic'],
   },
   {
     emoji: '🚧',
@@ -872,7 +765,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wip', 'progress', 'caution'],
     category: 'travel',
     color: '#FF8C00',
-    tags: ['construction', 'warning', 'barrier'],
   },
 
   // Transportation - Sea
@@ -882,7 +774,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ship', 'ferry', 'sea'],
     category: 'travel',
     color: '#696969',
-    tags: ['anchor', 'ship', 'nautical'],
   },
   {
     emoji: '⛵',
@@ -890,7 +781,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ship', 'summer', 'transportation'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['sailboat', 'sailing', 'yacht'],
   },
   {
     emoji: '🛶',
@@ -898,7 +788,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['boat', 'paddle', 'water'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['canoe', 'paddle', 'boat'],
   },
   {
     emoji: '🚤',
@@ -906,7 +795,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ship', 'transportation', 'vehicle'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['speedboat', 'fast', 'boat'],
   },
   {
     emoji: '🛳️',
@@ -914,7 +802,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['yacht', 'cruise', 'ferry'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['cruise', 'ship', 'passenger'],
   },
   {
     emoji: '⛴️',
@@ -922,7 +809,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ship', 'transport', 'boat'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['ferry', 'boat', 'transport'],
   },
   {
     emoji: '🛥️',
@@ -930,7 +816,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ship', 'motorboat', 'boat'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['motorboat', 'boat', 'speed'],
   },
   {
     emoji: '🚢',
@@ -938,7 +823,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'titanic', 'deploy'],
     category: 'travel',
     color: '#696969',
-    tags: ['ship', 'vessel', 'ocean'],
   },
 
   // Transportation - Air
@@ -948,7 +832,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'transportation', 'flight'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['airplane', 'flight', 'travel'],
   },
   {
     emoji: '🛩️',
@@ -956,7 +839,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['flight', 'transportation', 'fly'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['airplane', 'small', 'private'],
   },
   {
     emoji: '🛫',
@@ -964,7 +846,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['airport', 'flight', 'landing'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['takeoff', 'departure', 'airplane'],
   },
   {
     emoji: '🛬',
@@ -972,7 +853,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['airport', 'flight', 'boarding'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['landing', 'arrival', 'airplane'],
   },
   {
     emoji: '🪂',
@@ -980,7 +860,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fly', 'glide', 'parasail'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['parachute', 'skydiving', 'flying'],
   },
   {
     emoji: '💺',
@@ -988,7 +867,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sit', 'airplane', 'transport'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['seat', 'chair', 'airplane'],
   },
   {
     emoji: '🚁',
@@ -996,7 +874,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'fly'],
     category: 'travel',
     color: '#696969',
-    tags: ['helicopter', 'chopper', 'flying'],
   },
   {
     emoji: '🚟',
@@ -1004,7 +881,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['vehicle', 'transportation', 'railway'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['railway', 'suspension', 'cable'],
   },
   {
     emoji: '🚠',
@@ -1012,7 +888,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'ski'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['cable-car', 'mountain', 'gondola'],
   },
   {
     emoji: '🚡',
@@ -1020,7 +895,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'ski'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['tramway', 'aerial', 'cable'],
   },
   {
     emoji: '🛰️',
@@ -1028,7 +902,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['communication', 'gps', 'orbit'],
     category: 'travel',
     color: '#C0C0C0',
-    tags: ['satellite', 'space', 'orbit'],
   },
   {
     emoji: '🚀',
@@ -1036,7 +909,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['launch', 'ship', 'staffmode'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['rocket', 'space', 'launch'],
   },
   {
     emoji: '🛸',
@@ -1044,7 +916,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['transportation', 'vehicle', 'ufo'],
     category: 'travel',
     color: '#C0C0C0',
-    tags: ['ufo', 'alien', 'spaceship'],
   },
 
   // Hotel and tourism
@@ -1054,7 +925,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['service', 'hotel', 'bell'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['bell', 'hotel', 'service'],
   },
   {
     emoji: '🧳',
@@ -1062,7 +932,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['packing', 'travel', 'suitcase'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['luggage', 'suitcase', 'travel'],
   },
 
   // Time
@@ -1072,7 +941,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'clock', 'oldschool'],
     category: 'travel',
     color: '#DEB887',
-    tags: ['hourglass', 'time', 'done'],
   },
   {
     emoji: '⏳',
@@ -1080,7 +948,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['oldschool', 'time', 'countdown'],
     category: 'travel',
     color: '#DEB887',
-    tags: ['hourglass', 'time', 'waiting'],
   },
   {
     emoji: '⌚',
@@ -1088,7 +955,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'accessories', 'apple'],
     category: 'travel',
     color: '#C0C0C0',
-    tags: ['watch', 'time', 'wrist'],
   },
   {
     emoji: '⏰',
@@ -1096,7 +962,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'wake', 'morning'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['alarm', 'clock', 'wake'],
   },
   {
     emoji: '⏱️',
@@ -1104,7 +969,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'deadline', 'racing'],
     category: 'travel',
     color: '#C0C0C0',
-    tags: ['stopwatch', 'timer', 'sports'],
   },
   {
     emoji: '⏲️',
@@ -1112,7 +976,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['alarm', 'kitchen', 'timer'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['timer', 'clock', 'kitchen'],
   },
   {
     emoji: '🕰️',
@@ -1120,7 +983,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'clock', 'antique'],
     category: 'travel',
     color: '#8B4513',
-    tags: ['clock', 'mantel', 'antique'],
   },
   {
     emoji: '🕐',
@@ -1128,7 +990,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '1:00', 'time'],
   },
   {
     emoji: '🕜',
@@ -1136,7 +997,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '1:30', 'time'],
   },
   {
     emoji: '🕑',
@@ -1144,7 +1004,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '2:00', 'time'],
   },
   {
     emoji: '🕝',
@@ -1152,7 +1011,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '2:30', 'time'],
   },
   {
     emoji: '🕒',
@@ -1160,7 +1018,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '3:00', 'time'],
   },
   {
     emoji: '🕞',
@@ -1168,7 +1025,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '3:30', 'time'],
   },
   {
     emoji: '🕓',
@@ -1176,7 +1032,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '4:00', 'time'],
   },
   {
     emoji: '🕟',
@@ -1184,7 +1039,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '4:30', 'time'],
   },
   {
     emoji: '🕔',
@@ -1192,7 +1046,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '5:00', 'time'],
   },
   {
     emoji: '🕠',
@@ -1200,7 +1053,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '5:30', 'time'],
   },
   {
     emoji: '🕕',
@@ -1208,7 +1060,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '6:00', 'time'],
   },
   {
     emoji: '🕡',
@@ -1216,7 +1067,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '6:30', 'time'],
   },
   {
     emoji: '🕖',
@@ -1224,7 +1074,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '7:00', 'time'],
   },
   {
     emoji: '🕢',
@@ -1232,7 +1081,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '7:30', 'time'],
   },
   {
     emoji: '🕗',
@@ -1240,7 +1088,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '8:00', 'time'],
   },
   {
     emoji: '🕣',
@@ -1248,7 +1095,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '8:30', 'time'],
   },
   {
     emoji: '🕘',
@@ -1256,7 +1102,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '9:00', 'time'],
   },
   {
     emoji: '🕤',
@@ -1264,7 +1109,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '9:30', 'time'],
   },
   {
     emoji: '🕙',
@@ -1272,7 +1116,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '10:00', 'time'],
   },
   {
     emoji: '🕥',
@@ -1280,7 +1123,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '10:30', 'time'],
   },
   {
     emoji: '🕚',
@@ -1288,7 +1130,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '11:00', 'time'],
   },
   {
     emoji: '🕦',
@@ -1296,7 +1137,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '11:30', 'time'],
   },
   {
     emoji: '🕛',
@@ -1304,7 +1144,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'noon', 'midnight'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '12:00', 'time'],
   },
   {
     emoji: '🕧',
@@ -1312,7 +1151,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['time', 'late', 'early'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['clock', '12:30', 'time'],
   },
 
   // Sky and weather
@@ -1322,7 +1160,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['globe', 'world', 'international'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['earth', 'globe', 'europe-africa'],
   },
   {
     emoji: '🌎',
@@ -1330,7 +1167,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['globe', 'world', 'usa'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['earth', 'globe', 'americas'],
   },
   {
     emoji: '🌏',
@@ -1338,7 +1174,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['globe', 'world', 'east'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['earth', 'globe', 'asia'],
   },
   {
     emoji: '🌐',
@@ -1346,7 +1181,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['earth', 'international', 'world'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['globe', 'world', 'meridians'],
   },
   {
     emoji: '🗺️',
@@ -1354,7 +1188,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['location', 'direction', 'map'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['map', 'world', 'geography'],
   },
   {
     emoji: '🗿',
@@ -1362,7 +1195,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['stone', 'easter island', 'statue'],
     category: 'travel',
     color: '#696969',
-    tags: ['moai', 'easter-island', 'statue'],
   },
   {
     emoji: '🧭',
@@ -1370,7 +1202,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['magnetic', 'navigation', 'orienteering'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['compass', 'navigation', 'direction'],
   },
 
   // Weather phenomena
@@ -1380,7 +1211,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'morning', 'sky'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['sun', 'face', 'sunny'],
   },
   {
     emoji: '☀️',
@@ -1388,7 +1218,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'nature', 'brightness'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['sun', 'sunny', 'weather'],
   },
   {
     emoji: '🌝',
@@ -1396,7 +1225,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'face', 'full'],
   },
   {
     emoji: '🌛',
@@ -1404,7 +1232,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'face', 'quarter'],
   },
   {
     emoji: '🌜',
@@ -1412,7 +1239,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'face', 'quarter'],
   },
   {
     emoji: '🌚',
@@ -1420,7 +1246,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#696969',
-    tags: ['moon', 'face', 'new'],
   },
   {
     emoji: '🌕',
@@ -1428,7 +1253,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'yellow', 'twilight'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'full', 'night'],
   },
   {
     emoji: '🌖',
@@ -1436,7 +1260,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'waning', 'gibbous'],
   },
   {
     emoji: '🌗',
@@ -1444,7 +1267,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'quarter', 'last'],
   },
   {
     emoji: '🌘',
@@ -1452,7 +1274,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'waning', 'crescent'],
   },
   {
     emoji: '🌑',
@@ -1460,7 +1281,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#696969',
-    tags: ['moon', 'new', 'dark'],
   },
   {
     emoji: '🌒',
@@ -1468,7 +1288,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'waxing', 'crescent'],
   },
   {
     emoji: '🌓',
@@ -1476,7 +1295,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'twilight', 'planet'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'quarter', 'first'],
   },
   {
     emoji: '🌔',
@@ -1484,7 +1302,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'night', 'sky'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'waxing', 'gibbous'],
   },
   {
     emoji: '🌙',
@@ -1492,7 +1309,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['night', 'sleep', 'sky'],
     category: 'travel',
     color: '#F0E68C',
-    tags: ['moon', 'crescent', 'night'],
   },
   {
     emoji: '🌡️',
@@ -1500,7 +1316,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'temperature', 'hot'],
     category: 'travel',
     color: '#DC143C',
-    tags: ['thermometer', 'temperature', 'weather'],
   },
   {
     emoji: '☁️',
@@ -1508,7 +1323,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'nature', 'sky'],
     category: 'travel',
     color: '#D3D3D3',
-    tags: ['cloud', 'weather', 'sky'],
   },
   {
     emoji: '⛅',
@@ -1516,7 +1330,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'nature', 'cloudy'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['partly-cloudy', 'sun', 'cloud'],
   },
   {
     emoji: '⛈️',
@@ -1524,7 +1337,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'lightning', 'thunder'],
     category: 'travel',
     color: '#696969',
-    tags: ['storm', 'thunder', 'lightning'],
   },
   {
     emoji: '🌤️',
@@ -1532,7 +1344,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'nature', 'cloudy'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['mostly-sunny', 'weather', 'cloud'],
   },
   {
     emoji: '🌥️',
@@ -1540,7 +1351,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'nature', 'cloudy'],
     category: 'travel',
     color: '#D3D3D3',
-    tags: ['mostly-cloudy', 'weather', 'sun'],
   },
   {
     emoji: '🌦️',
@@ -1548,7 +1358,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'nature', 'cloudy'],
     category: 'travel',
     color: '#4682B4',
-    tags: ['sun-shower', 'rain', 'weather'],
   },
   {
     emoji: '🌧️',
@@ -1556,7 +1365,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'rain', 'cloud'],
     category: 'travel',
     color: '#4682B4',
-    tags: ['rain', 'weather', 'cloud'],
   },
   {
     emoji: '🌨️',
@@ -1564,7 +1372,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'cold', 'winter'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['snow', 'weather', 'winter'],
   },
   {
     emoji: '🌩️',
@@ -1572,7 +1379,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'thunder', 'lightning'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['lightning', 'thunder', 'storm'],
   },
   {
     emoji: '🌪️',
@@ -1580,7 +1386,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'cyclone', 'twister'],
     category: 'travel',
     color: '#696969',
-    tags: ['tornado', 'cyclone', 'twister'],
   },
   {
     emoji: '🌫️',
@@ -1588,7 +1393,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'fog', 'mist'],
     category: 'travel',
     color: '#D3D3D3',
-    tags: ['fog', 'mist', 'weather'],
   },
   {
     emoji: '🌬️',
@@ -1596,7 +1400,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['face', 'weather', 'blow'],
     category: 'travel',
     color: '#87CEEB',
-    tags: ['wind', 'blowing', 'face'],
   },
   {
     emoji: '🌀',
@@ -1604,7 +1407,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['weather', 'swirl', 'blue'],
     category: 'travel',
     color: '#4169E1',
-    tags: ['cyclone', 'spiral', 'hurricane'],
   },
   {
     emoji: '🌈',
@@ -1612,7 +1414,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['nature', 'happy', 'unicorn'],
     category: 'travel',
     color: '#FF0000',
-    tags: ['rainbow', 'colorful', 'weather'],
   },
   {
     emoji: '⚡',
@@ -1620,7 +1421,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['thunder', 'weather', 'lightning'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['lightning', 'electric', 'voltage'],
   },
   {
     emoji: '❄️',
@@ -1628,7 +1428,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['winter', 'season', 'cold'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['snowflake', 'winter', 'cold'],
   },
   {
     emoji: '☃️',
@@ -1636,7 +1435,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['winter', 'season', 'cold'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['snowman', 'winter', 'snow'],
   },
   {
     emoji: '⛄',
@@ -1644,7 +1442,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['winter', 'season', 'cold'],
     category: 'travel',
     color: '#F5F5F5',
-    tags: ['snowman', 'winter', 'simple'],
   },
   {
     emoji: '☄️',
@@ -1652,7 +1449,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['space', 'meteor', 'asteroid'],
     category: 'travel',
     color: '#FF8C00',
-    tags: ['comet', 'space', 'meteor'],
   },
   {
     emoji: '🔥',
@@ -1660,7 +1456,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hot', 'cook', 'flame'],
     category: 'travel',
     color: '#FF4500',
-    tags: ['fire', 'hot', 'flame'],
   },
   {
     emoji: '💧',
@@ -1668,7 +1463,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['water', 'drip', 'faucet'],
     category: 'travel',
     color: '#4682B4',
-    tags: ['droplet', 'water', 'drop'],
   },
   {
     emoji: '🌊',
@@ -1676,7 +1470,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sea', 'water', 'wave'],
     category: 'travel',
     color: '#4682B4',
-    tags: ['wave', 'ocean', 'water'],
   },
 
   // Space
@@ -1686,7 +1479,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['night', 'yellow', 'star'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['star', 'night', 'sky'],
   },
   {
     emoji: '🌟',
@@ -1694,7 +1486,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['night', 'awesome', 'good'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['star', 'glowing', 'bright'],
   },
   {
     emoji: '🌠',
@@ -1702,7 +1493,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['night', 'photo', 'wish'],
     category: 'travel',
     color: '#FFD700',
-    tags: ['shooting-star', 'wish', 'meteor'],
   },
   {
     emoji: '🌌',
@@ -1710,7 +1500,6 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['photo', 'space', 'stars'],
     category: 'travel',
     color: '#4B0082',
-    tags: ['galaxy', 'milky-way', 'space'],
   },
   {
     emoji: '☄️',
@@ -1718,6 +1507,5 @@ export const travelEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['space', 'meteor', 'asteroid'],
     category: 'travel',
     color: '#FF8C00',
-    tags: ['comet', 'space', 'shooting'],
   },
 ];

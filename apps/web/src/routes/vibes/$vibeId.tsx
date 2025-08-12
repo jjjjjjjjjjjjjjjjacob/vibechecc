@@ -429,7 +429,7 @@ function VibePage() {
   const isOwner = _user?.id && vibe && vibe.createdById === _user.id;
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto mb-8">
       <div className="grid w-full grid-cols-3 gap-8 transition-all duration-300">
         {/* Main Content */}
         <div className="col-span-3 w-full transition-all duration-300 sm:col-span-2">
@@ -474,13 +474,14 @@ function VibePage() {
 
           {/* Title with Emoji Rating */}
           <div className="mb-6 flex items-start justify-between gap-4">
-            <div className="flex-1">
+            <div className="flex flex-col gap-4">
               <h1 className="text-4xl font-bold lowercase">{vibe.title}</h1>
               {mostInteractedEmoji ? (
                 <EmojiRatingDisplay
                   rating={mostInteractedEmoji}
                   showScale={true}
                   onEmojiClick={handleEmojiRatingClick}
+                  size="lg"
                 />
               ) : (
                 <div className="mt-2">
@@ -668,11 +669,11 @@ function VibePage() {
           </div>
 
           {/* Reviews */}
-          <Card>
-            <CardContent className="p-6">
+          <Card className="m-0 border-none bg-transparent">
+            <CardContent className="p-0">
               <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
               {vibe.ratings.filter((r) => r.review).length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {vibe.ratings
                     .filter((r) => r.review)
                     .sort(
@@ -680,99 +681,113 @@ function VibePage() {
                         new Date(b.createdAt).getTime() -
                         new Date(a.createdAt).getTime()
                     )
-                    .map((rating, index) => (
-                      <div
-                        key={index}
-                        id={
-                          rating._id
-                            ? `rating-${rating._id}`
-                            : `rating-${index}`
-                        }
-                        className="border-b pb-4 last:border-b-0"
-                      >
-                        <a href={`#rating-${rating._id}`} className="anchor" />
-                        <div className="mb-3 flex items-start gap-3">
-                          {rating.user && rating.user.username ? (
-                            <Link
-                              to="/users/$username"
-                              params={{ username: rating.user.username }}
-                              className="flex-shrink-0 transition-opacity hover:opacity-80"
-                            >
-                              <Avatar className="h-10 w-10">
+                    .map((rating, index) => {
+                      const anchorId = rating._id
+                        ? `rating-${rating._id}`
+                        : `rating-${index}`;
+                      const hasUsername = !!(
+                        rating.user && rating.user.username
+                      );
+                      const displayName = computeUserDisplayName(rating.user);
+                      const username = rating.user?.username;
+
+                      return (
+                        <div
+                          key={index}
+                          id={anchorId}
+                          className="hover:bg-secondary/40 bg-secondary/20 group rounded-lg p-3 transition-colors"
+                        >
+                          <a
+                            href={`#${anchorId}`}
+                            className="anchor"
+                            aria-label="Permalink to this review"
+                          />
+                          <div className="flex items-start gap-3">
+                            {hasUsername ? (
+                              <Link
+                                to="/users/$username"
+                                params={{ username: username! }}
+                                className="flex-shrink-0 transition-opacity hover:opacity-80"
+                              >
+                                <Avatar className="h-10 w-10">
+                                  <AvatarImage
+                                    src={getUserAvatarUrl(rating.user)}
+                                    alt={displayName}
+                                  />
+                                  <AvatarFallback>
+                                    {getUserInitials(rating.user)}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </Link>
+                            ) : (
+                              <Avatar className="h-10 w-10 flex-shrink-0">
                                 <AvatarImage
                                   src={getUserAvatarUrl(rating.user)}
-                                  alt={computeUserDisplayName(rating.user)}
+                                  alt={displayName}
                                 />
                                 <AvatarFallback>
                                   {getUserInitials(rating.user)}
                                 </AvatarFallback>
                               </Avatar>
-                            </Link>
-                          ) : (
-                            <Avatar className="h-10 w-10 flex-shrink-0">
-                              <AvatarImage
-                                src={getUserAvatarUrl(rating.user)}
-                                alt={computeUserDisplayName(rating.user)}
-                              />
-                              <AvatarFallback>
-                                {getUserInitials(rating.user)}
-                              </AvatarFallback>
-                            </Avatar>
-                          )}
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <div>
-                                {rating.user && rating.user.username ? (
+                            )}
+
+                            <div className="min-w-0 flex-1">
+                              {/* Header */}
+                              <div className="mb-2 flex items-center gap-2">
+                                {hasUsername ? (
                                   <Link
                                     to="/users/$username"
-                                    params={{ username: rating.user.username }}
-                                    className="transition-opacity hover:opacity-80"
+                                    params={{ username: username! }}
+                                    className="truncate text-sm font-medium transition-opacity hover:opacity-80"
                                   >
-                                    <p className="hover:text-foreground/80 font-medium">
-                                      {computeUserDisplayName(rating.user)}
-                                    </p>
+                                    @{username}
                                   </Link>
                                 ) : (
-                                  <p className="font-medium">
-                                    {computeUserDisplayName(rating.user)}
-                                  </p>
+                                  <span className="truncate text-sm font-medium">
+                                    {displayName}
+                                  </span>
                                 )}
-                                <p className="text-muted-foreground text-sm">
+                                <span className="text-muted-foreground text-xs">
                                   {new Date(
                                     rating.createdAt || Date.now()
                                   ).toLocaleDateString()}
-                                </p>
+                                </span>
                               </div>
-                              {/* Show emoji rating on the right */}
-                              <div className="flex-shrink-0">
+
+                              {/* Review Text */}
+                              {rating.review && (
+                                <div className="mb-2">
+                                  <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
+                                    {rating.review}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Rating */}
+                              <div className="flex items-center justify-between">
                                 <EmojiRatingDisplay
                                   rating={{
-                                    emoji: rating.emoji || '😊', // Default emoji if somehow missing
+                                    emoji: rating.emoji || '😊',
                                     value: rating.value || 3,
-                                    count: 1,
+                                    count: undefined,
                                   }}
                                   showScale={false}
-                                  className="text-lg"
+                                  size="sm"
                                 />
                               </div>
                             </div>
                           </div>
                         </div>
-                        {rating.review && (
-                          <p className="text-muted-foreground whitespace-pre-line">
-                            {rating.review}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               ) : (
                 <div className="py-8 text-center">
                   <p className="text-muted-foreground mb-4">
-                    No written reviews yet
+                    no written reviews yet
                   </p>
                   <p className="text-muted-foreground text-sm">
-                    Be the first to review this vibe!
+                    be the first to review this vibe!
                   </p>
                 </div>
               )}

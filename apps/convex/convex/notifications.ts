@@ -169,8 +169,8 @@ export const createFollowerNotifications = internalMutation({
     }));
 
     // Use batch creation (much more efficient)
-    return await ctx.runMutation(
-      internal.notifications.createBatchNotifications,
+    return await (ctx as any).runMutation(
+      internal.internal.createBatchNotifications,
       {
         notifications,
       }
@@ -239,9 +239,30 @@ export const getNotifications = query({
           )
           .first();
 
+        // Ensure we have complete user data
+        const enrichedTriggerUser = triggerUser
+          ? {
+              ...triggerUser,
+              // Include all user fields
+              username: triggerUser.username,
+              first_name: triggerUser.first_name,
+              last_name: triggerUser.last_name,
+              full_name:
+                triggerUser.first_name && triggerUser.last_name
+                  ? `${triggerUser.first_name} ${triggerUser.last_name}`
+                  : triggerUser.first_name ||
+                    triggerUser.last_name ||
+                    undefined,
+              // Ensure image fields are present
+              image_url: triggerUser.image_url || triggerUser.profile_image_url,
+              profile_image_url:
+                triggerUser.profile_image_url || triggerUser.image_url,
+            }
+          : null;
+
         return {
           ...notification,
-          triggerUser,
+          triggerUser: enrichedTriggerUser,
         };
       })
     );

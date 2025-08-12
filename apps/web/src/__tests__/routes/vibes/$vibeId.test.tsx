@@ -3,17 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  RouterProvider,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from '@tanstack/react-router';
 import * as React from 'react';
-import { ThemeProvider } from '@/features/theming/components/theme-provider';
-import { Route } from '@/routes/vibes/$vibeId';
-// Get the component from the Route
-const VibePage = Route.options.component;
+import { ThemeInitializer } from '@/stores/theme-initializer';
+
+// Import the component directly instead of extracting from Route
+import VibePage from '@/routes/vibes/$vibeId';
 
 // Mock Clerk
 vi.mock('@clerk/tanstack-react-start', () => ({
@@ -248,40 +242,21 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     _mockRatingPopoverOpen = false;
   });
 
-  const renderWithRouter = (component: React.ReactNode) => {
-    const rootRoute = createRootRoute();
-    const vibeRoute = createRoute({
-      getParentRoute: () => rootRoute,
-      path: '/vibes/$vibeId',
-      component: () => component,
-    });
-
-    const router = createRouter({
-      routeTree: rootRoute.addChildren([vibeRoute]),
-      defaultPendingComponent: () => <div>Loading...</div>,
-      context: { queryClient },
-      defaultParams: {
-        vibeId: 'test-vibe-1',
-      },
-    });
-
-    // Navigate to the vibe route
-    router.navigate({
-      to: '/vibes/$vibeId',
-      params: { vibeId: 'test-vibe-1' },
-    });
+  const renderWithRouter = () => {
+    // Set mock route params for the vibe ID
+    (globalThis as any).setMockRouteParams({ vibeId: 'test-vibe-1' });
 
     return render(
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <RouterProvider router={router} />
-        </ThemeProvider>
+        <ThemeInitializer>
+          <VibePage />
+        </ThemeInitializer>
       </QueryClientProvider>
     );
   };
 
   it('renders vibe details correctly', async () => {
-    renderWithRouter(<VibePage />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(screen.getByText('Test Vibe')).toBeInTheDocument();
@@ -295,7 +270,7 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
   });
 
   it('opens rating popover when clicking the emoji rating selector', async () => {
-    renderWithRouter(<VibePage />);
+    renderWithRouter();
 
     await waitFor(() => {
       const headings = screen.getAllByRole('heading', {
@@ -321,7 +296,7 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
   });
 
   it('completes full emoji rating flow', async () => {
-    renderWithRouter(<VibePage />);
+    renderWithRouter();
 
     // Wait for the component to render
     await waitFor(() => {
@@ -348,7 +323,7 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
   });
 
   it('validates review length in emoji rating', async () => {
-    renderWithRouter(<VibePage />);
+    renderWithRouter();
 
     await waitFor(() => {
       const headings = screen.getAllByRole('heading', {

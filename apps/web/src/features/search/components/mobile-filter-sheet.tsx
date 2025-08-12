@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { SlidersHorizontal, X } from 'lucide-react';
-import { EmojiSearchCommand } from '@/features/ratings/components/emoji-search-command';
+import { EmojiSearchCommand } from '@/features/ratings/components/emoji-search-index';
 import { EmojiPillFilters } from '@/features/ratings/components/emoji-pill-filters';
 import { RatingRangeSlider } from '@/features/ratings/components/rating-range-slider';
 import { TagSearchCommand } from '@/components/tag-search-command';
@@ -22,6 +22,9 @@ interface MobileFilterSheetProps {
   ratingMin?: number;
   ratingMax?: number;
   tags?: string[];
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onEmojiFilterChange: (emojis: string[]) => void;
   onEmojiMinValueChange: (value: number) => void;
   onRatingChange: (rating?: number) => void;
@@ -37,6 +40,9 @@ export function MobileFilterSheet({
   ratingMin = 1,
   ratingMax = 5,
   tags,
+  trigger,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
   onEmojiFilterChange,
   onEmojiMinValueChange,
   onRatingChange,
@@ -45,7 +51,9 @@ export function MobileFilterSheet({
   onClearFilters,
 }: MobileFilterSheetProps) {
   const [emojiSearchValue, setEmojiSearchValue] = React.useState('');
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [_open, _setOpen] = React.useState(openProp ?? false);
+  const open = openProp ?? _open;
+  const onOpenChange = onOpenChangeProp ?? _setOpen;
 
   const hasActiveFilters =
     (emojiFilter && emojiFilter.length > 0) ||
@@ -56,17 +64,23 @@ export function MobileFilterSheet({
     (tags && tags.length > 0);
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4" />
-          filter
-          {hasActiveFilters && (
-            <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-              {(emojiFilter?.length || 0) + (rating ? 1 : 0)}
-            </Badge>
-          )}
-        </Button>
+        {trigger ?? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            filter
+            {hasActiveFilters && (
+              <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                {(emojiFilter?.length || 0) + (rating ? 1 : 0)}
+              </Badge>
+            )}
+          </Button>
+        )}
       </SheetTrigger>
 
       <SheetContent side="top" className="h-[80vh] overflow-y-auto">
@@ -219,7 +233,7 @@ export function MobileFilterSheet({
               className="w-full"
               onClick={() => {
                 onClearFilters();
-                setIsOpen(false);
+                onOpenChange(false);
               }}
             >
               clear all filters

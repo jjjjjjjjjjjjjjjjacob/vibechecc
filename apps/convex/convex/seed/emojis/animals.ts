@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const animalEmojis: Emoji[] = [
   // Mammals - Pets
   {
     emoji: '🐶',
@@ -8,7 +8,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dog', 'puppy', 'pet'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['dog', 'pet', 'cute'],
   },
   {
     emoji: '🐕',
@@ -16,7 +15,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dog', 'doggo', 'puppy'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['dog', 'pet', 'animal'],
   },
   {
     emoji: '🦮',
@@ -24,7 +22,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blind', 'guide', 'dog'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['guide-dog', 'service', 'assistance'],
   },
   {
     emoji: '🐕‍🦺',
@@ -32,7 +29,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['service', 'support', 'dog'],
     category: 'animals',
     color: '#FF4500',
-    tags: ['service-dog', 'support', 'working'],
   },
   {
     emoji: '🐩',
@@ -40,7 +36,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dog', 'poodle', 'fluffy'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['poodle', 'dog', 'fancy'],
   },
   {
     emoji: '🐺',
@@ -48,7 +43,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wolf', 'howl', 'wild'],
     category: 'animals',
     color: '#696969',
-    tags: ['wolf', 'wild', 'howl'],
   },
   {
     emoji: '🦊',
@@ -56,7 +50,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fox', 'face', 'clever'],
     category: 'animals',
     color: '#FF8C00',
-    tags: ['fox', 'clever', 'wild'],
   },
   {
     emoji: '🦝',
@@ -64,7 +57,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['raccoon', 'trash panda', 'curious'],
     category: 'animals',
     color: '#696969',
-    tags: ['raccoon', 'mischievous', 'cute'],
   },
   {
     emoji: '🐱',
@@ -72,7 +64,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cat', 'kitten', 'pet'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['cat', 'pet', 'cute'],
   },
   {
     emoji: '🐈',
@@ -80,7 +71,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cat', 'feline', 'pet'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['cat', 'pet', 'animal'],
   },
   {
     emoji: '🐈‍⬛',
@@ -88,7 +78,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['black', 'cat', 'superstition'],
     category: 'animals',
     color: '#000000',
-    tags: ['black-cat', 'mysterious', 'halloween'],
   },
   {
     emoji: '🦁',
@@ -96,7 +85,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lion', 'face', 'king'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['lion', 'king', 'brave'],
   },
   {
     emoji: '🐯',
@@ -104,7 +92,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tiger', 'face', 'cute'],
     category: 'animals',
     color: '#FF8C00',
-    tags: ['tiger', 'cute', 'fierce'],
   },
   {
     emoji: '🐅',
@@ -112,7 +99,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tiger', 'nature', 'stripes'],
     category: 'animals',
     color: '#FF8C00',
-    tags: ['tiger', 'wild', 'stripes'],
   },
   {
     emoji: '🐆',
@@ -120,7 +106,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['leopard', 'nature', 'spots'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['leopard', 'spots', 'fast'],
   },
 
   // Horses and farm animals
@@ -130,7 +115,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['horse', 'face', 'animal'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['horse', 'face', 'neigh'],
   },
   {
     emoji: '🐎',
@@ -138,7 +122,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['horse', 'racehorse', 'speed'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['horse', 'racing', 'fast'],
   },
   {
     emoji: '🦄',
@@ -146,7 +129,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['unicorn', 'fantasy', 'magic'],
     category: 'animals',
     color: '#FFB6C1',
-    tags: ['unicorn', 'magical', 'fantasy'],
   },
   {
     emoji: '🦓',
@@ -154,7 +136,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['zebra', 'stripes', 'safari'],
     category: 'animals',
     color: '#000000',
-    tags: ['zebra', 'stripes', 'africa'],
   },
   {
     emoji: '🦌',
@@ -162,7 +143,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['deer', 'nature', 'bambi'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['deer', 'forest', 'graceful'],
   },
   {
     emoji: '🦬',
@@ -170,7 +150,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bison', 'buffalo', 'ox'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['bison', 'buffalo', 'strong'],
   },
   {
     emoji: '🐮',
@@ -178,7 +157,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cow', 'face', 'moo'],
     category: 'animals',
     color: '#000000',
-    tags: ['cow', 'moo', 'cute'],
   },
   {
     emoji: '🐄',
@@ -186,7 +164,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cow', 'milk', 'moo'],
     category: 'animals',
     color: '#000000',
-    tags: ['cow', 'farm', 'dairy'],
   },
   {
     emoji: '🐂',
@@ -194,7 +171,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ox', 'bull', 'cow'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['ox', 'strong', 'bull'],
   },
   {
     emoji: '🐃',
@@ -202,7 +178,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['buffalo', 'water', 'ox'],
     category: 'animals',
     color: '#696969',
-    tags: ['buffalo', 'water', 'asia'],
   },
   {
     emoji: '🐷',
@@ -210,7 +185,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pig', 'face', 'oink'],
     category: 'animals',
     color: '#FFB6C1',
-    tags: ['pig', 'cute', 'oink'],
   },
   {
     emoji: '🐖',
@@ -218,7 +192,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pig', 'hog', 'oink'],
     category: 'animals',
     color: '#FFB6C1',
-    tags: ['pig', 'farm', 'animal'],
   },
   {
     emoji: '🐗',
@@ -226,7 +199,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['boar', 'wild', 'pig'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['boar', 'wild', 'tusks'],
   },
   {
     emoji: '🐽',
@@ -234,7 +206,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pig', 'nose', 'snout'],
     category: 'animals',
     color: '#FFB6C1',
-    tags: ['pig-nose', 'snout', 'oink'],
   },
   {
     emoji: '🐏',
@@ -242,7 +213,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sheep', 'ram', 'male'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['ram', 'horns', 'sheep'],
   },
   {
     emoji: '🐑',
@@ -250,7 +220,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sheep', 'wool', 'lamb'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['sheep', 'wool', 'fluffy'],
   },
   {
     emoji: '🐐',
@@ -258,7 +227,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['goat', 'animal', 'nature'],
     category: 'animals',
     color: '#D3D3D3',
-    tags: ['goat', 'farm', 'climbing'],
   },
   {
     emoji: '🐪',
@@ -266,7 +234,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['camel', 'desert', 'hump'],
     category: 'animals',
     color: '#DEB887',
-    tags: ['camel', 'desert', 'one-hump'],
   },
   {
     emoji: '🐫',
@@ -274,7 +241,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['camel', 'desert', 'two humps'],
     category: 'animals',
     color: '#DEB887',
-    tags: ['camel', 'desert', 'two-humps'],
   },
   {
     emoji: '🦙',
@@ -282,7 +248,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['llama', 'alpaca', 'animal'],
     category: 'animals',
     color: '#F5DEB3',
-    tags: ['llama', 'fluffy', 'cute'],
   },
   {
     emoji: '🦒',
@@ -290,7 +255,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['giraffe', 'spots', 'safari'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['giraffe', 'tall', 'africa'],
   },
   {
     emoji: '🐘',
@@ -298,7 +262,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['elephant', 'trunk', 'safari'],
     category: 'animals',
     color: '#696969',
-    tags: ['elephant', 'wise', 'trunk'],
   },
   {
     emoji: '🦣',
@@ -306,7 +269,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mammoth', 'extinct', 'elephant'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['mammoth', 'extinct', 'ancient'],
   },
   {
     emoji: '🦏',
@@ -314,7 +276,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['rhino', 'horn', 'safari'],
     category: 'animals',
     color: '#696969',
-    tags: ['rhino', 'horn', 'tough'],
   },
   {
     emoji: '🦛',
@@ -322,7 +283,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hippo', 'water', 'nature'],
     category: 'animals',
     color: '#9370DB',
-    tags: ['hippo', 'water', 'chubby'],
   },
 
   // Small mammals
@@ -332,7 +292,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mouse', 'face', 'rodent'],
     category: 'animals',
     color: '#D3D3D3',
-    tags: ['mouse', 'cute', 'small'],
   },
   {
     emoji: '🐁',
@@ -340,7 +299,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mouse', 'rodent', 'nature'],
     category: 'animals',
     color: '#D3D3D3',
-    tags: ['mouse', 'animal', 'rodent'],
   },
   {
     emoji: '🐀',
@@ -348,7 +306,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['rat', 'rodent', 'mouse'],
     category: 'animals',
     color: '#696969',
-    tags: ['rat', 'rodent', 'pet'],
   },
   {
     emoji: '🐹',
@@ -356,7 +313,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hamster', 'face', 'pet'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['hamster', 'cute', 'pet'],
   },
   {
     emoji: '🐰',
@@ -364,7 +320,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bunny', 'rabbit', 'face'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['rabbit', 'bunny', 'cute'],
   },
   {
     emoji: '🐇',
@@ -372,7 +327,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bunny', 'rabbit', 'animal'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['rabbit', 'hopping', 'bunny'],
   },
   {
     emoji: '🐿️',
@@ -380,7 +334,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chipmunk', 'squirrel', 'animal'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['chipmunk', 'nuts', 'cute'],
   },
   {
     emoji: '🦫',
@@ -388,7 +341,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['beaver', 'dam', 'animal'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['beaver', 'dam', 'builder'],
   },
   {
     emoji: '🦔',
@@ -396,7 +348,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hedgehog', 'spiny', 'nature'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['hedgehog', 'spiky', 'cute'],
   },
   {
     emoji: '🦇',
@@ -404,7 +355,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bat', 'vampire', 'batman'],
     category: 'animals',
     color: '#000000',
-    tags: ['bat', 'night', 'flying'],
   },
 
   // Bears
@@ -414,7 +364,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bear', 'face', 'teddy'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['bear', 'teddy', 'cute'],
   },
   {
     emoji: '🐻‍❄️',
@@ -422,7 +371,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bear', 'white', 'arctic'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['polar-bear', 'arctic', 'white'],
   },
   {
     emoji: '🐨',
@@ -430,7 +378,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['koala', 'nature', 'animal'],
     category: 'animals',
     color: '#D3D3D3',
-    tags: ['koala', 'australia', 'cute'],
   },
   {
     emoji: '🐼',
@@ -438,7 +385,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['panda', 'face', 'nature'],
     category: 'animals',
     color: '#000000',
-    tags: ['panda', 'bamboo', 'cute'],
   },
 
   // Marsupials and others
@@ -448,7 +394,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sloth', 'slow', 'lazy'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['sloth', 'slow', 'relaxed'],
   },
   {
     emoji: '🦦',
@@ -456,7 +401,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['otter', 'playful', 'fishing'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['otter', 'playful', 'water'],
   },
   {
     emoji: '🦨',
@@ -464,7 +408,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['skunk', 'stink', 'smelly'],
     category: 'animals',
     color: '#000000',
-    tags: ['skunk', 'smelly', 'stripe'],
   },
   {
     emoji: '🦘',
@@ -472,7 +415,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kangaroo', 'marsupial', 'joey'],
     category: 'animals',
     color: '#DEB887',
-    tags: ['kangaroo', 'australia', 'jumping'],
   },
   {
     emoji: '🦡',
@@ -480,7 +422,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['badger', 'honey badger', 'pester'],
     category: 'animals',
     color: '#696969',
-    tags: ['badger', 'tough', 'digging'],
   },
 
   // Birds
@@ -490,7 +431,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chicken', 'cluck', 'bird'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['chicken', 'farm', 'cluck'],
   },
   {
     emoji: '🐓',
@@ -498,7 +438,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['rooster', 'crow', 'chicken'],
     category: 'animals',
     color: '#DC143C',
-    tags: ['rooster', 'morning', 'crow'],
   },
   {
     emoji: '🐣',
@@ -506,7 +445,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chick', 'hatching', 'egg'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['chick', 'hatching', 'baby'],
   },
   {
     emoji: '🐤',
@@ -514,7 +452,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chick', 'baby', 'bird'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['chick', 'baby', 'cute'],
   },
   {
     emoji: '🐥',
@@ -522,7 +459,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chick', 'baby', 'bird'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['chick', 'front', 'baby'],
   },
   {
     emoji: '🐦',
@@ -530,7 +466,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bird', 'nature', 'tweet'],
     category: 'animals',
     color: '#87CEEB',
-    tags: ['bird', 'flying', 'tweet'],
   },
   {
     emoji: '🐧',
@@ -538,7 +473,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['penguin', 'nature', 'animal'],
     category: 'animals',
     color: '#000000',
-    tags: ['penguin', 'arctic', 'waddle'],
   },
   {
     emoji: '🕊️',
@@ -546,7 +480,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['peace', 'dove', 'bird'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['dove', 'peace', 'bird'],
   },
   {
     emoji: '🦅',
@@ -554,7 +487,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['eagle', 'bird', 'america'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['eagle', 'freedom', 'majestic'],
   },
   {
     emoji: '🦆',
@@ -562,7 +494,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['duck', 'quack', 'nature'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['duck', 'quack', 'water'],
   },
   {
     emoji: '🦢',
@@ -570,7 +501,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['swan', 'cygnet', 'ugly duckling'],
     category: 'animals',
     color: '#F5F5F5',
-    tags: ['swan', 'elegant', 'graceful'],
   },
   {
     emoji: '🦉',
@@ -578,7 +508,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['owl', 'wise', 'hoot'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['owl', 'wise', 'night'],
   },
   {
     emoji: '🦤',
@@ -586,7 +515,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dodo', 'extinct', 'mauritius'],
     category: 'animals',
     color: '#D3D3D3',
-    tags: ['dodo', 'extinct', 'bird'],
   },
   {
     emoji: '🪶',
@@ -594,7 +522,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['feather', 'bird', 'fly'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['feather', 'light', 'bird'],
   },
   {
     emoji: '🦩',
@@ -602,7 +529,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['flamingo', 'flamboyant', 'tropical'],
     category: 'animals',
     color: '#FF69B4',
-    tags: ['flamingo', 'pink', 'tropical'],
   },
   {
     emoji: '🦚',
@@ -610,7 +536,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['peacock', 'proud', 'bird'],
     category: 'animals',
     color: '#4169E1',
-    tags: ['peacock', 'proud', 'colorful'],
   },
   {
     emoji: '🦜',
@@ -618,7 +543,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['parrot', 'pirate', 'talk'],
     category: 'animals',
     color: '#FF0000',
-    tags: ['parrot', 'tropical', 'talking'],
   },
 
   // Amphibians
@@ -628,7 +552,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['frog', 'toad', 'nature'],
     category: 'animals',
     color: '#90EE90',
-    tags: ['frog', 'amphibian', 'ribbit'],
   },
 
   // Reptiles
@@ -638,7 +561,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['crocodile', 'nature', 'alligator'],
     category: 'animals',
     color: '#228B22',
-    tags: ['crocodile', 'dangerous', 'reptile'],
   },
   {
     emoji: '🐢',
@@ -646,7 +568,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['turtle', 'slow', 'nature'],
     category: 'animals',
     color: '#228B22',
-    tags: ['turtle', 'slow', 'shell'],
   },
   {
     emoji: '🦎',
@@ -654,7 +575,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lizard', 'nature', 'reptile'],
     category: 'animals',
     color: '#228B22',
-    tags: ['lizard', 'reptile', 'gecko'],
   },
   {
     emoji: '🐍',
@@ -662,7 +582,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['snake', 'serpent', 'python'],
     category: 'animals',
     color: '#228B22',
-    tags: ['snake', 'serpent', 'slither'],
   },
   {
     emoji: '🐲',
@@ -670,7 +589,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dragon', 'face', 'nature'],
     category: 'animals',
     color: '#228B22',
-    tags: ['dragon', 'face', 'mythical'],
   },
   {
     emoji: '🐉',
@@ -678,7 +596,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dragon', 'myth', 'nature'],
     category: 'animals',
     color: '#DC143C',
-    tags: ['dragon', 'chinese', 'mythical'],
   },
   {
     emoji: '🦕',
@@ -686,7 +603,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dinosaur', 'brachiosaurus', 'extinct'],
     category: 'animals',
     color: '#228B22',
-    tags: ['dinosaur', 'sauropod', 'extinct'],
   },
   {
     emoji: '🦖',
@@ -694,7 +610,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dinosaur', 'tyrannosaurus', 'extinct'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['t-rex', 'dinosaur', 'extinct'],
   },
 
   // Sea animals
@@ -704,7 +619,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['whale', 'sea', 'ocean'],
     category: 'animals',
     color: '#4682B4',
-    tags: ['whale', 'ocean', 'spouting'],
   },
   {
     emoji: '🐋',
@@ -712,7 +626,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['whale', 'nature', 'sea'],
     category: 'animals',
     color: '#4682B4',
-    tags: ['whale', 'ocean', 'big'],
   },
   {
     emoji: '🐬',
@@ -720,7 +633,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dolphin', 'flipper', 'fins'],
     category: 'animals',
     color: '#87CEEB',
-    tags: ['dolphin', 'smart', 'playful'],
   },
   {
     emoji: '🦭',
@@ -728,7 +640,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['seal', 'sea lion', 'animal'],
     category: 'animals',
     color: '#696969',
-    tags: ['seal', 'ocean', 'cute'],
   },
   {
     emoji: '🐟',
@@ -736,7 +647,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fish', 'swim', 'sea'],
     category: 'animals',
     color: '#4169E1',
-    tags: ['fish', 'swimming', 'ocean'],
   },
   {
     emoji: '🐠',
@@ -744,7 +654,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fish', 'tropical', 'swim'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['tropical-fish', 'colorful', 'ocean'],
   },
   {
     emoji: '🐡',
@@ -752,7 +661,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fish', 'pufferfish', 'nature'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['blowfish', 'puffer', 'spiky'],
   },
   {
     emoji: '🦈',
@@ -760,7 +668,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shark', 'jaws', 'fin'],
     category: 'animals',
     color: '#696969',
-    tags: ['shark', 'dangerous', 'ocean'],
   },
   {
     emoji: '🐙',
@@ -768,7 +675,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['octopus', 'animal', 'creature'],
     category: 'animals',
     color: '#FF69B4',
-    tags: ['octopus', 'tentacles', 'smart'],
   },
   {
     emoji: '🐚',
@@ -776,7 +682,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shell', 'sea', 'beach'],
     category: 'animals',
     color: '#FFB6C1',
-    tags: ['shell', 'beach', 'ocean'],
   },
 
   // Invertebrates
@@ -786,7 +691,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['snail', 'slow', 'shell'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['snail', 'slow', 'shell'],
   },
   {
     emoji: '🦋',
@@ -794,7 +698,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['butterfly', 'insect', 'nature'],
     category: 'animals',
     color: '#9370DB',
-    tags: ['butterfly', 'beautiful', 'flying'],
   },
   {
     emoji: '🐛',
@@ -802,7 +705,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bug', 'insect', 'worm'],
     category: 'animals',
     color: '#90EE90',
-    tags: ['bug', 'caterpillar', 'insect'],
   },
   {
     emoji: '🐜',
@@ -810,7 +712,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ant', 'insect', 'nature'],
     category: 'animals',
     color: '#000000',
-    tags: ['ant', 'hardworking', 'insect'],
   },
   {
     emoji: '🐝',
@@ -818,7 +719,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bee', 'honeybee', 'insect'],
     category: 'animals',
     color: '#FFD700',
-    tags: ['bee', 'honey', 'buzzing'],
   },
   {
     emoji: '🪲',
@@ -826,7 +726,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['beetle', 'bug', 'insect'],
     category: 'animals',
     color: '#000000',
-    tags: ['beetle', 'bug', 'insect'],
   },
   {
     emoji: '🐞',
@@ -834,7 +733,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ladybug', 'insect', 'nature'],
     category: 'animals',
     color: '#DC143C',
-    tags: ['ladybug', 'lucky', 'cute'],
   },
   {
     emoji: '🦗',
@@ -842,7 +740,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cricket', 'grasshopper', 'chirp'],
     category: 'animals',
     color: '#228B22',
-    tags: ['cricket', 'chirping', 'insect'],
   },
   {
     emoji: '🪳',
@@ -850,7 +747,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cockroach', 'pest', 'pests'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['cockroach', 'pest', 'gross'],
   },
   {
     emoji: '🕷️',
@@ -858,7 +754,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['spider', 'arachnid', 'insect'],
     category: 'animals',
     color: '#000000',
-    tags: ['spider', 'web', 'creepy'],
   },
   {
     emoji: '🕸️',
@@ -866,7 +761,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['web', 'spider', 'cobweb'],
     category: 'animals',
     color: '#D3D3D3',
-    tags: ['web', 'spider', 'halloween'],
   },
   {
     emoji: '🦂',
@@ -874,7 +768,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['scorpion', 'zodiac', 'sting'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['scorpion', 'sting', 'dangerous'],
   },
   {
     emoji: '🦟',
@@ -882,7 +775,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mosquito', 'insect', 'malaria'],
     category: 'animals',
     color: '#696969',
-    tags: ['mosquito', 'pest', 'buzzing'],
   },
   {
     emoji: '🪰',
@@ -890,7 +782,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fly', 'insect', 'pest'],
     category: 'animals',
     color: '#000000',
-    tags: ['fly', 'pest', 'buzzing'],
   },
   {
     emoji: '🪱',
@@ -898,7 +789,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['worm', 'parasite', 'annelid'],
     category: 'animals',
     color: '#FFB6C1',
-    tags: ['worm', 'earthworm', 'soil'],
   },
   {
     emoji: '🦠',
@@ -906,7 +796,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['germ', 'coronavirus', 'bacteria'],
     category: 'animals',
     color: '#90EE90',
-    tags: ['microbe', 'germ', 'virus'],
   },
 
   // Marine invertebrates
@@ -916,7 +805,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['crab', 'crustacean', 'cancer'],
     category: 'animals',
     color: '#DC143C',
-    tags: ['crab', 'pinch', 'seafood'],
   },
   {
     emoji: '🦞',
@@ -924,7 +812,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lobster', 'seafood', 'bisque'],
     category: 'animals',
     color: '#DC143C',
-    tags: ['lobster', 'seafood', 'ocean'],
   },
   {
     emoji: '🦐',
@@ -932,7 +819,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shrimp', 'seafood', 'small'],
     category: 'animals',
     color: '#FF69B4',
-    tags: ['shrimp', 'seafood', 'small'],
   },
   {
     emoji: '🦑',
@@ -940,7 +826,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['squid', 'animal', 'nature'],
     category: 'animals',
     color: '#FF69B4',
-    tags: ['squid', 'tentacles', 'ocean'],
   },
   {
     emoji: '🦪',
@@ -948,7 +833,6 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['oyster', 'food', 'pearl'],
     category: 'animals',
     color: '#D3D3D3',
-    tags: ['oyster', 'pearl', 'seafood'],
   },
 
   // Footprints
@@ -958,6 +842,5 @@ export const animalEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['paw', 'feet', 'footprints'],
     category: 'animals',
     color: '#8B4513',
-    tags: ['paws', 'animal', 'tracks'],
   },
 ];

@@ -13,21 +13,38 @@ import { useVibesInfinite, useForYouFeedInfinite } from '@/queries';
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
 import { ForYouEmptyState } from '@/components/for-you-empty-state';
 import { Flame, Sparkles, Clock, TrendingUp, Star } from 'lucide-react';
-
-type FeedTab = 'for-you' | 'hot' | 'new' | 'unrated';
+import { useInView } from 'react-intersection-observer';
+import { useHeaderNavStore } from '@/stores/header-nav-store';
+import { cn } from '@/utils/tailwind-utils';
 
 interface HomeFeedProps {
   className?: string;
 }
 
 export function HomeFeed({ className }: HomeFeedProps) {
-  const [activeTab, setActiveTab] = React.useState<FeedTab>('for-you');
+  const feedTab = useHeaderNavStore((state) => state.feedTab);
+  const setFeedTab = useHeaderNavStore((state) => state.setFeedTab);
+  const _pageNavState = useHeaderNavStore((state) => state.pageNavState);
+  const setPageNavState = useHeaderNavStore((state) => state.setPageNavState);
   const { user } = useUser();
   const { data: followStats } = useCurrentUserFollowStats();
 
+  // Track initial mount to prevent dipping on navigation
+  const [hasInitialized, setHasInitialized] = React.useState(false);
+
+  // Set up intersection observer for sticky tabs
+  const {
+    ref: tabsRef,
+    inView: tabsInView,
+    entry,
+  } = useInView({
+    threshold: 0,
+    rootMargin: '-120px 0px 0px 0px', // Account for header height
+  });
+
   // Handle tab change
-  const handleTabChange = (tab: FeedTab) => {
-    setActiveTab(tab);
+  const handleTabChange = (tab: 'for-you' | 'hot' | 'new' | 'unrated') => {
+    setFeedTab(tab);
   };
 
   // Feed tabs configuration
@@ -72,14 +89,14 @@ export function HomeFeed({ className }: HomeFeedProps) {
 
   React.useEffect(() => {
     // If user is not authenticated and on "for-you", switch to "hot"
-    if (!user?.id && activeTab === 'for-you') {
-      setActiveTab('hot');
+    if (!user?.id && feedTab === 'for-you') {
+      setFeedTab('hot');
     }
-  }, [user?.id, activeTab]);
+  }, [user?.id, feedTab, setFeedTab]);
 
   // Get query configuration for current tab
   const getQueryConfig = () => {
-    switch (activeTab) {
+    switch (feedTab) {
       case 'for-you':
         return {
           usePersonalizedFeed: true, // Use dedicated personalized feed
@@ -135,14 +152,14 @@ export function HomeFeed({ className }: HomeFeedProps) {
 
   // Use personalized feed for "for-you" tab, otherwise use generalized feed
   const personalizedFeedQuery = useForYouFeedInfinite({
-    enabled: queryConfig.enabled && activeTab === 'for-you',
+    enabled: queryConfig.enabled && feedTab === 'for-you',
     queryKeyPrefix: ['home-feed', 'for-you'],
   });
 
   const generalFeedQuery = useVibesInfinite(queryConfig.filters, {
-    enabled: queryConfig.enabled && activeTab !== 'for-you',
+    enabled: queryConfig.enabled && feedTab !== 'for-you',
     queryKeyPrefix: ['home-feed'],
-    queryKeyName: activeTab, // Use tab name as safe identifier
+    queryKeyName: feedTab, // Use tab name as safe identifier
   });
 
   // Use the appropriate query based on the active tab
@@ -153,7 +170,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
     isLoading,
     isFetchingNextPage,
     error,
-  } = activeTab === 'for-you' ? personalizedFeedQuery : generalFeedQuery;
+  } = feedTab === 'for-you' ? personalizedFeedQuery : generalFeedQuery;
 
   // Flatten all pages to get vibes array
   const vibes = React.useMemo(() => {
@@ -166,7 +183,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
 
   // For "for you" tab, use custom empty state component
   const shouldUseCustomEmptyState =
-    activeTab === 'for-you' && vibes.length === 0 && !isLoading;
+    feedTab === 'for-you' && vibes.length === 0 && !isLoading;
 
   // Load more function for intersection observer
   const loadMore = React.useCallback(() => {
@@ -174,26 +191,57 @@ export function HomeFeed({ className }: HomeFeedProps) {
     fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // Initialize after first intersection observer measurement
+  React.useEffect(() => {
+    if (entry && !hasInitialized) {
+      setHasInitialized(true);
+    }
+  }, [entry, hasInitialized]);
+
+  // Update header page nav state when tabs go out of view
+  React.useEffect(() => {
+    // Only set pageNavState if we're on the homepage
+    // This prevents tabs from appearing when navigating away
+    if (typeof window !== 'undefined' && window.location.pathname === '/') {
+      // Show tabs in header when:
+      // 1. They're not in view AND observer has initialized
+      // We ignore loading state to prevent tabs from disappearing during queries
+      if (!tabsInView && hasInitialized) {
+        setPageNavState('tabs');
+      } else if (tabsInView) {
+        // Hide tabs when they're visible in the main content
+        setPageNavState(null);
+      }
+    } else {
+      setPageNavState(null);
+    }
+
+    // Clear pageNavState when component unmounts (navigating away)
+    return () => {
+      setPageNavState(null);
+    };
+  }, [tabsInView, hasInitialized, setPageNavState]);
+
   // Prepare header content
   const headerContent = (
-    <div className="mb-4 flex items-center gap-2">
-      <TrendingUp className="text-primary h-5 w-5" />
-      <h1 className="text-2xl font-bold">feed</h1>
-    </div>
-  );
-
-  // Prepare sticky navigation
-  const stickyNavigation = [
-    {
-      id: 'feed-tabs',
-      content: (
+    <div className="flex flex-col">
+      <div className="mb-4 flex items-center gap-2">
+        <TrendingUp className="text-primary h-5 w-5" />
+        <h1 className="text-2xl font-bold">feed</h1>
+      </div>
+      <div ref={tabsRef}>
         <TooltipProvider>
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          <div
+            className={cn(
+              'flex gap-2 overflow-x-auto pb-2 transition delay-500 duration-300',
+              !tabsInView ? '-translate-y-5 opacity-0' : 'opacity-100'
+            )}
+          >
             {availableTabs.map((tab) => (
               <Tooltip key={tab.id}>
                 <TooltipTrigger asChild>
                   <Button
-                    variant={activeTab === tab.id ? 'default' : 'outline'}
+                    variant={feedTab === tab.id ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleTabChange(tab.id)}
                     className="flex items-center gap-2 whitespace-nowrap"
@@ -209,15 +257,14 @@ export function HomeFeed({ className }: HomeFeedProps) {
             ))}
           </div>
         </TooltipProvider>
-      ),
-    },
-  ];
+      </div>
+    </div>
+  );
 
   return (
     <FeedLayout
       className={className}
       header={headerContent}
-      stickyNavigation={stickyNavigation}
       headerSpacing="md"
       contentSpacing="sm"
     >
@@ -231,12 +278,12 @@ export function HomeFeed({ className }: HomeFeedProps) {
           error={error}
           hasMore={hasNextPage}
           onLoadMore={loadMore}
-          ratingDisplayMode={activeTab === 'hot' ? 'top-rated' : 'most-rated'}
+          ratingDisplayMode={feedTab === 'hot' ? 'top-rated' : 'most-rated'}
           variant="feed"
           emptyStateTitle={queryConfig.emptyTitle}
           emptyStateDescription={queryConfig.emptyDescription}
           emptyStateAction={
-            activeTab === 'for-you' ? null : queryConfig.emptyAction
+            feedTab === 'for-you' ? null : queryConfig.emptyAction
           }
         />
       )}

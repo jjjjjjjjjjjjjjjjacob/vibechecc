@@ -35,7 +35,7 @@ export function EmojiPillFilters({
     <div className={cn('space-y-3', className)}>
       {variant === 'default' && (
         <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-sm font-medium">
+          <span className="text-primary text-sm font-medium">
             selected emojis ({emojis.length})
           </span>
           {showClearAll && emojis.length > 1 && (
@@ -43,7 +43,7 @@ export function EmojiPillFilters({
               variant="ghost"
               size="sm"
               onClick={onClear}
-              className="text-muted-foreground hover:text-destructive h-auto p-1 text-xs"
+              className="text-primary hover:text-destructive h-auto p-1 text-xs"
             >
               clear all
             </Button>
@@ -64,7 +64,7 @@ export function EmojiPillFilters({
         {hiddenCount > 0 && (
           <Badge
             variant="secondary"
-            className="bg-muted text-muted-foreground border-dashed"
+            className="bg-muted text-secondary border-dashed"
           >
             +{hiddenCount} more
           </Badge>
@@ -88,39 +88,37 @@ function EmojiPill({
   className,
 }: EmojiPillProps) {
   return (
-    <div
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border transition-all duration-200',
-        'border-purple-200/50 bg-gradient-to-r from-purple-50 to-pink-50',
-        'hover:border-purple-300/50 hover:from-purple-100 hover:to-pink-100',
-        'dark:border-purple-500/30 dark:from-purple-950/30 dark:to-pink-950/30',
-        'dark:hover:from-purple-900/40 dark:hover:to-pink-900/40',
-        variant === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5',
-        className
-      )}
-    >
-      <span
+    <Button className="rounded-full" variant="ghost" asChild onClick={onRemove}>
+      <div
         className={cn(
-          'font-noto-color drop-shadow-sm',
-          variant === 'compact' ? 'text-lg' : 'text-xl'
+          'inline-flex items-center gap-1.5 rounded-full border transition-all duration-200',
+          'bg-muted/30 shadow-sm backdrop-blur-sm',
+          variant === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5',
+          className
         )}
       >
-        {emoji}
-      </span>
+        <span
+          className={cn(
+            'drop-shadow-sm',
+            variant === 'compact' ? 'text-lg' : 'text-xl'
+          )}
+        >
+          {emoji}
+        </span>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onRemove}
-        className={cn(
-          'hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors',
-          variant === 'compact' ? 'h-4 w-4 p-0' : 'h-5 w-5 p-0'
-        )}
-        aria-label={`Remove ${emoji} filter`}
-      >
-        <X className={cn(variant === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
-      </Button>
-    </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onRemove}
+          className={cn(
+            'text-muted-foreground hover:text-destructive text-2xs flex rounded-full p-0 transition-colors'
+          )}
+          aria-label={`Remove ${emoji} filter`}
+        >
+          <X className="!size-3" strokeWidth={4.0} />
+        </Button>
+      </div>
+    </Button>
   );
 }
 

@@ -1,6 +1,6 @@
 import type { Emoji } from '../../schema';
 
-export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
+export const foodEmojis: Emoji[] = [
   // Fruits
   {
     emoji: '🍏',
@@ -8,7 +8,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['apple', 'fruit', 'green'],
     category: 'food',
     color: '#90EE90',
-    tags: ['fruit', 'healthy', 'apple'],
   },
   {
     emoji: '🍎',
@@ -16,7 +15,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['apple', 'fruit', 'red'],
     category: 'food',
     color: '#DC143C',
-    tags: ['fruit', 'healthy', 'apple'],
   },
   {
     emoji: '🍐',
@@ -24,7 +22,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pear', 'fruit', 'nature'],
     category: 'food',
     color: '#90EE90',
-    tags: ['fruit', 'pear', 'sweet'],
   },
   {
     emoji: '🍊',
@@ -32,7 +29,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['orange', 'fruit', 'tangerine'],
     category: 'food',
     color: '#FFA500',
-    tags: ['fruit', 'citrus', 'orange'],
   },
   {
     emoji: '🍋',
@@ -40,7 +36,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lemon', 'fruit', 'citrus'],
     category: 'food',
     color: '#FFD700',
-    tags: ['fruit', 'citrus', 'sour'],
   },
   {
     emoji: '🍌',
@@ -48,7 +43,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['banana', 'fruit', 'food'],
     category: 'food',
     color: '#FFD700',
-    tags: ['fruit', 'banana', 'potassium'],
   },
   {
     emoji: '🍉',
@@ -56,7 +50,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['watermelon', 'fruit', 'summer'],
     category: 'food',
     color: '#FF69B4',
-    tags: ['fruit', 'summer', 'refreshing'],
   },
   {
     emoji: '🍇',
@@ -64,7 +57,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['grapes', 'fruit', 'wine'],
     category: 'food',
     color: '#9370DB',
-    tags: ['fruit', 'grapes', 'bunch'],
   },
   {
     emoji: '🍓',
@@ -72,7 +64,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['strawberry', 'fruit', 'food'],
     category: 'food',
     color: '#DC143C',
-    tags: ['fruit', 'berry', 'sweet'],
   },
   {
     emoji: '🫐',
@@ -80,7 +71,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['blueberries', 'fruit', 'berry'],
     category: 'food',
     color: '#4169E1',
-    tags: ['fruit', 'berry', 'healthy'],
   },
   {
     emoji: '🍈',
@@ -88,7 +78,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['melon', 'fruit', 'cantaloupe'],
     category: 'food',
     color: '#F0E68C',
-    tags: ['fruit', 'melon', 'sweet'],
   },
   {
     emoji: '🍒',
@@ -96,7 +85,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cherry', 'fruit', 'cherries'],
     category: 'food',
     color: '#DC143C',
-    tags: ['fruit', 'cherry', 'sweet'],
   },
   {
     emoji: '🍑',
@@ -104,7 +92,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['peach', 'fruit', 'nature'],
     category: 'food',
     color: '#FFDAB9',
-    tags: ['fruit', 'peach', 'juicy'],
   },
   {
     emoji: '🥭',
@@ -112,7 +99,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mango', 'fruit', 'tropical'],
     category: 'food',
     color: '#FFD700',
-    tags: ['fruit', 'tropical', 'mango'],
   },
   {
     emoji: '🍍',
@@ -120,7 +106,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pineapple', 'fruit', 'tropical'],
     category: 'food',
     color: '#FFD700',
-    tags: ['fruit', 'tropical', 'pineapple'],
   },
   {
     emoji: '🥥',
@@ -128,7 +113,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['coconut', 'palm', 'piña colada'],
     category: 'food',
     color: '#8B4513',
-    tags: ['fruit', 'tropical', 'coconut'],
   },
   {
     emoji: '🥝',
@@ -136,7 +120,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kiwi', 'fruit', 'food'],
     category: 'food',
     color: '#8B4513',
-    tags: ['fruit', 'kiwi', 'fuzzy'],
   },
   {
     emoji: '🍅',
@@ -144,7 +127,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tomato', 'fruit', 'vegetable'],
     category: 'food',
     color: '#FF6347',
-    tags: ['fruit', 'vegetable', 'tomato'],
   },
 
   // Vegetables
@@ -154,7 +136,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['eggplant', 'vegetable', 'nature'],
     category: 'food',
     color: '#9370DB',
-    tags: ['vegetable', 'eggplant', 'purple'],
   },
   {
     emoji: '🥑',
@@ -162,7 +143,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['avocado', 'fruit', 'food'],
     category: 'food',
     color: '#228B22',
-    tags: ['fruit', 'avocado', 'healthy'],
   },
   {
     emoji: '🥦',
@@ -170,7 +150,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['broccoli', 'vegetable', 'food'],
     category: 'food',
     color: '#228B22',
-    tags: ['vegetable', 'broccoli', 'healthy'],
   },
   {
     emoji: '🥬',
@@ -178,7 +157,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['kale', 'lettuce', 'bok choy'],
     category: 'food',
     color: '#228B22',
-    tags: ['vegetable', 'greens', 'salad'],
   },
   {
     emoji: '🥒',
@@ -186,7 +164,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cucumber', 'pickle', 'vegetable'],
     category: 'food',
     color: '#228B22',
-    tags: ['vegetable', 'cucumber', 'fresh'],
   },
   {
     emoji: '🌶️',
@@ -194,7 +171,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chili', 'spicy', 'hot'],
     category: 'food',
     color: '#DC143C',
-    tags: ['spicy', 'pepper', 'hot'],
   },
   {
     emoji: '🫑',
@@ -202,7 +178,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pepper', 'paprika', 'vegetable'],
     category: 'food',
     color: '#228B22',
-    tags: ['vegetable', 'pepper', 'bell'],
   },
   {
     emoji: '🌽',
@@ -210,7 +185,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['corn', 'ear', 'maize'],
     category: 'food',
     color: '#FFD700',
-    tags: ['vegetable', 'corn', 'cob'],
   },
   {
     emoji: '🥕',
@@ -218,7 +192,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['carrot', 'food', 'vegetable'],
     category: 'food',
     color: '#FF8C00',
-    tags: ['vegetable', 'carrot', 'orange'],
   },
   {
     emoji: '🫒',
@@ -226,7 +199,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['olive', 'food', 'mediterranean'],
     category: 'food',
     color: '#556B2F',
-    tags: ['olive', 'mediterranean', 'oil'],
   },
   {
     emoji: '🧄',
@@ -234,7 +206,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['garlic', 'flavoring', 'cook'],
     category: 'food',
     color: '#F5F5F5',
-    tags: ['garlic', 'cooking', 'flavor'],
   },
   {
     emoji: '🧅',
@@ -242,7 +213,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['onion', 'cook', 'tear'],
     category: 'food',
     color: '#DDA0DD',
-    tags: ['onion', 'cooking', 'vegetable'],
   },
   {
     emoji: '🥔',
@@ -250,7 +220,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['potato', 'food', 'tuber'],
     category: 'food',
     color: '#DEB887',
-    tags: ['potato', 'vegetable', 'starch'],
   },
   {
     emoji: '🍠',
@@ -258,7 +227,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sweet potato', 'roasted', 'food'],
     category: 'food',
     color: '#FF8C00',
-    tags: ['sweet-potato', 'roasted', 'yam'],
   },
 
   // Prepared foods
@@ -268,7 +236,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['croissant', 'food', 'bread'],
     category: 'food',
     color: '#DEB887',
-    tags: ['pastry', 'french', 'breakfast'],
   },
   {
     emoji: '🥖',
@@ -276,7 +243,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['baguette', 'food', 'bread'],
     category: 'food',
     color: '#DEB887',
-    tags: ['bread', 'french', 'baguette'],
   },
   {
     emoji: '🍞',
@@ -284,7 +250,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bread', 'loaf', 'carbs'],
     category: 'food',
     color: '#DEB887',
-    tags: ['bread', 'loaf', 'carbs'],
   },
   {
     emoji: '🥜',
@@ -292,7 +257,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['peanut', 'nut', 'food'],
     category: 'food',
     color: '#DEB887',
-    tags: ['nut', 'peanut', 'snack'],
   },
   {
     emoji: '🌰',
@@ -300,7 +264,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chestnut', 'food', 'squirrel'],
     category: 'food',
     color: '#8B4513',
-    tags: ['nut', 'chestnut', 'roasted'],
   },
   {
     emoji: '🍯',
@@ -308,7 +271,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['honey', 'honeypot', 'bees'],
     category: 'food',
     color: '#FFD700',
-    tags: ['honey', 'sweet', 'bee'],
   },
   {
     emoji: '🧈',
@@ -316,7 +278,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['butter', 'dairy', 'spread'],
     category: 'food',
     color: '#F0E68C',
-    tags: ['butter', 'dairy', 'spread'],
   },
   {
     emoji: '🥛',
@@ -324,7 +285,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['milk', 'drink', 'glass'],
     category: 'food',
     color: '#F5F5F5',
-    tags: ['milk', 'dairy', 'drink'],
   },
   {
     emoji: '🧀',
@@ -332,7 +292,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cheese', 'wedge', 'swiss'],
     category: 'food',
     color: '#FFD700',
-    tags: ['cheese', 'dairy', 'wedge'],
   },
   {
     emoji: '🥚',
@@ -340,7 +299,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['egg', 'chicken', 'easter'],
     category: 'food',
     color: '#F5F5F5',
-    tags: ['egg', 'breakfast', 'protein'],
   },
   {
     emoji: '🍳',
@@ -348,7 +306,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['eggs', 'frying', 'pan'],
     category: 'food',
     color: '#FFD700',
-    tags: ['cooking', 'eggs', 'frying'],
   },
   {
     emoji: '🥓',
@@ -356,7 +313,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bacon', 'breakfast', 'pork'],
     category: 'food',
     color: '#DC143C',
-    tags: ['bacon', 'meat', 'breakfast'],
   },
   {
     emoji: '🥩',
@@ -364,7 +320,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['steak', 'meat', 'chop'],
     category: 'food',
     color: '#DC143C',
-    tags: ['meat', 'steak', 'beef'],
   },
   {
     emoji: '🍗',
@@ -372,7 +327,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chicken', 'drumstick', 'leg'],
     category: 'food',
     color: '#8B4513',
-    tags: ['chicken', 'meat', 'drumstick'],
   },
   {
     emoji: '🍖',
@@ -380,7 +334,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['meat', 'bone', 'drumstick'],
     category: 'food',
     color: '#8B4513',
-    tags: ['meat', 'bone', 'bbq'],
   },
   {
     emoji: '🌭',
@@ -388,7 +341,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['hotdog', 'frankfurter', 'america'],
     category: 'food',
     color: '#8B4513',
-    tags: ['hotdog', 'sausage', 'american'],
   },
   {
     emoji: '🍔',
@@ -396,7 +348,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['burger', 'cheeseburger', 'mcdonalds'],
     category: 'food',
     color: '#8B4513',
-    tags: ['burger', 'american', 'fast-food'],
   },
   {
     emoji: '🍟',
@@ -404,7 +355,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fries', 'chips', 'mcdonalds'],
     category: 'food',
     color: '#FFD700',
-    tags: ['fries', 'potato', 'fast-food'],
   },
   {
     emoji: '🍕',
@@ -412,7 +362,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pizza', 'party', 'italy'],
     category: 'food',
     color: '#DC143C',
-    tags: ['pizza', 'italian', 'slice'],
   },
   {
     emoji: '🥪',
@@ -420,7 +369,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sandwich', 'bread', 'toast'],
     category: 'food',
     color: '#DEB887',
-    tags: ['sandwich', 'lunch', 'bread'],
   },
   {
     emoji: '🥙',
@@ -428,7 +376,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['flatbread', 'gyro', 'sandwich'],
     category: 'food',
     color: '#DEB887',
-    tags: ['flatbread', 'gyro', 'wrap'],
   },
   {
     emoji: '🧆',
@@ -436,7 +383,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['falafel', 'chickpea', 'meatball'],
     category: 'food',
     color: '#8B4513',
-    tags: ['falafel', 'middle-eastern', 'vegetarian'],
   },
   {
     emoji: '🌮',
@@ -444,7 +390,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['taco', 'mexican', 'food'],
     category: 'food',
     color: '#FFD700',
-    tags: ['taco', 'mexican', 'food'],
   },
   {
     emoji: '🌯',
@@ -452,7 +397,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['burrito', 'mexican', 'wrap'],
     category: 'food',
     color: '#F5DEB3',
-    tags: ['burrito', 'mexican', 'wrap'],
   },
   {
     emoji: '🫔',
@@ -460,7 +404,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tamale', 'mexican', 'wrapped'],
     category: 'food',
     color: '#90EE90',
-    tags: ['tamale', 'mexican', 'corn'],
   },
   {
     emoji: '🥗',
@@ -468,7 +411,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['salad', 'food', 'green'],
     category: 'food',
     color: '#90EE90',
-    tags: ['salad', 'healthy', 'greens'],
   },
   {
     emoji: '🥘',
@@ -476,7 +418,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['paella', 'curry', 'casserole'],
     category: 'food',
     color: '#FF8C00',
-    tags: ['paella', 'pan', 'food'],
   },
   {
     emoji: '🫕',
@@ -484,7 +425,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fondue', 'cheese', 'pot'],
     category: 'food',
     color: '#FFD700',
-    tags: ['fondue', 'cheese', 'melted'],
   },
   {
     emoji: '🥫',
@@ -492,7 +432,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['can', 'soup', 'preserve'],
     category: 'food',
     color: '#DC143C',
-    tags: ['canned', 'preserved', 'soup'],
   },
 
   // Asian foods
@@ -502,7 +441,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bento', 'box', 'japanese'],
     category: 'food',
     color: '#8B4513',
-    tags: ['bento', 'japanese', 'lunch'],
   },
   {
     emoji: '🍘',
@@ -510,7 +448,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['rice', 'cracker', 'japanese'],
     category: 'food',
     color: '#F5DEB3',
-    tags: ['rice-cracker', 'japanese', 'snack'],
   },
   {
     emoji: '🍙',
@@ -518,7 +455,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['rice', 'ball', 'japanese'],
     category: 'food',
     color: '#F5F5F5',
-    tags: ['onigiri', 'japanese', 'rice'],
   },
   {
     emoji: '🍚',
@@ -526,7 +462,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['rice', 'cook', 'food'],
     category: 'food',
     color: '#F5F5F5',
-    tags: ['rice', 'asian', 'cooked'],
   },
   {
     emoji: '🍛',
@@ -534,7 +469,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['curry', 'rice', 'food'],
     category: 'food',
     color: '#FFD700',
-    tags: ['curry', 'rice', 'indian'],
   },
   {
     emoji: '🍜',
@@ -542,7 +476,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['noodle', 'chopsticks', 'ramen'],
     category: 'food',
     color: '#FFD700',
-    tags: ['ramen', 'noodles', 'soup'],
   },
   {
     emoji: '🍝',
@@ -550,7 +483,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pasta', 'noodle', 'italian'],
     category: 'food',
     color: '#FFD700',
-    tags: ['pasta', 'italian', 'spaghetti'],
   },
   {
     emoji: '🍢',
@@ -558,7 +490,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['oden', 'skewer', 'seafood'],
     category: 'food',
     color: '#DEB887',
-    tags: ['oden', 'japanese', 'skewer'],
   },
   {
     emoji: '🍣',
@@ -566,7 +497,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sushi', 'fish', 'japanese'],
     category: 'food',
     color: '#FF69B4',
-    tags: ['sushi', 'japanese', 'fish'],
   },
   {
     emoji: '🍤',
@@ -574,7 +504,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shrimp', 'tempura', 'prawn'],
     category: 'food',
     color: '#FF8C00',
-    tags: ['shrimp', 'tempura', 'fried'],
   },
   {
     emoji: '🍥',
@@ -582,7 +511,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fish', 'cake', 'swirl'],
     category: 'food',
     color: '#FFB6C1',
-    tags: ['naruto', 'fish-cake', 'japanese'],
   },
   {
     emoji: '🥮',
@@ -590,7 +518,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mooncake', 'festival', 'autumn'],
     category: 'food',
     color: '#DEB887',
-    tags: ['mooncake', 'chinese', 'festival'],
   },
   {
     emoji: '🍡',
@@ -598,7 +525,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dango', 'dessert', 'sweet'],
     category: 'food',
     color: '#FFB6C1',
-    tags: ['dango', 'japanese', 'sweet'],
   },
   {
     emoji: '🥟',
@@ -606,7 +532,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['dumpling', 'potsticker', 'pierogi'],
     category: 'food',
     color: '#F5DEB3',
-    tags: ['dumpling', 'asian', 'steamed'],
   },
   {
     emoji: '🥠',
@@ -614,7 +539,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['fortune', 'cookie', 'food'],
     category: 'food',
     color: '#DEB887',
-    tags: ['fortune-cookie', 'chinese', 'dessert'],
   },
   {
     emoji: '🥡',
@@ -622,7 +546,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['takeout', 'chinese', 'food'],
     category: 'food',
     color: '#F5F5F5',
-    tags: ['takeout', 'chinese', 'box'],
   },
 
   // Sweets
@@ -634,7 +557,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['icecream', 'soft', 'dessert'],
     category: 'food',
     color: '#F5F5F5',
-    tags: ['ice-cream', 'soft-serve', 'dessert'],
   },
   {
     emoji: '🍧',
@@ -642,7 +564,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['shaved', 'ice', 'dessert'],
     category: 'food',
     color: '#87CEEB',
-    tags: ['shaved-ice', 'dessert', 'cold'],
   },
   {
     emoji: '🍨',
@@ -650,7 +571,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ice', 'cream', 'dessert'],
     category: 'food',
     color: '#FFB6C1',
-    tags: ['ice-cream', 'dessert', 'sundae'],
   },
   {
     emoji: '🍩',
@@ -658,7 +578,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['donut', 'dessert', 'snack'],
     category: 'food',
     color: '#D2691E',
-    tags: ['donut', 'dessert', 'sweet'],
   },
   {
     emoji: '🍪',
@@ -666,7 +585,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cookie', 'snack', 'chocolate'],
     category: 'food',
     color: '#D2691E',
-    tags: ['cookie', 'dessert', 'biscuit'],
   },
   {
     emoji: '🎂',
@@ -674,7 +592,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cake', 'birthday', 'dessert'],
     category: 'food',
     color: '#FFB6C1',
-    tags: ['cake', 'birthday', 'celebration'],
   },
   {
     emoji: '🍰',
@@ -682,7 +599,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cake', 'dessert', 'slice'],
     category: 'food',
     color: '#FFE4E1',
-    tags: ['cake', 'slice', 'dessert'],
   },
   {
     emoji: '🧁',
@@ -690,7 +606,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cupcake', 'food', 'dessert'],
     category: 'food',
     color: '#FFB6C1',
-    tags: ['cupcake', 'dessert', 'sweet'],
   },
   {
     emoji: '🥧',
@@ -698,7 +613,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['pie', 'filling', 'thanksgiving'],
     category: 'food',
     color: '#DEB887',
-    tags: ['pie', 'dessert', 'baked'],
   },
   {
     emoji: '🍫',
@@ -706,7 +620,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chocolate', 'sweet', 'dessert'],
     category: 'food',
     color: '#D2691E',
-    tags: ['chocolate', 'candy', 'sweet'],
   },
   {
     emoji: '🍬',
@@ -714,7 +627,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['candy', 'snack', 'dessert'],
     category: 'food',
     color: '#FF69B4',
-    tags: ['candy', 'sweet', 'wrapped'],
   },
   {
     emoji: '🍭',
@@ -722,7 +634,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['lollipop', 'candy', 'snack'],
     category: 'food',
     color: '#FF69B4',
-    tags: ['lollipop', 'candy', 'sweet'],
   },
   {
     emoji: '🍮',
@@ -730,7 +641,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['custard', 'pudding', 'dessert'],
     category: 'food',
     color: '#F0E68C',
-    tags: ['custard', 'pudding', 'dessert'],
   },
 
   // Beverages
@@ -740,7 +650,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['coffee', 'cafe', 'espresso'],
     category: 'food',
     color: '#8B4513',
-    tags: ['coffee', 'hot', 'beverage'],
   },
   {
     emoji: '🍵',
@@ -748,7 +657,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tea', 'green', 'breakfast'],
     category: 'food',
     color: '#90EE90',
-    tags: ['tea', 'green-tea', 'japanese'],
   },
   {
     emoji: '🫖',
@@ -756,7 +664,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['teapot', 'tea', 'drink'],
     category: 'food',
     color: '#8B4513',
-    tags: ['teapot', 'tea', 'brewing'],
   },
   {
     emoji: '🍶',
@@ -764,7 +671,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['sake', 'wine', 'drink'],
     category: 'food',
     color: '#F5F5F5',
-    tags: ['sake', 'japanese', 'alcohol'],
   },
   {
     emoji: '🍾',
@@ -772,7 +678,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['champagne', 'bottle', 'bubbly'],
     category: 'food',
     color: '#FFD700',
-    tags: ['champagne', 'celebration', 'popping'],
   },
   {
     emoji: '🍷',
@@ -780,7 +685,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['wine', 'drink', 'drunk'],
     category: 'food',
     color: '#8B0000',
-    tags: ['wine', 'red-wine', 'glass'],
   },
   {
     emoji: '🍸',
@@ -788,7 +692,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['drink', 'drunk', 'alcohol'],
     category: 'food',
     color: '#FF69B4',
-    tags: ['cocktail', 'martini', 'drink'],
   },
   {
     emoji: '🍹',
@@ -796,7 +699,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['tropical', 'drink', 'mojito'],
     category: 'food',
     color: '#FF69B4',
-    tags: ['tropical', 'cocktail', 'vacation'],
   },
   {
     emoji: '🍺',
@@ -804,7 +706,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['beer', 'drink', 'stein'],
     category: 'food',
     color: '#FFD700',
-    tags: ['beer', 'mug', 'alcohol'],
   },
   {
     emoji: '🍻',
@@ -812,7 +713,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['beers', 'drinks', 'cheers'],
     category: 'food',
     color: '#FFD700',
-    tags: ['cheers', 'beer', 'celebration'],
   },
   {
     emoji: '🥂',
@@ -820,7 +720,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cheers', 'champagne', 'glass'],
     category: 'food',
     color: '#FFD700',
-    tags: ['cheers', 'champagne', 'toast'],
   },
   {
     emoji: '🥃',
@@ -828,7 +727,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['whisky', 'liquor', 'shot'],
     category: 'food',
     color: '#8B4513',
-    tags: ['whiskey', 'tumbler', 'alcohol'],
   },
   {
     emoji: '🥤',
@@ -836,7 +734,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['drink', 'soda', 'soft drink'],
     category: 'food',
     color: '#DC143C',
-    tags: ['soda', 'drink', 'straw'],
   },
   {
     emoji: '🧋',
@@ -844,7 +741,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['bubble', 'tea', 'pearl'],
     category: 'food',
     color: '#DEB887',
-    tags: ['bubble-tea', 'boba', 'drink'],
   },
   {
     emoji: '🧃',
@@ -852,7 +748,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['juice', 'straw', 'drink'],
     category: 'food',
     color: '#FFA500',
-    tags: ['juice-box', 'drink', 'kids'],
   },
   {
     emoji: '🧉',
@@ -860,7 +755,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['mate', 'drink', 'tea'],
     category: 'food',
     color: '#8B4513',
-    tags: ['mate', 'tea', 'south-american'],
   },
   {
     emoji: '🧊',
@@ -868,7 +762,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['ice', 'cube', 'iceberg'],
     category: 'food',
     color: '#87CEEB',
-    tags: ['ice', 'cube', 'cold'],
   },
 
   // Utensils
@@ -878,7 +771,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['chopsticks', 'food', 'hashi'],
     category: 'food',
     color: '#8B4513',
-    tags: ['chopsticks', 'asian', 'utensils'],
   },
   {
     emoji: '🍴',
@@ -886,7 +778,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['cutlery', 'fork', 'knife'],
     category: 'food',
     color: '#C0C0C0',
-    tags: ['cutlery', 'dining', 'utensils'],
   },
   {
     emoji: '🥄',
@@ -894,7 +785,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['spoon', 'tableware', 'cutlery'],
     category: 'food',
     color: '#C0C0C0',
-    tags: ['spoon', 'utensil', 'eating'],
   },
   {
     emoji: '🔪',
@@ -902,7 +792,6 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['knife', 'blade', 'cutlery'],
     category: 'food',
     color: '#C0C0C0',
-    tags: ['knife', 'kitchen', 'cooking'],
   },
   {
     emoji: '🏺',
@@ -910,6 +799,5 @@ export const foodEmojis: Omit<Emoji, 'sentiment'>[] = [
     keywords: ['jar', 'vase', 'amphora'],
     category: 'food',
     color: '#8B4513',
-    tags: ['amphora', 'jar', 'ancient'],
   },
 ];

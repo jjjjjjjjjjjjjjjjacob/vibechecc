@@ -331,23 +331,40 @@ export class AuthUtils {
    */
   static async requireAdmin(ctx: {
     auth: { getUserIdentity(): Promise<any> };
+    db: any;
   }): Promise<void> {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('Authentication required');
     }
 
-    // Check for admin role in Clerk's JWT claims
-    // This assumes org:admin role is included in the JWT custom claims
-    const orgRole = identity.org_role;
-    const roles = identity.roles || [];
+    // First check JWT roles from Clerk
+    const hasJWTAdminRole =
+      identity.org_role === 'org:admin' ||
+      identity.org_role === 'admin' ||
+      (Array.isArray(identity.roles) &&
+        (identity.roles.includes('admin') ||
+          identity.roles.includes('org:admin')));
 
-    const isAdmin =
-      orgRole === 'org:admin' ||
-      roles.includes('admin') ||
-      roles.includes('org:admin');
+    if (hasJWTAdminRole) {
+      return; // User has admin role in JWT, allow access
+    }
 
-    if (!isAdmin) {
+    // Fall back to database check if JWT doesn't have admin role
+    const user = await ctx.db
+      .query('users')
+      .withIndex('byExternalId', (q: any) =>
+        q.eq('externalId', identity.subject)
+      )
+      .first();
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Check if user has admin role in the database
+    // You can set this field manually in the database for admin users
+    if (!user.isAdmin) {
       throw new Error('Admin privileges required to access this resource');
     }
   }

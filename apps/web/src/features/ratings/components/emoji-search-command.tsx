@@ -77,7 +77,7 @@ export function EmojiSearchCommand({
   const allEmojisQuery = useQuery({
     ...convexQuery(api.emojis.search, {
       page: categoryPage,
-      pageSize: 200, // Load more emojis initially for category view
+      pageSize: 500, // Load more emojis initially for category view to ensure all categories are represented
     }),
     enabled: showCategories && !searchValue && pageSize > 50,
     staleTime: 0, // Always fetch fresh data
@@ -172,7 +172,7 @@ export function EmojiSearchCommand({
     setAllCategoryEmojis([]);
   }, [searchValue]);
 
-  // Trigger initial load for category view
+  // Trigger initial load for category view and load more pages if needed
   React.useEffect(() => {
     if (
       showCategories &&
@@ -184,12 +184,27 @@ export function EmojiSearchCommand({
       // Force initial query if nothing loaded yet
       setCategoryPage(0);
     }
+
+    // Auto-load next page if we haven't loaded all categories yet
+    if (
+      showCategories &&
+      !searchValue &&
+      pageSize > 50 &&
+      allEmojisData.hasMore &&
+      !loadingRef.current &&
+      allCategoryEmojis.length < 1000 // Load at least first 1000 emojis to ensure all categories are represented
+    ) {
+      loadingRef.current = true;
+      setIsLoading(true);
+      setCategoryPage((prev) => prev + 1);
+    }
   }, [
     showCategories,
     searchValue,
     pageSize,
     allCategoryEmojis.length,
     allEmojisData.emojis.length,
+    allEmojisData.hasMore,
   ]);
 
   // Group emojis by category if enabled
@@ -282,7 +297,7 @@ export function EmojiSearchCommand({
                       color: emoji.color,
                     }}
                   >
-                    <span className="font-noto-color">{emoji.emoji}</span>
+                    <span className="font-sans">{emoji.emoji}</span>
                   </CommandItem>
                 ))}
               </div>
@@ -303,7 +318,7 @@ export function EmojiSearchCommand({
                       color: emoji.color,
                     }}
                   >
-                    <span className="font-noto-color">{emoji.emoji}</span>
+                    <span className="font-sans">{emoji.emoji}</span>
                   </CommandItem>
                 ))}
               </div>
@@ -347,7 +362,7 @@ export function EmojiSearchCommand({
                           color: emoji.color,
                         }}
                       >
-                        <span className="font-noto-color">{emoji.emoji}</span>
+                        <span className="font-sans">{emoji.emoji}</span>
                       </CommandItem>
                     ))}
                   </div>

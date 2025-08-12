@@ -1,5 +1,5 @@
 import { action } from './_generated/server';
-import { api } from './_generated/api';
+import { internal } from './_generated/api';
 
 // Basic emojis to import for testing
 const BASIC_EMOJIS = [
@@ -295,9 +295,12 @@ export const importBasicEmojis = action({
     console.log(`Importing ${BASIC_EMOJIS.length} basic emojis...`);
 
     try {
-      const result = (await ctx.runMutation(api.emojis.importBatch, {
-        emojis: BASIC_EMOJIS,
-      })) as { count: number };
+      const result = await (ctx as any).runMutation(
+        internal.emojis.importBatchInternal,
+        {
+          emojis: BASIC_EMOJIS,
+        }
+      );
 
       // eslint-disable-next-line no-console
       console.log(`Import complete! Imported ${result.count} new emojis`);

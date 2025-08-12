@@ -2,7 +2,6 @@
 
 /**
  * Hybrid Font Optimization
- * - Uses system fonts for emoji (instant)
  * - Only processes fonts that need conversion
  * - Skips already optimized WOFF2 files
  */
@@ -39,19 +38,6 @@ const FONTS_CONFIG = [
     file: 'Doto-VariableFont_ROND,wght.ttf',
     skipOptimization: false, // Needs conversion
     unicodeRange: 'U+0000-00FF', // Latin only
-  },
-  {
-    name: 'NotoEmoji',
-    file: 'NotoEmoji-VariableFont_wght.ttf',
-    skipOptimization: false, // Needs conversion
-    unicodeRange:
-      'U+1F600-1F64F, U+1F300-1F5FF, U+1F680-1F6FF, U+1F1E0-1F1FF, U+2600-26FF, U+2700-27BF, U+FE00-FE0F, U+1F900-1F9FF', // Common emoji ranges
-  },
-  {
-    name: 'NotoColorEmoji',
-    file: 'NotoColorEmoji-Regular.ttf',
-    skipOptimization: true, // Use pre-optimized files
-    skipInCSS: true, // We'll add manually in CSS generation
   },
 ];
 
@@ -111,44 +97,17 @@ function generateCSS(processedFonts) {
 `;
   });
 
-  // Add Noto Color Emoji fonts
-  css += `/* Noto Color Emoji - Core Set (Most Common Emojis) */
-@font-face {
-  font-family: 'NotoColorEmoji';
-  src: url('/fonts/optimized/noto-color-emoji-core.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+1F600-1F64F, U+1F300-1F5FF, U+1F680-1F6FF, U+1F1E0-1F1FF, U+2600-26FF, U+2700-27BF, U+FE00-FE0F, U+1F900-1F9FF;
-}
-
-/* Noto Color Emoji - Extended Set (Less Common Emojis) */
-@font-face {
-  font-family: 'NotoColorEmoji';
-  src: url('/fonts/optimized/noto-color-emoji-extended.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+1F780-1F7FF, U+1F800-1F8FF, U+1FAA0-1FAFF, U+1FB00-1FBFF;
-}
-
+  css += `
 /* Font Stacks */
 :root {
   --font-sans: 'GeistSans', system-ui, -apple-system, sans-serif;
   --font-mono: 'GeistMono', ui-monospace, monospace;
   --font-display: 'Doto', system-ui, sans-serif;
-  --font-emoji: 'NotoColorEmoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  --font-emoji-outline: 'NotoEmoji', system-ui, sans-serif;
 }
 
-/* Apply emoji font to common elements */
+/* Apply font to common elements */
 body {
-  font-family: var(--font-sans), var(--font-emoji);
-}
-
-/* Ensure emojis use the emoji font */
-.emoji, [data-emoji] {
-  font-family: var(--font-emoji);
+  font-family: var(--font-sans);
 }`;
 
   return css;
@@ -213,7 +172,6 @@ async function main() {
 
   // console.log('\n🎯 Optimizations Applied:');
   // console.log('   • WOFF2 fonts used directly (no re-processing)');
-  // console.log('   • System emoji fonts (0 KB download)');
   // console.log('   • Latin-only subset for Doto font');
   // console.log('   • font-display: swap for instant text');
 }

@@ -24,11 +24,11 @@ import {
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import {
-  useTheme,
-  type PrimaryColorTheme,
-  type SecondaryColorTheme,
-} from '@/features/theming/components/theme-provider';
+import { useTheme } from '@/stores/theme-initializer';
+import type {
+  PrimaryColorTheme,
+  SecondaryColorTheme,
+} from '@/stores/theme-store';
 import type { Vibe } from '@viberatr/types';
 import { getThemeColorValue } from '@/utils/theme-colors';
 import { useUser } from '@clerk/tanstack-react-start';
@@ -408,28 +408,28 @@ export function UserProfileView({
           {/* Modern Navigation */}
           <Tabs defaultValue="vibes" className="w-full">
             <div className="mt-12 mb-8 flex justify-center">
-              <TabsList className="gap-1 rounded-2xl border-0 bg-transparent p-1.5 shadow-2xl backdrop-blur-md">
+              <TabsList className="gap-1 rounded-lg border-0 bg-transparent p-1.5 shadow-2xl backdrop-blur-md">
                 <TabsTrigger
                   value="vibes"
-                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-2 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
+                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
                 >
-                  <Heart className="mr-2 h-4 w-4" />
+                  <Heart className="h-4 w-4" />
                   vibes
                 </TabsTrigger>
                 {userRatings !== undefined && (
                   <TabsTrigger
                     value="reviews"
-                    className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-2 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
+                    className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
                   >
-                    <Star className="mr-2 h-4 w-4" />
+                    <Star className="h-4 w-4" />
                     reviews
                   </TabsTrigger>
                 )}
                 <TabsTrigger
                   value="about"
-                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground rounded-xl px-6 py-2 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
+                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md !border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
                 >
-                  <Sparkles className="mr-2 h-4 w-4" />
+                  <Sparkles className="h-4 w-4" />
                   about
                 </TabsTrigger>
               </TabsList>
@@ -526,7 +526,7 @@ export function UserProfileView({
                                   rating?._id ||
                                   `rating-${rating?.vibeId}-${rating?.userId}-${index}`
                                 }
-                                className="border-border bg-card rounded-lg border p-4"
+                                className="border-border bg-card/60 rounded-lg border p-4"
                               >
                                 <div className="flex items-start gap-3">
                                   <img
@@ -653,7 +653,7 @@ export function UserProfileView({
                                     rating?._id ||
                                     `received-rating-${rating?.vibeId}-${rating?.userId}-${index}`
                                   }
-                                  className="border-border bg-card rounded-lg border p-4"
+                                  className="border-border bg-card/60 rounded-lg border p-4"
                                 >
                                   <div className="flex items-start gap-3">
                                     <Avatar className="h-8 w-8">
@@ -752,7 +752,7 @@ export function UserProfileView({
                 <div className="grid gap-6 lg:grid-cols-3">
                   {/* Profile Details */}
                   <Card
-                    className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
+                    className={`bg-background/60 border-theme-primary/20 shadow-xl backdrop-blur-md`}
                   >
                     <CardContent className="space-y-6 p-6">
                       {user.bio && (

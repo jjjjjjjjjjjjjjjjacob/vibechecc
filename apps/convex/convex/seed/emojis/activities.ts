@@ -8,7 +8,6 @@ export const activityEmojis = [
     keywords: ['sports', 'football', 'soccer'],
     category: 'activities',
     color: '#000000',
-    tags: ['soccer', 'football', 'sports'],
   },
   {
     emoji: '🏀',
@@ -16,7 +15,6 @@ export const activityEmojis = [
     keywords: ['sports', 'balls', 'basketball'],
     category: 'activities',
     color: '#FF8C00',
-    tags: ['basketball', 'sports', 'nba'],
   },
   {
     emoji: '🏈',
@@ -24,7 +22,6 @@ export const activityEmojis = [
     keywords: ['sports', 'balls', 'football'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['football', 'american', 'nfl'],
   },
   {
     emoji: '⚾',
@@ -32,7 +29,6 @@ export const activityEmojis = [
     keywords: ['sports', 'balls', 'baseball'],
     category: 'activities',
     color: '#F5F5F5',
-    tags: ['baseball', 'sports', 'mlb'],
   },
   {
     emoji: '🥎',
@@ -40,7 +36,6 @@ export const activityEmojis = [
     keywords: ['sports', 'balls', 'softball'],
     category: 'activities',
     color: '#FFFF00',
-    tags: ['softball', 'sports', 'ball'],
   },
   {
     emoji: '🎾',
@@ -48,7 +43,6 @@ export const activityEmojis = [
     keywords: ['sports', 'balls', 'tennis'],
     category: 'activities',
     color: '#ADFF2F',
-    tags: ['tennis', 'sports', 'racket'],
   },
   {
     emoji: '🏐',
@@ -56,7 +50,6 @@ export const activityEmojis = [
     keywords: ['sports', 'balls', 'volleyball'],
     category: 'activities',
     color: '#F5F5F5',
-    tags: ['volleyball', 'sports', 'beach'],
   },
   {
     emoji: '🏉',
@@ -64,7 +57,6 @@ export const activityEmojis = [
     keywords: ['sports', 'team', 'rugby'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['rugby', 'sports', 'ball'],
   },
   {
     emoji: '🥏',
@@ -72,7 +64,6 @@ export const activityEmojis = [
     keywords: ['frisbee', 'ultimate', 'disc'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['frisbee', 'disc', 'ultimate'],
   },
   {
     emoji: '🎱',
@@ -80,7 +71,6 @@ export const activityEmojis = [
     keywords: ['pool', 'hobby', '8ball'],
     category: 'activities',
     color: '#000000',
-    tags: ['pool', 'billiards', '8ball'],
   },
 
   // Sports equipment
@@ -90,7 +80,6 @@ export const activityEmojis = [
     keywords: ['sports', 'pingpong', 'table tennis'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['ping-pong', 'table-tennis', 'paddle'],
   },
   {
     emoji: '🏸',
@@ -98,7 +87,6 @@ export const activityEmojis = [
     keywords: ['sports', 'racquet', 'badminton'],
     category: 'activities',
     color: '#F5F5F5',
-    tags: ['badminton', 'racket', 'shuttlecock'],
   },
   {
     emoji: '🏒',
@@ -106,7 +94,6 @@ export const activityEmojis = [
     keywords: ['sports', 'hockey', 'ice'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['hockey', 'ice', 'stick'],
   },
   {
     emoji: '🏑',
@@ -114,7 +101,6 @@ export const activityEmojis = [
     keywords: ['sports', 'hockey', 'field'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['hockey', 'field', 'stick'],
   },
   {
     emoji: '🥍',
@@ -122,7 +108,6 @@ export const activityEmojis = [
     keywords: ['sports', 'ball', 'stick'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['lacrosse', 'sports', 'stick'],
   },
   {
     emoji: '🏏',
@@ -130,7 +115,6 @@ export const activityEmojis = [
     keywords: ['sports', 'cricket', 'bat'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['cricket', 'sports', 'bat'],
   },
   {
     emoji: '🪃',
@@ -138,7 +122,6 @@ export const activityEmojis = [
     keywords: ['weapon', 'australia', 'rebound'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['boomerang', 'australia', 'throw'],
   },
   {
     emoji: '🥅',
@@ -146,7 +129,6 @@ export const activityEmojis = [
     keywords: ['sports', 'goal', 'net'],
     category: 'activities',
     color: '#F5F5F5',
-    tags: ['goal', 'net', 'sports'],
   },
   {
     emoji: '⛳',
@@ -154,7 +136,6 @@ export const activityEmojis = [
     keywords: ['sports', 'business', 'golf'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['golf', 'flag', 'hole'],
   },
   {
     emoji: '🪁',
@@ -162,7 +143,6 @@ export const activityEmojis = [
     keywords: ['wind', 'fly', 'soar'],
     category: 'activities',
     color: '#FF69B4',
-    tags: ['kite', 'flying', 'wind'],
   },
 
   // Winter sports
@@ -172,7 +152,6 @@ export const activityEmojis = [
     keywords: ['sledge', 'sleigh', 'luge'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['sled', 'winter', 'snow'],
   },
   {
     emoji: '⛸️',
@@ -180,7 +159,6 @@ export const activityEmojis = [
     keywords: ['sports', 'skating', 'ice'],
     category: 'activities',
     color: '#C0C0C0',
-    tags: ['ice-skate', 'skating', 'winter'],
   },
   {
     emoji: '🎿',
@@ -188,7 +166,6 @@ export const activityEmojis = [
     keywords: ['sports', 'winter', 'cold'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['ski', 'skiing', 'winter'],
   },
   {
     emoji: '🥌',
@@ -196,7 +173,6 @@ export const activityEmojis = [
     keywords: ['sports', 'curling', 'stone'],
     category: 'activities',
     color: '#696969',
-    tags: ['curling', 'ice', 'stone'],
   },
 
   // Target sports
@@ -206,7 +182,6 @@ export const activityEmojis = [
     keywords: ['sports', 'archery', 'bow'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['archery', 'bow', 'arrow'],
   },
   {
     emoji: '🎯',
@@ -214,7 +189,6 @@ export const activityEmojis = [
     keywords: ['target', 'archery', 'game'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['target', 'bullseye', 'darts'],
   },
 
   // Games
@@ -224,7 +198,6 @@ export const activityEmojis = [
     keywords: ['play', 'controller', 'console'],
     category: 'activities',
     color: '#000000',
-    tags: ['gaming', 'controller', 'video-game'],
   },
   {
     emoji: '🕹️',
@@ -232,7 +205,6 @@ export const activityEmojis = [
     keywords: ['game', 'play', 'arcade'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['joystick', 'arcade', 'gaming'],
   },
   {
     emoji: '🎲',
@@ -240,7 +212,6 @@ export const activityEmojis = [
     keywords: ['dice', 'random', 'tabletop'],
     category: 'activities',
     color: '#F5F5F5',
-    tags: ['dice', 'game', 'chance'],
   },
   {
     emoji: '🧩',
@@ -248,7 +219,6 @@ export const activityEmojis = [
     keywords: ['interlocking', 'puzzle', 'piece'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['puzzle', 'piece', 'game'],
   },
   {
     emoji: '♟️',
@@ -256,7 +226,6 @@ export const activityEmojis = [
     keywords: ['chess', 'expendable', 'pawn'],
     category: 'activities',
     color: '#000000',
-    tags: ['chess', 'pawn', 'game'],
   },
   {
     emoji: '🎰',
@@ -264,7 +233,6 @@ export const activityEmojis = [
     keywords: ['slot', 'machine', 'gambling'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['slots', 'casino', 'gambling'],
   },
   {
     emoji: '🎳',
@@ -272,7 +240,6 @@ export const activityEmojis = [
     keywords: ['sports', 'fun', 'bowling'],
     category: 'activities',
     color: '#F5F5F5',
-    tags: ['bowling', 'pins', 'strike'],
   },
 
   // Arts and crafts
@@ -282,7 +249,6 @@ export const activityEmojis = [
     keywords: ['art', 'colors', 'paint'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['art', 'palette', 'painting'],
   },
   {
     emoji: '🧵',
@@ -290,7 +256,6 @@ export const activityEmojis = [
     keywords: ['needle', 'sewing', 'spool'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['thread', 'sewing', 'craft'],
   },
   {
     emoji: '🧶',
@@ -298,7 +263,6 @@ export const activityEmojis = [
     keywords: ['ball', 'crochet', 'knit'],
     category: 'activities',
     color: '#FF69B4',
-    tags: ['yarn', 'knitting', 'craft'],
   },
   {
     emoji: '🎭',
@@ -306,7 +270,6 @@ export const activityEmojis = [
     keywords: ['theater', 'drama', 'masks'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['theater', 'drama', 'masks'],
   },
   {
     emoji: '🖼️',
@@ -314,7 +277,6 @@ export const activityEmojis = [
     keywords: ['art', 'museum', 'painting'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['picture', 'art', 'frame'],
   },
   {
     emoji: '🎬',
@@ -322,7 +284,6 @@ export const activityEmojis = [
     keywords: ['movie', 'film', 'record'],
     category: 'activities',
     color: '#000000',
-    tags: ['movie', 'film', 'action'],
   },
   {
     emoji: '🎤',
@@ -330,7 +291,6 @@ export const activityEmojis = [
     keywords: ['music', 'sound', 'karaoke'],
     category: 'activities',
     color: '#C0C0C0',
-    tags: ['microphone', 'singing', 'karaoke'],
   },
   {
     emoji: '🎧',
@@ -338,7 +298,6 @@ export const activityEmojis = [
     keywords: ['music', 'earphones', 'headphones'],
     category: 'activities',
     color: '#000000',
-    tags: ['headphones', 'music', 'audio'],
   },
   {
     emoji: '🎼',
@@ -346,7 +305,6 @@ export const activityEmojis = [
     keywords: ['music', 'clef', 'compose'],
     category: 'activities',
     color: '#000000',
-    tags: ['music', 'score', 'notes'],
   },
   {
     emoji: '🎵',
@@ -354,7 +312,6 @@ export const activityEmojis = [
     keywords: ['music', 'note', 'tone'],
     category: 'activities',
     color: '#000000',
-    tags: ['music', 'note', 'sound'],
   },
   {
     emoji: '🎶',
@@ -362,7 +319,6 @@ export const activityEmojis = [
     keywords: ['music', 'notes', 'score'],
     category: 'activities',
     color: '#000000',
-    tags: ['music', 'notes', 'melody'],
   },
 
   // Musical instruments
@@ -372,7 +328,6 @@ export const activityEmojis = [
     keywords: ['piano', 'instrument', 'compose'],
     category: 'activities',
     color: '#000000',
-    tags: ['piano', 'keyboard', 'music'],
   },
   {
     emoji: '🥁',
@@ -380,7 +335,6 @@ export const activityEmojis = [
     keywords: ['music', 'instrument', 'drumsticks'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['drum', 'percussion', 'music'],
   },
   {
     emoji: '🪘',
@@ -388,7 +342,6 @@ export const activityEmojis = [
     keywords: ['beat', 'conga', 'rhythm'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['drum', 'conga', 'percussion'],
   },
   {
     emoji: '🎷',
@@ -396,7 +349,6 @@ export const activityEmojis = [
     keywords: ['music', 'instrument', 'jazz'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['saxophone', 'jazz', 'music'],
   },
   {
     emoji: '🎺',
@@ -404,7 +356,6 @@ export const activityEmojis = [
     keywords: ['music', 'brass', 'instrument'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['trumpet', 'brass', 'music'],
   },
   {
     emoji: '🎸',
@@ -412,7 +363,6 @@ export const activityEmojis = [
     keywords: ['music', 'instrument', 'rock'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['guitar', 'rock', 'music'],
   },
   {
     emoji: '🪕',
@@ -420,7 +370,6 @@ export const activityEmojis = [
     keywords: ['music', 'stringed', 'instrument'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['banjo', 'country', 'music'],
   },
   {
     emoji: '🎻',
@@ -428,7 +377,6 @@ export const activityEmojis = [
     keywords: ['music', 'instrument', 'orchestra'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['violin', 'classical', 'music'],
   },
   {
     emoji: '🪗',
@@ -436,7 +384,6 @@ export const activityEmojis = [
     keywords: ['music', 'concertina', 'squeeze'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['accordion', 'music', 'folk'],
   },
 
   // Events
@@ -446,7 +393,6 @@ export const activityEmojis = [
     keywords: ['event', 'concert', 'pass'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['ticket', 'event', 'admission'],
   },
   {
     emoji: '🎟️',
@@ -454,7 +400,6 @@ export const activityEmojis = [
     keywords: ['sports', 'concert', 'ticket'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['tickets', 'admission', 'event'],
   },
   {
     emoji: '🎪',
@@ -462,7 +407,6 @@ export const activityEmojis = [
     keywords: ['festival', 'carnival', 'party'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['circus', 'tent', 'carnival'],
   },
   {
     emoji: '🤹',
@@ -470,7 +414,6 @@ export const activityEmojis = [
     keywords: ['juggle', 'balance', 'skill'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['juggling', 'circus', 'performance'],
   },
   {
     emoji: '🤹‍♂️',
@@ -478,7 +421,6 @@ export const activityEmojis = [
     keywords: ['juggle', 'balance', 'skill'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['juggling', 'man', 'circus'],
   },
   {
     emoji: '🤹‍♀️',
@@ -486,7 +428,6 @@ export const activityEmojis = [
     keywords: ['juggle', 'balance', 'skill'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['juggling', 'woman', 'circus'],
   },
 
   // Awards and competitions
@@ -496,7 +437,6 @@ export const activityEmojis = [
     keywords: ['award', 'contest', 'winner'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['trophy', 'winner', 'champion'],
   },
   {
     emoji: '🏅',
@@ -504,7 +444,6 @@ export const activityEmojis = [
     keywords: ['gold', 'winner', 'medal'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['medal', 'gold', 'winner'],
   },
   {
     emoji: '🥇',
@@ -512,7 +451,6 @@ export const activityEmojis = [
     keywords: ['gold', 'first', 'medal'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['first', 'gold', 'winner'],
   },
   {
     emoji: '🥈',
@@ -520,7 +458,6 @@ export const activityEmojis = [
     keywords: ['silver', 'second', 'medal'],
     category: 'activities',
     color: '#C0C0C0',
-    tags: ['second', 'silver', 'medal'],
   },
   {
     emoji: '🥉',
@@ -528,7 +465,6 @@ export const activityEmojis = [
     keywords: ['bronze', 'third', 'medal'],
     category: 'activities',
     color: '#CD7F32',
-    tags: ['third', 'bronze', 'medal'],
   },
 
   // Martial arts
@@ -538,7 +474,6 @@ export const activityEmojis = [
     keywords: ['sports', 'fighting', 'boxing'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['boxing', 'glove', 'fighting'],
   },
   {
     emoji: '🥋',
@@ -546,7 +481,6 @@ export const activityEmojis = [
     keywords: ['judo', 'karate', 'taekwondo'],
     category: 'activities',
     color: '#F5F5F5',
-    tags: ['martial-arts', 'uniform', 'karate'],
   },
 
   // Other activities
@@ -556,7 +490,6 @@ export const activityEmojis = [
     keywords: ['food', 'hobby', 'fishing'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['fishing', 'pole', 'hobby'],
   },
   {
     emoji: '🤿',
@@ -564,7 +497,6 @@ export const activityEmojis = [
     keywords: ['sports', 'ocean', 'scuba'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['diving', 'snorkel', 'mask'],
   },
   {
     emoji: '🎽',
@@ -572,7 +504,6 @@ export const activityEmojis = [
     keywords: ['sports', 'running', 'athletics'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['running', 'shirt', 'athletics'],
   },
   {
     emoji: '🛹',
@@ -580,7 +511,6 @@ export const activityEmojis = [
     keywords: ['board', 'skateboard', 'sport'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['skateboard', 'skating', 'sport'],
   },
   {
     emoji: '🛼',
@@ -588,7 +518,6 @@ export const activityEmojis = [
     keywords: ['sports', 'footwear', 'skate'],
     category: 'activities',
     color: '#FF69B4',
-    tags: ['roller-skate', 'skating', 'retro'],
   },
   {
     emoji: '🪀',
@@ -596,7 +525,6 @@ export const activityEmojis = [
     keywords: ['toy', 'fluctuate', 'yoyo'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['yo-yo', 'toy', 'trick'],
   },
 
   // Exercise and fitness
@@ -606,7 +534,6 @@ export const activityEmojis = [
     keywords: ['sports', 'training', 'exercise'],
     category: 'activities',
     color: '#696969',
-    tags: ['weightlifting', 'gym', 'exercise'],
   },
   {
     emoji: '🏋️‍♂️',
@@ -614,7 +541,6 @@ export const activityEmojis = [
     keywords: ['sports', 'training', 'exercise'],
     category: 'activities',
     color: '#696969',
-    tags: ['weightlifting', 'man', 'gym'],
   },
   {
     emoji: '🏋️‍♀️',
@@ -622,7 +548,6 @@ export const activityEmojis = [
     keywords: ['sports', 'training', 'exercise'],
     category: 'activities',
     color: '#696969',
-    tags: ['weightlifting', 'woman', 'gym'],
   },
   {
     emoji: '🤸',
@@ -630,7 +555,6 @@ export const activityEmojis = [
     keywords: ['gymnastics', 'cartwheel', 'person'],
     category: 'activities',
     color: '#FF69B4',
-    tags: ['gymnastics', 'cartwheel', 'flexible'],
   },
   {
     emoji: '🤸‍♂️',
@@ -638,7 +562,6 @@ export const activityEmojis = [
     keywords: ['gymnastics', 'cartwheel', 'man'],
     category: 'activities',
     color: '#87CEEB',
-    tags: ['gymnastics', 'man', 'cartwheel'],
   },
   {
     emoji: '🤸‍♀️',
@@ -646,7 +569,6 @@ export const activityEmojis = [
     keywords: ['gymnastics', 'cartwheel', 'woman'],
     category: 'activities',
     color: '#FF69B4',
-    tags: ['gymnastics', 'woman', 'cartwheel'],
   },
   {
     emoji: '⛹️',
@@ -654,7 +576,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'basketball'],
     category: 'activities',
     color: '#FF8C00',
-    tags: ['basketball', 'dribbling', 'sport'],
   },
   {
     emoji: '⛹️‍♂️',
@@ -662,7 +583,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'basketball'],
     category: 'activities',
     color: '#FF8C00',
-    tags: ['basketball', 'man', 'dribbling'],
   },
   {
     emoji: '⛹️‍♀️',
@@ -670,7 +590,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'basketball'],
     category: 'activities',
     color: '#FF8C00',
-    tags: ['basketball', 'woman', 'dribbling'],
   },
   {
     emoji: '🤺',
@@ -678,7 +597,6 @@ export const activityEmojis = [
     keywords: ['sports', 'fencing', 'sword'],
     category: 'activities',
     color: '#C0C0C0',
-    tags: ['fencing', 'sword', 'sport'],
   },
   {
     emoji: '🤼',
@@ -686,7 +604,6 @@ export const activityEmojis = [
     keywords: ['sports', 'wrestling', 'wrestle'],
     category: 'activities',
     color: '#DAA520',
-    tags: ['wrestling', 'sport', 'grappling'],
   },
   {
     emoji: '🤼‍♂️',
@@ -694,7 +611,6 @@ export const activityEmojis = [
     keywords: ['sports', 'wrestling', 'men'],
     category: 'activities',
     color: '#DAA520',
-    tags: ['wrestling', 'men', 'sport'],
   },
   {
     emoji: '🤼‍♀️',
@@ -702,7 +618,6 @@ export const activityEmojis = [
     keywords: ['sports', 'wrestling', 'women'],
     category: 'activities',
     color: '#DAA520',
-    tags: ['wrestling', 'women', 'sport'],
   },
   {
     emoji: '🤽',
@@ -710,7 +625,6 @@ export const activityEmojis = [
     keywords: ['sports', 'water', 'polo'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['water-polo', 'swimming', 'sport'],
   },
   {
     emoji: '🤽‍♂️',
@@ -718,7 +632,6 @@ export const activityEmojis = [
     keywords: ['sports', 'water', 'polo'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['water-polo', 'man', 'swimming'],
   },
   {
     emoji: '🤽‍♀️',
@@ -726,7 +639,6 @@ export const activityEmojis = [
     keywords: ['sports', 'water', 'polo'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['water-polo', 'woman', 'swimming'],
   },
   {
     emoji: '🤾',
@@ -734,7 +646,6 @@ export const activityEmojis = [
     keywords: ['sports', 'handball', 'ball'],
     category: 'activities',
     color: '#FF4500',
-    tags: ['handball', 'sport', 'throwing'],
   },
   {
     emoji: '🤾‍♂️',
@@ -742,7 +653,6 @@ export const activityEmojis = [
     keywords: ['sports', 'handball', 'man'],
     category: 'activities',
     color: '#FF4500',
-    tags: ['handball', 'man', 'sport'],
   },
   {
     emoji: '🤾‍♀️',
@@ -750,7 +660,6 @@ export const activityEmojis = [
     keywords: ['sports', 'handball', 'woman'],
     category: 'activities',
     color: '#FF4500',
-    tags: ['handball', 'woman', 'sport'],
   },
   {
     emoji: '🧘',
@@ -758,7 +667,6 @@ export const activityEmojis = [
     keywords: ['yoga', 'meditation', 'zen'],
     category: 'activities',
     color: '#DDA0DD',
-    tags: ['yoga', 'meditation', 'lotus'],
   },
   {
     emoji: '🧘‍♂️',
@@ -766,7 +674,6 @@ export const activityEmojis = [
     keywords: ['yoga', 'meditation', 'man'],
     category: 'activities',
     color: '#87CEEB',
-    tags: ['yoga', 'man', 'meditation'],
   },
   {
     emoji: '🧘‍♀️',
@@ -774,7 +681,6 @@ export const activityEmojis = [
     keywords: ['yoga', 'meditation', 'woman'],
     category: 'activities',
     color: '#DDA0DD',
-    tags: ['yoga', 'woman', 'meditation'],
   },
 
   // Outdoor activities
@@ -784,7 +690,6 @@ export const activityEmojis = [
     keywords: ['photo', 'camping', 'tent'],
     category: 'activities',
     color: '#228B22',
-    tags: ['camping', 'outdoors', 'tent'],
   },
   {
     emoji: '🧗',
@@ -792,7 +697,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'athletics'],
     category: 'activities',
     color: '#696969',
-    tags: ['climbing', 'rock-climbing', 'sport'],
   },
   {
     emoji: '🧗‍♂️',
@@ -800,7 +704,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'athletics'],
     category: 'activities',
     color: '#696969',
-    tags: ['climbing', 'man', 'rock-climbing'],
   },
   {
     emoji: '🧗‍♀️',
@@ -808,7 +711,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'athletics'],
     category: 'activities',
     color: '#696969',
-    tags: ['climbing', 'woman', 'rock-climbing'],
   },
   {
     emoji: '🏇',
@@ -816,7 +718,6 @@ export const activityEmojis = [
     keywords: ['animal', 'betting', 'competition'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['horse-racing', 'jockey', 'sport'],
   },
   {
     emoji: '🏊',
@@ -824,7 +725,6 @@ export const activityEmojis = [
     keywords: ['sports', 'exercise', 'human'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['swimming', 'pool', 'sport'],
   },
   {
     emoji: '🏊‍♂️',
@@ -832,7 +732,6 @@ export const activityEmojis = [
     keywords: ['sports', 'exercise', 'human'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['swimming', 'man', 'pool'],
   },
   {
     emoji: '🏊‍♀️',
@@ -840,7 +739,6 @@ export const activityEmojis = [
     keywords: ['sports', 'exercise', 'human'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['swimming', 'woman', 'pool'],
   },
   {
     emoji: '🏄',
@@ -848,7 +746,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'beach'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['surfing', 'ocean', 'sport'],
   },
   {
     emoji: '🏄‍♂️',
@@ -856,7 +753,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'beach'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['surfing', 'man', 'ocean'],
   },
   {
     emoji: '🏄‍♀️',
@@ -864,7 +760,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'beach'],
     category: 'activities',
     color: '#00CED1',
-    tags: ['surfing', 'woman', 'ocean'],
   },
   {
     emoji: '🚣',
@@ -872,7 +767,6 @@ export const activityEmojis = [
     keywords: ['sports', 'hobby', 'water'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['rowing', 'boat', 'sport'],
   },
   {
     emoji: '🚣‍♂️',
@@ -880,7 +774,6 @@ export const activityEmojis = [
     keywords: ['sports', 'hobby', 'water'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['rowing', 'man', 'boat'],
   },
   {
     emoji: '🚣‍♀️',
@@ -888,7 +781,6 @@ export const activityEmojis = [
     keywords: ['sports', 'hobby', 'water'],
     category: 'activities',
     color: '#8B4513',
-    tags: ['rowing', 'woman', 'boat'],
   },
   {
     emoji: '🚴',
@@ -896,7 +788,6 @@ export const activityEmojis = [
     keywords: ['sports', 'bike', 'exercise'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['cycling', 'bike', 'sport'],
   },
   {
     emoji: '🚴‍♂️',
@@ -904,7 +795,6 @@ export const activityEmojis = [
     keywords: ['sports', 'bike', 'exercise'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['cycling', 'man', 'bike'],
   },
   {
     emoji: '🚴‍♀️',
@@ -912,7 +802,6 @@ export const activityEmojis = [
     keywords: ['sports', 'bike', 'exercise'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['cycling', 'woman', 'bike'],
   },
   {
     emoji: '🚵',
@@ -920,7 +809,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'race'],
     category: 'activities',
     color: '#228B22',
-    tags: ['mountain-biking', 'extreme', 'sport'],
   },
   {
     emoji: '🚵‍♂️',
@@ -928,7 +816,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'race'],
     category: 'activities',
     color: '#228B22',
-    tags: ['mountain-biking', 'man', 'extreme'],
   },
   {
     emoji: '🚵‍♀️',
@@ -936,7 +823,6 @@ export const activityEmojis = [
     keywords: ['sports', 'human', 'race'],
     category: 'activities',
     color: '#228B22',
-    tags: ['mountain-biking', 'woman', 'extreme'],
   },
 
   // Seasonal and celebrations
@@ -946,7 +832,6 @@ export const activityEmojis = [
     keywords: ['halloween', 'pumpkin', 'creepy'],
     category: 'activities',
     color: '#FF8C00',
-    tags: ['halloween', 'pumpkin', 'spooky'],
   },
   {
     emoji: '🎄',
@@ -954,7 +839,6 @@ export const activityEmojis = [
     keywords: ['festival', 'vacation', 'december'],
     category: 'activities',
     color: '#228B22',
-    tags: ['christmas', 'tree', 'holiday'],
   },
   {
     emoji: '🎆',
@@ -962,7 +846,6 @@ export const activityEmojis = [
     keywords: ['photo', 'festival', 'carnival'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['fireworks', 'celebration', 'new-year'],
   },
   {
     emoji: '🎇',
@@ -970,7 +853,6 @@ export const activityEmojis = [
     keywords: ['stars', 'night', 'shine'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['sparkler', 'firework', 'celebration'],
   },
   {
     emoji: '🧨',
@@ -978,7 +860,6 @@ export const activityEmojis = [
     keywords: ['dynamite', 'boom', 'explode'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['firecracker', 'explosive', 'celebration'],
   },
   {
     emoji: '✨',
@@ -986,7 +867,6 @@ export const activityEmojis = [
     keywords: ['stars', 'shine', 'shiny'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['sparkle', 'magic', 'shiny'],
   },
   {
     emoji: '🎈',
@@ -994,7 +874,6 @@ export const activityEmojis = [
     keywords: ['party', 'celebration', 'birthday'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['balloon', 'party', 'celebration'],
   },
   {
     emoji: '🎉',
@@ -1002,7 +881,6 @@ export const activityEmojis = [
     keywords: ['party', 'congratulations', 'birthday'],
     category: 'activities',
     color: '#FFD700',
-    tags: ['party', 'celebration', 'confetti'],
   },
   {
     emoji: '🎊',
@@ -1010,7 +888,6 @@ export const activityEmojis = [
     keywords: ['festival', 'party', 'birthday'],
     category: 'activities',
     color: '#FF69B4',
-    tags: ['confetti', 'party', 'celebration'],
   },
   {
     emoji: '🎋',
@@ -1018,7 +895,6 @@ export const activityEmojis = [
     keywords: ['plant', 'nature', 'branch'],
     category: 'activities',
     color: '#228B22',
-    tags: ['tanabata', 'japanese', 'wish'],
   },
   {
     emoji: '🎍',
@@ -1026,7 +902,6 @@ export const activityEmojis = [
     keywords: ['festival', 'plant', 'nature'],
     category: 'activities',
     color: '#228B22',
-    tags: ['decoration', 'japanese', 'new-year'],
   },
   {
     emoji: '🎎',
@@ -1034,7 +909,6 @@ export const activityEmojis = [
     keywords: ['japanese', 'toy', 'kimono'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['dolls', 'japanese', 'festival'],
   },
   {
     emoji: '🎏',
@@ -1042,7 +916,6 @@ export const activityEmojis = [
     keywords: ['fish', 'japanese', 'koinobori'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['koinobori', 'japanese', 'festival'],
   },
   {
     emoji: '🎐',
@@ -1050,7 +923,6 @@ export const activityEmojis = [
     keywords: ['nature', 'ding', 'spring'],
     category: 'activities',
     color: '#87CEEB',
-    tags: ['wind-chime', 'summer', 'japanese'],
   },
   {
     emoji: '🎑',
@@ -1058,7 +930,6 @@ export const activityEmojis = [
     keywords: ['photo', 'japan', 'asia'],
     category: 'activities',
     color: '#4169E1',
-    tags: ['moon-viewing', 'japanese', 'autumn'],
   },
   {
     emoji: '🧧',
@@ -1066,7 +937,6 @@ export const activityEmojis = [
     keywords: ['gift', 'money', 'luck'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['red-envelope', 'chinese', 'luck'],
   },
   {
     emoji: '🎀',
@@ -1074,7 +944,6 @@ export const activityEmojis = [
     keywords: ['decoration', 'pink', 'gift'],
     category: 'activities',
     color: '#FF69B4',
-    tags: ['ribbon', 'bow', 'gift'],
   },
   {
     emoji: '🎁',
@@ -1082,7 +951,6 @@ export const activityEmojis = [
     keywords: ['present', 'birthday', 'christmas'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['gift', 'present', 'wrapped'],
   },
   {
     emoji: '🪅',
@@ -1090,7 +958,6 @@ export const activityEmojis = [
     keywords: ['celebration', 'party', 'candy'],
     category: 'activities',
     color: '#FF69B4',
-    tags: ['pinata', 'party', 'mexican'],
   },
   {
     emoji: '🪆',
@@ -1098,6 +965,5 @@ export const activityEmojis = [
     keywords: ['matryoshka', 'russia', 'doll'],
     category: 'activities',
     color: '#DC143C',
-    tags: ['matryoshka', 'russian', 'dolls'],
   },
-] as const satisfies readonly Omit<Emoji, 'sentiment'>[];
+] as const satisfies readonly Emoji[];
