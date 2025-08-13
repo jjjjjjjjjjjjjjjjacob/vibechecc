@@ -1,8 +1,8 @@
-# viberatr Convex Backend
+# vibechecc Convex Backend
 
 > **Note:** For monorepo setup, scripts, and infrastructure, see the [root README.md](../../README.md).
 
-This directory contains the Convex backend functions for the viberatr application.
+This directory contains the Convex backend functions for the vibechecc application.
 
 ## Overview
 

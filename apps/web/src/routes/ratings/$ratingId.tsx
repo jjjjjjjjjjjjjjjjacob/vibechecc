@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 
 export const Route = createFileRoute('/ratings/$ratingId')({
   beforeLoad: async ({ params, context }) => {

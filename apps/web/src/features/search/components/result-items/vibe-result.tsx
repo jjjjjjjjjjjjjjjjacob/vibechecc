@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import type { VibeSearchResult } from '@viberatr/types';
+import type { VibeSearchResult } from '@vibechecc/types';
 
 interface VibeResultProps {
   result: VibeSearchResult;

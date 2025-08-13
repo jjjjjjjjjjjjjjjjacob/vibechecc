@@ -3,7 +3,7 @@ import { convexTest, type TestConvex } from 'convex-test';
 import { api, internal } from '../_generated/api';
 import schema from '../schema';
 import { modules } from '../../vitest.setup';
-import type { Notification } from '@viberatr/types';
+import type { Notification } from '@vibechecc/types';
 
 describe('Notifications', () => {
   let t: TestConvex<typeof schema>;

@@ -1,4 +1,4 @@
-# viberatr Web App
+# vibechecc Web App
 
 > **Note:** For monorepo setup, scripts, and infrastructure, see the [root README.md](../../README.md).
 
@@ -10,7 +10,7 @@ A modern social web application built with TanStack Start where users can share 
 
    ```bash
    git clone [repository-url]
-   cd viberatr
+   cd vibechecc
    bun install
    ```
 
@@ -234,7 +234,7 @@ refactor(components): organize components by feature
 // Example: emoji-rating-display.tsx
 import React from 'react';
 import { cn } from '@/utils/tailwind-utils';
-import type { EmojiRating } from '@viberatr/types';
+import type { EmojiRating } from '@vibechecc/types';
 
 interface EmojiRatingDisplayProps {
   ratings: EmojiRating[];
@@ -275,9 +275,9 @@ import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 
 // Types and utilities
-import type { User, Vibe } from '@viberatr/types';
+import type { User, Vibe } from '@vibechecc/types';
 import { cn } from '@/utils/tailwind-utils';
-import { computeUserDisplayName } from '@viberatr/utils';
+import { computeUserDisplayName } from '@vibechecc/utils';
 ```
 
 ### 4. Component with Variants
@@ -766,4 +766,4 @@ import { EmojiRatingDisplay } from '@/features/ratings/components';
 - [Tailwind CSS](https://tailwindcss.com)
 - [Vitest Testing](https://vitest.dev)
 
-Thank you for contributing to viberatr! 🎉
+Thank you for contributing to vibechecc! 🎉

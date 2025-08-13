@@ -78,8 +78,8 @@ jobs:
         run: |
           terraform workspace select ${{ steps.env.outputs.workspace }} || terraform workspace new ${{ steps.env.outputs.workspace }}
 
-      - name: Get DNS record IDs and import if they exist
-        id: dns_records
+      - name: Import existing Cloudflare resources
+        id: import_resources
         working-directory: terraform
         env:
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -88,86 +88,11 @@ jobs:
           TF_VAR_cloudflare_zone: ${{ vars.CLOUDFLARE_ZONE }}
           TF_VAR_environment: ${{ inputs.environment }}
           TF_VAR_pr_number: ${{ inputs.pr_number }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # Set prefix based on environment
-          PREFIX=""
-          if [ "${{ inputs.environment }}" = "ephemeral" ]; then
-            PREFIX="pr-${{ inputs.pr_number }}"
-          elif [ "${{ inputs.environment }}" = "production" ]; then
-            PREFIX="prod"
-          elif [ "${{ inputs.environment }}" = "development" ]; then
-            PREFIX="dev"
-          fi
-          if [ "$PREFIX" = "" ]; then
-            echo "Error: Invalid environment: ${{ inputs.environment }}"
-            exit 1
-          fi
-
-          # Get DNS records from Cloudflare API
-          curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" | jq '.' > dns_output.json
-
-          # Get Workers scripts from Cloudflare API
-          curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" | jq '.' > workers_output.json
-
-          # Extract A record ID for viberatr.io
-          A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
-
-          # Extract AAAA record ID for viberatr.io
-          AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
-
-          # Extract CNAME record ID for viberatr.io
-          CNAME_RECORD_ID=$(jq -r '.result[] | select(.type == "CNAME" and .name == "$PREFIX") | .id' dns_output.json)
-
-          # Extract Worker script name for viberatr-{prefix}-frontend
-          if [ "${{ inputs.environment }}" = "ephemeral" ]; then
-            WORKER_SCRIPT_NAME="viberatr-ephemeral-$PREFIX-frontend"
-          else
-            WORKER_SCRIPT_NAME="viberatr-${{ inputs.environment }}-frontend"
-          fi
-          WORKER_SCRIPT_EXISTS=$(jq -r --arg script_name "$WORKER_SCRIPT_NAME" '.result[] | select(.id == $script_name) | .id' workers_output.json)
-
-          # Set outputs for potential use in other steps
-          echo "a_record_id=$A_RECORD_ID" >> $GITHUB_OUTPUT
-          echo "aaaa_record_id=$AAAA_RECORD_ID" >> $GITHUB_OUTPUT
-          echo "cname_record_id=$CNAME_RECORD_ID" >> $GITHUB_OUTPUT
-          echo "worker_script_name=$WORKER_SCRIPT_EXISTS" >> $GITHUB_OUTPUT
-
-          # Import A record if it exists
-          if [ "$A_RECORD_ID" != "null" ] && [ -n "$A_RECORD_ID" ]; then
-            echo "Importing A record with ID: $A_RECORD_ID"
-            terraform import module.viberatr_worker.cloudflare_dns_record.frontend_a ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
-          else
-            echo "No A record found to import"
-          fi
-
-          # Import AAAA record if it exists
-          if [ "$AAAA_RECORD_ID" != "null" ] && [ -n "$AAAA_RECORD_ID" ]; then
-            echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
-            terraform import module.viberatr_worker.cloudflare_dns_record.frontend_aaaa ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
-          else
-            echo "No AAAA record found to import"
-          fi
-
-          # Import CNAME record if it exists
-
-          if [ "$CNAME_RECORD_ID" != "null" ] && [ -n "$CNAME_RECORD_ID" ]; then
-            echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
-            terraform import module.viberatr_worker.cloudflare_dns_record.frontend_cname ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
-          else
-            echo "No CNAME record found to import"
-          fi
-
-          # Import Worker script if it exists
-          if [ "$WORKER_SCRIPT_EXISTS" != "null" ] && [ -n "$WORKER_SCRIPT_EXISTS" ]; then
-            echo "Importing Worker script: $WORKER_SCRIPT_EXISTS"
-            terraform import module.viberatr_worker.cloudflare_workers_script.frontend ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$WORKER_SCRIPT_EXISTS || true
-          else
-            echo "No Worker script found to import"
-          fi
+          chmod +x ./import-existing-resources.sh
+          ./import-existing-resources.sh
 
       - name: Terraform Apply
         working-directory: terraform
@@ -226,7 +151,7 @@ jobs:
 
       # Build and deploy Convex backend
       - name: Build Convex Backend
-        run: bun nx build @viberatr/convex
+        run: bun nx build @vibechecc/convex
 
       - name: Deploy Convex
         working-directory: apps/convex
@@ -276,7 +201,7 @@ jobs:
           VITE_POSTHOG_API_HOST: https://us.i.posthog.com
           VITE_POSTHOG_PROJECT_ID: ${{ secrets.VITE_POSTHOG_PROJECT_ID }}
           VITE_POSTHOG_REGION: 'US Cloud'
-        run: bun nx build @viberatr/web
+        run: bun nx build @vibechecc/web
 
       - name: Add Environment to Wrangler Config
         if: inputs.environment == 'ephemeral'
@@ -285,7 +210,7 @@ jobs:
           cat >> wrangler.toml << EOF
 
           [env.pr-${{ inputs.pr_number }}]
-          name = "viberatr-pr-${{ inputs.pr_number }}-frontend"
+          name = "vibechecc-pr-${{ inputs.pr_number }}-web"
           EOF
 
       - name: Deploy to Cloudflare Workers

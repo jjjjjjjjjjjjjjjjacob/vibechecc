@@ -11,7 +11,7 @@ import {
 } from '@convex-dev/react-query';
 import { useConvex } from 'convex/react';
 import type { FunctionReference, FunctionArgs } from 'convex/server';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 // import { useAuth } from '@clerk/tanstack-react-start';
 
 // CONVEX INFINITE QUERY HELPER
@@ -32,7 +32,7 @@ const _convexInfiniteQuery = <
   };
 };
 
-// viberatr QUERIES
+// vibechecc QUERIES
 
 // Query to get all vibes (simple version for performance)
 export function useVibes() {

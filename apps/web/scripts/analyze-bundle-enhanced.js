@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Enhanced Bundle Analysis Script for viberatr
+ * Enhanced Bundle Analysis Script for vibechecc
  * Provides detailed bundle size analysis, dependency breakdown, and optimization recommendations
  */
 
@@ -522,7 +522,7 @@ function showActionableRecommendations() {
 
 function main() {
   console.log(
-    `${colors.bright}${colors.cyan}🎯 Enhanced Bundle Analysis for viberatr${colors.reset}\n`
+    `${colors.bright}${colors.cyan}🎯 Enhanced Bundle Analysis for vibechecc${colors.reset}\n`
   );
   console.log(
     `${colors.dim}Analyzing build output and providing optimization recommendations...${colors.reset}\n`

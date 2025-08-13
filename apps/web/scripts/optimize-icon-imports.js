@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Icon Import Optimizer for viberatr
+ * Icon Import Optimizer for vibechecc
  *
  * This script automatically replaces all lucide-react imports with optimized
  * imports from our custom icon barrel to reduce bundle size dramatically.

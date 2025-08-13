@@ -43,24 +43,24 @@ describe('environment access utilities', () => {
     });
 
     it('returns null for main domain', () => {
-      mockLocation('viberatr.io');
+      mockLocation('vibechecc.io');
       expect(getCurrentSubdomain()).toBeNull();
     });
 
     it('returns subdomain for dev environment', () => {
-      mockLocation('dev.viberatr.io');
+      mockLocation('dev.vibechecc.io');
       expect(getCurrentSubdomain()).toBe('dev');
     });
 
     it('returns subdomain for PR environment', () => {
-      mockLocation('pr-123.viberatr.io');
+      mockLocation('pr-123.vibechecc.io');
       expect(getCurrentSubdomain()).toBe('pr-123');
     });
   });
 
   describe('getEnvironmentInfo', () => {
     it('identifies dev environment correctly', () => {
-      mockLocation('dev.viberatr.io');
+      mockLocation('dev.vibechecc.io');
       const info = getEnvironmentInfo();
 
       expect(info.subdomain).toBe('dev');
@@ -70,7 +70,7 @@ describe('environment access utilities', () => {
     });
 
     it('identifies ephemeral environment correctly', () => {
-      mockLocation('pr-456.viberatr.io');
+      mockLocation('pr-456.vibechecc.io');
       const info = getEnvironmentInfo();
 
       expect(info.subdomain).toBe('pr-456');
@@ -80,7 +80,7 @@ describe('environment access utilities', () => {
     });
 
     it('identifies production environment correctly', () => {
-      mockLocation('viberatr.io');
+      mockLocation('vibechecc.io');
       const info = getEnvironmentInfo();
 
       expect(info.subdomain).toBeNull();
@@ -109,12 +109,12 @@ describe('environment access utilities', () => {
 
   describe('canAccessCurrentEnvironment', () => {
     it('allows access to production environment', () => {
-      mockLocation('viberatr.io');
+      mockLocation('vibechecc.io');
       expect(canAccessCurrentEnvironment()).toBe(true);
     });
 
     it('restricts access to dev environment without feature flag', () => {
-      mockLocation('dev.viberatr.io');
+      mockLocation('dev.vibechecc.io');
       mockAnalytics.isInitialized.mockReturnValue(true);
       mockAnalytics.isFeatureEnabled.mockReturnValue(false);
 
@@ -122,7 +122,7 @@ describe('environment access utilities', () => {
     });
 
     it('allows access to dev environment with feature flag', () => {
-      mockLocation('dev.viberatr.io');
+      mockLocation('dev.vibechecc.io');
       mockAnalytics.isInitialized.mockReturnValue(true);
       mockAnalytics.isFeatureEnabled.mockReturnValue(true);
 
@@ -132,13 +132,13 @@ describe('environment access utilities', () => {
 
   describe('getAccessDenialMessage', () => {
     it('returns dev environment message', () => {
-      mockLocation('dev.viberatr.io');
+      mockLocation('dev.vibechecc.io');
       const message = getAccessDenialMessage();
       expect(message).toContain('development environment');
     });
 
     it('returns ephemeral environment message', () => {
-      mockLocation('pr-123.viberatr.io');
+      mockLocation('pr-123.vibechecc.io');
       const message = getAccessDenialMessage();
       expect(message).toContain('preview environment');
     });

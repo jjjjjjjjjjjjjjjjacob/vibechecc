@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -15,7 +15,7 @@ import type {
   TagSearchResult,
   ReviewSearchResult,
   Vibe,
-} from '@viberatr/types';
+} from '@vibechecc/types';
 import { Hash, Users, MessageSquare } from '@/components/ui/icons';
 
 interface SearchResultListCardProps {

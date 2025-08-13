@@ -1,7 +1,7 @@
 import { CommandItem } from '@/components/ui/command';
 import { Plus, User, Settings, LogOut, Search } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
-import type { ActionSearchResult } from '@viberatr/types';
+import type { ActionSearchResult } from '@vibechecc/types';
 
 interface ActionResultProps {
   result: ActionSearchResult;

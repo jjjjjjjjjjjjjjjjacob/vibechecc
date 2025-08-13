@@ -1,6 +1,6 @@
-# Web Development Learnings - viberatr
+# Web Development Learnings - vibechecc
 
-This document captures learnings, patterns, and best practices discovered during web development tasks in the viberatr project.
+This document captures learnings, patterns, and best practices discovered during web development tasks in the vibechecc project.
 
 ## Personalized Feed Enhancement Patterns
 
@@ -335,14 +335,14 @@ if (
 
 ```typescript
 useEffect(() => {
-  const savedFilter = localStorage.getItem('viberatr-notification-filter');
+  const savedFilter = localStorage.getItem('vibechecc-notification-filter');
   if (savedFilter && filterOptions.includes(savedFilter)) {
     setActiveFilter(savedFilter as NotificationFilterType);
   }
 }, []);
 
 useEffect(() => {
-  localStorage.setItem('viberatr-notification-filter', activeFilter);
+  localStorage.setItem('vibechecc-notification-filter', activeFilter);
 }, [activeFilter]);
 ```
 
@@ -527,7 +527,7 @@ useEffect(() => {
 
 ### Debugging Tips
 
-1. **Backend Type Mismatches**: Always check the actual types from @viberatr/types package
+1. **Backend Type Mismatches**: Always check the actual types from @vibechecc/types package
 2. **Infinite Query Issues**: Verify the response structure matches expected pagination format
 3. **Mobile Testing**: Use browser dev tools responsive mode to test drawer behavior
 4. **Query Invalidation**: Ensure mutations properly invalidate notification queries for real-time updates

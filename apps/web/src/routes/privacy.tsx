@@ -6,9 +6,9 @@ export const Route = createFileRoute('/privacy')({
   head: () => ({
     meta: [
       ...seo({
-        title: 'privacy policy | viberatr',
+        title: 'privacy policy | vibechecc',
         description:
-          'privacy policy and data protection practices for viberatr platform',
+          'privacy policy and data protection practices for vibechecc platform',
       }),
     ],
   }),
@@ -28,10 +28,10 @@ function PrivacyPage() {
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">1. introduction</h2>
           <p className="mb-4">
-            at viberatr, we respect your privacy and are committed to protecting
-            your personal information. this privacy policy explains how we
-            collect, use, share, and protect your information when you use our
-            platform.
+            at vibechecc, we respect your privacy and are committed to
+            protecting your personal information. this privacy policy explains
+            how we collect, use, share, and protect your information when you
+            use our platform.
           </p>
         </section>
 
@@ -81,7 +81,7 @@ function PrivacyPage() {
             <ul className="list-disc space-y-2 pl-6">
               <li>
                 <strong>service provision:</strong> to operate and maintain the
-                viberatr platform
+                vibechecc platform
               </li>
               <li>
                 <strong>personalization:</strong> to customize your experience
@@ -288,7 +288,7 @@ function PrivacyPage() {
             11. children's privacy
           </h2>
           <p className="mb-4">
-            viberatr is not intended for children under 13. we do not knowingly
+            vibechecc is not intended for children under 13. we do not knowingly
             collect personal information from children under 13. if we discover
             we have collected such information, we will delete it promptly.
           </p>
@@ -319,7 +319,7 @@ function PrivacyPage() {
           <p className="mb-4">
             we may update this privacy policy from time to time. we will notify
             you of material changes by posting the new policy on our platform
-            and updating the effective date. your continued use of viberatr
+            and updating the effective date. your continued use of vibechecc
             after changes indicates acceptance of the updated policy.
           </p>
         </section>

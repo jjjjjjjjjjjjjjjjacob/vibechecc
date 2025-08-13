@@ -4,7 +4,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useIsTablet } from '@/hooks/use-tablet';
-import type { Vibe } from '@viberatr/types';
+import type { Vibe } from '@vibechecc/types';
 import { cn } from '@/utils/tailwind-utils';
 
 interface VirtualMasonryFeedProps {

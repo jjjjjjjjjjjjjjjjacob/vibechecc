@@ -45,9 +45,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-      '@viberatr/convex': resolve(__dirname, '../convex'),
-      '@viberatr/types': resolve(__dirname, '../../packages/types/src'),
-      '@viberatr/utils': resolve(__dirname, '../../packages/utils/src'),
+      '@vibechecc/convex': resolve(__dirname, '../convex'),
+      '@vibechecc/types': resolve(__dirname, '../../packages/types/src'),
+      '@vibechecc/utils': resolve(__dirname, '../../packages/utils/src'),
     },
   },
 });

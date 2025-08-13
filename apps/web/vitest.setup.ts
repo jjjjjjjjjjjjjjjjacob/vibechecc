@@ -154,7 +154,7 @@ const api = {
   },
 };
 
-vi.mock('@viberatr/convex', () => ({
+vi.mock('@vibechecc/convex', () => ({
   api,
 }));
 

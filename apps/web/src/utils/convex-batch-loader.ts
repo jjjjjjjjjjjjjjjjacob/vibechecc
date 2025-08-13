@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { api as _api } from '@viberatr/convex';
+import { api as _api } from '@vibechecc/convex';
 import type { FunctionReference } from 'convex/server';
 import { useConvex, type ConvexReactClient } from 'convex/react';
 

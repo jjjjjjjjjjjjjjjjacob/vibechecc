@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NotificationItem } from './notification-item';
-import type { Notification } from '@viberatr/types';
+import type { Notification } from '@vibechecc/types';
 import { formatDistanceToNow } from '@/utils/date-utils';
 
 // Mock the queries

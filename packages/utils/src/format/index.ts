@@ -1,5 +1,5 @@
 /**
- * Formatting utilities for the viberatr platform
+ * Formatting utilities for the vibechecc platform
  */
 
 export * from './date';
