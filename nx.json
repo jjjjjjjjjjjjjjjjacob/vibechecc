@@ -49,6 +49,16 @@
       "conventionalCommits": true,
       "fallbackCurrentVersionResolver": "disk"
     },
+    "conventionalCommits": {
+      "types": {
+        "__INVALID__": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Other Changes"
+          }
+        }
+      }
+    },
     "changelog": {
       "workspaceChangelog": {
         "createRelease": "github"
