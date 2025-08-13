@@ -13,7 +13,7 @@ import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-p
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { useUserRatings } from '@/queries';
 import type { User, Rating } from '@viberatr/types';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare } from '@/components/ui/icons';
 
 interface UserReviewsSectionProps {
   user: User;

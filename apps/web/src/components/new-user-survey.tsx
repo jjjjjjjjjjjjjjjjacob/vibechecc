@@ -23,7 +23,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { X, Circle } from 'lucide-react';
+import { X, Circle } from '@/components/ui/icons';
 
 interface NewUserSurveyProps {
   onComplete?: () => void;

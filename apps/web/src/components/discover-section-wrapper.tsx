@@ -5,7 +5,7 @@ import {
   type RatingDisplayMode,
 } from '@/components/vibe-category-row';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle } from '@/components/ui/icons';
 import type { Vibe } from '@/types';
 
 // Skeleton for lazy-loaded components

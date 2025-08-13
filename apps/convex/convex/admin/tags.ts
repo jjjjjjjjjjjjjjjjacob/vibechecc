@@ -43,7 +43,8 @@ export const getAllTags = query({
     }
 
     const sortedTags = tags.sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: string | number;
+      let bVal: string | number;
 
       switch (sortBy) {
         case 'name':

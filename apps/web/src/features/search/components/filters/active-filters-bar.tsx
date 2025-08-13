@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X, Star, Calendar, Tag } from 'lucide-react';
+import { X, Star, Calendar, Tag } from '@/components/ui/icons';
 import type { SearchFilters } from '@viberatr/types';
 
 interface ActiveFiltersBarProps {

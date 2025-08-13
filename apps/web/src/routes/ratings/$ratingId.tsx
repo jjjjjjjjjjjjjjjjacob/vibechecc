@@ -22,7 +22,9 @@ export const Route = createFileRoute('/ratings/$ratingId')({
 
     // Redirect to the vibe page with the rating anchor
     throw redirect({
-      to: `/vibes/${rating.vibeId}#rating-${rating._id}` as any,
+      to: '/vibes/$vibeId',
+      params: { vibeId: rating.vibeId },
+      hash: `rating-${rating._id}`,
     });
   },
   // This component should never render since we always redirect

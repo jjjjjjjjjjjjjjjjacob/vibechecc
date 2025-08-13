@@ -91,6 +91,7 @@ const schema = defineSchema({
     .index('byCreatedAt', ['createdAt'])
     .index('byVisibility', ['visibility']) // Index for filtering by visibility
     .index('byCreatedByAndVisibility', ['createdById', 'visibility']) // Index for user's public vibes
+    .index('byUpdatedAt', ['updatedAt']) // NEW: Index for recent content queries
     .searchIndex('searchTitle', {
       searchField: 'title',
       filterFields: ['createdById', 'tags', 'visibility'],
@@ -122,6 +123,8 @@ const schema = defineSchema({
     .index('byCreatedAt', ['createdAt'])
     .index('byUserAndEmoji', ['userId', 'emoji'])
     .index('byValue', ['value'])
+    .index('byVibeAndValue', ['vibeId', 'value']) // NEW: Compound index for rating-based sorting
+    .index('byValueAndVibe', ['value', 'vibeId']) // NEW: Index for filtering by rating value
     .searchIndex('searchReview', {
       searchField: 'review',
       filterFields: ['vibeId', 'userId', 'emoji', 'value'],

@@ -56,7 +56,7 @@ export const mockData = {
 };
 
 // Mock convexQuery function that returns proper React Query options
-export const mockConvexQuery = (query: any, args: any) => {
+export const mockConvexQuery = (query: unknown, args: unknown) => {
   const queryString = query?.toString() || '';
 
   return {
@@ -68,10 +68,11 @@ export const mockConvexQuery = (query: any, args: any) => {
       }
 
       if (queryString.includes('emojis.search')) {
-        if (args?.searchTerm === 'fire') {
+        const searchArgs = args as { searchTerm?: string };
+        if (searchArgs?.searchTerm === 'fire') {
           return mockData.emojis.search.fire;
         }
-        if (args?.searchTerm === 'xyzabc123notfound') {
+        if (searchArgs?.searchTerm === 'xyzabc123notfound') {
           return [];
         }
         return mockData.emojis.search.default;
@@ -93,7 +94,7 @@ export const mockConvexQuery = (query: any, args: any) => {
 };
 
 // Mock useConvexQuery hook
-export const mockUseConvexQuery = (query: any, args: any) => {
+export const mockUseConvexQuery = (query: unknown, args: unknown) => {
   const queryString = query?.toString() || '';
 
   // Mock emoji queries
@@ -106,14 +107,15 @@ export const mockUseConvexQuery = (query: any, args: any) => {
   }
 
   if (queryString.includes('emojis.search')) {
-    if (args?.searchTerm === 'fire') {
+    const searchArgs = args as { searchTerm?: string };
+    if (searchArgs?.searchTerm === 'fire') {
       return {
         data: mockData.emojis.search.fire,
         isLoading: false,
         error: null,
       };
     }
-    if (args?.searchTerm === 'xyzabc123notfound') {
+    if (searchArgs?.searchTerm === 'xyzabc123notfound') {
       return {
         data: [],
         isLoading: false,
@@ -193,15 +195,15 @@ export const createTestWrapper = (options?: {
 };
 
 // Utility to update mock data for specific tests
-export const updateMockData = (path: string, value: any) => {
+export const updateMockData = (path: string, value: unknown) => {
   const keys = path.split('.');
-  let current: any = mockData;
+  let current: Record<string, unknown> = mockData as Record<string, unknown>;
 
   for (let i = 0; i < keys.length - 1; i++) {
     if (!current[keys[i]]) {
       current[keys[i]] = {};
     }
-    current = current[keys[i]];
+    current = current[keys[i]] as Record<string, unknown>;
   }
 
   current[keys[keys.length - 1]] = value;

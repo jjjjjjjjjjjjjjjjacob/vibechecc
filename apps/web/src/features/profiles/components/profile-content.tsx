@@ -16,7 +16,7 @@ import { MasonryFeed } from '@/components/masonry-feed';
 import { CreateVibeButton } from '@/features/vibes/components/create-vibe-button';
 import { useUser } from '@clerk/tanstack-react-start';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Sparkles } from 'lucide-react';
+import { Sparkles } from '@/components/ui/icons';
 import toast from '@/utils/toast';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
 import { ThemeColorPicker } from '@/features/theming/components/theme-color-picker';
@@ -202,12 +202,10 @@ export function ProfileContent() {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const promises: Promise<any>[] = [];
+      const promises: Promise<unknown>[] = [];
 
       // Prepare Convex updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const convexUpdates: any = {};
+      const convexUpdates: Record<string, string> = {};
       if (username) convexUpdates.username = username;
       if (firstName) convexUpdates.first_name = firstName;
       if (lastName) convexUpdates.last_name = lastName;
@@ -220,8 +218,7 @@ export function ProfileContent() {
       }
 
       // Prepare Clerk updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const clerkUpdates: any = {};
+      const clerkUpdates: Record<string, string> = {};
       if (username) clerkUpdates.username = username;
       if (firstName) clerkUpdates.firstName = firstName;
       if (lastName) clerkUpdates.lastName = lastName;

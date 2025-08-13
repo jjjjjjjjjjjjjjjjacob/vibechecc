@@ -166,6 +166,7 @@ export const createOrUpdateEmojiRating = mutation({
       }
     } catch (error) {
       // Don't fail the rating operation if notification creation fails
+      // eslint-disable-next-line no-console
       console.error('Failed to create rating notification:', error);
     }
 
@@ -225,6 +226,7 @@ export const createOrUpdateEmojiRating = mutation({
         }
       } catch (error) {
         // Don't fail the rating operation if notification creation fails
+        // eslint-disable-next-line no-console
         console.error(
           'Failed to create new rating notifications for followers:',
           error

@@ -20,7 +20,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@/components/ui/icons';
 import toast from '@/utils/toast';
 import { DualThemeColorPicker } from '@/features/theming/components/dual-theme-color-picker';
 import { useTheme } from '@/stores/theme-initializer';
@@ -100,6 +100,7 @@ function ProfileEdit() {
           refetchUser();
         },
         onError: (error) => {
+          // eslint-disable-next-line no-console
           console.error('Failed to create user:', error);
           toast.error(
             'Failed to initialize user profile. Please refresh the page.'
@@ -200,9 +201,16 @@ function ProfileEdit() {
     }
 
     try {
-      const promises: Promise<any>[] = [];
+      const promises: Promise<unknown>[] = [];
 
-      const convexUpdates: any = {};
+      const convexUpdates: {
+        username?: string;
+        first_name?: string;
+        last_name?: string;
+        image_url?: string;
+        primaryColor?: string;
+        secondaryColor?: string;
+      } = {};
       if (username) convexUpdates.username = username;
       if (firstName) convexUpdates.first_name = firstName;
       if (lastName) convexUpdates.last_name = lastName;
@@ -214,7 +222,11 @@ function ProfileEdit() {
         promises.push(updateProfileMutation.mutateAsync(convexUpdates));
       }
 
-      const clerkUpdates: any = {};
+      const clerkUpdates: {
+        username?: string;
+        firstName?: string;
+        lastName?: string;
+      } = {};
       if (username) clerkUpdates.username = username;
       if (firstName) clerkUpdates.firstName = firstName;
       if (lastName) clerkUpdates.lastName = lastName;
@@ -233,6 +245,7 @@ function ProfileEdit() {
         navigate({ to: '/profile' });
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('(Profile Edit) Failed to update profile:', error);
       toast.error('Failed to update profile. Please try again.');
     } finally {

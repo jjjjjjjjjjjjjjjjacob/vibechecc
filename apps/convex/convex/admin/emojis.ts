@@ -66,7 +66,8 @@ export const getAllEmojis = query({
     }
 
     const sortedEmojis = emojis.sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: string | number;
+      let bVal: string | number;
 
       switch (sortBy) {
         case 'name':
@@ -212,7 +213,13 @@ export const updateEmojiField = mutation({
       throw new Error('Emoji not found');
     }
 
-    const updateData: any = {};
+    const updateData: {
+      name?: string;
+      category?: string;
+      sentiment?: 'positive' | 'negative' | 'neutral';
+      keywords?: string[];
+      tags?: string[];
+    } = {};
 
     switch (field) {
       case 'name':
@@ -241,7 +248,7 @@ export const updateEmojiField = mutation({
           throw new Error('Keywords must be an array');
         }
         updateData.keywords = value
-          .map((kw: any) => String(kw).trim())
+          .map((kw: unknown) => String(kw).trim())
           .filter(Boolean);
         break;
 
@@ -250,7 +257,7 @@ export const updateEmojiField = mutation({
           throw new Error('Tags must be an array or undefined');
         }
         updateData.tags = value
-          ? value.map((tag: any) => String(tag).trim()).filter(Boolean)
+          ? value.map((tag: unknown) => String(tag).trim()).filter(Boolean)
           : undefined;
         break;
 
@@ -315,7 +322,12 @@ export const bulkUpdateEmojis = mutation({
         continue;
       }
 
-      const updateData: any = {};
+      const updateData: {
+        disabled?: boolean;
+        category?: string;
+        sentiment?: 'positive' | 'negative' | 'neutral';
+        keywords?: string[];
+      } = {};
 
       switch (operation) {
         case 'enable':

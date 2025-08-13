@@ -66,7 +66,8 @@ export const getAllVibes = query({
     }
 
     const sortedVibes = vibes.sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: string | number;
+      let bVal: string | number;
 
       switch (sortBy) {
         case 'title':

@@ -12,12 +12,13 @@ import {
   useCurrentUser,
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, TrendingUp, Sparkles, Flame } from 'lucide-react';
+import { ArrowRight, TrendingUp, Sparkles, Flame } from '@/components/ui/icons';
 import { useTheme } from '@/stores/theme-initializer';
 import type {
   PrimaryColorTheme,
   SecondaryColorTheme,
 } from '@/stores/theme-store';
+import type { Vibe } from '@/types';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 
@@ -275,7 +276,7 @@ function NewSection() {
           <span className="font-sans">🆕</span> new vibes
         </>
       }
-      vibes={newVibes}
+      vibes={newVibes as Vibe[]}
       isLoading={isLoading}
       error={error}
       priority
@@ -301,7 +302,7 @@ function TrendingSection() {
           <span className="font-sans">🔥</span> trending now
         </>
       }
-      vibes={trendingVibes}
+      vibes={trendingVibes as Vibe[]}
       isLoading={isLoading}
       error={error}
       priority
@@ -335,7 +336,7 @@ function RecentArrivalsSection() {
           <span className="font-sans">✨</span> fresh arrivals
         </>
       }
-      vibes={recentVibes}
+      vibes={recentVibes as Vibe[]}
       isLoading={isLoading}
       error={error}
       ratingDisplayMode="most-rated"
@@ -362,7 +363,7 @@ function UnratedSection() {
           <span className="font-sans">👀</span> needs love
         </>
       }
-      vibes={unratedVibes}
+      vibes={unratedVibes as Vibe[]}
       isLoading={isLoading}
       error={error}
       ratingDisplayMode="most-rated"
@@ -383,7 +384,7 @@ function CommunityFavoritesSection() {
           <span className="font-sans">❤️</span> community favorites
         </>
       }
-      vibes={topRatedVibes}
+      vibes={topRatedVibes as Vibe[]}
       isLoading={isLoading}
       error={error}
       ratingDisplayMode="top-rated"
@@ -447,7 +448,7 @@ function PopularTagVibes({ tag }: { tag: string }) {
   return (
     <DiscoverSectionWrapper
       title={displayTitle}
-      vibes={tagVibes}
+      vibes={tagVibes as Vibe[]}
       isLoading={isLoading}
       error={error}
       ratingDisplayMode="most-rated"

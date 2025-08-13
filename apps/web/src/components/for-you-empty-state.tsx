@@ -2,7 +2,13 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Users, Heart, ArrowRight, Star } from 'lucide-react';
+import {
+  Sparkles,
+  Users,
+  Heart,
+  ArrowRight,
+  Star,
+} from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { CompactSuggestedFollows } from '@/features/follows/components/suggested-follows';
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';

@@ -84,11 +84,14 @@ export function DebugAuth() {
               <li>subject: {debugData?.identity?.subject || 'null'}</li>
               <li>
                 tokenIdentifier:{' '}
-                {(debugData?.identity as any)?.tokenIdentifier || 'null'}
+                {(debugData?.identity as { tokenIdentifier?: string })
+                  ?.tokenIdentifier || 'null'}
               </li>
               <li>
                 hasEmail:{' '}
-                {String((debugData?.identity as any)?.hasEmail) || 'null'}
+                {String(
+                  (debugData?.identity as { hasEmail?: boolean })?.hasEmail
+                ) || 'null'}
               </li>
             </ul>
           )}

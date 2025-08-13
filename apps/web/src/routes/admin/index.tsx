@@ -32,7 +32,7 @@ import {
   TrendingUp,
   Activity,
   Calendar,
-} from 'lucide-react';
+} from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -553,7 +553,7 @@ function AdminDashboard() {
               </div>
             ) : (
               <div className="max-h-[400px] space-y-2 overflow-y-auto">
-                {activity?.map((item: any, index: number) => (
+                {activity?.map((item, index) => (
                   <ActivityItem key={index} activity={item} />
                 ))}
               </div>

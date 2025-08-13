@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SecurityValidators, AuthUtils } from './securityValidators';
+import { QueryCtx } from 'convex/_generated/server';
 
 describe('SecurityValidators', () => {
   describe('checkRateLimit', () => {
@@ -233,7 +234,7 @@ describe('AuthUtils', () => {
           getUserIdentity: vi.fn().mockResolvedValue(null),
         },
         db: {} as any,
-      };
+      } as unknown as QueryCtx;
 
       await expect(AuthUtils.requireAdmin(mockCtx)).rejects.toThrow(
         'Authentication required'
@@ -260,7 +261,7 @@ describe('AuthUtils', () => {
             }),
           }),
         },
-      };
+      } as unknown as QueryCtx;
 
       await expect(AuthUtils.requireAdmin(mockCtx)).rejects.toThrow(
         'Admin privileges required'
@@ -277,7 +278,7 @@ describe('AuthUtils', () => {
           }),
         },
         db: {} as any,
-      };
+      } as unknown as QueryCtx;
 
       await expect(AuthUtils.requireAdmin(mockCtx)).resolves.toBeUndefined();
     });
@@ -292,7 +293,7 @@ describe('AuthUtils', () => {
           }),
         },
         db: {} as any,
-      };
+      } as unknown as QueryCtx;
 
       await expect(AuthUtils.requireAdmin(mockCtx)).resolves.toBeUndefined();
     });
@@ -307,7 +308,7 @@ describe('AuthUtils', () => {
           }),
         },
         db: {} as any,
-      };
+      } as unknown as QueryCtx;
 
       await expect(AuthUtils.requireAdmin(mockCtx)).resolves.toBeUndefined();
     });
@@ -332,7 +333,7 @@ describe('AuthUtils', () => {
             }),
           }),
         },
-      };
+      } as unknown as QueryCtx;
 
       await expect(AuthUtils.requireAdmin(mockCtx)).rejects.toThrow(
         'Admin privileges required'

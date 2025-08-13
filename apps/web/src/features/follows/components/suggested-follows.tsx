@@ -3,10 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { UserPlus, Users, Sparkles } from 'lucide-react';
+import { UserPlus, Users, Sparkles } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { useSuggestedFollows } from '../hooks/use-suggested-follows';
 import { FollowButton } from './follow-button';
+import type { User } from '@viberatr/types';
+
+interface SuggestedFollowsSuggestion {
+  user: User | null;
+  mutualConnections?: number;
+  engagementStats?: {
+    totalRatings: number;
+    averageRating: number;
+    vibeCount: number;
+  };
+}
 
 interface SuggestedFollowsProps {
   limit?: number;
@@ -128,7 +139,7 @@ export function SuggestedFollows({
             variant === 'list' ? 'space-y-3' : 'grid gap-3 sm:grid-cols-2'
           )}
         >
-          {suggestions.map((suggestion: any) => {
+          {suggestions.map((suggestion: SuggestedFollowsSuggestion) => {
             if (!suggestion.user) return null;
 
             const user = suggestion.user;
@@ -164,6 +175,7 @@ export function SuggestedFollows({
 
                   {/* Mutual Connections Badge */}
                   {showMutualConnections &&
+                    suggestion.mutualConnections &&
                     suggestion.mutualConnections > 0 && (
                       <div className="mt-1">
                         <Badge
@@ -178,6 +190,7 @@ export function SuggestedFollows({
 
                   {/* Popular User Badge - show for users with no mutual connections but high engagement */}
                   {(!showMutualConnections ||
+                    !suggestion.mutualConnections ||
                     suggestion.mutualConnections === 0) &&
                     suggestion.engagementStats && (
                       <div className="mt-1">

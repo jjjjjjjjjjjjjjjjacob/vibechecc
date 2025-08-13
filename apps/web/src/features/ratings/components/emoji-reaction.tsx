@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle } from '@/components/ui/icons';
 import { useUser } from '@clerk/tanstack-react-start';
 import type { EmojiReaction as EmojiReactionType } from '@/types';
 import {

@@ -1,13 +1,21 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Heart, Star, Zap } from 'lucide-react';
+import { Sparkles, Heart, Star, Zap } from '@/components/ui/icons';
 
 interface OnboardingWelcomeStepProps {
   onNext: () => void;
 }
 
 export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
+  const [isExiting, setIsExiting] = React.useState(false);
+
+  const handleNext = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onNext();
+    }, 500);
+  };
   const features = [
     {
       icon: Heart,
@@ -31,8 +39,14 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
   return (
     <div className="space-y-8 text-center">
       {/* Hero Section */}
-      <div className="animate-fade-in-down space-y-4">
-        <div className="from-theme-primary to-theme-secondary mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r">
+      <div
+        className="space-y-4 transition-all duration-500 data-[exiting=true]:translate-y-[-20px] data-[exiting=true]:scale-110 data-[exiting=true]:opacity-0"
+        data-exiting={isExiting}
+      >
+        <div
+          className="from-theme-primary to-theme-secondary mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r transition-transform duration-500 data-[exiting=true]:scale-125"
+          data-exiting={isExiting}
+        >
           <Sparkles className="h-10 w-10 text-white" />
         </div>
         <h1 className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
@@ -46,8 +60,8 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
 
       {/* Features Grid */}
       <div
-        className="animate-fade-in-down grid gap-6 opacity-0 md:grid-cols-3"
-        style={{ animation: 'fade-in-down 0.5s ease-out 0.2s forwards' }}
+        className="grid gap-6 transition-all delay-75 duration-500 data-[exiting=true]:translate-y-[-10px] data-[exiting=true]:opacity-0 md:grid-cols-3"
+        data-exiting={isExiting}
       >
         {features.map((feature, index) => (
           <Card
@@ -69,14 +83,14 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps) {
 
       {/* Call to Action */}
       <div
-        className="animate-fade-in-down space-y-4 opacity-0"
-        style={{ animation: 'fade-in-down 0.5s ease-out 0.4s forwards' }}
+        className="space-y-4 transition-all delay-150 duration-500 data-[exiting=true]:translate-y-[-10px] data-[exiting=true]:opacity-0"
+        data-exiting={isExiting}
       >
         <p className="text-muted-foreground">
           let's get you set up in just a few quick steps
         </p>
         <Button
-          onClick={onNext}
+          onClick={handleNext}
           size="lg"
           className="from-theme-primary to-theme-secondary text-primary-foreground hover:from-theme-primary/90 hover:to-theme-secondary/90 bg-gradient-to-r px-8 py-3 text-lg"
         >

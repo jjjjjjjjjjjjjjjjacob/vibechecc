@@ -137,7 +137,7 @@ export function FlipClockDigit({
 
       setPrevValue(value);
     }
-  }, [value]);
+  }, [value, prevValue]);
 
   // Handle lock-in animation
   React.useEffect(() => {

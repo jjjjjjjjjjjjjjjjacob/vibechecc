@@ -98,7 +98,7 @@ export function NotificationAccordion() {
   const notifications = React.useMemo(() => {
     if (!notificationQuery.data?.pages) return [];
     return notificationQuery.data.pages.flatMap(
-      (page: any) => page?.notifications || []
+      (page) => page?.notifications || []
     );
   }, [notificationQuery.data]);
 
@@ -109,8 +109,8 @@ export function NotificationAccordion() {
 
   const unreadCounts = unreadCountsByType
     ? {
-        all: Object.values(unreadCountsByType).reduce(
-          (sum: number, count: number) => sum + count,
+        all: Object.values(unreadCountsByType).reduce<number>(
+          (sum, count) => sum + count,
           0
         ),
         likes: unreadCountsByType.rating || 0,

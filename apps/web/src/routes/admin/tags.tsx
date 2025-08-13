@@ -61,9 +61,12 @@ function AdminTagsPage() {
       <div className="flex h-full flex-col">
         <TagsTable
           data={
-            data?.data?.map((tag: any) => ({
-              ...tag,
+            data?.data?.map((tag) => ({
+              _id: tag._id as string,
+              name: tag.name,
               usageCount: tag.count || 0,
+              lastUsed: tag.lastUsed,
+              createdAt: tag.createdAt,
             })) || []
           }
           totalCount={data?.totalCount || 0}

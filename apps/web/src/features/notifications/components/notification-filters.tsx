@@ -4,7 +4,7 @@ import {
   Sparkles,
   UserPlus,
   Grid3X3,
-} from 'lucide-react';
+} from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/tailwind-utils';
 

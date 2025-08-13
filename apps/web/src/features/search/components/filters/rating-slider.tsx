@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { Star } from 'lucide-react';
+import { Star } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 
 interface RatingSliderProps {

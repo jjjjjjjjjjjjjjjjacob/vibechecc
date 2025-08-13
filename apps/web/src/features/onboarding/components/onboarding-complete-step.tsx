@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, Sparkles, ArrowRight, Plus } from 'lucide-react';
+import { CheckCircle, Sparkles, ArrowRight, Plus } from '@/components/ui/icons';
 import { Link } from '@tanstack/react-router';
 
 interface OnboardingCompleteStepProps {
@@ -34,52 +33,24 @@ export function OnboardingCompleteStep({
   return (
     <div className="mx-auto max-w-2xl space-y-8 text-center">
       {/* Success Animation */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{
-          type: 'spring',
-          stiffness: 200,
-          damping: 15,
-          delay: 0.2,
-        }}
-        className="flex justify-center"
-      >
+      <div className="animate-zoomIn flex justify-center">
         <div className="relative">
           <div className="from-theme-primary to-theme-secondary flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-r">
             <CheckCircle className="h-12 w-12 text-white" />
           </div>
           {/* Animated rings */}
-          <motion.div
-            initial={{ scale: 1, opacity: 0.8 }}
-            animate={{ scale: 1.5, opacity: 0 }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeOut',
-            }}
-            className="border-primary/30 absolute inset-0 rounded-full border-4"
-          />
-          <motion.div
-            initial={{ scale: 1, opacity: 0.6 }}
-            animate={{ scale: 2, opacity: 0 }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeOut',
-              delay: 0.5,
-            }}
-            className="border-theme-secondary/30 absolute inset-0 rounded-full border-4"
+          <div className="border-primary/30 absolute inset-0 animate-pulse rounded-full border-4" />
+          <div
+            className="border-theme-secondary/30 absolute inset-0 animate-pulse rounded-full border-4"
+            style={{ animationDelay: '0.5s' }}
           />
         </div>
-      </motion.div>
+      </div>
 
       {/* Success Message */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="space-y-4"
+      <div
+        className="animate-slideInUp space-y-4"
+        style={{ animationDelay: '0.4s' }}
       >
         <h1 className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
           you're all set
@@ -89,23 +60,20 @@ export function OnboardingCompleteStep({
           <br />
           you're ready to start discovering and sharing vibes.
         </p>
-      </motion.div>
+      </div>
 
       {/* Next Steps */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        className="space-y-4"
+      <div
+        className="animate-slideInUp space-y-4"
+        style={{ animationDelay: '0.6s' }}
       >
         <h2 className="text-foreground text-xl font-semibold">what's next?</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {nextSteps.map((step, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, x: index === 0 ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
+              className={`${index === 0 ? 'animate-slideInLeft' : 'animate-slideInRight'}`}
+              style={{ animationDelay: `${0.8 + index * 0.1}s` }}
             >
               <Link to={step.href} className="block">
                 <Card className="border-border/50 group hover:border-primary/20 cursor-pointer border-2 transition-colors">
@@ -126,17 +94,15 @@ export function OnboardingCompleteStep({
                   </CardContent>
                 </Card>
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {/* Action Buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1 }}
-        className="space-y-4"
+      <div
+        className="animate-slideInUp space-y-4"
+        style={{ animationDelay: '1s' }}
       >
         <Button
           onClick={onComplete}
@@ -150,38 +116,25 @@ export function OnboardingCompleteStep({
         <p className="text-muted-foreground text-sm">
           you can always access these features from the main navigation
         </p>
-      </motion.div>
+      </div>
 
       {/* Confetti Effect */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 1.2 }}
-        className="pointer-events-none absolute inset-0 overflow-hidden"
+      <div
+        className="animate-fadeIn pointer-events-none absolute inset-0 overflow-hidden"
+        style={{ animationDelay: '1.2s' }}
       >
         {[...Array(20)].map((_, i) => (
-          <motion.div
+          <div
             key={i}
-            initial={{
-              y: -100,
-              x: Math.random() * window.innerWidth,
-              rotate: 0,
-              opacity: 1,
+            className="from-theme-primary/80 to-theme-secondary/80 absolute h-3 w-3 animate-bounce rounded-full bg-gradient-to-r"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 2}s`,
+              animationDuration: `${3 + Math.random() * 2}s`,
             }}
-            animate={{
-              y: window.innerHeight + 100,
-              rotate: 360,
-              opacity: 0,
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              delay: Math.random() * 2,
-              ease: 'easeOut',
-            }}
-            className="from-theme-primary/80 to-theme-secondary/80 absolute h-3 w-3 rounded-full bg-gradient-to-r"
           />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

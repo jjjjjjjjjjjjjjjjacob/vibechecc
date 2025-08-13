@@ -8,7 +8,7 @@ import { api } from '@viberatr/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { useTheme } from '@/stores/theme-initializer';
 import { Button } from '@/components/ui';
-import { ChevronUp } from 'lucide-react';
+import { ChevronUp } from '@/components/ui/icons';
 
 interface EmojiSearchCollapsibleProps {
   onSelect: (emoji: string) => void;

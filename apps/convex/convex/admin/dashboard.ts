@@ -1,10 +1,10 @@
-import { query } from '../_generated/server';
+import { query, QueryCtx } from '../_generated/server';
 import { v } from 'convex/values';
 import { AuthUtils } from '../lib/securityValidators';
 
 export const getDashboardStats = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx: QueryCtx) => {
     await AuthUtils.requireAdmin(ctx);
 
     const [users, vibes, ratings, follows, notifications] = await Promise.all([

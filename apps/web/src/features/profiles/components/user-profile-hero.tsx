@@ -10,7 +10,7 @@ import {
   Star,
   Heart,
   Sparkles,
-} from 'lucide-react';
+} from '@/components/ui/icons';
 
 interface UserProfileHeroProps {
   displayName: string;

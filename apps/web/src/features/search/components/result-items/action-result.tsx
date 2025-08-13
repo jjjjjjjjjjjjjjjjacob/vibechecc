@@ -1,5 +1,5 @@
 import { CommandItem } from '@/components/ui/command';
-import { Plus, User, Settings, LogOut, Search } from 'lucide-react';
+import { Plus, User, Settings, LogOut, Search } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
 import type { ActionSearchResult } from '@viberatr/types';
 

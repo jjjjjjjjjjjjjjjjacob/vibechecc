@@ -4,9 +4,13 @@ import { HomeFeed } from '@/components/home-feed';
 import { SignedIn, SignedOut, useUser } from '@clerk/tanstack-react-start';
 import { useCurrentUser } from '@/queries';
 import { useTheme } from '@/stores/theme-initializer';
+import type {
+  PrimaryColorTheme,
+  SecondaryColorTheme,
+} from '@/stores/theme-store';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Sparkles } from 'lucide-react';
+import { Plus, Sparkles } from '@/components/ui/icons';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -26,6 +30,15 @@ function Home() {
   const { data: currentUser, isLoading: _isUserLoading } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
   const { isLoaded: isClerkLoaded, user: _user } = useUser();
+  const [hasMounted, setHasMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasMounted(false);
+    const timeout = setTimeout(() => {
+      setHasMounted(true);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Apply user's color themes when user data changes
   React.useEffect(() => {
@@ -34,8 +47,10 @@ function Home() {
         currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
 
-      setColorTheme(`${primaryColor}-primary` as any);
-      setSecondaryColorTheme(`${secondaryColor}-secondary` as any);
+      setColorTheme(`${primaryColor}-primary` as PrimaryColorTheme);
+      setSecondaryColorTheme(
+        `${secondaryColor}-secondary` as SecondaryColorTheme
+      );
     }
   }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
@@ -44,7 +59,8 @@ function Home() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8">
         <div
-          className="from-theme-primary to-theme-secondary animate-gradient-shift rounded-2xl bg-gradient-to-r p-8 text-white md:p-12"
+          data-has-mounted={hasMounted}
+          className="from-theme-primary to-theme-secondary animate-gradient-shift rounded-2xl bg-gradient-to-r p-8 text-white transition delay-100 duration-500 data-[has-mounted=false]:opacity-0 data-[has-mounted=true]:opacity-100 md:p-12"
           style={{ backgroundSize: '200% 200%' }}
         >
           <div className="max-w-2xl">
@@ -53,7 +69,7 @@ function Home() {
             </h1>
             <p className="mb-6 text-lg opacity-90 md:text-xl">
               welcome to <strong>viberatr</strong>, where you can discover,
-              share, and rate vibes from around the world
+              share, and rate vibes because that's a thing you can do
             </p>
 
             {/* Show skeleton while Clerk is loading */}

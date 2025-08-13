@@ -9,7 +9,9 @@ export const getById = query({
   handler: async (ctx, args) => {
     // Try to find the rating by document ID in the ratings table
     try {
-      const doc = await ctx.db.get(args.ratingId as any);
+      const doc = await ctx.db.get(
+        args.ratingId as Parameters<typeof ctx.db.get>[0]
+      );
       if (!doc) return null;
 
       // Check if it's a rating by looking for rating-specific fields
@@ -19,10 +21,11 @@ export const getById = query({
         'emoji' in doc &&
         'value' in doc
       ) {
-        return doc as any; // Type assertion for rating document
+        return doc; // Return the rating document
       }
     } catch (error) {
       // Rating ID is not a valid document ID format
+      // eslint-disable-next-line no-console
       console.error('Invalid rating ID format:', args.ratingId, error);
     }
 

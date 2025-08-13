@@ -3,9 +3,10 @@ import React from 'react';
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => {
-  const MockIcon = React.forwardRef((props: any, ref: any) =>
-    React.createElement('svg', { ...props, ref }, null)
-  );
+  const MockIcon = React.forwardRef<
+    SVGSVGElement,
+    React.SVGProps<SVGSVGElement>
+  >((props, ref) => React.createElement('svg', { ...props, ref }, null));
   MockIcon.displayName = 'MockIcon';
 
   return {
@@ -208,7 +209,7 @@ vi.mock('lucide-react', () => {
 
 // Mock @clerk/tanstack-react-start
 vi.mock('@clerk/tanstack-react-start', () => ({
-  ClerkProvider: ({ children }: any) => children,
+  ClerkProvider: ({ children }: { children: React.ReactNode }) => children,
   useUser: () => ({
     user: {
       id: 'test-user-123',
@@ -225,18 +226,18 @@ vi.mock('@clerk/tanstack-react-start', () => ({
     sessionId: 'test-session',
     getToken: vi.fn().mockResolvedValue('test-token'),
   }),
-  SignInButton: ({ children }: any) =>
+  SignInButton: ({ children }: { children: React.ReactNode }) =>
     React.createElement('div', null, children),
-  SignUpButton: ({ children }: any) =>
+  SignUpButton: ({ children }: { children: React.ReactNode }) =>
     React.createElement('div', null, children),
-  SignOutButton: ({ children }: any) =>
+  SignOutButton: ({ children }: { children: React.ReactNode }) =>
     React.createElement('div', null, children),
   UserButton: () => React.createElement('div', null, 'User Button'),
 }));
 
 // Mock @convex-dev/react-query
 vi.mock('@convex-dev/react-query', () => ({
-  convexQuery: (query: any, args: any) => ({
+  convexQuery: (query: unknown, args: unknown) => ({
     queryKey: ['convexQuery', query?.toString() || '', args],
     queryFn: async () => {
       const queryString = query?.toString() || '';
@@ -261,7 +262,8 @@ vi.mock('@convex-dev/react-query', () => ({
       }
 
       if (queryString.includes('emojis.search')) {
-        if (args?.searchTerm === 'fire') {
+        const searchArgs = args as { searchTerm?: string };
+        if (searchArgs?.searchTerm === 'fire') {
           return [
             { _id: '1', emoji: '🔥', category: 'objects', description: 'Fire' },
             {
@@ -272,7 +274,7 @@ vi.mock('@convex-dev/react-query', () => ({
             },
           ];
         }
-        if (args?.searchTerm === 'xyzabc123notfound') {
+        if (searchArgs?.searchTerm === 'xyzabc123notfound') {
           return [];
         }
         return [
@@ -331,7 +333,7 @@ vi.mock('@convex-dev/react-query', () => ({
       return undefined;
     },
   }),
-  useConvexQuery: (query: any, _args: any) => {
+  useConvexQuery: (query: unknown, _args: unknown) => {
     const queryString = query?.toString() || '';
 
     if (queryString.includes('emojis')) {
@@ -359,7 +361,7 @@ vi.mock('@/features/theming/components/theme-provider', () => ({
     theme: 'light',
     setTheme: vi.fn(),
   }),
-  ThemeProvider: ({ children }: any) => children,
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // Mock theme store
@@ -395,24 +397,49 @@ vi.mock('@tanstack/react-router', () => ({
     search: '',
     hash: '',
   }),
-  Link: ({ children, ...props }: any) =>
-    React.createElement('a', props, children),
+  Link: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode;
+    [key: string]: unknown;
+  }) => React.createElement('a', props, children),
   Outlet: () => null,
 }));
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) =>
-      React.createElement('div', props, children),
-    span: ({ children, ...props }: any) =>
-      React.createElement('span', props, children),
-    button: ({ children, ...props }: any) =>
-      React.createElement('button', props, children),
-    a: ({ children, ...props }: any) =>
-      React.createElement('a', props, children),
+    div: ({
+      children,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      [key: string]: unknown;
+    }) => React.createElement('div', props, children),
+    span: ({
+      children,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      [key: string]: unknown;
+    }) => React.createElement('span', props, children),
+    button: ({
+      children,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      [key: string]: unknown;
+    }) => React.createElement('button', props, children),
+    a: ({
+      children,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      [key: string]: unknown;
+    }) => React.createElement('a', props, children),
   },
-  AnimatePresence: ({ children }: any) => children,
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
   useAnimation: () => ({
     start: vi.fn(),
     set: vi.fn(),
@@ -458,7 +485,7 @@ vi.mock('@/lib/posthog', () => ({
 
 // Mock convex/react
 vi.mock('convex/react', () => ({
-  ConvexProvider: ({ children }: any) => children,
+  ConvexProvider: ({ children }: { children: React.ReactNode }) => children,
   ConvexReactClient: class {
     constructor() {}
     setAuth() {}

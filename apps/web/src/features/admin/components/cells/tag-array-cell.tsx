@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { X, Plus, Check } from 'lucide-react';
+import { X, Plus, Check } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';

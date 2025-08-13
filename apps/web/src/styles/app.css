@@ -12,8 +12,8 @@
 
 /* Global themes */
 @theme inline {
-  --font-family-sans: var(--font-sans);
-  --font-family-mono: var(--font-mono);
+  --font-family-sans: 'GeistSans', var(--font-sans);
+  --font-family-mono: 'GeistMono', var(--font-mono);
   --font-geist: 'GeistSans';
   --font-geist-mono: 'GeistMono';
   --font-doto: 'Doto';
@@ -164,6 +164,10 @@
 
   .font-geist-mono {
     font-family: var(--font-geist-mono);
+  }
+
+  .font-doto {
+    font-family: var(--font-doto), var(--font-family-sans);
   }
 
   *::-webkit-scrollbar {
@@ -422,6 +426,36 @@
   }
 }
 
+/* Pulsing dots loader animation */
+@keyframes pulse-dot {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  20% {
+    transform: scale(1.4);
+    opacity: 0.9;
+  }
+}
+
+/* Pulsing dots loader animation */
+@keyframes pulse-text {
+  0%,
+  40%,
+  100% {
+    transform-style: preserve-3d;
+    transform: perspective(500px) scale(1);
+    opacity: 0.9;
+  }
+  20% {
+    transform-style: preserve-3d;
+    transform: perspective(500px) translateZ(80px);
+    opacity: 1;
+  }
+}
+
 /* Flip clock animations */
 @keyframes flip-up-out {
   0% {
@@ -551,6 +585,14 @@
 
 .animate-stagger-fade-in {
   animation: stagger-fade-in 0.4s ease-out;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+.animate-pulse-text {
+  animation: pulse-text 2.8s ease-in-out infinite;
 }
 
 /* Responsive animation controls */

@@ -85,20 +85,19 @@ export const follow = mutation({
     // Create follow notification for the user being followed
     try {
       const followerDisplayName = computeUserDisplayName(currentUser);
-      await (ctx.scheduler as any).runAfter(
-        0,
-        internal.notifications.createNotification,
-        {
-          userId: args.followingId,
-          type: 'follow',
-          triggerUserId: currentUser.externalId,
-          targetId: currentUser.externalId, // Link to follower's profile
-          title: `${followerDisplayName} followed you`,
-          description: 'check out their profile',
-        }
-      );
+      await (
+        ctx.scheduler as unknown as { runAfter: typeof ctx.scheduler.runAfter }
+      ).runAfter(0, internal.notifications.createNotification, {
+        userId: args.followingId,
+        type: 'follow',
+        triggerUserId: currentUser.externalId,
+        targetId: currentUser.externalId, // Link to follower's profile
+        title: `${followerDisplayName} followed you`,
+        description: 'check out their profile',
+      });
     } catch (error) {
       // Don't fail the follow operation if notification creation fails
+      // eslint-disable-next-line no-console
       console.error('Failed to create follow notification:', error);
     }
 

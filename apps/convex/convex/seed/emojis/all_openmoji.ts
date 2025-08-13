@@ -24,4 +24,5 @@ export const allOpenMojiEmojis = [
 ];
 
 export const emojiCount = allOpenMojiEmojis.length;
+// eslint-disable-next-line no-console
 console.log(`OpenMoji dataset loaded: ${emojiCount} emojis`);

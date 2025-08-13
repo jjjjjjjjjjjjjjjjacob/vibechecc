@@ -61,11 +61,26 @@ function AdminReviewsPage() {
       <div className="flex h-full flex-col">
         <ReviewsTable
           data={
-            data?.data?.map((review: any) => ({
+            data?.data?.map((review) => ({
               ...review,
               user: review.user
-                ? { ...review.user, externalId: 'unknown' }
+                ? {
+                    ...review.user,
+                    externalId: review.userId || 'unknown',
+                  }
                 : null,
+              vibe: review.vibe
+                ? {
+                    ...review.vibe,
+                    id: review.vibeId || '',
+                    image: undefined,
+                    createdBy: {
+                      id: '',
+                      name: '',
+                    },
+                    createdAt: review.createdAt,
+                  }
+                : undefined,
             })) || []
           }
           totalCount={data?.totalCount || 0}
@@ -81,7 +96,16 @@ function AdminReviewsPage() {
             setDateFrom(from);
             setDateTo(to);
           }}
-          stats={stats as any}
+          stats={
+            stats
+              ? {
+                  totalReviews: stats.totalReviews,
+                  flaggedReviews: stats.flaggedReviews,
+                  averageRating: stats.averageRating,
+                  totalRatings: stats.totalReviews, // Use totalReviews as totalRatings
+                }
+              : undefined
+          }
         />
       </div>
     </AdminLayout>

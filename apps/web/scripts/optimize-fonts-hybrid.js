@@ -35,9 +35,9 @@ const FONTS_CONFIG = [
   },
   {
     name: 'Doto',
-    file: 'Doto-VariableFont_ROND,wght.ttf',
-    skipOptimization: false, // Needs conversion
-    unicodeRange: 'U+0000-00FF', // Latin only
+    file: 'Doto-VariableFont_ROND,wght.woff2',
+    skipOptimization: true, // Already WOFF2
+    unicodeRange: 'U+0030-0039, U+002E, U+002F', // Numbers 0-9, decimal point, and forward slash
   },
 ];
 

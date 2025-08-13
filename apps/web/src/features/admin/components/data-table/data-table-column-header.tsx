@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Column } from '@tanstack/react-table';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { Button } from '@/components/ui/button';
 

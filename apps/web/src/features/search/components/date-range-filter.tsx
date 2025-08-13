@@ -1,4 +1,4 @@
-import { Calendar } from 'lucide-react';
+import { Calendar } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import {
   Popover,

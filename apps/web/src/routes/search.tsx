@@ -47,18 +47,54 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui';
-import { ChevronLeft, SlidersHorizontal } from 'lucide-react';
+import { ChevronLeft, SlidersHorizontal } from '@/components/ui/icons';
 
 // Loading skeletons for code-split components
 function SearchResultsSkeleton() {
   return (
-    <div className="flex flex-col">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Card key={i}>
-          <div className="p-4">
-            <Skeleton className="mb-2 h-4 w-full" />
-            <Skeleton className="mb-3 h-3 w-full" />
-            <Skeleton className="h-20 w-full" />
+    <div className="flex flex-col gap-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Card key={i} className="relative h-full overflow-hidden">
+          {/* Avatar skeleton in top left */}
+          <div className="absolute top-2 left-2 z-10">
+            <Skeleton className="h-6 w-6 rounded-full" />
+          </div>
+
+          {/* Main content structure matching VibeResultCard */}
+          <div className="block h-full">
+            {/* Image placeholder */}
+            <div className="relative aspect-video overflow-hidden">
+              <Skeleton className="h-full w-full" />
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+              {/* Title */}
+              <Skeleton className="mb-2 h-6 w-3/4" />
+
+              {/* Description */}
+              <Skeleton className="mb-1 h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </div>
+
+            {/* Footer with rating skeleton */}
+            <div className="flex flex-col items-start gap-3 p-4 pt-0">
+              {/* Emoji rating display skeleton */}
+              <div className="w-full space-y-1">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <div className="flex flex-col gap-1">
+                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+                {/* Additional rating items */}
+                <div className="flex gap-1">
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       ))}
@@ -182,6 +218,7 @@ function SearchResultsPage() {
     page: 1,
     includeTypes: undefined, // Get counts for all types
     enabled: tab !== 'all', // Only run this query when not on "all" tab
+    skipTracking: true, // Skip tracking for this secondary query to prevent duplicates
   });
 
   React.useEffect(() => {
@@ -190,7 +227,7 @@ function SearchResultsPage() {
     } else if (filterExpanded && isMobile) {
       setFilterExpanded(false);
     }
-  }, [isMobile]);
+  }, [isMobile, filterExpanded]);
 
   // Update cached counts - use data from "all" tab or from separate counts query
   React.useEffect(() => {

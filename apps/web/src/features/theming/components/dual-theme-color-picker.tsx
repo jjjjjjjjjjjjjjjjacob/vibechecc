@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Check, Palette, Layers } from 'lucide-react';
+import { Check, Palette, Layers } from '@/components/ui/icons';
 import {
   THEME_COLORS,
   type ThemeColor,

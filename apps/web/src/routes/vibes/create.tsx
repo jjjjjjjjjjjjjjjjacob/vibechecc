@@ -13,7 +13,7 @@ import { getWebRequest } from '@tanstack/react-start/server';
 import { TagInput } from '@/components/tag-input';
 import { ImageUpload } from '@/components/image-upload';
 import { cn } from '@/utils/tailwind-utils';
-import { Circle, Sparkles } from 'lucide-react';
+import { Circle, Sparkles } from '@/components/ui/icons';
 import type { Id } from '@viberatr/convex/dataModel';
 import toast from '@/utils/toast';
 

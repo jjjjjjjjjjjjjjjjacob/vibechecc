@@ -9,14 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Users, X } from 'lucide-react';
+import { Search, Users, X } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
 import { useFollowers } from '../hooks/use-followers';
 import { FollowButton } from './follow-button';
 import type { User } from '@viberatr/types';
 import { trackEvents } from '@/lib/posthog';
 
-interface _Follower {
+interface FollowersModalFollower {
   user: User | null;
   followedAt: number;
   mutualConnections?: number;
@@ -46,7 +46,7 @@ export function FollowersModal({
     if (!searchQuery.trim()) return data.followers;
 
     const query = searchQuery.toLowerCase().trim();
-    return data.followers.filter((follower) => {
+    return data.followers.filter((follower: FollowersModalFollower) => {
       const user = follower.user;
       if (!user) return false;
 
@@ -163,63 +163,65 @@ export function FollowersModal({
               </div>
             ) : (
               // Followers list
-              filteredFollowers.map((follower, index: number) => {
-                if (!follower.user) return null;
-                const user = follower.user;
-                const displayName =
-                  `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
-                  user.username ||
-                  'User';
+              filteredFollowers.map(
+                (follower: FollowersModalFollower, index: number) => {
+                  if (!follower.user) return null;
+                  const user = follower.user;
+                  const displayName =
+                    `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
+                    user.username ||
+                    'User';
 
-                return (
-                  <div
-                    key={`${user._id}-${index}`}
-                    className="bg-card/30 border-border/50 hover:bg-card/50 flex items-center gap-3 rounded-lg border p-3 backdrop-blur transition-colors"
-                  >
+                  return (
                     <div
-                      className="flex flex-1 cursor-pointer items-center gap-3"
-                      onClick={() => handleUserClick(user)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleUserClick(user);
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`View ${displayName}'s profile`}
+                      key={`${user._id}-${index}`}
+                      className="bg-card/30 border-border/50 hover:bg-card/50 flex items-center gap-3 rounded-lg border p-3 backdrop-blur transition-colors"
                     >
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={user.image_url || user.profile_image_url}
-                          alt={displayName}
-                        />
-                        <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
-                          {displayName.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div
+                        className="flex flex-1 cursor-pointer items-center gap-3"
+                        onClick={() => handleUserClick(user)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleUserClick(user);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`View ${displayName}'s profile`}
+                      >
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={user.image_url || user.profile_image_url}
+                            alt={displayName}
+                          />
+                          <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
+                            {displayName.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
 
-                      <div className="min-w-0 flex-1">
-                        <p className="text-foreground truncate font-medium lowercase">
-                          {displayName}
-                        </p>
-                        {user.username && (
-                          <p className="text-muted-foreground truncate text-sm">
-                            @{user.username}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-foreground truncate font-medium lowercase">
+                            {displayName}
                           </p>
-                        )}
+                          {user.username && (
+                            <p className="text-muted-foreground truncate text-sm">
+                              @{user.username}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <FollowButton
-                      targetUserId={user.externalId}
-                      username={user.username}
-                      variant="compact"
-                      size="sm"
-                    />
-                  </div>
-                );
-              })
+                      <FollowButton
+                        targetUserId={user.externalId}
+                        username={user.username}
+                        variant="compact"
+                        size="sm"
+                      />
+                    </div>
+                  );
+                }
+              )
             )}
           </div>
 

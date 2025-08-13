@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Copy, Eye, Edit2 } from 'lucide-react';
+import { MoreHorizontal, Copy, Eye, Edit2 } from '@/components/ui/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';
+import type { Id } from '@viberatr/convex/dataModel';
 import { DataTable } from '../data-table';
 import { DataTableColumnHeader } from '../data-table/data-table-column-header';
 import { EditableTextCell } from '../cells/editable-text-cell';
@@ -99,10 +100,10 @@ export function EmojisTable({
     mutationFn: async (params: {
       emojiId: string;
       field: 'name' | 'category' | 'sentiment' | 'keywords';
-      value: any;
+      value: string | string[] | undefined;
     }) => {
       return updateEmojiFieldMutation({
-        emojiId: params.emojiId as any,
+        emojiId: params.emojiId as Id<'emojis'>,
         field: params.field,
         value: params.value,
       });
@@ -120,7 +121,7 @@ export function EmojisTable({
   const handleToggleEmojiStatus = useMutation({
     mutationFn: async (params: { emojiId: string; disabled: boolean }) => {
       return toggleEmojiStatusMutation({
-        emojiId: params.emojiId as any,
+        emojiId: params.emojiId as Id<'emojis'>,
         disabled: params.disabled,
       });
     },

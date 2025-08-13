@@ -1,4 +1,10 @@
-import { Bell, Heart, MessageCircle, UserPlus, Sparkles } from 'lucide-react';
+import {
+  Bell,
+  Heart,
+  MessageCircle,
+  UserPlus,
+  Sparkles,
+} from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
 

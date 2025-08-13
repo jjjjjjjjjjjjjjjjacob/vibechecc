@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Button, type ButtonProps } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus } from '@/components/ui/icons';
 
 export function CreateVibeButton({
   variant = 'outline',

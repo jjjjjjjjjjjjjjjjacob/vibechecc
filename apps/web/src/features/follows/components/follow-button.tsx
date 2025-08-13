@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { UserPlus, UserMinus, Loader2 } from 'lucide-react';
+import { UserPlus, UserMinus, Loader2 } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { useFollowUser } from '../hooks/use-follow-user';
 import { useIsCurrentUserFollowing } from '../hooks/use-is-following';

@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Hash, Trash2, Edit2 } from 'lucide-react';
+import { MoreHorizontal, Hash, Trash2, Edit2 } from '@/components/ui/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';
+import type { Id } from '@viberatr/convex/dataModel';
 import { DataTable } from '../data-table';
 import { DataTableColumnHeader } from '../data-table/data-table-column-header';
 import { EditableTextCell } from '../cells/editable-text-cell';
@@ -72,7 +73,7 @@ export function TagsTable({
 
   const handleUpdateTag = useMutation({
     mutationFn: async ({ tagId, name }: { tagId: string; name: string }) => {
-      return updateTagMutation({ tagId: tagId as any, name });
+      return updateTagMutation({ tagId: tagId as Id<'tags'>, name });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'tags'] });
@@ -86,7 +87,7 @@ export function TagsTable({
 
   const handleDeleteTag = useMutation({
     mutationFn: async ({ tagId }: { tagId: string }) => {
-      return deleteTagMutation({ tagId: tagId as any });
+      return deleteTagMutation({ tagId: tagId as Id<'tags'> });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'tags'] });
@@ -107,8 +108,8 @@ export function TagsTable({
       targetTagId: string;
     }) => {
       return mergeTagsMutation({
-        sourceTagId: sourceTagId as any,
-        targetTagId: targetTagId as any,
+        sourceTagId: sourceTagId as Id<'tags'>,
+        targetTagId: targetTagId as Id<'tags'>,
       });
     },
     onSuccess: () => {

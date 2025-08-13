@@ -1,4 +1,4 @@
-import { Filter } from 'lucide-react';
+import { Filter } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {

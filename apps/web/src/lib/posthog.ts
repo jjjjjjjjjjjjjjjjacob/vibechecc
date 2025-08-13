@@ -126,7 +126,7 @@ export const trackEvents = {
 
   searchFilterApplied: (
     filterType: string,
-    filterValue: any,
+    filterValue: string | number | boolean | string[] | undefined,
     searchQuery?: string
   ) =>
     analytics.capture('search_filter_applied', {
@@ -137,7 +137,7 @@ export const trackEvents = {
 
   searchFilterRemoved: (
     filterType: string,
-    filterValue: any,
+    filterValue: string | number | boolean | string[] | undefined,
     searchQuery?: string
   ) =>
     analytics.capture('search_filter_removed', {
@@ -225,10 +225,10 @@ export const trackEvents = {
       vibe_id: vibeId,
     }),
 
-  modalOpened: (modalType: string, context?: Record<string, any>) =>
+  modalOpened: (modalType: string, context?: Record<string, unknown>) =>
     analytics.capture('modal_opened', { modal_type: modalType, ...context }),
 
-  modalClosed: (modalType: string, context?: Record<string, any>) =>
+  modalClosed: (modalType: string, context?: Record<string, unknown>) =>
     analytics.capture('modal_closed', { modal_type: modalType, ...context }),
 
   // Errors
@@ -240,7 +240,7 @@ export const trackEvents = {
   surveyTriggered: (
     surveyType: string,
     userId: string,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ) =>
     analytics.capture('survey_triggered', {
       survey_type: surveyType,
@@ -258,7 +258,7 @@ export const trackEvents = {
   surveyCompleted: (
     surveyType: string,
     userId: string,
-    responses: Record<string, any>
+    responses: Record<string, unknown>
   ) =>
     analytics.capture('survey_completed', {
       survey_type: surveyType,

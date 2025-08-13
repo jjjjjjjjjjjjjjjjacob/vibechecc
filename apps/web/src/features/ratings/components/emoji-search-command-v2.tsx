@@ -33,7 +33,10 @@ export function EmojiSearchCommandV2({
     mutationFn: useConvexMutation(api.emojis.trackUsage),
   });
 
-  const handleEmojiSelect = (emoji: any) => {
+  const handleEmojiSelect = (emoji: {
+    native?: string;
+    shortcodes?: string[];
+  }) => {
     const selectedEmoji = emoji.native || emoji.shortcodes?.[0] || '';
 
     // Track emoji usage if user is logged in

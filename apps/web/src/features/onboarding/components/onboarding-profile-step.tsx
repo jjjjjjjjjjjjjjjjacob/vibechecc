@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -46,12 +45,10 @@ export function OnboardingProfileStep({
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const promises: Promise<any>[] = [];
+      const promises: Promise<unknown>[] = [];
 
       // Prepare Convex updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const convexUpdates: any = {};
+      const convexUpdates: Record<string, string> = {};
       if (formData.username.trim())
         convexUpdates.username = formData.username.trim();
       if (formData.first_name.trim())
@@ -72,8 +69,7 @@ export function OnboardingProfileStep({
       }
 
       // Prepare Clerk updates
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const clerkUpdates: any = {};
+      const clerkUpdates: Record<string, string> = {};
       if (formData.username.trim())
         clerkUpdates.username = formData.username.trim();
       if (formData.first_name.trim())
@@ -137,11 +133,7 @@ export function OnboardingProfileStep({
 
   return (
     <div className="mx-auto max-w-md">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="animate-slideInUp">
         <Card className="border-border/50 border-2">
           <CardHeader className="space-y-4 text-center">
             <div>
@@ -231,7 +223,7 @@ export function OnboardingProfileStep({
             </form>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 }
