@@ -104,23 +104,45 @@ jobs:
           fi
 
           # Get DNS records from Cloudflare API
-          curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records" \
+          echo "Fetching DNS records..."
+          DNS_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" | jq '.' > dns_output.json
+            -H "Content-Type: application/json")
+          
+          # Check if the DNS API call was successful
+          if echo "$DNS_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
+            echo "$DNS_RESPONSE" | jq '.' > dns_output.json
+            echo "DNS records fetched successfully"
+          else
+            echo "Error fetching DNS records:"
+            echo "$DNS_RESPONSE" | jq '.'
+            echo '{"result": []}' > dns_output.json
+          fi
 
           # Get Workers scripts from Cloudflare API
-          curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts" \
+          echo "Fetching Workers scripts..."
+          WORKERS_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" | jq '.' > workers_output.json
+            -H "Content-Type: application/json")
+          
+          # Check if the Workers API call was successful
+          if echo "$WORKERS_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
+            echo "$WORKERS_RESPONSE" | jq '.' > workers_output.json
+            echo "Workers scripts fetched successfully"
+          else
+            echo "Error fetching Workers scripts:"
+            echo "$WORKERS_RESPONSE" | jq '.'
+            echo '{"result": []}' > workers_output.json
+          fi
 
-          # Extract A record ID for vibechecc.io
-          A_RECORD_ID=$(jq -r '.result[] | select(.type == "A" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
+          # Extract A record ID for vibechecc.io (with null check)
+          A_RECORD_ID=$(jq -r '.result[]? | select(.type == "A" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json 2>/dev/null || echo "")
 
-          # Extract AAAA record ID for vibechecc.io
-          AAAA_RECORD_ID=$(jq -r '.result[] | select(.type == "AAAA" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json)
+          # Extract AAAA record ID for vibechecc.io (with null check)
+          AAAA_RECORD_ID=$(jq -r '.result[]? | select(.type == "AAAA" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json 2>/dev/null || echo "")
 
-          # Extract CNAME record ID for vibechecc.io
-          CNAME_RECORD_ID=$(jq -r '.result[] | select(.type == "CNAME" and .name == "$PREFIX") | .id' dns_output.json)
+          # Extract CNAME record ID for the subdomain (with null check)
+          CNAME_RECORD_ID=$(jq -r --arg prefix "$PREFIX.${{ vars.CLOUDFLARE_ZONE }}" '.result[]? | select(.type == "CNAME" and .name == $prefix) | .id' dns_output.json 2>/dev/null || echo "")
 
           # Extract Worker script name for vibechecc-{prefix}-web
           if [ "${{ inputs.environment }}" = "ephemeral" ]; then
@@ -128,7 +150,7 @@ jobs:
           else
             WORKER_SCRIPT_NAME="vibechecc-${{ inputs.environment }}-web"
           fi
-          WORKER_SCRIPT_EXISTS=$(jq -r --arg script_name "$WORKER_SCRIPT_NAME" '.result[] | select(.id == $script_name) | .id' workers_output.json)
+          WORKER_SCRIPT_EXISTS=$(jq -r --arg script_name "$WORKER_SCRIPT_NAME" '.result[]? | select(.id == $script_name) | .id' workers_output.json 2>/dev/null || echo "")
 
           # Set outputs for potential use in other steps
           echo "a_record_id=$A_RECORD_ID" >> $GITHUB_OUTPUT
@@ -137,7 +159,7 @@ jobs:
           echo "worker_script_name=$WORKER_SCRIPT_EXISTS" >> $GITHUB_OUTPUT
 
           # Import A record if it exists
-          if [ "$A_RECORD_ID" != "null" ] && [ -n "$A_RECORD_ID" ]; then
+          if [ -n "$A_RECORD_ID" ] && [ "$A_RECORD_ID" != "null" ]; then
             echo "Importing A record with ID: $A_RECORD_ID"
             terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_a ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
           else
@@ -145,7 +167,7 @@ jobs:
           fi
 
           # Import AAAA record if it exists
-          if [ "$AAAA_RECORD_ID" != "null" ] && [ -n "$AAAA_RECORD_ID" ]; then
+          if [ -n "$AAAA_RECORD_ID" ] && [ "$AAAA_RECORD_ID" != "null" ]; then
             echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
             terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_aaaa ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
           else
@@ -153,8 +175,7 @@ jobs:
           fi
 
           # Import CNAME record if it exists
-
-          if [ "$CNAME_RECORD_ID" != "null" ] && [ -n "$CNAME_RECORD_ID" ]; then
+          if [ -n "$CNAME_RECORD_ID" ] && [ "$CNAME_RECORD_ID" != "null" ]; then
             echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
             terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_cname ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
           else
@@ -162,7 +183,7 @@ jobs:
           fi
 
           # Import Worker script if it exists
-          if [ "$WORKER_SCRIPT_EXISTS" != "null" ] && [ -n "$WORKER_SCRIPT_EXISTS" ]; then
+          if [ -n "$WORKER_SCRIPT_EXISTS" ] && [ "$WORKER_SCRIPT_EXISTS" != "null" ]; then
             echo "Importing Worker script: $WORKER_SCRIPT_EXISTS"
             terraform import module.vibechecc_worker.cloudflare_workers_script.frontend ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$WORKER_SCRIPT_EXISTS || true
           else
