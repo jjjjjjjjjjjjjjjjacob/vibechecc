@@ -49,16 +49,6 @@
       "conventionalCommits": true,
       "fallbackCurrentVersionResolver": "disk"
     },
-    "conventionalCommits": {
-      "types": {
-        "__INVALID__": {
-          "semverBump": "patch",
-          "changelog": {
-            "title": "Other Changes"
-          }
-        }
-      }
-    },
     "changelog": {
       "workspaceChangelog": {
         "createRelease": "github"
@@ -68,7 +58,8 @@
       "commit": true,
       "commitMessage": "chore(release): v{version} [skip ci]",
       "tag": true,
-      "tagMessage": "v{version}"
+      "tagMessage": "v{version}",
+      "stagePatterns": ["package.json", "*/package.json", "*/*/package.json", "bun.lock", "CHANGELOG.md"]
     },
     "projects": ["*", "!@vibechecc/e2e"]
   },
