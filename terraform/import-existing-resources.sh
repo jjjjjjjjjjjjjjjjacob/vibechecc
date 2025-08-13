@@ -101,32 +101,48 @@ echo "  Worker script: ${WORKER_SCRIPT_EXISTS:-not found}"
 
 # Import A record if it exists (production only)
 if [ "$TF_VAR_environment" = "production" ] && [ -n "$A_RECORD_ID" ] && [ "$A_RECORD_ID" != "null" ]; then
-  echo "Importing A record with ID: $A_RECORD_ID"
-  terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_a[0]' "$TF_VAR_cloudflare_zone_id/$A_RECORD_ID" || true
+  if terraform state list | grep -Fq 'module.vibechecc_worker.cloudflare_dns_record.web_a[0]'; then
+    echo "Skipping import, already in state: module.vibechecc_worker.cloudflare_dns_record.web_a[0]"
+  else
+    echo "Importing A record with ID: $A_RECORD_ID"
+    terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_a[0]' "$TF_VAR_cloudflare_zone_id/$A_RECORD_ID" || true
+  fi
 else
   echo "No A record to import for environment: $TF_VAR_environment"
 fi
 
 # Import AAAA record if it exists (production only)
 if [ "$TF_VAR_environment" = "production" ] && [ -n "$AAAA_RECORD_ID" ] && [ "$AAAA_RECORD_ID" != "null" ]; then
-  echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
-  terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_aaaa[0]' "$TF_VAR_cloudflare_zone_id/$AAAA_RECORD_ID" || true
+  if terraform state list | grep -Fq 'module.vibechecc_worker.cloudflare_dns_record.web_aaaa[0]'; then
+    echo "Skipping import, already in state: module.vibechecc_worker.cloudflare_dns_record.web_aaaa[0]"
+  else
+    echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
+    terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_aaaa[0]' "$TF_VAR_cloudflare_zone_id/$AAAA_RECORD_ID" || true
+  fi
 else
   echo "No AAAA record to import for environment: $TF_VAR_environment"
 fi
 
 # Import CNAME record if it exists (non-production only)
 if [ "$TF_VAR_environment" != "production" ] && [ -n "$CNAME_RECORD_ID" ] && [ "$CNAME_RECORD_ID" != "null" ]; then
-  echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
-  terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_cname[0]' "$TF_VAR_cloudflare_zone_id/$CNAME_RECORD_ID" || true
+  if terraform state list | grep -Fq 'module.vibechecc_worker.cloudflare_dns_record.web_cname[0]'; then
+    echo "Skipping import, already in state: module.vibechecc_worker.cloudflare_dns_record.web_cname[0]"
+  else
+    echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
+    terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_cname[0]' "$TF_VAR_cloudflare_zone_id/$CNAME_RECORD_ID" || true
+  fi
 else
   echo "No CNAME record to import for environment: $TF_VAR_environment"
 fi
 
 # Import Worker script if it exists
 if [ -n "$WORKER_SCRIPT_EXISTS" ] && [ "$WORKER_SCRIPT_EXISTS" != "null" ]; then
-  echo "Importing Worker script: $WORKER_SCRIPT_EXISTS"
-  terraform import module.vibechecc_worker.cloudflare_workers_script.web "$TF_VAR_cloudflare_account_id/$WORKER_SCRIPT_EXISTS" || true
+  if terraform state list | grep -Fq 'module.vibechecc_worker.cloudflare_workers_script.web'; then
+    echo "Skipping import, already in state: module.vibechecc_worker.cloudflare_workers_script.web"
+  else
+    echo "Importing Worker script: $WORKER_SCRIPT_EXISTS"
+    terraform import module.vibechecc_worker.cloudflare_workers_script.web "$TF_VAR_cloudflare_account_id/$WORKER_SCRIPT_EXISTS" || true
+  fi
 else
   echo "No Worker script found to import"
 fi
@@ -149,8 +165,12 @@ if echo "$ROUTES_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
   ROUTE_ID=$(echo "$ROUTES_RESPONSE" | jq -r --arg pattern "$ROUTE_PATTERN" '.result[]? | select(.pattern == $pattern) | .id' 2>/dev/null || echo "")
   
   if [ -n "$ROUTE_ID" ] && [ "$ROUTE_ID" != "null" ]; then
-    echo "Importing Workers route with ID: $ROUTE_ID"
-    terraform import module.vibechecc_worker.cloudflare_workers_route.web "$TF_VAR_cloudflare_zone_id/$ROUTE_ID" || true
+    if terraform state list | grep -Fq 'module.vibechecc_worker.cloudflare_workers_route.web'; then
+      echo "Skipping import, already in state: module.vibechecc_worker.cloudflare_workers_route.web"
+    else
+      echo "Importing Workers route with ID: $ROUTE_ID"
+      terraform import module.vibechecc_worker.cloudflare_workers_route.web "$TF_VAR_cloudflare_zone_id/$ROUTE_ID" || true
+    fi
   else
     echo "No Workers route found to import"
   fi
