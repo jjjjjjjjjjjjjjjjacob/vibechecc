@@ -1,6 +1,6 @@
 {
   "name": "@vibechecc/convex",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "main": "convex/_generated/api.js",
