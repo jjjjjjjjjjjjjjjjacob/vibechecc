@@ -77,9 +77,40 @@ function UserProfile() {
       user={user}
       userVibes={userVibes}
       vibesLoading={vibesLoading}
-      userRatings={userRatings as any}
+      userRatings={userRatings
+        ?.filter((rating) => rating !== null)
+        .map((rating) => ({
+          ...rating,
+          vibe: rating.vibe
+            ? {
+                ...rating.vibe,
+                createdBy: rating.vibe.createdBy
+                  ? {
+                      id:
+                        rating.vibe.createdBy.externalId ||
+                        rating.vibe.createdBy._id ||
+                        'unknown',
+                      name:
+                        rating.vibe.createdBy.username ||
+                        `${rating.vibe.createdBy.first_name || ''} ${rating.vibe.createdBy.last_name || ''}`.trim() ||
+                        'Unknown',
+                      avatar: rating.vibe.createdBy.image_url,
+                    }
+                  : {
+                      id: 'unknown',
+                      name: 'Unknown User',
+                      avatar: undefined,
+                    },
+              }
+            : undefined,
+        }))}
       ratingsLoading={ratingsLoading}
-      receivedRatings={receivedRatings as any}
+      receivedRatings={receivedRatings
+        ?.filter((rating) => rating !== null)
+        .map((rating) => ({
+          ...rating,
+          rater: rating.rater || undefined,
+        }))}
       receivedRatingsLoading={receivedRatingsLoading}
       emojiStats={emojiStats}
       scopedTheme={true}

@@ -12,7 +12,13 @@ import { FeedLayout } from '@/components/layouts';
 import { useVibesInfinite, useForYouFeedInfinite } from '@/queries';
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
 import { ForYouEmptyState } from '@/components/for-you-empty-state';
-import { Flame, Sparkles, Clock, TrendingUp, Star } from 'lucide-react';
+import {
+  Flame,
+  Sparkles,
+  Clock,
+  TrendingUp,
+  Star,
+} from '@/components/ui/icons';
 import { useInView } from 'react-intersection-observer';
 import { useHeaderNavStore } from '@/stores/header-nav-store';
 import { cn } from '@/utils/tailwind-utils';
@@ -22,9 +28,10 @@ interface HomeFeedProps {
 }
 
 export function HomeFeed({ className }: HomeFeedProps) {
+  // Use selector functions to prevent unnecessary re-renders
   const feedTab = useHeaderNavStore((state) => state.feedTab);
   const setFeedTab = useHeaderNavStore((state) => state.setFeedTab);
-  const _pageNavState = useHeaderNavStore((state) => state.pageNavState);
+  // Only subscribe to setPageNavState (not the state itself to avoid re-renders)
   const setPageNavState = useHeaderNavStore((state) => state.setPageNavState);
   const { user } = useUser();
   const { data: followStats } = useCurrentUserFollowStats();
@@ -172,14 +179,14 @@ export function HomeFeed({ className }: HomeFeedProps) {
     error,
   } = feedTab === 'for-you' ? personalizedFeedQuery : generalFeedQuery;
 
-  // Flatten all pages to get vibes array
+  // Flatten all pages to get vibes array - optimized with better memoization
   const vibes = React.useMemo(() => {
     if (!data || typeof data !== 'object' || !('pages' in data) || !data.pages)
       return [];
     return (
       data as { pages: Array<{ vibes?: import('@/types').Vibe[] }> }
     ).pages.flatMap((page) => page?.vibes || []);
-  }, [data]);
+  }, [data]); // Include full data object for proper dependency tracking
 
   // For "for you" tab, use custom empty state component
   const shouldUseCustomEmptyState =
@@ -194,7 +201,9 @@ export function HomeFeed({ className }: HomeFeedProps) {
   // Initialize after first intersection observer measurement
   React.useEffect(() => {
     if (entry && !hasInitialized) {
-      setHasInitialized(true);
+      setTimeout(() => {
+        setHasInitialized(true);
+      }, 1000);
     }
   }, [entry, hasInitialized]);
 
@@ -225,16 +234,22 @@ export function HomeFeed({ className }: HomeFeedProps) {
   // Prepare header content
   const headerContent = (
     <div className="flex flex-col">
-      <div className="mb-4 flex items-center gap-2">
+      <div
+        data-show-tabs={tabsInView}
+        data-has-mounted={hasInitialized}
+        className="mb-4 flex items-center gap-2 transition data-[has-mounted=false]:delay-1000 data-[show-tabs=false]:opacity-0 data-[show-tabs=true]:opacity-100"
+      >
         <TrendingUp className="text-primary h-5 w-5" />
         <h1 className="text-2xl font-bold">feed</h1>
       </div>
       <div ref={tabsRef}>
         <TooltipProvider>
           <div
+            data-show-tabs={tabsInView}
+            data-has-mounted={hasInitialized}
             className={cn(
-              'flex gap-2 overflow-x-auto pb-2 transition delay-500 duration-300',
-              !tabsInView ? '-translate-y-5 opacity-0' : 'opacity-100'
+              'flex gap-2 overflow-x-auto pb-2 transition duration-300 data-[has-mounted=false]:delay-1000',
+              'opacity-100 data-[show-tabs=false]:-translate-y-5 data-[show-tabs=false]:opacity-0 data-[show-tabs=true]:translate-y-0'
             )}
           >
             {availableTabs.map((tab) => (

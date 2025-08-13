@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, Sparkles } from 'lucide-react';
+import { TrendingUp, Sparkles } from '@/components/ui/icons';
 import { useTrendingEmojiRatings } from '@/queries';
 import { cn } from '@/utils/tailwind-utils';
 

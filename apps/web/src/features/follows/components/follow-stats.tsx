@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Users, UserPlus } from 'lucide-react';
+import { Users, UserPlus } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { useFollowStats } from '../hooks/use-follow-stats';
 import { Skeleton } from '@/components/ui/skeleton';

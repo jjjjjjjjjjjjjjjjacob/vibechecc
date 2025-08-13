@@ -16,7 +16,7 @@ import type {
   ReviewSearchResult,
   Vibe,
 } from '@viberatr/types';
-import { Hash, Users, MessageSquare } from 'lucide-react';
+import { Hash, Users, MessageSquare } from '@/components/ui/icons';
 
 interface SearchResultListCardProps {
   result: SearchResult;

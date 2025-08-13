@@ -2,8 +2,38 @@ import { internalMutation } from '../_generated/server';
 import { getEmojiColor, getEmojiSentiment } from '../lib/emojiColors';
 import * as emojiMartDataImport from '@emoji-mart/data';
 
-// Cast to any to bypass type checking for JSON data
-const emojiMartData = emojiMartDataImport as any;
+// Type for emoji skin data
+type EmojiSkin = {
+  native?: string;
+  unified?: string;
+};
+
+// Type for emoji data
+type EmojiData = {
+  id: string;
+  name: string;
+  keywords?: string[];
+  skins?: EmojiSkin[];
+  emoticons?: string[];
+  aliases?: string[];
+  unified?: string;
+  added?: string;
+};
+
+// Type for category data
+type CategoryData = {
+  name?: string;
+  emojis?: string[];
+};
+
+// Type for the emoji-mart data structure
+type EmojiMartData = {
+  categories?: Record<string, CategoryData>;
+  emojis?: Record<string, EmojiData>;
+};
+
+// Cast with proper typing
+const emojiMartData = emojiMartDataImport as EmojiMartData;
 
 // Internal migration to import emoji-mart data
 export const importEmojiMartData = internalMutation({
@@ -15,12 +45,12 @@ export const importEmojiMartData = internalMutation({
 
     // Process each category
     for (const categoryId of categories) {
-      const categoryData = emojiMartData.categories[categoryId];
+      const categoryData = emojiMartData.categories![categoryId];
       const categoryEmojis = categoryData.emojis || [];
 
       // Process emojis in this category
       for (const emojiId of categoryEmojis) {
-        const emojiData = emojiMartData.emojis[emojiId];
+        const emojiData = emojiMartData.emojis![emojiId];
         if (!emojiData) continue;
 
         // Get the native emoji character
@@ -44,8 +74,10 @@ export const importEmojiMartData = internalMutation({
               emoticons: emojiData.emoticons || undefined,
               aliases: emojiData.aliases || undefined,
               skins:
-                emojiData.skins?.slice(1).map((s: any) => s.native) ||
-                undefined,
+                emojiData.skins
+                  ?.slice(1)
+                  .map((s) => s.native)
+                  .filter((s): s is string => Boolean(s)) || undefined,
             });
           }
           totalSkipped++;
@@ -86,7 +118,10 @@ export const importEmojiMartData = internalMutation({
           emoticons: emojiData.emoticons || undefined,
           aliases: emojiData.aliases || undefined,
           skins:
-            emojiData.skins?.slice(1).map((s: any) => s.native) || undefined,
+            emojiData.skins
+              ?.slice(1)
+              .map((s) => s.native)
+              .filter((s): s is string => Boolean(s)) || undefined,
           disabled: false,
           usageCount: 0,
         });
@@ -108,7 +143,7 @@ export const getEmojiMartCategories = internalMutation({
   args: {},
   handler: async () => {
     return Object.entries(emojiMartData.categories || {}).map(
-      ([id, category]: [string, any]) => ({
+      ([id, category]) => ({
         id,
         name: category.name || id,
         emojis: category.emojis || [],

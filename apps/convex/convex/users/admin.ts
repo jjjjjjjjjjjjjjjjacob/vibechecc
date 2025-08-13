@@ -17,6 +17,7 @@ export const updateAdminStatus = internalMutation({
       .first();
 
     if (!user) {
+      // eslint-disable-next-line no-console
       console.warn(`User with externalId ${args.externalId} not found`);
       return { success: false, error: 'User not found' };
     }
@@ -25,6 +26,7 @@ export const updateAdminStatus = internalMutation({
       isAdmin: args.isAdmin,
     });
 
+    // eslint-disable-next-line no-console
     console.log(
       `Updated admin status for user ${user.username}: isAdmin=${args.isAdmin}`
     );

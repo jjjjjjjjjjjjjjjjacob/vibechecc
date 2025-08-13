@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { TopEmojiRatings, type EmojiRating } from './emoji-rating-display';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, ArrowRight } from 'lucide-react';
+import { X, ArrowRight } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
 import { useMediaQuery } from '@/hooks/use-media-query';

@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
 import type { EmojiRating, EmojiRatingMetadata } from '@viberatr/types';
-import { Circle } from 'lucide-react';
+import { Circle } from '@/components/ui/icons';
 import { Badge } from '@/components/ui/badge';
 // Using v2 emoji-mart component - switch to './emoji-search-command' for rollback
 import { EmojiSearchCollapsible as EmojiSearchCommand } from './emoji-search-collapsible';

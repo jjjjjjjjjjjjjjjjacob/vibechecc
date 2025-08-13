@@ -1,5 +1,5 @@
 import { CommandItem } from '@/components/ui/command';
-import { Hash } from 'lucide-react';
+import { Hash } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
 import type { TagSearchResult } from '@viberatr/types';
 

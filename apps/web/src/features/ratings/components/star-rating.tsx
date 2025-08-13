@@ -1,4 +1,4 @@
-import { Circle } from 'lucide-react';
+import { Circle } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { useTheme } from '@/stores/theme-initializer';
 import { useEffect, useState } from 'react';

@@ -295,12 +295,11 @@ export const importBasicEmojis = action({
     console.log(`Importing ${BASIC_EMOJIS.length} basic emojis...`);
 
     try {
-      const result = await (ctx as any).runMutation(
-        internal.emojis.importBatchInternal,
-        {
-          emojis: BASIC_EMOJIS,
-        }
-      );
+      const result = await (
+        ctx as unknown as { runMutation: typeof ctx.runMutation }
+      ).runMutation(internal.emojis.importBatchInternal, {
+        emojis: BASIC_EMOJIS,
+      });
 
       // eslint-disable-next-line no-console
       console.log(`Import complete! Imported ${result.count} new emojis`);

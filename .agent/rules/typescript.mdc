@@ -3,6 +3,39 @@ description:
 globs: *.ts,*.tsx,*.js,*.jsx
 alwaysApply: false
 ---
-- Filenames should use `kebab-case` (e.g. `user-profile.tsx`)
+## File Naming Conventions
+- **Web app files** (`apps/web/`): Use `kebab-case` (e.g. `user-profile.tsx`)
+- **Convex files** (`apps/convex/`): Use `camelCase` (e.g. `userProfile.ts`)
+  - IMPORTANT: Hyphens break Convex codegen, so always use camelCase in Convex directory
+
+## Code Naming Conventions
 - Classes, components, and types should use `PascalCase` (e.g. `UserProfile`)
 - Variables & non-component functions should use `camelCase` (e.g. `isSignedIn`, `userProfileSignIn()`)
+- **Local component-specific types**: Use `ComponentNameTypeName` pattern
+  - Example: For `FollowersModal` component, use `FollowersModalFollower` not `_Follower`
+  - Example: For `UserProfile` component, use `UserProfileStats` not `_Stats`
+  - NEVER use underscore prefix for local types
+
+## Type Safety Rules
+
+### NEVER Use `any` Type
+- **NEVER** use `any` type unless all other options have been exhausted
+- **Prefer `unknown`** when the type is truly unknown and needs runtime checking
+- **Use proper type inference** or explicit types from imported types
+- **For external data:** Create proper interfaces or use type guards
+- **For event handlers:** Use proper React event types (e.g., `React.MouseEvent<HTMLButtonElement>`)
+- **For API responses:** Define response interfaces or use generated types
+
+### When `any` Cannot Be Avoided
+If `any` absolutely cannot be avoided (last resort):
+1. Document why with a comment
+2. Consider using `unknown` instead
+3. Add type guards or assertions to narrow the type
+4. File a tech debt ticket to fix it later
+
+### Common Replacements
+- `any[]` → `unknown[]` or specific array type
+- `Promise<any>` → `Promise<unknown>` or specific promise type
+- `(arg: any) => void` → proper function signature
+- `as any` → proper type assertion or remove if possible
+- Mock functions in tests → use `unknown` or mock-specific types

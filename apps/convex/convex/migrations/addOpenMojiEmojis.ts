@@ -1,4 +1,5 @@
 import { internalMutation } from '../_generated/server';
+import type { Doc } from '../_generated/dataModel';
 import { allOpenMojiEmojis } from '../seed/emojis/all_openmoji';
 
 // Helper to get unicode from emoji character
@@ -18,6 +19,7 @@ function getUnicodeFromEmoji(emoji: string): string {
 // Migration to add all OpenMoji emojis
 export const addOpenMojiEmojis = internalMutation({
   handler: async (ctx) => {
+    // eslint-disable-next-line no-console
     console.log('Starting OpenMoji emoji migration...');
 
     let added = 0;
@@ -55,10 +57,11 @@ export const addOpenMojiEmojis = internalMutation({
             color: emojiData.color,
             sentiment: emojiData.sentiment,
             disabled: false,
-          } as any);
+          } as unknown as Doc<'emojis'>);
 
           added++;
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error(`Error adding emoji ${emojiData.emoji}:`, error);
           errors++;
         }
@@ -69,6 +72,7 @@ export const addOpenMojiEmojis = internalMutation({
         (i + batchSize) % 500 === 0 ||
         i + batchSize >= allOpenMojiEmojis.length
       ) {
+        // eslint-disable-next-line no-console
         console.log(
           `Progress: ${Math.min(i + batchSize, allOpenMojiEmojis.length)}/${allOpenMojiEmojis.length} processed`
         );
@@ -83,6 +87,7 @@ export const addOpenMojiEmojis = internalMutation({
       message: `Migration complete: Added ${added} new emojis, skipped ${skipped} existing, ${errors} errors`,
     };
 
+    // eslint-disable-next-line no-console
     console.log(result.message);
     return result;
   },

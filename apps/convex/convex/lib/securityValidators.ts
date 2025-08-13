@@ -1,5 +1,7 @@
 // SECURITY: Input validation and sanitization utilities
 
+import type { QueryCtx, MutationCtx } from '../_generated/server';
+
 /**
  * Validates and sanitizes user input to prevent injection attacks
  */
@@ -329,10 +331,7 @@ export class AuthUtils {
    * Checks if the authenticated user has admin privileges
    * Uses Clerk's organization roles to determine admin status
    */
-  static async requireAdmin(ctx: {
-    auth: { getUserIdentity(): Promise<any> };
-    db: any;
-  }): Promise<void> {
+  static async requireAdmin(ctx: QueryCtx | MutationCtx): Promise<void> {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('Authentication required');
@@ -353,9 +352,7 @@ export class AuthUtils {
     // Fall back to database check if JWT doesn't have admin role
     const user = await ctx.db
       .query('users')
-      .withIndex('byExternalId', (q: any) =>
-        q.eq('externalId', identity.subject)
-      )
+      .withIndex('byExternalId', (q) => q.eq('externalId', identity.subject))
       .first();
 
     if (!user) {

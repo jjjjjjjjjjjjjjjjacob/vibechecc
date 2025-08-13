@@ -6,10 +6,11 @@ import {
   Shield,
   Ban,
   Trash2,
-} from 'lucide-react';
+} from '@/components/ui/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';
+import type { Id } from '@viberatr/convex/dataModel';
 import type { User } from '@viberatr/types';
 import { DataTable } from '../data-table';
 import { DataTableColumnHeader } from '../data-table/data-table-column-header';
@@ -84,7 +85,11 @@ export function UsersTable({
       suspended: boolean;
       reason?: string;
     }) => {
-      return updateUserMutation({ userId: userId as any, suspended, reason });
+      return updateUserMutation({
+        userId: userId as Id<'users'>,
+        suspended,
+        reason,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
@@ -104,7 +109,7 @@ export function UsersTable({
       userId: string;
       reason?: string;
     }) => {
-      return deleteUserMutation({ userId: userId as any, reason });
+      return deleteUserMutation({ userId: userId as Id<'users'>, reason });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
@@ -204,7 +209,8 @@ export function UsersTable({
       ),
       cell: ({ row }) => {
         const user = row.original;
-        const isSuspended = (user as any).suspended === true;
+        const isSuspended =
+          (user as { suspended?: boolean }).suspended === true;
 
         return (
           <div className="space-y-2">
@@ -271,7 +277,9 @@ export function UsersTable({
       ),
       cell: ({ row }) => {
         const user = row.original;
-        const completed = (user as any).onboardingCompleted === true;
+        const completed =
+          (user as { onboardingCompleted?: boolean }).onboardingCompleted ===
+          true;
         return (
           <Badge
             variant={completed ? 'default' : 'secondary'}
@@ -287,7 +295,8 @@ export function UsersTable({
       header: 'actions',
       cell: ({ row }) => {
         const user = row.original;
-        const isSuspended = (user as any).suspended === true;
+        const isSuspended =
+          (user as { suspended?: boolean }).suspended === true;
 
         return (
           <DropdownMenu>

@@ -1,9 +1,16 @@
 import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Eye, Flag, Trash2, CheckCircle } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Eye,
+  Flag,
+  Trash2,
+  CheckCircle,
+} from '@/components/ui/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';
+import type { Id } from '@viberatr/convex/dataModel';
 import type { Rating } from '@viberatr/types';
 import { DataTable } from '../data-table';
 import { DataTableColumnHeader } from '../data-table/data-table-column-header';
@@ -76,7 +83,7 @@ export function ReviewsTable({
       reason?: string;
     }) => {
       return moderateReviewMutation({
-        reviewId: reviewId as any,
+        reviewId: reviewId as Id<'ratings'>,
         flagged,
         reason,
       });
@@ -99,7 +106,10 @@ export function ReviewsTable({
       reviewId: string;
       reason?: string;
     }) => {
-      return deleteReviewMutation({ reviewId: reviewId as any, reason });
+      return deleteReviewMutation({
+        reviewId: reviewId as Id<'ratings'>,
+        reason,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'reviews'] });
@@ -236,7 +246,7 @@ export function ReviewsTable({
       ),
       cell: ({ row }) => {
         const rating = row.original;
-        const isFlagged = (rating as any).flagged === true;
+        const isFlagged = (rating as { flagged?: boolean }).flagged === true;
 
         return (
           <ToggleCell
@@ -271,7 +281,7 @@ export function ReviewsTable({
       header: 'actions',
       cell: ({ row }) => {
         const rating = row.original;
-        const isFlagged = (rating as any).flagged === true;
+        const isFlagged = (rating as { flagged?: boolean }).flagged === true;
 
         return (
           <DropdownMenu>

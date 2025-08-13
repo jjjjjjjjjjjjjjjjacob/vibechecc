@@ -72,10 +72,25 @@ export const Route = createRootRouteWithContext<{
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
-      // Font preloading for critical fonts
+      // Font preloading for critical fonts - optimized for performance
       {
         rel: 'preload',
         href: '/fonts/optimized/GeistSans-Variable.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'preload',
+        href: '/fonts/optimized/GeistMono-Variable.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
+      // Doto display font - preload with lower priority for branding
+      {
+        rel: 'preload',
+        href: '/fonts/optimized/Doto-VariableFont_ROND,wght.woff2',
         as: 'font',
         type: 'font/woff2',
         crossOrigin: 'anonymous',

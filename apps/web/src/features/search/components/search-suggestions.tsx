@@ -1,6 +1,6 @@
 import { CommandGroup, CommandItem } from '@/components/ui/command';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, TrendingUp, Search, Hash } from 'lucide-react';
+import { Clock, TrendingUp, Search, Hash } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import type { SearchSuggestion } from '@viberatr/types';
 

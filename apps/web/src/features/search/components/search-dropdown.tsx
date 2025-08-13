@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Search, X, Loader2 } from 'lucide-react';
+import { Search, X, Loader2 } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

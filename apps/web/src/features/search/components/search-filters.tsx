@@ -14,7 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Filter } from 'lucide-react';
+import { Filter } from '@/components/ui/icons';
 import { TagFilterEnhanced } from './filters/tag-filter-enhanced';
 import { RatingSlider } from './filters/rating-slider';
 import { DateRangePicker } from './filters/date-range-picker';

@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Flame, Sparkles, Clock, Star } from 'lucide-react';
+import { Flame, Sparkles, Clock, Star } from '@/components/ui/icons';
 import { useHeaderNavStore } from '@/stores/header-nav-store';
 import { useUser } from '@clerk/tanstack-react-start';
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';

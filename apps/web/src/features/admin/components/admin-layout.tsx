@@ -27,7 +27,7 @@ import {
   Smile,
   Home,
   ChevronRight,
-} from 'lucide-react';
+} from '@/components/ui/icons';
 import { Separator } from '@/components/ui/separator';
 
 export interface AdminLayoutProps {

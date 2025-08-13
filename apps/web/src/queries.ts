@@ -134,8 +134,18 @@ export function useCreateVibeMutation() {
 
   return useMutation({
     mutationFn: convexMutation,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vibes'] });
+    onSuccess: (_newVibe) => {
+      // Targeted invalidation - only invalidate affected queries
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibes.getAllSimple],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibes.getAll],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibes.getFilteredVibes],
+      });
+      // Don't invalidate individual vibe queries as they're not affected
     },
   });
 }
@@ -147,8 +157,23 @@ export function useUpdateVibeMutation() {
 
   return useMutation({
     mutationFn: convexMutation,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vibes'] });
+    onSuccess: (updatedVibe, variables) => {
+      // Targeted invalidation - only invalidate the specific vibe and lists
+      if (variables?.vibeId) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'convexQuery',
+            api.vibes.getById,
+            { id: variables.vibeId },
+          ],
+        });
+      }
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibes.getAllSimple],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibes.getAll],
+      });
     },
   });
 }
@@ -160,8 +185,26 @@ export function useDeleteVibeMutation() {
 
   return useMutation({
     mutationFn: convexMutation,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vibes'] });
+    onSuccess: (_result, variables) => {
+      // Targeted invalidation - remove from lists but keep cached if accessed directly
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibes.getAllSimple],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibes.getAll],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibes.getFilteredVibes],
+      });
+      if (variables?.vibeId) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'convexQuery',
+            api.vibes.getById,
+            { id: variables.vibeId },
+          ],
+        });
+      }
     },
   });
 }
@@ -173,8 +216,21 @@ export function useAddRatingMutation() {
 
   return useMutation({
     mutationFn: convexMutation,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vibes'] });
+    onSuccess: (_result, variables) => {
+      // Only invalidate the specific vibe that was rated
+      if (variables?.vibeId) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'convexQuery',
+            api.vibes.getById,
+            { id: variables.vibeId },
+          ],
+        });
+        // Also invalidate filtered queries that might be affected by rating changes
+        queryClient.invalidateQueries({
+          queryKey: ['convexQuery', api.vibes.getFilteredVibes],
+        });
+      }
     },
   });
 }
@@ -188,8 +244,23 @@ export function useCreateEmojiRatingMutation() {
 
   return useMutation({
     mutationFn: convexMutation,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vibes'] });
+    onSuccess: (_result, variables) => {
+      // Targeted invalidation for emoji ratings
+      if (variables?.vibeId) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'convexQuery',
+            api.vibes.getById,
+            { id: variables.vibeId },
+          ],
+        });
+        // Note: getForVibe method doesn't exist in emojiRatings API
+        // Removing this invalidation as the method is not available
+        // Invalidate filtered queries as emoji ratings affect filters
+        queryClient.invalidateQueries({
+          queryKey: ['convexQuery', api.vibes.getFilteredVibes],
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['emojiRatings'] });
     },
   });

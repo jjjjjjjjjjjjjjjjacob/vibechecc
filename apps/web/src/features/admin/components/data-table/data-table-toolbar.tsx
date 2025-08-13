@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Table } from '@tanstack/react-table';
-import { X, Download, Settings2 } from 'lucide-react';
+import { X, Download, Settings2 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {

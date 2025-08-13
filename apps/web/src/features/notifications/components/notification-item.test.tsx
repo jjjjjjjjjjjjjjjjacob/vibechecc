@@ -4,7 +4,7 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NotificationItem } from './notification-item';
 import type { Notification } from '@viberatr/types';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from '@/utils/date-utils';
 
 // Mock the queries
 vi.mock('@/queries', () => ({
@@ -24,8 +24,8 @@ vi.mock('@tanstack/react-router', async () => {
   };
 });
 
-// Mock date-fns
-vi.mock('date-fns', () => ({
+// Mock date-utils
+vi.mock('@/utils/date-utils', () => ({
   formatDistanceToNow: vi.fn(() => '2 hours ago'),
 }));
 

@@ -12,7 +12,7 @@ import {
   Bell,
   LogIn,
   LogOut,
-} from 'lucide-react';
+} from '@/components/ui/icons';
 import { useCallback, useState, useEffect, useRef, RefObject } from 'react';
 import { cn } from '../utils/tailwind-utils';
 import { ThemeToggle } from '@/features/theming/components/theme-toggle';
@@ -308,7 +308,9 @@ export function Header() {
     <>
       <header
         data-is-dark={isHydrated ? resolvedTheme === 'dark' : false}
-        className={cn('relative h-fit')}
+        className={cn(
+          'animate-in fade-in in fade-in relative h-fit duration-300'
+        )}
       >
         <div
           data-is-vibe-page={isVibePage}

@@ -153,7 +153,8 @@ export function AccordionMenu({
             if (typeof child !== 'object' || !('props' in child)) return child;
             const childElement = child as ReactElement;
             if (
-              (childElement.type as any)?.displayName !== 'AccordionMenuContent'
+              (childElement.type as { displayName?: string })?.displayName !==
+              'AccordionMenuContent'
             )
               return child;
 

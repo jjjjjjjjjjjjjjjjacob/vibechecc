@@ -62,11 +62,37 @@ function AdminVibesPage() {
       <div className="flex h-full flex-col">
         <VibesTable
           data={
-            data?.data?.map((vibe: any) => ({
+            data?.data?.map((vibe) => ({
               ...vibe,
-              createdBy: vibe.creator,
-              ratings: vibe.emojiRatings || [], // Use emojiRatings from backend
-              emojiRatings: vibe.emojiRatings || [],
+              _id: vibe._id,
+              id: vibe.id,
+              title: vibe.title,
+              description: vibe.description,
+              image: vibe.image,
+              createdBy: vibe.creator
+                ? {
+                    ...vibe.creator,
+                    externalId: vibe.createdById || 'unknown',
+                  }
+                : null,
+              createdAt: vibe.createdAt,
+              ratings: (vibe.emojiRatings || []).map((rating) => ({
+                ...rating,
+                user: rating.user
+                  ? {
+                      ...rating.user,
+                      externalId: rating.userId,
+                    }
+                  : null,
+                value: rating.value,
+                emoji: rating.emoji,
+                review: rating.review,
+                createdAt: rating.createdAt,
+                tags: rating.tags,
+              })),
+              tags: vibe.tags,
+              viewCount: 0, // viewCount not tracked in backend
+              visibility: vibe.visibility,
             })) || []
           }
           totalCount={data?.totalCount || 0}
@@ -77,12 +103,21 @@ function AdminVibesPage() {
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
           onSearchChange={setSearch}
-          onStatusChange={setStatus as any}
+          onStatusChange={(
+            newStatus: 'all' | 'public' | 'private' | 'deleted'
+          ) => {
+            if (newStatus === 'private') {
+              // Convert 'private' to 'all' since our state doesn't support 'private'
+              setStatus('all');
+            } else {
+              setStatus(newStatus as 'all' | 'public' | 'deleted');
+            }
+          }}
           onDateRangeChange={(from, to) => {
             setDateFrom(from);
             setDateTo(to);
           }}
-          stats={stats as any}
+          stats={stats}
         />
       </div>
     </AdminLayout>

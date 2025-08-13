@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
-import { AlertTriangle, Edit, Trash2 } from 'lucide-react';
+import { AlertTriangle, Edit, Trash2 } from '@/components/ui/icons';
 
 // Constants to avoid rollup issues with empty array literals
 const EMPTY_ARRAY: never[] = [];
@@ -45,6 +45,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import type { Vibe } from '@/types';
 
 export const Route = createFileRoute('/vibes/$vibeId')({
   component: VibePage,
@@ -802,7 +803,7 @@ function VibePage() {
               {similarVibes.map((similarVibe) => (
                 <VibeCard
                   key={similarVibe.id}
-                  vibe={similarVibe}
+                  vibe={similarVibe as Vibe}
                   compact={true}
                 />
               ))}

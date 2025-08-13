@@ -169,12 +169,18 @@ export const createFollowerNotifications = internalMutation({
     }));
 
     // Use batch creation (much more efficient)
-    return await (ctx as any).runMutation(
-      internal.internal.createBatchNotifications,
-      {
-        notifications,
+    const notificationIds: string[] = await (
+      ctx as {
+        runMutation: <T>(
+          fn: T,
+          args: { notifications: typeof notifications }
+        ) => Promise<string[]>;
       }
-    );
+    ).runMutation(internal.internal.createBatchNotifications, {
+      notifications,
+    });
+
+    return notificationIds;
   },
 });
 

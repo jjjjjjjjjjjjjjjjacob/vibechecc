@@ -20,7 +20,7 @@ import {
   EyeOff,
   AlertCircle,
   CheckCircle,
-} from 'lucide-react';
+} from '@/components/ui/icons';
 import type { Id } from '@viberatr/convex/dataModel';
 import toast from '@/utils/toast';
 

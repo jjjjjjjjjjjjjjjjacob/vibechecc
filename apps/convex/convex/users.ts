@@ -259,21 +259,19 @@ export const updateProfile = action({
       })
     ),
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handler: async (ctx, args): Promise<any> => {
+  handler: async (ctx, args): Promise<unknown> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('User not authenticated');
     }
 
     // Update Convex only - Clerk will be updated from frontend
-    return await (ctx as any).runMutation(
-      internal.internal.updateProfileInternal,
-      {
-        externalId: identity.subject,
-        ...args,
-      }
-    );
+    return await (
+      ctx as unknown as { runMutation: typeof ctx.runMutation }
+    ).runMutation(internal.internal.updateProfileInternal, {
+      externalId: identity.subject,
+      ...args,
+    });
   },
 });
 
@@ -306,8 +304,25 @@ export const updateProfileInternal = internalMutation({
       throw new Error('User not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updates: Record<string, any> = {};
+    const updates: Partial<{
+      username: string;
+      first_name: string;
+      last_name: string;
+      image_url: string;
+      profile_image_url: string;
+      bio: string;
+      themeColor: string;
+      primaryColor: string;
+      secondaryColor: string;
+      interests: string[];
+      socials: {
+        twitter?: string;
+        instagram?: string;
+        tiktok?: string;
+        youtube?: string;
+        website?: string;
+      };
+    }> = {};
 
     if (args.username !== undefined) {
       updates.username = args.username;
@@ -358,21 +373,19 @@ export const completeOnboarding = action({
     interests: v.optional(v.array(v.string())),
     image_url: v.optional(v.string()),
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handler: async (ctx, args): Promise<any> => {
+  handler: async (ctx, args): Promise<unknown> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('User not authenticated');
     }
 
     // Update Convex only - Clerk will be updated from frontend
-    return await (ctx as any).runMutation(
-      internal.internal.completeOnboardingInternal,
-      {
-        externalId: identity.subject,
-        ...args,
-      }
-    );
+    return await (
+      ctx as unknown as { runMutation: typeof ctx.runMutation }
+    ).runMutation(internal.internal.completeOnboardingInternal, {
+      externalId: identity.subject,
+      ...args,
+    });
   },
 });
 
@@ -397,8 +410,13 @@ export const completeOnboardingInternal = internalMutation({
       throw new Error('User not authenticated');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updates: Record<string, any> = {
+    const updates: {
+      onboardingCompleted: boolean;
+      username?: string;
+      interests?: string[];
+      image_url?: string;
+      profile_image_url?: string;
+    } = {
       onboardingCompleted: true,
     };
 
@@ -427,21 +445,19 @@ export const updateOnboardingData = action({
     interests: v.optional(v.array(v.string())),
     image_url: v.optional(v.string()),
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handler: async (ctx, args): Promise<any> => {
+  handler: async (ctx, args): Promise<unknown> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('User not authenticated');
     }
 
     // Update Convex only - Clerk will be updated from frontend
-    return await (ctx as any).runMutation(
-      internal.internal.updateOnboardingDataInternal,
-      {
-        externalId: identity.subject,
-        ...args,
-      }
-    );
+    return await (
+      ctx as unknown as { runMutation: typeof ctx.runMutation }
+    ).runMutation(internal.internal.updateOnboardingDataInternal, {
+      externalId: identity.subject,
+      ...args,
+    });
   },
 });
 
@@ -474,8 +490,14 @@ export const updateOnboardingDataInternal = internalMutation({
       throw new Error('User not authenticated');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updates: Record<string, any> = {};
+    const updates: Partial<{
+      username: string;
+      first_name: string;
+      last_name: string;
+      interests: string[];
+      image_url: string;
+      profile_image_url: string;
+    }> = {};
 
     if (args.username !== undefined) {
       updates.username = args.username;
@@ -665,6 +687,7 @@ export const upsertFromClerk = internalMutation({
           SecurityValidators.validateUsername(validatedUsername) || undefined;
       } catch (error) {
         // Log validation error but don't fail the webhook - use undefined instead
+        // eslint-disable-next-line no-console
         console.warn(
           `Clerk username validation failed for user ${data.id}:`,
           error
@@ -786,6 +809,7 @@ export const trackUserSignup = internalAction({
     }
   ) => {
     if (!POSTHOG_API_KEY) {
+      // eslint-disable-next-line no-console
       console.warn(
         'PostHog API key not configured, skipping server-side signup tracking'
       );
@@ -822,6 +846,7 @@ export const trackUserSignup = internalAction({
       });
 
       if (!signupResponse.ok) {
+        // eslint-disable-next-line no-console
         console.error(
           'Failed to track signup to PostHog:',
           signupResponse.status,
@@ -864,6 +889,7 @@ export const trackUserSignup = internalAction({
       });
 
       if (!identifyResponse.ok) {
+        // eslint-disable-next-line no-console
         console.warn(
           'Failed to set user properties in PostHog:',
           identifyResponse.status
@@ -871,9 +897,11 @@ export const trackUserSignup = internalAction({
         // Don't fail the whole operation for this
       }
 
+      // eslint-disable-next-line no-console
       console.log(`Successfully tracked signup for user ${userId} to PostHog`);
       return { success: true, userId, email };
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error tracking signup to PostHog:', error);
       return { success: false, reason: 'network_error', error: String(error) };
     }

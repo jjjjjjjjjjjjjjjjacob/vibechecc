@@ -19,6 +19,7 @@ export function OnboardingFlow() {
   const navigate = useNavigate();
   const { user } = useUser();
   const [currentStep, setCurrentStep] = React.useState(1);
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
   const [onboardingData, setOnboardingData] = React.useState({
     username: '',
     first_name: '',
@@ -40,13 +41,27 @@ export function OnboardingFlow() {
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      setCurrentStep((prev) => prev + 1);
+      if (currentStep === 1) {
+        // Special handling for welcome step with fade-out animation
+        // Animation is handled in OnboardingWelcomeStep
+        setCurrentStep((prev) => prev + 1);
+      } else {
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setCurrentStep((prev) => prev + 1);
+          setIsTransitioning(false);
+        }, 300);
+      }
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep((prev) => prev - 1);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentStep((prev) => prev - 1);
+        setIsTransitioning(false);
+      }, 300);
     }
   };
 
@@ -117,12 +132,10 @@ export function OnboardingFlow() {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const promises: Promise<any>[] = [];
+      const promises: Promise<unknown>[] = [];
 
       // Prepare Convex completion
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const convexData: any = {};
+      const convexData: Record<string, string | string[]> = {};
       if (onboardingData.username)
         convexData.username = onboardingData.username;
       if (onboardingData.interests.length > 0)
@@ -134,8 +147,7 @@ export function OnboardingFlow() {
       promises.push(completeOnboardingMutation.mutateAsync(convexData));
 
       // Prepare Clerk updates if needed
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const clerkUpdates: any = {};
+      const clerkUpdates: Record<string, string> = {};
       if (onboardingData.username)
         clerkUpdates.username = onboardingData.username;
       if (onboardingData.first_name)
@@ -252,6 +264,7 @@ export function OnboardingFlow() {
       showSkip={currentStep < 6}
       title={getStepTitle()}
       subtitle={getStepSubtitle()}
+      isTransitioning={isTransitioning}
     >
       {getStepContent()}
     </OnboardingLayout>

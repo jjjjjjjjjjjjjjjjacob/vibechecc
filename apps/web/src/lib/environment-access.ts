@@ -1,7 +1,7 @@
 import { analytics } from './posthog';
 
 /**
- * Utility functions for environment-based access control
+ * Utility functions for environment-based access control and theme loading management
  */
 
 export interface EnvironmentInfo {
@@ -122,4 +122,76 @@ export function trackEnvironmentAccess(
     access_granted: allowed,
     has_feature_flag: hasDevEnvironmentAccess(),
   });
+}
+
+/**
+ * Simple readiness state tracking
+ */
+export interface ReadinessState {
+  isThemeReady: boolean;
+  isPostHogReady: boolean;
+  isFullyReady: boolean;
+}
+
+/**
+ * Determines if theme system is ready for rendering
+ * Theme is ready when localStorage has been checked and user preferences synced
+ */
+export function isThemeReady(
+  isLocalStorageLoaded: boolean,
+  isThemeLoaded: boolean,
+  isUserLoaded: boolean
+): boolean {
+  // Theme is ready when:
+  // 1. localStorage has been checked
+  // 2. User loading state is settled (logged in/out)
+  // 3. Theme preferences have been loaded/synced
+  return isLocalStorageLoaded && isThemeLoaded && isUserLoaded;
+}
+
+/**
+ * Determines if PostHog access check is complete
+ */
+export function isPostHogReady(
+  isPostHogInitialized: boolean,
+  hasEnvironmentAccess: boolean | null
+): boolean {
+  // For localhost, only theme readiness matters
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+      return true;
+    }
+  }
+
+  // For production environments, both PostHog and access check must be complete
+  return isPostHogInitialized && hasEnvironmentAccess !== null;
+}
+
+/**
+ * Gets overall readiness state
+ */
+export function getReadinessState(
+  isLocalStorageLoaded: boolean,
+  isThemeLoaded: boolean,
+  isUserLoaded: boolean,
+  isPostHogInitialized: boolean,
+  hasEnvironmentAccess: boolean | null
+): ReadinessState {
+  const isThemeReady_ = isThemeReady(
+    isLocalStorageLoaded,
+    isThemeLoaded,
+    isUserLoaded
+  );
+  const isPostHogReady_ = isPostHogReady(
+    isPostHogInitialized,
+    hasEnvironmentAccess
+  );
+  const isFullyReady = isThemeReady_ && isPostHogReady_;
+
+  return {
+    isThemeReady: isThemeReady_,
+    isPostHogReady: isPostHogReady_,
+    isFullyReady,
+  };
 }

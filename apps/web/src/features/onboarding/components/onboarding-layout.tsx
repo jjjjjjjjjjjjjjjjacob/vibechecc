@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X } from '@/components/ui/icons';
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
@@ -13,6 +13,7 @@ interface OnboardingLayoutProps {
   showSkip?: boolean;
   title?: string;
   subtitle?: string;
+  isTransitioning?: boolean;
 }
 
 export function OnboardingLayout({
@@ -25,11 +26,15 @@ export function OnboardingLayout({
   showSkip = true,
   title,
   subtitle,
+  isTransitioning = false,
 }: OnboardingLayoutProps) {
   const progress = (currentStep / totalSteps) * 100;
 
   return (
-    <div className="from-theme-primary/5 to-theme-secondary/5 dark:from-background dark:to-muted/50 min-h-screen bg-gradient-to-br">
+    <div
+      className="from-theme-primary/5 to-theme-secondary/5 dark:from-background dark:to-muted/50 min-h-screen bg-gradient-to-br transition-all duration-500 data-[transitioning=true]:opacity-0"
+      data-transitioning={isTransitioning}
+    >
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -83,8 +88,8 @@ export function OnboardingLayout({
           )}
 
           <div
-            className="animate-fade-in-down opacity-0"
-            style={{ animation: 'fade-in-down 0.3s ease-out 0.1s forwards' }}
+            className="transition-all duration-300 data-[transitioning=true]:translate-y-[-10px] data-[transitioning=true]:opacity-0"
+            data-transitioning={isTransitioning}
           >
             {children}
           </div>

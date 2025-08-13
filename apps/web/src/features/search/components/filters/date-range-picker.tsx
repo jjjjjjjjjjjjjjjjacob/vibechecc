@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, CalendarDays, ChevronRight } from 'lucide-react';
+import { Calendar, CalendarDays, ChevronRight } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -15,7 +15,7 @@ import {
   startOfWeek,
   startOfMonth,
   startOfYear,
-} from 'date-fns';
+} from '@/utils/date-utils';
 
 interface DateRangePickerProps {
   value?: { start: string; end: string };

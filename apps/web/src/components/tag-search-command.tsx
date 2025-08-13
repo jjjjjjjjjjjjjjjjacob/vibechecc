@@ -8,7 +8,7 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
-import { Hash, X } from 'lucide-react';
+import { Hash, X } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { useAllTags } from '@/queries';
 
@@ -32,7 +32,7 @@ export function TagSearchCommand({
 
   // Filter tags based on search
   const filteredTags = allTags?.filter(
-    (tag) =>
+    (tag: { tag: string; count: number }) =>
       tag.tag.toLowerCase().includes(searchValue.toLowerCase()) &&
       !selectedTags.includes(tag.tag)
   );
@@ -53,7 +53,7 @@ export function TagSearchCommand({
           )}
           {filteredTags && filteredTags.length > 0 && (
             <CommandGroup>
-              {filteredTags.map((tag) => (
+              {filteredTags.map((tag: { tag: string; count: number }) => (
                 <CommandItem
                   key={tag.tag}
                   value={tag.tag}

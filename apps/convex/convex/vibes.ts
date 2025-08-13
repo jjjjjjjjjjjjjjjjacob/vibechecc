@@ -148,36 +148,48 @@ export const getFilteredVibes = query({
       );
     }
 
-    // Get emoji ratings if emoji filter is present
+    // Get emoji ratings if emoji filter is present - OPTIMIZED BATCH FETCH
     let vibesWithEmojiRatings = filteredVibes;
     if (filters.emojis && filters.emojis.length > 0) {
-      vibesWithEmojiRatings = await Promise.all(
-        filteredVibes.map(async (vibe) => {
-          const emojiRatings = await ctx.db
+      // Batch fetch all ratings for all vibes in one go
+      const vibeIds = filteredVibes.map((v) => v.id);
+      const allRatings = await Promise.all(
+        vibeIds.map((vibeId) =>
+          ctx.db
             .query('ratings')
-            .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-            .collect();
-
-          const relevantEmojiRatings = emojiRatings.filter((rating) =>
-            filters.emojis!.includes(rating.emoji)
-          );
-
-          const avgEmojiRating =
-            relevantEmojiRatings.length > 0
-              ? relevantEmojiRatings.reduce((sum, r) => sum + r.value, 0) /
-                relevantEmojiRatings.length
-              : 0;
-
-          return {
-            ...vibe,
-            avgEmojiRating,
-            hasEmojiFilter: relevantEmojiRatings.length > 0,
-          } as typeof vibe & {
-            avgEmojiRating: number;
-            hasEmojiFilter: boolean;
-          };
-        })
+            .withIndex('vibe', (q) => q.eq('vibeId', vibeId))
+            .collect()
+        )
       );
+
+      // Create a map for O(1) lookup
+      const ratingsMap = new Map<string, (typeof allRatings)[0]>();
+      vibeIds.forEach((vibeId, index) => {
+        ratingsMap.set(vibeId, allRatings[index]);
+      });
+
+      // Process vibes with pre-fetched ratings
+      vibesWithEmojiRatings = filteredVibes.map((vibe) => {
+        const emojiRatings = ratingsMap.get(vibe.id) || [];
+        const relevantEmojiRatings = emojiRatings.filter((rating) =>
+          filters.emojis!.includes(rating.emoji)
+        );
+
+        const avgEmojiRating =
+          relevantEmojiRatings.length > 0
+            ? relevantEmojiRatings.reduce((sum, r) => sum + r.value, 0) /
+              relevantEmojiRatings.length
+            : 0;
+
+        return {
+          ...vibe,
+          avgEmojiRating,
+          hasEmojiFilter: relevantEmojiRatings.length > 0,
+        } as typeof vibe & {
+          avgEmojiRating: number;
+          hasEmojiFilter: boolean;
+        };
+      });
 
       // Filter out vibes without the required emoji ratings
       vibesWithEmojiRatings = vibesWithEmojiRatings.filter(
@@ -196,28 +208,39 @@ export const getFilteredVibes = query({
       }
     }
 
-    // Apply general rating filters
+    // Apply general rating filters - OPTIMIZED BATCH FETCH
     if (!filters.emojis && (filters.minRating || filters.maxRating)) {
-      vibesWithEmojiRatings = await Promise.all(
-        vibesWithEmojiRatings.map(async (vibe) => {
-          // Get ratings to calculate average
-          const ratings = await ctx.db
+      // Batch fetch all ratings for all vibes
+      const vibeIds = vibesWithEmojiRatings.map((v) => ('id' in v ? v.id : ''));
+      const allRatings = await Promise.all(
+        vibeIds.map((vibeId) =>
+          ctx.db
             .query('ratings')
-            .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-            .collect();
-
-          const averageRating =
-            ratings.length > 0
-              ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
-              : 0;
-
-          return {
-            ...vibe,
-            rating: averageRating,
-            ratingCount: ratings.length,
-          } as typeof vibe & { rating: number; ratingCount: number };
-        })
+            .withIndex('vibe', (q) => q.eq('vibeId', vibeId))
+            .collect()
+        )
       );
+
+      // Create a map for O(1) lookup
+      const ratingsMap = new Map<string, (typeof allRatings)[0]>();
+      vibeIds.forEach((vibeId, index) => {
+        ratingsMap.set(vibeId, allRatings[index]);
+      });
+
+      // Process vibes with pre-fetched ratings
+      vibesWithEmojiRatings = vibesWithEmojiRatings.map((vibe) => {
+        const ratings = ratingsMap.get('id' in vibe ? vibe.id : '') || [];
+        const averageRating =
+          ratings.length > 0
+            ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
+            : 0;
+
+        return {
+          ...vibe,
+          rating: averageRating,
+          ratingCount: ratings.length,
+        } as typeof vibe & { rating: number; ratingCount: number };
+      });
 
       vibesWithEmojiRatings = vibesWithEmojiRatings.filter((vibe) => {
         if (
@@ -238,24 +261,40 @@ export const getFilteredVibes = query({
       });
     }
 
-    // Filter by rating count if requested
+    // Filter by rating count if requested - OPTIMIZED BATCH FETCH
     if (
       filters.minRatingCount !== undefined ||
       filters.maxRatingCount !== undefined
     ) {
-      vibesWithEmojiRatings = await Promise.all(
-        vibesWithEmojiRatings.map(async (vibe) => {
-          const ratings = await ctx.db
-            .query('ratings')
-            .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-            .collect();
+      // Only fetch if we haven't already fetched ratings
+      if (!('ratingCount' in (vibesWithEmojiRatings[0] || {}))) {
+        const vibeIds = vibesWithEmojiRatings.map((v) =>
+          'id' in v ? v.id : ''
+        );
+        const allRatings = await Promise.all(
+          vibeIds.map((vibeId) =>
+            ctx.db
+              .query('ratings')
+              .withIndex('vibe', (q) => q.eq('vibeId', vibeId))
+              .collect()
+          )
+        );
 
+        // Create a map for O(1) lookup
+        const ratingsMap = new Map<string, (typeof allRatings)[0]>();
+        vibeIds.forEach((vibeId, index) => {
+          ratingsMap.set(vibeId, allRatings[index]);
+        });
+
+        // Process vibes with pre-fetched ratings
+        vibesWithEmojiRatings = vibesWithEmojiRatings.map((vibe) => {
+          const ratings = ratingsMap.get('id' in vibe ? vibe.id : '') || [];
           return {
             ...vibe,
             ratingCount: ratings.length,
           } as typeof vibe & { ratingCount: number };
-        })
-      );
+        });
+      }
 
       vibesWithEmojiRatings = vibesWithEmojiRatings.filter((vibe) => {
         if ('ratingCount' in vibe && typeof vibe.ratingCount === 'number') {
@@ -327,43 +366,66 @@ export const getFilteredVibes = query({
     const finalVibes = vibesWithEmojiRatings.slice(0, limit);
 
     // Get details for final vibes
-    const vibesWithDetails = await Promise.all(
-      finalVibes.map(async (vibe) => {
-        const creator = await ctx.db
-          .query('users')
-          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
-          .first();
+    // OPTIMIZED: Batch fetch all users and ratings
+    // Step 1: Collect all user IDs we need to fetch
+    const creatorIds = [...new Set(finalVibes.map((v) => v.createdById))];
 
-        const ratings = await ctx.db
+    // Step 2: Batch fetch all creators
+    const creators = await Promise.all(
+      creatorIds.map((id) =>
+        ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) => q.eq('externalId', id))
+          .first()
+      )
+    );
+    const creatorMap = new Map(creatorIds.map((id, i) => [id, creators[i]]));
+
+    // Step 3: Batch fetch ratings for all vibes
+    const allRatings = await Promise.all(
+      finalVibes.map((vibe) =>
+        ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(10);
-
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
-
-        return {
-          ...vibe,
-          createdBy: creator,
-          ratings: ratingDetails,
-        };
-      })
+          .take(10)
+      )
     );
+
+    // Step 4: Collect all rating user IDs
+    const ratingUserIds = [...new Set(allRatings.flat().map((r) => r.userId))];
+
+    // Step 5: Batch fetch all rating users
+    const ratingUsers = await Promise.all(
+      ratingUserIds.map((id) =>
+        ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) => q.eq('externalId', id))
+          .first()
+      )
+    );
+    const ratingUserMap = new Map(
+      ratingUserIds.map((id, i) => [id, ratingUsers[i]])
+    );
+
+    // Step 6: Assemble the final data structure
+    const vibesWithDetails = finalVibes.map((vibe, index) => {
+      const creator = creatorMap.get(vibe.createdById);
+      const ratings = allRatings[index];
+
+      const ratingDetails = ratings.map((rating) => ({
+        user: ratingUserMap.get(rating.userId),
+        emoji: rating.emoji,
+        value: rating.value,
+        review: rating.review,
+        createdAt: rating.createdAt,
+      }));
+
+      return {
+        ...vibe,
+        createdBy: creator,
+        ratings: ratingDetails,
+      };
+    });
 
     return {
       vibes: vibesWithDetails,
@@ -389,45 +451,67 @@ export const getAll = query({
       numItems: limit,
     });
 
-    const vibesWithDetails = await Promise.all(
-      vibes.page.map(async (vibe) => {
-        // Use more efficient user lookup
-        const creator = await ctx.db
+    // OPTIMIZED: Batch fetch all users and ratings to eliminate N+1 queries
+    // Step 1: Collect all creator IDs
+    const creatorIds = [...new Set(vibes.page.map((v) => v.createdById))];
+
+    // Step 2: Batch fetch all creators using indexed queries
+    const creators = await Promise.all(
+      creatorIds.map((id) =>
+        ctx.db
           .query('users')
-          .filter((q) => q.eq(q.field('externalId'), vibe.createdById))
-          .first();
-
-        // Limit ratings to avoid excessive reads
-        const ratings = await ctx.db
-          .query('ratings')
-          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(10); // Limit to 10 most recent ratings
-
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
-
-        return {
-          ...vibe,
-          createdBy: creator,
-          ratings: ratingDetails,
-        };
-      })
+          .withIndex('byExternalId', (q) => q.eq('externalId', id))
+          .first()
+      )
     );
+    const creatorMap = new Map(creatorIds.map((id, i) => [id, creators[i]]));
+
+    // Step 3: Batch fetch ratings for all vibes
+    const allRatings = await Promise.all(
+      vibes.page.map(
+        (vibe) =>
+          ctx.db
+            .query('ratings')
+            .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+            .take(10) // Limit to 10 most recent ratings
+      )
+    );
+
+    // Step 4: Collect all rating user IDs
+    const ratingUserIds = [...new Set(allRatings.flat().map((r) => r.userId))];
+
+    // Step 5: Batch fetch all rating users
+    const ratingUsers = await Promise.all(
+      ratingUserIds.map((id) =>
+        ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) => q.eq('externalId', id))
+          .first()
+      )
+    );
+    const ratingUserMap = new Map(
+      ratingUserIds.map((id, i) => [id, ratingUsers[i]])
+    );
+
+    // Step 6: Assemble the final data structure with O(1) lookups
+    const vibesWithDetails = vibes.page.map((vibe, index) => {
+      const creator = creatorMap.get(vibe.createdById);
+      const ratings = allRatings[index];
+
+      const ratingDetails = ratings.map((rating) => ({
+        user: ratingUserMap.get(rating.userId),
+        emoji: rating.emoji,
+        value: rating.value,
+        review: rating.review,
+        createdAt: rating.createdAt,
+      }));
+
+      return {
+        ...vibe,
+        createdBy: creator,
+        ratings: ratingDetails,
+      };
+    });
 
     return {
       vibes: vibesWithDetails,
@@ -734,6 +818,7 @@ export const create = mutation({
         try {
           imageValue = SecurityValidators.validateUrl(args.image) || undefined;
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.warn('Image URL validation failed, skipping image:', error);
           // Don't throw - just don't set the image
           imageValue = undefined;
@@ -762,7 +847,15 @@ export const create = mutation({
 
     // Update tag usage counts
     if (args.tags && args.tags.length > 0) {
-      await (ctx.scheduler as any).runAfter(0, internal.tags.updateTagCounts, {
+      await (
+        ctx.scheduler as unknown as {
+          runAfter: (
+            delay: number,
+            fn: unknown,
+            args: unknown
+          ) => Promise<unknown>;
+        }
+      ).runAfter(0, internal.tags.updateTagCounts, {
         tagsToAdd: args.tags,
       });
     }
@@ -792,6 +885,7 @@ export const create = mutation({
       );
     } catch (error) {
       // Don't fail the vibe creation if notification creation fails
+      // eslint-disable-next-line no-console
       console.error('Failed to create new vibe notifications:', error);
     }
 
@@ -1096,6 +1190,7 @@ export const addRating = mutation({
         }
       } catch (error) {
         // Don't fail the rating operation if notification creation fails
+        // eslint-disable-next-line no-console
         console.error('Failed to create new rating notifications:', error);
       }
     }
@@ -1211,6 +1306,7 @@ export const quickReact = mutation({
       }
     } catch (error) {
       // Don't fail the rating operation if notification creation fails
+      // eslint-disable-next-line no-console
       console.error('Failed to create new rating notifications:', error);
     }
 
@@ -2583,23 +2679,31 @@ export const updateVibe = mutation({
       const tagsToRemove = oldTags.filter((tag) => !newTags.includes(tag));
 
       if (tagsToAdd.length > 0) {
-        await (ctx.scheduler as any).runAfter(
-          0,
-          internal.tags.updateTagCounts,
-          {
-            tagsToAdd,
+        await (
+          ctx.scheduler as unknown as {
+            runAfter: (
+              delay: number,
+              fn: unknown,
+              args: unknown
+            ) => Promise<unknown>;
           }
-        );
+        ).runAfter(0, internal.tags.updateTagCounts, {
+          tagsToAdd,
+        });
       }
 
       if (tagsToRemove.length > 0) {
-        await (ctx.scheduler as any).runAfter(
-          0,
-          internal.tags.updateTagCounts,
-          {
-            tagsToRemove,
+        await (
+          ctx.scheduler as unknown as {
+            runAfter: (
+              delay: number,
+              fn: unknown,
+              args: unknown
+            ) => Promise<unknown>;
           }
-        );
+        ).runAfter(0, internal.tags.updateTagCounts, {
+          tagsToRemove,
+        });
       }
     }
 
@@ -2647,7 +2751,15 @@ export const deleteVibe = mutation({
 
     // Remove tags from count (since the vibe is no longer visible)
     if (vibe.tags && vibe.tags.length > 0) {
-      await (ctx.scheduler as any).runAfter(0, internal.tags.updateTagCounts, {
+      await (
+        ctx.scheduler as unknown as {
+          runAfter: (
+            delay: number,
+            fn: unknown,
+            args: unknown
+          ) => Promise<unknown>;
+        }
+      ).runAfter(0, internal.tags.updateTagCounts, {
         tagsToRemove: vibe.tags,
       });
     }

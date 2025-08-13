@@ -10,7 +10,13 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { Heart, Star, MessageCircle, Sparkles, Eye } from 'lucide-react';
+import {
+  Heart,
+  Star,
+  MessageCircle,
+  Sparkles,
+  Eye,
+} from '@/components/ui/icons';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import type { UserTheme } from '@/utils/theme-colors';
 import toast from '@/utils/toast';

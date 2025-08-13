@@ -17,7 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import toast from '@/utils/toast';
 import { UserProfileView } from '@/features/profiles/components';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@/components/ui/icons';
 
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
@@ -55,7 +55,7 @@ function ProfilePreview() {
     convexUser?.externalId || ''
   );
   const { data: receivedRatings, isLoading: receivedRatingsLoading } =
-    useUserReceivedRatings(convexUser?.externalId || '') as any;
+    useUserReceivedRatings(convexUser?.externalId || '');
   const { data: emojiStats } = useUserEmojiStats(convexUser?.externalId || '');
 
   React.useEffect(() => {
@@ -71,6 +71,7 @@ function ProfilePreview() {
           refetchUser();
         },
         onError: (error) => {
+          // eslint-disable-next-line no-console
           console.error('Failed to create user:', error);
           toast.error(
             'Failed to initialize user profile. Please refresh the page.'
@@ -143,9 +144,40 @@ function ProfilePreview() {
           user={convexUser}
           userVibes={userVibes}
           vibesLoading={vibesLoading}
-          userRatings={userRatings as any}
+          userRatings={userRatings
+            ?.filter((rating) => rating !== null)
+            .map((rating) => ({
+              ...rating,
+              vibe: rating.vibe
+                ? {
+                    ...rating.vibe,
+                    createdBy: rating.vibe.createdBy
+                      ? {
+                          id:
+                            rating.vibe.createdBy.externalId ||
+                            rating.vibe.createdBy._id ||
+                            'unknown',
+                          name:
+                            rating.vibe.createdBy.username ||
+                            `${rating.vibe.createdBy.first_name || ''} ${rating.vibe.createdBy.last_name || ''}`.trim() ||
+                            'Unknown',
+                          avatar: rating.vibe.createdBy.image_url,
+                        }
+                      : {
+                          id: 'unknown',
+                          name: 'Unknown User',
+                          avatar: undefined,
+                        },
+                  }
+                : undefined,
+            }))}
           ratingsLoading={ratingsLoading}
-          receivedRatings={receivedRatings as any}
+          receivedRatings={receivedRatings
+            ?.filter((rating) => rating !== null)
+            .map((rating) => ({
+              ...rating,
+              rater: rating.rater || undefined,
+            }))}
           receivedRatingsLoading={receivedRatingsLoading}
           emojiStats={emojiStats}
           showBackButton={false}

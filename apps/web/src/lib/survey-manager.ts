@@ -28,6 +28,7 @@ class SurveyManager {
     _userEmail?: string
   ): Promise<void> {
     if (!analytics.isInitialized()) {
+      // eslint-disable-next-line no-console
       console.warn('PostHog not initialized, cannot trigger survey');
       return;
     }
@@ -56,6 +57,7 @@ class SurveyManager {
         this.showSurveyIfEligible(userId);
       }, this.DEFAULT_CONFIG.delayMs);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to trigger new user survey:', error);
       analytics.capture('survey_error', {
         error_type: 'trigger_failed',
@@ -81,6 +83,7 @@ class SurveyManager {
       // The actual survey display is handled by the NewUserSurvey React component
       // which checks user eligibility and PostHog initialization
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to prepare survey:', error);
     }
   }
@@ -108,6 +111,7 @@ class SurveyManager {
       // Track specific insights for business intelligence
       this.trackDiscoveryInsights(responses);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to record survey response:', error);
       analytics.capture('survey_error', {
         error_type: 'response_recording_failed',
@@ -153,6 +157,7 @@ class SurveyManager {
         posthogInstance.get_property('survey_dismissed');
       return !!personProps;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to check survey completion status:', error);
       return false;
     }

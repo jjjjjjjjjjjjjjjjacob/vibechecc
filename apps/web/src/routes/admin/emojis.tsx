@@ -94,10 +94,17 @@ function AdminEmojisPage() {
       <div className="flex h-full flex-col">
         <EmojisTable
           data={
-            data?.data?.map((emoji: any) => ({
-              ...emoji,
-              unicode: emoji.unicode || emoji.codepoint || 'U+0000',
+            data?.data?.map((emoji) => ({
+              _id: emoji._id as string,
+              emoji: emoji.emoji,
+              name: emoji.name,
+              category: emoji.category,
+              keywords: emoji.keywords || [],
+              sentiment: emoji.sentiment,
+              unicode: emoji.unicode || 'U+0000',
               enabled: !emoji.disabled,
+              usageCount: emoji.usageCount,
+              lastUsed: emoji.lastUsed,
             })) || []
           }
           totalCount={data?.totalCount || 0}
@@ -131,7 +138,17 @@ function AdminEmojisPage() {
             setSortDirection(direction);
           }}
           categories={categories || []}
-          stats={stats as any}
+          stats={
+            stats
+              ? {
+                  totalEmojis: stats.totalEmojis,
+                  enabledEmojis: stats.enabledEmojis,
+                  categoriesCount: Object.keys(stats.categoryDistribution || {})
+                    .length,
+                  averageUsage: stats.averageUsagePerEmoji,
+                }
+              : undefined
+          }
           searchValue={search}
           categoryValue={category}
           sentimentValue={sentiment}

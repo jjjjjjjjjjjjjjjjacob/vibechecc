@@ -13,7 +13,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Sparkles, Shield } from 'lucide-react';
+import { Sparkles, Shield } from '@/components/ui/icons';
 import toast from '@/utils/toast';
 import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 import { DebugAuth } from '@/features/auth/components/debug-auth';
@@ -89,6 +89,7 @@ function Profile() {
           refetchUser();
         },
         onError: (error) => {
+          // eslint-disable-next-line no-console
           console.error('Failed to create user:', error);
           toast.error(
             'Failed to initialize user profile. Please refresh the page.'

@@ -39,7 +39,7 @@ export function useSearchTracking() {
 
   const trackFilterApplied = (
     filterType: string,
-    filterValue: any,
+    filterValue: string | number | boolean | string[] | undefined,
     searchQuery?: string
   ) => {
     trackEvents.searchFilterApplied(filterType, filterValue, searchQuery);
@@ -47,7 +47,7 @@ export function useSearchTracking() {
 
   const trackFilterRemoved = (
     filterType: string,
-    filterValue: any,
+    filterValue: string | number | boolean | string[] | undefined,
     searchQuery?: string
   ) => {
     trackEvents.searchFilterRemoved(filterType, filterValue, searchQuery);

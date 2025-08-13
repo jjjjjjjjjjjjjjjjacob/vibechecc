@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Moon, Sun, Laptop } from 'lucide-react';
+import { Moon, Sun, Laptop } from '@/components/ui/icons';
 import { useTheme } from '@/stores/theme-initializer';
 import { Button } from '@/components/ui/button';
 import {

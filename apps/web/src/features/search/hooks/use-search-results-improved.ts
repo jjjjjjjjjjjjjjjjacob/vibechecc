@@ -53,10 +53,12 @@ export function useSearchResultsImproved({
   page = 1,
   includeTypes,
   enabled = true,
-}: UseSearchResultsParams) {
+  skipTracking = false, // New parameter to skip tracking for secondary queries
+}: UseSearchResultsParams & { skipTracking?: boolean }) {
   const debouncedQuery = useDebouncedValue(query, 300);
   const { user } = useUser();
   const previousQuery = useRef<string>('');
+  const hasTrackedRef = useRef<Set<string>>(new Set());
 
   // Use the optimized search API with proper pagination
   const searchQuery = useQuery({
@@ -77,36 +79,45 @@ export function useSearchResultsImproved({
     mutationFn: useConvexMutation(api.search.trackSearch),
   });
 
-  // Stable callback for tracking searches
+  // Stable callback for tracking searches with deduplication
   const trackSearch = useCallback(
     (query: string, resultCount: number) => {
+      // Create a unique key for this search
+      const _trackingKey = `${query}-${resultCount}-${Date.now()}`;
+
+      // Prevent duplicate tracking within 1 second
+      if (hasTrackedRef.current.has(query)) {
+        return;
+      }
+
+      hasTrackedRef.current.add(query);
+      // Clear the tracking key after 1 second
+      setTimeout(() => {
+        hasTrackedRef.current.delete(query);
+      }, 1000);
+
       trackSearchMutation.mutate({ query, resultCount }, {});
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  // Track search when debounced query changes (for search history)
+  // Track search only once when query changes and we get results
   useEffect(() => {
-    // Only track when we have a non-empty query, user is authenticated, and query actually changed
+    // Skip tracking if disabled or for secondary queries
+    if (skipTracking) return;
+
+    // Only track when we have a non-empty query, user is authenticated, query changed, and we have data
     if (
       debouncedQuery.trim() &&
       user?.id &&
-      debouncedQuery !== previousQuery.current
+      debouncedQuery !== previousQuery.current &&
+      searchQuery.data
     ) {
       previousQuery.current = debouncedQuery;
-      // Track immediately when query changes for search history
-      trackSearch(debouncedQuery, 0); // We don't know the count yet
-    }
-  }, [debouncedQuery, user?.id, trackSearch]); // Track on debounced query changes
 
-  // Update search history with actual result count when we have results
-  useEffect(() => {
-    if (searchQuery.data && debouncedQuery.trim() && user?.id) {
-      // Try different ways to get the count
+      // Calculate total count from results
       let totalCount = 0;
-
-      // First try using the totalCount field if it exists
       if (searchQuery.data.totalCount !== undefined) {
         totalCount = searchQuery.data.totalCount;
       } else {
@@ -119,10 +130,10 @@ export function useSearchResultsImproved({
           (searchQuery.data.reviews?.length || 0);
       }
 
-      // Always update with the actual result count (even if 0)
+      // Track once with the actual result count
       trackSearch(debouncedQuery, totalCount);
     }
-  }, [searchQuery.data, debouncedQuery, user?.id, trackSearch]); // Update when we get actual results
+  }, [debouncedQuery, user?.id, searchQuery.data, skipTracking, trackSearch]); // Single effect for tracking
 
   return {
     data: searchQuery.data,

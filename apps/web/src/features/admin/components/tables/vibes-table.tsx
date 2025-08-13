@@ -1,10 +1,14 @@
 import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Eye, Edit, Trash2, Flag } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit, Trash2, Flag } from '@/components/ui/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@viberatr/convex';
 import type { Vibe } from '@viberatr/types';
+import type { VibeStats } from '@/features/admin/types';
+
+// Define Id type locally to avoid import issues
+type Id<T extends string> = string & { __tableName: T };
 import { DataTable } from '../data-table';
 import { DataTableColumnHeader } from '../data-table/data-table-column-header';
 import { EditableTextCell } from '../cells/editable-text-cell';
@@ -36,13 +40,7 @@ interface VibesTableProps {
   onSearchChange: (search: string) => void;
   onStatusChange: (status: 'all' | 'public' | 'private' | 'deleted') => void;
   onDateRangeChange: (from: number | undefined, to: number | undefined) => void;
-  stats?: {
-    totalVibes: number;
-    publicVibes: number;
-    deletedVibes: number;
-    averageRating: number;
-    totalViews: number;
-  };
+  stats?: VibeStats;
 }
 
 export function VibesTable({
@@ -75,7 +73,7 @@ export function VibesTable({
       reason?: string;
     }) => {
       return moderateVibeMutation({
-        vibeId: vibeId as any,
+        vibeId: vibeId as Id<'vibes'>,
         visibility,
         reason,
       });
@@ -98,7 +96,7 @@ export function VibesTable({
       vibeId: string;
       reason?: string;
     }) => {
-      return deleteVibeMutation({ vibeId: vibeId as any, reason });
+      return deleteVibeMutation({ vibeId: vibeId as Id<'vibes'>, reason });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'vibes'] });

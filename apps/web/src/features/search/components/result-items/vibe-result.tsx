@@ -1,7 +1,7 @@
 import { CommandItem } from '@/components/ui/command';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Star } from 'lucide-react';
+import { Star } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import type { VibeSearchResult } from '@viberatr/types';

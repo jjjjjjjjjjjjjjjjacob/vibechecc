@@ -18,6 +18,12 @@ import { useSearchTracking } from '../hooks/use-search-tracking';
 import { useNavigate } from '@tanstack/react-router';
 import { cn } from '@/utils/tailwind-utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import type {
+  VibeSearchResult,
+  UserSearchResult,
+  TagSearchResult,
+  ActionSearchResult,
+} from '@viberatr/types';
 import { type NavState } from '@/stores/header-nav-store';
 
 interface GlobalSearchCommandProps {
@@ -289,7 +295,7 @@ export function GlobalSearchCommand({
                 <>
                   {data.vibes && data.vibes.length > 0 && (
                     <CommandGroup heading="vibes">
-                      {data.vibes.map((vibe) => (
+                      {data.vibes.map((vibe: VibeSearchResult) => (
                         <VibeResult
                           key={vibe.id}
                           result={vibe}
@@ -307,7 +313,7 @@ export function GlobalSearchCommand({
                         <CommandSeparator />
                       )}
                       <CommandGroup heading="users">
-                        {data.users.map((user) => (
+                        {data.users.map((user: UserSearchResult) => (
                           <UserResult
                             key={user.id}
                             result={user}
@@ -327,7 +333,7 @@ export function GlobalSearchCommand({
                         <CommandSeparator />
                       )}
                       <CommandGroup heading="tags">
-                        {data.tags.map((tag) => (
+                        {data.tags.map((tag: TagSearchResult) => (
                           <TagResult
                             key={tag.id}
                             result={tag}
@@ -348,7 +354,7 @@ export function GlobalSearchCommand({
                         <CommandSeparator />
                       )}
                       <CommandGroup heading="actions">
-                        {data.actions.map((action) => (
+                        {data.actions.map((action: ActionSearchResult) => (
                           <ActionResult
                             key={action.id}
                             result={action}

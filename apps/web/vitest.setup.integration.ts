@@ -17,6 +17,7 @@ afterEach(() => {
 // Setup before all tests
 beforeAll(() => {
   // Any global setup needed for integration tests
+  // eslint-disable-next-line no-console
   console.log(
     'Running integration tests with Convex backend:',
     process.env.VITE_CONVEX_URL

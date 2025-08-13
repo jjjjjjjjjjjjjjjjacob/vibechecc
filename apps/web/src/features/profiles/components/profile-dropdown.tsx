@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
-import { User, Settings, Heart, LogOut, Shield } from 'lucide-react';
+import { User, Settings, Heart, LogOut, Shield } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { useCurrentUser } from '@/queries';
 import { SignOutButton, useUser } from '@clerk/tanstack-react-start';

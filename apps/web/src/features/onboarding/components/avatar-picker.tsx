@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Camera, User } from 'lucide-react';
+import { Camera, User } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 
 interface AvatarPickerProps {

@@ -1,5 +1,6 @@
 import { action, internalMutation } from './_generated/server';
 import { internal } from './_generated/api';
+import type { Doc } from './_generated/dataModel';
 import { v } from 'convex/values';
 import { nanoid } from 'nanoid';
 
@@ -77,14 +78,16 @@ export const seed = action({
       // Step 1: Clear all existing data
       // eslint-disable-next-line no-console
       console.log('Step 1: Clearing existing data...');
-      await (ctx as any).runMutation(internal.seed.clearAllData);
+      await (
+        ctx as unknown as { runMutation: (fn: unknown) => Promise<unknown> }
+      ).runMutation(internal.seed.clearAllData);
 
       // Step 2: Seed emoji database
       // eslint-disable-next-line no-console
       console.log('Step 2: Seeding emoji database...');
-      const emojiResult = (await (ctx as any).runMutation(
-        internal.seed.seedEmojis
-      )) as {
+      const emojiResult = (await (
+        ctx as unknown as { runMutation: (fn: unknown) => Promise<unknown> }
+      ).runMutation(internal.seed.seedEmojis)) as unknown as {
         count: number;
       };
       // eslint-disable-next-line no-console
@@ -93,24 +96,26 @@ export const seed = action({
       // Step 3: Create users (20 for good development data)
       // eslint-disable-next-line no-console
       console.log('Step 3: Creating users...');
-      const userResult = (await (ctx as any).runMutation(
-        internal.seed.seedUsers,
-        {
-          count: 20,
+      const userResult = (await (
+        ctx as unknown as {
+          runMutation: (fn: unknown, args: unknown) => Promise<unknown>;
         }
-      )) as { count: number };
+      ).runMutation(internal.seed.seedUsers, {
+        count: 20,
+      })) as unknown as { count: number };
       // eslint-disable-next-line no-console
       console.log(`Created ${userResult.count} users`);
 
       // Step 4: Create vibes (25 for variety)
       // eslint-disable-next-line no-console
       console.log('Step 4: Creating vibes...');
-      const vibeResult = (await (ctx as any).runMutation(
-        internal.seed.seedVibes,
-        {
-          count: 100,
+      const vibeResult = (await (
+        ctx as unknown as {
+          runMutation: (fn: unknown, args: unknown) => Promise<unknown>;
         }
-      )) as { count: number };
+      ).runMutation(internal.seed.seedVibes, {
+        count: 100,
+      })) as unknown as { count: number };
       // eslint-disable-next-line no-console
       console.log(`Created ${vibeResult.count} vibes`);
 
@@ -126,9 +131,9 @@ export const seed = action({
       // Step 6: Create tags from vibes
       // eslint-disable-next-line no-console
       console.log('Step 6: Creating tags...');
-      const tagResult = (await (ctx as any).runMutation(
-        internal.seed.seedTags
-      )) as {
+      const tagResult = (await (
+        ctx as unknown as { runMutation: (fn: unknown) => Promise<unknown> }
+      ).runMutation(internal.seed.seedTags)) as unknown as {
         count: number;
       };
       // eslint-disable-next-line no-console
@@ -221,7 +226,7 @@ export const seedEmojis = internalMutation({
         unicode: getUnicodeFromEmoji(emojiData.emoji),
       };
 
-      await ctx.db.insert('emojis', completeEmoji as any);
+      await ctx.db.insert('emojis', completeEmoji as unknown as Doc<'emojis'>);
       count++;
     }
 

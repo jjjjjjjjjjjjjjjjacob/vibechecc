@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Heart } from 'lucide-react';
+import { Check, Heart } from '@/components/ui/icons';
 import { useAllTags } from '@/queries';
 
 interface OnboardingInterestsStepProps {
@@ -103,11 +102,7 @@ export function OnboardingInterestsStep({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="animate-slideInUp">
         <Card className="border-border/50 border-2">
           <CardHeader className="space-y-4 text-center">
             <div className="flex justify-center">
@@ -127,11 +122,10 @@ export function OnboardingInterestsStep({
           <CardContent className="space-y-6">
             <div className="flex flex-wrap justify-center gap-3">
               {availableInterests.map((interest, index) => (
-                <motion.div
+                <div
                   key={interest}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.02 }}
+                  className="animate-zoomIn"
+                  style={{ animationDelay: `${index * 0.02}s` }}
                 >
                   <Badge
                     variant={
@@ -151,19 +145,15 @@ export function OnboardingInterestsStep({
                       <Check className="ml-1 h-3 w-3" />
                     )}
                   </Badge>
-                </motion.div>
+                </div>
               ))}
             </div>
 
             {selectedInterests.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-muted-foreground text-center text-sm"
-              >
+              <div className="text-muted-foreground animate-slideInUp text-center text-sm">
                 {selectedInterests.length} interest
                 {selectedInterests.length !== 1 ? 's' : ''} selected
-              </motion.div>
+              </div>
             )}
 
             <div className="flex gap-3">
@@ -187,7 +177,7 @@ export function OnboardingInterestsStep({
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 }

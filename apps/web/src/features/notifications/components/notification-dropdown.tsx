@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/components/ui/icons';
 import {
   useNotificationsInfinite,
   useUnreadNotificationCountByType,
@@ -122,7 +122,7 @@ export function NotificationDropdown({
   const notifications = React.useMemo(() => {
     if (!notificationQuery.data?.pages) return [];
     return notificationQuery.data.pages.flatMap(
-      (page: any) => page?.notifications || []
+      (page) => page?.notifications || []
     );
   }, [notificationQuery.data]);
 
@@ -133,8 +133,8 @@ export function NotificationDropdown({
 
   const unreadCounts = unreadCountsByType
     ? {
-        all: Object.values(unreadCountsByType).reduce(
-          (sum: number, count: number) => sum + count,
+        all: Object.values(unreadCountsByType).reduce<number>(
+          (sum, count) => sum + count,
           0
         ),
         likes: unreadCountsByType.rating || 0,

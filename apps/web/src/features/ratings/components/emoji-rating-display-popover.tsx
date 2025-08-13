@@ -4,7 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { EmojiRatingDisplay } from './emoji-rating-display';
 import { TopEmojiRatingsAccordion } from './top-emoji-ratings-accordion';

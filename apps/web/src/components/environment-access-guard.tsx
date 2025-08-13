@@ -1,13 +1,17 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { SignInButton } from '@clerk/tanstack-react-start';
+import * as React from 'react';
+import { SignInButton, useUser } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
-import { LogIn } from 'lucide-react';
+import { LogIn } from '@/components/ui/icons';
 import { usePostHog } from '@/hooks/usePostHog';
+import { useThemeStore } from '@/stores/theme-store';
 import {
   canAccessCurrentEnvironment,
   getEnvironmentInfo,
   getAccessDenialMessage,
   trackEnvironmentAccess,
+  getReadinessState,
+  type ReadinessState,
 } from '@/lib/environment-access';
 
 interface EnvironmentAccessGuardProps {
@@ -24,19 +28,102 @@ export function EnvironmentAccessGuard({
   fallback,
 }: EnvironmentAccessGuardProps) {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { isInitialized } = usePostHog();
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [shouldShowContent, setShouldShowContent] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
+  const { isInitialized: isPostHogInitialized } = usePostHog();
+  const { isLoaded: isUserLoaded, user, isSignedIn } = useUser();
+  const {
+    isThemeLoaded,
+    isLocalStorageLoaded,
+    getEffectiveColorTheme,
+    getEffectiveSecondaryColorTheme,
+    setUserSignedIn,
+    loadThemeFromLocalStorage,
+    syncUserThemePreferences,
+  } = useThemeStore();
+
+  // Get readiness state
+  const readiness: ReadinessState = getReadinessState(
+    isLocalStorageLoaded,
+    isThemeLoaded,
+    isUserLoaded,
+    isPostHogInitialized,
+    hasAccess
+  );
+
+  // Initialize theme from localStorage on mount
+  React.useEffect(() => {
+    loadThemeFromLocalStorage();
+  }, [loadThemeFromLocalStorage]);
+
+  // Sync user authentication state with theme store
+  React.useEffect(() => {
+    if (isSignedIn !== undefined) {
+      setUserSignedIn(isSignedIn);
+    }
+  }, [isSignedIn, setUserSignedIn]);
+
+  // Sync user theme preferences when user data is available
+  React.useEffect(() => {
+    if (user && isUserLoaded && isLocalStorageLoaded) {
+      // Extract user theme preferences from user data
+      const userTheme = user.publicMetadata?.theme as
+        | 'light'
+        | 'dark'
+        | 'system'
+        | undefined;
+      const userColorTheme = user.publicMetadata?.colorTheme as
+        | string
+        | undefined;
+      const userSecondaryColorTheme = user.publicMetadata
+        ?.secondaryColorTheme as string | undefined;
+
+      syncUserThemePreferences(
+        userTheme,
+        userColorTheme as Parameters<typeof syncUserThemePreferences>[1],
+        userSecondaryColorTheme as Parameters<
+          typeof syncUserThemePreferences
+        >[2]
+      );
+    } else if (isLocalStorageLoaded) {
+      // No user data, mark theme as loaded with current localStorage state
+      syncUserThemePreferences();
+    }
+  }, [user, isUserLoaded, isLocalStorageLoaded, syncUserThemePreferences]);
+
+  // Show welcome when fully ready, then fade to content after 2 seconds
+  React.useEffect(() => {
+    if (readiness.isFullyReady && hasAccess) {
+      const welcomeTimer = setTimeout(() => {
+        setShowWelcome(true);
+        const fadeTimer = setTimeout(() => {
+          setIsFadingOut(true);
+          setTimeout(() => {
+            setShowWelcome(false);
+            setShouldShowContent(true);
+          }, 1300); // Wait for fade-out animation
+        }, 2650);
+        return () => clearTimeout(fadeTimer);
+      }, 200); // Initial delay before showing welcome
+
+      return () => {
+        clearTimeout(welcomeTimer);
+      };
+    }
+  }, [readiness.isFullyReady, hasAccess]);
+
+  // PostHog and Environment Access Check
   useEffect(() => {
     const checkAccess = () => {
       const envInfo = getEnvironmentInfo();
       const allowed = canAccessCurrentEnvironment();
 
       setHasAccess(allowed);
-      setIsLoading(false);
 
       // Track the access attempt (only if PostHog is initialized)
-      if (isInitialized) {
+      if (isPostHogInitialized) {
         trackEnvironmentAccess(allowed, envInfo);
       }
     };
@@ -52,32 +139,127 @@ export function EnvironmentAccessGuard({
     }
 
     // For production environments, wait for PostHog to initialize
-    if (!isInitialized) {
+    if (!isPostHogInitialized) {
       // Set a timeout to prevent infinite loading
       const timeout = setTimeout(() => {
         // eslint-disable-next-line no-console
         console.warn('PostHog initialization timeout, allowing access');
         setHasAccess(true);
-        setIsLoading(false);
-      }, 5000); // 5 second timeout
+      }, 7000); // 5 second timeout
 
       return () => clearTimeout(timeout);
     }
 
     // Check access immediately if PostHog is ready
     checkAccess();
-  }, [isInitialized]);
+  }, [isPostHogInitialized]);
 
-  // Show loading state while PostHog initializes
-  if (isLoading || hasAccess === null) {
+  const welcomeMessage = React.useMemo(
+    () =>
+      Array.from(
+        (() => {
+          const taglines = [
+            "we're vibing here",
+            'vibe or be vibed',
+            'what am i doing here',
+            'one doesn\'t just "vibe"',
+            "vibing hasn't killed anyone (yet)",
+            'all vibes no chill',
+            'addicted to the vibe',
+            "mary wake up you're in a coma",
+            'vibe summer',
+            'people die but vibes are eternal',
+            'professional vibe checker',
+            'vibe responsibly',
+            'caught in 4k vibing',
+            'a vibe a day keeps the doctor away',
+            "that's not a vibe this is a vibe",
+            "forget it jake it's vibetown",
+            'show me everest',
+            "you've got vibes",
+          ];
+          return taglines[Math.floor(Math.random() * taglines.length)];
+        })()
+      ).map((char, i) => (
+        <span
+          data-theme-ready={readiness.isFullyReady}
+          className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] whitespace-pre transition duration-800"
+          key={i}
+          style={{ animationDelay: `${i * 25}ms` }}
+        >
+          {char}
+        </span>
+      )),
+    [showWelcome, readiness.isFullyReady]
+  );
+
+  // Show loading/welcome state while not ready or showing welcome
+  if (!shouldShowContent) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div
+        className="data-[theme-ready=true]:from-theme-primary data-[theme-ready=true]:to-theme-secondary flex min-h-screen items-center justify-center bg-gradient-to-br from-white to-white transition duration-500 data-[fading-out=true]:opacity-0 data-[fading-out=true]:delay-700 data-[fading-out=true]:duration-600"
+        data-theme-ready={readiness.isThemeReady}
+        data-posthog-ready={readiness.isPostHogReady}
+        data-fully-ready={readiness.isFullyReady}
+        data-show-welcome={showWelcome}
+        data-has-access={hasAccess}
+        data-fading-out={isFadingOut}
+        data-has-custom-theme={
+          !!(getEffectiveColorTheme() && getEffectiveSecondaryColorTheme())
+        }
+      >
         <div className="space-y-6 text-center">
-          <div className="flex flex-col space-y-4">
-            <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
-              viberatr
-            </span>
-            <div className="border-muted border-t-theme-primary mx-auto h-8 w-8 animate-spin rounded-full border-4"></div>
+          <div
+            className="flex flex-col space-y-2 transition duration-800 data-[fading-out=true]:scale-105 data-[fading-out=true]:opacity-0"
+            data-fading-out={isFadingOut}
+          >
+            <p
+              data-theme-ready={readiness.isThemeReady}
+              className="data-[theme-ready=false]:text-foreground inline-flex w-full bg-transparent text-4xl font-bold duration-500 data-[theme-ready=true]:text-white"
+            >
+              {Array.from('viberatr').map((char, i) => (
+                <span
+                  data-theme-ready={readiness.isFullyReady}
+                  className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800"
+                  key={i}
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  {char}
+                </span>
+              ))}
+            </p>
+
+            <div className="relative flex h-6 w-full items-center justify-center transition duration-500">
+              <p
+                data-theme-ready={readiness.isFullyReady}
+                data-show-welcome={showWelcome}
+                className="data-[theme-ready=false]:text-foreground absolute inset-0 inline-flex w-full items-center justify-center text-center text-lg font-medium opacity-100 transition delay-800 duration-800 data-[show-welcome=false]:opacity-0 data-[theme-ready=true]:text-white"
+                style={{ animationDelay: `300ms` }}
+              >
+                {welcomeMessage}
+              </p>
+              <div
+                data-show-welcome={
+                  showWelcome || isFadingOut || shouldShowContent
+                }
+                className="animate-text-pulse absolute inset-0 flex items-center justify-center gap-1.5 p-0 transition duration-300 data-[show-welcome=true]:opacity-0"
+              >
+                <span
+                  data-theme-ready={readiness.isFullyReady}
+                  className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
+                />
+                <span
+                  data-theme-ready={readiness.isFullyReady}
+                  className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
+                  style={{ animationDelay: '300ms' }}
+                />
+                <span
+                  data-theme-ready={readiness.isFullyReady}
+                  className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
+                  style={{ animationDelay: '600ms' }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -139,6 +321,11 @@ export function EnvironmentAccessGuard({
     );
   }
 
-  // User has access, render children
+  // Show content when ready
+  if (shouldShowContent) {
+    return <>{children}</>;
+  }
+
+  // This shouldn't happen, but fallback to content if something goes wrong
   return <>{children}</>;
 }

@@ -8,7 +8,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { EmojiRatingDisplay } from './emoji-rating-display';
-import { ChevronDown, ArrowRight } from 'lucide-react';
+import { ChevronDown, ArrowRight } from '@/components/ui/icons';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 

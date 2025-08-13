@@ -20,7 +20,7 @@ import {
   ChevronLeft,
   Twitter,
   Instagram,
-} from 'lucide-react';
+} from '@/components/ui/icons';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';

@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Home } from 'lucide-react';
+import { AlertTriangle, Home } from '@/components/ui/icons';
 import { Link } from '@tanstack/react-router';
 
 export interface AdminGuardProps {

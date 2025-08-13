@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { SlidersHorizontal, X } from '@/components/ui/icons';
 import { EmojiSearchCommand } from '@/features/ratings/components/emoji-search-index';
 import { EmojiPillFilters } from '@/features/ratings/components/emoji-pill-filters';
 import { RatingRangeSlider } from '@/features/ratings/components/rating-range-slider';

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check } from 'lucide-react';
+import { Check } from '@/components/ui/icons';
 import { THEME_COLORS, type ThemeColor } from '@/utils/theme-colors';
 import { cn } from '@/utils/tailwind-utils';
 

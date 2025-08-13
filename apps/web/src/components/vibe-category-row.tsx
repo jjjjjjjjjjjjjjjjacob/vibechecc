@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { cn } from '@/utils/tailwind-utils';

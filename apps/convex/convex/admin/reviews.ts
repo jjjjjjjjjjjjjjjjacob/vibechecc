@@ -62,7 +62,8 @@ export const getAllReviews = query({
     }
 
     const sortedReviews = reviews.sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: string | number;
+      let bVal: string | number;
 
       switch (sortBy) {
         case 'value':

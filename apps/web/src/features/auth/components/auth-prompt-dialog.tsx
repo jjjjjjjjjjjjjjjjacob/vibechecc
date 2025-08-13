@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Sparkles, LogIn } from 'lucide-react';
+import { Sparkles, LogIn } from '@/components/ui/icons';
 
 interface AuthPromptDialogProps {
   open: boolean;

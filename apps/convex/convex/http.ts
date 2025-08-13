@@ -1,10 +1,21 @@
 import { httpRouter } from 'convex/server';
 import { httpAction } from './_generated/server';
 import { internal } from './_generated/api';
-import type { WebhookEvent } from '@clerk/backend';
+import type {
+  WebhookEvent,
+  UserJSON,
+  OrganizationMembershipJSON,
+} from '@clerk/backend';
 import { Webhook } from 'svix';
 
 const http = httpRouter();
+
+// Type for extended webhook event types (including organization membership events)
+type ExtendedWebhookEventType =
+  | WebhookEvent['type']
+  | 'organizationMembership.created'
+  | 'organizationMembership.updated'
+  | 'organizationMembership.deleted';
 
 const handleClerkWebhook = httpAction(async (ctx, request) => {
   // SECURITY: Rate limiting and basic request validation
@@ -13,12 +24,14 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
 
   // SECURITY: Validate content type
   if (!contentType || !contentType.includes('application/json')) {
+    // eslint-disable-next-line no-console
     console.error('Invalid content type:', contentType);
     return new Response('Invalid content type', { status: 400 });
   }
 
   // SECURITY: Validate User-Agent (Svix webhooks should have identifiable UA)
   if (!userAgent || !userAgent.includes('Svix')) {
+    // eslint-disable-next-line no-console
     console.error('Invalid or missing user agent:', userAgent);
     return new Response('Invalid request', { status: 400 });
   }
@@ -27,45 +40,52 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
   if (!event) {
     return new Response('Webhook validation failed', { status: 400 });
   }
-  switch (event.type) {
-    case 'user.created':
+
+  switch (event.type as ExtendedWebhookEventType) {
+    case 'user.created': {
+      const userData = event.data as UserJSON;
       // Create user in database
-      await (ctx as any).runMutation(internal.users.upsertFromClerk, {
-        data: event.data,
+      await ctx.runMutation(internal.users.upsertFromClerk, {
+        data: userData,
       });
 
       // Track signup to PostHog
-      await (ctx as any).runAction(internal.users.trackUserSignup, {
-        userId: event.data.id,
-        email: event.data.email_addresses?.[0]?.email_address,
-        username: event.data.username || undefined,
-        firstName: event.data.first_name || undefined,
-        lastName: event.data.last_name || undefined,
+      await ctx.runAction(internal.users.trackUserSignup, {
+        userId: userData.id,
+        email: userData.email_addresses?.[0]?.email_address,
+        username: userData.username || undefined,
+        firstName: userData.first_name || undefined,
+        lastName: userData.last_name || undefined,
         signupMethod: 'clerk',
-        createdAt: event.data.created_at,
+        createdAt: userData.created_at,
       });
 
+      // eslint-disable-next-line no-console
       console.log(
-        `New user created: ${event.data.id} (${event.data.email_addresses?.[0]?.email_address})`
+        `New user created: ${userData.id} (${userData.email_addresses?.[0]?.email_address})`
       );
       break;
+    }
 
     case 'user.updated': {
-      await (ctx as any).runMutation(internal.users.upsertFromClerk, {
-        data: event.data,
+      const userData = event.data as UserJSON;
+      await ctx.runMutation(internal.users.upsertFromClerk, {
+        data: userData,
       });
 
       // Check if user has admin role in organizations
-      const organizationMemberships = (event.data as any)
-        .organization_memberships;
+      const organizationMemberships = (
+        userData as UserJSON & {
+          organization_memberships?: Array<{ role: string }>;
+        }
+      ).organization_memberships;
       if (organizationMemberships) {
-        const hasAdminRole = organizationMemberships.some(
-          (membership: any) =>
-            membership.role === 'org:admin' || membership.role === 'admin'
-        );
+        const hasAdminRole = organizationMemberships.some((membership) => {
+          return membership.role === 'org:admin' || membership.role === 'admin';
+        });
 
-        await (ctx as any).runMutation(internal.users.admin.updateAdminStatus, {
-          externalId: event.data.id,
+        await ctx.runMutation(internal.users.admin.updateAdminStatus, {
+          externalId: userData.id,
           isAdmin: hasAdminRole,
         });
       }
@@ -73,27 +93,34 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
     }
 
     case 'user.deleted': {
-      const clerkUserId = event.data.id!;
+      const userData = event.data as UserJSON;
+      const clerkUserId = userData.id;
       // console.log('Deleting user', clerkUserId);
-      await (ctx as any).runMutation(internal.users.deleteFromClerk, {
+      await ctx.runMutation(internal.users.deleteFromClerk, {
         clerkUserId,
       });
       break;
     }
 
-    case 'organizationMembership.created' as any:
-    case 'organizationMembership.updated' as any: {
-      const membershipData = event.data as any;
-      const userId = membershipData.public_user_data?.user_id;
+    case 'organizationMembership.created':
+    case 'organizationMembership.updated': {
+      const membershipData = event.data as OrganizationMembershipJSON;
+      const publicUserData = (
+        membershipData as OrganizationMembershipJSON & {
+          public_user_data?: { user_id?: string };
+        }
+      ).public_user_data;
+      const userId = publicUserData?.user_id;
       const role = membershipData.role;
 
       if (userId) {
         const isAdmin = role === 'org:admin' || role === 'admin';
+        // eslint-disable-next-line no-console
         console.log(
           `Updating admin status for user ${userId}: role=${role}, isAdmin=${isAdmin}`
         );
 
-        await (ctx as any).runMutation(internal.users.admin.updateAdminStatus, {
+        await ctx.runMutation(internal.users.admin.updateAdminStatus, {
           externalId: userId,
           isAdmin,
         });
@@ -101,16 +128,19 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
       break;
     }
 
-    case 'organizationMembership.deleted' as any: {
-      const membershipData = event.data as any;
-      const userId = membershipData.public_user_data?.user_id;
+    case 'organizationMembership.deleted': {
+      const membershipData = event.data as OrganizationMembershipJSON;
+      const publicUserData = (
+        membershipData as OrganizationMembershipJSON & {
+          public_user_data?: { user_id?: string };
+        }
+      ).public_user_data;
+      const userId = publicUserData?.user_id;
 
       if (userId) {
-        console.log(
-          `Removing admin status for user ${userId} (membership deleted)`
-        );
-
-        await (ctx as any).runMutation(internal.users.admin.updateAdminStatus, {
+        // eslint-disable-next-line no-console
+        console.log(`Removing admin status for user ${userId}`);
+        await ctx.runMutation(internal.users.admin.updateAdminStatus, {
           externalId: userId,
           isAdmin: false,
         });
@@ -119,64 +149,54 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
     }
 
     default:
-    // console.log('Ignored Clerk webhook event', event.type);
+      // console.log('Unhandled event type:', event.type);
+      break;
   }
 
   return new Response(null, { status: 200 });
 });
 
+// Validate webhook request
+async function validateRequest(req: Request): Promise<WebhookEvent | null> {
+  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!;
+  if (!webhookSecret) {
+    // eslint-disable-next-line no-console
+    console.error('Missing CLERK_WEBHOOK_SECRET');
+    return null;
+  }
+
+  const svix_id = req.headers.get('svix-id') ?? '';
+  const svix_timestamp = req.headers.get('svix-timestamp') ?? '';
+  const svix_signature = req.headers.get('svix-signature') ?? '';
+
+  if (!svix_id || !svix_timestamp || !svix_signature) {
+    // eslint-disable-next-line no-console
+    console.error('Missing svix headers');
+    return null;
+  }
+
+  const body = await req.text();
+
+  const svixHeaders = {
+    'svix-id': svix_id,
+    'svix-timestamp': svix_timestamp,
+    'svix-signature': svix_signature,
+  };
+
+  const wh = new Webhook(webhookSecret);
+  try {
+    return wh.verify(body, svixHeaders) as WebhookEvent;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Webhook verification failed:', error);
+    return null;
+  }
+}
+
 http.route({
-  path: '/webhooks/clerk',
+  path: '/clerk',
   method: 'POST',
   handler: handleClerkWebhook,
 });
 
-async function validateRequest(req: Request): Promise<WebhookEvent | null> {
-  const payloadString = await req.text();
-  const svixHeaders = {
-    'svix-id': req.headers.get('svix-id')!,
-    'svix-timestamp': req.headers.get('svix-timestamp')!,
-    'svix-signature': req.headers.get('svix-signature')!,
-  };
-
-  // SECURITY: Validate required headers exist
-  if (
-    !svixHeaders['svix-id'] ||
-    !svixHeaders['svix-timestamp'] ||
-    !svixHeaders['svix-signature']
-  ) {
-    console.error('Missing required svix headers');
-    return null;
-  }
-
-  // SECURITY: Check timestamp to prevent replay attacks (5 minute tolerance)
-  const timestamp = parseInt(svixHeaders['svix-timestamp']);
-  const now = Math.floor(Date.now() / 1000);
-  const timestampTolerance = 300; // 5 minutes
-
-  if (Math.abs(now - timestamp) > timestampTolerance) {
-    console.error('Webhook timestamp too old or too far in future', {
-      timestamp,
-      now,
-      diff: Math.abs(now - timestamp),
-    });
-    return null;
-  }
-
-  // SECURITY: Validate webhook secret exists
-  const webhookSecret = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
-  if (!webhookSecret) {
-    console.error('CLERK_WEBHOOK_SIGNING_SECRET not configured');
-    return null;
-  }
-
-  const wh = new Webhook(webhookSecret);
-  try {
-    return wh.verify(payloadString, svixHeaders) as unknown as WebhookEvent;
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error verifying webhook event', error);
-    return null;
-  }
-}
 export default http;

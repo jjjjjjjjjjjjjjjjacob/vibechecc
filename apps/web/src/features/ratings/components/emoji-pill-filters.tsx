@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/tailwind-utils';
-import { X } from 'lucide-react';
+import { X } from '@/components/ui/icons';
 
 interface EmojiPillFiltersProps {
   emojis: string[];

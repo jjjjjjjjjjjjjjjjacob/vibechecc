@@ -1,7 +1,7 @@
 import { convexTest } from 'convex-test';
 import { modules } from '../vitest.setup';
 import { describe, it, expect, beforeEach } from 'vitest';
-import schema from './schema';
+import schema, { User } from './schema';
 import { api } from './_generated/api';
 
 describe('Authentication Debug Tests', () => {
@@ -277,12 +277,12 @@ describe('Authentication Debug Tests', () => {
         .action(api.users.updateOnboardingData, onboardingData);
 
       expect(result).toBeDefined();
-      expect(result?.externalId).toBe(mockIdentity.subject);
-      expect(result?.username).toBe(onboardingData.username);
-      expect(result?.first_name).toBe(onboardingData.first_name);
-      expect(result?.last_name).toBe(onboardingData.last_name);
-      expect(result?.interests).toEqual(onboardingData.interests);
-      expect(result?.image_url).toBe(onboardingData.image_url);
+      expect((result as User).externalId).toBe(mockIdentity.subject);
+      expect((result as User).username).toBe(onboardingData.username);
+      expect((result as User).first_name).toBe(onboardingData.first_name);
+      expect((result as User).last_name).toBe(onboardingData.last_name);
+      expect((result as User).interests).toEqual(onboardingData.interests);
+      expect((result as User).image_url).toBe(onboardingData.image_url);
     });
 
     it('should handle completeOnboarding with authentication', async () => {
@@ -306,11 +306,11 @@ describe('Authentication Debug Tests', () => {
         .action(api.users.completeOnboarding, completionData);
 
       expect(result).toBeDefined();
-      expect(result?.externalId).toBe(mockIdentity.subject);
-      expect(result?.username).toBe(completionData.username);
-      expect(result?.interests).toEqual(completionData.interests);
-      expect(result?.image_url).toBe(completionData.image_url);
-      expect(result?.onboardingCompleted).toBe(true);
+      expect((result as User).externalId).toBe(mockIdentity.subject);
+      expect((result as User).username).toBe(completionData.username);
+      expect((result as User).interests).toEqual(completionData.interests);
+      expect((result as User).image_url).toBe(completionData.image_url);
+      expect((result as User).onboardingCompleted).toBe(true);
 
       // Verify onboarding status is now complete
       const onboardingStatus = await t
@@ -356,12 +356,12 @@ describe('Authentication Debug Tests', () => {
         .action(api.users.updateProfile, profileData);
 
       expect(result).toBeDefined();
-      expect(result?.externalId).toBe(mockIdentity.subject);
-      expect(result?.username).toBe(profileData.username);
-      expect(result?.first_name).toBe(profileData.first_name);
-      expect(result?.last_name).toBe(profileData.last_name);
-      expect(result?.bio).toBe(profileData.bio);
-      expect(result?.socials).toEqual(profileData.socials);
+      expect((result as User).externalId).toBe(mockIdentity.subject);
+      expect((result as User).username).toBe(profileData.username);
+      expect((result as User).first_name).toBe(profileData.first_name);
+      expect((result as User).last_name).toBe(profileData.last_name);
+      expect((result as User).bio).toBe(profileData.bio);
+      expect((result as User).socials).toEqual(profileData.socials);
     });
   });
 
