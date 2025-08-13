@@ -54,23 +54,30 @@ jobs:
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NX_SKIP_LOCK_FILE_UPDATE: true
         run: |
           # Ensure tags are available locally for detection
           git fetch --tags --force
+          
+          # Stage any lock file if it exists to prevent git errors
+          if [ -f "bun.lock" ]; then
+            git add bun.lock
+          elif [ -f "bun.lockb" ]; then
+            git add bun.lockb
+          fi
+          
           # Check if any version tags exist
           if ! git tag -l "v*" | grep -q .; then
             echo "No version tags found, using --first-release"
             if [ "${{ inputs.prerelease }}" = "true" ]; then
-              bunx nx release --preid=beta --first-release --yes --skip-lock-file-update
+              bunx nx release --preid=beta --first-release --yes
             else
-              bunx nx release --first-release --yes --skip-lock-file-update
+              bunx nx release --first-release --yes
             fi
           else
             if [ "${{ inputs.prerelease }}" = "true" ]; then
-              bunx nx release --preid=beta --yes --skip-lock-file-update
+              bunx nx release --preid=beta --yes
             else
-              bunx nx release --yes --skip-lock-file-update
+              bunx nx release --yes
             fi
           fi
 
