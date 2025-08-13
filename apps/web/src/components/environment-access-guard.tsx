@@ -166,6 +166,7 @@ export function EnvironmentAccessGuard({
             'no chill only vibes',
             'vibe now or vibe later',
             "it's a thing to do",
+            'the nothing app',
           ];
           return taglines[Math.floor(Math.random() * taglines.length)];
         })()
