@@ -25,12 +25,7 @@
         "serveStaticTargetName": "serve-static"
       }
     },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    }
+    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } }
   ],
   "targetDefaults": {
     "build": {
@@ -46,14 +41,9 @@
       "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
       "cache": true
     },
-    "typecheck": {
-      "inputs": ["default", "^production"],
-      "cache": true
-    }
+    "typecheck": { "inputs": ["default", "^production"], "cache": true }
   },
-  "tui": {
-    "enabled": true
-  },
+  "tui": { "enabled": true },
   "release": {
     "version": {
       "conventionalCommits": true,
@@ -70,6 +60,7 @@
       "tag": true,
       "tagMessage": "v{version}"
     },
-    "projects": ["*", "!@vibechecc/e2e"]
-  }
+    "projects": ["*", "!@viberatr/e2e"]
+  },
+  "nxCloudId": "689c5cca149bc2504f5532bf"
 }
