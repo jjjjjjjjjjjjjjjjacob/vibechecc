@@ -28,10 +28,10 @@ function PrivacyPage() {
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">1. introduction</h2>
           <p className="mb-4">
-            at vibechecc, we respect your privacy and are committed to protecting
-            your personal information. this privacy policy explains how we
-            collect, use, share, and protect your information when you use our
-            platform.
+            at vibechecc, we respect your privacy and are committed to
+            protecting your personal information. this privacy policy explains
+            how we collect, use, share, and protect your information when you
+            use our platform.
           </p>
         </section>
 
