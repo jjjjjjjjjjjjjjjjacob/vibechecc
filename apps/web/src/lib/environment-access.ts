@@ -160,7 +160,7 @@ export function isPostHogReady(
   if (typeof window === 'undefined') {
     return false;
   }
-  
+
   // For localhost, only theme readiness matters
   const hostname = window.location.hostname;
   if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
