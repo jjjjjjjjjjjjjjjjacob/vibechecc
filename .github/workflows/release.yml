@@ -55,6 +55,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Ensure tags are available locally for detection
+          git fetch --tags --force
           # Check if any version tags exist
           if ! git tag -l "v*" | grep -q .; then
             echo "No version tags found, using --first-release"

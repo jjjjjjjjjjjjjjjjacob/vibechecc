@@ -60,7 +60,7 @@
       "tag": true,
       "tagMessage": "v{version}"
     },
-    "projects": ["*", "!@viberatr/e2e"]
+    "projects": ["*", "!@vibechecc/e2e"]
   },
   "nxCloudId": "689c5cca149bc2504f5532bf"
 }
