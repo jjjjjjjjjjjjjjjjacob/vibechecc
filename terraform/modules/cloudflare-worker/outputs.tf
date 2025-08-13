@@ -1,16 +1,16 @@
-output "frontend_a_record_id" {
-  description = "The ID of the A record for the frontend (production only)."
-  value       = var.environment == "production" ? cloudflare_dns_record.frontend_a[0].id : null
+output "web_a_record_id" {
+  description = "The ID of the A record for the web app (production only)."
+  value       = var.environment == "production" ? cloudflare_dns_record.web_a[0].id : null
 }
 
-output "frontend_aaaa_record_id" {
-  description = "The ID of the AAAA record for the frontend (production only)."
-  value       = var.environment == "production" ? cloudflare_dns_record.frontend_aaaa[0].id : null
+output "web_aaaa_record_id" {
+  description = "The ID of the AAAA record for the web app (production only)."
+  value       = var.environment == "production" ? cloudflare_dns_record.web_aaaa[0].id : null
 }
 
-output "frontend_cname_record_id" {
-  description = "The ID of the CNAME record for the frontend (non-production only)."
-  value       = var.environment != "production" ? cloudflare_dns_record.frontend_cname[0].id : null
+output "web_cname_record_id" {
+  description = "The ID of the CNAME record for the web app (non-production only)."
+  value       = var.environment != "production" ? cloudflare_dns_record.web_cname[0].id : null
 }
 
 output "worker_script_name" {

@@ -42,30 +42,30 @@ resource "cloudflare_workers_route" "web" {
 
 # The DNS record that points the hostname to Cloudflare's proxy
 # A and AAAA records are only created for production (root domain)
-resource "cloudflare_dns_record" "frontend_a" {
+resource "cloudflare_dns_record" "web_a" {
   count   = var.environment == "production" ? 1 : 0
   zone_id = var.cloudflare_zone_id
   name    = "@"
-  content = "192.0.2.1"  # Cloudflare's anycast IP for Workers
+  content = "192.0.2.1" # Cloudflare's anycast IP for Workers
   type    = "A"
   proxied = true
   comment = "Managed by Terraform for vibechecc Worker"
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "frontend_aaaa" {
+resource "cloudflare_dns_record" "web_aaaa" {
   count   = var.environment == "production" ? 1 : 0
   zone_id = var.cloudflare_zone_id
   name    = "@"
   type    = "AAAA"
-  content = "100::"  # Cloudflare's anycast IPv6 for Workers
+  content = "100::" # Cloudflare's anycast IPv6 for Workers
   proxied = true
   comment = "Managed by Terraform for vibechecc Worker"
   ttl     = 1
 }
 
 # CNAME record for non-production environments (dev, ephemeral)
-resource "cloudflare_dns_record" "frontend_cname" {
+resource "cloudflare_dns_record" "web_cname" {
   count   = var.environment != "production" ? 1 : 0
   zone_id = var.cloudflare_zone_id
   name    = var.prefix

@@ -161,7 +161,7 @@ jobs:
           # Import A record if it exists (production only)
           if [ "${{ inputs.environment }}" = "production" ] && [ -n "$A_RECORD_ID" ] && [ "$A_RECORD_ID" != "null" ]; then
             echo "Importing A record with ID: $A_RECORD_ID"
-            terraform import 'module.vibechecc_worker.cloudflare_dns_record.frontend_a[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
+            terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_a[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
           else
             echo "No A record to import for environment: ${{ inputs.environment }}"
           fi
@@ -169,7 +169,7 @@ jobs:
           # Import AAAA record if it exists (production only)
           if [ "${{ inputs.environment }}" = "production" ] && [ -n "$AAAA_RECORD_ID" ] && [ "$AAAA_RECORD_ID" != "null" ]; then
             echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
-            terraform import 'module.vibechecc_worker.cloudflare_dns_record.frontend_aaaa[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
+            terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_aaaa[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
           else
             echo "No AAAA record to import for environment: ${{ inputs.environment }}"
           fi
@@ -177,7 +177,7 @@ jobs:
           # Import CNAME record if it exists (non-production only)
           if [ "${{ inputs.environment }}" != "production" ] && [ -n "$CNAME_RECORD_ID" ] && [ "$CNAME_RECORD_ID" != "null" ]; then
             echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
-            terraform import 'module.vibechecc_worker.cloudflare_dns_record.frontend_cname[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
+            terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_cname[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
           else
             echo "No CNAME record to import for environment: ${{ inputs.environment }}"
           fi
@@ -185,7 +185,7 @@ jobs:
           # Import Worker script if it exists
           if [ -n "$WORKER_SCRIPT_EXISTS" ] && [ "$WORKER_SCRIPT_EXISTS" != "null" ]; then
             echo "Importing Worker script: $WORKER_SCRIPT_EXISTS"
-            terraform import module.vibechecc_worker.cloudflare_workers_script.frontend ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$WORKER_SCRIPT_EXISTS || true
+            terraform import module.vibechecc_worker.cloudflare_workers_script.web ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$WORKER_SCRIPT_EXISTS || true
           else
             echo "No Worker script found to import"
           fi
