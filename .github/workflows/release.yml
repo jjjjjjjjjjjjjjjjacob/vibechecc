@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -61,6 +61,8 @@ jobs:
           # Stage the lock file if it exists to prevent git errors
           if [ -f "bun.lock" ]; then
             git add bun.lock
+          elif [ -f "bun.lockb" ]; then
+            git add bun.lockb
           fi
           
           # Check if any version tags exist
