@@ -22,8 +22,9 @@
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0030-0039, U+002E; /* Numbers 0-9 and decimal point */
+  unicode-range: U+0030-0039, U+002E, U+002F;
 }
+
 
 /* Font Stacks */
 :root {

@@ -159,24 +159,13 @@ export function EnvironmentAccessGuard({
       Array.from(
         (() => {
           const taglines = [
-            "we're vibing here",
-            'vibe or be vibed',
             'what am i doing here',
-            'one doesn\'t just "vibe"',
-            'vibing is protected speech',
-            'all vibes no chill',
-            'addicted to the vibe',
-            "mary wake up you're in a coma",
-            'vibe summer',
-            'trends die but vibes are eternal',
             'professional vibe checker',
-            'vibe responsibly',
-            'caught in 4k vibing',
-            'a vibe a day keeps the doctor away',
-            "that's not a vibe this is a vibe",
-            "forget it jake it's vibetown",
-            'show me everest',
-            "you've got vibes",
+            "careful don't vibe too hard",
+            "it's a vibe",
+            'no chill only vibes',
+            'vibe now or vibe later',
+            "it's a thing to do",
           ];
           return taglines[Math.floor(Math.random() * taglines.length)];
         })()
