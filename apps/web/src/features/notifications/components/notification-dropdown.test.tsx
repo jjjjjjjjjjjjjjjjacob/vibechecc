@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NotificationDropdown } from './notification-dropdown';
-import type { Notification } from '@viberatr/types';
+import type { Notification } from '@vibechecc/types';
 
 // Mock the hooks
 vi.mock('@/queries', () => ({
@@ -513,10 +513,10 @@ describe('NotificationDropdown', () => {
     );
 
     expect(localStorageMock.getItem).toHaveBeenCalledWith(
-      'viberatr-notification-filter'
+      'vibechecc-notification-filter'
     );
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      'viberatr-notification-filter',
+      'vibechecc-notification-filter',
       'followers'
     );
   });

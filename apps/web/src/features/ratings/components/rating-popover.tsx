@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/tailwind-utils';
-import type { EmojiRating, EmojiRatingMetadata } from '@viberatr/types';
+import type { EmojiRating, EmojiRatingMetadata } from '@vibechecc/types';
 import { Circle } from '@/components/ui/icons';
 import { Badge } from '@/components/ui/badge';
 // Using v2 emoji-mart component - switch to './emoji-search-command' for rollback

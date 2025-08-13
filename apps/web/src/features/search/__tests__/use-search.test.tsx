@@ -43,7 +43,7 @@ vi.mock('@convex-dev/react-query', () => ({
   useConvexMutation: vi.fn(() => vi.fn()),
 }));
 
-vi.mock('@viberatr/convex', () => ({
+vi.mock('@vibechecc/convex', () => ({
   api: {
     search: {
       searchAll: 'search.searchAll',

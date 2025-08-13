@@ -9,7 +9,7 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 import { useInstantSearch } from '../hooks/use-instant-search';
-import type { SearchResponse } from '@viberatr/types';
+import type { SearchResponse } from '@vibechecc/types';
 import React, { type ReactNode } from 'react';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
@@ -38,7 +38,7 @@ vi.mock('@convex-dev/react-query', () => ({
   })),
 }));
 
-vi.mock('@viberatr/convex', () => ({
+vi.mock('@vibechecc/convex', () => ({
   api: {
     search: {
       getSearchSuggestions: 'search.getSearchSuggestions',

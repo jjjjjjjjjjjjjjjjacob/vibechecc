@@ -2,7 +2,7 @@ import { CommandItem } from '@/components/ui/command';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Users, Sparkles } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
-import type { UserSearchResult } from '@viberatr/types';
+import type { UserSearchResult } from '@vibechecc/types';
 
 interface UserResultProps {
   result: UserSearchResult;

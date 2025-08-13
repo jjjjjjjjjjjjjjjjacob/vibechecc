@@ -167,6 +167,7 @@ export function EnvironmentAccessGuard({
             'vibe now or vibe later',
             "it's a thing to do",
             'the nothing app',
+            'who told you about this',
           ];
           return taglines[Math.floor(Math.random() * taglines.length)];
         })()
@@ -207,7 +208,7 @@ export function EnvironmentAccessGuard({
               data-theme-ready={readiness.isThemeReady}
               className="data-[theme-ready=false]:text-foreground inline-flex w-full bg-transparent text-4xl font-bold duration-500 data-[theme-ready=true]:text-white"
             >
-              {Array.from('viberatr').map((char, i) => (
+              {Array.from('vibechecc').map((char, i) => (
                 <span
                   data-theme-ready={readiness.isFullyReady}
                   className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800"
@@ -270,7 +271,7 @@ export function EnvironmentAccessGuard({
         <div className="mx-auto max-w-md space-y-8 p-6 text-center">
           <div className="space-y-4">
             <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
-              viberatr
+              vibechecc
             </span>
             <div className="space-y-2">
               <h1 className="text-foreground text-2xl font-semibold">
@@ -284,7 +285,7 @@ export function EnvironmentAccessGuard({
             <SignInButton mode="modal">
               <Button className="from-theme-primary to-theme-secondary h-12 w-full bg-gradient-to-r text-base font-semibold text-white transition-all hover:scale-[1.02] hover:shadow-lg">
                 <LogIn className="mr-2 h-5 w-5" />
-                sign in to viberatr
+                sign in to vibechecc
               </Button>
             </SignInButton>
           </div>
@@ -299,10 +300,10 @@ export function EnvironmentAccessGuard({
             <p>
               if you believe this is an error, please contact{' '}
               <a
-                href="mailto:admin@viberatr.io"
+                href="mailto:admin@vibechecc.io"
                 className="text-theme-primary hover:text-theme-primary/80 underline transition-colors"
               >
-                admin@viberatr.io
+                admin@vibechecc.io
               </a>
             </p>
           </div>

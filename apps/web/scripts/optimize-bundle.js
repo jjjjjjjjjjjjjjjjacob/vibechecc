@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Complete Bundle Optimization Script for viberatr
+ * Complete Bundle Optimization Script for vibechecc
  *
  * This script applies all the optimizations we've identified:
  * 1. Build with optimized configuration
@@ -361,7 +361,7 @@ function showSuccessSummary(bundleData) {
 
 function main() {
   console.log(
-    `${colors.bright}${colors.cyan}🎯 Complete Bundle Optimization for viberatr${colors.reset}\n`
+    `${colors.bright}${colors.cyan}🎯 Complete Bundle Optimization for vibechecc${colors.reset}\n`
   );
   console.log(
     `${colors.dim}Applying all optimizations and measuring improvements...${colors.reset}\n`

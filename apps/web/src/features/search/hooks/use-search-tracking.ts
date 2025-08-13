@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 import { useUser } from '@clerk/tanstack-react-start';
 import { trackEvents } from '@/lib/posthog';
 

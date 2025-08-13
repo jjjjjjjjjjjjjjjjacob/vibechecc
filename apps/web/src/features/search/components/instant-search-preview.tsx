@@ -7,7 +7,7 @@ import type {
   VibeSearchResult,
   UserSearchResult,
   TagSearchResult,
-} from '@viberatr/types';
+} from '@vibechecc/types';
 
 interface InstantSearchPreviewProps {
   isVisible: boolean;

@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
-import type { EmojiRating } from '@viberatr/types';
+import type { EmojiRating } from '@vibechecc/types';
 import { AllEmojiRatingsPopover } from './all-emoji-ratings-popover';
 import { ChevronDown } from '@/components/ui/icons';
 import { RatingScale } from './rating-scale';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
 

@@ -23,7 +23,7 @@ import type {
   UserSearchResult,
   TagSearchResult,
   ActionSearchResult,
-} from '@viberatr/types';
+} from '@vibechecc/types';
 import { type NavState } from '@/stores/header-nav-store';
 
 interface GlobalSearchCommandProps {

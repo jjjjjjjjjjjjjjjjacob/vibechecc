@@ -21,11 +21,11 @@ variable "cloudflare_zone_id" {
 }
 
 variable "cloudflare_zone" {
-  description = "The root domain name (e.g., 'viberatr.io')."
+  description = "The root domain name (e.g., 'vibechecc.io')."
   type        = string
 }
 
 variable "cloudflare_worker_hostname" {
-  description = "The full hostname for the worker (e.g., 'viberatr.io' or 'dev.viberatr.io')."
+  description = "The full hostname for the worker (e.g., 'vibechecc.io' or 'dev.vibechecc.io')."
   type        = string
 }

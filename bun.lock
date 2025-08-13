@@ -51,7 +51,7 @@
       },
     },
     "apps/convex": {
-      "name": "@viberatr/convex",
+      "name": "@vibechecc/convex",
       "version": "0.0.0",
       "dependencies": {
         "convex": "^1.24.8",
@@ -67,7 +67,7 @@
       },
     },
     "apps/web": {
-      "name": "@viberatr/web",
+      "name": "@vibechecc/web",
       "version": "0.0.0",
       "dependencies": {
         "@clerk/backend": "^2.0.0",
@@ -100,7 +100,7 @@
         "@tanstack/react-start": "^1.121.134",
         "@tanstack/react-table": "^8.21.3",
         "@types/lodash": "^4.17.20",
-        "@viberatr/convex": "workspace:^",
+        "@vibechecc/convex": "workspace:^",
         "@vitejs/plugin-react": "^4.6.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -136,7 +136,7 @@
       },
     },
     "packages/types": {
-      "name": "@viberatr/types",
+      "name": "@vibechecc/types",
       "version": "0.0.0",
       "devDependencies": {
         "tsup": "^8.0.1",
@@ -144,7 +144,7 @@
       },
     },
     "packages/utils": {
-      "name": "@viberatr/utils",
+      "name": "@vibechecc/utils",
       "version": "0.0.0",
       "devDependencies": {
         "tsup": "^8.0.1",
@@ -1273,13 +1273,13 @@
 
     "@vercel/nft": ["@vercel/nft@0.29.4", "", { "dependencies": { "@mapbox/node-pre-gyp": "^2.0.0", "@rollup/pluginutils": "^5.1.3", "acorn": "^8.6.0", "acorn-import-attributes": "^1.9.5", "async-sema": "^3.1.1", "bindings": "^1.4.0", "estree-walker": "2.0.2", "glob": "^10.4.5", "graceful-fs": "^4.2.9", "node-gyp-build": "^4.2.2", "picomatch": "^4.0.2", "resolve-from": "^5.0.0" }, "bin": { "nft": "out/cli.js" } }, "sha512-6lLqMNX3TuycBPABycx7A9F1bHQR7kiQln6abjFbPrf5C/05qHM9M5E4PeTE59c7z8g6vHnx1Ioihb2AQl7BTA=="],
 
-    "@viberatr/convex": ["@viberatr/convex@workspace:apps/convex"],
+    "@vibechecc/convex": ["@vibechecc/convex@workspace:apps/convex"],
 
-    "@viberatr/types": ["@viberatr/types@workspace:packages/types"],
+    "@vibechecc/types": ["@vibechecc/types@workspace:packages/types"],
 
-    "@viberatr/utils": ["@viberatr/utils@workspace:packages/utils"],
+    "@vibechecc/utils": ["@vibechecc/utils@workspace:packages/utils"],
 
-    "@viberatr/web": ["@viberatr/web@workspace:apps/web"],
+    "@vibechecc/web": ["@vibechecc/web@workspace:apps/web"],
 
     "@vitejs/plugin-react": ["@vitejs/plugin-react@4.6.0", "", { "dependencies": { "@babel/core": "^7.27.4", "@babel/plugin-transform-react-jsx-self": "^7.27.1", "@babel/plugin-transform-react-jsx-source": "^7.27.1", "@rolldown/pluginutils": "1.0.0-beta.19", "@types/babel__core": "^7.20.5", "react-refresh": "^0.17.0" }, "peerDependencies": { "vite": "^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0-beta.0" } }, "sha512-5Kgff+m8e2PB+9j51eGHEpn5kUzRKH2Ry0qGoe8ItJg7pqnkPrYPkDQZGgGmTa0EGarHrkjLvOdU3b1fzI8otQ=="],
 

@@ -13,7 +13,7 @@ export const seo = ({
   twitterCreator?: string;
   twitterSite?: string;
 }) => {
-  const defaultTwitterHandle = '@viberatr';
+  const defaultTwitterHandle = '@vibechecc';
 
   const tags = [
     { title },

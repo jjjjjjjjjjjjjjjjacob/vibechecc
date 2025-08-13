@@ -11,7 +11,7 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 import { AdminLayout } from '@/features/admin/components/admin-layout';
 import {
   Card,

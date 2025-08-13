@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { MasonryFeed } from '@/components/masonry-feed';
 import { CreateVibeButton } from '@/features/vibes/components/create-vibe-button';
 import { useUserVibes } from '@/queries';
-import type { User } from '@viberatr/types';
+import type { User } from '@vibechecc/types';
 
 interface UserVibesSectionProps {
   user: User;

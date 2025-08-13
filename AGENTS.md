@@ -15,8 +15,8 @@ Operational guide for AI coding assistants (Claude, GPT, Cursor, Codeium, etc.) 
 - Monorepo (Nx) with shared packages and app workspaces:
   - `apps/web` — React app (TanStack Start, shadcn/ui, Tailwind v4)
   - `apps/convex` — Convex backend (queries, mutations, actions, HTTP actions)
-  - `packages/types` — `@viberatr/types` shared interfaces
-  - `packages/utils` — `@viberatr/utils` shared utilities
+  - `packages/types` — `@vibechecc/types` shared interfaces
+  - `packages/utils` — `@vibechecc/utils` shared utilities
   - `terraform` — Cloudflare/Convex infra as code
 
 ## Commands (run from repo root with Bun)
@@ -68,7 +68,7 @@ Use Bun exclusively. Do not use npm, yarn, or pnpm. Run commands from the reposi
 - No hardcoded colors. Use theme/semantic colors. See `.agent/rules/theme-colors.mdc`.
 - Import rules:
   - shadcn/ui is allowed only in `apps/web/`
-  - Prefer workspace imports: `@viberatr/types`, `@viberatr/utils`, `@viberatr/convex`
+  - Prefer workspace imports: `@vibechecc/types`, `@vibechecc/utils`, `@vibechecc/convex`
 - Code style: 2-space indentation for TS/JS/JSON. Avoid comments unless explicitly requested. Favor existing utilities over new ones.
 
 ## Frontend (apps/web)

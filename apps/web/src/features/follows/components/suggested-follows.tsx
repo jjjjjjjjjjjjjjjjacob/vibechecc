@@ -7,7 +7,7 @@ import { UserPlus, Users, Sparkles } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { useSuggestedFollows } from '../hooks/use-suggested-follows';
 import { FollowButton } from './follow-button';
-import type { User } from '@viberatr/types';
+import type { User } from '@vibechecc/types';
 
 interface SuggestedFollowsSuggestion {
   user: User | null;

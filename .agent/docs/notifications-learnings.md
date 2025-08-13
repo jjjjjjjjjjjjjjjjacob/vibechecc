@@ -1,6 +1,6 @@
-# Notifications System Implementation Learnings - viberatr
+# Notifications System Implementation Learnings - vibechecc
 
-This document captures learnings, patterns, and implementation details discovered during the implementation of the notification system backend for the viberatr project.
+This document captures learnings, patterns, and implementation details discovered during the implementation of the notification system backend for the vibechecc project.
 
 ## Context
 

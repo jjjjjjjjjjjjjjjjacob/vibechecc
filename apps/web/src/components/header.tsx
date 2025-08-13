@@ -354,7 +354,7 @@ export function Header() {
                   onClick={() => setNavState(null)}
                 >
                   <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent">
-                    viberatr
+                    vibechecc
                   </span>
                 </Link>
 

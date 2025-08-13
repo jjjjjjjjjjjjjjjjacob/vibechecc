@@ -1,4 +1,4 @@
-module "viberatr_worker" {
+module "vibechecc_worker" {
   source = "./modules/cloudflare-worker"
   providers = {
     cloudflare = cloudflare

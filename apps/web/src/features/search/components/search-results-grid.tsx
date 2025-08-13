@@ -2,7 +2,7 @@ import { SearchResultCard } from './search-result-card';
 import { SearchEmptyState } from './search-empty-state';
 import { SearchLoading } from './search-loading';
 import { SearchError } from './search-error';
-import type { SearchResult } from '@viberatr/types';
+import type { SearchResult } from '@vibechecc/types';
 
 interface SearchResultsGridProps {
   results?: SearchResult[];

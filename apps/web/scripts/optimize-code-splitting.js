@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Code Splitting Optimizer for viberatr
+ * Code Splitting Optimizer for vibechecc
  *
  * This script identifies heavy components and routes that should be
  * lazily loaded to reduce the initial bundle size.
@@ -395,7 +395,7 @@ function generateCodeExamples() {
 
 function main() {
   console.log(
-    `${colors.bright}${colors.cyan}🎯 Code Splitting Analysis for viberatr${colors.reset}\n`
+    `${colors.bright}${colors.cyan}🎯 Code Splitting Analysis for vibechecc${colors.reset}\n`
   );
   console.log(
     `${colors.dim}Identifying components for lazy loading optimization...${colors.reset}\n`

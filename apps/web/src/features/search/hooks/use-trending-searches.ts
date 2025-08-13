@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 
 export function useTrendingSearches(limit: number = 10) {
   return useQuery({

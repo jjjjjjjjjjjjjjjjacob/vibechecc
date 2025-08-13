@@ -4,7 +4,7 @@ import Picker from '@emoji-mart/react';
 import { cn } from '@/utils/tailwind-utils';
 import { useUser } from '@clerk/tanstack-react-start';
 import { useMutation } from '@tanstack/react-query';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { useTheme } from '@/stores/theme-initializer';
 

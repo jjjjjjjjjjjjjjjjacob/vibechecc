@@ -378,7 +378,7 @@ export function VibeCard({
           open={showAuthDialog}
           onOpenChange={setShowAuthDialog}
           title="sign in to rate vibes"
-          description="join viberatr to share your reactions and ratings with the community"
+          description="join vibechecc to share your reactions and ratings with the community"
         />
       </>
     );
@@ -545,7 +545,7 @@ export function VibeCard({
           open={showAuthDialog}
           onOpenChange={setShowAuthDialog}
           title="sign in to rate vibes"
-          description="join viberatr to share your reactions and ratings with the community"
+          description="join vibechecc to share your reactions and ratings with the community"
         />
       </>
     );
@@ -792,7 +792,7 @@ export function VibeCard({
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         title="sign in to rate vibes"
-        description="join viberatr to share your reactions and ratings with the community"
+        description="join vibechecc to share your reactions and ratings with the community"
       />
     </>
   );

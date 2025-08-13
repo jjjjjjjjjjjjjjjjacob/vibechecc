@@ -19,7 +19,7 @@ import { TagFilterEnhanced } from './filters/tag-filter-enhanced';
 import { RatingSlider } from './filters/rating-slider';
 import { DateRangePicker } from './filters/date-range-picker';
 import { ActiveFiltersBar } from './filters/active-filters-bar';
-import type { SearchFilters as SearchFiltersType } from '@viberatr/types';
+import type { SearchFilters as SearchFiltersType } from '@vibechecc/types';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface SearchFiltersProps {

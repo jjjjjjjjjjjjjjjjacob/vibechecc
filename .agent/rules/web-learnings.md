@@ -143,9 +143,9 @@
 
 **When to reference**: Importing from shared packages
 
-- Use `@viberatr/types` for shared TypeScript types
-- Use `@viberatr/utils` for shared utilities
-- Use `@viberatr/convex` for API imports
+- Use `@vibechecc/types` for shared TypeScript types
+- Use `@vibechecc/utils` for shared utilities
+- Use `@vibechecc/convex` for API imports
 - Never use relative imports across workspace boundaries
 
 ## React Query with Convex Integration

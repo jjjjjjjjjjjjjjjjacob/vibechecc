@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SearchFilters } from '@/features/search/components/search-filters';
-import type { SearchFilters as SearchFiltersType } from '@viberatr/types';
+import type { SearchFilters as SearchFiltersType } from '@vibechecc/types';
 
 // Mock child components
 vi.mock('@/features/search/components/filters/active-filters-bar', () => ({

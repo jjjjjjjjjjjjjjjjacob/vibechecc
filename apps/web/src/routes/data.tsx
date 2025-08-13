@@ -6,9 +6,9 @@ export const Route = createFileRoute('/data')({
   head: () => ({
     meta: [
       ...seo({
-        title: 'data policy | viberatr',
+        title: 'data policy | vibechecc',
         description:
-          'data handling and processing policies for viberatr platform',
+          'data handling and processing policies for vibechecc platform',
       }),
     ],
   }),
@@ -28,7 +28,7 @@ function DataPage() {
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">1. overview</h2>
           <p className="mb-4">
-            this data policy explains how viberatr collects, processes, stores,
+            this data policy explains how vibechecc collects, processes, stores,
             and protects your personal data. we are committed to transparency
             and giving you control over your information.
           </p>
@@ -70,7 +70,7 @@ function DataPage() {
           <div className="space-y-4">
             <p>we use your data to:</p>
             <ul className="list-disc space-y-2 pl-6">
-              <li>provide and improve the viberatr service</li>
+              <li>provide and improve the vibechecc service</li>
               <li>personalize your experience and content recommendations</li>
               <li>enable social features like following and interactions</li>
               <li>analyze usage patterns to enhance platform performance</li>
@@ -217,7 +217,7 @@ function DataPage() {
             10. children's privacy
           </h2>
           <p className="mb-4">
-            viberatr is not intended for users under 13 years of age. we do not
+            vibechecc is not intended for users under 13 years of age. we do not
             knowingly collect personal data from children under 13. if we become
             aware of such collection, we will delete the data promptly.
           </p>
@@ -230,7 +230,7 @@ function DataPage() {
           <p className="mb-4">
             we may update this data policy periodically. we will notify you of
             significant changes through the platform or by email. your continued
-            use of viberatr after changes constitutes acceptance of the updated
+            use of vibechecc after changes constitutes acceptance of the updated
             policy.
           </p>
         </section>
