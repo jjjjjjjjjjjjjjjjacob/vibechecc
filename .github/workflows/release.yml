@@ -80,14 +80,26 @@ jobs:
           fi
 
           # Stage any changes again in case Nx modified the lock file
-          git add bun.lock
+          git add bun.lock || true
 
-          # Stage all modified package.json files and CHANGELOG
-          git add -A package.json packages/*/package.json apps/*/package.json CHANGELOG.md
+          # Stage all modified package.json files (they should exist)
+          git add package.json packages/*/package.json apps/*/package.json || true
+          
+          # Stage CHANGELOG if it exists (may not exist on first release)
+          if [ -f "CHANGELOG.md" ]; then
+            git add CHANGELOG.md
+          fi
 
           # Get the version from package.json after release
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Create commit and tag if there are changes (backup in case Nx didn't)
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Creating release commit and tag..."
+            git commit -m "chore(release): v${VERSION} [skip ci]" || true
+            git tag -a "v${VERSION}" -m "v${VERSION}" || true
+          fi
 
       - name: Push changes
         run: git push origin ${{ inputs.branch }} --follow-tags
