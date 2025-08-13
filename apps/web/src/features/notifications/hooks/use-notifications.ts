@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useConvex } from 'convex/react';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 
 export type NotificationFilter =
   | 'all'

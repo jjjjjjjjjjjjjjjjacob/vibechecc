@@ -1,5 +1,5 @@
 {
-  "name": "@viberatr/utils",
+  "name": "@vibechecc/utils",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/utils/src",

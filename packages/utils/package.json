@@ -1,7 +1,7 @@
 {
-  "name": "@viberatr/utils",
+  "name": "@vibechecc/utils",
   "version": "0.0.0",
-  "description": "Shared utility functions for the viberatr workspace",
+  "description": "Shared utility functions for the vibechecc workspace",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

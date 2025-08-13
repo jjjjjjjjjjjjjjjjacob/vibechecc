@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import { RatingPopover } from './rating-popover';
-import type { EmojiRatingMetadata } from '@viberatr/types';
+import type { EmojiRatingMetadata } from '@vibechecc/types';
 
 interface EmojiRatingCycleDisplayProps {
   onSubmit: (data: {

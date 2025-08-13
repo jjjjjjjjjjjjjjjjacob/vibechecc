@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
-import { api } from '@viberatr/convex';
+import { api } from '@vibechecc/convex';
 import { AdminLayout } from '@/features/admin/components/admin-layout';
 import { VibesTable } from '@/features/admin/components/tables/vibes-table';
 import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';

@@ -9,9 +9,9 @@ import {
 } from '@/components/ui/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
-import { api } from '@viberatr/convex';
-import type { Id } from '@viberatr/convex/dataModel';
-import type { User } from '@viberatr/types';
+import { api } from '@vibechecc/convex';
+import type { Id } from '@vibechecc/convex/dataModel';
+import type { User } from '@vibechecc/types';
 import { DataTable } from '../data-table';
 import { DataTableColumnHeader } from '../data-table/data-table-column-header';
 import { EditableTextCell } from '../cells/editable-text-cell';

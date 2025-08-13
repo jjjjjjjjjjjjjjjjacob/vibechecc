@@ -27,7 +27,7 @@ export function getCurrentSubdomain(): string | null {
     return null; // No subdomain restrictions for localhost
   }
 
-  // For production domains like dev.viberatr.io, pr-123.viberatr.io
+  // For production domains like dev.vibechecc.io, pr-123.vibechecc.io
   if (parts.length > 2) {
     return parts[0];
   }

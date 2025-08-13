@@ -14,7 +14,7 @@ import { TagInput } from '@/components/tag-input';
 import { ImageUpload } from '@/components/image-upload';
 import { cn } from '@/utils/tailwind-utils';
 import { Circle, Sparkles } from '@/components/ui/icons';
-import type { Id } from '@viberatr/convex/dataModel';
+import type { Id } from '@vibechecc/convex/dataModel';
 import toast from '@/utils/toast';
 
 // Server function to check authentication
@@ -252,7 +252,7 @@ function CreateVibe() {
 
           {/* Bottom hint */}
           <p className="text-muted-foreground mt-6 text-center text-xs">
-            your vibe will be visible to everyone on viberatr
+            your vibe will be visible to everyone on vibechecc
           </p>
         </div>
       </div>

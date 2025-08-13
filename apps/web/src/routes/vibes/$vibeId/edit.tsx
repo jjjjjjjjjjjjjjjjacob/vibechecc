@@ -21,7 +21,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from '@/components/ui/icons';
-import type { Id } from '@viberatr/convex/dataModel';
+import type { Id } from '@vibechecc/convex/dataModel';
 import toast from '@/utils/toast';
 
 // Server function to check authentication
@@ -541,7 +541,7 @@ function EditVibe() {
 
           {/* Bottom hint */}
           <p className="text-muted-foreground mt-6 text-center text-xs">
-            your updated vibe will be visible to everyone on viberatr
+            your updated vibe will be visible to everyone on vibechecc
           </p>
         </div>
       </div>

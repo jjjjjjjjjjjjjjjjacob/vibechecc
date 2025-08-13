@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import { RatingPopover } from './rating-popover';
-import type { EmojiRating, EmojiRatingMetadata } from '@viberatr/types';
+import type { EmojiRating, EmojiRatingMetadata } from '@vibechecc/types';
 
 interface EmojiRatingSelectorProps {
   topEmojis?: EmojiRating[];

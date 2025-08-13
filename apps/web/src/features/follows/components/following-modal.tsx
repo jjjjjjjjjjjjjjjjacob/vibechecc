@@ -13,7 +13,7 @@ import { Search, UserPlus, X } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
 import { useFollowing } from '../hooks/use-following';
 import { FollowButton } from './follow-button';
-import type { User } from '@viberatr/types';
+import type { User } from '@vibechecc/types';
 import { trackEvents } from '@/lib/posthog';
 
 interface FollowingModalFollowing {

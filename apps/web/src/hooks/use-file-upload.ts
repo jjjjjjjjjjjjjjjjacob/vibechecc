@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { useConvex } from 'convex/react';
-import { api } from '@viberatr/convex';
-import type { Id } from '@viberatr/convex/dataModel';
+import { api } from '@vibechecc/convex';
+import type { Id } from '@vibechecc/convex/dataModel';
 
 export interface UploadResult {
   storageId: Id<'_storage'>;

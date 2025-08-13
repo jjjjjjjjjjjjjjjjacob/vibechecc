@@ -1,7 +1,7 @@
 import { queryOptions, type QueryClient } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
-import { api } from '@viberatr/convex';
-import type { SearchFilters } from '@viberatr/types';
+import { api } from '@vibechecc/convex';
+import type { SearchFilters } from '@vibechecc/types';
 
 // Valid sort options for Convex search
 const VALID_CONVEX_SORT_OPTIONS = [

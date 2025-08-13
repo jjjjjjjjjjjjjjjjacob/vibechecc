@@ -3,8 +3,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal, Eye, Edit, Trash2, Flag } from '@/components/ui/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
-import { api } from '@viberatr/convex';
-import type { Vibe } from '@viberatr/types';
+import { api } from '@vibechecc/convex';
+import type { Vibe } from '@vibechecc/types';
 import type { VibeStats } from '@/features/admin/types';
 
 // Define Id type locally to avoid import issues

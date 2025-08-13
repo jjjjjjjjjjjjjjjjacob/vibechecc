@@ -122,7 +122,7 @@ export function NewUserSurvey({ onComplete, onDismiss }: NewUserSurveyProps) {
       className="space-y-6 p-6"
     >
       <div className="flex flex-col space-y-4">
-        <Label className="text-base">how did you hear about viberatr?</Label>
+        <Label className="text-base">how did you hear about vibechecc?</Label>
         <RadioGroup
           value={discoveryChannel}
           onValueChange={setDiscoveryChannel}
@@ -185,7 +185,7 @@ export function NewUserSurvey({ onComplete, onDismiss }: NewUserSurveyProps) {
           <DrawerHeader className="p-6 pb-0">
             <div className="flex items-center justify-between">
               <DrawerTitle className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl text-transparent">
-                welcome to viberatr
+                welcome to vibechecc
               </DrawerTitle>
               <Button
                 variant="ghost"
@@ -211,7 +211,7 @@ export function NewUserSurvey({ onComplete, onDismiss }: NewUserSurveyProps) {
       >
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
-            <DialogTitle>welcome to viberatr</DialogTitle>
+            <DialogTitle>welcome to vibechecc</DialogTitle>
             <Button
               variant="ghost"
               size="sm"

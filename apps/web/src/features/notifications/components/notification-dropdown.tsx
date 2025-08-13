@@ -70,7 +70,7 @@ export function NotificationDropdown({
   // Load filter preference from localStorage
   useEffect(() => {
     if (!convexAvailable) return;
-    const savedFilter = localStorage.getItem('viberatr-notification-filter');
+    const savedFilter = localStorage.getItem('vibechecc-notification-filter');
     if (
       savedFilter &&
       ['all', 'likes', 'comments', 'mentions', 'followers'].includes(
@@ -84,7 +84,7 @@ export function NotificationDropdown({
   // Save filter preference to localStorage
   useEffect(() => {
     if (!convexAvailable) return;
-    localStorage.setItem('viberatr-notification-filter', activeFilter);
+    localStorage.setItem('vibechecc-notification-filter', activeFilter);
   }, [activeFilter, convexAvailable]);
 
   // Check mobile screen size

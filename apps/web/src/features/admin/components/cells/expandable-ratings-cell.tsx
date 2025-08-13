@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/tailwind-utils';
-import type { Rating } from '@viberatr/types';
+import type { Rating } from '@vibechecc/types';
 
 interface ExpandableRatingsCellProps {
   ratings: Rating[];

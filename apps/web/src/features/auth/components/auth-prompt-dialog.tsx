@@ -21,7 +21,7 @@ export function AuthPromptDialog({
   open,
   onOpenChange,
   title = 'sign in required',
-  description = 'you must sign in to use viberatr',
+  description = 'you must sign in to use vibechecc',
   actionText: _actionText = 'this feature',
 }: AuthPromptDialogProps) {
   return (
@@ -40,7 +40,7 @@ export function AuthPromptDialog({
             <SignInButton mode="modal">
               <Button className="h-12 w-full border-transparent bg-gradient-to-r from-violet-600 to-pink-600 text-base font-semibold text-white transition-all hover:scale-[1.02] hover:border-transparent hover:from-violet-700 hover:to-pink-700 hover:shadow-lg hover:shadow-violet-500/25">
                 <LogIn className="mr-2 h-5 w-5" />
-                sign in to viberatr
+                sign in to vibechecc
               </Button>
             </SignInButton>
             <SignUpButton mode="modal">

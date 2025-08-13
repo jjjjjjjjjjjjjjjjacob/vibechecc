@@ -105,7 +105,7 @@ export function OnboardingThemeStep({
         {/* Sample gradient text */}
         <div className="text-center">
           <p className="themed-gradient-text text-lg font-bold">
-            your personalized viberatr experience
+            your personalized vibechecc experience
           </p>
         </div>
       </div>

@@ -51,12 +51,12 @@ describe('environment access - localhost fix', () => {
 
   describe('production environment access', () => {
     it('should allow access to production domain', () => {
-      mockLocation('viberatr.io');
+      mockLocation('vibechecc.io');
       expect(canAccessCurrentEnvironment()).toBe(true);
     });
 
     it('should restrict access to dev subdomain (when no feature flag)', () => {
-      mockLocation('dev.viberatr.io');
+      mockLocation('dev.vibechecc.io');
 
       // Mock PostHog to return false for the feature flag
       vi.doMock('@/lib/posthog', () => ({

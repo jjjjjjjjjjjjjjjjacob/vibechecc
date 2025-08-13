@@ -3,9 +3,9 @@
 # The worker script that will be deployed
 # This resource only provisions the script if it doesn't exist in state
 # Deployment is handled via wrangler for proper bundling
-resource "cloudflare_workers_script" "frontend" {
+resource "cloudflare_workers_script" "web" {
   account_id  = var.cloudflare_account_id
-  script_name = "viberatr-${var.environment == "ephemeral" ? var.prefix : var.environment}-frontend"
+  script_name = "vibechecc-${var.environment == "ephemeral" ? var.prefix : var.environment}-web"
 
   # Use a placeholder script for initial provisioning
   # Actual deployment is handled by wrangler
@@ -31,44 +31,47 @@ resource "cloudflare_workers_script" "frontend" {
   }
 }
 
-# The route that triggers the worker (e.g., viberatr.io/*)
-resource "cloudflare_workers_route" "frontend" {
+# The route that triggers the worker (e.g., vibechecc.io/*)
+resource "cloudflare_workers_route" "web" {
   zone_id = var.cloudflare_zone_id
   pattern = "${var.cloudflare_worker_hostname}/*"
-  script  = cloudflare_workers_script.frontend.script_name
+  script  = cloudflare_workers_script.web.script_name
 
-  depends_on = [cloudflare_workers_script.frontend]
+  depends_on = [cloudflare_workers_script.web]
 }
 
 # The DNS record that points the hostname to Cloudflare's proxy
-resource "cloudflare_dns_record" "frontend_a" {
+# A and AAAA records are only created for production (root domain)
+resource "cloudflare_dns_record" "web_a" {
+  count   = var.environment == "production" ? 1 : 0
   zone_id = var.cloudflare_zone_id
   name    = "@"
-  content = "141.101.64.0"
+  content = "192.0.2.1" # Cloudflare's anycast IP for Workers
   type    = "A"
   proxied = true
-  comment = "Managed by Terraform for viberatr Worker"
+  comment = "Managed by Terraform for vibechecc Worker"
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "frontend_aaaa" {
+resource "cloudflare_dns_record" "web_aaaa" {
+  count   = var.environment == "production" ? 1 : 0
   zone_id = var.cloudflare_zone_id
   name    = "@"
   type    = "AAAA"
-  content = "2400:cb00::"
+  content = "100::" # Cloudflare's anycast IPv6 for Workers
   proxied = true
-  comment = "Managed by Terraform for viberatr Worker"
+  comment = "Managed by Terraform for vibechecc Worker"
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "frontend_cname" {
-  # Only create CNAME record for non-production environments
-  count   = var.environment == "production" ? 0 : 1
+# CNAME record for non-production environments (dev, ephemeral)
+resource "cloudflare_dns_record" "web_cname" {
+  count   = var.environment != "production" ? 1 : 0
   zone_id = var.cloudflare_zone_id
   name    = var.prefix
   type    = "CNAME"
   content = var.cloudflare_zone
   proxied = true
-  comment = "Managed by Terraform for viberatr Worker"
+  comment = "Managed by Terraform for vibechecc Worker"
   ttl     = 1
 }

@@ -17,7 +17,7 @@ vi.mock('convex/react', () => ({
 }));
 
 // Mock the API
-vi.mock('@viberatr/convex', () => ({
+vi.mock('@vibechecc/convex', () => ({
   api: {
     notifications: {
       getNotifications: 'notifications:getNotifications',

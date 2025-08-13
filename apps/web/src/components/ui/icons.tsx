@@ -1,5 +1,5 @@
 /**
- * Optimized Icon System for viberatr
+ * Optimized Icon System for vibechecc
  *
  * This file imports only the specific icons used throughout the app
  * to significantly reduce bundle size from lucide-react (600KB -> ~50KB)

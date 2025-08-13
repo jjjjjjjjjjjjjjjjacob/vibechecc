@@ -1,4 +1,4 @@
-import type { Vibe, User, Rating } from '@viberatr/types';
+import type { Vibe, User, Rating } from '@vibechecc/types';
 
 // Define Id type locally to avoid import issues
 type Id<T extends string> = string & { __tableName: T };

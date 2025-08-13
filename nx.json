@@ -69,6 +69,6 @@
       "tag": true,
       "tagMessage": "v{version}"
     },
-    "projects": ["*", "!@viberatr/e2e"]
+    "projects": ["*", "!@vibechecc/e2e"]
   }
 }

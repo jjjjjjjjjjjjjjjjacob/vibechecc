@@ -5,8 +5,8 @@ import { Link } from '@tanstack/react-router';
 import { cn } from '@/utils/tailwind-utils';
 import { formatDistanceToNow } from '@/utils/date-utils';
 import { useMarkNotificationAsReadMutation } from '@/queries';
-import type { Notification } from '@viberatr/types';
-import type { Id } from '@viberatr/convex/dataModel';
+import type { Notification } from '@vibechecc/types';
+import type { Id } from '@vibechecc/convex/dataModel';
 import { useHeaderNavStore } from '@/stores/header-nav-store';
 import { usePostHog } from '@/hooks/usePostHog';
 

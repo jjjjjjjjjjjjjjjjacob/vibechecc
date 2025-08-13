@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X, Star, Calendar, Tag } from '@/components/ui/icons';
-import type { SearchFilters } from '@viberatr/types';
+import type { SearchFilters } from '@vibechecc/types';
 
 interface ActiveFiltersBarProps {
   filters: Partial<SearchFilters>;

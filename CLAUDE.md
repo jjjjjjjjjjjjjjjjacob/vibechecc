@@ -13,7 +13,7 @@ These files contain critical information about how to work with this codebase ef
 
 ## Project Overview
 
-**viberatr** is a modern social web application built as an Nx-powered monorepo. Users can share "vibes" (life experiences, thoughts, situations), rate and react to others' vibes with emojis and stars, and discover trending content through advanced search and filtering.
+**vibechecc** is a modern social web application built as an Nx-powered monorepo. Users can share "vibes" (life experiences, thoughts, situations), rate and react to others' vibes with emojis and stars, and discover trending content through advanced search and filtering.
 
 ## Architecture
 
@@ -21,8 +21,8 @@ These files contain critical information about how to work with this codebase ef
 
 - `apps/web/` - React web app (TanStack Start)
 - `apps/convex/` - Convex real-time backend
-- `packages/types/` - Shared TypeScript interfaces (@viberatr/types)
-- `packages/utils/` - Shared utility functions (@viberatr/utils)
+- `packages/types/` - Shared TypeScript interfaces (@vibechecc/types)
+- `packages/utils/` - Shared utility functions (@vibechecc/utils)
 - `terraform/` - Infrastructure as code
 - `.github/workflows/` - CI/CD pipelines
 - `.agent/` - AI assistant documentation and learnings
@@ -133,15 +133,15 @@ bun nx reset                            # Clear Nx cache
 
 ```typescript
 // From web app
-import { api } from '@viberatr/convex';
-import type { User, Vibe, Rating } from '@viberatr/types';
-import { computeUserDisplayName, getUserAvatarUrl } from '@viberatr/utils';
+import { api } from '@vibechecc/convex';
+import type { User, Vibe, Rating } from '@vibechecc/types';
+import { computeUserDisplayName, getUserAvatarUrl } from '@vibechecc/utils';
 import { cn } from '@/utils/tailwind-utils';
 
 // From backend
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import type { User } from '@viberatr/types';
+import type { User } from '@vibechecc/types';
 ```
 
 ## Convex Backend Development

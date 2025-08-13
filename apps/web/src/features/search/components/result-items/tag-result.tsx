@@ -1,7 +1,7 @@
 import { CommandItem } from '@/components/ui/command';
 import { Hash } from '@/components/ui/icons';
 import { useNavigate } from '@tanstack/react-router';
-import type { TagSearchResult } from '@viberatr/types';
+import type { TagSearchResult } from '@vibechecc/types';
 
 interface TagResultProps {
   result: TagSearchResult;

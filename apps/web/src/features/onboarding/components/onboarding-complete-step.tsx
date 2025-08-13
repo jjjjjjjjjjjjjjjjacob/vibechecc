@@ -56,7 +56,7 @@ export function OnboardingCompleteStep({
           you're all set
         </h1>
         <p className="text-muted-foreground text-xl">
-          welcome to the viberatr community!
+          welcome to the vibechecc community!
           <br />
           you're ready to start discovering and sharing vibes.
         </p>

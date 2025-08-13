@@ -101,7 +101,7 @@ function AdminSidebarContent() {
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-semibold">admin panel</span>
               <span className="text-muted-foreground text-xs">
-                viberatr management
+                vibechecc management
               </span>
             </div>
           )}
@@ -153,11 +153,11 @@ function AdminSidebarContent() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              tooltip={isCollapsed ? 'back to viberatr' : undefined}
+              tooltip={isCollapsed ? 'back to vibechecc' : undefined}
             >
               <Link to="/">
                 <Home className="size-4" />
-                {!isCollapsed && <span>back to viberatr</span>}
+                {!isCollapsed && <span>back to vibechecc</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
