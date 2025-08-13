@@ -58,14 +58,7 @@
       "commit": true,
       "commitMessage": "chore(release): v{version} [skip ci]",
       "tag": true,
-      "tagMessage": "v{version}",
-      "stagePatterns": [
-        "package.json",
-        "*/package.json",
-        "*/*/package.json",
-        "bun.lock",
-        "CHANGELOG.md"
-      ]
+      "tagMessage": "v{version}"
     },
     "projects": ["*", "!@vibechecc/e2e"]
   },
