@@ -259,11 +259,13 @@ jobs:
         working-directory: apps/web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           ENV_NAME="${{ inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number) || inputs.environment }}"
-          echo ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }} | bunx wrangler secret put --env $ENV_NAME VITE_CLERK_PUBLISHABLE_KEY
-          echo ${{ secrets.VITE_CONVEX_URL }} | bunx wrangler secret put --env $ENV_NAME VITE_CONVEX_URL
-          echo ${{ secrets.CLERK_SECRET_KEY }} | bunx wrangler secret put --env $ENV_NAME CLERK_SECRET_KEY
-          echo ${{ secrets.VITE_POSTHOG_API_KEY }} | bunx wrangler secret put --env $ENV_NAME VITE_POSTHOG_API_KEY
-          echo ${{ secrets.VITE_POSTHOG_API_HOST }} | bunx wrangler secret put --env $ENV_NAME VITE_POSTHOG_API_HOST
-          echo ${{ secrets.VITE_POSTHOG_PROJECT_ID }} | bunx wrangler secret put --env $ENV_NAME VITE_POSTHOG_PROJECT_ID
+          echo "Updating secrets for environment: $ENV_NAME"
+          echo "${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" | bunx wrangler secret put VITE_CLERK_PUBLISHABLE_KEY --env $ENV_NAME
+          echo "${{ secrets.VITE_CONVEX_URL }}" | bunx wrangler secret put VITE_CONVEX_URL --env $ENV_NAME
+          echo "${{ secrets.CLERK_SECRET_KEY }}" | bunx wrangler secret put CLERK_SECRET_KEY --env $ENV_NAME
+          echo "${{ secrets.VITE_POSTHOG_API_KEY }}" | bunx wrangler secret put VITE_POSTHOG_API_KEY --env $ENV_NAME
+          echo "${{ secrets.VITE_POSTHOG_API_HOST }}" | bunx wrangler secret put VITE_POSTHOG_API_HOST --env $ENV_NAME
+          echo "${{ secrets.VITE_POSTHOG_PROJECT_ID }}" | bunx wrangler secret put VITE_POSTHOG_PROJECT_ID --env $ENV_NAME
