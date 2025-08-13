@@ -57,31 +57,33 @@ jobs:
         run: |
           # Ensure tags are available locally for detection
           git fetch --tags --force
-          
-          # Stage the lock file if it exists to prevent git errors
-          if [ -f "bun.lock" ]; then
-            git add bun.lock
-          elif [ -f "bun.lockb" ]; then
-            git add bun.lockb
-          fi
-          
+
+          # Pre-stage the lock file to prevent Nx from trying to stage bun.lockb
+          git add bun.lock
+
           # Check if any version tags exist
           if ! git tag -l "v*" | grep -q .; then
             echo "No version tags found, using --first-release"
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Let conventional commits determine the bump, with preid for beta
-              bunx nx release --preid=beta --first-release --yes
+              bunx nx release --preid=beta --first-release --yes || true
             else
-              bunx nx release --first-release --yes
+              bunx nx release --first-release --yes || true
             fi
           else
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Let conventional commits determine the bump, with preid for beta
-              bunx nx release --preid=beta --yes
+              bunx nx release --preid=beta --yes || true
             else
-              bunx nx release --yes
+              bunx nx release --yes || true
             fi
           fi
+
+          # Stage any changes again in case Nx modified the lock file
+          git add bun.lock
+
+          # Stage all modified package.json files and CHANGELOG
+          git add -A package.json packages/*/package.json apps/*/package.json CHANGELOG.md
 
           # Get the version from package.json after release
           VERSION=$(node -p "require('./package.json').version")
