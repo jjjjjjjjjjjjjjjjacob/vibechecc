@@ -1,0 +1,164 @@
+{
+  "result": [
+    {
+      "created_on": "2025-08-13T08:27:33.94101Z",
+      "modified_on": "2025-08-13T08:27:33.94101Z",
+      "id": "vibechecc-pr-16-web",
+      "tag": "98cec4997db24a73aaaf3ea20a67fd92",
+      "tags": null,
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "has_assets": false,
+      "has_modules": true,
+      "etag": "51d78121147612d7bb930dcea5078962cff1b2e40f8669e94cb155ee7706532c",
+      "handlers": [
+        "fetch"
+      ],
+      "last_deployed_from": "terraform",
+      "compatibility_date": "2025-07-06",
+      "usage_model": "standard",
+      "routes": null
+    },
+    {
+      "created_on": "2025-07-27T04:26:29.482056Z",
+      "modified_on": "2025-08-03T21:56:05.54963Z",
+      "id": "viberater-development-frontend",
+      "tag": "8e112f699257400a83467a8517f69897",
+      "tags": [],
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+      },
+      "has_assets": true,
+      "has_modules": true,
+      "etag": "2edc5de6328c7f15d5a71cf13ceb5c9eb9913dda249a91efc61bcc6f99febe20",
+      "handlers": [
+        "fetch",
+        "scheduled",
+        "email",
+        "queue",
+        "tail",
+        "trace"
+      ],
+      "last_deployed_from": "wrangler",
+      "compatibility_date": "2025-07-01",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "routes": [
+        {
+          "id": "d3c3459b1db2467cad2383a7135105f7",
+          "pattern": "dev.viberater.vip/*",
+          "script": "viberater-development-frontend",
+          "request_limit_fail_open": false
+        }
+      ]
+    },
+    {
+      "created_on": "2025-08-03T23:09:08.764985Z",
+      "modified_on": "2025-08-05T20:08:22.010624Z",
+      "id": "viberatr-development-frontend",
+      "tag": "454ddd99509742068555af5f878431f2",
+      "tags": [],
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+      },
+      "has_assets": true,
+      "has_modules": true,
+      "etag": "e331cebe7e121c61d2940685a2a39013e15952282ccc77cb6d4b6382641839d5",
+      "handlers": [
+        "fetch",
+        "scheduled",
+        "email",
+        "queue",
+        "tail",
+        "trace"
+      ],
+      "last_deployed_from": "wrangler",
+      "compatibility_date": "2025-07-01",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "routes": [
+        {
+          "id": "3ab558860c754e4e8c611222f06f789d",
+          "pattern": "dev.viberatr.io/*",
+          "script": "viberatr-development-frontend",
+          "request_limit_fail_open": false
+        }
+      ]
+    },
+    {
+      "created_on": "2025-08-05T15:21:25.160908Z",
+      "modified_on": "2025-08-05T15:21:51.299637Z",
+      "id": "viberatr-pr-12-frontend",
+      "tag": "ee2bd35e3eb14f31929b7d87b64c87c8",
+      "tags": [],
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+      },
+      "has_assets": true,
+      "has_modules": true,
+      "etag": "2c2c060cdbede47180dccf50226eb19b4e0a7de9f4dea5a70ecbe0dd119a74d2",
+      "handlers": [
+        "fetch",
+        "scheduled",
+        "email",
+        "queue",
+        "tail",
+        "trace"
+      ],
+      "last_deployed_from": "wrangler",
+      "compatibility_date": "2025-07-01",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "routes": null
+    },
+    {
+      "created_on": "2025-08-05T22:58:23.044156Z",
+      "modified_on": "2025-08-05T22:58:23.044156Z",
+      "id": "viberatr-pr-16-frontend",
+      "tag": "a1ca10bf52db4437abe4a43cb39932ad",
+      "tags": null,
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "has_assets": false,
+      "has_modules": true,
+      "etag": "51d78121147612d7bb930dcea5078962cff1b2e40f8669e94cb155ee7706532c",
+      "handlers": [
+        "fetch"
+      ],
+      "last_deployed_from": "terraform",
+      "compatibility_date": "2025-07-06",
+      "usage_model": "standard",
+      "routes": [
+        {
+          "id": "02e4b29cdef04253a69d1546c526d3bd",
+          "pattern": "pr-16.viberatr.io/*",
+          "script": "viberatr-pr-16-frontend",
+          "request_limit_fail_open": false
+        }
+      ]
+    }
+  ],
+  "success": true,
+  "errors": [],
+  "messages": []
+}

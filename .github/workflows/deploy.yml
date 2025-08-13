@@ -78,8 +78,8 @@ jobs:
         run: |
           terraform workspace select ${{ steps.env.outputs.workspace }} || terraform workspace new ${{ steps.env.outputs.workspace }}
 
-      - name: Get DNS record IDs and import if they exist
-        id: dns_records
+      - name: Import existing Cloudflare resources
+        id: import_resources
         working-directory: terraform
         env:
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -88,107 +88,11 @@ jobs:
           TF_VAR_cloudflare_zone: ${{ vars.CLOUDFLARE_ZONE }}
           TF_VAR_environment: ${{ inputs.environment }}
           TF_VAR_pr_number: ${{ inputs.pr_number }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # Set prefix based on environment
-          PREFIX=""
-          if [ "${{ inputs.environment }}" = "ephemeral" ]; then
-            PREFIX="pr-${{ inputs.pr_number }}"
-          elif [ "${{ inputs.environment }}" = "production" ]; then
-            PREFIX="prod"
-          elif [ "${{ inputs.environment }}" = "development" ]; then
-            PREFIX="dev"
-          fi
-          if [ "$PREFIX" = "" ]; then
-            echo "Error: Invalid environment: ${{ inputs.environment }}"
-            exit 1
-          fi
-
-          # Get DNS records from Cloudflare API
-          echo "Fetching DNS records..."
-          DNS_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json")
-          
-          # Check if the DNS API call was successful
-          if echo "$DNS_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
-            echo "$DNS_RESPONSE" | jq '.' > dns_output.json
-            echo "DNS records fetched successfully"
-          else
-            echo "Error fetching DNS records:"
-            echo "$DNS_RESPONSE" | jq '.'
-            echo '{"result": []}' > dns_output.json
-          fi
-
-          # Get Workers scripts from Cloudflare API
-          echo "Fetching Workers scripts..."
-          WORKERS_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json")
-          
-          # Check if the Workers API call was successful
-          if echo "$WORKERS_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
-            echo "$WORKERS_RESPONSE" | jq '.' > workers_output.json
-            echo "Workers scripts fetched successfully"
-          else
-            echo "Error fetching Workers scripts:"
-            echo "$WORKERS_RESPONSE" | jq '.'
-            echo '{"result": []}' > workers_output.json
-          fi
-
-          # Extract A record ID for vibechecc.io (with null check)
-          A_RECORD_ID=$(jq -r '.result[]? | select(.type == "A" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json 2>/dev/null || echo "")
-
-          # Extract AAAA record ID for vibechecc.io (with null check)
-          AAAA_RECORD_ID=$(jq -r '.result[]? | select(.type == "AAAA" and .name == "${{ vars.CLOUDFLARE_ZONE }}") | .id' dns_output.json 2>/dev/null || echo "")
-
-          # Extract CNAME record ID for the subdomain (with null check)
-          CNAME_RECORD_ID=$(jq -r --arg prefix "$PREFIX.${{ vars.CLOUDFLARE_ZONE }}" '.result[]? | select(.type == "CNAME" and .name == $prefix) | .id' dns_output.json 2>/dev/null || echo "")
-
-          # Extract Worker script name for vibechecc-{prefix}-web
-          if [ "${{ inputs.environment }}" = "ephemeral" ]; then
-            WORKER_SCRIPT_NAME="vibechecc-ephemeral-$PREFIX-web"
-          else
-            WORKER_SCRIPT_NAME="vibechecc-${{ inputs.environment }}-web"
-          fi
-          WORKER_SCRIPT_EXISTS=$(jq -r --arg script_name "$WORKER_SCRIPT_NAME" '.result[]? | select(.id == $script_name) | .id' workers_output.json 2>/dev/null || echo "")
-
-          # Set outputs for potential use in other steps
-          echo "a_record_id=$A_RECORD_ID" >> $GITHUB_OUTPUT
-          echo "aaaa_record_id=$AAAA_RECORD_ID" >> $GITHUB_OUTPUT
-          echo "cname_record_id=$CNAME_RECORD_ID" >> $GITHUB_OUTPUT
-          echo "worker_script_name=$WORKER_SCRIPT_EXISTS" >> $GITHUB_OUTPUT
-
-          # Import A record if it exists (production only)
-          if [ "${{ inputs.environment }}" = "production" ] && [ -n "$A_RECORD_ID" ] && [ "$A_RECORD_ID" != "null" ]; then
-            echo "Importing A record with ID: $A_RECORD_ID"
-            terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_a[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
-          else
-            echo "No A record to import for environment: ${{ inputs.environment }}"
-          fi
-
-          # Import AAAA record if it exists (production only)
-          if [ "${{ inputs.environment }}" = "production" ] && [ -n "$AAAA_RECORD_ID" ] && [ "$AAAA_RECORD_ID" != "null" ]; then
-            echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
-            terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_aaaa[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
-          else
-            echo "No AAAA record to import for environment: ${{ inputs.environment }}"
-          fi
-
-          # Import CNAME record if it exists (non-production only)
-          if [ "${{ inputs.environment }}" != "production" ] && [ -n "$CNAME_RECORD_ID" ] && [ "$CNAME_RECORD_ID" != "null" ]; then
-            echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
-            terraform import 'module.vibechecc_worker.cloudflare_dns_record.web_cname[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
-          else
-            echo "No CNAME record to import for environment: ${{ inputs.environment }}"
-          fi
-
-          # Import Worker script if it exists
-          if [ -n "$WORKER_SCRIPT_EXISTS" ] && [ "$WORKER_SCRIPT_EXISTS" != "null" ]; then
-            echo "Importing Worker script: $WORKER_SCRIPT_EXISTS"
-            terraform import module.vibechecc_worker.cloudflare_workers_script.web ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$WORKER_SCRIPT_EXISTS || true
-          else
-            echo "No Worker script found to import"
-          fi
+          chmod +x ./import-existing-resources.sh
+          ./import-existing-resources.sh
 
       - name: Terraform Apply
         working-directory: terraform
