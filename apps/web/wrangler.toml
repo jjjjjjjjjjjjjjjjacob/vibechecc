@@ -12,10 +12,6 @@ directory = "./.output/public"
 [observability]
 enabled = true
 
-# Build configuration for optimized output
-[build]
-command = "bun run build"
-
 # Production Environment
 [env.production]
 name = "viberatr-production-frontend"

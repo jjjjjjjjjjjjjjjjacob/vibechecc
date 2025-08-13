@@ -156,12 +156,15 @@ export function isPostHogReady(
   isPostHogInitialized: boolean,
   hasEnvironmentAccess: boolean | null
 ): boolean {
+  // During SSR, return false to ensure consistent initial render
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  
   // For localhost, only theme readiness matters
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-      return true;
-    }
+  const hostname = window.location.hostname;
+  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+    return true;
   }
 
   // For production environments, both PostHog and access check must be complete
