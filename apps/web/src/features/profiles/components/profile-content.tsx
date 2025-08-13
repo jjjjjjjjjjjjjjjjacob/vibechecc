@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import * as React from 'react';
 import {
-  useuserVibes,
+  useUserVibes,
   useUserReactedVibes,
   useUpdateProfileMutation,
   useCurrentUser,
@@ -89,7 +89,10 @@ export function ProfileContent() {
         onSuccess: () => {
           refetchUser();
         },
-        onError: (error) => {          toast.error(
+        onError: (error) => {
+          // eslint-disable-next-line no-console
+          console.warn(error);
+          toast.error(
             'failed to initialize user profile. please refresh the page.'
           );
         },
@@ -215,7 +218,10 @@ export function ProfileContent() {
       }
 
       setIsEditing(false);
-    } catch (error) {      toast.error('failed to update profile. please try again.');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn(error);
+      toast.error('failed to update profile. please try again.');
     } finally {
       setIsSaving(false);
     }

@@ -44,7 +44,7 @@ export const createNotification = internalMutation({
 
     // If the recipient doesn't exist, raise an error so the caller can react
     if (!receivingUser) {
-      throw new Error('receiving user not found');
+      throw new Error('Receiving user not found');
     }
 
     // Fetch the user who triggered the notification to ensure they exist
@@ -55,7 +55,7 @@ export const createNotification = internalMutation({
 
     // Bail out if the triggering user does not exist
     if (!triggerUser) {
-      throw new Error('triggering user not found');
+      throw new Error('Triggering user not found');
     }
 
     // Insert the notification into the database
@@ -288,10 +288,10 @@ export const markAsRead = mutation({
     const currentUser = await getCurrentUserOrThrow(ctx); // require auth
     const notification = await ctx.db.get(args.notificationId); // fetch notification
     if (!notification) {
-      throw new Error('notification not found');
+      throw new Error('Notification not found');
     }
     if (notification.userId !== currentUser.externalId) {
-      throw new Error('not authorized to update this notification');
+      throw new Error('Not authorized to update this notification');
     }
     await ctx.db.patch(args.notificationId, {
       read: true, // set read flag

@@ -56,7 +56,7 @@ export function VibeListExample({ vibes }: { vibes: Vibe[] }) {
             'rounded-md px-3 py-1.5 text-sm transition-colors',
             view === 'grid'
               ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80',
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
           )}
         >
           {/* keep label lowercase */}
@@ -69,7 +69,7 @@ export function VibeListExample({ vibes }: { vibes: Vibe[] }) {
             'rounded-md px-3 py-1.5 text-sm transition-colors',
             view === 'list'
               ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80',
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
           )}
         >
           {/* keep label lowercase */}

@@ -43,18 +43,18 @@ import { useConvex } from 'convex/react';
 type MobileNavState = 'nav' | 'profile' | 'search' | 'notifications' | null;
 
 export function Header() {
-    // theme utilities to read current theme and update colors
+  // theme utilities to read current theme and update colors
   const { resolvedTheme, setTheme, setColorTheme, setSecondaryColorTheme } =
     useTheme();
-    // current mobile navigation section being displayed
+  // current mobile navigation section being displayed
   const [mobileNavState, setMobileNavState] = useState<MobileNavState>(null);
-    // track when the component has hydrated on the client
+  // track when the component has hydrated on the client
   const [isHydrated, setIsHydrated] = useState(false);
-    // animate transitions between mobile panels
+  // animate transitions between mobile panels
   const [isTransitioning, setIsTransitioning] = useState(false);
-    // store a ref to the search button for returning focus
+  // store a ref to the search button for returning focus
   const searchButtonRef = React.useRef<HTMLButtonElement | null>(null);
-    // Clerk hooks for reading current user and opening the profile modal
+  // Clerk hooks for reading current user and opening the profile modal
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
 

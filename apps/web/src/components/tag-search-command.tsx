@@ -56,7 +56,7 @@ export function TagSearchCommand({
   return (
     <div className={cn('space-y-3', className)}>
       <Command className="ring-border rounded-lg border-0 ring-1">
-      {/* search input driving the command palette */}
+        {/* search input driving the command palette */}
         <CommandInput
           placeholder={placeholder}
           value={searchValue}

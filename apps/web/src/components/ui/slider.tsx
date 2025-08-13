@@ -25,20 +25,20 @@ function Slider({
     [value, defaultValue, min, max]
   );
 
-    return (
-      <SliderPrimitive.Root
-        data-slot="slider"
-        defaultValue={defaultValue}
-        value={value}
-        min={min}
-        max={max}
-        className={cn(
-          // flex layout and orientation-driven sizing
-          'relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col',
-          className
-        )}
-        {...props}
-      >
+  return (
+    <SliderPrimitive.Root
+      data-slot="slider"
+      defaultValue={defaultValue}
+      value={value}
+      min={min}
+      max={max}
+      className={cn(
+        // flex layout and orientation-driven sizing
+        'relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col',
+        className
+      )}
+      {...props}
+    >
       <SliderPrimitive.Track
         data-slot="slider-track"
         className={cn(

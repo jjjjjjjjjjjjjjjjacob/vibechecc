@@ -64,10 +64,10 @@ function CreateVibe() {
       return;
     }
 
-      if (!user?.id) {
-        setError('you must be signed in to create a vibe');
-        return;
-      }
+    if (!user?.id) {
+      setError('you must be signed in to create a vibe');
+      return;
+    }
 
     setIsSubmitting(true);
     setError('');
@@ -87,7 +87,7 @@ function CreateVibe() {
       toast.success('vibe created successfully!', {
         duration: 5000,
         action: {
-            label: 'go to vibe',
+          label: 'go to vibe',
           onClick: () =>
             navigate({
               to: '/vibes/$vibeId',
@@ -102,7 +102,7 @@ function CreateVibe() {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-          setError('an error occurred while creating your vibe');
+        setError('an error occurred while creating your vibe');
       }
       setIsSubmitting(false);
     }

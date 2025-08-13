@@ -83,6 +83,5 @@ export default Object.assign(
     message: string,
     options?: { duration?: number; icon?: string; className?: string }
   ) => toast.default(message, options),
-  toast,
+  toast
 );
-

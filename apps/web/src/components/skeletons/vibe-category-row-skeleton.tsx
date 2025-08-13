@@ -8,11 +8,14 @@ import { VibeCardSkeleton } from './vibe-card-skeleton'; // card placeholder
 
 export function VibeCategoryRowSkeleton() {
   return (
-    <div className="mb-8">{/* overall section spacing */}
+    <div className="mb-8">
+      {/* overall section spacing */}
       {/* heading and action buttons */}
       <div className="mb-4 flex items-center justify-between">
-        <Skeleton className="h-6 w-32" />{/* fake title */}
-        <div className="flex gap-2">{/* arrow buttons */}
+        <Skeleton className="h-6 w-32" />
+        {/* fake title */}
+        <div className="flex gap-2">
+          {/* arrow buttons */}
           <Skeleton className="h-10 w-10 rounded-md" />
           <Skeleton className="h-10 w-10 rounded-md" />
         </div>
@@ -25,7 +28,8 @@ export function VibeCategoryRowSkeleton() {
             key={i}
             className="min-w-[250px] snap-start md:min-w-[280px] lg:min-w-[300px]"
           >
-            <VibeCardSkeleton />{/* individual card placeholder */}
+            <VibeCardSkeleton />
+            {/* individual card placeholder */}
           </div>
         ))}
       </div>

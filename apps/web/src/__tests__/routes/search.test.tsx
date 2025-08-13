@@ -394,7 +394,7 @@ describe('Search Page - Emoji Filter Integration', () => {
     renderWithRouter();
 
     await waitFor(() => {
-      expect(screen.getByText('Search Error')).toBeInTheDocument();
+      expect(screen.getByText('search error')).toBeInTheDocument();
     });
   });
 

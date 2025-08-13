@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import {
   useUpdateProfileMutation,
-  useCurrentuser,
+  useCurrentUser,
   useEnsureUserExistsMutation,
   useUserVibes,
   useUserRatings,
@@ -79,7 +79,7 @@ function Profile() {
     convexUser?.externalId || ''
   );
   const { data: receivedRatings, isLoading: receivedRatingsLoading } =
-    useUserReceivedRatings(convexUser?.externalId || '') as unknown;
+    useUserReceivedRatings(convexUser?.externalId || '');
   const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
     convexUser?.externalId || ''
   );
@@ -144,7 +144,8 @@ function Profile() {
         onSuccess: () => {
           refetchUser();
         },
-        onError: (error) => {          toast.error(
+        onError: () => {
+          toast.error(
             'failed to initialize user profile. please refresh the page.'
           );
         },
@@ -290,7 +291,10 @@ function Profile() {
       }
 
       setIsEditing(false);
-    } catch (error) {      toast.error('failed to update profile. please try again.');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn(error);
+      toast.error('failed to update profile. please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -330,9 +334,9 @@ function Profile() {
         user={previewUser}
         userVibes={userVibes}
         vibesLoading={vibesLoading}
-        userRatings={userRatings as unknown}
+        userRatings={userRatings}
         ratingsLoading={ratingsLoading}
-        receivedRatings={receivedRatings as unknown}
+        receivedRatings={receivedRatings}
         receivedRatingsLoading={receivedRatingsLoading}
         emojiStats={emojiStats}
         showBackButton={true}

@@ -92,7 +92,9 @@ export function NotificationItem({
   const user = notification.triggerUser; // used for avatar
 
   return (
-    <Link to={href} onClick={onClick}> {/* navigate to target */}
+    <Link to={href} onClick={onClick}>
+      {' '}
+      {/* navigate to target */}
       <div
         className={cn(
           'hover:bg-muted/50 flex items-start gap-3 px-4 pt-3 pb-2',

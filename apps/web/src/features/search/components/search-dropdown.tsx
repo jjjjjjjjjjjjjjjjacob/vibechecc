@@ -229,7 +229,7 @@ export function SearchDropdown({
                 {data.vibes && data.vibes.length > 0 && (
                   <div>
                     <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider">
-vibes
+                      vibes
                     </h3>
                     <div className="space-y-1">
                       {data.vibes.map((vibe) => (
@@ -247,7 +247,7 @@ vibes
                 {data.users && data.users.length > 0 && (
                   <div>
                     <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider">
-users
+                      users
                     </h3>
                     <div className="space-y-1">
                       {data.users.map((user) => (
@@ -265,7 +265,7 @@ users
                 {data.tags && data.tags.length > 0 && (
                   <div>
                     <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider">
-tags
+                      tags
                     </h3>
                     <div className="space-y-1">
                       {data.tags.map((tag) => (
@@ -283,7 +283,7 @@ tags
                 {data.actions && data.actions.length > 0 && (
                   <div>
                     <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider">
-actions
+                      actions
                     </h3>
                     <div className="space-y-1">
                       {data.actions.map((action) => (

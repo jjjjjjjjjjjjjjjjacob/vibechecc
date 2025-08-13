@@ -84,7 +84,8 @@ export function EditableText({
       }}
       className={buttonClassName} // custom styling for the button
     >
-      {value || <span className="text-slate-400 italic">edit</span>} // display placeholder when empty
+      {value || <span className="text-slate-400 italic">edit</span>} // display
+      placeholder when empty
     </button>
   );
 }

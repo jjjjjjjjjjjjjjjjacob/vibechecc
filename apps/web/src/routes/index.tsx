@@ -32,7 +32,8 @@ function Home() {
   React.useEffect(() => {
     if (currentUser) {
       // Derive primary and secondary colors with sensible fallbacks
-      const primaryColor = currentUser.primaryColor || currentUser.themeColor || 'pink';
+      const primaryColor =
+        currentUser.primaryColor || currentUser.themeColor || 'pink';
       const secondaryColor = currentUser.secondaryColor || 'orange';
 
       // Update global theme variables
@@ -45,7 +46,10 @@ function Home() {
     <>
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8">
-        <div className="from-theme-primary to-theme-secondary animate-gradient-shift rounded-2xl bg-gradient-to-r p-8 text-white md:p-12" style={{ backgroundSize: '200% 200%' }}>
+        <div
+          className="from-theme-primary to-theme-secondary animate-gradient-shift rounded-2xl bg-gradient-to-r p-8 text-white md:p-12"
+          style={{ backgroundSize: '200% 200%' }}
+        >
           <div className="max-w-2xl">
             {/* Site tagline */}
             <h1 className="mb-4 text-4xl font-bold lowercase md:text-5xl">
@@ -59,14 +63,22 @@ function Home() {
             <SignedIn>
               <div className="flex gap-3">
                 {/* Button for creating a new vibe */}
-                <Button asChild variant="outline" className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
+                >
                   <Link to="/vibes/create">
                     <Plus className="mr-2 h-4 w-4" />
                     create vibe
                   </Link>
                 </Button>
                 {/* Button for browsing existing vibes */}
-                <Button asChild variant="outline" className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
+                >
                   <Link to="/discover">
                     <Sparkles className="mr-2 h-4 w-4" />
                     discover vibes

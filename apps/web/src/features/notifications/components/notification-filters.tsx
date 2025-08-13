@@ -74,7 +74,9 @@ export function NotificationFilters({
   unreadCounts,
 }: NotificationFiltersProps) {
   return (
-    <div className="border-border/50 border-b"> {/* top border separating from dropdown header */}
+    <div className="border-border/50 border-b">
+      {' '}
+      {/* top border separating from dropdown header */}
       <div className="flex flex-wrap gap-1 px-3 pt-0 pb-3">
         {filterConfig.map(({ id, label, icon: Icon }) => {
           const isActive = activeFilter === id; // determine if button is selected
@@ -91,7 +93,8 @@ export function NotificationFilters({
               )}
               onClick={() => onFilterChange(id)} // inform parent of new selection
             >
-              <Icon style={{ width: '12px' }} /> {/* small icon representing filter */}
+              <Icon style={{ width: '12px' }} />{' '}
+              {/* small icon representing filter */}
               <span className="truncate">{label}</span>
               {unreadCount > 0 && (
                 <span className="bg-theme-primary text-primary-foreground ml-1 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-xs">

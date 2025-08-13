@@ -1,7 +1,6 @@
 /* eslint-disable */
 /**
  * Generated `api` utility.
- * Provides typed helpers for calling Convex functions.
  *
  * THIS CODE IS AUTOMATICALLY GENERATED.
  *
@@ -29,13 +28,13 @@ import type * as lib_security_validators from "../lib/security-validators.js";
 import type * as notifications from "../notifications.js";
 import type * as ratings from "../ratings.js";
 import type * as search_fuzzy_search from "../search/fuzzy-search.js";
-import type * as search_search_scorer from "../search/search_scorer.js";
 import type * as search_search_utils from "../search/search-utils.js";
-import type * as search from "../search.js";
+import type * as search_search_scorer from "../search/search_scorer.js";
+import type * as search_backup from "../search-backup.js";
 import type * as search_improved from "../search-improved.js";
 import type * as search_optimized from "../search-optimized.js";
 import type * as search_v2 from "../search-v2.js";
-import type * as search_backup from "../search-backup.js";
+import type * as search from "../search.js";
 import type * as seed_emojis_activities from "../seed/emojis/activities.js";
 import type * as seed_emojis_animals from "../seed/emojis/animals.js";
 import type * as seed_emojis_food from "../seed/emojis/food.js";
@@ -73,13 +72,13 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   ratings: typeof ratings;
   "search/fuzzy-search": typeof search_fuzzy_search;
-  "search/search_scorer": typeof search_search_scorer;
   "search/search-utils": typeof search_search_utils;
-  search: typeof search;
+  "search/search_scorer": typeof search_search_scorer;
+  "search-backup": typeof search_backup;
   "search-improved": typeof search_improved;
   "search-optimized": typeof search_optimized;
   "search-v2": typeof search_v2;
-  "search-backup": typeof search_backup;
+  search: typeof search;
   "seed/emojis/activities": typeof seed_emojis_activities;
   "seed/emojis/animals": typeof seed_emojis_animals;
   "seed/emojis/food": typeof seed_emojis_food;

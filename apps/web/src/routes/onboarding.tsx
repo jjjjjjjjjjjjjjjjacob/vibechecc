@@ -47,7 +47,9 @@ function OnboardingPage() {
       <SignedOut>
         <div className="from-theme-primary/5 to-theme-secondary/5 dark:from-background dark:to-muted/50 flex min-h-screen items-center justify-center bg-gradient-to-br">
           <div className="mx-auto max-w-md space-y-4 px-4 text-center">
-            <h1 className="text-foreground text-2xl font-bold">sign in required</h1>
+            <h1 className="text-foreground text-2xl font-bold">
+              sign in required
+            </h1>
             <p className="text-muted-foreground">
               you need to be signed in to complete the onboarding process.
             </p>

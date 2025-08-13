@@ -57,7 +57,8 @@ export function DecimalRatingSelector({
       {label && <Label className="text-sm font-medium">{label}</Label>}
 
       {showStars && (
-        <div className="flex justify-center">{/* star visualization */}
+        <div className="flex justify-center">
+          {/* star visualization */}
           <StarRating
             value={value}
             onChange={onChange}
@@ -70,7 +71,8 @@ export function DecimalRatingSelector({
       )}
 
       {showSlider && (
-        <div className="px-3">{/* numeric slider */}
+        <div className="px-3">
+          {/* numeric slider */}
           <Slider
             value={[value]}
             onValueChange={handleSliderChange}
@@ -87,7 +89,8 @@ export function DecimalRatingSelector({
       )}
 
       {showInput && (
-        <div className="flex items-center gap-2">{/* manual numeric entry */}
+        <div className="flex items-center gap-2">
+          {/* manual numeric entry */}
           <Input
             type="number"
             value={value}

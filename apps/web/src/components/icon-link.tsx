@@ -13,10 +13,7 @@ export function IconLink({
 }) {
   return (
     // Anchor element wraps icon and label
-    <a
-      href={href}
-      className="text-center text-xs font-bold text-slate-500"
-    >
+    <a href={href} className="text-center text-xs font-bold text-slate-500">
       {/* Icon image displayed above the label */}
       <img
         src={icon}

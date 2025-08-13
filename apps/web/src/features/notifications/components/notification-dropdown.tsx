@@ -195,8 +195,12 @@ export function NotificationDropdown({
         unreadCounts={unreadCounts} // pass unread counts for badges
       />
 
-      <ScrollArea className="flex-1 overflow-y-auto"> // allow scrolling of long lists
-        <div className="min-h-0"> // wrapper to ensure ScrollArea works
+      <ScrollArea className="flex-1 overflow-y-auto">
+        {' '}
+        // allow scrolling of long lists
+        <div className="min-h-0">
+          {' '}
+          // wrapper to ensure ScrollArea works
           {notificationQuery.isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-muted-foreground text-sm">
@@ -206,7 +210,9 @@ export function NotificationDropdown({
           ) : notifications.length === 0 ? (
             <NotificationEmptyState filter={activeFilter} /> // show empty state when no notifications
           ) : (
-            <div className="divide-border/50 divide-y"> // separator between notification items
+            <div className="divide-border/50 divide-y">
+              {' '}
+              // separator between notification items
               {notifications.map((notification) => (
                 <NotificationItem
                   key={notification._id} // stable key for list rendering

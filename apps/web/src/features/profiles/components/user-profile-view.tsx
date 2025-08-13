@@ -34,6 +34,7 @@ import {
   type SecondaryColorTheme,
 } from '@/features/theming/components/theme-provider';
 import type { Vibe } from '@viberatr/types';
+import type { Id } from '@viberatr/convex/dataModel';
 import { getThemeColorValue } from '@/utils/theme-colors';
 import { useUser } from '@clerk/tanstack-react-start';
 import {
@@ -69,7 +70,7 @@ interface UserProfileViewProps {
   userVibes?: Array<Vibe>;
   vibesLoading?: boolean;
   userRatings?: Array<{
-    _id?: string;
+    _id?: string | Id<'ratings'>;
     vibeId: string;
     userId: string;
     emoji: string;
@@ -78,18 +79,11 @@ interface UserProfileViewProps {
     tags?: string[];
     createdAt: string;
     updatedAt?: string;
-    vibe?: {
-      id: string;
-      title: string;
-      description: string;
-      image?: string;
-      createdBy: { id: string; name: string; avatar?: string };
-      createdAt: string;
-    };
-  }>;
+    vibe?: any; // Accept any vibe structure from Convex
+  } | null> | null;
   ratingsLoading?: boolean;
   receivedRatings?: Array<{
-    _id?: string;
+    _id?: string | Id<'ratings'>;
     vibeId: string;
     userId: string;
     emoji: string;
@@ -99,13 +93,13 @@ interface UserProfileViewProps {
     createdAt: string;
     updatedAt?: string;
     rater?: {
-      _id?: string;
+      _id?: string | Id<'users'>;
       username?: string;
       first_name?: string;
       last_name?: string;
       image_url?: string;
-    };
-  }>;
+    } | null;
+  }> | null;
   receivedRatingsLoading?: boolean;
   emojiStats?: {
     totalEmojiRatings: number;
@@ -158,11 +152,11 @@ export function UserProfileView({
       ? new Date(user.created_at || user._creationTime!).toLocaleDateString()
       : 'Unknown';
   const vibeCount = userVibes?.length || 0;
-  const givenRatingsCount = userRatings?.length || 0;
+  const givenRatingsCount = userRatings?.filter((r) => r !== null).length || 0;
   const receivedRatingsCount = receivedRatings?.length || 0;
   const averageReceivedRating =
     receivedRatings && receivedRatings.length > 0
-      ? receivedRatings.reduce((sum, rating) => sum + (rating.value || 0), 0) /
+      ? receivedRatings.reduce((sum, rating) => sum + (rating?.value || 0), 0) /
         receivedRatings.length
       : 0;
 
@@ -524,64 +518,70 @@ export function UserProfileView({
                           </div>
                         ) : userRatings && userRatings.length > 0 ? (
                           <div className="space-y-4">
-                            {userRatings.slice(0, 5).map((rating, index) => (
-                              <div
-                                key={
-                                  rating?._id ||
-                                  `rating-${rating?.vibeId}-${rating?.userId}-${index}`
-                                }
-                                className="border-border bg-card rounded-lg border p-4"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <img
-                                    src={rating?.vibe?.image || ''}
-                                    alt={rating?.vibe?.title || ''}
-                                    className="h-12 w-12 rounded-lg object-cover"
-                                  />
-                                  <div className="flex-1">
-                                    <div className="mb-1 flex items-center gap-2">
-                                      <h4 className="text-sm font-medium">
-                                        {rating?.vibe?.title || 'Unknown'}
-                                      </h4>
-                                      {rating?.emoji ? (
-                                        <EmojiRatingDisplay
-                                          rating={{
-                                            emoji: rating.emoji,
-                                            value: rating.value || 0,
-                                            count: 1,
-                                          }}
-                                          showScale={false}
-                                        />
-                                      ) : (
-                                        <div className="flex items-center gap-1">
-                                          {[...Array(5)].map((_, i) => (
-                                            <Star
-                                              key={i}
-                                              className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                            {userRatings
+                              .filter((r) => r !== null)
+                              .slice(0, 5)
+                              .map((rating, index) => {
+                                if (!rating) return null;
+                                return (
+                                  <div
+                                    key={
+                                      rating._id ||
+                                      `rating-${rating.vibeId}-${rating.userId}-${index}`
+                                    }
+                                    className="border-border bg-card rounded-lg border p-4"
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      <img
+                                        src={rating.vibe?.image || ''}
+                                        alt={rating.vibe?.title || ''}
+                                        className="h-12 w-12 rounded-lg object-cover"
+                                      />
+                                      <div className="flex-1">
+                                        <div className="mb-1 flex items-center gap-2">
+                                          <h4 className="text-sm font-medium">
+                                            {rating.vibe?.title || 'Unknown'}
+                                          </h4>
+                                          {rating.emoji ? (
+                                            <EmojiRatingDisplay
+                                              rating={{
+                                                emoji: rating.emoji,
+                                                value: rating.value || 0,
+                                                count: 1,
+                                              }}
+                                              showScale={false}
                                             />
-                                          ))}
+                                          ) : (
+                                            <div className="flex items-center gap-1">
+                                              {[...Array(5)].map((_, i) => (
+                                                <Star
+                                                  key={i}
+                                                  className={`h-3 w-3 ${rating.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                                />
+                                              ))}
+                                            </div>
+                                          )}
                                         </div>
-                                      )}
+                                        {rating.review && (
+                                          <p className="text-muted-foreground text-sm">
+                                            {rating.review}
+                                          </p>
+                                        )}
+                                        <p className="text-muted-foreground mt-1 text-xs">
+                                          {rating.createdAt
+                                            ? new Date(
+                                                rating.createdAt
+                                              ).toLocaleDateString()
+                                            : ''}
+                                        </p>
+                                      </div>
                                     </div>
-                                    {rating?.review && (
-                                      <p className="text-muted-foreground text-sm">
-                                        {rating.review}
-                                      </p>
-                                    )}
-                                    <p className="text-muted-foreground mt-1 text-xs">
-                                      {rating?.createdAt
-                                        ? new Date(
-                                            rating.createdAt
-                                          ).toLocaleDateString()
-                                        : ''}
-                                    </p>
                                   </div>
-                                </div>
-                              </div>
-                            ))}
-                            {userRatings.length > 5 && (
+                                );
+                              })}
+                            {givenRatingsCount > 5 && (
                               <p className="text-muted-foreground text-center text-sm">
-                                and {userRatings.length - 5} more reviews...
+                                and {givenRatingsCount - 5} more reviews...
                               </p>
                             )}
                           </div>
@@ -654,8 +654,8 @@ export function UserProfileView({
                               .map((rating, index) => (
                                 <div
                                   key={
-                                    rating?._id ||
-                                    `received-rating-${rating?.vibeId}-${rating?.userId}-${index}`
+                                    rating._id ||
+                                    `received-rating-${rating.vibeId}-${rating.userId}-${index}`
                                   }
                                   className="border-border bg-card rounded-lg border p-4"
                                 >
@@ -673,7 +673,7 @@ export function UserProfileView({
                                         <span className="text-sm font-medium">
                                           {rating.rater?.username || 'Unknown'}
                                         </span>
-                                        {rating?.emoji ? (
+                                        {rating.emoji ? (
                                           <EmojiRatingDisplay
                                             rating={{
                                               emoji: rating.emoji,
@@ -687,7 +687,7 @@ export function UserProfileView({
                                             {[...Array(5)].map((_, i) => (
                                               <Star
                                                 key={i}
-                                                className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                                className={`h-3 w-3 ${rating.value && i < rating.value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                                               />
                                             ))}
                                           </div>
@@ -702,13 +702,13 @@ export function UserProfileView({
                                         ).vibe?.title || 'Unknown'}
                                         "
                                       </p>
-                                      {rating?.review && (
+                                      {rating.review && (
                                         <p className="text-muted-foreground text-sm">
                                           {rating.review}
                                         </p>
                                       )}
                                       <p className="text-muted-foreground mt-1 text-xs">
-                                        {rating?.createdAt
+                                        {rating.createdAt
                                           ? new Date(
                                               rating.createdAt
                                             ).toLocaleDateString()
@@ -718,9 +718,9 @@ export function UserProfileView({
                                   </div>
                                 </div>
                               ))}
-                            {receivedRatings.length > 5 && (
+                            {receivedRatingsCount > 5 && (
                               <p className="text-muted-foreground text-center text-sm">
-                                and {receivedRatings.length - 5} more reviews...
+                                and {receivedRatingsCount - 5} more reviews...
                               </p>
                             )}
                           </div>

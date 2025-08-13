@@ -48,7 +48,9 @@ export function SimpleVibePlaceholder({
 
   // Render a plain block before mounting so server and client markup match.
   if (!mounted) {
-    return <div className={cn('relative h-full w-full bg-zinc-800', className)} />;
+    return (
+      <div className={cn('relative h-full w-full bg-zinc-800', className)} />
+    );
   }
 
   // Choose a gradient class based on the hashed index and current theme.
@@ -105,4 +107,3 @@ export function SimpleVibePlaceholder({
     </div>
   );
 }
-

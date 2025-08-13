@@ -2752,5 +2752,5 @@ export const peopleEmojis = [
     color: '#8B4513',
     tags: ['footprints', 'tracks', 'walking'],
   },
-// treat the list as immutable and type-checked
+  // treat the list as immutable and type-checked
 ] as const satisfies readonly Omit<Emoji, 'sentiment'>[];

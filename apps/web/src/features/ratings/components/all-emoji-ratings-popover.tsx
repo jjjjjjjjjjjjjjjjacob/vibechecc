@@ -43,7 +43,8 @@ export function AllEmojiRatingsPopover({
   // shared content used by both popover and dialog variants
   const content = (
     <>
-      <ScrollArea className="max-h-[300px] overflow-y-auto p-4">{/* list container */}
+      <ScrollArea className="max-h-[300px] overflow-y-auto p-4">
+        {/* list container */}
         <TopEmojiRatings
           emojiRatings={emojiRatings}
           expanded={true}
@@ -51,7 +52,8 @@ export function AllEmojiRatingsPopover({
         />
       </ScrollArea>
       {vibeId && (
-        <div className="border-t p-4">{/* link to full vibe page */}
+        <div className="border-t p-4">
+          {/* link to full vibe page */}
           <Link to="/vibes/$vibeId" params={{ vibeId }}>
             <Button
               variant="ghost"

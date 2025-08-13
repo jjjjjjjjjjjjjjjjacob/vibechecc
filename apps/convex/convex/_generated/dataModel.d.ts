@@ -1,7 +1,6 @@
- 
+/* eslint-disable */
 /**
  * Generated data model types.
- * Defines TypeScript interfaces for Convex tables and documents.
  *
  * THIS CODE IS AUTOMATICALLY GENERATED.
  *

@@ -632,7 +632,7 @@ describe('NotificationItem', () => {
       );
 
       const avatar = screen.getByRole('img');
-      expect(avatar).toHaveAttribute('alt', 'User');
+      expect(avatar).toHaveAttribute('alt', 'user');
     });
   });
 });

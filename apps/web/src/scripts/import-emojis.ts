@@ -30,7 +30,7 @@ async function importEmojis() {
     // Use the importBasicEmojis action to seed all entries
     const result = await client.action(
       api['import-emojis'].importBasicEmojis,
-      {},
+      {}
     );
 
     // eslint-disable-next-line no-console

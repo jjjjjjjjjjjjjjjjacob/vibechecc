@@ -312,12 +312,13 @@ describe('Users Functions', () => {
       };
 
       // This should NOT throw an error - the user should be able to "update" to the same username
-      await expect(
-        t.withIdentity(mockIdentity).mutation(api.users.update, {
+      const updateResult = await t
+        .withIdentity(mockIdentity)
+        .mutation(api.users.update, {
           externalId: 'clerk_user_latin_update',
           username: 'françois-müller', // Same username with Latin characters
-        })
-      ).resolves.not.toThrow();
+        });
+      expect(updateResult).toBeDefined();
 
       // Verify the username is still there
       user = await t.query(api.users.getById, {

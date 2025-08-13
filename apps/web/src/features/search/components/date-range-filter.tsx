@@ -29,7 +29,7 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
   ];
 
   const getDateFromPreset = (preset: string): { from?: Date; to?: Date } => {
-  const now = new Date();
+    const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     switch (preset) {

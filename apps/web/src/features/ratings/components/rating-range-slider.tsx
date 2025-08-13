@@ -54,10 +54,12 @@ export function RatingRangeSlider({
   return (
     <div className={cn('space-y-3', className)}>
       {variant === 'default' && (
-        <div className="flex items-center justify-between">{/* header row */}
+        <div className="flex items-center justify-between">
+          {/* header row */}
           <Label className="text-sm font-medium lowercase">{label}</Label>
           {showValues && (
-            <div className="flex items-center gap-2">{/* current range display */}
+            <div className="flex items-center gap-2">
+              {/* current range display */}
               <Badge
                 variant="secondary"
                 className="border-[hsl(var(--theme-primary))]/20 bg-[hsl(var(--theme-primary))]/10 text-xs text-[hsl(var(--theme-primary))]"
@@ -70,7 +72,8 @@ export function RatingRangeSlider({
       )}
 
       {variant === 'compact' && showValues && (
-        <div className="flex items-center justify-between text-xs">{/* compact values */}
+        <div className="flex items-center justify-between text-xs">
+          {/* compact values */}
           <span className="text-muted-foreground">
             min: {formatValue(minValue)}
           </span>
@@ -80,7 +83,8 @@ export function RatingRangeSlider({
         </div>
       )}
 
-      <div className="px-3 py-2">{/* interactive slider */}
+      <div className="px-3 py-2">
+        {/* interactive slider */}
         <Slider
           value={[minValue, maxValue]}
           onValueChange={handleValueChange}
@@ -101,7 +105,8 @@ export function RatingRangeSlider({
       </div>
 
       {variant === 'default' && (
-        <div className="text-muted-foreground flex items-center justify-between px-3 text-xs">{/* slider bounds */}
+        <div className="text-muted-foreground flex items-center justify-between px-3 text-xs">
+          {/* slider bounds */}
           <span>{min}</span>
           <span>{max}</span>
         </div>
