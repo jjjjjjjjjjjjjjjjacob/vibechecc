@@ -55,10 +55,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ inputs.prerelease }}" = "true" ]; then
-            bunx nx release --preid=beta --yes
+          # Check if any version tags exist
+          if ! git tag -l "v*" | grep -q .; then
+            echo "No version tags found, using --first-release"
+            if [ "${{ inputs.prerelease }}" = "true" ]; then
+              bunx nx release --preid=beta --first-release --yes
+            else
+              bunx nx release --first-release --yes
+            fi
           else
-            bunx nx release --yes
+            if [ "${{ inputs.prerelease }}" = "true" ]; then
+              bunx nx release --preid=beta --yes
+            else
+              bunx nx release --yes
+            fi
           fi
 
           # Get the version from package.json after release
