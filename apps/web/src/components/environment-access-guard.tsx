@@ -152,7 +152,7 @@ export function EnvironmentAccessGuard({
 
     // Check access immediately if PostHog is ready
     checkAccess();
-  }, [isPostHogInitialized]);
+  }, [isPostHogInitialized, user]);
 
   const welcomeMessage = React.useMemo(
     () =>
@@ -194,7 +194,7 @@ export function EnvironmentAccessGuard({
   );
 
   // Show loading/welcome state while not ready or showing welcome
-  if (!shouldShowContent) {
+  if (!shouldShowContent && (hasAccess || hasAccess == null)) {
     return (
       <div
         className="data-[theme-ready=true]:from-theme-primary data-[theme-ready=true]:to-theme-secondary flex min-h-screen items-center justify-center bg-gradient-to-br from-white to-white transition duration-500 data-[fading-out=true]:opacity-0 data-[fading-out=true]:delay-700 data-[fading-out=true]:duration-600"

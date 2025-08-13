@@ -85,6 +85,7 @@ export function canAccessCurrentEnvironment(): boolean {
   }
 
   // For dev/ephemeral environments, check the feature flag
+  console.log('hasDevEnvironmentAccess', hasDevEnvironmentAccess());
   return hasDevEnvironmentAccess();
 }
 
