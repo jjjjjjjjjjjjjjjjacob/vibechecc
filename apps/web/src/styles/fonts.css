@@ -25,7 +25,6 @@
   unicode-range: U+0030-0039, U+002E, U+002F;
 }
 
-
 /* Font Stacks */
 :root {
   --font-sans: 'GeistSans', system-ui, -apple-system, sans-serif;

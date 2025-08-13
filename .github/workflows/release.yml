@@ -84,7 +84,7 @@ jobs:
 
           # Stage all modified package.json files (they should exist)
           git add package.json packages/*/package.json apps/*/package.json || true
-          
+
           # Stage CHANGELOG if it exists (may not exist on first release)
           if [ -f "CHANGELOG.md" ]; then
             git add CHANGELOG.md
@@ -93,7 +93,7 @@ jobs:
           # Get the version from package.json after release
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          
+
           # Create commit and tag if there are changes (backup in case Nx didn't)
           if [ -n "$(git status --porcelain)" ]; then
             echo "Creating release commit and tag..."
