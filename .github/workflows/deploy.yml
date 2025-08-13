@@ -224,7 +224,14 @@ jobs:
           # Verify the output was created
           if [ ! -f "apps/web/.output/server/index.mjs" ]; then
             echo "Error: apps/web/.output/server/index.mjs not found after build"
-            exit 1
+            echo "Checking what exists in apps/web/:"
+            ls -la apps/web/ || true
+            echo "Trying to rebuild without cache..."
+            bun nx build @vibechecc/web --skip-nx-cache
+            if [ ! -f "apps/web/.output/server/index.mjs" ]; then
+              echo "Still failed after rebuild"
+              exit 1
+            fi
           fi
           
           echo "Build successful. Output structure:"

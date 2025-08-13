@@ -18,6 +18,7 @@
         "command": "bun run build",
         "cwd": "{projectRoot}"
       },
+      "outputs": ["{projectRoot}/.output", "{projectRoot}/.tanstack"],
       "dependsOn": ["^build", "convex:build"]
     },
     "start": {
