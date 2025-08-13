@@ -16,12 +16,6 @@ enabled = true
 [build]
 command = "bun run build"
 
-# Enable automatic compression for responses
-# Cloudflare automatically compresses certain content types
-# This works in conjunction with our worker-compression middleware
-[browser]
-cache_control = "public, max-age=31536000, immutable"
-
 # Production Environment
 [env.production]
 name = "viberatr-production-frontend"
