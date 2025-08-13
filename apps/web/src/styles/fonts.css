@@ -16,6 +16,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Doto';
+  src: url('/fonts/optimized/Doto-VariableFont_ROND,wght.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039, U+002E; /* Numbers 0-9 and decimal point */
+}
 
 /* Font Stacks */
 :root {
