@@ -158,28 +158,28 @@ jobs:
           echo "cname_record_id=$CNAME_RECORD_ID" >> $GITHUB_OUTPUT
           echo "worker_script_name=$WORKER_SCRIPT_EXISTS" >> $GITHUB_OUTPUT
 
-          # Import A record if it exists
-          if [ -n "$A_RECORD_ID" ] && [ "$A_RECORD_ID" != "null" ]; then
+          # Import A record if it exists (production only)
+          if [ "${{ inputs.environment }}" = "production" ] && [ -n "$A_RECORD_ID" ] && [ "$A_RECORD_ID" != "null" ]; then
             echo "Importing A record with ID: $A_RECORD_ID"
-            terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_a ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
+            terraform import 'module.vibechecc_worker.cloudflare_dns_record.frontend_a[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$A_RECORD_ID || true
           else
-            echo "No A record found to import"
+            echo "No A record to import for environment: ${{ inputs.environment }}"
           fi
 
-          # Import AAAA record if it exists
-          if [ -n "$AAAA_RECORD_ID" ] && [ "$AAAA_RECORD_ID" != "null" ]; then
+          # Import AAAA record if it exists (production only)
+          if [ "${{ inputs.environment }}" = "production" ] && [ -n "$AAAA_RECORD_ID" ] && [ "$AAAA_RECORD_ID" != "null" ]; then
             echo "Importing AAAA record with ID: $AAAA_RECORD_ID"
-            terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_aaaa ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
+            terraform import 'module.vibechecc_worker.cloudflare_dns_record.frontend_aaaa[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$AAAA_RECORD_ID || true
           else
-            echo "No AAAA record found to import"
+            echo "No AAAA record to import for environment: ${{ inputs.environment }}"
           fi
 
-          # Import CNAME record if it exists
-          if [ -n "$CNAME_RECORD_ID" ] && [ "$CNAME_RECORD_ID" != "null" ]; then
+          # Import CNAME record if it exists (non-production only)
+          if [ "${{ inputs.environment }}" != "production" ] && [ -n "$CNAME_RECORD_ID" ] && [ "$CNAME_RECORD_ID" != "null" ]; then
             echo "Importing CNAME record with ID: $CNAME_RECORD_ID"
-            terraform import module.vibechecc_worker.cloudflare_dns_record.frontend_cname ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
+            terraform import 'module.vibechecc_worker.cloudflare_dns_record.frontend_cname[0]' ${{ secrets.CLOUDFLARE_ZONE_ID }}/$CNAME_RECORD_ID || true
           else
-            echo "No CNAME record found to import"
+            echo "No CNAME record to import for environment: ${{ inputs.environment }}"
           fi
 
           # Import Worker script if it exists
