@@ -124,9 +124,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
+
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -183,14 +191,22 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
+
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      # Build frontend (now in apps/web)
+      # Build frontend for Cloudflare Workers
       - name: Build Frontend
         env:
           VITE_CONVEX_URL: ${{ secrets.VITE_CONVEX_URL }}
@@ -201,7 +217,18 @@ jobs:
           VITE_POSTHOG_API_HOST: https://us.i.posthog.com
           VITE_POSTHOG_PROJECT_ID: ${{ secrets.VITE_POSTHOG_PROJECT_ID }}
           VITE_POSTHOG_REGION: 'US Cloud'
-        run: bun nx build @vibechecc/web
+        run: |
+          echo "Building frontend for Cloudflare Workers using Nx..."
+          bun nx build @vibechecc/web
+          
+          # Verify the output was created
+          if [ ! -f "apps/web/.output/server/index.mjs" ]; then
+            echo "Error: apps/web/.output/server/index.mjs not found after build"
+            exit 1
+          fi
+          
+          echo "Build successful. Output structure:"
+          ls -la apps/web/.output/
 
       - name: Add Environment to Wrangler Config
         if: inputs.environment == 'ephemeral'
