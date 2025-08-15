@@ -114,7 +114,16 @@ describe('EnvironmentAccessGuard', () => {
     it('renders children after animation in production', async () => {
       vi.useFakeTimers();
 
-      render(
+      // Start with not fully ready state to trigger loading animation
+      vi.mocked(environmentAccess.getReadinessState).mockReturnValue({
+        isLocalStorageReady: true,
+        isThemeReady: true,
+        isUserReady: true,
+        isPostHogReady: false,
+        isFullyReady: false,
+      });
+
+      const { rerender } = render(
         <EnvironmentAccessGuard>
           <div data-testid="app-content">App Content</div>
         </EnvironmentAccessGuard>
@@ -122,6 +131,21 @@ describe('EnvironmentAccessGuard', () => {
 
       // Initially should show loading state
       expect(screen.queryByTestId('app-content')).not.toBeInTheDocument();
+
+      // Now simulate PostHog becoming ready
+      vi.mocked(environmentAccess.getReadinessState).mockReturnValue({
+        isLocalStorageReady: true,
+        isThemeReady: true,
+        isUserReady: true,
+        isPostHogReady: true,
+        isFullyReady: true,
+      });
+
+      rerender(
+        <EnvironmentAccessGuard>
+          <div data-testid="app-content">App Content</div>
+        </EnvironmentAccessGuard>
+      );
 
       // Fast forward through all animation timers
       await act(async () => {
@@ -139,23 +163,50 @@ describe('EnvironmentAccessGuard', () => {
     it('shows welcome animation with app name', async () => {
       vi.useFakeTimers();
 
-      const { container } = render(
+      // Start with not fully ready to show loading state
+      vi.mocked(environmentAccess.getReadinessState).mockReturnValue({
+        isLocalStorageReady: true,
+        isThemeReady: true,
+        isUserReady: true,
+        isPostHogReady: false,
+        isFullyReady: false,
+      });
+
+      const { container, rerender } = render(
         <EnvironmentAccessGuard>
           <div data-testid="app-content">App Content</div>
         </EnvironmentAccessGuard>
       );
 
-      // Should show vibechecc text
-      expect(screen.getByText(/v/)).toBeInTheDocument();
+      // Should show vibechecc text in loading state
+      const appNameLetters = container.querySelectorAll('.animate-pulse-text');
+      expect(appNameLetters.length).toBeGreaterThan(0);
+      const welcomeText = container.textContent?.toLowerCase() || '';
+      expect(welcomeText).toContain('vibechecc');
+
+      // Now simulate becoming ready
+      vi.mocked(environmentAccess.getReadinessState).mockReturnValue({
+        isLocalStorageReady: true,
+        isThemeReady: true,
+        isUserReady: true,
+        isPostHogReady: true,
+        isFullyReady: true,
+      });
+
+      rerender(
+        <EnvironmentAccessGuard>
+          <div data-testid="app-content">App Content</div>
+        </EnvironmentAccessGuard>
+      );
 
       // Fast forward to show welcome message
       await act(async () => {
         vi.advanceTimersByTime(200);
       });
 
-      // Welcome message should be visible
-      const welcomeText = container.textContent?.toLowerCase() || '';
-      expect(welcomeText).toContain('vibechecc');
+      // Welcome message should still be visible during animation
+      const updatedText = container.textContent?.toLowerCase() || '';
+      expect(updatedText).toContain('vibechecc');
 
       vi.useRealTimers();
     });
@@ -513,6 +564,15 @@ describe('EnvironmentAccessGuard', () => {
     it('displays app name with animation', async () => {
       vi.useFakeTimers();
 
+      // Start with not fully ready to show loading state
+      vi.mocked(environmentAccess.getReadinessState).mockReturnValue({
+        isLocalStorageReady: true,
+        isThemeReady: true,
+        isUserReady: true,
+        isPostHogReady: false,
+        isFullyReady: false,
+      });
+
       const { container } = render(
         <EnvironmentAccessGuard>
           <div data-testid="app-content">App Content</div>
@@ -540,7 +600,31 @@ describe('EnvironmentAccessGuard', () => {
     it('shows tagline during welcome', async () => {
       vi.useFakeTimers();
 
-      const { container } = render(
+      // Start with not fully ready to show loading state
+      vi.mocked(environmentAccess.getReadinessState).mockReturnValue({
+        isLocalStorageReady: true,
+        isThemeReady: true,
+        isUserReady: true,
+        isPostHogReady: false,
+        isFullyReady: false,
+      });
+
+      const { container, rerender } = render(
+        <EnvironmentAccessGuard>
+          <div>Content</div>
+        </EnvironmentAccessGuard>
+      );
+
+      // Now simulate becoming ready
+      vi.mocked(environmentAccess.getReadinessState).mockReturnValue({
+        isLocalStorageReady: true,
+        isThemeReady: true,
+        isUserReady: true,
+        isPostHogReady: true,
+        isFullyReady: true,
+      });
+
+      rerender(
         <EnvironmentAccessGuard>
           <div>Content</div>
         </EnvironmentAccessGuard>
