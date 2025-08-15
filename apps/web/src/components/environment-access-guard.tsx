@@ -128,10 +128,10 @@ export function EnvironmentAccessGuard({
   const [hasAccess, setHasAccess] = useState<boolean>(() => {
     // During SSR or initial client render, use default logic without mocks
     if (typeof window === 'undefined') {
-      return true; // SSR default
+      return false; // SSR default - deny until verified
     }
-    // Initial client state should match SSR
-    return true;
+    // Initial client state should match SSR - deny until feature flag is checked
+    return false;
   });
 
   // Update access calculation after mount when all data is available
