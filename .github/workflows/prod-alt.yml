@@ -20,6 +20,7 @@ jobs:
     with:
       prerelease: false
       branch: main-alt
+      alt_release: true
     secrets: inherit
 
   deploy:
