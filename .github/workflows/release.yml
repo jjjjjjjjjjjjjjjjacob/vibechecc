@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
@@ -115,7 +115,14 @@ jobs:
           fi
 
       - name: Push changes
-        run: git push origin ${{ inputs.branch }} --follow-tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          # Use the bot token if available to bypass branch protection
+          if [ -n "${{ secrets.RELEASE_BOT_TOKEN }}" ]; then
+            git remote set-url origin https://x-access-token:${{ secrets.RELEASE_BOT_TOKEN }}@github.com/${{ github.repository }}.git
+          fi
+          git push origin ${{ inputs.branch }} --follow-tags
 
       - name: Generate Release Notes
         if: steps.release.outputs.version != ''
