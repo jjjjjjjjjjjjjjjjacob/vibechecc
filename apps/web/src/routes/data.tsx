@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';
+import { APP_NAME } from '@/config/app';
 
 export const Route = createFileRoute('/data')({
   head: () => ({
     meta: [
       ...seo({
-        title: 'data policy | vibechecc',
-        description:
-          'data handling and processing policies for vibechecc platform',
+        title: `data policy | ${APP_NAME}`,
+        description: `data handling and processing policies for ${APP_NAME} platform`,
       }),
     ],
   }),
@@ -28,9 +28,9 @@ function DataPage() {
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">1. overview</h2>
           <p className="mb-4">
-            this data policy explains how vibechecc collects, processes, stores,
-            and protects your personal data. we are committed to transparency
-            and giving you control over your information.
+            this data policy explains how {APP_NAME} collects, processes,
+            stores, and protects your personal data. we are committed to
+            transparency and giving you control over your information.
           </p>
         </section>
 
@@ -70,7 +70,7 @@ function DataPage() {
           <div className="space-y-4">
             <p>we use your data to:</p>
             <ul className="list-disc space-y-2 pl-6">
-              <li>provide and improve the vibechecc service</li>
+              <li>provide and improve the {APP_NAME} service</li>
               <li>personalize your experience and content recommendations</li>
               <li>enable social features like following and interactions</li>
               <li>analyze usage patterns to enhance platform performance</li>
@@ -217,9 +217,9 @@ function DataPage() {
             10. children's privacy
           </h2>
           <p className="mb-4">
-            vibechecc is not intended for users under 13 years of age. we do not
-            knowingly collect personal data from children under 13. if we become
-            aware of such collection, we will delete the data promptly.
+            {APP_NAME} is not intended for users under 13 years of age. we do
+            not knowingly collect personal data from children under 13. if we
+            become aware of such collection, we will delete the data promptly.
           </p>
         </section>
 
@@ -230,8 +230,8 @@ function DataPage() {
           <p className="mb-4">
             we may update this data policy periodically. we will notify you of
             significant changes through the platform or by email. your continued
-            use of vibechecc after changes constitutes acceptance of the updated
-            policy.
+            use of {APP_NAME} after changes constitutes acceptance of the
+            updated policy.
           </p>
         </section>
 

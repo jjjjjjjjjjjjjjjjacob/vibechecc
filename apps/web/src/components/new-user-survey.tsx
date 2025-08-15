@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog } from '@/hooks/use-posthog';
 import {
   surveyManager,
   trackSurveyEvents,

@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { cn } from '@/utils/tailwind-utils';
+import { APP_NAME } from '@/config/app';
 
 export interface FooterProps {
   className?: string;
@@ -15,7 +16,7 @@ export function Footer({ className }: FooterProps) {
           {/* Logo/Brand */}
           <div className="flex items-center gap-2">
             <Link to="/" className="text-foreground text-lg font-semibold">
-              vibechecc
+              {APP_NAME}
             </Link>
           </div>
 
@@ -45,7 +46,7 @@ export function Footer({ className }: FooterProps) {
 
           {/* Copyright */}
           <div className="text-muted-foreground text-center text-sm md:text-right">
-            © {currentYear} vibechecc. all rights reserved.
+            © {currentYear} {APP_NAME}. all rights reserved.
           </div>
         </div>
       </div>

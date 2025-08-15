@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog } from '@/hooks/use-posthog';
 import { Badge } from '@/components/ui/badge';
 import {
   useTopEmojiRatings,

@@ -5,7 +5,7 @@
 # Deployment is handled via wrangler for proper bundling
 resource "cloudflare_workers_script" "web" {
   account_id  = var.cloudflare_account_id
-  script_name = "vibechecc-${var.environment == "ephemeral" ? var.prefix : var.environment}-web"
+  script_name = var.worker_name
 
   # Use a placeholder script for initial provisioning
   # Actual deployment is handled by wrangler
@@ -49,7 +49,7 @@ resource "cloudflare_dns_record" "web_a" {
   content = "192.0.2.1" # Cloudflare's anycast IP for Workers
   type    = "A"
   proxied = true
-  comment = "Managed by Terraform for vibechecc Worker"
+  comment = "Managed by Terraform for ${var.app_name} Worker"
   ttl     = 1
 }
 
@@ -60,7 +60,7 @@ resource "cloudflare_dns_record" "web_aaaa" {
   type    = "AAAA"
   content = "100::" # Cloudflare's anycast IPv6 for Workers
   proxied = true
-  comment = "Managed by Terraform for vibechecc Worker"
+  comment = "Managed by Terraform for ${var.app_name} Worker"
   ttl     = 1
 }
 
@@ -72,6 +72,6 @@ resource "cloudflare_dns_record" "web_cname" {
   type    = "CNAME"
   content = var.cloudflare_zone
   proxied = true
-  comment = "Managed by Terraform for vibechecc Worker"
+  comment = "Managed by Terraform for ${var.app_name} Worker"
   ttl     = 1
 }

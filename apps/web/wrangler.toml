@@ -1,4 +1,6 @@
 # Top-level configuration
+# Note: The actual worker name is set dynamically during deployment
+# based on the APP_NAME environment variable
 "$schema" = "../../node_modules/wrangler/config-schema.json"
 name = "vibechecc"
 main = "./.output/server/index.mjs"
@@ -16,6 +18,11 @@ enabled = true
 [env.production]
 name = "vibechecc-production-web"
 # Secrets should be set via `npx wrangler secret put --env production`
+
+# Production Alt Environment (for viberatr)
+[env.production-alt]
+name = "viberatr-production-alt-web"
+# Secrets should be set via `npx wrangler secret put --env production-alt`
 
 # Development Environment
 [env.development]

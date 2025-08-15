@@ -1,4 +1,5 @@
 import { analytics } from './posthog';
+import { APP_DOMAIN } from '@/config/app';
 
 /**
  * Utility functions for environment-based access control and theme loading management
@@ -27,8 +28,10 @@ export function getCurrentSubdomain(): string | null {
     return null; // No subdomain restrictions for localhost
   }
 
-  // For production domains like dev.vibechecc.io, pr-123.vibechecc.io
-  if (parts.length > 2) {
+  // For production domains like dev.example.com, pr-123.example.com
+  // Extract subdomain based on the configured app domain
+  const baseDomain = APP_DOMAIN.replace(/^https?:\/\//, '');
+  if (hostname.endsWith(baseDomain) && parts.length > baseDomain.split('.').length) {
     return parts[0];
   }
 
@@ -54,40 +57,9 @@ export function getEnvironmentInfo(): EnvironmentInfo {
 }
 
 /**
- * Checks if the current user has access to dev environments
- * Uses PostHog feature flag: 'dev-environment-access'
+ * Note: Feature flag checking has been moved to React components using useFeatureFlagEnabled hook
+ * This provides better reactivity and automatic updates when flags change
  */
-export function hasDevEnvironmentAccess(): boolean {
-  if (!analytics.isInitialized()) {
-    return false;
-  }
-
-  return analytics.isFeatureEnabled('dev-environment-access');
-}
-
-/**
- * Checks if the user should be allowed to access the current environment
- */
-export function canAccessCurrentEnvironment(): boolean {
-  // Always allow access for localhost development
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-      return true;
-    }
-  }
-
-  const envInfo = getEnvironmentInfo();
-
-  // If it's not a restricted environment, allow access
-  if (!envInfo.requiresDevAccess) {
-    return true;
-  }
-
-  // For dev/ephemeral environments, check the feature flag
-  console.log('hasDevEnvironmentAccess', hasDevEnvironmentAccess());
-  return hasDevEnvironmentAccess();
-}
 
 /**
  * Gets a user-friendly message for access denial
@@ -121,7 +93,6 @@ export function trackEnvironmentAccess(
     is_ephemeral_environment: env.isEphemeralEnvironment,
     requires_dev_access: env.requiresDevAccess,
     access_granted: allowed,
-    has_feature_flag: hasDevEnvironmentAccess(),
   });
 }
 

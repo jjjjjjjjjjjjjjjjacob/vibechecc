@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import { useRouter } from '@tanstack/react-router';
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog as usePostHogNative } from 'posthog-js/react';
+import { usePostHog } from '@/hooks/use-posthog';
 
 interface PostHogPageTrackerProps {
   title?: string;
@@ -10,17 +11,20 @@ interface PostHogPageTrackerProps {
 
 export function PostHogPageTracker({ title }: PostHogPageTrackerProps) {
   const router = useRouter();
-  const { capturePageView, trackEvents } = usePostHog();
+  const posthog = usePostHogNative();
+  const { trackEvents } = usePostHog();
 
   useEffect(() => {
     const currentPath = router.state.location.pathname;
 
-    // Track page view
-    capturePageView(currentPath);
+    // Track page view using native PostHog
+    posthog?.capture('$pageview', {
+      $current_url: window.location.href,
+    });
 
     // Also use our custom tracking event
     trackEvents.pageViewed(currentPath, title || document.title);
-  }, [router.state.location.pathname, capturePageView, trackEvents, title]);
+  }, [router.state.location.pathname, posthog, trackEvents, title]);
 
   return null; // This component doesn't render anything
 }

@@ -2,18 +2,20 @@
 
 import { useEffect, useRef } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog as usePostHogNative } from 'posthog-js/react';
+import { usePostHog } from '@/hooks/use-posthog';
 import { trackSurveyEvents } from '@/lib/survey-manager';
 
 export function ClerkPostHogIntegration() {
   const { user, isSignedIn } = useUser();
-  const { identify, setPersonProperties, reset, trackEvents } = usePostHog();
+  const posthog = usePostHogNative();
+  const { trackEvents } = usePostHog();
   const hasTriggeredSurvey = useRef(false);
 
   useEffect(() => {
     if (isSignedIn && user) {
-      // Identify the user in PostHog
-      identify(user.id, {
+      // Identify the user in PostHog using native hook
+      posthog?.identify(user.id, {
         email: user.primaryEmailAddress?.emailAddress,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -22,8 +24,8 @@ export function ClerkPostHogIntegration() {
         lastSignInAt: user.lastSignInAt,
       });
 
-      // Set additional person properties
-      setPersonProperties({
+      // Set additional person properties using native hook
+      posthog?.setPersonProperties({
         email: user.primaryEmailAddress?.emailAddress,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -62,10 +64,10 @@ export function ClerkPostHogIntegration() {
         }
       }
     } else if (!isSignedIn) {
-      // Reset PostHog when user signs out
-      reset();
+      // Reset PostHog when user signs out using native hook
+      posthog?.reset();
     }
-  }, [isSignedIn, user, identify, setPersonProperties, reset, trackEvents]);
+  }, [isSignedIn, user, posthog, trackEvents]);
 
   return null; // This component doesn't render anything
 }

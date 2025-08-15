@@ -3,10 +3,11 @@ import * as React from 'react';
 import { SignInButton, useUser } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
 import { LogIn } from '@/components/ui/icons';
-import { usePostHog } from '@/hooks/usePostHog';
+import { useFeatureFlagEnabled } from 'posthog-js/react';
+import { usePostHog } from '@/hooks/use-posthog';
 import { useThemeStore } from '@/stores/theme-store';
+import { APP_NAME } from '@/config/app';
 import {
-  canAccessCurrentEnvironment,
   getEnvironmentInfo,
   getAccessDenialMessage,
   trackEnvironmentAccess,
@@ -27,13 +28,15 @@ export function EnvironmentAccessGuard({
   children,
   fallback,
 }: EnvironmentAccessGuardProps) {
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [shouldShowContent, setShouldShowContent] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   const { isInitialized: isPostHogInitialized } = usePostHog();
   const { isLoaded: isUserLoaded, user, isSignedIn } = useUser();
+  
+  // Use PostHog React hook for feature flag - this will automatically update when the flag changes
+  const devAccessFlag = useFeatureFlagEnabled('dev-environment-access');
   const {
     isThemeLoaded,
     isLocalStorageLoaded,
@@ -44,6 +47,15 @@ export function EnvironmentAccessGuard({
     syncUserThemePreferences,
   } = useThemeStore();
 
+  // Determine if user has access based on environment and feature flag
+  const envInfo = getEnvironmentInfo();
+  const isLocalhost = typeof window !== 'undefined' && 
+    (window.location.hostname.includes('localhost') || 
+     window.location.hostname.includes('127.0.0.1'));
+  
+  // Calculate access: localhost always allowed, otherwise check if environment needs access and if user has flag
+  const hasAccess = isLocalhost || !envInfo.requiresDevAccess || devAccessFlag === true;
+  
   // Get readiness state
   const readiness: ReadinessState = getReadinessState(
     isLocalStorageLoaded,
@@ -114,45 +126,13 @@ export function EnvironmentAccessGuard({
     }
   }, [readiness.isFullyReady, hasAccess]);
 
-  // PostHog and Environment Access Check
+  // Track environment access attempts
   useEffect(() => {
-    const checkAccess = () => {
-      const envInfo = getEnvironmentInfo();
-      const allowed = canAccessCurrentEnvironment();
-
-      setHasAccess(allowed);
-
-      // Track the access attempt (only if PostHog is initialized)
-      if (isPostHogInitialized) {
-        trackEnvironmentAccess(allowed, envInfo);
-      }
-    };
-
-    // For localhost development, don't wait for PostHog - check access immediately
-    if (
-      typeof window !== 'undefined' &&
-      (window.location.hostname.includes('localhost') ||
-        window.location.hostname.includes('127.0.0.1'))
-    ) {
-      checkAccess();
-      return;
+    // Track the access attempt (only if PostHog is initialized and we have a definitive access state)
+    if (isPostHogInitialized && typeof devAccessFlag === 'boolean') {
+      trackEnvironmentAccess(hasAccess, envInfo);
     }
-
-    // For production environments, wait for PostHog to initialize
-    if (!isPostHogInitialized) {
-      // Set a timeout to prevent infinite loading
-      const timeout = setTimeout(() => {
-        // eslint-disable-next-line no-console
-        console.warn('PostHog initialization timeout, allowing access');
-        setHasAccess(true);
-      }, 7000); // 5 second timeout
-
-      return () => clearTimeout(timeout);
-    }
-
-    // Check access immediately if PostHog is ready
-    checkAccess();
-  }, [isPostHogInitialized, user]);
+  }, [isPostHogInitialized, devAccessFlag, hasAccess, envInfo]);
 
   const welcomeMessage = React.useMemo(
     () =>
@@ -185,7 +165,7 @@ export function EnvironmentAccessGuard({
   );
 
   // Show loading/welcome state while not ready or showing welcome
-  if (!shouldShowContent && (hasAccess || hasAccess == null)) {
+  if (!shouldShowContent && (hasAccess || devAccessFlag === undefined)) {
     return (
       <div
         className="data-[theme-ready=true]:from-theme-primary data-[theme-ready=true]:to-theme-secondary flex min-h-screen items-center justify-center bg-gradient-to-br from-white to-white transition duration-500 data-[fading-out=true]:opacity-0 data-[fading-out=true]:delay-700 data-[fading-out=true]:duration-600"
@@ -208,7 +188,7 @@ export function EnvironmentAccessGuard({
               data-theme-ready={readiness.isThemeReady}
               className="data-[theme-ready=false]:text-foreground inline-flex w-full bg-transparent text-4xl font-bold duration-500 data-[theme-ready=true]:text-white"
             >
-              {Array.from('vibechecc').map((char, i) => (
+              {Array.from(APP_NAME as string).map((char, i) => (
                 <span
                   data-theme-ready={readiness.isFullyReady}
                   className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800"

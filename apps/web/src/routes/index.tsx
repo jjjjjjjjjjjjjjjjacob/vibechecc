@@ -11,6 +11,7 @@ import type {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Sparkles } from '@/components/ui/icons';
+import { APP_NAME } from '@/config/app';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -68,7 +69,7 @@ function Home() {
               we're vibing here
             </h1>
             <p className="mb-6 text-lg opacity-90 md:text-xl">
-              welcome to <strong>vibechecc</strong>, where you can discover,
+              welcome to <strong>{APP_NAME}</strong>, where you can discover,
               share, and rate vibes because that's a thing you can do
             </p>
 

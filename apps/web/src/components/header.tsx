@@ -44,7 +44,8 @@ import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 import { Separator } from '@/components/ui/separator';
 import { TabAccordion, TabAccordionContent } from './tab-accordion';
 import { ProfileSnapshotCard } from './profile-snapshot-card';
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog } from '@/hooks/use-posthog';
+import { APP_NAME } from '@/config/app';
 
 export function Header() {
   const { resolvedTheme, setTheme, setColorTheme, setSecondaryColorTheme } =
@@ -354,7 +355,7 @@ export function Header() {
                   onClick={() => setNavState(null)}
                 >
                   <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent">
-                    vibechecc
+                    {APP_NAME}
                   </span>
                 </Link>
 
