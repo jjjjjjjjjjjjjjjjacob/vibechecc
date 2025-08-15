@@ -114,15 +114,43 @@ export function getPublicEnvironment(): PublicEnv {
     return PublicEnvSchema.parse(publicEnv);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      // In development, provide helpful error messages
+      // In development, provide helpful error messages but don't fail
       if (import.meta.env.DEV) {
-        console.error(
-          'Invalid public environment configuration:',
-          error.errors
+        console.warn(
+          'Missing or invalid environment variables, using defaults:',
+          error.errors.map((e) => e.path.join('.')).join(', ')
         );
       }
-      // Return defaults for any missing values
-      return PublicEnvSchema.parse({});
+
+      // Build partial config with available values and defaults
+      const partialConfig: Partial<PublicEnv> = {};
+
+      // Add any successfully parsed values
+      for (const [key, value] of Object.entries(publicEnv)) {
+        if (value !== undefined) {
+          (partialConfig as Record<string, unknown>)[key] = value;
+        }
+      }
+
+      // Use safe parse to get partial results with defaults
+      const result = PublicEnvSchema.safeParse(partialConfig);
+      if (result.success) {
+        return result.data;
+      }
+
+      // Last resort: return all defaults
+      return {
+        VITE_APP_NAME: 'vibechecc',
+        VITE_APP_DOMAIN: 'vibechecc.com',
+        VITE_APP_TWITTER_HANDLE: '@vibechecc',
+        VITE_CONVEX_URL: publicEnv.VITE_CONVEX_URL || '',
+        VITE_CLERK_PUBLISHABLE_KEY: publicEnv.VITE_CLERK_PUBLISHABLE_KEY || '',
+        VITE_POSTHOG_API_KEY: publicEnv.VITE_POSTHOG_API_KEY || '',
+        VITE_POSTHOG_API_HOST:
+          publicEnv.VITE_POSTHOG_API_HOST || 'https://us.i.posthog.com',
+        VITE_POSTHOG_PROJECT_ID: publicEnv.VITE_POSTHOG_PROJECT_ID,
+        VITE_POSTHOG_REGION: publicEnv.VITE_POSTHOG_REGION || 'US Cloud',
+      };
     }
     throw error;
   }

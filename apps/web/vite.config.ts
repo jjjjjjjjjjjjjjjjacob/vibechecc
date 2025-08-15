@@ -3,11 +3,13 @@ import { defineConfig } from 'vite';
 import tsConfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig(() => {
   const isProduction = process.env.NODE_ENV === 'production';
 
   return {
+    envDir: path.resolve(__dirname, '../..'), // Load .env files from root directory
     server: {
       port: 3000,
       hmr: {

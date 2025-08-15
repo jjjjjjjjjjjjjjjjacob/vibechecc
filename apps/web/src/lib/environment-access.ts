@@ -145,10 +145,12 @@ export function isPostHogReady(
     return false;
   }
 
-  // For localhost, only theme readiness matters
+  // For localhost, PostHog still needs to be initialized
+  // This ensures consistent state between server and client
   const hostname = window.location.hostname;
   if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-    return true;
+    // Even on localhost, respect the initialization state for consistency
+    return isPostHogInitialized;
   }
 
   // For production environments, both PostHog and access check must be complete

@@ -33,12 +33,14 @@ export function EnvironmentAccessGuard({
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [hasTimedOut, setHasTimedOut] = useState(false);
 
+  // Start with false to match SSR, then update after mount
+  const [isPostHogReady, setIsPostHogReady] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { isInitialized: isPostHogInitialized } = usePostHog();
   const { isLoaded: isUserLoaded, user, isSignedIn } = useUser();
 
   // Use PostHog React hook for feature flag - this will automatically update when the flag changes
   const devAccessFlag = useFeatureFlagEnabled('dev-environment-access');
-  console.log('test', devAccessFlag);
 
   const {
     isThemeLoaded,
@@ -51,21 +53,29 @@ export function EnvironmentAccessGuard({
   } = useThemeStore();
 
   const envInfo = React.useMemo(() => getEnvironmentInfo(), []);
-  const isLocalhost =
-    typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1' ||
-      window.location.hostname === '::1' ||
-      window.location.hostname === '0.0.0.0');
+
+  // Use state for isLocalhost to avoid hydration mismatch
+  const [isLocalhost, setIsLocalhost] = useState(false);
+
+  // Check localhost after mount
+  React.useEffect(() => {
+    setIsLocalhost(
+      window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname === '::1' ||
+        window.location.hostname === '0.0.0.0'
+    );
+  }, []);
+
   const hasAccess =
     isLocalhost || !envInfo.requiresDevAccess || devAccessFlag === true;
 
-  // Get readiness state
+  // Get readiness state - use the stable PostHog state
   const readiness: ReadinessState = getReadinessState(
     isLocalStorageLoaded,
     isThemeLoaded,
     isUserLoaded,
-    isPostHogInitialized,
+    isPostHogReady, // Use stable state instead of directly from hook
     hasAccess
   );
 
@@ -73,6 +83,19 @@ export function EnvironmentAccessGuard({
   React.useEffect(() => {
     loadThemeFromLocalStorage();
   }, [loadThemeFromLocalStorage]);
+
+  // Track when component is mounted
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Update PostHog ready state after mount to avoid hydration mismatch
+  React.useEffect(() => {
+    // Only update after mount to ensure SSR/client consistency
+    if (isMounted) {
+      setIsPostHogReady(isPostHogInitialized);
+    }
+  }, [isMounted, isPostHogInitialized]);
 
   // Sync user authentication state with theme store
   React.useEffect(() => {
@@ -153,68 +176,71 @@ export function EnvironmentAccessGuard({
 
   // Track environment access attempts
   useEffect(() => {
-    if (isPostHogInitialized && typeof devAccessFlag === 'boolean') {
+    if (isPostHogReady && typeof devAccessFlag === 'boolean') {
       trackEnvironmentAccess(hasAccess, envInfo);
     }
-  }, [isPostHogInitialized, devAccessFlag, hasAccess, envInfo]);
+  }, [isPostHogReady, devAccessFlag, hasAccess, envInfo]);
 
-  const welcomeMessage = React.useMemo(
-    () =>
-      Array.from(
-        (() => {
-          const taglines = [
-            'what am i doing here',
-            'professional vibe checker',
-            "careful don't vibe too hard",
-            "it's a vibe",
-            'no chill only vibes',
-            'vibe now or vibe later',
-            "it's a thing to do",
-            'the nothing app',
-            'who told you about this',
-          ];
-          return taglines[Math.floor(Math.random() * taglines.length)];
-        })()
-      ).map((char, i) => (
-        <span
-          data-theme-ready={readiness.isFullyReady}
-          className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] whitespace-pre transition duration-800"
-          key={i}
-          style={{ animationDelay: `${i * 25}ms` }}
-        >
-          {char}
-        </span>
-      )),
-    [readiness.isFullyReady]
-  );
+  // Use a stable tagline index that won't change between server and client
+  const [taglineIndex] = useState(() => {
+    // Use a deterministic value for SSR (always use first tagline)
+    // On client, we could use random but keeping it stable prevents hydration issues
+    return 0;
+  });
+
+  const welcomeMessage = React.useMemo(() => {
+    const taglines = [
+      'what am i doing here',
+      'professional vibe checker',
+      "careful don't vibe too hard",
+      "it's a vibe",
+      'no chill only vibes',
+      'vibe now or vibe later',
+      "it's a thing to do",
+      'the nothing app',
+      'who told you about this',
+    ];
+    const selectedTagline = taglines[taglineIndex % taglines.length];
+
+    return Array.from(selectedTagline).map((char, i) => (
+      <span
+        data-theme-ready={String(readiness.isFullyReady)}
+        className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] whitespace-pre transition duration-800"
+        key={i}
+        style={{ animationDelay: `${i * 25}ms` }}
+      >
+        {char}
+      </span>
+    ));
+  }, [readiness.isFullyReady, taglineIndex]);
 
   // Show loading/welcome state while not ready or showing welcome (unless timed out)
   if (!shouldShowContent && !hasTimedOut) {
     return (
       <div
         className="data-[theme-ready=true]:from-theme-primary data-[theme-ready=true]:to-theme-secondary flex min-h-screen items-center justify-center bg-gradient-to-br from-white to-white transition duration-500 data-[fading-out=true]:opacity-0 data-[fading-out=true]:delay-700 data-[fading-out=true]:duration-600"
-        data-theme-ready={readiness.isThemeReady}
-        data-posthog-ready={readiness.isPostHogReady}
-        data-fully-ready={readiness.isFullyReady}
-        data-show-welcome={showWelcome}
-        data-has-access={hasAccess}
-        data-fading-out={isFadingOut}
-        data-has-custom-theme={
+        data-theme-ready={String(readiness.isThemeReady)}
+        data-posthog-ready={String(readiness.isPostHogReady)}
+        data-fully-ready={String(readiness.isFullyReady)}
+        data-show-welcome={String(showWelcome)}
+        data-has-access={String(hasAccess)}
+        data-fading-out={String(isFadingOut)}
+        data-has-custom-theme={String(
           !!(getEffectiveColorTheme() && getEffectiveSecondaryColorTheme())
-        }
+        )}
       >
         <div className="space-y-6 text-center">
           <div
             className="flex flex-col space-y-2 transition duration-800 data-[fading-out=true]:scale-105 data-[fading-out=true]:opacity-0"
-            data-fading-out={isFadingOut}
+            data-fading-out={String(isFadingOut)}
           >
             <p
-              data-theme-ready={readiness.isThemeReady}
+              data-theme-ready={String(readiness.isThemeReady)}
               className="data-[theme-ready=false]:text-foreground inline-flex w-full bg-transparent text-4xl font-bold duration-500 data-[theme-ready=true]:text-white"
             >
               {Array.from(APP_NAME as string).map((char, i) => (
                 <span
-                  data-theme-ready={readiness.isFullyReady}
+                  data-theme-ready={String(readiness.isFullyReady)}
                   className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800"
                   key={i}
                   style={{ animationDelay: `${i * 50}ms` }}
@@ -226,30 +252,30 @@ export function EnvironmentAccessGuard({
 
             <div className="relative flex h-6 w-full items-center justify-center transition duration-500">
               <p
-                data-theme-ready={readiness.isFullyReady}
-                data-show-welcome={showWelcome}
+                data-theme-ready={String(readiness.isFullyReady)}
+                data-show-welcome={String(showWelcome)}
                 className="data-[theme-ready=false]:text-foreground absolute inset-0 inline-flex w-full items-center justify-center text-center text-lg font-medium opacity-100 transition delay-800 duration-800 data-[show-welcome=false]:opacity-0 data-[theme-ready=true]:text-white"
                 style={{ animationDelay: `300ms` }}
               >
                 {welcomeMessage}
               </p>
               <div
-                data-show-welcome={
+                data-show-welcome={String(
                   showWelcome || isFadingOut || shouldShowContent
-                }
+                )}
                 className="animate-text-pulse absolute inset-0 flex items-center justify-center gap-1.5 p-0 transition duration-300 data-[show-welcome=true]:opacity-0"
               >
                 <span
-                  data-theme-ready={readiness.isFullyReady}
+                  data-theme-ready={String(readiness.isFullyReady)}
                   className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
                 />
                 <span
-                  data-theme-ready={readiness.isFullyReady}
+                  data-theme-ready={String(readiness.isFullyReady)}
                   className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
                   style={{ animationDelay: '300ms' }}
                 />
                 <span
-                  data-theme-ready={readiness.isFullyReady}
+                  data-theme-ready={String(readiness.isFullyReady)}
                   className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
                   style={{ animationDelay: '600ms' }}
                 />

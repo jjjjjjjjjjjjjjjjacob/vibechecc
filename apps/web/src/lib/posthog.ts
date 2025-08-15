@@ -85,6 +85,10 @@ class PostHogService {
   }
 
   isInitialized() {
+    // During SSR, always return false for consistency
+    if (typeof window === 'undefined') {
+      return false;
+    }
     return this.initialized;
   }
 }
