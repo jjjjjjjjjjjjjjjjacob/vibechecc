@@ -56,6 +56,7 @@ export function getRuntimeBindings(): PublicEnv {
       cachedRuntimeConfig = publicConfig;
       return publicConfig;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get runtime bindings:', error);
       // Fall back to build-time values
       return getPublicEnvironment();

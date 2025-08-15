@@ -20,6 +20,7 @@ export const fetchRuntimeConfig = createServerFn({ method: 'GET' }).handler(
         timestamp: Date.now(),
       };
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to fetch runtime config:', error);
 
       // Return safe defaults on error

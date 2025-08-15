@@ -116,6 +116,7 @@ export function getPublicEnvironment(): PublicEnv {
     if (error instanceof z.ZodError) {
       // In development, provide helpful error messages but don't fail
       if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
         console.warn(
           'Missing or invalid environment variables, using defaults:',
           error.errors.map((e) => e.path.join('.')).join(', ')
@@ -223,6 +224,7 @@ export function auditPublicConfig(config: PublicEnv): void {
 
     // Check for base64 encoded secrets (common pattern)
     if (value.length > 100 && /^[A-Za-z0-9+/]+=*$/.test(value)) {
+      // eslint-disable-next-line no-console
       console.warn(
         `WARNING: Possible encoded secret in ${key} - please verify this is safe`
       );
