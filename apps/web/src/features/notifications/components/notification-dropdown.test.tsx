@@ -41,7 +41,7 @@ vi.mock('@/stores/header-nav-store', () => ({
 }));
 
 // Mock PostHog hook
-vi.mock('@/hooks/usePostHog', () => ({
+vi.mock('@/hooks/use-posthog', () => ({
   usePostHog: () => ({
     trackEvents: {
       notificationMarkedAsRead: vi.fn(),

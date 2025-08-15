@@ -48,14 +48,13 @@ export function EnvironmentAccessGuard({
     syncUserThemePreferences,
   } = useThemeStore();
 
-  // Determine if user has access based on environment and feature flag
-  const envInfo = getEnvironmentInfo();
+  const envInfo = React.useMemo(() => getEnvironmentInfo(), []);
   const isLocalhost =
     typeof window !== 'undefined' &&
-    (window.location.hostname.includes('localhost') ||
-      window.location.hostname.includes('127.0.0.1'));
-
-  // Calculate access: localhost always allowed, otherwise check if environment needs access and if user has flag
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname === '::1' ||
+      window.location.hostname === '0.0.0.0');
   const hasAccess =
     isLocalhost || !envInfo.requiresDevAccess || devAccessFlag === true;
 
@@ -147,7 +146,6 @@ export function EnvironmentAccessGuard({
 
   // Track environment access attempts
   useEffect(() => {
-    // Track the access attempt (only if PostHog is initialized and we have a definitive access state)
     if (isPostHogInitialized && typeof devAccessFlag === 'boolean') {
       trackEnvironmentAccess(hasAccess, envInfo);
     }
@@ -260,9 +258,7 @@ export function EnvironmentAccessGuard({
     );
   }
 
-  // Show access denied message if user doesn't have permission
   if (!hasAccess) {
-    const envInfo = getEnvironmentInfo();
     const message = getAccessDenialMessage(envInfo);
 
     if (fallback) {
