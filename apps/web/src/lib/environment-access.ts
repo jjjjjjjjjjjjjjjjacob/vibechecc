@@ -10,6 +10,22 @@ export interface EnvironmentInfo {
   isDevEnvironment: boolean;
   isEphemeralEnvironment: boolean;
   requiresDevAccess: boolean;
+  isAllowlistedHost: boolean;
+}
+
+/**
+ * Hosts that are allowed to bypass access restrictions
+ * These are typically local development environments
+ */
+const ALLOWLISTED_HOSTS = ['localhost', '127.0.0.1', '::1', '0.0.0.0'];
+
+/**
+ * Check if the current host is in the allowlist
+ */
+function isHostAllowlisted(hostname: string): boolean {
+  return ALLOWLISTED_HOSTS.some(
+    (allowed) => hostname === allowed || hostname.startsWith(`${allowed}:`)
+  );
 }
 
 /**
@@ -23,9 +39,9 @@ export function getCurrentSubdomain(): string | null {
   const hostname = window.location.hostname;
   const parts = hostname.split('.');
 
-  // For localhost development, subdomain might be in a different format
-  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-    return null; // No subdomain restrictions for localhost
+  // For allowlisted hosts, return null (no subdomain)
+  if (isHostAllowlisted(hostname)) {
+    return null;
   }
 
   // For production domains like dev.example.com, pr-123.example.com
@@ -55,6 +71,9 @@ export function getCurrentSubdomain(): string | null {
  */
 export function getEnvironmentInfo(): EnvironmentInfo {
   const subdomain = getCurrentSubdomain();
+  const hostname =
+    typeof window !== 'undefined' ? window.location.hostname : '';
+  const isAllowlistedHost = isHostAllowlisted(hostname);
 
   const isDevEnvironment = subdomain === 'dev';
   const isEphemeralEnvironment = subdomain?.startsWith('pr-') ?? false;
@@ -65,6 +84,7 @@ export function getEnvironmentInfo(): EnvironmentInfo {
     isDevEnvironment,
     isEphemeralEnvironment,
     requiresDevAccess,
+    isAllowlistedHost,
   };
 }
 
@@ -145,11 +165,11 @@ export function isPostHogReady(
     return false;
   }
 
-  // For localhost, PostHog still needs to be initialized
-  // This ensures consistent state between server and client
   const hostname = window.location.hostname;
-  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-    // Even on localhost, respect the initialization state for consistency
+  // For allowlisted hosts, PostHog still needs to be initialized
+  // This ensures consistent state between server and client
+  if (isHostAllowlisted(hostname)) {
+    // Even on allowlisted hosts, respect the initialization state for consistency
     return isPostHogInitialized;
   }
 

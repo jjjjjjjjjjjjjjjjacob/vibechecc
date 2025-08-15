@@ -81,25 +81,13 @@ export function EnvironmentAccessGuard({
     return mockedInfo || getEnvironmentInfo();
   }, [mockConfig]);
 
-  // Use state for isLocalhost to avoid hydration mismatch
-  const [isLocalhost, setIsLocalhost] = useState(false);
-
-  // Check localhost after mount
+  // Check if we're on an allowlisted host after mount
   React.useEffect(() => {
-    const hostname = window.location.hostname;
-    const isLocal =
-      hostname === 'localhost' ||
-      hostname === '127.0.0.1' ||
-      hostname === '::1' ||
-      hostname === '0.0.0.0';
-
-    setIsLocalhost(isLocal);
-
-    // Show mock indicator if in mock mode
-    if (isLocal && mockConfig.enabled) {
+    // Show mock indicator if in mock mode and on allowlisted host
+    if (envInfo.isAllowlistedHost && mockConfig.enabled) {
       MockStatusIndicator()?.render();
     }
-  }, [mockConfig]);
+  }, [mockConfig, envInfo.isAllowlistedHost]);
 
   // Apply mock access override if configured - start with real flag for SSR
   const [effectiveDevAccessFlag, setEffectiveDevAccessFlag] = useState<
@@ -119,10 +107,10 @@ export function EnvironmentAccessGuard({
   }, [mockConfig, devAccessFlag]);
 
   // Determine if feature flag has loaded (not undefined)
-  // In mock mode with localhost, consider flag loaded if mock config is set
+  // On allowlisted hosts when NOT mocking, consider flag loaded
   const isFeatureFlagLoaded =
     effectiveDevAccessFlag !== undefined ||
-    (isLocalhost && !mockConfig.enabled); // Only bypass for localhost when NOT mocking
+    (envInfo.isAllowlistedHost && !mockConfig.enabled); // Only bypass for allowlisted hosts when NOT mocking
 
   // Calculate access - start with SSR-safe default
   const [hasAccess, setHasAccess] = useState<boolean>(() => {
@@ -136,27 +124,38 @@ export function EnvironmentAccessGuard({
 
   // Update access calculation after mount when all data is available
   React.useEffect(() => {
-    // If we're mocking, use the mocked environment requirements
-    if (mockConfig.enabled && isLocalhost) {
-      // If environment doesn't require dev access, grant access
-      if (!envInfo.requiresDevAccess) {
+    // If we're mocking on an allowlisted host, use the mocked environment requirements
+    if (mockConfig.enabled && envInfo.isAllowlistedHost) {
+      // Check if environment requires dev access
+      if (envInfo.requiresDevAccess === true) {
+        // Environment requires dev access, check the flag
+        setHasAccess(effectiveDevAccessFlag === true);
+      } else if (envInfo.requiresDevAccess === false) {
+        // Environment explicitly doesn't require dev access
         setHasAccess(true);
       } else {
-        // Otherwise check the effective flag
-        setHasAccess(effectiveDevAccessFlag === true);
+        // requiresDevAccess is undefined/null - deny by default
+        setHasAccess(false);
       }
-    } else if (isLocalhost) {
-      // Non-mock behavior: localhost always has access
+    } else if (envInfo.isAllowlistedHost) {
+      // Non-mock behavior: allowlisted hosts always have access
       setHasAccess(true);
     } else {
-      // Production behavior
-      setHasAccess(
-        !envInfo.requiresDevAccess || effectiveDevAccessFlag === true
-      );
+      // Production behavior: explicit checks
+      if (envInfo.requiresDevAccess === true) {
+        // Environment requires dev access, must have the flag
+        setHasAccess(effectiveDevAccessFlag === true);
+      } else if (envInfo.requiresDevAccess === false) {
+        // Environment explicitly doesn't require dev access (production)
+        setHasAccess(true);
+      } else {
+        // requiresDevAccess is undefined/null - deny by default
+        setHasAccess(false);
+      }
     }
   }, [
     mockConfig,
-    isLocalhost,
+    envInfo.isAllowlistedHost,
     envInfo.requiresDevAccess,
     effectiveDevAccessFlag,
   ]);

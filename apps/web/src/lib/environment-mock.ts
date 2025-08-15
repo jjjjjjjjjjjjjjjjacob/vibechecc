@@ -132,6 +132,7 @@ export function getMockedEnvironmentInfo(mockConfig?: MockEnvironmentConfig) {
     isDevEnvironment,
     isEphemeralEnvironment,
     requiresDevAccess,
+    isAllowlistedHost: true, // Always true when mocking (only works on allowlisted hosts)
   };
 }
 
