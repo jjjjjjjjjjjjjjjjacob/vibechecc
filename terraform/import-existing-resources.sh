@@ -50,35 +50,87 @@ fi
 echo "Environment: $TF_VAR_environment"
 echo "Prefix: $PREFIX"
 
-# Get DNS records from Cloudflare API
-echo "Fetching DNS records..."
-DNS_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$TF_VAR_cloudflare_zone_id/dns_records" \
-  -H "Authorization: Bearer $TF_VAR_cloudflare_api_token" \
-  -H "Content-Type: application/json")
+# Helper function to check if resource exists in terraform state
+terraform_state_exists() {
+  local resource_address="$1"
+  terraform state show "$resource_address" >/dev/null 2>&1
+}
 
-# Check if the DNS API call was successful
-if echo "$DNS_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
-  echo "$DNS_RESPONSE" | jq '.' > dns_output.json || echo '{"result": []}' > dns_output.json
-  echo "DNS records fetched successfully"
+# Check if Terraform state exists and has resources
+echo "Checking Terraform state..."
+STATE_COUNT=$(terraform state list 2>/dev/null | wc -l | tr -d ' ')
+if [ "$STATE_COUNT" -eq "0" ]; then
+  echo "Fresh environment detected - no resources in state"
+  IS_FRESH_ENV="true"
 else
-  echo "Error fetching DNS records:"
-  echo "$DNS_RESPONSE" | jq '.' 2>/dev/null || echo "$DNS_RESPONSE"
-  echo '{"result": []}' > dns_output.json
+  echo "Existing environment detected - $STATE_COUNT resources in state"
+  IS_FRESH_ENV="false"
 fi
 
-# Get Workers scripts from Cloudflare API
-echo "Fetching Workers scripts..."
-WORKERS_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/$TF_VAR_cloudflare_account_id/workers/scripts" \
-  -H "Authorization: Bearer $TF_VAR_cloudflare_api_token" \
-  -H "Content-Type: application/json")
+# Check if we need to fetch resources from Cloudflare API
+# Only fetch if it's a fresh environment or if specific resources are missing
+NEED_API_FETCH="false"
 
-# Check if the Workers API call was successful
-if echo "$WORKERS_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
-  echo "$WORKERS_RESPONSE" | jq '.' > workers_output.json || echo '{"result": []}' > workers_output.json
-  echo "Workers scripts fetched successfully"
+if [ "$IS_FRESH_ENV" = "true" ]; then
+  echo "Fresh environment - will fetch resources from Cloudflare API"
+  NEED_API_FETCH="true"
 else
-  echo "Error fetching Workers scripts:"
-  echo "$WORKERS_RESPONSE" | jq '.' 2>/dev/null || echo "$WORKERS_RESPONSE"
+  # Check if specific resources are missing from state
+  if [ "$TF_VAR_environment" = "production" ]; then
+    if ! terraform_state_exists 'module.app_worker.cloudflare_dns_record.web_a[0]' || \
+       ! terraform_state_exists 'module.app_worker.cloudflare_dns_record.web_aaaa[0]'; then
+      echo "Missing production DNS records in state - will fetch from API"
+      NEED_API_FETCH="true"
+    fi
+  else
+    if ! terraform_state_exists 'module.app_worker.cloudflare_dns_record.web_cname[0]'; then
+      echo "Missing CNAME record in state - will fetch from API"
+      NEED_API_FETCH="true"
+    fi
+  fi
+  
+  if ! terraform_state_exists 'module.app_worker.cloudflare_workers_script.web' || \
+     ! terraform_state_exists 'module.app_worker.cloudflare_workers_route.web'; then
+    echo "Missing Worker resources in state - will fetch from API"
+    NEED_API_FETCH="true"
+  fi
+fi
+
+if [ "$NEED_API_FETCH" = "true" ]; then
+  # Get DNS records from Cloudflare API
+  echo "Fetching DNS records..."
+  DNS_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$TF_VAR_cloudflare_zone_id/dns_records" \
+    -H "Authorization: Bearer $TF_VAR_cloudflare_api_token" \
+    -H "Content-Type: application/json")
+
+  # Check if the DNS API call was successful
+  if echo "$DNS_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
+    echo "$DNS_RESPONSE" | jq '.' > dns_output.json || echo '{"result": []}' > dns_output.json
+    echo "DNS records fetched successfully"
+  else
+    echo "Error fetching DNS records:"
+    echo "$DNS_RESPONSE" | jq '.' 2>/dev/null || echo "$DNS_RESPONSE"
+    echo '{"result": []}' > dns_output.json
+  fi
+
+  # Get Workers scripts from Cloudflare API
+  echo "Fetching Workers scripts..."
+  WORKERS_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/$TF_VAR_cloudflare_account_id/workers/scripts" \
+    -H "Authorization: Bearer $TF_VAR_cloudflare_api_token" \
+    -H "Content-Type: application/json")
+
+  # Check if the Workers API call was successful
+  if echo "$WORKERS_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
+    echo "$WORKERS_RESPONSE" | jq '.' > workers_output.json || echo '{"result": []}' > workers_output.json
+    echo "Workers scripts fetched successfully"
+  else
+    echo "Error fetching Workers scripts:"
+    echo "$WORKERS_RESPONSE" | jq '.' 2>/dev/null || echo "$WORKERS_RESPONSE"
+    echo '{"result": []}' > workers_output.json
+  fi
+else
+  echo "All expected resources found in state - skipping API fetch"
+  echo '{"result": []}' > dns_output.json
   echo '{"result": []}' > workers_output.json
 fi
 
@@ -99,12 +151,6 @@ else
 fi
 WORKER_SCRIPT_EXISTS=$(jq -r --arg script_name "$WORKER_SCRIPT_NAME" '.result[]? | select(.id == $script_name) | .id' workers_output.json 2>/dev/null || echo "")
 
-# Helper function to check if resource exists in terraform state
-terraform_state_exists() {
-  local resource_address="$1"
-  terraform state show "$resource_address" >/dev/null 2>&1
-}
-
 # Helper function to import resource if not in state
 import_resource() {
   local resource_address="$1"
@@ -122,7 +168,7 @@ import_resource() {
 
 echo "Found resources:"
 if [ "$TF_VAR_environment" = "production" ] && [ -n "$A_RECORD_ID" ] && [ "$A_RECORD_ID" != "null" ]; then
-  if terraform_state_exists 'module.vibechecc_worker.cloudflare_dns_record.web_a[0]'; then
+  if terraform_state_exists 'module.app_worker.cloudflare_dns_record.web_a[0]'; then
     echo "  A record: in state (ID: $A_RECORD_ID)"
   else
     echo "  A record: found in API (ID: $A_RECORD_ID)"
@@ -132,7 +178,7 @@ else
 fi
 
 if [ "$TF_VAR_environment" = "production" ] && [ -n "$AAAA_RECORD_ID" ] && [ "$AAAA_RECORD_ID" != "null" ]; then
-  if terraform_state_exists 'module.vibechecc_worker.cloudflare_dns_record.web_aaaa[0]'; then
+  if terraform_state_exists 'module.app_worker.cloudflare_dns_record.web_aaaa[0]'; then
     echo "  AAAA record: in state (ID: $AAAA_RECORD_ID)"
   else
     echo "  AAAA record: found in API (ID: $AAAA_RECORD_ID)"
@@ -142,7 +188,7 @@ else
 fi
 
 if [ "$TF_VAR_environment" != "production" ] && [ -n "$CNAME_RECORD_ID" ] && [ "$CNAME_RECORD_ID" != "null" ]; then
-  if terraform_state_exists 'module.vibechecc_worker.cloudflare_dns_record.web_cname[0]'; then
+  if terraform_state_exists 'module.app_worker.cloudflare_dns_record.web_cname[0]'; then
     echo "  CNAME record: in state (ID: $CNAME_RECORD_ID)"
   else
     echo "  CNAME record: found in API (ID: $CNAME_RECORD_ID)"
@@ -152,7 +198,7 @@ else
 fi
 
 if [ -n "$WORKER_SCRIPT_EXISTS" ] && [ "$WORKER_SCRIPT_EXISTS" != "null" ]; then
-  if terraform_state_exists 'module.vibechecc_worker.cloudflare_workers_script.web'; then
+  if terraform_state_exists 'module.app_worker.cloudflare_workers_script.web'; then
     echo "  Worker script: in state (Name: $WORKER_SCRIPT_EXISTS)"
   else
     echo "  Worker script: found in API (Name: $WORKER_SCRIPT_EXISTS)"
@@ -163,22 +209,22 @@ fi
 
 # Import A record if it exists (production only)
 if [ "$TF_VAR_environment" = "production" ] && [ -n "$A_RECORD_ID" ] && [ "$A_RECORD_ID" != "null" ]; then
-  import_resource 'module.vibechecc_worker.cloudflare_dns_record.web_a[0]' "$TF_VAR_cloudflare_zone_id/$A_RECORD_ID" "A record" || true
+  import_resource 'module.app_worker.cloudflare_dns_record.web_a[0]' "$TF_VAR_cloudflare_zone_id/$A_RECORD_ID" "A record" || true
 fi
 
 # Import AAAA record if it exists (production only)
 if [ "$TF_VAR_environment" = "production" ] && [ -n "$AAAA_RECORD_ID" ] && [ "$AAAA_RECORD_ID" != "null" ]; then
-  import_resource 'module.vibechecc_worker.cloudflare_dns_record.web_aaaa[0]' "$TF_VAR_cloudflare_zone_id/$AAAA_RECORD_ID" "AAAA record" || true
+  import_resource 'module.app_worker.cloudflare_dns_record.web_aaaa[0]' "$TF_VAR_cloudflare_zone_id/$AAAA_RECORD_ID" "AAAA record" || true
 fi
 
 # Import CNAME record if it exists (non-production only)
 if [ "$TF_VAR_environment" != "production" ] && [ -n "$CNAME_RECORD_ID" ] && [ "$CNAME_RECORD_ID" != "null" ]; then
-  import_resource 'module.vibechecc_worker.cloudflare_dns_record.web_cname[0]' "$TF_VAR_cloudflare_zone_id/$CNAME_RECORD_ID" "CNAME record" || true
+  import_resource 'module.app_worker.cloudflare_dns_record.web_cname[0]' "$TF_VAR_cloudflare_zone_id/$CNAME_RECORD_ID" "CNAME record" || true
 fi
 
 # Import Worker script if it exists
 if [ -n "$WORKER_SCRIPT_EXISTS" ] && [ "$WORKER_SCRIPT_EXISTS" != "null" ]; then
-  import_resource 'module.vibechecc_worker.cloudflare_workers_script.web' "$TF_VAR_cloudflare_account_id/$WORKER_SCRIPT_EXISTS" "Worker script" || true
+  import_resource 'module.app_worker.cloudflare_workers_script.web' "$TF_VAR_cloudflare_account_id/$WORKER_SCRIPT_EXISTS" "Worker script" || true
 fi
 
 # Import Workers route if it exists
@@ -188,23 +234,30 @@ else
   ROUTE_PATTERN="$TF_VAR_cloudflare_zone/*"
 fi
 
-echo "Checking for Workers route with pattern: $ROUTE_PATTERN"
-
-# Get Workers routes
-ROUTES_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$TF_VAR_cloudflare_zone_id/workers/routes" \
-  -H "Authorization: Bearer $TF_VAR_cloudflare_api_token" \
-  -H "Content-Type: application/json")
-
-if echo "$ROUTES_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
-  ROUTE_ID=$(echo "$ROUTES_RESPONSE" | jq -r --arg pattern "$ROUTE_PATTERN" '.result[]? | select(.pattern == $pattern) | .id' 2>/dev/null || echo "")
+# Only check for Workers route if we need to import it
+if [ "$NEED_API_FETCH" = "true" ] && ! terraform_state_exists 'module.app_worker.cloudflare_workers_route.web'; then
+  echo "Checking for Workers route with pattern: $ROUTE_PATTERN"
   
-  if [ -n "$ROUTE_ID" ] && [ "$ROUTE_ID" != "null" ]; then
-    import_resource 'module.vibechecc_worker.cloudflare_workers_route.web' "$TF_VAR_cloudflare_zone_id/$ROUTE_ID" "Workers route" || true
+  # Get Workers routes
+  ROUTES_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$TF_VAR_cloudflare_zone_id/workers/routes" \
+    -H "Authorization: Bearer $TF_VAR_cloudflare_api_token" \
+    -H "Content-Type: application/json")
+
+  if echo "$ROUTES_RESPONSE" | jq -e '.success == true' > /dev/null 2>&1; then
+    ROUTE_ID=$(echo "$ROUTES_RESPONSE" | jq -r --arg pattern "$ROUTE_PATTERN" '.result[]? | select(.pattern == $pattern) | .id' 2>/dev/null || echo "")
+    
+    if [ -n "$ROUTE_ID" ] && [ "$ROUTE_ID" != "null" ]; then
+      import_resource 'module.app_worker.cloudflare_workers_route.web' "$TF_VAR_cloudflare_zone_id/$ROUTE_ID" "Workers route" || true
+    else
+      echo "No Workers route found to import"
+    fi
   else
-    echo "No Workers route found to import"
+    echo "Error fetching Workers routes"
   fi
 else
-  echo "Error fetching Workers routes"
+  if terraform_state_exists 'module.app_worker.cloudflare_workers_route.web'; then
+    echo "Workers route already in state - skipping import"
+  fi
 fi
 
 echo "Import process completed"
