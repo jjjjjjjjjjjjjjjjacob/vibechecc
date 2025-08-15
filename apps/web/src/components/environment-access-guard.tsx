@@ -14,6 +14,12 @@ import {
   getReadinessState,
   type ReadinessState,
 } from '@/lib/environment-access';
+import {
+  getMockConfig,
+  getMockedEnvironmentInfo,
+  MockStatusIndicator,
+  type MockEnvironmentConfig,
+} from '@/lib/environment-mock';
 
 interface EnvironmentAccessGuardProps {
   children: ReactNode;
@@ -52,27 +58,108 @@ export function EnvironmentAccessGuard({
     syncUserThemePreferences,
   } = useThemeStore();
 
-  const envInfo = React.useMemo(() => getEnvironmentInfo(), []);
+  // Get mock config for testing - only on client to avoid SSR mismatch
+  const [mockConfig, setMockConfig] = useState<MockEnvironmentConfig>(() => {
+    // Initial state must match server (no mocking during SSR)
+    if (typeof window === 'undefined') {
+      return { enabled: false };
+    }
+    return { enabled: false }; // Start with disabled to match SSR
+  });
+
+  // Load mock config after mount to avoid hydration issues
+  React.useEffect(() => {
+    const config = getMockConfig();
+    if (config.enabled) {
+      setMockConfig(config);
+    }
+  }, []);
+
+  // Use mocked environment info if available, otherwise use real info
+  const envInfo = React.useMemo(() => {
+    const mockedInfo = getMockedEnvironmentInfo(mockConfig);
+    return mockedInfo || getEnvironmentInfo();
+  }, [mockConfig]);
 
   // Use state for isLocalhost to avoid hydration mismatch
   const [isLocalhost, setIsLocalhost] = useState(false);
 
   // Check localhost after mount
   React.useEffect(() => {
-    setIsLocalhost(
-      window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1' ||
-        window.location.hostname === '::1' ||
-        window.location.hostname === '0.0.0.0'
-    );
-  }, []);
+    const hostname = window.location.hostname;
+    const isLocal =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '0.0.0.0';
+
+    setIsLocalhost(isLocal);
+
+    // Show mock indicator if in mock mode
+    if (isLocal && mockConfig.enabled) {
+      MockStatusIndicator()?.render();
+    }
+  }, [mockConfig]);
+
+  // Apply mock access override if configured - start with real flag for SSR
+  const [effectiveDevAccessFlag, setEffectiveDevAccessFlag] = useState<
+    boolean | undefined
+  >(devAccessFlag);
+
+  // Update effective flag when mock config or real flag changes
+  React.useEffect(() => {
+    if (mockConfig.enabled && mockConfig.hasDevAccess !== undefined) {
+      // Convert null to undefined for TypeScript compatibility
+      setEffectiveDevAccessFlag(
+        mockConfig.hasDevAccess === null ? undefined : mockConfig.hasDevAccess
+      );
+    } else {
+      setEffectiveDevAccessFlag(devAccessFlag);
+    }
+  }, [mockConfig, devAccessFlag]);
 
   // Determine if feature flag has loaded (not undefined)
-  const isFeatureFlagLoaded = devAccessFlag !== undefined || isLocalhost;
+  // In mock mode with localhost, consider flag loaded if mock config is set
+  const isFeatureFlagLoaded =
+    effectiveDevAccessFlag !== undefined ||
+    (isLocalhost && !mockConfig.enabled); // Only bypass for localhost when NOT mocking
 
-  // Calculate access only after flag is loaded
-  const hasAccess =
-    isLocalhost || !envInfo.requiresDevAccess || devAccessFlag === true;
+  // Calculate access - start with SSR-safe default
+  const [hasAccess, setHasAccess] = useState<boolean>(() => {
+    // During SSR or initial client render, use default logic without mocks
+    if (typeof window === 'undefined') {
+      return true; // SSR default
+    }
+    // Initial client state should match SSR
+    return true;
+  });
+
+  // Update access calculation after mount when all data is available
+  React.useEffect(() => {
+    // If we're mocking, use the mocked environment requirements
+    if (mockConfig.enabled && isLocalhost) {
+      // If environment doesn't require dev access, grant access
+      if (!envInfo.requiresDevAccess) {
+        setHasAccess(true);
+      } else {
+        // Otherwise check the effective flag
+        setHasAccess(effectiveDevAccessFlag === true);
+      }
+    } else if (isLocalhost) {
+      // Non-mock behavior: localhost always has access
+      setHasAccess(true);
+    } else {
+      // Production behavior
+      setHasAccess(
+        !envInfo.requiresDevAccess || effectiveDevAccessFlag === true
+      );
+    }
+  }, [
+    mockConfig,
+    isLocalhost,
+    envInfo.requiresDevAccess,
+    effectiveDevAccessFlag,
+  ]);
 
   // Get readiness state - use the stable PostHog state
   const readiness: ReadinessState = getReadinessState(
@@ -181,10 +268,10 @@ export function EnvironmentAccessGuard({
 
   // Track environment access attempts
   useEffect(() => {
-    if (isPostHogReady && typeof devAccessFlag === 'boolean') {
+    if (isPostHogReady && typeof effectiveDevAccessFlag === 'boolean') {
       trackEnvironmentAccess(hasAccess, envInfo);
     }
-  }, [isPostHogReady, devAccessFlag, hasAccess, envInfo]);
+  }, [isPostHogReady, effectiveDevAccessFlag, hasAccess, envInfo]);
 
   // Use a stable tagline index that won't change between server and client
   const [taglineIndex] = useState(() => {
@@ -210,7 +297,7 @@ export function EnvironmentAccessGuard({
     return Array.from(selectedTagline).map((char, i) => (
       <span
         data-theme-ready={String(readiness.isFullyReady)}
-        className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] whitespace-pre transition duration-800"
+        className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] whitespace-pre transition duration-800 data-[theme-ready=true]:text-white"
         key={i}
         style={{ animationDelay: `${i * 25}ms` }}
       >
@@ -246,7 +333,7 @@ export function EnvironmentAccessGuard({
               {Array.from(APP_NAME as string).map((char, i) => (
                 <span
                   data-theme-ready={String(readiness.isFullyReady)}
-                  className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800"
+                  className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800 data-[theme-ready=true]:text-white"
                   key={i}
                   style={{ animationDelay: `${i * 50}ms` }}
                 >
@@ -268,20 +355,29 @@ export function EnvironmentAccessGuard({
                 data-show-welcome={String(
                   showWelcome || isFadingOut || shouldShowContent
                 )}
+                data-dots-initialized={String(
+                  readiness.isThemeReady || readiness.isFullyReady
+                )}
                 className="animate-text-pulse absolute inset-0 flex items-center justify-center gap-1.5 p-0 transition duration-300 data-[show-welcome=true]:opacity-0"
               >
                 <span
-                  data-theme-ready={String(readiness.isFullyReady)}
-                  className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
+                  data-dots-initialized={String(
+                    readiness.isThemeReady || readiness.isFullyReady
+                  )}
+                  className="data-[dots-initialized=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800 data-[dots-initialized=true]:bg-white"
                 />
                 <span
-                  data-theme-ready={String(readiness.isFullyReady)}
-                  className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
+                  data-dots-initialized={String(
+                    readiness.isThemeReady || readiness.isFullyReady
+                  )}
+                  className="data-[dots-initialized=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800 data-[dots-initialized=true]:bg-white"
                   style={{ animationDelay: '300ms' }}
                 />
                 <span
-                  data-theme-ready={String(readiness.isFullyReady)}
-                  className="data-[theme-ready=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800"
+                  data-dots-initialized={String(
+                    readiness.isThemeReady || readiness.isFullyReady
+                  )}
+                  className="data-[dots-initialized=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800 data-[dots-initialized=true]:bg-white"
                   style={{ animationDelay: '600ms' }}
                 />
               </div>
@@ -329,6 +425,7 @@ export function EnvironmentAccessGuard({
               environment:{' '}
               <span className="font-mono">
                 {envInfo.subdomain || 'production'}
+                {mockConfig.enabled && ' (mocked)'}
               </span>
             </p>
             <p>
