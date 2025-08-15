@@ -56,7 +56,7 @@ export function getCurrentSubdomain(): string | null {
 export function getEnvironmentInfo(): EnvironmentInfo {
   const subdomain = getCurrentSubdomain();
 
-  const isDevEnvironment = subdomain === 'dev';
+  const isDevEnvironment = subdomain === 'dev' || subdomain === null;
   const isEphemeralEnvironment = subdomain?.startsWith('pr-') ?? false;
   const requiresDevAccess = isDevEnvironment || isEphemeralEnvironment;
 

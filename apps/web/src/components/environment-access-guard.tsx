@@ -67,6 +67,10 @@ export function EnvironmentAccessGuard({
     );
   }, []);
 
+  // Determine if feature flag has loaded (not undefined)
+  const isFeatureFlagLoaded = devAccessFlag !== undefined || isLocalhost;
+  
+  // Calculate access only after flag is loaded
   const hasAccess =
     isLocalhost || !envInfo.requiresDevAccess || devAccessFlag === true;
 
@@ -76,7 +80,7 @@ export function EnvironmentAccessGuard({
     isThemeLoaded,
     isUserLoaded,
     isPostHogReady, // Use stable state instead of directly from hook
-    hasAccess
+    isFeatureFlagLoaded ? hasAccess : null // Pass null if flag not loaded yet
   );
 
   // Initialize theme from localStorage on mount
@@ -150,7 +154,8 @@ export function EnvironmentAccessGuard({
 
   // Show welcome when fully ready, then fade to content after 2 seconds
   React.useEffect(() => {
-    if (readiness.isFullyReady) {
+    // Only proceed if fully ready AND feature flag has been loaded
+    if (readiness.isFullyReady && isFeatureFlagLoaded) {
       if (hasAccess) {
         const welcomeTimer = setTimeout(() => {
           setShowWelcome(true);
@@ -172,7 +177,7 @@ export function EnvironmentAccessGuard({
         setShouldShowContent(true);
       }
     }
-  }, [readiness.isFullyReady, hasAccess]);
+  }, [readiness.isFullyReady, hasAccess, isFeatureFlagLoaded]);
 
   // Track environment access attempts
   useEffect(() => {
@@ -287,7 +292,8 @@ export function EnvironmentAccessGuard({
     );
   }
 
-  if (!hasAccess) {
+  // Only show access denied if feature flag is loaded and user doesn't have access
+  if (isFeatureFlagLoaded && !hasAccess) {
     const message = getAccessDenialMessage(envInfo);
 
     if (fallback) {

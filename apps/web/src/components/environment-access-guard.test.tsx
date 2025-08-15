@@ -635,20 +635,34 @@ describe('EnvironmentAccessGuard', () => {
     it('handles undefined feature flag gracefully', async () => {
       vi.useFakeTimers();
 
+      // Start with undefined (loading)
       vi.mocked(posthogReact.useFeatureFlagEnabled).mockReturnValue(undefined);
 
-      render(
+      const { rerender } = render(
         <EnvironmentAccessGuard>
           <div data-testid="app-content">App Content</div>
         </EnvironmentAccessGuard>
       );
 
-      // Fast forward through animations or timeout
+      // Should show loading state (not content yet)
+      expect(screen.queryByTestId('app-content')).not.toBeInTheDocument();
+
+      // Simulate feature flag loading completes with false (no access)
+      vi.mocked(posthogReact.useFeatureFlagEnabled).mockReturnValue(false);
+      
+      rerender(
+        <EnvironmentAccessGuard>
+          <div data-testid="app-content">App Content</div>
+        </EnvironmentAccessGuard>
+      );
+
+      // Fast forward through animations
       await act(async () => {
-        vi.advanceTimersByTime(11000);
+        vi.advanceTimersByTime(5000);
       });
 
-      // Should eventually render content (defaults to allowed in production or timeout)
+      // For production environment (default mock), should show content since requiresDevAccess is false
+      // Note: getEnvironmentInfo is mocked to return production environment by default
       expect(screen.getByTestId('app-content')).toBeInTheDocument();
 
       vi.useRealTimers();
