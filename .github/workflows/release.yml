@@ -103,3 +103,32 @@ jobs:
 
       - name: Push changes
         run: git push origin ${{ inputs.branch }} --follow-tags
+
+      - name: Generate Release Notes
+        if: steps.release.outputs.version != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.release.outputs.version }}"
+          TAG_NAME="v${VERSION}"
+          
+          # Get the previous tag for comparison
+          PREV_TAG=$(git describe --tags --abbrev=0 ${TAG_NAME}^ 2>/dev/null || echo "")
+          
+          # Generate release notes using GitHub CLI
+          if [ -z "$PREV_TAG" ]; then
+            # First release - no previous tag
+            gh release create "$TAG_NAME" \
+              --generate-notes \
+              --title "Release ${VERSION}" \
+              --prerelease=${{ inputs.prerelease }} \
+              --verify-tag || true
+          else
+            # Normal release with previous tag for comparison
+            gh release create "$TAG_NAME" \
+              --generate-notes \
+              --notes-start-tag "$PREV_TAG" \
+              --title "Release ${VERSION}" \
+              --prerelease=${{ inputs.prerelease }} \
+              --verify-tag || true
+          fi
