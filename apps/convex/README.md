@@ -237,7 +237,7 @@ Set these in your Convex dashboard:
 CLERK_SECRET_KEY=sk_live_your_clerk_secret_key
 
 # Required for webhook verification
-CLERK_WEBHOOK_SIGNING_SECRET=whsec_your_webhook_secret
+CLERK_WEBHOOK_SECRET=whsec_your_webhook_secret
 ```
 
 ## Database Seeding

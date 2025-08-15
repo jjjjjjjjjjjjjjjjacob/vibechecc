@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog } from '@/hooks/use-posthog';
 import { Badge } from '@/components/ui/badge';
 import {
   useTopEmojiRatings,
@@ -39,11 +39,12 @@ type VibeCardVariant =
   | 'search-result';
 
 interface VibeCardProps {
-  vibe: Vibe;
+  vibe?: Vibe;
   variant?: VibeCardVariant;
   ratingDisplayMode?: RatingDisplayMode;
   className?: string;
   delay?: number;
+  loading?: boolean;
   // Legacy props for backward compatibility
   compact?: boolean;
   layout?: 'masonry' | 'grid' | 'single';
@@ -55,6 +56,7 @@ export function VibeCard({
   ratingDisplayMode = 'most-rated',
   className,
   delay = 0,
+  loading = false,
   // Legacy prop support
   compact,
   layout,
@@ -88,15 +90,17 @@ export function VibeCard({
   const { data: emojiMetadataArray } = useEmojiMetadata();
 
   // Get image URL (handles both legacy URLs and storage IDs)
-  const { data: imageUrl, isLoading: isImageLoading } = useVibeImageUrl(vibe);
+  const { data: imageUrl, isLoading: isImageLoading } = useVibeImageUrl(
+    vibe || {}
+  );
 
   // Fetch emoji rating data - get all unique emoji reactions for this vibe
   const { data: topEmojiRatings, isLoading: isTopEmojiRatingsLoading } =
-    useTopEmojiRatings(vibe.id, 20);
+    useTopEmojiRatings(vibe?.id || '', 20);
   const {
     data: mostInteractedEmojiData,
     isLoading: isMostInteractedEmojiLoading,
-  } = useMostInteractedEmoji(vibe.id);
+  } = useMostInteractedEmoji(vibe?.id || '');
 
   // Determine if we should use a placeholder
   const usePlaceholder = !imageUrl || imageError || isImageLoading;
@@ -196,6 +200,8 @@ export function VibeCard({
     review: string;
     tags?: string[];
   }) => {
+    if (!vibe) return;
+
     await createEmojiRatingMutation.mutateAsync({
       vibeId: vibe.id,
       emoji: data.emoji,
@@ -255,6 +261,41 @@ export function VibeCard({
 
   // Search result variant implementation
   if (finalVariant === 'search-result') {
+    // Show skeleton if loading
+    if (loading) {
+      return (
+        <Card className="bg-card/30 border-border/50 flex w-full overflow-hidden">
+          <CardContent className="w-full p-0">
+            <div className="flex gap-4 p-4">
+              <div className="relative flex w-1/2 overflow-hidden rounded-lg">
+                <Skeleton className="h-full w-full md:aspect-[4/3]" />
+              </div>
+              <div className="flex w-1/2 flex-col">
+                <div className="flex min-w-0 flex-[1] flex-col justify-between">
+                  <div>
+                    <Skeleton className="mb-2 h-5 w-full" />
+                    <Skeleton className="mb-1 h-4 w-24" />
+                    <Skeleton className="mb-3 h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                </div>
+                <div className="flex w-full min-w-0 flex-[1] flex-col justify-between">
+                  <div>
+                    <Skeleton className="mb-2 h-5 w-full" />
+                    <Skeleton className="mb-1 h-4 w-24" />
+                    <Skeleton className="mb-3 h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (!vibe) return null;
+
     return (
       <>
         <Card className="bg-card/30 border-border/50 overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -386,6 +427,41 @@ export function VibeCard({
 
   // List variant implementation
   if (finalVariant === 'list') {
+    // Show skeleton if loading
+    if (loading) {
+      return (
+        <div
+          className={cn(
+            'bg-muted/30 relative block w-full overflow-hidden rounded-lg shadow-sm',
+            'min-h-[6rem] sm:min-h-[7rem]',
+            className
+          )}
+        >
+          {/* Background layer to match actual card */}
+          <div className="from-muted/50 to-muted/30 absolute inset-0 bg-gradient-to-r" />
+
+          {/* Content - matching actual component structure */}
+          <div className="relative z-10 flex h-full min-h-[6rem] items-center justify-between p-4 sm:min-h-[7rem]">
+            {/* Left side: Avatar and title */}
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <Skeleton className="h-10 w-10 flex-shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+
+            {/* Right side: Rating display */}
+            <div className="ml-4 flex-shrink-0">
+              <Skeleton className="h-10 w-20 rounded-full" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (!vibe) return null;
+
     return (
       <>
         <div
@@ -550,6 +626,116 @@ export function VibeCard({
       </>
     );
   }
+
+  // Main card variants skeleton (default, feed-masonry, feed-grid, feed-single, compact)
+  if (loading) {
+    return (
+      <Card
+        className={cn(
+          'bg-popover/20 border-border/50 relative overflow-hidden',
+          'h-full w-full',
+          finalVariant === 'feed-masonry' && 'break-inside-avoid',
+          className
+        )}
+      >
+        {/* Avatar skeleton */}
+        <div className="absolute top-2 left-2 z-10">
+          <Skeleton className="h-6 w-6 rounded-full" />
+        </div>
+
+        <div className="block h-full">
+          {/* Image skeleton */}
+          <div className="relative">
+            <Skeleton
+              className={cn(
+                'w-full',
+                (() => {
+                  switch (finalVariant) {
+                    case 'feed-single':
+                      return 'sm:aspect-video';
+                    case 'feed-masonry':
+                    case 'feed-grid':
+                      return 'aspect-[3/4]';
+                    case 'compact':
+                      return 'aspect-[4/3]';
+                    default:
+                      return 'aspect-video';
+                  }
+                })()
+              )}
+            />
+          </div>
+
+          {/* Content skeleton */}
+          <CardContent
+            className={cn('p-4', finalVariant === 'compact' && 'p-3')}
+          >
+            <Skeleton
+              className={cn(
+                'mb-2',
+                (() => {
+                  switch (finalVariant) {
+                    case 'feed-masonry':
+                    case 'feed-single':
+                      return 'h-6 w-full';
+                    case 'feed-grid':
+                      return 'h-5 w-full';
+                    case 'compact':
+                      return 'h-5 w-3/4';
+                    default:
+                      return 'h-6 w-3/4';
+                  }
+                })()
+              )}
+            />
+
+            {finalVariant !== 'compact' && (
+              <>
+                <Skeleton className="mb-1 h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </>
+            )}
+          </CardContent>
+
+          {/* Footer skeleton */}
+          <CardFooter
+            className={cn(
+              'flex flex-col items-start gap-3 p-4 pt-0',
+              finalVariant === 'compact' && 'p-3 pt-0'
+            )}
+          >
+            <div className="w-full space-y-3">
+              {/* Primary rating skeleton */}
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <div className="flex flex-col gap-1">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
+
+              {/* Emoji reactions skeleton */}
+              {finalVariant !== 'compact' && (
+                <div className="flex flex-wrap gap-1">
+                  {Array.from({
+                    length:
+                      finalVariant === 'feed-masonry' ||
+                      finalVariant === 'feed-single'
+                        ? 6
+                        : 4,
+                  }).map((_, i) => (
+                    <Skeleton key={i} className="h-6 w-12 rounded-full" />
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardFooter>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!vibe) return null;
 
   return (
     <>

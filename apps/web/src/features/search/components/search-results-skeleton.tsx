@@ -38,44 +38,43 @@ export function SearchResultsSkeleton({
 
 function VibeResultSkeleton() {
   return (
-    <Card className="relative h-full overflow-hidden transition-all duration-200">
-      {/* Avatar skeleton in top left */}
-      <div className="absolute top-2 left-2 z-10">
-        <Skeleton className="h-6 w-6 rounded-full shadow-md" />
-      </div>
+    <Card className="bg-card/30 border-border/50 flex w-full overflow-hidden">
+      <div className="w-full p-0">
+        <div className="flex gap-4 p-4">
+          {/* Image - Takes up left side, matching vibe-card search-result variant */}
+          <div className="relative flex-1 overflow-hidden rounded-lg">
+            <Skeleton className="h-full w-full md:aspect-[4/3]" />
+          </div>
 
-      <div className="block h-full">
-        {/* Image placeholder with proper aspect ratio */}
-        <div className="relative aspect-video overflow-hidden">
-          <Skeleton className="h-full w-full" />
-        </div>
+          {/* Content - Takes up right side */}
+          <div className="flex min-w-0 flex-[1] flex-col justify-between">
+            <div>
+              {/* Title and username */}
+              <Skeleton className="mb-2 h-5 w-full" />
+              <Skeleton className="mb-1 h-4 w-24" />
 
-        {/* Content section */}
-        <div className="p-4">
-          {/* Title */}
-          <Skeleton className="mb-2 h-6 w-3/4" />
-
-          {/* Description lines */}
-          <Skeleton className="mb-1 h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-        </div>
-
-        {/* Footer with rating skeleton */}
-        <div className="flex flex-col items-start gap-3 p-4 pt-0">
-          {/* Primary emoji rating display */}
-          <div className="w-full space-y-2">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <div className="flex flex-col gap-1">
-                <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-3 w-16" />
-              </div>
+              {/* Description */}
+              <Skeleton className="mb-3 h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
             </div>
-            {/* Secondary ratings */}
-            <div className="flex gap-1">
-              <Skeleton className="h-6 w-16 rounded-full" />
-              <Skeleton className="h-6 w-16 rounded-full" />
-              <Skeleton className="h-6 w-16 rounded-full" />
+
+            {/* Bottom section with ratings and tags */}
+            <div className="mt-auto space-y-2">
+              {/* Primary emoji rating display */}
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-6 w-6 rounded-full" />
+                <div className="flex flex-col gap-1">
+                  <Skeleton className="h-3 w-12" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1">
+                <Skeleton className="h-5 w-12 rounded-full" />
+                <Skeleton className="h-5 w-14 rounded-full" />
+                <Skeleton className="h-5 w-10 rounded-full" />
+              </div>
             </div>
           </div>
         </div>
@@ -86,89 +85,141 @@ function VibeResultSkeleton() {
 
 function UserResultSkeleton() {
   return (
-    <Card className="h-full overflow-hidden transition-all duration-200">
-      <div className="flex flex-col items-center space-y-4 p-6 text-center">
-        {/* Avatar */}
-        <Skeleton className="h-20 w-20 rounded-full" />
+    <div className="space-y-1">
+      {/* Main User Card */}
+      <Card className="bg-card/30 overflow-hidden">
+        <div className="p-0">
+          <div className="flex items-center gap-4 p-4 pb-2">
+            {/* Avatar */}
+            <Skeleton className="h-16 w-16 flex-shrink-0 rounded-full" />
 
-        {/* Name and username */}
-        <div className="space-y-1">
-          <Skeleton className="mx-auto h-5 w-32" />
-          <Skeleton className="mx-auto h-4 w-24" />
-        </div>
+            <div className="flex min-w-0 flex-1 items-center justify-between">
+              <div className="min-w-0 flex-1">
+                {/* Name and username */}
+                <div className="mb-1 flex items-center gap-3">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-4 w-20 flex-shrink-0" />
+                </div>
 
-        {/* Stats */}
-        <div className="flex gap-4">
-          <div className="space-y-1">
-            <Skeleton className="mx-auto h-4 w-8" />
-            <Skeleton className="mx-auto h-3 w-12" />
+                {/* Stats */}
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </div>
+
+              {/* Badge */}
+              <Skeleton className="h-6 w-12 flex-shrink-0 rounded-full" />
+            </div>
           </div>
-          <div className="space-y-1">
-            <Skeleton className="mx-auto h-4 w-8" />
-            <Skeleton className="mx-auto h-3 w-16" />
+
+          {/* Top Vibes section - Show placeholders for compact vibes */}
+          <div className="px-4 pb-4">
+            <div className="hidden sm:grid sm:grid-cols-3 sm:gap-2">
+              {/* Three compact vibe skeletons on desktop */}
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-muted/30 rounded-lg p-3">
+                  <Skeleton className="mb-2 h-20 w-full rounded" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              ))}
+            </div>
+            {/* Mobile: Show only one compact vibe */}
+            <div className="sm:hidden">
+              <div className="bg-muted/30 rounded-lg p-3">
+                <Skeleton className="mb-2 h-20 w-full rounded" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Badge */}
-        <Skeleton className="h-6 w-16 rounded-full" />
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 }
 
 function TagResultSkeleton() {
   return (
-    <Card className="h-full overflow-hidden transition-all duration-200">
-      <div className="flex flex-col items-center space-y-4 p-6 text-center">
-        {/* Icon placeholder */}
-        <Skeleton className="h-20 w-20 rounded-full" />
+    <div className="space-y-1">
+      {/* Main Tag Card */}
+      <Card className="overflow-hidden">
+        <div className="p-0">
+          <div className="flex items-center gap-4 p-4 pb-2">
+            {/* Icon placeholder */}
+            <Skeleton className="h-16 w-16 flex-shrink-0 rounded-full" />
 
-        {/* Tag name */}
-        <div className="space-y-2">
-          <Skeleton className="mx-auto h-5 w-24" />
-          <Skeleton className="mx-auto h-4 w-20" />
+            <div className="flex min-w-0 flex-1 items-center justify-between">
+              <div className="min-w-0 flex-1">
+                {/* Tag name and count */}
+                <div className="mb-1 flex items-center gap-3">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-16 flex-shrink-0" />
+                </div>
+              </div>
+
+              {/* Badge */}
+              <Skeleton className="h-6 w-10 flex-shrink-0 rounded-full" />
+            </div>
+          </div>
+
+          {/* Top Vibes section - Same as UserResultSkeleton */}
+          <div className="px-4 pb-4">
+            <div className="hidden sm:grid sm:grid-cols-3 sm:gap-2">
+              {/* Three compact vibe skeletons on desktop */}
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-muted/30 rounded-lg p-3">
+                  <Skeleton className="mb-2 h-20 w-full rounded" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              ))}
+            </div>
+            {/* Mobile: Show only one compact vibe */}
+            <div className="sm:hidden">
+              <div className="bg-muted/30 rounded-lg p-3">
+                <Skeleton className="mb-2 h-20 w-full rounded" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* Badge */}
-        <Skeleton className="h-6 w-12 rounded-full" />
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 }
 
 function ReviewResultSkeleton() {
   return (
-    <Card className="h-full overflow-hidden transition-all duration-200">
-      <div className="p-4">
-        <div className="flex items-start gap-3">
-          {/* Review content */}
+    <Card className="bg-card/30 overflow-hidden">
+      <div className="p-0">
+        <div className="flex gap-3 p-4">
+          {/* Reviewer Avatar */}
+          <Skeleton className="h-10 w-10 flex-shrink-0 rounded-full" />
+
+          {/* Content */}
           <div className="min-w-0 flex-1">
-            {/* Header with avatar and rating */}
-            <div className="mb-2 flex items-start gap-2">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                </div>
-                <Skeleton className="mt-1 h-3 w-32" />
+            {/* Header */}
+            <div className="mb-2 flex flex-col gap-0">
+              <div className="flex w-full items-center justify-between gap-0">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-5 w-14 rounded-full" />
               </div>
+              <Skeleton className="mt-1 h-3 w-32" />
             </div>
 
-            {/* Review text */}
-            <Skeleton className="mb-1 h-4 w-full" />
-            <Skeleton className="mb-1 h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
+            {/* Review Text */}
+            <div className="mb-3">
+              <Skeleton className="mb-1 h-4 w-full" />
+              <Skeleton className="mb-1 h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+
+            {/* Rating */}
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <Skeleton className="h-4 w-12" />
+            </div>
           </div>
-
-          {/* Vibe image */}
-          <Skeleton className="h-20 w-20 flex-shrink-0 rounded-md" />
         </div>
-      </div>
-
-      {/* Footer badge */}
-      <div className="p-4 pt-0">
-        <Skeleton className="h-5 w-16 rounded-full" />
       </div>
     </Card>
   );

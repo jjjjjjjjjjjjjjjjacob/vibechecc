@@ -8,7 +8,7 @@ import { useMarkNotificationAsReadMutation } from '@/queries';
 import type { Notification } from '@vibechecc/types';
 import type { Id } from '@vibechecc/convex/dataModel';
 import { useHeaderNavStore } from '@/stores/header-nav-store';
-import { usePostHog } from '@/hooks/usePostHog';
+import { usePostHog } from '@/hooks/use-posthog';
 
 interface NotificationItemProps {
   notification: Notification;

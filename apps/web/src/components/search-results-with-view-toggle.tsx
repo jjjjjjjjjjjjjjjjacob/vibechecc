@@ -9,15 +9,19 @@ import { cn } from '@/utils/tailwind-utils';
 type ViewMode = 'grid' | 'list';
 
 interface SearchResultsWithViewToggleProps {
-  vibes: Vibe[];
+  vibes?: Vibe[];
   defaultView?: ViewMode;
   className?: string;
+  loading?: boolean;
+  skeletonCount?: number;
 }
 
 export function SearchResultsWithViewToggle({
   vibes,
   defaultView = 'grid',
   className,
+  loading = false,
+  skeletonCount = 8,
 }: SearchResultsWithViewToggleProps) {
   const [viewMode, setViewMode] = React.useState<ViewMode>(defaultView);
 
@@ -39,7 +43,11 @@ export function SearchResultsWithViewToggle({
       {/* Header with view toggle */}
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
-          {vibes.length} {vibes.length === 1 ? 'vibe' : 'vibes'} found
+          {loading
+            ? 'loading...'
+            : vibes
+              ? `${vibes.length} ${vibes.length === 1 ? 'vibe' : 'vibes'} found`
+              : '0 vibes found'}
         </p>
 
         <div className="bg-muted flex items-center gap-1 rounded-lg p-1">
@@ -65,7 +73,29 @@ export function SearchResultsWithViewToggle({
       </div>
 
       {/* Results */}
-      {viewMode === 'list' ? (
+      {loading || !vibes ? (
+        viewMode === 'list' ? (
+          <div className="space-y-3">
+            {Array.from({ length: skeletonCount }).map((_, index) => (
+              <VibeCard
+                key={`skeleton-${index}`}
+                variant="list"
+                loading={true}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: skeletonCount }).map((_, index) => (
+              <VibeCard
+                key={`skeleton-${index}`}
+                variant="default"
+                loading={true}
+              />
+            ))}
+          </div>
+        )
+      ) : viewMode === 'list' ? (
         <div className="space-y-3">
           {vibes.map((vibe) => (
             <VibeCard key={vibe.id} vibe={vibe} variant="list" />

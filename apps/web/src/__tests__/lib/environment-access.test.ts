@@ -4,8 +4,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   getCurrentSubdomain,
   getEnvironmentInfo,
-  hasDevEnvironmentAccess,
-  canAccessCurrentEnvironment,
   getAccessDenialMessage,
 } from '@/lib/environment-access';
 import { analytics } from '@/lib/posthog';
@@ -18,7 +16,7 @@ vi.mock('@/lib/posthog', () => ({
   },
 }));
 
-const mockAnalytics = analytics as any;
+const _mockAnalytics = analytics as any;
 
 // Mock window.location
 const mockLocation = (hostname: string) => {
@@ -43,24 +41,29 @@ describe('environment access utilities', () => {
     });
 
     it('returns null for main domain', () => {
-      mockLocation('vibechecc.io');
+      mockLocation('vibechecc.com');
+      expect(getCurrentSubdomain()).toBeNull();
+    });
+
+    it('returns null for www.vibechecc.com (www is not a subdomain)', () => {
+      mockLocation('www.vibechecc.com');
       expect(getCurrentSubdomain()).toBeNull();
     });
 
     it('returns subdomain for dev environment', () => {
-      mockLocation('dev.vibechecc.io');
+      mockLocation('dev.vibechecc.com');
       expect(getCurrentSubdomain()).toBe('dev');
     });
 
     it('returns subdomain for PR environment', () => {
-      mockLocation('pr-123.vibechecc.io');
+      mockLocation('pr-123.vibechecc.com');
       expect(getCurrentSubdomain()).toBe('pr-123');
     });
   });
 
   describe('getEnvironmentInfo', () => {
     it('identifies dev environment correctly', () => {
-      mockLocation('dev.vibechecc.io');
+      mockLocation('dev.vibechecc.com');
       const info = getEnvironmentInfo();
 
       expect(info.subdomain).toBe('dev');
@@ -70,7 +73,7 @@ describe('environment access utilities', () => {
     });
 
     it('identifies ephemeral environment correctly', () => {
-      mockLocation('pr-456.vibechecc.io');
+      mockLocation('pr-456.vibechecc.com');
       const info = getEnvironmentInfo();
 
       expect(info.subdomain).toBe('pr-456');
@@ -80,7 +83,7 @@ describe('environment access utilities', () => {
     });
 
     it('identifies production environment correctly', () => {
-      mockLocation('vibechecc.io');
+      mockLocation('vibechecc.com');
       const info = getEnvironmentInfo();
 
       expect(info.subdomain).toBeNull();
@@ -90,55 +93,18 @@ describe('environment access utilities', () => {
     });
   });
 
-  describe('hasDevEnvironmentAccess', () => {
-    it('returns false when PostHog is not initialized', () => {
-      mockAnalytics.isInitialized.mockReturnValue(false);
-      expect(hasDevEnvironmentAccess()).toBe(false);
-    });
-
-    it('returns feature flag value when PostHog is initialized', () => {
-      mockAnalytics.isInitialized.mockReturnValue(true);
-      mockAnalytics.isFeatureEnabled.mockReturnValue(true);
-
-      expect(hasDevEnvironmentAccess()).toBe(true);
-      expect(mockAnalytics.isFeatureEnabled).toHaveBeenCalledWith(
-        'dev-environment-access'
-      );
-    });
-  });
-
-  describe('canAccessCurrentEnvironment', () => {
-    it('allows access to production environment', () => {
-      mockLocation('vibechecc.io');
-      expect(canAccessCurrentEnvironment()).toBe(true);
-    });
-
-    it('restricts access to dev environment without feature flag', () => {
-      mockLocation('dev.vibechecc.io');
-      mockAnalytics.isInitialized.mockReturnValue(true);
-      mockAnalytics.isFeatureEnabled.mockReturnValue(false);
-
-      expect(canAccessCurrentEnvironment()).toBe(false);
-    });
-
-    it('allows access to dev environment with feature flag', () => {
-      mockLocation('dev.vibechecc.io');
-      mockAnalytics.isInitialized.mockReturnValue(true);
-      mockAnalytics.isFeatureEnabled.mockReturnValue(true);
-
-      expect(canAccessCurrentEnvironment()).toBe(true);
-    });
-  });
+  // Note: hasDevEnvironmentAccess and canAccessCurrentEnvironment have been moved
+  // to the useEnvironmentAccess React hook for better reactivity
 
   describe('getAccessDenialMessage', () => {
     it('returns dev environment message', () => {
-      mockLocation('dev.vibechecc.io');
+      mockLocation('dev.vibechecc.com');
       const message = getAccessDenialMessage();
       expect(message).toContain('development environment');
     });
 
     it('returns ephemeral environment message', () => {
-      mockLocation('pr-123.vibechecc.io');
+      mockLocation('pr-123.vibechecc.com');
       const message = getAccessDenialMessage();
       expect(message).toContain('preview environment');
     });

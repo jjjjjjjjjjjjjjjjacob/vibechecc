@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { APP_URL } from '@/config/app';
 
 export const Route = createFileRoute('/sitemap/xml')({
   loader: async () => {
-    const baseUrl = 'https://vibechecc.com';
+    const baseUrl = APP_URL;
 
     // Static pages
     const staticUrls = [

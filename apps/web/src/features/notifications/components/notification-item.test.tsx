@@ -37,7 +37,7 @@ vi.mock('@/stores/header-nav-store', () => ({
 }));
 
 // Mock PostHog hook
-vi.mock('@/hooks/usePostHog', () => ({
+vi.mock('@/hooks/use-posthog', () => ({
   usePostHog: () => ({
     trackEvents: {
       notificationMarkedAsRead: vi.fn(),
@@ -424,8 +424,9 @@ describe('NotificationItem', () => {
         <NotificationItem notification={unreadNotification} />
       );
 
-      const notificationLink = screen.getByText('see profile').closest('a');
-      fireEvent.click(notificationLink!);
+      // Click on the notification item link (the whole item is wrapped in a Link)
+      const notificationLink = screen.getByRole('link');
+      fireEvent.click(notificationLink);
 
       expect(mockMutate).toHaveBeenCalledWith({
         notificationId: 'notif123',

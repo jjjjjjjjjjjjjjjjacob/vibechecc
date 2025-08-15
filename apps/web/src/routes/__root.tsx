@@ -1,4 +1,3 @@
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools/production';
 import {
   Outlet,
   createRootRouteWithContext,
@@ -8,10 +7,26 @@ import {
   useRouteContext,
   useNavigate,
 } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { createServerFn } from '@tanstack/react-start';
 import { getWebRequest } from '@tanstack/react-start/server';
 import * as React from 'react';
+
+// Lazy load devtools only in development
+const ReactQueryDevtools = import.meta.env.DEV
+  ? React.lazy(() =>
+      import('@tanstack/react-query-devtools').then((m) => ({
+        default: m.ReactQueryDevtools,
+      }))
+    )
+  : () => null;
+
+const TanStackRouterDevtools = import.meta.env.DEV
+  ? React.lazy(() =>
+      import('@tanstack/react-router-devtools').then((m) => ({
+        default: m.TanStackRouterDevtools,
+      }))
+    )
+  : () => null;
 import { Toaster } from '@/components/ui/sonner';
 import type { QueryClient } from '@tanstack/react-query';
 import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
@@ -27,6 +42,7 @@ import { EnvironmentAccessGuard } from '@/components/environment-access-guard';
 import { NewUserSurvey } from '@/components/new-user-survey';
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
+import { APP_CONFIG } from '@/config/app';
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
@@ -66,8 +82,8 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       ...seo({
-        title: 'vibechecc | share and discover vibes',
-        description: `vibechecc is a platform for sharing and discovering vibes. rate, react, and share your favorite vibes with the world.`,
+        title: APP_CONFIG.seo.defaultTitle,
+        description: APP_CONFIG.seo.defaultDescription,
       }),
     ],
     links: [
@@ -155,6 +171,33 @@ export const Route = createRootRouteWithContext<{
 
 function ClerkProviderWrapper({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const [clerkError, setClerkError] = React.useState<Error | null>(null);
+
+  // Handle Clerk initialization errors
+  React.useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      if (
+        event.error?.message?.includes('Clerk') ||
+        event.error?.message?.includes('clerk')
+      ) {
+        // eslint-disable-next-line no-console
+        console.error('clerk initialization error:', event.error);
+        setClerkError(event.error);
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  // If Clerk fails to load, show error state but continue rendering
+  if (clerkError) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      'clerk failed to initialize, continuing without auth:',
+      clerkError
+    );
+  }
 
   return (
     <ClerkProvider
@@ -254,8 +297,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </div>
           </ThemeInitializer>
         </PostHogProvider>
-        <ReactQueryDevtools />
-        <TanStackRouterDevtools position="bottom-right" />
+        {import.meta.env.DEV && (
+          <React.Suspense fallback={null}>
+            <ReactQueryDevtools />
+            <TanStackRouterDevtools position="bottom-right" />
+          </React.Suspense>
+        )}
         <Scripts />
       </body>
     </html>

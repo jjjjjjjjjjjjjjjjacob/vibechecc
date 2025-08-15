@@ -1,13 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';
+import { APP_CONFIG, APP_NAME } from '@/config/app';
 
 export const Route = createFileRoute('/terms')({
   head: () => ({
     meta: [
       ...seo({
-        title: 'terms of service | vibechecc',
-        description: 'terms of service for vibechecc platform',
+        title: APP_CONFIG.legal.termsTitle,
+        description: APP_CONFIG.legal.termsDescription,
       }),
     ],
   }),
@@ -29,10 +30,10 @@ function TermsPage() {
             1. acceptance of terms
           </h2>
           <p className="mb-4">
-            by accessing and using vibechecc ("the service", "platform"), you
-            accept and agree to be bound by the terms and provision of this
-            agreement. if you do not agree to abide by the above, please do not
-            use this service.
+            by accessing and using {APP_CONFIG.name} ("the service",
+            "platform"), you accept and agree to be bound by the terms and
+            provision of this agreement. if you do not agree to abide by the
+            above, please do not use this service.
           </p>
         </section>
 
@@ -41,10 +42,10 @@ function TermsPage() {
             2. description of service
           </h2>
           <p className="mb-4">
-            vibechecc is a social platform that allows users to share "vibes"
-            (experiences, thoughts, situations), rate and react to content with
-            emojis and stars, and discover trending content through search and
-            filtering capabilities.
+            {APP_CONFIG.name} is a social platform that allows users to share
+            "vibes" (experiences, thoughts, situations), rate and react to
+            content with emojis and stars, and discover trending content through
+            search and filtering capabilities.
           </p>
         </section>
 
@@ -102,13 +103,13 @@ function TermsPage() {
           </h2>
           <div className="space-y-4">
             <p>
-              you retain ownership of content you post on vibechecc. however, by
-              posting content, you grant vibechecc a worldwide, non-exclusive,
-              royalty-free license to use, reproduce, modify, adapt, publish,
-              translate, distribute, and display such content.
+              you retain ownership of content you post on {APP_NAME}. however,
+              by posting content, you grant {APP_NAME} a worldwide,
+              non-exclusive, royalty-free license to use, reproduce, modify,
+              adapt, publish, translate, distribute, and display such content.
             </p>
             <p>
-              vibechecc respects intellectual property rights. if you believe
+              {APP_NAME} respects intellectual property rights. if you believe
               your copyright has been infringed, please contact us with details
               of the alleged infringement.
             </p>
@@ -120,7 +121,7 @@ function TermsPage() {
           <p className="mb-4">
             your privacy is important to us. our privacy policy explains how we
             collect, use, and protect your information when you use our service.
-            by using vibechecc, you agree to our privacy policy.
+            by using {APP_NAME}, you agree to our privacy policy.
           </p>
         </section>
 
@@ -156,7 +157,7 @@ function TermsPage() {
             9. limitation of liability
           </h2>
           <p className="mb-4">
-            to the maximum extent permitted by law, vibechecc shall not be
+            to the maximum extent permitted by law, {APP_NAME} shall not be
             liable for any indirect, incidental, special, consequential, or
             punitive damages, including but not limited to loss of profits,
             data, or use.

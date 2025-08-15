@@ -1,3 +1,5 @@
+import { APP_TWITTER_HANDLE } from '@/config/app';
+
 export const seo = ({
   title,
   description,
@@ -13,8 +15,6 @@ export const seo = ({
   twitterCreator?: string;
   twitterSite?: string;
 }) => {
-  const defaultTwitterHandle = '@vibechecc';
-
   const tags = [
     { title },
     { name: 'description', content: description },
@@ -23,9 +23,9 @@ export const seo = ({
     { name: 'twitter:description', content: description },
     {
       name: 'twitter:creator',
-      content: twitterCreator || defaultTwitterHandle,
+      content: twitterCreator || APP_TWITTER_HANDLE,
     },
-    { name: 'twitter:site', content: twitterSite || defaultTwitterHandle },
+    { name: 'twitter:site', content: twitterSite || APP_TWITTER_HANDLE },
     { name: 'og:type', content: 'website' },
     { name: 'og:title', content: title },
     { name: 'og:description', content: description },

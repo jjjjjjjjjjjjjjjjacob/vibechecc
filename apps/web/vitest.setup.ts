@@ -463,6 +463,7 @@ vi.mock('@/lib/posthog', () => ({
     identify: vi.fn(),
     reset: vi.fn(),
     capture: vi.fn(),
+    setPersonProperties: vi.fn(),
     isInitialized: vi.fn().mockReturnValue(true),
   },
 }));

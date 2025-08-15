@@ -156,10 +156,21 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
   return new Response(null, { status: 200 });
 });
 
-// Validate webhook request
-async function validateRequest(req: Request): Promise<WebhookEvent | null> {
-  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!;
-  if (!webhookSecret) {
+/**
+ * Validate webhook request from Clerk
+ *
+ * This function supports multiple webhook signing secrets to allow the same
+ * backend to handle webhooks from different Clerk instances (e.g., main and main-alt).
+ * It will try the main secret first, and if that fails and an alternative secret
+ * is configured, it will try that one.
+ */
+export async function validateRequest(
+  req: Request
+): Promise<WebhookEvent | null> {
+  const mainWebhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+  const mainAltWebhookSecret = process.env.CLERK_WEBHOOK_SECRET_ALT;
+
+  if (!mainWebhookSecret) {
     // eslint-disable-next-line no-console
     console.error('Missing CLERK_WEBHOOK_SECRET');
     return null;
@@ -183,10 +194,30 @@ async function validateRequest(req: Request): Promise<WebhookEvent | null> {
     'svix-signature': svix_signature,
   };
 
-  const wh = new Webhook(webhookSecret);
+  // Try main webhook secret first
   try {
-    return wh.verify(body, svixHeaders) as WebhookEvent;
+    const wh = new Webhook(mainWebhookSecret);
+    const event = wh.verify(body, svixHeaders) as WebhookEvent;
+    // eslint-disable-next-line no-console
+    console.log('Webhook validated with main secret');
+    return event;
   } catch (error) {
+    // If main secret fails and we have an alt secret, try that
+    if (mainAltWebhookSecret) {
+      try {
+        const whAlt = new Webhook(mainAltWebhookSecret);
+        const event = whAlt.verify(body, svixHeaders) as WebhookEvent;
+        // eslint-disable-next-line no-console
+        console.log('Webhook validated with main-alt secret');
+        return event;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_altError) {
+        // eslint-disable-next-line no-console
+        console.error('Webhook verification failed with both secrets');
+        return null;
+      }
+    }
+
     // eslint-disable-next-line no-console
     console.error('Webhook verification failed:', error);
     return null;

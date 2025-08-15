@@ -37,13 +37,34 @@ if [ "$TF_VAR_environment" = "ephemeral" ] && [ -z "$TF_VAR_pr_number" ]; then
     exit 1
 fi
 
+# Check for APP_NAME override - if it exists in .envrc or environment
+if [ -f ".envrc" ] && grep -q "APP_NAME=" .envrc; then
+    # Source APP_NAME from .envrc if not already set
+    if [ -z "$APP_NAME" ]; then
+        export APP_NAME=$(grep "APP_NAME=" .envrc | cut -d'=' -f2 | tr -d '"' | tr -d "'")
+    fi
+fi
+
+# Determine the state key based on APP_NAME
+if [ "$APP_NAME" = "viberatr" ]; then
+    STATE_KEY="viberatr/terraform.state"
+    echo "Using override state key: $STATE_KEY (APP_NAME=$APP_NAME)"
+else
+    STATE_KEY="vibechecc/terraform.tfstate"
+    if [ -n "$APP_NAME" ]; then
+        echo "Using default state key: $STATE_KEY (APP_NAME=$APP_NAME)"
+    else
+        echo "Using default state key: $STATE_KEY"
+    fi
+fi
+
 # Set endpoints
 ENDPOINTS="{ s3 = \"https://${TF_VAR_cloudflare_account_id}.r2.cloudflarestorage.com\" }"
 
 # Generate the .tfvars file
 cat > backend.tfvars << EOF
 bucket = "$R2_BUCKET"
-key = "vibechecc/terraform.tfstate"
+key = "$STATE_KEY"
 endpoints = $ENDPOINTS
 access_key = "$R2_ACCESS_KEY_ID"
 secret_key = "$R2_SECRET_ACCESS_KEY"

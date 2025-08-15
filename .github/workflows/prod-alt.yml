@@ -1,0 +1,32 @@
+name: Production Alt Deployment
+
+# This workflow deploys the 'viberatr' variant for A/B testing
+# Both main and main-alt share the same Convex backend deployment
+on:
+  push:
+    branches:
+      - main-alt
+
+jobs:
+  static-checks:
+    uses: ./.github/workflows/static-checks.yml
+
+  release:
+    needs: static-checks
+    uses: ./.github/workflows/release.yml
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      prerelease: false
+      branch: main-alt
+    secrets: inherit
+
+  deploy:
+    needs: [static-checks, release]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production-alt
+      branch: main-alt
+      version: ${{ needs.release.outputs.version }}
+    secrets: inherit

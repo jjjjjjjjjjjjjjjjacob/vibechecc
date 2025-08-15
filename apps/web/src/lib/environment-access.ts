@@ -1,4 +1,5 @@
 import { analytics } from './posthog';
+import { APP_DOMAIN } from '@/config/app';
 
 /**
  * Utility functions for environment-based access control and theme loading management
@@ -27,9 +28,23 @@ export function getCurrentSubdomain(): string | null {
     return null; // No subdomain restrictions for localhost
   }
 
-  // For production domains like dev.vibechecc.io, pr-123.vibechecc.io
-  if (parts.length > 2) {
-    return parts[0];
+  // For production domains like dev.example.com, pr-123.example.com
+  // Extract subdomain based on the configured app domain
+  // Normalize APP_DOMAIN by stripping protocol if present
+  const baseDomain = APP_DOMAIN.replace(/^https?:\/\//, '');
+  const baseDomainParts = baseDomain.split('.');
+
+  // Check if hostname ends with base domain and has more parts
+  if (hostname.endsWith(baseDomain)) {
+    // Only return subdomain if there are more parts than base domain
+    // and the first part is not "www" (treat "www" as main domain)
+    if (parts.length > baseDomainParts.length) {
+      const firstPart = parts[0];
+      if (firstPart === 'www') {
+        return null; // Treat www as main domain, not a subdomain
+      }
+      return firstPart;
+    }
   }
 
   return null;
@@ -54,40 +69,9 @@ export function getEnvironmentInfo(): EnvironmentInfo {
 }
 
 /**
- * Checks if the current user has access to dev environments
- * Uses PostHog feature flag: 'dev-environment-access'
+ * Note: Feature flag checking has been moved to React components using useFeatureFlagEnabled hook
+ * This provides better reactivity and automatic updates when flags change
  */
-export function hasDevEnvironmentAccess(): boolean {
-  if (!analytics.isInitialized()) {
-    return false;
-  }
-
-  return analytics.isFeatureEnabled('dev-environment-access');
-}
-
-/**
- * Checks if the user should be allowed to access the current environment
- */
-export function canAccessCurrentEnvironment(): boolean {
-  // Always allow access for localhost development
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-      return true;
-    }
-  }
-
-  const envInfo = getEnvironmentInfo();
-
-  // If it's not a restricted environment, allow access
-  if (!envInfo.requiresDevAccess) {
-    return true;
-  }
-
-  // For dev/ephemeral environments, check the feature flag
-  console.log('hasDevEnvironmentAccess', hasDevEnvironmentAccess());
-  return hasDevEnvironmentAccess();
-}
 
 /**
  * Gets a user-friendly message for access denial
@@ -121,7 +105,6 @@ export function trackEnvironmentAccess(
     is_ephemeral_environment: env.isEphemeralEnvironment,
     requires_dev_access: env.requiresDevAccess,
     access_granted: allowed,
-    has_feature_flag: hasDevEnvironmentAccess(),
   });
 }
 
@@ -162,10 +145,12 @@ export function isPostHogReady(
     return false;
   }
 
-  // For localhost, only theme readiness matters
+  // For localhost, PostHog still needs to be initialized
+  // This ensures consistent state between server and client
   const hostname = window.location.hostname;
   if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-    return true;
+    // Even on localhost, respect the initialization state for consistency
+    return isPostHogInitialized;
   }
 
   // For production environments, both PostHog and access check must be complete

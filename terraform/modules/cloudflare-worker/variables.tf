@@ -29,3 +29,13 @@ variable "cloudflare_worker_hostname" {
   description = "The full hostname for the worker (e.g., 'vibechecc.io' or 'dev.vibechecc.io')."
   type        = string
 }
+
+variable "app_name" {
+  description = "The name of the application (e.g., 'vibechecc', 'viberatr')"
+  type        = string
+}
+
+variable "worker_name" {
+  description = "The name of the worker script"
+  type        = string
+}

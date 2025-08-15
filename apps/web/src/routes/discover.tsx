@@ -529,7 +529,15 @@ function FeaturedCollectionVibeList({
       </Link>
       <CardContent className="pt-0">
         <div className="space-y-2">
-          {!vibes || vibes.length === 0 ? (
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, index) => (
+              <VibeCard
+                key={`skeleton-${index}`}
+                variant="list"
+                loading={true}
+              />
+            ))
+          ) : !vibes || vibes.length === 0 ? (
             <div className="text-muted-foreground flex items-center justify-center py-8 text-sm">
               no vibes yet
             </div>

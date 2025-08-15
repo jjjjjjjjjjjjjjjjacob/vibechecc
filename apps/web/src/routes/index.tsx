@@ -11,6 +11,7 @@ import type {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Sparkles } from '@/components/ui/icons';
+import { APP_NAME } from '@/config/app';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -31,6 +32,7 @@ function Home() {
   const { setColorTheme, setSecondaryColorTheme } = useTheme();
   const { isLoaded: isClerkLoaded, user: _user } = useUser();
   const [hasMounted, setHasMounted] = React.useState(false);
+  const [clerkTimedOut, setClerkTimedOut] = React.useState(false);
 
   React.useEffect(() => {
     setHasMounted(false);
@@ -39,6 +41,21 @@ function Home() {
     }, 300);
     return () => clearTimeout(timeout);
   }, []);
+
+  // Add a timeout specifically for Clerk loading on the home page
+  React.useEffect(() => {
+    if (!isClerkLoaded) {
+      const timeoutId = setTimeout(() => {
+        if (!isClerkLoaded) {
+          // eslint-disable-next-line no-console
+          console.warn('clerk loading timeout on home page - showing fallback');
+          setClerkTimedOut(true);
+        }
+      }, 5000); // 5 second timeout for home page
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isClerkLoaded]);
 
   // Apply user's color themes when user data changes
   React.useEffect(() => {
@@ -68,27 +85,21 @@ function Home() {
               we're vibing here
             </h1>
             <p className="mb-6 text-lg opacity-90 md:text-xl">
-              welcome to <strong>vibechecc</strong>, where you can discover,
+              welcome to <strong>{APP_NAME}</strong>, where you can discover,
               share, and rate vibes because that's a thing you can do
             </p>
 
-            {/* Show skeleton while Clerk is loading */}
-            {!isClerkLoaded ? (
+            {/* Show skeleton while Clerk is loading, unless it times out */}
+            {!isClerkLoaded && !clerkTimedOut ? (
               <HeroButtonsSkeleton />
             ) : (
               <>
-                <SignedIn>
-                  <div className="flex gap-3">
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
-                    >
-                      <Link to="/vibes/create">
-                        <Plus className="mr-2 h-4 w-4" />
-                        create vibe
-                      </Link>
-                    </Button>
+                {clerkTimedOut && !isClerkLoaded ? (
+                  // Fallback UI when Clerk fails to load
+                  <div className="space-y-4">
+                    <p className="text-lg opacity-75">
+                      authentication service is currently unavailable
+                    </p>
                     <Button
                       asChild
                       variant="outline"
@@ -96,16 +107,43 @@ function Home() {
                     >
                       <Link to="/discover">
                         <Sparkles className="mr-2 h-4 w-4" />
-                        discover vibes
+                        browse vibes anyway
                       </Link>
                     </Button>
                   </div>
-                </SignedIn>
-                <SignedOut>
-                  <p className="text-lg opacity-75">
-                    sign in to start creating and sharing your own vibes
-                  </p>
-                </SignedOut>
+                ) : (
+                  <>
+                    <SignedIn>
+                      <div className="flex gap-3">
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
+                        >
+                          <Link to="/vibes/create">
+                            <Plus className="mr-2 h-4 w-4" />
+                            create vibe
+                          </Link>
+                        </Button>
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
+                        >
+                          <Link to="/discover">
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            discover vibes
+                          </Link>
+                        </Button>
+                      </div>
+                    </SignedIn>
+                    <SignedOut>
+                      <p className="text-lg opacity-75">
+                        sign in to start creating and sharing your own vibes
+                      </p>
+                    </SignedOut>
+                  </>
+                )}
               </>
             )}
           </div>
