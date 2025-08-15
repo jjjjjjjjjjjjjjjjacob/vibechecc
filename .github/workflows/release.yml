@@ -133,7 +133,7 @@ jobs:
           if [ "${{ inputs.alt_release }}" = "true" ]; then
             RELEASE_TITLE="Release ${VERSION} (Alt)"
           fi
-          
+
           if [ -z "$PREV_TAG" ]; then
             # First release - no previous tag
             gh release create "$TAG_NAME" \

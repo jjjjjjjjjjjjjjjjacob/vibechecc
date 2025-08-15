@@ -69,7 +69,7 @@ export function EnvironmentAccessGuard({
 
   // Determine if feature flag has loaded (not undefined)
   const isFeatureFlagLoaded = devAccessFlag !== undefined || isLocalhost;
-  
+
   // Calculate access only after flag is loaded
   const hasAccess =
     isLocalhost || !envInfo.requiresDevAccess || devAccessFlag === true;

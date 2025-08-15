@@ -649,7 +649,7 @@ describe('EnvironmentAccessGuard', () => {
 
       // Simulate feature flag loading completes with false (no access)
       vi.mocked(posthogReact.useFeatureFlagEnabled).mockReturnValue(false);
-      
+
       rerender(
         <EnvironmentAccessGuard>
           <div data-testid="app-content">App Content</div>
