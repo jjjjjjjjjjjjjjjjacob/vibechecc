@@ -19,6 +19,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.branch == 'main' && 'main' || 'dev' }}
     outputs:
       version: ${{ steps.release.outputs.version }}
     permissions:
@@ -111,10 +113,10 @@ jobs:
         run: |
           VERSION="${{ steps.release.outputs.version }}"
           TAG_NAME="v${VERSION}"
-          
+
           # Get the previous tag for comparison
           PREV_TAG=$(git describe --tags --abbrev=0 ${TAG_NAME}^ 2>/dev/null || echo "")
-          
+
           # Generate release notes using GitHub CLI
           if [ -z "$PREV_TAG" ]; then
             # First release - no previous tag
