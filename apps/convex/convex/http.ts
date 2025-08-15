@@ -164,7 +164,9 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
  * It will try the main secret first, and if that fails and an alternative secret
  * is configured, it will try that one.
  */
-async function validateRequest(req: Request): Promise<WebhookEvent | null> {
+export async function validateRequest(
+  req: Request
+): Promise<WebhookEvent | null> {
   const mainWebhookSecret = process.env.CLERK_WEBHOOK_SECRET;
   const mainAltWebhookSecret = process.env.CLERK_WEBHOOK_SECRET_ALT;
 

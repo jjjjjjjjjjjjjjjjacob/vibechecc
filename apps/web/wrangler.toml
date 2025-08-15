@@ -5,7 +5,7 @@
 name = "vibechecc"
 main = "./.output/server/index.mjs"
 compatibility_date = "2025-07-01"
-compatibility_flags = [ "nodejs_compat" ]
+compatibility_flags = [ "nodejs_compat", "nodejs_compat_populate_process_env" ]
 
 # TanStack Start static assets
 [assets]

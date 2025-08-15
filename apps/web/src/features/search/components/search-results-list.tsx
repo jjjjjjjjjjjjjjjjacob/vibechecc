@@ -1,6 +1,5 @@
 import { SearchResultListCard } from './search-result-list-card';
 import { SearchEmptyState } from './search-empty-state';
-import { SearchLoading } from './search-loading';
 import { SearchError } from './search-error';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import type { SearchResult, VibeSearchResult } from '@vibechecc/types';
@@ -48,8 +47,91 @@ export function SearchResultsList({
     return <SearchError error={error} onRetry={onRetry} />;
   }
 
+  // Show loading state with appropriate card skeletons
   if (loading) {
-    return <SearchLoading itemCount={6} type="list" />;
+    // Determine what type of skeletons to show based on results or default to mixed
+    const getLoadingCards = () => {
+      const skeletonCount = 6;
+      const cards = [];
+
+      // If we have results, use their types for skeletons
+      if (results && results.length > 0) {
+        for (let i = 0; i < Math.min(skeletonCount, results.length); i++) {
+          cards.push(
+            <SearchResultListCard
+              key={`skeleton-${i}`}
+              result={results[i]}
+              loading={true}
+              queriedEmojis={queriedEmojis}
+            />
+          );
+        }
+      } else {
+        // Default: show mixed content skeletons
+        cards.push(
+          <SearchResultListCard
+            key="skeleton-vibe-1"
+            result={{ type: 'vibe' } as SearchResult}
+            loading={true}
+            queriedEmojis={queriedEmojis}
+          />
+        );
+        cards.push(
+          <SearchResultListCard
+            key="skeleton-user"
+            result={{ type: 'user' } as SearchResult}
+            loading={true}
+            queriedEmojis={queriedEmojis}
+          />
+        );
+        cards.push(
+          <SearchResultListCard
+            key="skeleton-vibe-2"
+            result={{ type: 'vibe' } as SearchResult}
+            loading={true}
+            queriedEmojis={queriedEmojis}
+          />
+        );
+        cards.push(
+          <SearchResultListCard
+            key="skeleton-tag"
+            result={{ type: 'tag' } as SearchResult}
+            loading={true}
+            queriedEmojis={queriedEmojis}
+          />
+        );
+        cards.push(
+          <SearchResultListCard
+            key="skeleton-review"
+            result={{ type: 'review' } as SearchResult}
+            loading={true}
+            queriedEmojis={queriedEmojis}
+          />
+        );
+        cards.push(
+          <SearchResultListCard
+            key="skeleton-vibe-3"
+            result={{ type: 'vibe' } as SearchResult}
+            loading={true}
+            queriedEmojis={queriedEmojis}
+          />
+        );
+      }
+
+      return cards;
+    };
+
+    return (
+      <div
+        className={
+          isMobile
+            ? 'flex w-full flex-col gap-y-2'
+            : 'flex w-full flex-col gap-y-4'
+        }
+      >
+        {getLoadingCards()}
+      </div>
+    );
   }
 
   if (!results || results.length === 0) {

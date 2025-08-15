@@ -11,7 +11,15 @@ import { convexTest } from 'convex-test';
 import { modules } from '../vitest.setup';
 import schema from './schema';
 import { internal } from './_generated/api';
+import { validateRequest } from './http';
 // WebhookEvent type removed - not directly used
+
+// Mock svix module
+vi.mock('svix', () => {
+  return {
+    Webhook: vi.fn(),
+  };
+});
 
 // Mock console to suppress logs during tests
 let consoleErrorSpy: MockInstance;
@@ -153,11 +161,13 @@ describe('HTTP Webhook Handler', () => {
     });
 
     it('should accept webhook with alternative secret when main secret fails', async () => {
-      // Set both secrets - the main one will fail, alt should succeed
       process.env.CLERK_WEBHOOK_SECRET = 'main_webhook_secret';
       process.env.CLERK_WEBHOOK_SECRET_ALT = 'alt_webhook_secret';
 
-      // This request would be signed with the alt secret
+      const body = JSON.stringify({
+        type: 'user.created',
+        data: { id: 'user_123' },
+      });
       const request = new Request('http://localhost/webhooks/clerk', {
         method: 'POST',
         headers: {
@@ -165,22 +175,41 @@ describe('HTTP Webhook Handler', () => {
           'user-agent': 'Svix/1.0',
           'svix-id': 'test-id',
           'svix-timestamp': Math.floor(Date.now() / 1000).toString(),
-          'svix-signature': 'test-signature', // This would be validated with alt secret
+          'svix-signature': 'irrelevant-for-mocked-verify',
         },
-        body: JSON.stringify({
-          type: 'unknown.event',
-          data: {},
-        }),
+        body,
       });
 
-      // Note: In a real test, we'd need to properly sign the webhook with the alt secret
-      // For now, this test documents the expected behavior
-      const response = await validateWebhookRequest(request);
+      // Import the mocked Webhook
+      const { Webhook } = await import('svix');
+
+      // Setup the mock to fail on first call, succeed on second
+      let callCount = 0;
+      (Webhook as any).mockImplementation(() => {
+        return {
+          verify: vi.fn().mockImplementation(() => {
+            callCount++;
+            if (callCount === 1) {
+              throw new Error('main secret fails');
+            }
+            return { type: 'user.created', data: { id: 'user_123' } };
+          }),
+        };
+      });
+
+      const eventOrNull = await validateRequest(request);
+
+      // Verify that the function tried both secrets
+      expect(callCount).toBe(2);
+      expect(eventOrNull).not.toBeNull();
+      expect(eventOrNull?.type).toBe('user.created');
+      expect(Webhook).toHaveBeenCalledTimes(2);
+      expect(Webhook).toHaveBeenCalledWith('main_webhook_secret');
+      expect(Webhook).toHaveBeenCalledWith('alt_webhook_secret');
 
       // Clean up
+      (Webhook as any).mockClear();
       delete process.env.CLERK_WEBHOOK_SECRET_ALT;
-
-      expect(response.status).toBe(200);
     });
   });
 

@@ -38,6 +38,8 @@ export function EnvironmentAccessGuard({
 
   // Use PostHog React hook for feature flag - this will automatically update when the flag changes
   const devAccessFlag = useFeatureFlagEnabled('dev-environment-access');
+  console.log('test', devAccessFlag);
+
   const {
     isThemeLoaded,
     isLocalStorageLoaded,
@@ -125,22 +127,27 @@ export function EnvironmentAccessGuard({
 
   // Show welcome when fully ready, then fade to content after 2 seconds
   React.useEffect(() => {
-    if (readiness.isFullyReady && hasAccess) {
-      const welcomeTimer = setTimeout(() => {
-        setShowWelcome(true);
-        const fadeTimer = setTimeout(() => {
-          setIsFadingOut(true);
-          setTimeout(() => {
-            setShowWelcome(false);
-            setShouldShowContent(true);
-          }, 1300); // Wait for fade-out animation
-        }, 2650);
-        return () => clearTimeout(fadeTimer);
-      }, 200); // Initial delay before showing welcome
+    if (readiness.isFullyReady) {
+      if (hasAccess) {
+        const welcomeTimer = setTimeout(() => {
+          setShowWelcome(true);
+          const fadeTimer = setTimeout(() => {
+            setIsFadingOut(true);
+            setTimeout(() => {
+              setShowWelcome(false);
+              setShouldShowContent(true);
+            }, 1300); // Wait for fade-out animation
+          }, 2650);
+          return () => clearTimeout(fadeTimer);
+        }, 200); // Initial delay before showing welcome
 
-      return () => {
-        clearTimeout(welcomeTimer);
-      };
+        return () => {
+          clearTimeout(welcomeTimer);
+        };
+      } else {
+        // If no access, immediately set shouldShowContent to show the access denied screen
+        setShouldShowContent(true);
+      }
     }
   }, [readiness.isFullyReady, hasAccess]);
 
@@ -182,11 +189,7 @@ export function EnvironmentAccessGuard({
   );
 
   // Show loading/welcome state while not ready or showing welcome (unless timed out)
-  if (
-    !shouldShowContent &&
-    !hasTimedOut &&
-    (hasAccess || devAccessFlag === undefined)
-  ) {
+  if (!shouldShowContent && !hasTimedOut) {
     return (
       <div
         className="data-[theme-ready=true]:from-theme-primary data-[theme-ready=true]:to-theme-secondary flex min-h-screen items-center justify-center bg-gradient-to-br from-white to-white transition duration-500 data-[fading-out=true]:opacity-0 data-[fading-out=true]:delay-700 data-[fading-out=true]:duration-600"

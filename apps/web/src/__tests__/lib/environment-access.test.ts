@@ -45,6 +45,11 @@ describe('environment access utilities', () => {
       expect(getCurrentSubdomain()).toBeNull();
     });
 
+    it('returns null for www.vibechecc.com (www is not a subdomain)', () => {
+      mockLocation('www.vibechecc.com');
+      expect(getCurrentSubdomain()).toBeNull();
+    });
+
     it('returns subdomain for dev environment', () => {
       mockLocation('dev.vibechecc.com');
       expect(getCurrentSubdomain()).toBe('dev');

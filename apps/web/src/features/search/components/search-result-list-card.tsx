@@ -17,16 +17,38 @@ import type {
   Vibe,
 } from '@vibechecc/types';
 import { Hash, Users, MessageSquare } from '@/components/ui/icons';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface SearchResultListCardProps {
-  result: SearchResult;
+  result?: SearchResult;
   queriedEmojis?: string[];
+  loading?: boolean;
 }
 
 export function SearchResultListCard({
   result,
   queriedEmojis,
+  loading = false,
 }: SearchResultListCardProps) {
+  // If loading, show skeleton based on result type or default
+  if (loading) {
+    // Default to vibe skeleton if no result type specified
+    if (!result || result.type === 'vibe') {
+      return <VibeResultListCard loading={true} />;
+    }
+    if (result.type === 'user') {
+      return <UserResultListCard loading={true} />;
+    }
+    if (result.type === 'tag') {
+      return <TagResultListCard loading={true} />;
+    }
+    if (result.type === 'review') {
+      return <ReviewResultListCard loading={true} />;
+    }
+  }
+
+  if (!result) return null;
+
   if (result.type === 'vibe') {
     return (
       <VibeResultListCard
@@ -54,10 +76,23 @@ export function SearchResultListCard({
 function VibeResultListCard({
   result,
   queriedEmojis: _queriedEmojis,
+  loading = false,
 }: {
-  result: VibeSearchResult;
+  result?: VibeSearchResult;
   queriedEmojis?: string[];
+  loading?: boolean;
 }) {
+  // If loading, delegate to VibeCard's loading state
+  if (loading || !result) {
+    return (
+      <VibeCard
+        loading={true}
+        variant={'search-result'}
+        ratingDisplayMode="most-rated"
+      />
+    );
+  }
+
   // Convert VibeSearchResult to Vibe format for VibeCard
   const vibe: Vibe = {
     id: result.id,
@@ -88,14 +123,63 @@ function VibeResultListCard({
   );
 }
 
-function UserResultListCard({ result }: { result: UserSearchResult }) {
-  // Fetch user's top vibes
+function UserResultListCard({
+  result,
+  loading = false,
+}: {
+  result?: UserSearchResult;
+  loading?: boolean;
+}) {
+  // Fetch user's top vibes - hooks must always be called
   const userVibesQuery = useQuery({
     ...convexQuery(api.vibes.getByUser, {
-      userId: result.id,
+      userId: result?.id || '',
     }),
-    enabled: !!result.id,
+    enabled: !!result?.id && !loading,
   });
+
+  // Show skeleton if loading
+  if (loading || !result) {
+    return (
+      <div className="space-y-1">
+        <Card className="bg-card/30 overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-4 p-4 pb-2">
+              <Skeleton className="h-16 w-16 flex-shrink-0 rounded-full" />
+              <div className="flex min-w-0 flex-1 items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center gap-3">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                </div>
+                <Skeleton className="h-6 w-14 rounded-full" />
+              </div>
+            </div>
+            <div className="px-4 pb-4">
+              <div className="hidden sm:grid sm:grid-cols-3 sm:gap-2">
+                {[0, 1, 2].map((i) => (
+                  <VibeCard
+                    key={i}
+                    loading={true}
+                    variant="compact"
+                    className="w-full"
+                  />
+                ))}
+              </div>
+              <div className="sm:hidden">
+                <VibeCard loading={true} variant="compact" className="w-full" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const topVibes = (userVibesQuery.data || []).slice(0, 3);
 
@@ -175,15 +259,62 @@ function UserResultListCard({ result }: { result: UserSearchResult }) {
   );
 }
 
-function TagResultListCard({ result }: { result: TagSearchResult }) {
-  // Fetch top vibes for this tag
+function TagResultListCard({
+  result,
+  loading = false,
+}: {
+  result?: TagSearchResult;
+  loading?: boolean;
+}) {
+  // Fetch top vibes for this tag - hooks must always be called
   const tagVibesQuery = useQuery({
     ...convexQuery(api.vibes.getByTag, {
-      tag: result.title,
+      tag: result?.title || '',
       limit: 3,
     }),
-    enabled: !!result.title,
+    enabled: !!result?.title && !loading,
   });
+
+  // Show skeleton if loading
+  if (loading || !result) {
+    return (
+      <div className="space-y-1">
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-4 p-4 pb-2">
+              <div className="bg-primary/10 flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+              <div className="flex min-w-0 flex-1 items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center gap-3">
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+                <Skeleton className="h-6 w-12 rounded-full" />
+              </div>
+            </div>
+            <div className="px-4 pb-4">
+              <div className="hidden sm:grid sm:grid-cols-3 sm:gap-2">
+                {[0, 1, 2].map((i) => (
+                  <VibeCard
+                    key={i}
+                    loading={true}
+                    variant="compact"
+                    className="w-full"
+                  />
+                ))}
+              </div>
+              <div className="sm:hidden">
+                <VibeCard loading={true} variant="compact" className="w-full" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const topVibes = tagVibesQuery.data || [];
 
@@ -257,7 +388,42 @@ function TagResultListCard({ result }: { result: TagSearchResult }) {
   );
 }
 
-function ReviewResultListCard({ result }: { result: ReviewSearchResult }) {
+function ReviewResultListCard({
+  result,
+  loading = false,
+}: {
+  result?: ReviewSearchResult;
+  loading?: boolean;
+}) {
+  // Show skeleton if loading
+  if (loading || !result) {
+    return (
+      <Card className="bg-card/30 overflow-hidden">
+        <CardContent className="p-0">
+          <div className="flex gap-3 p-4">
+            <Skeleton className="h-10 w-10 flex-shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex flex-col gap-0">
+                <div className="flex w-full items-center justify-between gap-0">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <Skeleton className="h-3 w-32" />
+              </div>
+              <div className="mb-3">
+                <Skeleton className="mb-1 h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+              <div className="flex items-center">
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const _usePlaceholder = !result.vibeImage;
 
   return (

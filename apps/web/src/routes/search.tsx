@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 import * as React from 'react';
 import { z } from 'zod';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useIsTablet } from '@/hooks/use-tablet';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -27,6 +27,7 @@ const SearchPagination = lazy(() =>
 
 // Import non-heavy components normally
 import { useSearchResultsImproved } from '@/features/search/hooks/use-search-results-improved';
+import type { SearchResult } from '@vibechecc/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -48,59 +49,6 @@ import {
   TabsTrigger,
 } from '@/components/ui';
 import { ChevronLeft, SlidersHorizontal } from '@/components/ui/icons';
-
-// Loading skeletons for code-split components
-function SearchResultsSkeleton() {
-  return (
-    <div className="flex flex-col gap-4">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Card key={i} className="relative h-full overflow-hidden">
-          {/* Avatar skeleton in top left */}
-          <div className="absolute top-2 left-2 z-10">
-            <Skeleton className="h-6 w-6 rounded-full" />
-          </div>
-
-          {/* Main content structure matching VibeResultCard */}
-          <div className="block h-full">
-            {/* Image placeholder */}
-            <div className="relative aspect-video overflow-hidden">
-              <Skeleton className="h-full w-full" />
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-              {/* Title */}
-              <Skeleton className="mb-2 h-6 w-3/4" />
-
-              {/* Description */}
-              <Skeleton className="mb-1 h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-            </div>
-
-            {/* Footer with rating skeleton */}
-            <div className="flex flex-col items-start gap-3 p-4 pt-0">
-              {/* Emoji rating display skeleton */}
-              <div className="w-full space-y-1">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-8 w-8 rounded-full" />
-                  <div className="flex flex-col gap-1">
-                    <Skeleton className="h-4 w-12" />
-                    <Skeleton className="h-3 w-16" />
-                  </div>
-                </div>
-                {/* Additional rating items */}
-                <div className="flex gap-1">
-                  <Skeleton className="h-6 w-14 rounded-full" />
-                  <Skeleton className="h-6 w-14 rounded-full" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-}
 
 function PaginationSkeleton() {
   return (
@@ -682,7 +630,24 @@ function SearchResultsPage() {
               data-open={filterExpanded}
               className="relative flex w-full gap-0 transition data-[open=false]:gap-x-0 data-[open=true]:gap-x-4"
             >
-              <Suspense fallback={<SearchResultsSkeleton />}>
+              <Suspense
+                fallback={
+                  <SearchResultsList
+                    results={[
+                      { type: 'vibe' } as SearchResult,
+                      { type: 'user' } as SearchResult,
+                      { type: 'vibe' } as SearchResult,
+                      { type: 'tag' } as SearchResult,
+                      { type: 'review' } as SearchResult,
+                      { type: 'vibe' } as SearchResult,
+                    ]}
+                    loading={true}
+                    error={undefined}
+                    onRetry={() => window.location.reload()}
+                    queriedEmojis={emojiFilter}
+                  />
+                }
+              >
                 <SearchResultsList
                   results={[
                     ...(data?.vibes || []),
@@ -704,7 +669,24 @@ function SearchResultsPage() {
               data-open={filterExpanded}
               className="flex w-full transition data-[open=false]:gap-x-0 data-[open=true]:gap-x-4"
             >
-              <Suspense fallback={<SearchResultsSkeleton />}>
+              <Suspense
+                fallback={
+                  <SearchResultsList
+                    results={[
+                      { type: 'vibe' } as SearchResult,
+                      { type: 'vibe' } as SearchResult,
+                      { type: 'vibe' } as SearchResult,
+                      { type: 'vibe' } as SearchResult,
+                      { type: 'vibe' } as SearchResult,
+                      { type: 'vibe' } as SearchResult,
+                    ]}
+                    loading={true}
+                    error={undefined}
+                    onRetry={() => window.location.reload()}
+                    queriedEmojis={emojiFilter}
+                  />
+                }
+              >
                 <SearchResultsList
                   results={data?.vibes || []}
                   loading={isLoading}
@@ -720,7 +702,22 @@ function SearchResultsPage() {
               data-open={filterExpanded}
               className="flex w-full transition data-[open=false]:gap-x-0 data-[open=true]:gap-x-4"
             >
-              <Suspense fallback={<SearchResultsSkeleton />}>
+              <Suspense
+                fallback={
+                  <SearchResultsList
+                    results={[
+                      { type: 'user' } as SearchResult,
+                      { type: 'user' } as SearchResult,
+                      { type: 'user' } as SearchResult,
+                      { type: 'user' } as SearchResult,
+                    ]}
+                    loading={true}
+                    error={undefined}
+                    onRetry={() => window.location.reload()}
+                    queriedEmojis={emojiFilter}
+                  />
+                }
+              >
                 <SearchResultsList
                   results={data?.users || []}
                   loading={isLoading}
@@ -736,7 +733,22 @@ function SearchResultsPage() {
               data-open={filterExpanded}
               className="flex w-full transition data-[open=false]:gap-x-0 data-[open=true]:gap-x-4"
             >
-              <Suspense fallback={<SearchResultsSkeleton />}>
+              <Suspense
+                fallback={
+                  <SearchResultsList
+                    results={[
+                      { type: 'tag' } as SearchResult,
+                      { type: 'tag' } as SearchResult,
+                      { type: 'tag' } as SearchResult,
+                      { type: 'tag' } as SearchResult,
+                    ]}
+                    loading={true}
+                    error={undefined}
+                    onRetry={() => window.location.reload()}
+                    queriedEmojis={emojiFilter}
+                  />
+                }
+              >
                 <SearchResultsList
                   results={data?.tags || []}
                   loading={isLoading}
@@ -753,7 +765,22 @@ function SearchResultsPage() {
               data-open={filterExpanded}
               className="flex w-full transition data-[open=false]:gap-x-0 data-[open=true]:gap-x-4"
             >
-              <Suspense fallback={<SearchResultsSkeleton />}>
+              <Suspense
+                fallback={
+                  <SearchResultsList
+                    results={[
+                      { type: 'review' } as SearchResult,
+                      { type: 'review' } as SearchResult,
+                      { type: 'review' } as SearchResult,
+                      { type: 'review' } as SearchResult,
+                    ]}
+                    loading={true}
+                    error={undefined}
+                    onRetry={() => window.location.reload()}
+                    queriedEmojis={emojiFilter}
+                  />
+                }
+              >
                 <SearchResultsList
                   results={data?.reviews || []}
                   loading={isLoading}

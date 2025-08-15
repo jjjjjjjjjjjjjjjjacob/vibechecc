@@ -4,16 +4,30 @@ import type { Vibe } from '@/types';
 import { cn } from '@/utils/tailwind-utils';
 
 interface VibeListProps {
-  vibes: Vibe[];
+  vibes?: Vibe[];
   className?: string;
   ratingDisplayMode?: 'most-rated' | 'top-rated';
+  loading?: boolean;
+  skeletonCount?: number;
 }
 
 export function VibeList({
   vibes,
   className,
   ratingDisplayMode = 'most-rated',
+  loading = false,
+  skeletonCount = 3,
 }: VibeListProps) {
+  if (loading || !vibes) {
+    return (
+      <div className={cn('space-y-3', className)}>
+        {Array.from({ length: skeletonCount }).map((_, index) => (
+          <VibeCard key={`skeleton-${index}`} variant="list" loading={true} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className={cn('space-y-3', className)}>
       {vibes.map((vibe) => (

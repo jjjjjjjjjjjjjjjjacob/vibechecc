@@ -30,12 +30,21 @@ export function getCurrentSubdomain(): string | null {
 
   // For production domains like dev.example.com, pr-123.example.com
   // Extract subdomain based on the configured app domain
+  // Normalize APP_DOMAIN by stripping protocol if present
   const baseDomain = APP_DOMAIN.replace(/^https?:\/\//, '');
-  if (
-    hostname.endsWith(baseDomain) &&
-    parts.length > baseDomain.split('.').length
-  ) {
-    return parts[0];
+  const baseDomainParts = baseDomain.split('.');
+
+  // Check if hostname ends with base domain and has more parts
+  if (hostname.endsWith(baseDomain)) {
+    // Only return subdomain if there are more parts than base domain
+    // and the first part is not "www" (treat "www" as main domain)
+    if (parts.length > baseDomainParts.length) {
+      const firstPart = parts[0];
+      if (firstPart === 'www') {
+        return null; // Treat www as main domain, not a subdomain
+      }
+      return firstPart;
+    }
   }
 
   return null;

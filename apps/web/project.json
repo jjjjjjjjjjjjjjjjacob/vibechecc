@@ -19,7 +19,20 @@
         "cwd": "{projectRoot}"
       },
       "outputs": ["{projectRoot}/.output", "{projectRoot}/.tanstack"],
-      "dependsOn": ["^build", "convex:build"]
+      "dependsOn": ["^build", "convex:build"],
+      "inputs": [
+        "production",
+        "^production",
+        { "env": "VITE_APP_NAME" },
+        { "env": "VITE_APP_DOMAIN" },
+        { "env": "VITE_APP_TWITTER_HANDLE" },
+        { "env": "VITE_CONVEX_URL" },
+        { "env": "VITE_CLERK_PUBLISHABLE_KEY" },
+        { "env": "VITE_POSTHOG_API_KEY" },
+        { "env": "VITE_POSTHOG_API_HOST" },
+        { "env": "VITE_POSTHOG_PROJECT_ID" },
+        { "env": "VITE_POSTHOG_REGION" }
+      ]
     },
     "start": {
       "executor": "nx:run-commands",
