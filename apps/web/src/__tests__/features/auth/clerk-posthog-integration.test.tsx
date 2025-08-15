@@ -10,7 +10,7 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 }));
 
 // Mock PostHog hook
-vi.mock('@/hooks/usePostHog', () => ({
+vi.mock('@/hooks/use-posthog', () => ({
   usePostHog: vi.fn(),
 }));
 

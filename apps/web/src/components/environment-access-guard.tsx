@@ -31,10 +31,11 @@ export function EnvironmentAccessGuard({
   const [showWelcome, setShowWelcome] = useState(false);
   const [shouldShowContent, setShouldShowContent] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
 
   const { isInitialized: isPostHogInitialized } = usePostHog();
   const { isLoaded: isUserLoaded, user, isSignedIn } = useUser();
-  
+
   // Use PostHog React hook for feature flag - this will automatically update when the flag changes
   const devAccessFlag = useFeatureFlagEnabled('dev-environment-access');
   const {
@@ -49,13 +50,15 @@ export function EnvironmentAccessGuard({
 
   // Determine if user has access based on environment and feature flag
   const envInfo = getEnvironmentInfo();
-  const isLocalhost = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('localhost') || 
-     window.location.hostname.includes('127.0.0.1'));
-  
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname.includes('localhost') ||
+      window.location.hostname.includes('127.0.0.1'));
+
   // Calculate access: localhost always allowed, otherwise check if environment needs access and if user has flag
-  const hasAccess = isLocalhost || !envInfo.requiresDevAccess || devAccessFlag === true;
-  
+  const hasAccess =
+    isLocalhost || !envInfo.requiresDevAccess || devAccessFlag === true;
+
   // Get readiness state
   const readiness: ReadinessState = getReadinessState(
     isLocalStorageLoaded,
@@ -104,6 +107,22 @@ export function EnvironmentAccessGuard({
       syncUserThemePreferences();
     }
   }, [user, isUserLoaded, isLocalStorageLoaded, syncUserThemePreferences]);
+
+  // Add timeout to prevent infinite loading if Clerk fails to initialize
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (!readiness.isFullyReady && !shouldShowContent) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          'environment access guard timed out - proceeding with fallback'
+        );
+        setHasTimedOut(true);
+        setShouldShowContent(true);
+      }
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timeoutId);
+  }, [readiness.isFullyReady, shouldShowContent]);
 
   // Show welcome when fully ready, then fade to content after 2 seconds
   React.useEffect(() => {
@@ -161,11 +180,15 @@ export function EnvironmentAccessGuard({
           {char}
         </span>
       )),
-    [showWelcome, readiness.isFullyReady]
+    [readiness.isFullyReady]
   );
 
-  // Show loading/welcome state while not ready or showing welcome
-  if (!shouldShowContent && (hasAccess || devAccessFlag === undefined)) {
+  // Show loading/welcome state while not ready or showing welcome (unless timed out)
+  if (
+    !shouldShowContent &&
+    !hasTimedOut &&
+    (hasAccess || devAccessFlag === undefined)
+  ) {
     return (
       <div
         className="data-[theme-ready=true]:from-theme-primary data-[theme-ready=true]:to-theme-secondary flex min-h-screen items-center justify-center bg-gradient-to-br from-white to-white transition duration-500 data-[fading-out=true]:opacity-0 data-[fading-out=true]:delay-700 data-[fading-out=true]:duration-600"
@@ -292,8 +315,22 @@ export function EnvironmentAccessGuard({
     );
   }
 
-  // Show content when ready
-  if (shouldShowContent) {
+  // Show content when ready or if timed out with error recovery
+  if (shouldShowContent || hasTimedOut) {
+    // If we timed out, show a warning but still render the app
+    if (hasTimedOut && !readiness.isFullyReady) {
+      return (
+        <>
+          <div className="bg-destructive/10 border-destructive/20 fixed top-16 right-0 left-0 z-40 border-b p-2 text-center">
+            <p className="text-destructive text-sm">
+              authentication service is taking longer than expected - some
+              features may be limited
+            </p>
+          </div>
+          {children}
+        </>
+      );
+    }
     return <>{children}</>;
   }
 

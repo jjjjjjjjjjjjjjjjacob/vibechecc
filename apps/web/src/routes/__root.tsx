@@ -171,6 +171,33 @@ export const Route = createRootRouteWithContext<{
 
 function ClerkProviderWrapper({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const [clerkError, setClerkError] = React.useState<Error | null>(null);
+
+  // Handle Clerk initialization errors
+  React.useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      if (
+        event.error?.message?.includes('Clerk') ||
+        event.error?.message?.includes('clerk')
+      ) {
+        // eslint-disable-next-line no-console
+        console.error('clerk initialization error:', event.error);
+        setClerkError(event.error);
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  // If Clerk fails to load, show error state but continue rendering
+  if (clerkError) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      'clerk failed to initialize, continuing without auth:',
+      clerkError
+    );
+  }
 
   return (
     <ClerkProvider

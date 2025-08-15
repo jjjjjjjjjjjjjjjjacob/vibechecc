@@ -288,9 +288,10 @@ function PrivacyPage() {
             11. children's privacy
           </h2>
           <p className="mb-4">
-            {APP_CONFIG.name} is not intended for children under 13. we do not knowingly
-            collect personal information from children under 13. if we discover
-            we have collected such information, we will delete it promptly.
+            {APP_CONFIG.name} is not intended for children under 13. we do not
+            knowingly collect personal information from children under 13. if we
+            discover we have collected such information, we will delete it
+            promptly.
           </p>
         </section>
 
@@ -319,7 +320,8 @@ function PrivacyPage() {
           <p className="mb-4">
             we may update this privacy policy from time to time. we will notify
             you of material changes by posting the new policy on our platform
-            and updating the effective date. your continued use of {APP_CONFIG.name}
+            and updating the effective date. your continued use of{' '}
+            {APP_CONFIG.name}
             after changes indicates acceptance of the updated policy.
           </p>
         </section>

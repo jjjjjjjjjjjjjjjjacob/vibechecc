@@ -31,7 +31,10 @@ export function getCurrentSubdomain(): string | null {
   // For production domains like dev.example.com, pr-123.example.com
   // Extract subdomain based on the configured app domain
   const baseDomain = APP_DOMAIN.replace(/^https?:\/\//, '');
-  if (hostname.endsWith(baseDomain) && parts.length > baseDomain.split('.').length) {
+  if (
+    hostname.endsWith(baseDomain) &&
+    parts.length > baseDomain.split('.').length
+  ) {
     return parts[0];
   }
 

@@ -221,14 +221,6 @@ function SearchResultsPage() {
     skipTracking: true, // Skip tracking for this secondary query to prevent duplicates
   });
 
-  React.useEffect(() => {
-    if (!filterExpanded && !isMobile) {
-      setFilterExpanded(true);
-    } else if (filterExpanded && isMobile) {
-      setFilterExpanded(false);
-    }
-  }, [isMobile, filterExpanded]);
-
   // Update cached counts - use data from "all" tab or from separate counts query
   React.useEffect(() => {
     if (tab === 'all' && data?.totalCounts) {

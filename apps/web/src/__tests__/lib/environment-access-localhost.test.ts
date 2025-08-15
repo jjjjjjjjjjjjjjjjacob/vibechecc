@@ -1,10 +1,7 @@
 /// <reference lib="dom" />
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  getEnvironmentInfo,
-  canAccessCurrentEnvironment,
-} from '@/lib/environment-access';
+import { getEnvironmentInfo } from '@/lib/environment-access';
 
 // Mock window.location
 const mockLocation = (hostname: string) => {
@@ -23,19 +20,24 @@ describe('environment access - localhost fix', () => {
   });
 
   describe('localhost development access', () => {
-    it('should allow access for localhost:3000', () => {
+    // Note: canAccessCurrentEnvironment has been moved to useEnvironmentAccess hook
+    // These tests now verify that localhost doesn't require dev access
+    it('should not require dev access for localhost:3000', () => {
       mockLocation('localhost:3000');
-      expect(canAccessCurrentEnvironment()).toBe(true);
+      const envInfo = getEnvironmentInfo();
+      expect(envInfo.requiresDevAccess).toBe(false);
     });
 
-    it('should allow access for 127.0.0.1:3000', () => {
+    it('should not require dev access for 127.0.0.1:3000', () => {
       mockLocation('127.0.0.1:3000');
-      expect(canAccessCurrentEnvironment()).toBe(true);
+      const envInfo = getEnvironmentInfo();
+      expect(envInfo.requiresDevAccess).toBe(false);
     });
 
-    it('should allow access for localhost', () => {
+    it('should not require dev access for localhost', () => {
       mockLocation('localhost');
-      expect(canAccessCurrentEnvironment()).toBe(true);
+      const envInfo = getEnvironmentInfo();
+      expect(envInfo.requiresDevAccess).toBe(false);
     });
 
     it('should not require dev access for localhost', () => {
@@ -50,13 +52,14 @@ describe('environment access - localhost fix', () => {
   });
 
   describe('production environment access', () => {
-    it('should allow access to production domain', () => {
-      mockLocation('vibechecc.io');
-      expect(canAccessCurrentEnvironment()).toBe(true);
+    it('should not require dev access for production domain', () => {
+      mockLocation('vibechecc.com');
+      const envInfo = getEnvironmentInfo();
+      expect(envInfo.requiresDevAccess).toBe(false);
     });
 
     it('should restrict access to dev subdomain (when no feature flag)', () => {
-      mockLocation('dev.vibechecc.io');
+      mockLocation('dev.vibechecc.com');
 
       // Mock PostHog to return false for the feature flag
       vi.doMock('@/lib/posthog', () => ({

@@ -179,4 +179,3 @@ Once sufficient data is collected, analyze the metrics to determine which brandi
 1. Switch entirely to the winning variant
 2. Continue running both if they serve different user segments
 3. Test additional variants by creating more branches/environments
-
