@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Moon, Sun, Laptop } from '@/components/ui/icons';
-import { useTheme } from '@/stores/theme-initializer';
+import { useThemeStore } from '@/stores/theme-store';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function ThemeToggle() {
-  const { setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useThemeStore();
   const [mounted, setMounted] = React.useState(false);
 
   // Avoid hydration mismatch by only rendering after mount

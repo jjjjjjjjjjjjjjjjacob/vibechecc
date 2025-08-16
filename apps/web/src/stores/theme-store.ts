@@ -50,23 +50,14 @@ interface ThemeStore {
   setSecondaryColorTheme: (
     secondaryColorTheme: SecondaryColorTheme | null
   ) => void;
-  initializeTheme: () => void;
   applyThemeToDocument: () => void;
   isInitialized: boolean;
-  isUserSignedIn: boolean;
-  setUserSignedIn: (isSignedIn: boolean) => void;
-  // Get the effective color theme (only returns custom theme if user is signed in)
-  getEffectiveColorTheme: () => ColorTheme | null;
-  getEffectiveSecondaryColorTheme: () => SecondaryColorTheme | null;
-  // Theme loading state management
-  isThemeLoaded: boolean;
-  isLocalStorageLoaded: boolean;
-  loadThemeFromLocalStorage: () => void;
-  syncUserThemePreferences: (
-    userTheme?: Theme,
-    userColorTheme?: ColorTheme | null,
-    userSecondaryColorTheme?: SecondaryColorTheme | null
-  ) => void;
+  initialize: (params: {
+    isSignedIn: boolean;
+    userTheme?: Theme;
+    userColorTheme?: ColorTheme | null;
+    userSecondaryColorTheme?: SecondaryColorTheme | null;
+  }) => void;
 }
 
 const getSystemTheme = (): 'light' | 'dark' => {
@@ -124,9 +115,6 @@ export const useThemeStore = create<ThemeStore>()(
       secondaryColorTheme: null,
       resolvedTheme: 'light',
       isInitialized: false,
-      isUserSignedIn: false,
-      isThemeLoaded: false,
-      isLocalStorageLoaded: false,
 
       setTheme: (theme) => {
         set({ theme });
@@ -145,32 +133,95 @@ export const useThemeStore = create<ThemeStore>()(
         get().applyThemeToDocument();
       },
 
-      setUserSignedIn: (isSignedIn) => {
-        set({ isUserSignedIn: isSignedIn });
-        // Re-apply theme when sign-in status changes
-        get().applyThemeToDocument();
-      },
+      initialize: (params) => {
+        if (typeof window === 'undefined') return;
 
-      getEffectiveColorTheme: () => {
-        const state = get();
-        // Only return custom color theme if user is signed in
-        return state.isUserSignedIn ? state.colorTheme : null;
-      },
+        // Prevent re-initialization
+        if (get().isInitialized) return;
 
-      getEffectiveSecondaryColorTheme: () => {
-        const state = get();
-        // Only return custom secondary color theme if user is signed in
-        return state.isUserSignedIn ? state.secondaryColorTheme : null;
-      },
+        // Step 1: Load from localStorage
+        let localTheme: Theme = 'system';
+        let localColorTheme: ColorTheme | null = null;
+        let localSecondaryColorTheme: SecondaryColorTheme | null = null;
 
-      initializeTheme: () => {
-        const state = get();
+        try {
+          const stored = localStorage.getItem('theme-storage');
+          if (stored) {
+            const parsedData = JSON.parse(stored);
+            const storedState = parsedData.state || {};
+            localTheme = storedState.theme || 'system';
+            localColorTheme = storedState.colorTheme || null;
+            localSecondaryColorTheme = storedState.secondaryColorTheme || null;
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to load theme from localStorage:', error);
+        }
+
+        // Step 2: Determine final theme values
+        let finalTheme = localTheme;
+        let finalColorTheme = localColorTheme;
+        let finalSecondaryColorTheme = localSecondaryColorTheme;
+
+        // If user is signed in and has theme preferences, use them
+        if (
+          params.isSignedIn &&
+          (params.userTheme ||
+            params.userColorTheme ||
+            params.userSecondaryColorTheme)
+        ) {
+          // For mode, always prefer localStorage (user can change it locally)
+          finalTheme = localTheme;
+
+          // For colors, use user preferences if they exist
+          if (params.userColorTheme !== undefined) {
+            finalColorTheme = params.userColorTheme;
+          }
+          if (params.userSecondaryColorTheme !== undefined) {
+            finalSecondaryColorTheme = params.userSecondaryColorTheme;
+          }
+
+          // Update localStorage with merged preferences
+          try {
+            const storageData = {
+              state: {
+                theme: finalTheme,
+                colorTheme: finalColorTheme,
+                secondaryColorTheme: finalSecondaryColorTheme,
+              },
+            };
+            localStorage.setItem('theme-storage', JSON.stringify(storageData));
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to update localStorage:', error);
+          }
+        }
+
+        // If not signed in, clear color themes
+        if (!params.isSignedIn) {
+          finalColorTheme = null;
+          finalSecondaryColorTheme = null;
+        }
+
+        // Step 3: Calculate resolved theme
         const resolvedTheme =
-          state.theme === 'system' ? getSystemTheme() : state.theme;
-        set({ resolvedTheme, isInitialized: true });
-        state.applyThemeToDocument();
+          finalTheme === 'system' ? getSystemTheme() : finalTheme;
 
-        if (typeof window !== 'undefined' && state.theme === 'system') {
+        // Step 4: Set state once
+        set({
+          theme: finalTheme,
+          colorTheme: finalColorTheme,
+          secondaryColorTheme: finalSecondaryColorTheme,
+          resolvedTheme,
+          isInitialized: true,
+        });
+
+        // Step 5: Apply to document
+        get().applyThemeToDocument();
+
+        // Step 6: Setup system theme listener if needed
+        /*
+        if (finalTheme === 'system') {
           const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
           const handleChange = () => {
             const newResolvedTheme = getSystemTheme();
@@ -179,6 +230,7 @@ export const useThemeStore = create<ThemeStore>()(
           };
           mediaQuery.addEventListener('change', handleChange);
         }
+        */
       },
 
       applyThemeToDocument: () => {
@@ -194,109 +246,12 @@ export const useThemeStore = create<ThemeStore>()(
         // Clear all color themes
         root.classList.remove(...colorThemes, ...secondaryThemes);
 
-        // Only apply custom color themes if user is signed in
-        const effectiveColorTheme = state.getEffectiveColorTheme();
-        const effectiveSecondaryColorTheme =
-          state.getEffectiveSecondaryColorTheme();
-
-        if (effectiveColorTheme) {
-          root.classList.add(effectiveColorTheme);
+        // Apply color themes if they exist
+        if (state.colorTheme) {
+          root.classList.add(state.colorTheme);
         }
-        if (effectiveSecondaryColorTheme) {
-          root.classList.add(effectiveSecondaryColorTheme);
-        }
-      },
-
-      loadThemeFromLocalStorage: () => {
-        if (typeof window === 'undefined') return;
-
-        try {
-          const stored = localStorage.getItem('theme-storage');
-          if (stored) {
-            const parsedData = JSON.parse(stored);
-            const { theme, colorTheme, secondaryColorTheme } =
-              parsedData.state || {};
-
-            // Apply localStorage data immediately
-            if (theme) {
-              const resolvedTheme =
-                theme === 'system' ? getSystemTheme() : theme;
-              set({
-                theme,
-                colorTheme: colorTheme || null,
-                secondaryColorTheme: secondaryColorTheme || null,
-                resolvedTheme,
-                isLocalStorageLoaded: true,
-              });
-              // Apply theme immediately
-              get().applyThemeToDocument();
-            }
-          } else {
-            // No localStorage data, mark as loaded with defaults
-            set({ isLocalStorageLoaded: true });
-          }
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.warn('Failed to load theme from localStorage:', error);
-          set({ isLocalStorageLoaded: true });
-        }
-      },
-
-      syncUserThemePreferences: (
-        userTheme,
-        userColorTheme,
-        userSecondaryColorTheme
-      ) => {
-        const state = get();
-
-        // If localStorage already has data, localStorage is source of truth
-        if (
-          state.isLocalStorageLoaded &&
-          (state.colorTheme !== null || state.secondaryColorTheme !== null)
-        ) {
-          set({ isThemeLoaded: true });
-          return;
-        }
-
-        // If no localStorage data but user has preferences, use user preferences and update localStorage
-        if (userTheme || userColorTheme || userSecondaryColorTheme) {
-          const newTheme = userTheme || state.theme;
-          const resolvedTheme =
-            newTheme === 'system' ? getSystemTheme() : newTheme;
-
-          set({
-            theme: newTheme,
-            colorTheme: userColorTheme || null,
-            secondaryColorTheme: userSecondaryColorTheme || null,
-            resolvedTheme,
-            isThemeLoaded: true,
-          });
-
-          get().applyThemeToDocument();
-
-          // Update localStorage with user preferences
-          try {
-            const currentStorage = localStorage.getItem('theme-storage');
-            const storageData = currentStorage
-              ? JSON.parse(currentStorage)
-              : { state: {} };
-            storageData.state = {
-              ...storageData.state,
-              theme: newTheme,
-              colorTheme: userColorTheme || null,
-              secondaryColorTheme: userSecondaryColorTheme || null,
-            };
-            localStorage.setItem('theme-storage', JSON.stringify(storageData));
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.warn(
-              'Failed to update localStorage with user preferences:',
-              error
-            );
-          }
-        } else {
-          // No user preferences, use defaults
-          set({ isThemeLoaded: true });
+        if (state.secondaryColorTheme) {
+          root.classList.add(state.secondaryColorTheme);
         }
       },
     }),
@@ -306,7 +261,6 @@ export const useThemeStore = create<ThemeStore>()(
         theme: state.theme,
         colorTheme: state.colorTheme,
         secondaryColorTheme: state.secondaryColorTheme,
-        // Note: isUserSignedIn is NOT persisted - it's determined by Clerk auth state
       }),
     }
   )

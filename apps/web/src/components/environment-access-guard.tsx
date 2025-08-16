@@ -1,283 +1,124 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import * as React from 'react';
 import { SignInButton, useUser } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
 import { LogIn } from '@/components/ui/icons';
 import { useFeatureFlagEnabled } from 'posthog-js/react';
-import { usePostHog } from '@/hooks/use-posthog';
-import { useThemeStore } from '@/stores/theme-store';
+import {
+  useThemeStore,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
+} from '@/stores/theme-store';
 import { APP_NAME } from '@/config/app';
-import {
-  getEnvironmentInfo,
-  getAccessDenialMessage,
-  trackEnvironmentAccess,
-  getReadinessState,
-  type ReadinessState,
-} from '@/lib/environment-access';
-import {
-  getMockConfig,
-  getMockedEnvironmentInfo,
-  MockStatusIndicator,
-  type MockEnvironmentConfig,
-} from '@/lib/environment-mock';
+import { cn } from '@/utils';
 
 interface EnvironmentAccessGuardProps {
   children: ReactNode;
   fallback?: ReactNode;
 }
 
+type LoadingState =
+  | 'theme-check' // State 1: Checking theme (white bg, dark text)
+  | 'access-check' // State 2: Checking access (theme gradient bg, white text)
+  | 'post-check-fade-out' // State 2.5: Fading out dots before welcome
+  | 'show-welcome' // State 3: Showing welcome animation
+  | 'fade-out' // State 4: Fading out to content
+  | 'access-denied' // State 3 (alt): Access denied
+  | 'content'; // Final: Show content
+
 /**
  * Component that restricts access to dev and ephemeral environments
- * based on PostHog feature flags and user cohorts
+ * based on PostHog feature flags
  */
 export function EnvironmentAccessGuard({
   children,
   fallback,
 }: EnvironmentAccessGuardProps) {
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [shouldShowContent, setShouldShowContent] = useState(false);
-  const [isFadingOut, setIsFadingOut] = useState(false);
-  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [loadingState, setLoadingState] = useState<LoadingState>('theme-check');
+  const [taglineIndex, setTaglineIndex] = useState(0);
 
-  // Start with false to match SSR, then update after mount
-  const [isPostHogReady, setIsPostHogReady] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const { isInitialized: isPostHogInitialized } = usePostHog();
+  // Set random tagline only on client side to avoid hydration mismatch
+  React.useEffect(() => {
+    setTaglineIndex(Math.floor(Math.random() * 9));
+  }, []);
+
   const { isLoaded: isUserLoaded, user, isSignedIn } = useUser();
 
-  // Use PostHog React hook for feature flag - this will automatically update when the flag changes
-  const devAccessFlag = useFeatureFlagEnabled('dev-environment-access');
+  // Use PostHog React hook for feature flag
+  const hasAccess = useFeatureFlagEnabled('dev-environment-access');
 
-  const {
-    isThemeLoaded,
-    isLocalStorageLoaded,
-    getEffectiveColorTheme,
-    getEffectiveSecondaryColorTheme,
-    setUserSignedIn,
-    loadThemeFromLocalStorage,
-    syncUserThemePreferences,
-  } = useThemeStore();
+  const { isInitialized, initialize, applyThemeToDocument } = useThemeStore();
 
-  // Get mock config for testing - only on client to avoid SSR mismatch
-  const [mockConfig, setMockConfig] = useState<MockEnvironmentConfig>(() => {
-    // Initial state must match server (no mocking during SSR)
-    if (typeof window === 'undefined') {
-      return { enabled: false };
-    }
-    return { enabled: false }; // Start with disabled to match SSR
-  });
+  // Core access logic
+  const isFeatureFlagChecked = hasAccess !== undefined;
 
-  // Load mock config after mount to avoid hydration issues
+  // Theme is fully ready when initialized
+  const isThemeReady = isInitialized;
+
+  // Initialize theme once user data is loaded
   React.useEffect(() => {
-    const config = getMockConfig();
-    if (config.enabled) {
-      setMockConfig(config);
-    }
-  }, []);
-
-  // Use mocked environment info if available, otherwise use real info
-  const envInfo = React.useMemo(() => {
-    const mockedInfo = getMockedEnvironmentInfo(mockConfig);
-    return mockedInfo || getEnvironmentInfo();
-  }, [mockConfig]);
-
-  // Check if we're on an allowlisted host after mount
-  React.useEffect(() => {
-    // Show mock indicator if in mock mode and on allowlisted host
-    if (envInfo.isAllowlistedHost && mockConfig.enabled) {
-      MockStatusIndicator()?.render();
-    }
-  }, [mockConfig, envInfo.isAllowlistedHost]);
-
-  // Apply mock access override if configured - start with real flag for SSR
-  const [effectiveDevAccessFlag, setEffectiveDevAccessFlag] = useState<
-    boolean | undefined
-  >(devAccessFlag);
-
-  // Update effective flag when mock config or real flag changes
-  React.useEffect(() => {
-    if (mockConfig.enabled && mockConfig.hasDevAccess !== undefined) {
-      // Convert null to undefined for TypeScript compatibility
-      setEffectiveDevAccessFlag(
-        mockConfig.hasDevAccess === null ? undefined : mockConfig.hasDevAccess
-      );
-    } else {
-      setEffectiveDevAccessFlag(devAccessFlag);
-    }
-  }, [mockConfig, devAccessFlag]);
-
-  // Determine if feature flag has loaded (not undefined)
-  // On allowlisted hosts when NOT mocking, consider flag loaded
-  const isFeatureFlagLoaded =
-    effectiveDevAccessFlag !== undefined ||
-    (envInfo.isAllowlistedHost && !mockConfig.enabled); // Only bypass for allowlisted hosts when NOT mocking
-
-  // Calculate access - start with SSR-safe default
-  const [hasAccess, setHasAccess] = useState<boolean>(() => {
-    // During SSR or initial client render, use default logic without mocks
-    if (typeof window === 'undefined') {
-      return false; // SSR default - deny until verified
-    }
-    // Initial client state should match SSR - deny until feature flag is checked
-    return false;
-  });
-
-  // Update access calculation after mount when all data is available
-  React.useEffect(() => {
-    // If we're mocking on an allowlisted host, use the mocked environment requirements
-    if (mockConfig.enabled && envInfo.isAllowlistedHost) {
-      // Check if environment requires dev access
-      if (envInfo.requiresDevAccess === true) {
-        // Environment requires dev access, check the flag
-        setHasAccess(effectiveDevAccessFlag === true);
-      } else if (envInfo.requiresDevAccess === false) {
-        // Environment explicitly doesn't require dev access
-        setHasAccess(true);
-      } else {
-        // requiresDevAccess is undefined/null - deny by default
-        setHasAccess(false);
-      }
-    } else if (envInfo.isAllowlistedHost) {
-      // Non-mock behavior: allowlisted hosts always have access
-      setHasAccess(true);
-    } else {
-      // Production behavior: explicit checks
-      if (envInfo.requiresDevAccess === true) {
-        // Environment requires dev access, must have the flag
-        setHasAccess(effectiveDevAccessFlag === true);
-      } else if (envInfo.requiresDevAccess === false) {
-        // Environment explicitly doesn't require dev access (production)
-        setHasAccess(true);
-      } else {
-        // requiresDevAccess is undefined/null - deny by default
-        setHasAccess(false);
-      }
-    }
-  }, [
-    mockConfig,
-    envInfo.isAllowlistedHost,
-    envInfo.requiresDevAccess,
-    effectiveDevAccessFlag,
-  ]);
-
-  // Get readiness state - use the stable PostHog state
-  const readiness: ReadinessState = getReadinessState(
-    isLocalStorageLoaded,
-    isThemeLoaded,
-    isUserLoaded,
-    isPostHogReady, // Use stable state instead of directly from hook
-    isFeatureFlagLoaded ? hasAccess : null // Pass null if flag not loaded yet
-  );
-
-  // Initialize theme from localStorage on mount
-  React.useEffect(() => {
-    loadThemeFromLocalStorage();
-  }, [loadThemeFromLocalStorage]);
-
-  // Track when component is mounted
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Update PostHog ready state after mount to avoid hydration mismatch
-  React.useEffect(() => {
-    // Only update after mount to ensure SSR/client consistency
-    if (isMounted) {
-      setIsPostHogReady(isPostHogInitialized);
-    }
-  }, [isMounted, isPostHogInitialized]);
-
-  // Sync user authentication state with theme store
-  React.useEffect(() => {
-    if (isSignedIn !== undefined) {
-      setUserSignedIn(isSignedIn);
-    }
-  }, [isSignedIn, setUserSignedIn]);
-
-  // Sync user theme preferences when user data is available
-  React.useEffect(() => {
-    if (user && isUserLoaded && isLocalStorageLoaded) {
+    if (isUserLoaded && !isInitialized) {
       // Extract user theme preferences from user data
-      const userTheme = user.publicMetadata?.theme as
+      const userTheme = user?.publicMetadata?.theme as
         | 'light'
         | 'dark'
         | 'system'
         | undefined;
-      const userColorTheme = user.publicMetadata?.colorTheme as
+      const userColorTheme = user?.publicMetadata?.colorTheme as
         | string
         | undefined;
-      const userSecondaryColorTheme = user.publicMetadata
+      const userSecondaryColorTheme = user?.publicMetadata
         ?.secondaryColorTheme as string | undefined;
 
-      syncUserThemePreferences(
+      initialize({
+        isSignedIn: !!isSignedIn,
         userTheme,
-        userColorTheme as Parameters<typeof syncUserThemePreferences>[1],
-        userSecondaryColorTheme as Parameters<
-          typeof syncUserThemePreferences
-        >[2]
-      );
-    } else if (isLocalStorageLoaded) {
-      // No user data, mark theme as loaded with current localStorage state
-      syncUserThemePreferences();
+        userColorTheme: userColorTheme as PrimaryColorTheme | undefined,
+        userSecondaryColorTheme: userSecondaryColorTheme as
+          | SecondaryColorTheme
+          | undefined,
+      });
+      // Apply theme immediately after initialization
+      applyThemeToDocument();
+      // State 1 -> State 2: Move to access-check once theme is ready
+      setLoadingState('access-check');
     }
-  }, [user, isUserLoaded, isLocalStorageLoaded, syncUserThemePreferences]);
+  }, [
+    isUserLoaded,
+    isSignedIn,
+    user,
+    isInitialized,
+    initialize,
+    applyThemeToDocument,
+  ]);
 
-  // Add timeout to prevent infinite loading if Clerk fails to initialize
+  // State progression logic
   React.useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!readiness.isFullyReady && !shouldShowContent) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          'environment access guard timed out - proceeding with fallback'
-        );
-        setHasTimedOut(true);
-        setShouldShowContent(true);
-      }
-    }, 10000); // 10 second timeout
-
-    return () => clearTimeout(timeoutId);
-  }, [readiness.isFullyReady, shouldShowContent]);
-
-  // Show welcome when fully ready, then fade to content after 2 seconds
-  React.useEffect(() => {
-    // Only proceed if fully ready AND feature flag has been loaded
-    if (readiness.isFullyReady && isFeatureFlagLoaded) {
+    // State 2 -> State 2.5/3-alt: Once access is determined
+    if (loadingState === 'access-check' && isFeatureFlagChecked) {
       if (hasAccess) {
-        const welcomeTimer = setTimeout(() => {
-          setShowWelcome(true);
-          const fadeTimer = setTimeout(() => {
-            setIsFadingOut(true);
-            setTimeout(() => {
-              setShowWelcome(false);
-              setShouldShowContent(true);
-            }, 1300); // Wait for fade-out animation
-          }, 2650);
-          return () => clearTimeout(fadeTimer);
-        }, 200); // Initial delay before showing welcome
-
-        return () => {
-          clearTimeout(welcomeTimer);
-        };
-      } else {
-        // If no access, immediately set shouldShowContent to show the access denied screen
-        setShouldShowContent(true);
+        // Transition to post-check-fade-out
+        setTimeout(() => setLoadingState('post-check-fade-out'), 200);
+      } else if (hasAccess === false) {
+        setLoadingState('access-denied');
       }
     }
-  }, [readiness.isFullyReady, hasAccess, isFeatureFlagLoaded]);
 
-  // Track environment access attempts
-  useEffect(() => {
-    if (isPostHogReady && typeof effectiveDevAccessFlag === 'boolean') {
-      trackEnvironmentAccess(hasAccess, envInfo);
+    // State 2.5 -> State 3: After dots fade out
+    if (loadingState === 'post-check-fade-out') {
+      setTimeout(() => setLoadingState('show-welcome'), 300);
     }
-  }, [isPostHogReady, effectiveDevAccessFlag, hasAccess, envInfo]);
 
-  // Use a stable tagline index that won't change between server and client
-  const [taglineIndex] = useState(() => {
-    // Use a deterministic value for SSR (always use first tagline)
-    // On client, we could use random but keeping it stable prevents hydration issues
-    return 0;
-  });
+    // State 3 -> State 4: After welcome animation
+    if (loadingState === 'show-welcome') {
+      setTimeout(() => setLoadingState('fade-out'), 2650);
+    }
+
+    // State 4 -> Final: After fade out
+    if (loadingState === 'fade-out') {
+      setTimeout(() => setLoadingState('content'), 1300);
+    }
+  }, [loadingState, isThemeReady, isFeatureFlagChecked, hasAccess]);
 
   const welcomeMessage = React.useMemo(() => {
     const taglines = [
@@ -292,47 +133,52 @@ export function EnvironmentAccessGuard({
       'who told you about this',
     ];
     const selectedTagline = taglines[taglineIndex % taglines.length];
+    return selectedTagline;
+  }, [taglineIndex]);
 
-    return Array.from(selectedTagline).map((char, i) => (
-      <span
-        data-theme-ready={String(readiness.isFullyReady)}
-        className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] whitespace-pre transition duration-800 data-[theme-ready=true]:text-white"
-        key={i}
-        style={{ animationDelay: `${i * 25}ms` }}
-      >
-        {char}
-      </span>
-    ));
-  }, [readiness.isFullyReady, taglineIndex]);
-
-  // Show loading/welcome state while not ready or showing welcome (unless timed out)
-  if (!shouldShowContent && !hasTimedOut) {
+  if (
+    loadingState === 'theme-check' ||
+    loadingState === 'access-check' ||
+    loadingState === 'post-check-fade-out' ||
+    loadingState === 'show-welcome' ||
+    loadingState === 'fade-out'
+  ) {
     return (
       <div
-        className="data-[theme-ready=true]:from-theme-primary data-[theme-ready=true]:to-theme-secondary flex min-h-screen items-center justify-center bg-gradient-to-br from-white to-white transition duration-500 data-[fading-out=true]:opacity-0 data-[fading-out=true]:delay-700 data-[fading-out=true]:duration-600"
-        data-theme-ready={String(readiness.isThemeReady)}
-        data-posthog-ready={String(readiness.isPostHogReady)}
-        data-fully-ready={String(readiness.isFullyReady)}
-        data-show-welcome={String(showWelcome)}
-        data-has-access={String(hasAccess)}
-        data-fading-out={String(isFadingOut)}
-        data-has-custom-theme={String(
-          !!(getEffectiveColorTheme() && getEffectiveSecondaryColorTheme())
+        data-state={loadingState}
+        className={cn(
+          'to-66%, flex min-h-screen items-center justify-center bg-gradient-to-br transition duration-500',
+          'data-[state=theme-check]:from-white data-[state=theme-check]:to-white',
+          'data-[state=access-check]:from-theme-primary data-[state=access-check]:to-theme-secondary',
+          'data-[state=post-check-fade-out]:from-theme-primary data-[state=post-check-fade-out]:to-theme-secondary',
+          'data-[state=show-welcome]:from-theme-primary data-[state=show-welcome]:to-theme-secondary',
+          'data-[state=fade-out]:from-background data-[state=fade-out]:to-background data-[state=fade-out]:delay-700 data-[state=fade-out]:duration-600'
         )}
       >
         <div className="space-y-6 text-center">
           <div
-            className="flex flex-col space-y-2 transition duration-800 data-[fading-out=true]:scale-105 data-[fading-out=true]:opacity-0"
-            data-fading-out={String(isFadingOut)}
+            data-state={loadingState}
+            className="flex flex-col items-center space-y-2 transition duration-800 data-[state=fade-out]:scale-105 data-[state=fade-out]:opacity-0"
           >
             <p
-              data-theme-ready={String(readiness.isThemeReady)}
-              className="data-[theme-ready=false]:text-foreground inline-flex w-full bg-transparent text-4xl font-bold duration-500 data-[theme-ready=true]:text-white"
+              data-state={loadingState}
+              className={cn(
+                'inline-flex w-full items-center justify-center bg-transparent text-4xl font-bold transition duration-500 data-[state=fade-out]:opacity-0'
+              )}
             >
-              {Array.from(APP_NAME as string).map((char, i) => (
+              {Array.from(
+                typeof APP_NAME === 'string' ? APP_NAME : 'vibechecc'
+              ).map((char, i) => (
                 <span
-                  data-theme-ready={String(readiness.isFullyReady)}
-                  className="data-[theme-ready=false]:text-foreground animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800 data-[theme-ready=true]:text-white"
+                  data-state={loadingState}
+                  className={cn(
+                    'text-foreground animate-pulse-text m-0 inline-flex rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800',
+                    'data-[state=theme-check]:text-foreground',
+                    'data-[state=access-check]:text-white',
+                    'data-[state=post-check-fade-out]:text-white',
+                    'data-[state=show-welcome]:text-white',
+                    'data-[state=fade-out]:opacity-0'
+                  )}
                   key={i}
                   style={{ animationDelay: `${i * 50}ms` }}
                 >
@@ -340,45 +186,73 @@ export function EnvironmentAccessGuard({
                 </span>
               ))}
             </p>
-
-            <div className="relative flex h-6 w-full items-center justify-center transition duration-500">
-              <p
-                data-theme-ready={String(readiness.isFullyReady)}
-                data-show-welcome={String(showWelcome)}
-                className="data-[theme-ready=false]:text-foreground absolute inset-0 inline-flex w-full items-center justify-center text-center text-lg font-medium opacity-100 transition delay-800 duration-800 data-[show-welcome=false]:opacity-0 data-[theme-ready=true]:text-white"
-                style={{ animationDelay: `300ms` }}
-              >
-                {welcomeMessage}
-              </p>
+            <div className="flex-flex-col relative h-6 w-full items-center justify-center">
               <div
-                data-show-welcome={String(
-                  showWelcome || isFadingOut || shouldShowContent
+                data-state={loadingState}
+                className={cn(
+                  'absolute inset-0 m-auto inline-flex items-center justify-center gap-1 opacity-100 transition duration-300',
+                  'data-[state=post-check-fade-out]:opacity-0',
+                  'data-[state=show-welcome]:hidden',
+                  'data-[state=fade-out]:hidden'
                 )}
-                data-dots-initialized={String(
-                  readiness.isThemeReady || readiness.isFullyReady
-                )}
-                className="animate-text-pulse absolute inset-0 flex items-center justify-center gap-1.5 p-0 transition duration-300 data-[show-welcome=true]:opacity-0"
               >
                 <span
-                  data-dots-initialized={String(
-                    readiness.isThemeReady || readiness.isFullyReady
+                  data-state={loadingState}
+                  className={cn(
+                    'animate-pulse-dot inline-block size-2 rounded-full bg-black transition duration-800',
+                    'data-[state=theme-check]:bg-black',
+                    'data-[state=access-check]:bg-white',
+                    'data-[state=post-check-fade-out]:bg-white',
+                    'data-[state=show-welcome]:bg-white'
                   )}
-                  className="data-[dots-initialized=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800 data-[dots-initialized=true]:bg-white"
                 />
                 <span
-                  data-dots-initialized={String(
-                    readiness.isThemeReady || readiness.isFullyReady
+                  data-state={loadingState}
+                  className={cn(
+                    'animate-pulse-dot inline-block size-2 rounded-full bg-black transition duration-800',
+                    'data-[state=theme-check]:bg-black',
+                    'data-[state=access-check]:bg-white',
+                    'data-[state=post-check-fade-out]:bg-white',
+                    'data-[state=show-welcome]:bg-white'
                   )}
-                  className="data-[dots-initialized=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800 data-[dots-initialized=true]:bg-white"
                   style={{ animationDelay: '300ms' }}
                 />
                 <span
-                  data-dots-initialized={String(
-                    readiness.isThemeReady || readiness.isFullyReady
+                  data-state={loadingState}
+                  className={cn(
+                    'animate-pulse-dot inline-block size-2 rounded-full bg-black transition duration-800',
+                    'data-[state=theme-check]:bg-black',
+                    'data-[state=access-check]:bg-white',
+                    'data-[state=post-check-fade-out]:bg-white',
+                    'data-[state=show-welcome]:bg-white'
                   )}
-                  className="data-[dots-initialized=false]:bg-foreground animate-pulse-dot inline-block size-2 rounded-full bg-white transition duration-800 data-[dots-initialized=true]:bg-white"
                   style={{ animationDelay: '600ms' }}
                 />
+              </div>
+              <div
+                data-state={loadingState}
+                className={cn(
+                  'absolute inset-0 hidden',
+                  'data-[state=post-check-fade-out]:inline-flex',
+                  'data-[state=show-welcome]:inline-flex',
+                  'data-[state=fade-out]:inline-flex'
+                )}
+              >
+                <p
+                  data-state={loadingState}
+                  className="inline-flex w-full items-center justify-center text-center text-lg font-medium text-white opacity-0 transition duration-800 data-[state=fade-out]:opacity-0 data-[state=show-welcome]:opacity-100"
+                >
+                  {Array.from(welcomeMessage).map((char, i) => (
+                    <span
+                      data-state={loadingState}
+                      className="animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] whitespace-pre transition duration-800 data-[state=fade-out]:opacity-0"
+                      key={i}
+                      style={{ animationDelay: `${i * 25}ms` }}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                </p>
               </div>
             </div>
           </div>
@@ -387,10 +261,8 @@ export function EnvironmentAccessGuard({
     );
   }
 
-  // Only show access denied if feature flag is loaded and user doesn't have access
-  if (isFeatureFlagLoaded && !hasAccess) {
-    const message = getAccessDenialMessage(envInfo);
-
+  // (alt): Access denied
+  if (loadingState === 'access-denied') {
     if (fallback) {
       return <>{fallback}</>;
     }
@@ -406,7 +278,10 @@ export function EnvironmentAccessGuard({
               <h1 className="text-foreground text-2xl font-semibold">
                 access restricted
               </h1>
-              <p className="text-muted-foreground">{message}</p>
+              <p className="text-muted-foreground">
+                Access to the development environment is restricted to
+                authorized developers.'
+              </p>
             </div>
           </div>
 
@@ -420,13 +295,6 @@ export function EnvironmentAccessGuard({
           </div>
 
           <div className="text-muted-foreground space-y-2 text-sm">
-            <p>
-              environment:{' '}
-              <span className="font-mono">
-                {envInfo.subdomain || 'production'}
-                {mockConfig.enabled && ' (mocked)'}
-              </span>
-            </p>
             <p>
               if you believe this is an error, please contact{' '}
               <a
@@ -442,25 +310,6 @@ export function EnvironmentAccessGuard({
     );
   }
 
-  // Show content when ready or if timed out with error recovery
-  if (shouldShowContent || hasTimedOut) {
-    // If we timed out, show a warning but still render the app
-    if (hasTimedOut && !readiness.isFullyReady) {
-      return (
-        <>
-          <div className="bg-destructive/10 border-destructive/20 fixed top-16 right-0 left-0 z-40 border-b p-2 text-center">
-            <p className="text-destructive text-sm">
-              authentication service is taking longer than expected - some
-              features may be limited
-            </p>
-          </div>
-          {children}
-        </>
-      );
-    }
-    return <>{children}</>;
-  }
-
-  // This shouldn't happen, but fallback to content if something goes wrong
+  // Final state: Show content
   return <>{children}</>;
 }

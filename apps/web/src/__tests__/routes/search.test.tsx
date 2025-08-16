@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeInitializer } from '@/stores/theme-initializer';
 
 // Import the component directly instead of trying to extract from Route
 import SearchResultsPage from '@/routes/search';
@@ -292,9 +291,7 @@ describe('Search Page - Emoji Filter Integration', () => {
 
     return render(
       <QueryClientProvider client={queryClient}>
-        <ThemeInitializer>
-          <SearchResultsPage />
-        </ThemeInitializer>
+        <SearchResultsPage />
       </QueryClientProvider>
     );
   };

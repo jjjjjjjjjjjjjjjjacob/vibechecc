@@ -3,10 +3,10 @@ import * as React from 'react';
 import { HomeFeed } from '@/components/home-feed';
 import { SignedIn, SignedOut, useUser } from '@clerk/tanstack-react-start';
 import { useCurrentUser } from '@/queries';
-import { useTheme } from '@/stores/theme-initializer';
-import type {
-  PrimaryColorTheme,
-  SecondaryColorTheme,
+import {
+  useThemeStore,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
 } from '@/stores/theme-store';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,7 +29,7 @@ function HeroButtonsSkeleton() {
 function Home() {
   // Get current user's theme
   const { data: currentUser, isLoading: _isUserLoading } = useCurrentUser();
-  const { setColorTheme, setSecondaryColorTheme } = useTheme();
+  const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
   const { isLoaded: isClerkLoaded, user: _user } = useUser();
   const [hasMounted, setHasMounted] = React.useState(false);
   const [clerkTimedOut, setClerkTimedOut] = React.useState(false);

@@ -24,10 +24,10 @@ import {
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/stores/theme-initializer';
-import type {
-  PrimaryColorTheme,
-  SecondaryColorTheme,
+import {
+  useThemeStore,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
 } from '@/stores/theme-store';
 import type { Vibe } from '@vibechecc/types';
 import { getThemeColorValue } from '@/utils/theme-colors';
@@ -176,7 +176,7 @@ export function UserProfileView({
     [user?.primaryColor, user?.themeColor, user?.secondaryColor]
   );
 
-  const { setColorTheme, setSecondaryColorTheme } = useTheme();
+  const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
 
   React.useEffect(() => {
     // Apply global theme when not using scoped theme (e.g., on own profile)

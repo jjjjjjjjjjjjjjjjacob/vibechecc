@@ -23,10 +23,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from '@/components/ui/icons';
 import toast from '@/utils/toast';
 import { DualThemeColorPicker } from '@/features/theming/components/dual-theme-color-picker';
-import { useTheme } from '@/stores/theme-initializer';
-import type {
-  PrimaryColorTheme,
-  SecondaryColorTheme,
+import {
+  useThemeStore,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
 } from '@/stores/theme-store';
 
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -118,7 +118,7 @@ function ProfileEdit() {
     refetchUser,
   ]);
 
-  const { setColorTheme, setSecondaryColorTheme } = useTheme();
+  const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
 
   React.useEffect(() => {
     setColorTheme(`${userTheme.primaryColor}-primary` as PrimaryColorTheme);

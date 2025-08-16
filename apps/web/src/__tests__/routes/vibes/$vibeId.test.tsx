@@ -4,7 +4,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as React from 'react';
-import { ThemeInitializer } from '@/stores/theme-initializer';
 
 // Import the component directly instead of extracting from Route
 import VibePage from '@/routes/vibes/$vibeId';
@@ -248,9 +247,7 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
 
     return render(
       <QueryClientProvider client={queryClient}>
-        <ThemeInitializer>
-          <VibePage />
-        </ThemeInitializer>
+        <VibePage />
       </QueryClientProvider>
     );
   };

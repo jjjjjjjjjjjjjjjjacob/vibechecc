@@ -2,7 +2,6 @@
 import React from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import { vi, beforeEach, afterEach, expect, describe, it } from 'vitest';
-import { ThemeInitializer } from '@/stores/theme-initializer';
 
 // Mock data for consistent testing
 export const mockUser = {
@@ -74,12 +73,9 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 
 export function renderWithProviders(
   ui: React.ReactElement,
-  { withThemeProvider = true, ...renderOptions }: CustomRenderOptions = {}
+  { ...renderOptions }: CustomRenderOptions = {}
 ) {
   function Wrapper({ children }: { children: React.ReactNode }) {
-    if (withThemeProvider) {
-      return <ThemeInitializer>{children}</ThemeInitializer>;
-    }
     return <>{children}</>;
   }
 

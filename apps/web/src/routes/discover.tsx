@@ -13,10 +13,10 @@ import {
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from '@/components/ui/icons';
-import { useTheme } from '@/stores/theme-initializer';
-import type {
-  PrimaryColorTheme,
-  SecondaryColorTheme,
+import {
+  useThemeStore,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
 } from '@/stores/theme-store';
 import type { Vibe } from '@/types';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
@@ -118,7 +118,7 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
 function DiscoverPage() {
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
-  const { setColorTheme, setSecondaryColorTheme } = useTheme();
+  const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
 
   // Apply user's color themes when user data changes
   React.useEffect(() => {

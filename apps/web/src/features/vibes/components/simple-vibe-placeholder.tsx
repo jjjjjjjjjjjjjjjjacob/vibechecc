@@ -1,4 +1,4 @@
-import { useTheme } from '@/stores/theme-initializer';
+import { useThemeStore } from '@/stores/theme-store';
 import { cn } from '@/utils/tailwind-utils';
 import { useEffect, useState } from 'react';
 
@@ -13,7 +13,7 @@ export function SimpleVibePlaceholder({
   className,
   hideText = false,
 }: SimplePlaceholderProps) {
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch by only rendering after mount

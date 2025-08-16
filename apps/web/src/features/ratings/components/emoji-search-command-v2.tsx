@@ -6,7 +6,7 @@ import { useUser } from '@clerk/tanstack-react-start';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '@vibechecc/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
-import { useTheme } from '@/stores/theme-initializer';
+import { useThemeStore } from '@/stores/theme-store';
 
 interface EmojiSearchCommandV2Props {
   onSelect: (emoji: string) => void;
@@ -28,7 +28,7 @@ export function EmojiSearchCommandV2({
   'data-testid': dataTestId,
 }: EmojiSearchCommandV2Props) {
   const { user } = useUser();
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme } = useThemeStore();
   const trackUsage = useMutation({
     mutationFn: useConvexMutation(api.emojis.trackUsage),
   });

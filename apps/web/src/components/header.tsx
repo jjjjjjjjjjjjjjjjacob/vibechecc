@@ -30,10 +30,10 @@ import {
   useUser,
   useClerk,
 } from '@clerk/tanstack-react-start';
-import { useTheme } from '@/stores/theme-initializer';
-import type {
-  PrimaryColorTheme,
-  SecondaryColorTheme,
+import {
+  useThemeStore,
+  type PrimaryColorTheme,
+  type SecondaryColorTheme,
 } from '@/stores/theme-store';
 import { GlobalSearchCommand } from '@/features/search/components/global-search-command';
 import { useSearchShortcuts } from '@/features/search/hooks/use-search-shortcuts';
@@ -49,7 +49,7 @@ import { APP_NAME } from '@/config/app';
 
 export function Header() {
   const { resolvedTheme, setTheme, setColorTheme, setSecondaryColorTheme } =
-    useTheme();
+    useThemeStore();
   const navState = useHeaderNavStore((state) => state.navState);
   const setNavState = useHeaderNavStore((state) => state.setNavState);
   const pageNavState = useHeaderNavStore((state) => state.pageNavState);

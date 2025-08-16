@@ -33,7 +33,6 @@ import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
 import { NotFound } from '@/components/not-found';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { ThemeInitializer } from '@/stores/theme-initializer';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
 import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
@@ -214,8 +213,6 @@ function ClerkProviderWrapper({ children }: { children: React.ReactNode }) {
       routerReplace={(to) => navigate({ to, replace: true })}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
-      afterSignInUrl="/"
-      afterSignUpUrl="/"
     >
       {children}
     </ClerkProvider>
@@ -268,34 +265,32 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="bg-background text-foreground">
         <PostHogProvider>
-          <ThemeInitializer>
-            <div className="relative flex min-h-screen flex-col">
-              <PostHogPageTracker />
-              <ClerkPostHogIntegration />
-              {isAdminRoute ? (
-                // Admin routes - no header/footer, no guards
-                <>{children}</>
-              ) : (
-                // Regular app routes - with header/footer and guards
-                <>
-                  <EnvironmentAccessGuard>
-                    <OnboardingGuard>
-                      <Header />
-                      <LoadingIndicator />
+          <div className="relative flex min-h-screen flex-col">
+            <PostHogPageTracker />
+            <ClerkPostHogIntegration />
+            {isAdminRoute ? (
+              // Admin routes - no header/footer, no guards
+              <>{children}</>
+            ) : (
+              // Regular app routes - with header/footer and guards
+              <>
+                <EnvironmentAccessGuard>
+                  <OnboardingGuard>
+                    <Header />
+                    <LoadingIndicator />
 
-                      <main className="flex-1" data-vaul-drawer-wrapper>
-                        {children}
-                      </main>
-                      <NewUserSurvey />
-                    </OnboardingGuard>
-                  </EnvironmentAccessGuard>
+                    <main className="flex-1" data-vaul-drawer-wrapper>
+                      {children}
+                    </main>
+                    <NewUserSurvey />
+                  </OnboardingGuard>
+                </EnvironmentAccessGuard>
 
-                  <Footer />
-                </>
-              )}
-              <Toaster />
-            </div>
-          </ThemeInitializer>
+                <Footer />
+              </>
+            )}
+            <Toaster />
+          </div>
         </PostHogProvider>
         {import.meta.env.DEV && (
           <React.Suspense fallback={null}>

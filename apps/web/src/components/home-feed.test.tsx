@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeInitializer } from '@/stores/theme-initializer';
 import { HomeFeed } from './home-feed';
 
 // Mock hooks
@@ -267,9 +266,7 @@ describe('HomeFeed', () => {
   const renderComponent = () => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <ThemeInitializer>
-          <HomeFeed />
-        </ThemeInitializer>
+        <HomeFeed />
       </QueryClientProvider>
     );
   };
