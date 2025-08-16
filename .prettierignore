@@ -1,15 +1,16 @@
 # Generated files
-apps/backend/convex/_generated/
-apps/convex/convex/_generated/
 apps/**/dist/
 packages/**/dist/
-.vinxi/
-.output/
 apps/web/src/routeTree.gen.ts
+apps/convex/convex/_generated/
 
 # Build outputs
 dist/
 build/
+.nitro/
+.output/
+.tanstack/
+.wrangler/
 
 # Cache and temporary files
 .nx/
@@ -19,7 +20,7 @@ yarn.lock
 *.log
 
 # Config timestamps
-app.config.timestamp_*.js
+vite.config.timestamp_*.js
 
 # Terraform
-terraform/.terraform/ 
+terraform/.terraform/

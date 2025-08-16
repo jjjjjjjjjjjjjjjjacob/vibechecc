@@ -25,7 +25,7 @@
     "format:check": "prettier --check .",
     "format:staged": "prettier --write --cache --ignore-unknown",
     "typecheck": "nx run-many --target=typecheck",
-    "quality": "bun run typecheck && bun run lint && bun run format:check",
+    "quality": "bun run typecheck && bun run test && bun run format:check && bun run lint",
     "quality:fix": "bun run typecheck && bun run lint:fix && bun run format",
     "deploy": "bun run build && bun run wrangler:deploy",
     "cf-typegen": "wrangler types --env-interface Env",

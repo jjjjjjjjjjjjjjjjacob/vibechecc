@@ -4,6 +4,7 @@ import { SignInButton, useUser } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
 import { LogIn } from '@/components/ui/icons';
 import { useFeatureFlagEnabled } from 'posthog-js/react';
+import posthog from 'posthog-js';
 import {
   useThemeStore,
   type PrimaryColorTheme,
@@ -51,6 +52,20 @@ export function EnvironmentAccessGuard({
 
   // Core access logic
   const isFeatureFlagChecked = hasAccess !== undefined;
+
+  // Reload feature flags when auth state changes
+  React.useEffect(() => {
+    if (isUserLoaded) {
+      // When signing in or out, reload feature flags
+      posthog.reloadFeatureFlags();
+
+      // Reset to access-check state if we're in access-denied state
+      // This allows re-evaluation after auth changes
+      if (loadingState === 'access-denied' || loadingState === 'content') {
+        setLoadingState('access-check');
+      }
+    }
+  }, [isSignedIn, isUserLoaded, loadingState]); // Include all dependencies
 
   // Theme is fully ready when initialized
   const isThemeReady = isInitialized;
@@ -280,7 +295,7 @@ export function EnvironmentAccessGuard({
               </h1>
               <p className="text-muted-foreground">
                 Access to the development environment is restricted to
-                authorized developers.'
+                authorized developers.
               </p>
             </div>
           </div>
