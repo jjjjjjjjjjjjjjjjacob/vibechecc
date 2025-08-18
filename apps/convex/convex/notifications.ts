@@ -259,10 +259,8 @@ export const getNotifications = query({
                   : triggerUser.first_name ||
                     triggerUser.last_name ||
                     undefined,
-              // Ensure image fields are present
-              image_url: triggerUser.image_url || triggerUser.profile_image_url,
-              profile_image_url:
-                triggerUser.profile_image_url || triggerUser.image_url,
+              // Ensure image field is present
+              image_url: triggerUser.image_url,
             }
           : null;
 

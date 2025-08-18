@@ -12,16 +12,29 @@ import { getRuntimeConfig, type PublicEnv } from '@/lib/env/runtime-config';
 function getAppConfig() {
   let config: PublicEnv;
 
+  // Debug: Log what's available in import.meta.env
   try {
     // Try to get runtime config (which may read from Worker env)
     config = getRuntimeConfig();
   } catch {
     // Fall back to static build-time values
+    // These are REQUIRED - no defaults
+    if (!import.meta.env.VITE_APP_NAME) {
+      throw new Error('VITE_APP_NAME environment variable is required');
+    }
+    if (!import.meta.env.VITE_APP_DOMAIN) {
+      throw new Error('VITE_APP_DOMAIN environment variable is required');
+    }
+
     config = {
-      VITE_APP_NAME: import.meta.env.VITE_APP_NAME || 'vibechecc',
-      VITE_APP_DOMAIN: import.meta.env.VITE_APP_DOMAIN || 'vibechecc.com',
+      VITE_APP_NAME: import.meta.env.VITE_APP_NAME,
+      VITE_APP_DOMAIN: import.meta.env.VITE_APP_DOMAIN,
+      VITE_APP_URL:
+        import.meta.env.VITE_APP_URL ||
+        `https://${import.meta.env.VITE_APP_DOMAIN}`,
       VITE_APP_TWITTER_HANDLE:
-        import.meta.env.VITE_APP_TWITTER_HANDLE || '@vibechecc',
+        import.meta.env.VITE_APP_TWITTER_HANDLE ||
+        `@${import.meta.env.VITE_APP_NAME}`,
       VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL || '',
       VITE_CLERK_PUBLISHABLE_KEY:
         import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '',
@@ -35,12 +48,13 @@ function getAppConfig() {
 
   const appName = config.VITE_APP_NAME;
   const appDomain = config.VITE_APP_DOMAIN;
+  const appUrl = config.VITE_APP_URL || `https://${appDomain}`;
   const appTwitterHandle = config.VITE_APP_TWITTER_HANDLE;
 
   return {
     name: appName,
     domain: appDomain,
-    url: `https://${appDomain}`,
+    url: appUrl,
     twitterHandle: appTwitterHandle,
 
     // Display names

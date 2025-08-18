@@ -49,16 +49,8 @@ export function getUserAvatarUrl(
     return undefined;
   }
 
-  // Prefer Clerk image URLs
-  if (user.image_url) {
-    return user.image_url;
-  }
-
-  if (user.profile_image_url) {
-    return user.profile_image_url;
-  }
-
-  return undefined;
+  // Return user's image URL
+  return user.image_url;
 }
 
 /**

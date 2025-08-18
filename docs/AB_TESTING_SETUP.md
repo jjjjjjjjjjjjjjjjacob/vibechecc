@@ -12,10 +12,10 @@ Both deployments share the same Convex backend database and functionality, allow
 ## Architecture
 
 ```
-┌─────────────────┐           ┌─────────────────┐
-│  vibechecc.com  │           │  viberatr.com   │
+┌─────────────────┐           ┌──────────────────┐
+│  vibechecc.io   │           │  viberatr.io     │
 │   (main branch) │           │ (main-alt branch)│
-└────────┬────────┘           └────────┬────────┘
+└────────┬────────┘           └─────────┬────────┘
          │                              │
          │     Cloudflare Workers       │
          │                              │
@@ -38,7 +38,7 @@ Each deployment uses different branding through environment variables:
 
 ```bash
 VITE_APP_NAME=vibechecc
-VITE_APP_DOMAIN=vibechecc.com
+VITE_APP_DOMAIN=vibechecc.io
 VITE_APP_TWITTER_HANDLE=@vibechecc
 ```
 

@@ -6,9 +6,10 @@ import { z } from 'zod';
  */
 const PublicEnvSchema = z.object({
   // App branding configuration
-  VITE_APP_NAME: z.string().default('vibechecc'),
-  VITE_APP_DOMAIN: z.string().default('vibechecc.com'),
-  VITE_APP_TWITTER_HANDLE: z.string().default('@vibechecc'),
+  VITE_APP_NAME: z.string(),
+  VITE_APP_DOMAIN: z.string(),
+  VITE_APP_URL: z.string().url().optional(), // Optional since we can derive from domain
+  VITE_APP_TWITTER_HANDLE: z.string(),
 
   // Public API endpoints
   VITE_CONVEX_URL: z.string().url(),
@@ -139,11 +140,21 @@ export function getPublicEnvironment(): PublicEnv {
         return result.data;
       }
 
-      // Last resort: return all defaults
+      // For required variables, throw error
+      if (!publicEnv.VITE_APP_NAME || !publicEnv.VITE_APP_DOMAIN) {
+        throw new Error(
+          'VITE_APP_NAME and VITE_APP_DOMAIN are required environment variables'
+        );
+      }
+
+      // Return config with required values
       return {
-        VITE_APP_NAME: 'vibechecc',
-        VITE_APP_DOMAIN: 'vibechecc.com',
-        VITE_APP_TWITTER_HANDLE: '@vibechecc',
+        VITE_APP_NAME: publicEnv.VITE_APP_NAME,
+        VITE_APP_DOMAIN: publicEnv.VITE_APP_DOMAIN,
+        VITE_APP_URL:
+          publicEnv.VITE_APP_URL || `https://${publicEnv.VITE_APP_DOMAIN}`,
+        VITE_APP_TWITTER_HANDLE:
+          publicEnv.VITE_APP_TWITTER_HANDLE || `@${publicEnv.VITE_APP_NAME}`,
         VITE_CONVEX_URL: publicEnv.VITE_CONVEX_URL || '',
         VITE_CLERK_PUBLISHABLE_KEY: publicEnv.VITE_CLERK_PUBLISHABLE_KEY || '',
         VITE_POSTHOG_API_KEY: publicEnv.VITE_POSTHOG_API_KEY || '',

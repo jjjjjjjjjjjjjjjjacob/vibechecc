@@ -596,3 +596,214 @@ beforeLoad: async ({ params, context }) => {
 - **Rating/comment permalink routes**: Routes that redirect to parent content with anchors
 - **Authentication redirects**: Routes that check auth state and redirect accordingly
 - **Legacy URL handling**: Routes that convert old URLs to new formats
+
+## Social Connection Profile Integration Patterns
+
+### Context
+
+Integrated social connection components (SocialConnectionsList and ConnectSocialButton) into user profile pages as part of Phase 5: Profile Enhancement. Added functionality for users to view, connect, and disconnect social accounts directly from their profile pages.
+
+### Key Integration Patterns
+
+#### 1. Component Import and Usage
+
+**Pattern**: Import social connection components using standard @/components path structure
+
+```typescript
+import { SocialConnectionsList } from '@/components/social/connections/social-connections-list';
+import { ConnectSocialButton } from '@/components/social/connections/connect-social-button';
+```
+
+**Usage in Profile Edit Page**:
+
+```typescript
+<div className="space-y-4 pt-4">
+  <div>
+    <h3 className="text-sm font-medium mb-3">social connections</h3>
+    <SocialConnectionsList className="mb-4" />
+    <div className="flex flex-wrap gap-2">
+      <ConnectSocialButton platform="twitter" size="sm" variant="outline" />
+      <ConnectSocialButton platform="instagram" size="sm" variant="outline" />
+      <ConnectSocialButton platform="tiktok" size="sm" variant="outline" />
+    </div>
+  </div>
+</div>
+```
+
+**Usage in Profile View Page**:
+
+```typescript
+{/* 4. Social Connections */}
+<SocialConnectionsList className="mb-6 sm:mb-8" />
+```
+
+#### 2. Profile Page Layout Integration
+
+**Pattern**: Add social connections section within existing content management structure
+
+- **Edit Page**: Added after theme color picker, before action buttons
+- **View Page**: Added as fourth section after vibes, reviews, and interests
+
+**Benefits**: Maintains logical flow and keeps social features grouped with profile management functionality.
+
+#### 3. Component Self-Containment
+
+**Pattern**: Social connection components handle their own state, API calls, and empty states
+
+```typescript
+// Components handle loading states
+if (!connections) {
+  return <Card className={className}><Loader2 /></Card>;
+}
+
+// Components handle empty states
+if (connections.length === 0) {
+  return (
+    <Card className={className}>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          no social accounts connected yet. connect your accounts in profile settings.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+**Why**: Reduces complexity in parent components and maintains separation of concerns.
+
+#### 4. Button Configuration for Different Contexts
+
+**Pattern**: Use different button configurations for edit vs view contexts
+
+- **Edit Page**: Small outline buttons for compact display in form
+- **View Page**: Full component with default styling for better visibility
+
+```typescript
+// Edit page - compact
+<ConnectSocialButton platform="twitter" size="sm" variant="outline" />
+
+// View page - default component handles its own presentation
+<SocialConnectionsList className="mb-6 sm:mb-8" />
+```
+
+### UI Design Integration
+
+#### 1. Consistent Spacing and Typography
+
+**Pattern**: Follow existing profile page spacing and text conventions
+
+```typescript
+// Section header follows existing pattern
+<h3 className="text-sm font-medium mb-3">social connections</h3>
+
+// Consistent margin classes with other sections
+<SocialConnectionsList className="mb-6 sm:mb-8" />
+```
+
+#### 2. Responsive Layout Integration
+
+**Pattern**: Use flex-wrap for connection buttons to handle mobile layouts
+
+```typescript
+<div className="flex flex-wrap gap-2">
+  {/* Connection buttons */}
+</div>
+```
+
+**Benefits**: Ensures buttons wrap gracefully on smaller screens while maintaining alignment.
+
+#### 3. Visual Hierarchy
+
+**Pattern**: Place social connections as a distinct section with clear hierarchy
+
+- Edit page: Grouped with other profile settings
+- View page: Positioned after core content (vibes, reviews, interests) but before account management
+
+### Backend Integration
+
+#### 1. Convex Query Usage
+
+**Pattern**: Components use useConvexQuery for real-time data fetching
+
+```typescript
+const connections = useConvexQuery(api.social.connections.getSocialConnections);
+const disconnectMutation = useConvexMutation(
+  api.social.connections.disconnectSocialAccount
+);
+```
+
+**Benefits**: Provides real-time updates when connections change and proper error handling.
+
+#### 2. Platform Support
+
+**Supported Platforms**: twitter, instagram, tiktok
+**Connection States**: connected, disconnected, expired, error
+
+### User Experience Patterns
+
+#### 1. Progressive Enhancement
+
+**Pattern**: Show connection options even when no connections exist
+
+- Empty state provides clear guidance on how to connect accounts
+- Connection buttons remain accessible for easy account linking
+
+#### 2. Contextual Actions
+
+**Pattern**: Different actions available in different contexts
+
+- **Edit Page**: Focus on connecting new accounts and managing existing ones
+- **View Page**: Focus on displaying connected accounts for profile overview
+
+### Security and Data Handling
+
+#### 1. Secure Data Display
+
+**Pattern**: Components only display public social connection data
+
+- Platform usernames and connection status visible
+- Sensitive tokens and credentials handled server-side only
+
+#### 2. User Ownership Validation
+
+**Pattern**: Components automatically scope to current user
+
+```typescript
+// Backend automatically filters to current user
+const currentUser = await getCurrentUserOrThrow(ctx);
+const connections = await ctx.db
+  .query('socialConnections')
+  .withIndex('byUser', (q) => q.eq('userId', currentUser.externalId));
+```
+
+### Development Best Practices
+
+#### 1. Component Reusability
+
+**Pattern**: Single components work across different profile page contexts
+
+- SocialConnectionsList adapts to different className props
+- ConnectSocialButton accepts various size and variant props
+
+#### 2. Type Safety
+
+**Pattern**: Use TypeScript platform unions for type safety
+
+```typescript
+platform: 'twitter' | 'instagram' | 'tiktok';
+```
+
+### Future Enhancement Opportunities
+
+1. **Connection Status Indicators**: Visual indicators for connection health
+2. **Bulk Actions**: Connect/disconnect multiple platforms at once
+3. **Connection Analytics**: Show sharing statistics for connected accounts
+4. **Platform-Specific Settings**: Individual settings per connected platform
+
+### Applicable Situations
+
+- **Profile Management Features**: When adding new profile-related functionality
+- **Social Feature Integration**: When integrating social features into existing pages
+- **Component Integration Patterns**: When adding complex components to existing layouts
+- **User Settings Sections**: When extending user settings with new categories

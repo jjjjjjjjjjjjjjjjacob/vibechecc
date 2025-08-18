@@ -785,7 +785,6 @@ export const create = mutation({
         first_name: undefined,
         last_name: undefined,
         image_url: undefined,
-        profile_image_url: undefined,
         created_at: Date.now(),
         updated_at: Date.now(),
       });

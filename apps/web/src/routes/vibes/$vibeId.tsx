@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { AlertTriangle, Edit, Trash2 } from '@/components/ui/icons';
+import { ShareButton } from '@/components/social/share-button';
 
 // Constants to avoid rollup issues with empty array literals
 const EMPTY_ARRAY: never[] = [];
@@ -478,14 +479,16 @@ function VibePage() {
             <div className="flex flex-col gap-4">
               <h1 className="text-4xl font-bold lowercase">{vibe.title}</h1>
               {mostInteractedEmoji ? (
-                <EmojiRatingDisplay
-                  rating={mostInteractedEmoji}
-                  showScale={true}
-                  onEmojiClick={handleEmojiRatingClick}
-                  size="lg"
-                />
+                <div className="flex items-center gap-2">
+                  <EmojiRatingDisplay
+                    rating={mostInteractedEmoji}
+                    showScale={true}
+                    onEmojiClick={handleEmojiRatingClick}
+                    size="lg"
+                  />
+                </div>
               ) : (
-                <div className="mt-2">
+                <div className="mt-2 flex items-center gap-2">
                   <EmojiRatingCycleDisplay
                     onSubmit={handleEmojiRating}
                     isSubmitting={createEmojiRatingMutation.isPending}
@@ -496,31 +499,43 @@ function VibePage() {
               )}
             </div>
 
-            {/* Edit/Delete buttons for vibe owner */}
-            {isOwner && (
-              <div className="flex gap-2">
-                <Link
-                  to="/vibes/$vibeId/edit"
-                  params={{ vibeId }}
-                  className="inline-block"
-                >
-                  <Button variant="outline" size="sm">
-                    <Edit className="mr-2 h-4 w-4" />
-                    edit
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              {isOwner && (
+                <>
+                  <Link
+                    to="/vibes/$vibeId/edit"
+                    params={{ vibeId }}
+                    className="inline-block"
+                  >
+                    <Button variant="outline" size="sm">
+                      <Edit className="mr-2 h-4 w-4" />
+                      edit
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDeleteVibe}
+                    disabled={deleteVibeMutation.isPending}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {deleteVibeMutation.isPending ? 'deleting...' : 'delete'}
                   </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDeleteVibe}
-                  disabled={deleteVibeMutation.isPending}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {deleteVibeMutation.isPending ? 'deleting...' : 'delete'}
-                </Button>
-              </div>
-            )}
+                </>
+              )}
+              <ShareButton
+                contentType="vibe"
+                variant="outline"
+                size="sm"
+                showCount={vibe.shareCount ? true : false}
+                currentShareCount={vibe.shareCount}
+                vibe={vibe}
+                author={vibe.createdBy || undefined}
+                ratings={vibe.ratings}
+              />
+            </div>
           </div>
 
           {/* Top Emoji Ratings */}

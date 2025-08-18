@@ -59,6 +59,15 @@ const mockEmojiMetadata = [
   },
 ];
 
+// Mock lucide-react to include all icons that might be used
+vi.mock('lucide-react', async () => {
+  const actual = await vi.importActual('lucide-react');
+  return {
+    ...actual,
+    Music2: () => <span>Music2 Icon</span>,
+  };
+});
+
 // Mock hooks
 vi.mock('@/features/search/hooks/use-search-results-improved', () => ({
   useSearchResultsImproved: vi.fn(() => ({
@@ -100,35 +109,14 @@ vi.mock('@/queries', () => ({
 }));
 
 // Mock components
-vi.mock('@/features/search/components', () => ({
-  SearchResultsGrid: ({
-    results,
-    loading,
-    error,
-  }: {
-    results?: Array<{ id: string; title: string }>;
-    loading?: boolean;
-    error?: Error;
-  }) => {
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error loading search results</div>;
-    if (!results || results.length === 0) return <div>no results found</div>;
-
-    return (
-      <div data-testid="search-results">
-        {results.map((result) => (
-          <div key={result.id}>{result.title}</div>
-        ))}
-      </div>
-    );
-  },
-  SearchPagination: () => <div data-testid="pagination">Pagination</div>,
+// Mock the lazy loaded search components
+vi.mock('@/features/search/components/search-results-list', () => ({
   SearchResultsList: ({
     results,
     loading,
     error,
   }: {
-    results?: Array<{ id: string; title: string }>;
+    results?: Array<{ id?: string; title?: string; type?: string }>;
     loading?: boolean;
     error?: Error;
   }) => {
@@ -138,10 +126,39 @@ vi.mock('@/features/search/components', () => ({
 
     return (
       <div data-testid="search-results-list">
-        {results.map((result) => (
-          <div key={result.id} data-testid="search-result-list-item">
-            {result.title}
+        {results.map((result, index) => (
+          <div key={result.id || index} data-testid="search-result-list-item">
+            {result.title || 'No title'}
           </div>
+        ))}
+      </div>
+    );
+  },
+}));
+
+vi.mock('@/features/search/components/search-pagination', () => ({
+  SearchPagination: () => <div data-testid="pagination">Pagination</div>,
+}));
+
+vi.mock('@/features/search/components/search-results-grid', () => ({
+  SearchResultsGrid: ({
+    results,
+    loading,
+    error,
+  }: {
+    results?: { vibes?: Array<{ id: string; title: string }> };
+    loading?: boolean;
+    error?: Error;
+  }) => {
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error loading search results</div>;
+    if (!results?.vibes || results.vibes.length === 0)
+      return <div>no results found</div>;
+
+    return (
+      <div data-testid="search-results">
+        {results.vibes.map((vibe) => (
+          <div key={vibe.id}>{vibe.title}</div>
         ))}
       </div>
     );
@@ -470,7 +487,21 @@ describe('Search Page - Emoji Filter Integration', () => {
   });
 
   it('renders pagination when there are multiple pages', async () => {
-    const manyResults = { ...mockSearchResults, totalCount: 50, totalPages: 5 };
+    const manyResults = {
+      ...mockSearchResults,
+      totalCount: 50,
+      totalPages: 5,
+      vibes: Array(10)
+        .fill(null)
+        .map((_, i) => ({
+          id: `vibe-${i}`,
+          title: `Test Vibe ${i}`,
+          description: `Description ${i}`,
+          tags: ['test'],
+          createdAt: new Date().toISOString(),
+        })),
+    };
+
     mockUseSearchResultsImproved.mockReturnValue({
       data: manyResults,
       isLoading: false,
@@ -479,16 +510,23 @@ describe('Search Page - Emoji Filter Integration', () => {
       isSuccess: true,
     });
 
-    renderWithRouter({ tab: 'vibes' }); // Use 'vibes' tab, not 'all'
+    renderWithRouter({ tab: 'vibes', q: 'test' });
 
     await waitFor(() => {
-      // Check that data is loaded with many results
-      expect(screen.getByText('50 results found')).toBeInTheDocument();
+      // The page renders with search results text
+      expect(screen.getByText(/50.*results.*found/i)).toBeInTheDocument();
     });
 
-    // For now, just check that the search results are showing properly with many results
-    // The pagination might have complex conditional logic we haven't fully captured
-    expect(screen.getByText('50 results found')).toBeInTheDocument();
-    expect(screen.getByText('search results')).toBeInTheDocument();
+    // Check that SearchResultsList component is rendered
+    const resultsList = screen.getByTestId('search-results-list');
+    expect(resultsList).toBeInTheDocument();
+
+    // Our mock components render these test vibes
+    expect(screen.getByText('Test Vibe 0')).toBeInTheDocument();
+    expect(screen.getByText('Test Vibe 1')).toBeInTheDocument();
+
+    // Check pagination is rendered through our mock
+    const pagination = screen.getByTestId('pagination');
+    expect(pagination).toBeInTheDocument();
   });
 });

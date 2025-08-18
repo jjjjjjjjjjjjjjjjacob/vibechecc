@@ -2,12 +2,16 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { analytics, type PostHogConfig } from '@/lib/posthog';
+import { useServerFeatureFlags } from '@/hooks/use-server-feature-flags';
 
 interface PostHogProviderProps {
   children: ReactNode;
 }
 
 export function PostHogProvider({ children }: PostHogProviderProps) {
+  // Bootstrap with server-side feature flags
+  useServerFeatureFlags();
+
   useEffect(() => {
     // Initialize PostHog on the client side only
     if (typeof window !== 'undefined') {

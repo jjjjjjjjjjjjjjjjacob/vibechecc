@@ -228,7 +228,7 @@ jobs:
           VITE_POSTHOG_PROJECT_ID: ${{ secrets.VITE_POSTHOG_PROJECT_ID }}
           VITE_POSTHOG_REGION: 'US Cloud'
           VITE_APP_NAME: ${{ inputs.environment == 'production-alt' && 'viberatr' || 'vibechecc' }}
-          VITE_APP_DOMAIN: ${{ inputs.environment == 'production-alt' && 'viberatr.com' || 'vibechecc.com' }}
+          VITE_APP_DOMAIN: ${{ inputs.environment == 'production-alt' && 'viberatr.io' || 'vibechecc.io' }}
           VITE_APP_TWITTER_HANDLE: ${{ inputs.environment == 'production-alt' && '@viberatr' || '@vibechecc' }}
         run: |
           echo "Building frontend for Cloudflare Workers using Nx..."

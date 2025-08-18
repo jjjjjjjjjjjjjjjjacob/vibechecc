@@ -237,7 +237,6 @@ describe('HTTP Webhook Handler', () => {
         username: 'testuser',
         image_url: '',
         has_image: false,
-        profile_image_url: '',
         phone_numbers: [],
         primary_phone_number_id: null,
         two_factor_enabled: false,

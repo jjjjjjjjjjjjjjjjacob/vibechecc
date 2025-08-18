@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser, useClerk } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
-import { getAuth } from '@clerk/tanstack-react-start/server';
+import { getOptimizedAuth } from '@/lib/optimized-auth';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sparkles, Shield } from '@/components/ui/icons';
@@ -27,12 +27,16 @@ import {
   FollowersModal,
   FollowingModal,
 } from '@/features/follows/components';
+import { SocialConnectionsList } from '@/components/social/connections/social-connections-list';
+import { ConnectSocialButton } from '@/components/social/connections/connect-social-button';
+import { api } from '@vibechecc/convex';
+import { useConvexQuery } from '@convex-dev/react-query';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
   if (!request) throw new Error('No request found');
-  const { userId } = await getAuth(request);
+  const { userId } = await getOptimizedAuth(request);
 
   if (!userId) {
     throw redirect({
@@ -60,6 +64,11 @@ function Profile() {
   const { mutate: ensureUserExists, isPending: isCreatingUser } =
     useEnsureUserExistsMutation();
   const updateProfileMutation = useUpdateProfileMutation();
+
+  // Fetch social connections
+  const socialConnections = useConvexQuery(
+    api.social.connections.getSocialConnections
+  );
 
   // Follow modal states
   const [isFollowersModalOpen, setIsFollowersModalOpen] = React.useState(false);
@@ -294,6 +303,67 @@ function Profile() {
               updateProfileMutation={updateProfileMutation}
               className="mb-6 sm:mb-8"
             />
+
+            {/* 4. Social Connections */}
+            <div className="mb-6 sm:mb-8">
+              <SocialConnectionsList className="mb-4" />
+
+              {/* Connection CTAs */}
+              {socialConnections && (
+                <Card className="bg-background/90 border-none shadow-lg backdrop-blur">
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="mb-4 text-lg font-semibold lowercase">
+                      connect more accounts
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {!socialConnections.some(
+                        (c) =>
+                          c.platform === 'twitter' &&
+                          c.connectionStatus === 'connected'
+                      ) && (
+                        <ConnectSocialButton
+                          platform="twitter"
+                          variant="outline"
+                          size="default"
+                          showLabel={true}
+                        />
+                      )}
+                      {!socialConnections.some(
+                        (c) =>
+                          c.platform === 'instagram' &&
+                          c.connectionStatus === 'connected'
+                      ) && (
+                        <ConnectSocialButton
+                          platform="instagram"
+                          variant="outline"
+                          size="default"
+                          showLabel={true}
+                        />
+                      )}
+                      {!socialConnections.some(
+                        (c) =>
+                          c.platform === 'tiktok' &&
+                          c.connectionStatus === 'connected'
+                      ) && (
+                        <ConnectSocialButton
+                          platform="tiktok"
+                          variant="outline"
+                          size="default"
+                          showLabel={true}
+                        />
+                      )}
+                    </div>
+                    {socialConnections.filter(
+                      (c) => c.connectionStatus === 'connected'
+                    ).length === 3 && (
+                      <p className="text-muted-foreground mt-4 text-sm">
+                        all social accounts connected! 🎉
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
 
           {/* C) ACCOUNT MANAGEMENT SECTION */}

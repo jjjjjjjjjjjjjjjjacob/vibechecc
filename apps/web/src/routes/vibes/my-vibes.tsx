@@ -5,7 +5,7 @@ import { VibeGrid } from '@/features/vibes/components/vibe-grid';
 import { CreateVibeButton } from '@/features/vibes/components/create-vibe-button';
 import { useUser } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
-import { getAuth } from '@clerk/tanstack-react-start/server';
+import { getOptimizedAuth } from '@/lib/optimized-auth';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { VibeGridSkeleton } from '@/components/skeletons/vibe-grid-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
   if (!request) throw new Error('No request found');
-  const { userId } = await getAuth(request);
+  const { userId } = await getOptimizedAuth(request);
 
   if (!userId) {
     throw redirect({

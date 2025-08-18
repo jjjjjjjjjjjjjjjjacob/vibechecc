@@ -3,14 +3,13 @@ import * as React from 'react';
 import { SignInButton, useUser } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
 import { LogIn } from '@/components/ui/icons';
-import { useFeatureFlagEnabled } from 'posthog-js/react';
-import posthog from 'posthog-js';
+import { checkEnvironmentAccess } from '@/lib/env/access-control';
 import {
   useThemeStore,
   type PrimaryColorTheme,
   type SecondaryColorTheme,
 } from '@/stores/theme-store';
-import { APP_NAME } from '@/config/app';
+import { APP_NAME, APP_DOMAIN } from '@/config/app';
 import { cn } from '@/utils';
 
 interface EnvironmentAccessGuardProps {
@@ -27,45 +26,71 @@ type LoadingState =
   | 'access-denied' // State 3 (alt): Access denied
   | 'content'; // Final: Show content
 
+const taglines = [
+  'what am i doing here',
+  'professional vibe checker',
+  "careful don't vibe too hard",
+  "it's a vibe",
+  'no chill only vibes',
+  'vibe now or vibe later',
+  "it's a thing to do",
+  'the nothing app',
+  'who told you about this',
+];
+
 /**
  * Component that restricts access to dev and ephemeral environments
- * based on PostHog feature flags
+ * based on server-side PostHog feature flags
  */
 export function EnvironmentAccessGuard({
   children,
   fallback,
 }: EnvironmentAccessGuardProps) {
   const [loadingState, setLoadingState] = useState<LoadingState>('theme-check');
+  // Initialize with 0 to avoid hydration mismatch, will be randomized on client
   const [taglineIndex, setTaglineIndex] = useState(0);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
   // Set random tagline only on client side to avoid hydration mismatch
   React.useEffect(() => {
-    setTaglineIndex(Math.floor(Math.random() * 9));
+    setTaglineIndex(Math.floor(Math.random() * taglines.length));
   }, []);
 
   const { isLoaded: isUserLoaded, user, isSignedIn } = useUser();
 
-  // Use PostHog React hook for feature flag
-  const hasAccess = useFeatureFlagEnabled('dev-environment-access');
-
   const { isInitialized, initialize, applyThemeToDocument } = useThemeStore();
 
-  // Core access logic
-  const isFeatureFlagChecked = hasAccess !== undefined;
-
-  // Reload feature flags when auth state changes
+  // Check access via server function
   React.useEffect(() => {
-    if (isUserLoaded) {
-      // When signing in or out, reload feature flags
-      posthog.reloadFeatureFlags();
+    let cancelled = false;
 
-      // Reset to access-check state if we're in access-denied state
-      // This allows re-evaluation after auth changes
-      if (loadingState === 'access-denied' || loadingState === 'content') {
-        setLoadingState('access-check');
+    async function checkAccess() {
+      try {
+        const result = await checkEnvironmentAccess();
+
+        if (!cancelled) {
+          setHasAccess(result.hasAccess);
+        }
+      } catch {
+        // On error, default to denying access
+        if (!cancelled) {
+          setHasAccess(false);
+        }
       }
     }
-  }, [isSignedIn, isUserLoaded, loadingState]); // Include all dependencies
+
+    // Check access when user auth state changes
+    if (isUserLoaded) {
+      checkAccess();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isUserLoaded, isSignedIn]);
+
+  // Core access logic
+  const isFeatureFlagChecked = hasAccess !== null;
 
   // Theme is fully ready when initialized
   const isThemeReady = isInitialized;
@@ -136,17 +161,6 @@ export function EnvironmentAccessGuard({
   }, [loadingState, isThemeReady, isFeatureFlagChecked, hasAccess]);
 
   const welcomeMessage = React.useMemo(() => {
-    const taglines = [
-      'what am i doing here',
-      'professional vibe checker',
-      "careful don't vibe too hard",
-      "it's a vibe",
-      'no chill only vibes',
-      'vibe now or vibe later',
-      "it's a thing to do",
-      'the nothing app',
-      'who told you about this',
-    ];
     const selectedTagline = taglines[taglineIndex % taglines.length];
     return selectedTagline;
   }, [taglineIndex]);
@@ -181,9 +195,7 @@ export function EnvironmentAccessGuard({
                 'inline-flex w-full items-center justify-center bg-transparent text-4xl font-bold transition duration-500 data-[state=fade-out]:opacity-0'
               )}
             >
-              {Array.from(
-                typeof APP_NAME === 'string' ? APP_NAME : 'vibechecc'
-              ).map((char, i) => (
+              {Array.from(APP_NAME).map((char, i) => (
                 <span
                   data-state={loadingState}
                   className={cn(
@@ -287,7 +299,7 @@ export function EnvironmentAccessGuard({
         <div className="mx-auto max-w-md space-y-8 p-6 text-center">
           <div className="space-y-4">
             <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
-              vibechecc
+              {APP_NAME}
             </span>
             <div className="space-y-2">
               <h1 className="text-foreground text-2xl font-semibold">
@@ -304,7 +316,7 @@ export function EnvironmentAccessGuard({
             <SignInButton mode="modal">
               <Button className="from-theme-primary to-theme-secondary h-12 w-full bg-gradient-to-r text-base font-semibold text-white transition-all hover:scale-[1.02] hover:shadow-lg">
                 <LogIn className="mr-2 h-5 w-5" />
-                sign in to vibechecc
+                sign in to {APP_NAME}
               </Button>
             </SignInButton>
           </div>
@@ -313,10 +325,10 @@ export function EnvironmentAccessGuard({
             <p>
               if you believe this is an error, please contact{' '}
               <a
-                href="mailto:admin@vibechecc.io"
+                href={`mailto:admin@${APP_DOMAIN}`}
                 className="text-theme-primary hover:text-theme-primary/80 underline transition-colors"
               >
-                admin@vibechecc.io
+                admin@{APP_DOMAIN}
               </a>
             </p>
           </div>

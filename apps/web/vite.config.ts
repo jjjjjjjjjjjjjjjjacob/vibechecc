@@ -8,8 +8,11 @@ import path from 'path';
 export default defineConfig(() => {
   const isProduction = process.env.NODE_ENV === 'production';
 
+  // Load environment variables from root directory
+  const rootDir = path.resolve(__dirname, '../..');
+
   return {
-    envDir: path.resolve(__dirname, '../..'), // Load .env files from root directory
+    envDir: rootDir, // Load .env files from root directory
     server: {
       port: 3000,
       hmr: {

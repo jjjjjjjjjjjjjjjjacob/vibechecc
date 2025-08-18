@@ -12,3 +12,6 @@ export * from './constants/limits';
 
 // Date formatting utilities
 export * from './format/date';
+
+// Social sharing utilities
+export * from './social-sharing';

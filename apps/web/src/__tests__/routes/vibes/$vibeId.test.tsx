@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as React from 'react';
 
 // Import the component directly instead of extracting from Route
-import VibePage from '@/routes/vibes/$vibeId';
+import VibePage from '@/routes/vibes/$vibeId.tsx';
 
 // Mock Clerk
 vi.mock('@clerk/tanstack-react-start', () => ({
@@ -49,7 +49,45 @@ vi.mock('@convex-dev/react-query', () => ({
     },
     enabled: true,
   })),
+  useConvexQuery: vi.fn((query: any) => {
+    // Handle social connections query
+    if (query?.toString?.().includes('getSocialConnections')) {
+      return []; // Return empty array directly
+    }
+    return null; // Return null for other queries
+  }),
+  useConvexMutation: vi.fn(() => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn().mockResolvedValue({}),
+    isPending: false,
+  })),
 }));
+
+// Mock Convex API
+vi.mock('@vibechecc/convex', () => ({
+  api: {
+    social: {
+      connections: {
+        getSocialConnections: 'api.social.connections.getSocialConnections',
+      },
+      sharing: {
+        trackShare: 'api.social.sharing.trackShare',
+      },
+    },
+    files: {
+      getUrl: 'api.files.getUrl',
+    },
+  },
+}));
+
+// Mock lucide-react icons
+vi.mock('lucide-react', async () => {
+  const actual = await vi.importActual('lucide-react');
+  return {
+    ...actual,
+    Music2: () => <span>Music2 Icon</span>,
+  };
+});
 
 // Mock queries
 const mockVibe = {

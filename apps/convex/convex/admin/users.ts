@@ -210,7 +210,6 @@ export const deleteUser = mutation({
       last_name: undefined,
       bio: undefined,
       image_url: undefined,
-      profile_image_url: undefined,
     });
 
     const userVibes = await ctx.db

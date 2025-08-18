@@ -1,0 +1,640 @@
+# PostHog Feature Flags for Social Media Sharing Implementation Plan
+
+> ⚠️ **CRITICAL**: PostHog feature flags are already created in the dashboard. They must be ENABLED (100% rollout for all environments) before any development begins. This ensures safe, feature-flagged development.
+
+## Overview
+Unified implementation plan for social media sharing features controlled by PostHog feature flags. This plan manages the implementation of direct posting for X/Twitter, TikTok ShareKit integration, and Instagram Business API posting with manual fallbacks when direct posting is unavailable.
+
+**Flag Strategy**: 
+- Flags control UI presentation (show API options vs manual options)
+- Actual API functionality depends on OAuth connections
+- Manual fallbacks always available regardless of flag state
+- All users targeted in all environments and devices
+
+## Current State Analysis
+- ✅ Feature flag infrastructure implemented (`config/feature-flags.ts`, hooks)
+- ✅ PostHog client integrated and configured
+- ✅ OAuth connections synced through Clerk webhooks
+- ✅ Basic share buttons and modals implemented
+- ✅ Social connections UI components created
+- ✅ Profile integration for social connections completed
+- 🚧 Instagram share modal exists with manual fallback
+- 🚧 TikTok modal exists, needs ShareKit integration
+- 📋 X/Twitter integration not yet implemented
+
+## Feature Flag Structure
+
+### Required Feature Flags
+```typescript
+interface SocialSharingFeatureFlags {
+  // Platform feature flags - when enabled, use direct posting; when disabled, use manual fallback
+  'social-twitter-direct-enabled': boolean;     // Controls X/Twitter API posting
+  'social-instagram-direct-enabled': boolean;   // Controls Instagram Business API posting
+  'social-tiktok-sharekit-enabled': boolean;    // Controls TikTok ShareKit usage
+```
+
+## Phase 1: Enable Feature Flags in PostHog Dashboard ✅ READY FOR CONFIGURATION
+
+### Task 1.1: Configure PostHog Dashboard 
+**Location**: PostHog Dashboard (app.posthog.com)
+**Status**: CODE READY, FLAGS NEED TO BE ENABLED IN POSTHOG
+**Priority**: IMMEDIATE - Required before implementing features
+
+**What's Complete**:
+- [x] Feature flag infrastructure implemented in code
+- [x] PostHog SDK integrated and configured
+- [x] Hooks ready to consume feature flags
+- [x] Default values set to false (safe defaults)
+
+**Action Required in PostHog Dashboard**:
+1. Log into PostHog at app.posthog.com
+2. Navigate to Feature Flags section
+3. Create/Enable these flags with 100% rollout:
+   - `social-twitter-direct-enabled`
+   - `social-instagram-direct-enabled`  
+   - `social-tiktok-sharekit-enabled`
+4. Set targeting to: All users, all environments
+5. Save and activate each flag
+
+**Verification**:
+- Flags will be consumed by hooks automatically
+- Manual fallbacks always available when flags are false
+- No code changes needed - just enable in PostHog
+
+## Phase 2: Manual Sharing Fallback UI Implementation ✅ COMPLETED
+
+> **CRITICAL**: These fallback UIs must be implemented BEFORE any feature-flagged OAuth/API functionality. They ensure users can always share content regardless of feature flag state, API availability, or OAuth connections.
+
+### Task 2.1: Instagram Manual Sharing Fallback UI ✅
+**Location**: `apps/web/src/components/social/instagram-manual-share.tsx`
+**Status**: COMPLETED
+**Purpose**: Provide fully functional sharing when feature flags are disabled/failed
+**Implementation Approach**:
+- ✅ Reused existing canvas generation from `useStoryCanvas` hook
+- ✅ Wrapped existing preview tabs (expanded/minimal) instead of duplicating
+- ✅ Added platform-specific actions (download, copy caption, copy link)
+- ✅ Included Instagram-specific hashtags and instructions
+- ✅ Added full-width stepper for clear user flow
+- ✅ Implemented deep linking with mobile detection
+
+### Task 2.2: TikTok Manual Sharing Fallback UI ✅
+**Location**: `apps/web/src/components/social/tiktok-manual-share.tsx`
+**Status**: COMPLETED
+**Purpose**: Provide fully functional sharing when ShareKit unavailable
+**Implementation Approach**:
+- ✅ Reused existing canvas generation from `useStoryCanvas` hook
+- ✅ Wrapped existing preview tabs (expanded/minimal) instead of duplicating
+- ✅ Added TikTok-specific actions (download, copy caption, copy hashtags, copy link)
+- ✅ Included trending TikTok hashtags (#fyp, #foryou, #viral)
+- ✅ Added hashtag preview section for better visibility
+- ✅ Implemented deep linking with mobile detection
+- ✅ Created detailed TikTok-specific instructions
+
+### Task 2.3: Fallback UI Error Handling ✅
+**Location**: Integrated within manual share components
+**Status**: COMPLETED
+**Implementation Approach**:
+- ✅ Used existing error handling from `useStoryCanvas` hook
+- ✅ Toast notifications for clipboard and download failures
+- ✅ Disabled states for buttons when content not ready
+- ✅ Loading states with Loader2 spinners
+- ✅ Deep link fallback to web versions after timeout
+- ✅ Clear user feedback with success/error states
+
+## Phase 3: X/Twitter Integration Implementation
+
+### Task 2.1: Create Twitter Share Components
+**Location**: `apps/web/src/components/social/twitter/`
+**Priority**: HIGH
+**Subtasks**:
+- [ ] Create `TwitterShareModal` component
+  ```typescript
+  // Check feature flag for direct posting vs manual
+  const directEnabled = useFeatureFlag(FeatureFlags.SOCIAL_TWITTER_DIRECT);
+  
+  if (directEnabled) {
+    // Direct posting via Twitter API
+    return <TwitterDirectPost />;
+  } else {
+    // Manual sharing with intent URL
+    return <TwitterManualShare />;
+  }
+  ```
+- [ ] Implement Twitter manual sharing
+  - [ ] Generate Twitter intent URL with content
+  - [ ] Format content within character limits
+  - [ ] Add hashtags and mentions
+  - [ ] Open in new window/tab
+- [ ] Add Twitter connection flow
+  - [ ] OAuth integration via Clerk
+  - [ ] Store connection in socialConnections table
+
+### Task 2.2: Implement Twitter API Integration
+**Location**: `apps/convex/convex/social/twitter.ts`
+**Priority**: HIGH
+**Subtasks**:
+- [ ] Create Twitter posting mutation
+  - [ ] Validate user has Twitter connection
+  - [ ] Format content for Twitter API v2
+  - [ ] Handle media attachments
+  - [ ] Post tweet via API
+- [ ] Add Twitter OAuth handler
+  - [ ] Handle OAuth callback from Clerk
+  - [ ] Store access tokens securely
+  - [ ] Implement token refresh logic
+- [ ] Create share tracking
+  - [ ] Log successful shares
+  - [ ] Track engagement metrics
+  - [ ] Handle API errors gracefully
+
+### Task 2.3: Update Share Button for Twitter
+**Location**: `apps/web/src/components/social/share-button.tsx`
+**Priority**: MEDIUM
+**Subtasks**:
+- [ ] Add Twitter to platform options
+  - [ ] Twitter/X icon and branding
+  - [ ] Check connection status
+  - [ ] Handle share action
+- [ ] Implement share handler
+  - [ ] Check feature flag for direct vs manual
+  - [ ] Open appropriate modal
+  - [ ] Track share attempts in analytics
+
+## Phase 4: Instagram Sharing Implementation
+
+### Task 3.1: Enhance Instagram Share Modal
+**Location**: `apps/web/src/components/social/instagram-share-modal.tsx`
+**Priority**: HIGH
+**Status**: Partially implemented, needs enhancement
+**Subtasks**:
+- [ ] Update modal with simplified feature flag check
+  ```typescript
+  const directEnabled = useFeatureFlag(FeatureFlags.SOCIAL_INSTAGRAM_DIRECT);
+  
+  if (directEnabled) {
+    // Direct posting via Instagram Business API
+    return <InstagramDirectPost />;
+  } else {
+    // Manual sharing with download workflow
+    return <InstagramManualShare />;
+  }
+  ```
+- [ ] Enhance manual sharing workflow
+  - [ ] Improve canvas-based image generation
+  - [ ] Support both story (9:16) and post (1:1) formats
+  - [ ] Download button for generated image
+  - [ ] Copy caption with hashtags to clipboard
+  - [ ] Deep link to Instagram app (instagram://camera)
+- [ ] Add connection flow for Instagram
+  - [ ] OAuth via Clerk for Instagram Business accounts
+  - [ ] Store connection in socialConnections table
+  - [ ] Show connection status in UI
+
+### Task 3.2: Implement Instagram Business API Integration
+**Location**: `apps/convex/convex/social/instagram.ts`
+**Priority**: HIGH
+**Prerequisites**: Instagram Business/Creator account required
+**Subtasks**:
+- [ ] Create Instagram posting mutation
+  - [ ] Validate user has Instagram Business connection
+  - [ ] Format content for Instagram API
+  - [ ] Handle image upload to Instagram
+  - [ ] Post to feed or story based on format
+- [ ] Add Instagram OAuth handler
+  - [ ] Handle OAuth callback from Clerk
+  - [ ] Verify Business/Creator account status
+  - [ ] Store access tokens securely
+  - [ ] Implement 60-day token refresh
+- [ ] Create share tracking
+  - [ ] Log successful posts
+  - [ ] Track post performance
+  - [ ] Handle API errors with fallback to manual
+
+## Phase 5: TikTok ShareKit Implementation
+
+### Task 4.1: Implement TikTok ShareKit
+**Location**: `apps/web/src/lib/tiktok-sharekit.ts`
+**Priority**: HIGH
+**Subtasks**:
+- [ ] Install TikTok ShareKit SDK
+  ```bash
+  bun add @tiktok/sharekit
+  ```
+- [ ] Create ShareKit wrapper with feature flag check
+  ```typescript
+  const shareKitEnabled = useFeatureFlag(FeatureFlags.SOCIAL_TIKTOK_SHAREKIT);
+  
+  if (shareKitEnabled) {
+    // Use TikTok ShareKit for sharing
+    return <TikTokShareKit />;
+  } else {
+    // Manual sharing with download workflow
+    return <TikTokManualShare />;
+  }
+  ```
+- [ ] Configure ShareKit parameters
+  - [ ] App ID configuration
+  - [ ] Share content types (image, video preview)
+  - [ ] Handle ShareKit load failures with fallback
+
+### Task 4.2: Create TikTok Share Components
+**Location**: `apps/web/src/components/social/tiktok/`
+**Priority**: HIGH
+**Subtasks**:
+- [ ] Enhance existing `TikTokShareModal` component
+  - [ ] Add ShareKit integration when flag enabled
+  - [ ] Manual fallback with download workflow
+  - [ ] Generate TikTok-optimized content (9:16 aspect ratio)
+- [ ] Add TikTok connection flow
+  - [ ] OAuth via Clerk (when available)
+  - [ ] Store connection in socialConnections table
+  - [ ] Show connection status
+- [ ] Implement manual sharing workflow
+  - [ ] Download video/image button
+  - [ ] Copy caption with trending hashtags
+  - [ ] Deep link to TikTok app (snssdk1128://)
+  - [ ] Step-by-step instructions for manual posting
+
+## Phase 6: Analytics and Monitoring
+
+### Task 5.1: Implement Feature Flag Analytics
+**Location**: `apps/web/src/utils/analytics/feature-flags.ts`
+**Priority**: MEDIUM
+**Subtasks**:
+- [ ] Track flag exposure events
+  ```typescript
+  posthog.capture('feature_flag_called', {
+    flag: flagName,
+    value: flagValue,
+    context: 'social_sharing'
+  });
+  ```
+- [ ] Track conversion metrics
+  - [ ] Share completion rate by platform
+  - [ ] Migration completion rate
+  - [ ] ShareKit adoption rate
+- [ ] Create analytics dashboard queries
+  - [ ] Flag performance metrics
+  - [ ] A/B test results
+  - [ ] User feedback correlation
+
+### Task 5.2: Create Monitoring Dashboard
+**Location**: PostHog Dashboard
+**Priority**: MEDIUM
+**Subtasks**:
+- [ ] Create feature flag performance dashboard
+  - [ ] Flag adoption curves
+  - [ ] Error rates by flag state
+  - [ ] User engagement metrics
+- [ ] Set up alerts
+  - [ ] Error spike alerts
+  - [ ] Low adoption alerts
+  - [ ] Performance degradation alerts
+- [ ] Create rollback procedures
+  - [ ] Document flag rollback process
+  - [ ] Emergency kill switches
+  - [ ] Gradual rollback strategies
+
+## Phase 7: Testing and Quality Assurance
+
+### Task 6.1: Unit Tests for Feature Flags
+**Location**: `apps/web/src/__tests__/`
+**Priority**: HIGH
+**Subtasks**:
+- [ ] Test feature flag hooks
+  - [ ] Mock PostHog client
+  - [ ] Test default values
+  - [ ] Test loading states
+- [ ] Test conditional rendering
+  - [ ] Facebook hidden when disabled
+  - [ ] Instagram manual flow
+  - [ ] TikTok ShareKit integration
+- [ ] Test migration flows
+  - [ ] User prompts
+  - [ ] Data preservation
+
+### Task 6.2: Integration Tests
+**Location**: `apps/web/src/__tests__/integration/`
+**Priority**: MEDIUM
+**Subtasks**:
+- [ ] Test complete share flows with flags
+  - [ ] Each platform with flags on/off
+  - [ ] Migration scenarios
+  - [ ] Fallback behaviors
+- [ ] Test analytics tracking
+  - [ ] Event firing verification
+  - [ ] Data accuracy checks
+- [ ] Test error scenarios
+  - [ ] ShareKit load failures
+  - [ ] Network errors
+  - [ ] Flag fetch failures
+
+### Task 6.3: Manual QA Checklist
+**Documentation**: `.agent/docs/social-sharing-qa-checklist.md`
+**Priority**: HIGH
+**Subtasks**:
+- [ ] Create comprehensive QA checklist
+- [ ] Test on multiple devices
+  - [ ] iOS Safari
+  - [ ] Android Chrome
+  - [ ] Desktop browsers
+- [ ] Test edge cases
+  - [ ] Slow networks
+  - [ ] Ad blockers
+  - [ ] Privacy modes
+
+## Phase 8: Gradual Rollout Strategy
+
+### Task 7.1: Define Rollout Stages
+**Documentation**: `.agent/docs/feature-flag-rollout-plan.md`
+**Priority**: HIGH
+**Timeline**: 2-4 weeks
+**Stages**:
+1. **Stage 1: Internal Testing (Week 1)**
+   - [ ] Enable for team members only
+   - [ ] Collect internal feedback
+   - [ ] Fix critical issues
+
+2. **Stage 2: Beta Users (Week 2)**
+   - [ ] Roll out to 5% of users
+   - [ ] Monitor metrics closely
+   - [ ] Gather user feedback
+
+3. **Stage 3: Gradual Increase (Week 3)**
+   - [ ] Increase to 25% of users
+   - [ ] A/B test performance
+   - [ ] Optimize based on data
+
+4. **Stage 4: Full Rollout (Week 4)**
+   - [ ] Enable for 100% of users
+   - [ ] Monitor for issues
+   - [ ] Plan feature flag cleanup
+
+### Task 7.2: Create Rollback Plan
+**Priority**: HIGH
+**Subtasks**:
+- [ ] Document rollback triggers
+  - [ ] Error rate thresholds
+  - [ ] User complaint thresholds
+  - [ ] Performance degradation limits
+- [ ] Create rollback procedures
+  - [ ] One-click flag disable
+  - [ ] Database cleanup scripts
+  - [ ] User communication templates
+- [ ] Test rollback process
+  - [ ] Staging environment tests
+  - [ ] Rollback time measurements
+  - [ ] Data integrity verification
+
+## Implementation Notes
+
+### Dependencies
+- PostHog SDK already integrated
+- TikTok ShareKit SDK to be added
+- Existing social sharing components
+- Canvas API for image generation
+
+### Risk Mitigation
+- **Feature Flag Failures**: Implement robust default values
+- **ShareKit Issues**: Maintain fallback to manual sharing
+- **Migration Confusion**: Clear user communication and help docs
+- **Performance Impact**: Lazy load SDKs, cache flag values
+
+### Success Metrics
+- **Share Completion Rate**: >60% complete share workflow (manual or API)
+- **API Adoption**: >40% of users connect OAuth for direct posting
+- **ShareKit Success**: >70% successful TikTok shares when SDK enabled
+- **Error Rate**: <1% share failure rate
+- **User Satisfaction**: >4.0 star rating for sharing features
+
+### Timeline Estimate
+- Phase 1: Immediate (Enable PostHog flags)
+- Phase 2: Already completed (Infrastructure)
+- Phase 3: 2 days (X/Twitter Integration)
+- Phase 4: 2 days (Instagram Enhancement)
+- Phase 5: 2 days (TikTok ShareKit)
+- Phase 6: 1 day (Analytics)
+- Phase 7: 2 days (Testing)
+- Phase 8: 2-4 weeks (Gradual Rollout)
+
+**Total: 1 week development + 2-4 weeks progressive enablement**
+
+## Phase 9: Instagram Business API Implementation (Future)
+
+### Overview
+Full OAuth integration for Instagram Professional accounts (Business/Creator). Currently postponed due to account setup requirements. Users will use manual sharing with "OAuth coming soon" messaging until this is implemented.
+
+### Task 8.1: Meta Business App Setup
+**Prerequisites**: Instagram Professional Account required
+**Timeline**: When Instagram account issues resolved
+**Subtasks**:
+- [ ] Create Meta Business App (NOT Consumer app)
+- [ ] Add Instagram product to Business app
+- [ ] Configure OAuth redirect URIs
+- [ ] Set up new scopes (instagram_business_basic, instagram_business_content_publish)
+- [ ] Add test users with Professional accounts
+- [ ] Submit for App Review if needed
+
+### Task 8.2: Backend OAuth Implementation
+**Location**: `apps/convex/convex/social/instagramBusiness.ts`
+**Subtasks**:
+- [ ] Create OAuth authorization flow
+  - [ ] Generate authorization URL with new scopes
+  - [ ] Handle CSRF protection with state parameter
+  - [ ] Verify Professional account requirement
+- [ ] Implement token exchange
+  - [ ] Exchange code for short-lived token (1 hour)
+  - [ ] Convert to long-lived token (60 days)
+  - [ ] Implement automatic refresh before expiry
+- [ ] Add HTTP routes for OAuth callbacks
+- [ ] Store tokens securely in socialConnections table
+
+### Task 8.3: Frontend OAuth Flow
+**Location**: `apps/web/src/components/social/instagram-oauth/`
+**Subtasks**:
+- [ ] Create Instagram Professional account requirements modal
+  - [ ] Explain Meta's business model requirement
+  - [ ] Provide conversion instructions
+  - [ ] Show benefits of OAuth integration
+- [ ] Update connect button to check OAuth flag
+- [ ] Implement OAuth callback handler
+- [ ] Add error handling for non-Professional accounts
+
+### Task 8.4: Enable OAuth via Feature Flag
+**Subtasks**:
+- [ ] Test OAuth flow end-to-end
+- [ ] Update `social-instagram-oauth-enabled` flag to true
+- [ ] Monitor adoption and error rates
+- [ ] Gradually roll out to users
+
+## Phase 10: TikTok OAuth Implementation (Future)
+
+### Overview
+Full OAuth integration for TikTok. Currently using ShareKit and manual sharing with "OAuth coming soon" messaging.
+
+### Task 9.1: TikTok Developer App Setup
+**Timeline**: After Instagram OAuth is stable
+**Subtasks**:
+- [ ] Create TikTok Developer account
+- [ ] Create new TikTok app
+- [ ] Configure OAuth settings
+  - [ ] Set redirect URIs
+  - [ ] Configure required scopes (user.info.basic, video.upload)
+- [ ] Get app approved for production
+
+### Task 9.2: Backend TikTok OAuth
+**Location**: `apps/convex/convex/social/tiktok.ts`
+**Subtasks**:
+- [ ] Implement TikTok OAuth flow
+  - [ ] Authorization URL generation
+  - [ ] Token exchange endpoint
+  - [ ] User profile fetching
+- [ ] Add Clerk custom OAuth provider for TikTok
+- [ ] Store tokens and user data
+
+### Task 9.3: Frontend TikTok OAuth
+**Location**: `apps/web/src/components/social/tiktok-oauth/`
+**Subtasks**:
+- [ ] Create TikTok connect flow
+- [ ] Handle OAuth callbacks
+- [ ] Update share components to use OAuth when available
+- [ ] Maintain fallback to ShareKit/manual
+
+### Task 9.4: Enable OAuth via Feature Flag
+**Subtasks**:
+- [ ] Test TikTok OAuth flow
+- [ ] Update `social-tiktok-oauth-enabled` flag to true
+- [ ] Monitor performance
+- [ ] Full rollout when stable
+
+## Completed Work from Previous Implementation
+
+### Social Infrastructure ✅
+- Database schema for social connections (`socialConnections` table)
+- Convex backend functions for managing connections
+- URL generation utilities for share links
+- Content formatting utilities for each platform
+- Clerk webhook integration for OAuth sync
+
+### UI Components ✅
+- `ShareButton` component with platform selection
+- `UnifiedShareModal` for coordinating share actions
+- `SocialConnectionsList` for displaying connected accounts
+- `ConnectSocialButton` for OAuth initiation
+- `VibeShareCanvas` for image generation
+- Profile pages updated with social connections display
+
+### Instagram Components (Partial) 🚧
+- `InstagramShareModal` exists with basic feature flag checks
+- Manual sharing workflow partially implemented
+- Needs enhancement for "OAuth coming soon" messaging
+- Canvas generation needs aspect ratio improvements
+
+### TikTok Components (Partial) 🚧
+- `TikTokShareModal` component exists
+- Needs ShareKit SDK integration
+- Manual fallback needs implementation
+
+## Implementation Priority Order
+
+1. **Day 0 - IMMEDIATE**: 
+   - 🚨 Enable PostHog feature flags in dashboard (100% rollout for all environments)
+   - Verify flags are working in development
+   - This enables safe development with feature-flagged UI
+
+2. **Week 1 - Core Implementation**: 
+   - Days 1-2: X/Twitter integration (manual sharing + API-ready components)
+   - Days 3-4: Instagram enhancement (manual download + Business API-ready)
+   - Days 5-6: TikTok ShareKit (ShareKit integration + manual fallback)
+   - Day 7: Integration testing and documentation
+
+3. **Week 2 - Progressive API Enablement**:
+   - Set up OAuth connections for test accounts
+   - Verify API posting for connected accounts
+   - Test graceful fallbacks for non-connected users
+   - Monitor performance and error rates
+
+4. **Ongoing - Enhancement**:
+   - APIs activate automatically when users connect OAuth
+   - Manual fallbacks always available when APIs unavailable
+   - Feature flags control UI presentation, not API availability
+
+## Platform Summary
+
+### X/Twitter
+- **Manual**: Always available via intent URLs
+- **Direct**: Twitter API v2 when flag enabled and OAuth connected
+- **Connection**: Via Clerk OAuth provider
+
+### Instagram
+- **Manual**: Always available with download workflow
+- **Direct**: Business API when flag enabled and Professional account connected
+- **Connection**: Via Clerk OAuth (requires Business/Creator account)
+
+### TikTok
+- **Manual**: Always available with download workflow
+- **ShareKit**: When flag enabled and SDK configured
+- **Connection**: Via Clerk OAuth when available
+
+## Key Principles
+- **Single flag per platform**: Direct enabled = API, disabled = manual
+- **Always have fallback**: Manual sharing always available
+- **Progressive enhancement**: Add API capabilities as ready
+- **Feature flag control**: All rollouts controlled via PostHog
+
+## Immediate Next Steps
+
+### ✅ 0. PostHog Feature Flags - READY FOR DASHBOARD CONFIGURATION
+**Status**: Code implementation complete, awaiting PostHog dashboard configuration
+
+**To Enable Flags**:
+1. Go to app.posthog.com → Feature Flags
+2. Create/enable these three flags (100% rollout):
+   - `social-twitter-direct-enabled`
+   - `social-instagram-direct-enabled`
+   - `social-tiktok-sharekit-enabled`
+3. Target: All users, all environments
+4. Save and activate
+
+**Important Notes**:
+- Code is ready and will automatically consume flags
+- Default values are `false` (safe - shows manual sharing)
+- When flags are `true`, UI shows API options (gracefully handles no OAuth)
+- No code changes needed after enabling flags in PostHog
+
+### 1. Implement X/Twitter Integration (Days 1-2)
+- [ ] Create `TwitterShareModal` component
+- [ ] Implement manual sharing with Twitter intent URLs (always works)
+- [ ] Add Twitter OAuth connection UI via Clerk
+- [ ] Create Twitter API posting mutation (will activate when OAuth connected)
+
+### 2. Enhance Instagram Sharing (Days 3-4)
+- [ ] Update `InstagramShareModal` with simplified flag logic
+- [ ] Improve canvas generation for stories (9:16) and posts (1:1)
+- [ ] Add Instagram Business connection flow UI via Clerk
+- [ ] Create Instagram API posting mutation (requires Professional account)
+
+### 3. Implement TikTok ShareKit (Days 5-6)
+- [ ] Install TikTok ShareKit SDK
+- [ ] Update `TikTokShareModal` with ShareKit integration
+- [ ] Implement manual fallback with download workflow
+- [ ] Add TikTok connection UI for future OAuth
+
+### 4. Testing & Integration (Day 7)
+- [ ] Test all three platforms with flags enabled/disabled
+- [ ] Verify manual fallbacks work when APIs unavailable
+- [ ] Test OAuth connection flows
+- [ ] Document setup process for each platform
+
+### 5. Progressive API Enablement (Week 2)
+- [ ] Set up OAuth connections for test accounts
+- [ ] Verify API posting works for connected accounts
+- [ ] Test graceful fallback for non-connected users
+- [ ] Monitor error rates and performance
+
+## Key Reminders
+- **Feature flags first**: All new features must be behind flags
+- **Conservative defaults**: OAuth and direct posting disabled by default
+- **Manual fallbacks**: Always provide manual sharing options
+- **Clear communication**: "Coming soon" messaging for future OAuth features
+- **Progressive enhancement**: Add capabilities as they become available

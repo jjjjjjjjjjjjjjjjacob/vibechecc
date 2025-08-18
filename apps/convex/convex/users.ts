@@ -60,7 +60,6 @@ export async function getCurrentUserOrCreate(ctx: MutationCtx) {
       first_name: identity.givenName || undefined,
       last_name: identity.familyName || undefined,
       image_url: identity.pictureUrl || undefined,
-      profile_image_url: identity.pictureUrl || undefined,
       username: identity.nickname || undefined,
       created_at: Date.now(),
       updated_at: Date.now(),
@@ -101,7 +100,6 @@ export const getAll = query({
       externalId: user.externalId,
       username: user.username,
       image_url: user.image_url,
-      profile_image_url: user.profile_image_url,
       created_at: user.created_at,
       // Do not expose sensitive fields like email, interests, etc.
     }));
@@ -134,7 +132,6 @@ export const getById = query({
         first_name: user.first_name,
         last_name: user.last_name,
         image_url: user.image_url,
-        profile_image_url: user.profile_image_url,
         bio: user.bio,
         created_at: user.created_at,
         // Do not expose private fields like interests, socials, etc.
@@ -309,7 +306,6 @@ export const updateProfileInternal = internalMutation({
       first_name: string;
       last_name: string;
       image_url: string;
-      profile_image_url: string;
       bio: string;
       themeColor: string;
       primaryColor: string;
@@ -335,7 +331,6 @@ export const updateProfileInternal = internalMutation({
     }
     if (args.image_url !== undefined) {
       updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
     }
     if (args.bio !== undefined) {
       updates.bio = args.bio;
@@ -415,7 +410,6 @@ export const completeOnboardingInternal = internalMutation({
       username?: string;
       interests?: string[];
       image_url?: string;
-      profile_image_url?: string;
     } = {
       onboardingCompleted: true,
     };
@@ -428,7 +422,6 @@ export const completeOnboardingInternal = internalMutation({
     }
     if (args.image_url !== undefined) {
       updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
     }
 
     await ctx.db.patch(user._id, updates);
@@ -496,7 +489,6 @@ export const updateOnboardingDataInternal = internalMutation({
       last_name: string;
       interests: string[];
       image_url: string;
-      profile_image_url: string;
     }> = {};
 
     if (args.username !== undefined) {
@@ -513,7 +505,6 @@ export const updateOnboardingDataInternal = internalMutation({
     }
     if (args.image_url !== undefined) {
       updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
     }
 
     // console.log('Updates to apply:', updates);
@@ -601,7 +592,6 @@ export const ensureUserExists = mutation({
         first_name: identity.givenName || undefined,
         last_name: identity.familyName || undefined,
         image_url: identity.pictureUrl || undefined,
-        profile_image_url: identity.pictureUrl || undefined,
         username: identity.nickname || undefined,
         created_at: Date.now(),
         updated_at: Date.now(),
@@ -673,6 +663,14 @@ export const listAll = internalQuery({
   },
 });
 
+// Internal query to get user by external ID
+export const getByExternalId = internalQuery({
+  args: { externalId: v.string() },
+  handler: async (ctx, { externalId }) => {
+    return await userByExternalId(ctx, externalId);
+  },
+});
+
 // WEBHOOK MUTATIONS FOR CLERK INTEGRATION
 
 // Internal mutation for webhook upsert events (user.created, user.updated)
@@ -702,7 +700,6 @@ export const upsertFromClerk = internalMutation({
       first_name: data.first_name || undefined,
       last_name: data.last_name || undefined,
       image_url: data.image_url || undefined,
-      profile_image_url: data.image_url || undefined,
       has_image: data.has_image || undefined,
       primary_email_address_id: data.primary_email_address_id || undefined,
       last_sign_in_at: data.last_sign_in_at || undefined,
@@ -904,6 +901,144 @@ export const trackUserSignup = internalAction({
       // eslint-disable-next-line no-console
       console.error('Error tracking signup to PostHog:', error);
       return { success: false, reason: 'network_error', error: String(error) };
+    }
+  },
+});
+
+/**
+ * Track session events (created/ended) to monitor social connection activity
+ * This helps us understand when users connect/disconnect social accounts
+ */
+export const trackSessionEvent = internalAction({
+  args: {
+    userId: v.string(),
+    eventType: v.union(
+      v.literal('session_created'),
+      v.literal('session_ended')
+    ),
+    timestamp: v.optional(v.number()),
+    metadata: v.optional(v.any()),
+  },
+  handler: async (ctx, { userId, eventType, timestamp, metadata }) => {
+    try {
+      // Log session events for monitoring social connection patterns
+      // eslint-disable-next-line no-console
+      console.log(`Session event: ${eventType} for user ${userId}`, {
+        timestamp: timestamp
+          ? new Date(timestamp).toISOString()
+          : new Date().toISOString(),
+        metadata,
+      });
+
+      // If session is created, we might want to refresh the user's OAuth connections
+      if (eventType === 'session_created') {
+        // Get the user from our database
+        const user = await ctx.runQuery(internal.users.getByExternalId, {
+          externalId: userId,
+        });
+
+        if (user) {
+          // Log any social connections that might be active
+          // This helps us understand which social platforms users are connecting through
+          // eslint-disable-next-line no-console
+          console.log(
+            `User ${userId} session created - checking for social connections`
+          );
+
+          // Track to PostHog if configured
+          if (POSTHOG_API_KEY) {
+            try {
+              const sessionPayload = {
+                api_key: POSTHOG_API_KEY,
+                event: 'session_started',
+                distinct_id: userId,
+                properties: {
+                  session_id: metadata?.sessionId,
+                  client_id: metadata?.clientId,
+                  status: metadata?.status,
+                  source: 'webhook',
+                  timestamp: timestamp
+                    ? new Date(timestamp).toISOString()
+                    : new Date().toISOString(),
+                  $lib: 'convex-server',
+                  $lib_version: '1.0.0',
+                },
+              };
+
+              const response = await fetch('https://app.posthog.com/capture/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(sessionPayload),
+              });
+
+              if (!response.ok) {
+                throw new Error(`PostHog API error: ${response.statusText}`);
+              }
+
+              // eslint-disable-next-line no-console
+              console.log(
+                `Successfully tracked session start for user ${userId} to PostHog`
+              );
+            } catch (error) {
+              // eslint-disable-next-line no-console
+              console.error('Error tracking session to PostHog:', error);
+            }
+          }
+        }
+      }
+
+      // Track session ended events
+      if (eventType === 'session_ended') {
+        // Track to PostHog if configured
+        if (POSTHOG_API_KEY) {
+          try {
+            const sessionPayload = {
+              api_key: POSTHOG_API_KEY,
+              event: 'session_ended',
+              distinct_id: userId,
+              properties: {
+                session_id: metadata?.sessionId,
+                abandoned_at: metadata?.abandonedAt,
+                ended_at: metadata?.endedAt,
+                source: 'webhook',
+                timestamp: timestamp
+                  ? new Date(timestamp).toISOString()
+                  : new Date().toISOString(),
+                $lib: 'convex-server',
+                $lib_version: '1.0.0',
+              },
+            };
+
+            const response = await fetch('https://app.posthog.com/capture/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(sessionPayload),
+            });
+
+            if (!response.ok) {
+              throw new Error(`PostHog API error: ${response.statusText}`);
+            }
+
+            // eslint-disable-next-line no-console
+            console.log(
+              `Successfully tracked session end for user ${userId} to PostHog`
+            );
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Error tracking session end to PostHog:', error);
+          }
+        }
+      }
+
+      return { success: true, userId, eventType };
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Error tracking session event ${eventType}:`, error);
+      return { success: false, reason: 'error', error: String(error) };
     }
   },
 });

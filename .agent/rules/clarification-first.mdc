@@ -1,0 +1,41 @@
+# Always Ask for Clarification When Uncertain
+
+## Rule
+When there is ANY ambiguity or potential confusion in terminology, requirements, or implementation details, ALWAYS ask for clarification before proceeding with changes.
+
+## Common Areas Requiring Clarification
+
+### UI Terminology
+- **Expanded/Collapsed States**: Modal states vs tab names vs view states
+  - "Expanded tab" = A tab labeled 'expanded' 
+  - "Expanded view" = Full-screen maximized modal
+  - "Collapsed view" = Normal modal view
+  - "Minimal tab" = A tab labeled 'minimal'
+
+### Component Hierarchy
+- Parent vs child components
+- Wrapper components vs nested components
+- Which specific instance when multiple exist
+
+### Behavioral Requirements  
+- Should behavior apply to all instances or specific ones?
+- Are changes additive or replacements?
+- What are the edge cases?
+
+## Examples of Good Clarification Questions
+- "I see there are two concepts here: tabs labeled 'expanded'/'minimal' and view states (maximized/minimized). Which are you referring to?"
+- "Should this apply to all three instances or just the first one?"
+- "Do you want this behavior only when X condition is met, or always?"
+
+## Why This Matters
+- Prevents incorrect implementations
+- Saves time by avoiding rework
+- Ensures user requirements are met accurately
+- Reduces frustration for both parties
+
+## Implementation
+Before making changes when ANY uncertainty exists:
+1. State what you understand
+2. Identify the ambiguity
+3. Ask specific clarifying questions
+4. Wait for confirmation before proceeding

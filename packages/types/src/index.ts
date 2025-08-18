@@ -113,6 +113,10 @@ export interface Vibe {
   tags?: string[];
   viewCount?: number;
   visibility?: 'public' | 'deleted'; // From Convex schema
+
+  // Share tracking fields
+  shareCount?: number; // Total number of times this vibe has been shared
+  lastSharedAt?: number; // Timestamp of most recent share
 }
 
 export interface Follow {
@@ -141,4 +145,52 @@ export interface Notification {
   createdAt: number; // Timestamp
   _creationTime?: number; // Convex creation time for compatibility
   triggerUser: User | null; // Populated user data for the user who triggered the notification (can be null if user deleted)
+}
+
+export interface SocialConnection {
+  _id?: string; // Convex document ID for compatibility
+  userId: string; // External ID of user who owns this connection
+  platform: 'twitter' | 'instagram' | 'tiktok'; // Social platform type
+  platformUserId: string; // User ID on the social platform
+  platformUsername?: string; // Username on the social platform
+  accessToken?: string; // OAuth access token (encrypted)
+  refreshToken?: string; // OAuth refresh token (encrypted)
+  tokenExpiresAt?: number; // When the access token expires
+  connectionStatus: 'connected' | 'disconnected' | 'expired' | 'error'; // Status of the connection
+  connectedAt: number; // When the connection was established
+  lastSyncAt?: number; // Last time data was synced from platform
+  metadata?: Record<string, unknown>; // Additional platform-specific data
+  lastError?: string; // Last error message if connection failed
+  errorCount?: number; // Number of consecutive errors
+  _creationTime?: number; // Convex creation time for compatibility
+}
+
+export interface ShareEvent {
+  _id?: string; // Convex document ID for compatibility
+  contentType: 'vibe' | 'profile'; // Type of content shared
+  contentId: string; // ID of the content (vibeId or userId)
+  userId?: string; // External ID of user who shared (optional for anonymous)
+  platform: 'twitter' | 'instagram' | 'tiktok' | 'clipboard' | 'native'; // Platform shared to
+  shareType: 'story' | 'feed' | 'direct' | 'copy'; // Type of share action
+
+  // Tracking metadata
+  sessionId?: string; // Session identifier for tracking
+  referrer?: string; // Referrer URL
+  userAgent?: string; // User agent string
+  ipAddress?: string; // IP address (if tracked)
+
+  // UTM tracking
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmTerm?: string;
+  utmContent?: string;
+
+  // Event metadata
+  success: boolean; // Whether the share was successful
+  errorMessage?: string; // Error message if share failed
+  metadata?: Record<string, unknown>; // Additional event-specific data
+
+  createdAt: number; // Timestamp of the share event
+  _creationTime?: number; // Convex creation time for compatibility
 }

@@ -1,5 +1,5 @@
 import { httpRouter } from 'convex/server';
-import { httpAction } from './_generated/server';
+import { httpAction, type ActionCtx } from './_generated/server';
 import { internal } from './_generated/api';
 import type {
   WebhookEvent,
@@ -10,12 +10,160 @@ import { Webhook } from 'svix';
 
 const http = httpRouter();
 
-// Type for extended webhook event types (including organization membership events)
+// Type for extended webhook event types (including organization membership and session events)
 type ExtendedWebhookEventType =
   | WebhookEvent['type']
   | 'organizationMembership.created'
   | 'organizationMembership.updated'
-  | 'organizationMembership.deleted';
+  | 'organizationMembership.deleted'
+  | 'session.created'
+  | 'session.ended';
+
+// Helper function to sync OAuth connections from Clerk user data
+async function syncUserOAuthConnections(
+  ctx: ActionCtx,
+  userData: UserJSON
+): Promise<void> {
+  try {
+    // Extract external accounts (OAuth connections) from user data
+    const externalAccounts = userData.external_accounts || [];
+
+    // eslint-disable-next-line no-console
+    console.log(
+      `Syncing OAuth connections for user ${userData.id}, found ${externalAccounts.length} external accounts`
+    );
+
+    for (const account of externalAccounts) {
+      // Map Clerk provider names to our platform types
+      const platformMapping: Record<
+        string,
+        'twitter' | 'instagram' | 'tiktok' | null
+      > = {
+        oauth_twitter: 'twitter',
+        oauth_x: 'twitter', // X (formerly Twitter)
+        oauth_instagram: 'instagram',
+        oauth_tiktok: 'tiktok',
+        twitter: 'twitter',
+        x: 'twitter',
+        instagram: 'instagram',
+        tiktok: 'tiktok',
+      };
+
+      const platform = platformMapping[account.provider] || null;
+
+      // Skip unsupported platforms (like Apple sign-in) or accounts without user IDs
+      if (!platform) {
+        // Only log for truly unsupported providers, not Apple
+        if (!account.provider.includes('apple')) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Skipping unsupported OAuth provider: ${account.provider}`
+          );
+        }
+        continue;
+      }
+
+      // Skip if no provider user ID (some OAuth connections might not have one yet)
+      if (!account.provider_user_id || account.provider_user_id.trim() === '') {
+        // eslint-disable-next-line no-console
+        console.log(
+          `Skipping ${account.provider} - no provider user ID available`
+        );
+        continue;
+      }
+
+      // Store or update the social connection
+      try {
+        await ctx.runMutation(
+          internal.social.connections.internalConnectSocialAccount,
+          {
+            userId: userData.id,
+            platform,
+            platformUserId: account.provider_user_id,
+            platformUsername:
+              account.username || account.email_address || undefined,
+            // Note: We don't have access to OAuth tokens through webhooks for security
+            // These would need to be stored during the OAuth flow on the client side
+            accessToken: undefined,
+            refreshToken: undefined,
+            tokenExpiresAt: undefined,
+            metadata: {
+              email: account.email_address,
+              firstName: account.first_name,
+              lastName: account.last_name,
+              imageUrl: account.image_url,
+              provider: account.provider,
+              clerkAccountId: account.id,
+              verificationStatus: account.verification?.status,
+              approvedScopes: account.approved_scopes,
+            },
+          }
+        );
+
+        // eslint-disable-next-line no-console
+        console.log(
+          `Successfully synced ${platform} connection for user ${userData.id}`
+        );
+      } catch (connectionError) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `Failed to sync ${platform} connection for user ${userData.id}:`,
+          connectionError
+        );
+
+        // Try to mark the connection as having an error
+        try {
+          await ctx.runMutation(
+            internal.social.connections.internalMarkConnectionError,
+            {
+              userId: userData.id,
+              platform,
+              errorMessage: `Webhook sync failed: ${connectionError instanceof Error ? connectionError.message : 'Unknown error'}`,
+            }
+          );
+        } catch (markErrorFailure) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `Failed to mark connection error for ${platform}:`,
+            markErrorFailure
+          );
+        }
+      }
+    }
+  } catch (syncError) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `Failed to sync OAuth connections for user ${userData.id}:`,
+      syncError
+    );
+  }
+}
+
+// Helper function to clean up OAuth connections when user is deleted
+async function cleanupUserOAuthConnections(
+  ctx: ActionCtx,
+  clerkUserId: string
+): Promise<void> {
+  try {
+    const result = await ctx.runMutation(
+      internal.social.connections.cleanupUserConnections,
+      {
+        clerkUserId,
+      }
+    );
+
+    // eslint-disable-next-line no-console
+    console.log(
+      `Cleaned up ${result.cleaned} OAuth connections for deleted user ${clerkUserId}`
+    );
+  } catch (cleanupError) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `Failed to cleanup OAuth connections for deleted user ${clerkUserId}:`,
+      cleanupError
+    );
+  }
+}
 
 const handleClerkWebhook = httpAction(async (ctx, request) => {
   // SECURITY: Rate limiting and basic request validation
@@ -49,6 +197,9 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
         data: userData,
       });
 
+      // Sync OAuth connections if present
+      await syncUserOAuthConnections(ctx, userData);
+
       // Track signup to PostHog
       await ctx.runAction(internal.users.trackUserSignup, {
         userId: userData.id,
@@ -73,6 +224,9 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
         data: userData,
       });
 
+      // Sync OAuth connections if present
+      await syncUserOAuthConnections(ctx, userData);
+
       // Check if user has admin role in organizations
       const organizationMemberships = (
         userData as UserJSON & {
@@ -95,6 +249,10 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
     case 'user.deleted': {
       const userData = event.data as UserJSON;
       const clerkUserId = userData.id;
+
+      // Clean up OAuth connections before deleting user
+      await cleanupUserOAuthConnections(ctx, clerkUserId);
+
       // console.log('Deleting user', clerkUserId);
       await ctx.runMutation(internal.users.deleteFromClerk, {
         clerkUserId,
@@ -144,6 +302,72 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
           externalId: userId,
           isAdmin: false,
         });
+      }
+      break;
+    }
+
+    case 'session.created': {
+      // Session created - track social connections that are active
+      const sessionData = event.data as unknown as Record<string, unknown>; // Session type not exported by Clerk
+      const userId = sessionData.user_id as string;
+
+      if (userId) {
+        // eslint-disable-next-line no-console
+        console.log(`Session created for user ${userId}`);
+
+        // Fetch the user data to sync OAuth connections
+        // This ensures we capture any new OAuth connections made during sign-in
+        try {
+          // Note: We might need to fetch full user data from Clerk API here
+          // For now, we'll just log the event for monitoring
+          await ctx.runAction(internal.users.trackSessionEvent, {
+            userId,
+            eventType: 'session_created',
+            timestamp: (sessionData.created_at as number) || Date.now(),
+            metadata: {
+              sessionId: sessionData.id as string,
+              clientId: sessionData.client_id as string,
+              status: sessionData.status as string,
+            },
+          });
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `Failed to track session creation for user ${userId}:`,
+            error
+          );
+        }
+      }
+      break;
+    }
+
+    case 'session.ended': {
+      // Session ended - track when users sign out
+      const sessionData = event.data as unknown as Record<string, unknown>; // Session type not exported by Clerk
+      const userId = sessionData.user_id as string;
+
+      if (userId) {
+        // eslint-disable-next-line no-console
+        console.log(`Session ended for user ${userId}`);
+
+        try {
+          await ctx.runAction(internal.users.trackSessionEvent, {
+            userId,
+            eventType: 'session_ended',
+            timestamp: (sessionData.updated_at as number) || Date.now(),
+            metadata: {
+              sessionId: sessionData.id as string,
+              abandonedAt: sessionData.abandoned_at as number | undefined,
+              endedAt: sessionData.ended_at as number | undefined,
+            },
+          });
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `Failed to track session end for user ${userId}:`,
+            error
+          );
+        }
       }
       break;
     }
@@ -225,7 +449,7 @@ export async function validateRequest(
 }
 
 http.route({
-  path: '/clerk',
+  path: '/webhooks/clerk',
   method: 'POST',
   handler: handleClerkWebhook,
 });

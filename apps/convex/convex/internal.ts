@@ -47,7 +47,6 @@ export const updateProfileInternal = internalMutation({
     }
     if (args.image_url !== undefined) {
       updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
     }
     if (args.bio !== undefined) {
       updates.bio = args.bio;
@@ -109,7 +108,6 @@ export const completeOnboardingInternal = internalMutation({
     }
     if (args.image_url !== undefined) {
       updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
     }
 
     await ctx.db.patch(user._id, updates);
@@ -156,7 +154,6 @@ export const updateOnboardingDataInternal = internalMutation({
     }
     if (args.image_url !== undefined) {
       updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
     }
 
     if (Object.keys(updates).length > 0) {

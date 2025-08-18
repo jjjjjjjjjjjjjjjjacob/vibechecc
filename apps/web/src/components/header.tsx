@@ -354,7 +354,7 @@ export function Header() {
                   className="flex items-center gap-2"
                   onClick={() => setNavState(null)}
                 >
-                  <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent">
+                  <span className="from-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-xl font-bold text-transparent">
                     {APP_NAME}
                   </span>
                 </Link>

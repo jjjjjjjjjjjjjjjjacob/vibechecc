@@ -11,18 +11,20 @@ import {
 import { Button } from '@/components/ui/button';
 import { useUser } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
-import { getAuth } from '@clerk/tanstack-react-start/server';
+import { getOptimizedAuth } from '@/lib/optimized-auth';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import toast from '@/utils/toast';
 import { UserProfileView } from '@/features/profiles/components';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from '@/components/ui/icons';
+import { api } from '@vibechecc/convex';
+import { useConvexQuery } from '@convex-dev/react-query';
 
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
   if (!request) throw new Error('No request found');
-  const { userId } = await getAuth(request);
+  const { userId } = await getOptimizedAuth(request);
 
   if (!userId) {
     throw redirect({
@@ -57,6 +59,12 @@ function ProfilePreview() {
   const { data: receivedRatings, isLoading: receivedRatingsLoading } =
     useUserReceivedRatings(convexUser?.externalId || '');
   const { data: emojiStats } = useUserEmojiStats(convexUser?.externalId || '');
+
+  // Fetch social connections for preview
+  const socialConnections = useConvexQuery(
+    api.social.connections.getUserSocialConnections,
+    convexUser?.externalId ? { userId: convexUser.externalId } : 'skip'
+  );
 
   React.useEffect(() => {
     if (
@@ -142,6 +150,7 @@ function ProfilePreview() {
         </div>
         <UserProfileView
           user={convexUser}
+          socialConnections={socialConnections}
           userVibes={userVibes}
           vibesLoading={vibesLoading}
           userRatings={userRatings

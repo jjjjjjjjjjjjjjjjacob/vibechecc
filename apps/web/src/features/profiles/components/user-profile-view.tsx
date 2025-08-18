@@ -21,6 +21,7 @@ import {
   Twitter,
   Instagram,
 } from '@/components/ui/icons';
+import { Music2 } from 'lucide-react';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -48,7 +49,6 @@ interface UserProfileViewProps {
     first_name?: string;
     last_name?: string;
     image_url?: string;
-    profile_image_url?: string;
     bio?: string;
     created_at?: number;
     _creationTime?: number;
@@ -62,6 +62,11 @@ interface UserProfileViewProps {
       website?: string;
     };
   };
+  socialConnections?: Array<{
+    platform: 'twitter' | 'instagram' | 'tiktok';
+    platformUsername?: string;
+    connectedAt?: number;
+  }>;
   userVibes?: Array<Vibe>;
   vibesLoading?: boolean;
   userRatings?: Array<{
@@ -124,6 +129,7 @@ interface UserProfileViewProps {
 
 export function UserProfileView({
   user,
+  socialConnections,
   userVibes,
   vibesLoading = false,
   userRatings,
@@ -239,7 +245,7 @@ export function UserProfileView({
                   <div className="from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-theme-primary/40 relative rounded-full bg-gradient-to-r p-1.5">
                     <Avatar className="border-theme-primary/50 h-28 w-28 sm:h-32 sm:w-32">
                       <AvatarImage
-                        src={user.image_url || user.profile_image_url}
+                        src={user.image_url}
                         alt={displayName}
                         className="object-cover"
                       />
@@ -346,41 +352,87 @@ export function UserProfileView({
 
                   {/* Social Links and Follow Button */}
                   <div className="flex flex-wrap items-center gap-3">
-                    {/* Social Links */}
+                    {/* Connected Social Accounts */}
+                    {socialConnections && socialConnections.length > 0 && (
+                      <>
+                        {socialConnections.map((connection) => {
+                          const icons = {
+                            twitter: Twitter,
+                            instagram: Instagram,
+                            tiktok: Music2,
+                          };
+                          const Icon = icons[connection.platform];
+                          const urls = {
+                            twitter: `/out/twitter/${connection.platformUsername}`,
+                            instagram: `/out/instagram/${connection.platformUsername}`,
+                            tiktok: `/out/tiktok/${connection.platformUsername}`,
+                          };
+
+                          if (!connection.platformUsername) return null;
+
+                          return (
+                            <Button
+                              key={connection.platform}
+                              variant="outline"
+                              size="sm"
+                              asChild
+                              className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
+                            >
+                              <a
+                                href={urls[connection.platform]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={`@${connection.platformUsername} on ${connection.platform}`}
+                              >
+                                <Icon className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          );
+                        })}
+                      </>
+                    )}
+
+                    {/* Legacy Social Links (fallback) */}
                     {user.socials && (
                       <>
-                        {user.socials.twitter && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            asChild
-                            className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
-                          >
-                            <a
-                              href={`https://twitter.com/${user.socials.twitter}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                        {user.socials.twitter &&
+                          !socialConnections?.some(
+                            (c) => c.platform === 'twitter'
+                          ) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              asChild
+                              className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
                             >
-                              <Twitter className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        )}
-                        {user.socials.instagram && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            asChild
-                            className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
-                          >
-                            <a
-                              href={`https://instagram.com/${user.socials.instagram}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              <a
+                                href={`/out/twitter/${user.socials.twitter}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Twitter className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          )}
+                        {user.socials.instagram &&
+                          !socialConnections?.some(
+                            (c) => c.platform === 'instagram'
+                          ) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              asChild
+                              className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
                             >
-                              <Instagram className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        )}
+                              <a
+                                href={`/out/instagram/${user.socials.instagram}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Instagram className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          )}
                         {user.socials.website && (
                           <Button
                             variant="outline"
@@ -389,7 +441,7 @@ export function UserProfileView({
                             className="border-border bg-card/30 text-foreground hover:bg-card/50 transition-all hover:scale-105"
                           >
                             <a
-                              href={user.socials.website}
+                              href={`/out/website?url=${encodeURIComponent(user.socials.website)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                             >

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useUser } from '@clerk/tanstack-react-start';
 import { usePostHog } from '@/hooks/use-posthog';
 import { createServerFn } from '@tanstack/react-start';
-import { getAuth } from '@clerk/tanstack-react-start/server';
+import { getOptimizedAuth } from '@/lib/optimized-auth';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { TagInput } from '@/components/tag-input';
 import { ImageUpload } from '@/components/image-upload';
@@ -21,7 +21,7 @@ import toast from '@/utils/toast';
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
   if (!request) throw new Error('No request found');
-  const { userId } = await getAuth(request);
+  const { userId } = await getOptimizedAuth(request);
 
   if (!userId) {
     throw redirect({

@@ -26,8 +26,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/constants/index.ts src/format/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/constants/index.ts src/format/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup && tsc --project tsconfig.declarations.json",
+    "dev": "tsup --watch",
     "clean": "rm -rf dist"
   },
   "devDependencies": {

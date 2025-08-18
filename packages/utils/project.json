@@ -7,14 +7,14 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsup src/index.ts --format cjs,esm --dts",
+        "command": "tsup && tsc --project tsconfig.declarations.json",
         "cwd": "packages/utils"
       }
     },
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsup src/index.ts --format cjs,esm --dts --watch",
+        "command": "tsup --watch",
         "cwd": "packages/utils"
       }
     },

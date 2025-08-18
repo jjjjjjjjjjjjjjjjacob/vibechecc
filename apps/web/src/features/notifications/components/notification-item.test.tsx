@@ -29,10 +29,16 @@ vi.mock('@/utils/date-utils', () => ({
   formatDistanceToNow: vi.fn(() => '2 hours ago'),
 }));
 
-// Mock header nav store
+// Mock header nav store - need to return a function that returns the value
+const mockSetNavState = vi.fn();
 vi.mock('@/stores/header-nav-store', () => ({
-  useHeaderNavStore: () => ({
-    setNavState: vi.fn(),
+  useHeaderNavStore: vi.fn((selector) => {
+    // If selector is provided, call it with the mock state
+    if (typeof selector === 'function') {
+      return selector({ setNavState: mockSetNavState });
+    }
+    // Otherwise return the whole mock state
+    return { setNavState: mockSetNavState };
   }),
 }));
 

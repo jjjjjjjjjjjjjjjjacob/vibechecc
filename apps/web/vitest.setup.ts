@@ -2,6 +2,14 @@
 import { vi, afterEach } from 'vitest';
 import React from 'react';
 
+// Set up environment variables for tests
+vi.stubEnv('VITE_APP_NAME', 'vibechecc');
+vi.stubEnv('VITE_APP_DOMAIN', 'vibechecc.com');
+vi.stubEnv('VITE_APP_TWITTER_HANDLE', '@vibechecc');
+vi.stubEnv('VITE_CONVEX_URL', 'https://test.convex.cloud');
+vi.stubEnv('VITE_CLERK_PUBLISHABLE_KEY', 'pk_test_123');
+vi.stubEnv('VITE_POSTHOG_API_KEY', 'phk_test_123');
+
 // Mock all external modules before anything else
 vi.mock('lucide-react', () => {
   const MockIcon = React.forwardRef((props: any, ref: any) =>
@@ -48,6 +56,7 @@ vi.mock('lucide-react', () => {
     'Image',
     'ImageIcon',
     'Info',
+    'Instagram',
     'Laptop',
     'Layers',
     'LayoutGrid',
@@ -75,6 +84,7 @@ vi.mock('lucide-react', () => {
     'Tag',
     'Trash2',
     'TrendingUp',
+    'Twitter',
     'User',
     'UserMinus',
     'UserPlus',

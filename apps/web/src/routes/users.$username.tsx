@@ -13,6 +13,8 @@ import { MasonryFeed } from '@/components/masonry-feed';
 import { UserProfileView } from '@/features/profiles/components/user-profile-view';
 import { useUser } from '@clerk/tanstack-react-start';
 import { trackEvents } from '@/lib/posthog';
+import { api } from '@vibechecc/convex';
+import { useConvexQuery } from '@convex-dev/react-query';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,
@@ -36,6 +38,12 @@ function UserProfile() {
     useUserReceivedRatings(user?.externalId || '');
   const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
     user?.externalId || ''
+  );
+
+  // Fetch social connections for public profile
+  const socialConnections = useConvexQuery(
+    api.social.connections.getUserSocialConnections,
+    user?.externalId ? { userId: user.externalId } : 'skip'
   );
 
   // Track profile view when user data is loaded
@@ -75,6 +83,7 @@ function UserProfile() {
   return (
     <UserProfileView
       user={user}
+      socialConnections={socialConnections}
       userVibes={userVibes}
       vibesLoading={vibesLoading}
       userRatings={userRatings
