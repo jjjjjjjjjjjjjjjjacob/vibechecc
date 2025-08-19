@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/use-posthog';
+import { trackEvents } from '@/lib/track-events';
 import { Badge } from '@/components/ui/badge';
 import {
   useTopEmojiRatings,
@@ -85,7 +85,6 @@ export function VibeCard({
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const [isAvatarHovered, setIsAvatarHovered] = React.useState(false);
   const { user } = useUser();
-  const { trackEvents } = usePostHog();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
   const { data: emojiMetadataArray } = useEmojiMetadata();
 

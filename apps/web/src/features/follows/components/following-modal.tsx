@@ -14,7 +14,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useFollowing } from '../hooks/use-following';
 import { FollowButton } from './follow-button';
 import type { User } from '@vibechecc/types';
-import { trackEvents } from '@/lib/posthog';
+import { trackEvents } from '@/lib/track-events';
 
 interface FollowingModalFollowing {
   user: User | null;

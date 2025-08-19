@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';
-import { APP_CONFIG } from '@/config/app';
+import { APP_CONFIG } from '@/utils/bindings';
 
 export const Route = createFileRoute('/privacy')({
   head: () => ({

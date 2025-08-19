@@ -84,6 +84,9 @@ export default defineConfig(() => {
       // CSS code splitting
       cssCodeSplit: true,
     },
+    ssr: {
+      noExternal: ['posthog-js', 'posthog-js/react'],
+    },
 
     // Optimize dependencies
     optimizeDeps: {
@@ -120,6 +123,7 @@ export default defineConfig(() => {
         '@tanstack/react-router-devtools',
         // Analytics (loaded asynchronously anyway)
         'posthog-js',
+        'posthog-js/react',
       ],
     },
 

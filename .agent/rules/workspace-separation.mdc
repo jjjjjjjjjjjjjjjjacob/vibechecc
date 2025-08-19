@@ -28,16 +28,22 @@ Keep code where it belongs. Only extract to shared packages when multiple worksp
 
 ### ❌ Bad: Over-extraction
 ```typescript
-// packages/utils/src/posthog.ts
-import { posthog } from 'posthog-js'; // Frontend-specific library!
+// packages/utils/src/analytics.ts
+import posthog from 'posthog-js'; // Frontend-specific library!
 export function trackEvent() { ... }
 ```
 
 ### ✅ Good: Keep in workspace
 ```typescript
-// apps/frontend/browser/src/lib/posthog.ts
-import { posthog } from 'posthog-js';
-export function trackEvent() { ... }
+// apps/web/src/lib/track-events.ts
+import posthog from 'posthog-js';
+export const trackEvents = {
+  vibeCreated: (id: string) => posthog.capture('vibe_created', { id })
+  // Project-specific event definitions
+};
+
+// Use native PostHog React hooks directly in components:
+// import { usePostHog, useFeatureFlagEnabled } from 'posthog-js/react';
 ```
 
 ### ✅ Good: Truly shared utility

@@ -16,6 +16,7 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 
 vi.mock('posthog-js/react', () => ({
   useFeatureFlagEnabled: vi.fn(),
+  useFeatureFlagPayload: vi.fn(),
 }));
 
 vi.mock('@/stores/theme-store', () => ({
@@ -39,6 +40,7 @@ describe('EnvironmentAccessGuard', () => {
         applyThemeToDocument: vi.fn(),
       });
       vi.mocked(posthogReact.useFeatureFlagEnabled).mockReturnValue(true);
+      vi.mocked(posthogReact.useFeatureFlagPayload).mockReturnValue(true);
       vi.mocked(clerkReact.useUser).mockReturnValue({
         isLoaded: true,
         user: null,
@@ -61,6 +63,7 @@ describe('EnvironmentAccessGuard', () => {
         applyThemeToDocument: vi.fn(),
       });
       vi.mocked(posthogReact.useFeatureFlagEnabled).mockReturnValue(undefined);
+      vi.mocked(posthogReact.useFeatureFlagPayload).mockReturnValue(undefined);
       vi.mocked(clerkReact.useUser).mockReturnValue({
         isLoaded: false,
         user: null,
@@ -91,6 +94,7 @@ describe('EnvironmentAccessGuard', () => {
         applyThemeToDocument: mockApplyTheme,
       });
       vi.mocked(posthogReact.useFeatureFlagEnabled).mockReturnValue(true);
+      vi.mocked(posthogReact.useFeatureFlagPayload).mockReturnValue(true);
       vi.mocked(clerkReact.useUser).mockReturnValue({
         isLoaded: true,
         user: {

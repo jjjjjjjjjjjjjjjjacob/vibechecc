@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/use-posthog';
 import {
   surveyManager,
   trackSurveyEvents,
@@ -37,14 +36,13 @@ interface NewUserSurveyProps {
 export function NewUserSurvey({ onComplete, onDismiss }: NewUserSurveyProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { user } = useUser();
-  const { isInitialized } = usePostHog();
   const [discoveryChannel, setDiscoveryChannel] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
 
   // Check if user is eligible for survey
   useEffect(() => {
-    if (!user || !isInitialized || !user.createdAt) return;
+    if (!user || !user.createdAt) return;
 
     // Don't show if user has already completed or dismissed the survey
     if (surveyManager.hasUserCompletedOrDismissedSurvey()) {
@@ -57,7 +55,7 @@ export function NewUserSurvey({ onComplete, onDismiss }: NewUserSurveyProps) {
     if (isEligible) {
       setShowSurvey(true);
     }
-  }, [user, isInitialized]);
+  }, [user]);
 
   const discoveryOptions = [
     {

@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Sparkles } from '@/components/ui/icons';
-import { APP_NAME } from '@/config/app';
+import { APP_NAME } from '@/utils/bindings';
 
 export const Route = createFileRoute('/')({
   component: Home,

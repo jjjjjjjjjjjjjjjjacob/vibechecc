@@ -1,35 +1,27 @@
-'use client';
-
-import { useEffect, type ReactNode } from 'react';
-import { analytics, type PostHogConfig } from '@/lib/posthog';
+import * as React from 'react';
+import posthog from 'posthog-js';
+import { PostHogProvider as PostHogProviderNative } from 'posthog-js/react';
+import { APP_CONFIG } from '@/utils/bindings';
 
 interface PostHogProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function PostHogProvider({ children }: PostHogProviderProps) {
-  useEffect(() => {
-    // Initialize PostHog on the client side only
-    if (typeof window !== 'undefined') {
-      const config: PostHogConfig = {
-        apiKey: import.meta.env.VITE_POSTHOG_API_KEY || '',
-        apiHost:
-          import.meta.env.VITE_POSTHOG_API_HOST || 'https://app.posthog.com',
-        projectId: import.meta.env.VITE_POSTHOG_PROJECT_ID || '',
-        region: import.meta.env.VITE_POSTHOG_REGION || 'us',
-      };
-
-      // Only initialize if we have the required API key
-      if (config.apiKey) {
-        analytics.init(config);
-      } else {
-        // eslint-disable-next-line no-console
-        console.warn(
-          'PostHog API key not found. Analytics will not be initialized.'
-        );
-      }
+  React.useEffect(() => {
+    if (APP_CONFIG.env.VITE_POSTHOG_API_KEY) {
+      // Initialize PostHog only once on client-side
+      posthog.init(APP_CONFIG.env.VITE_POSTHOG_API_KEY, {
+        api_host: APP_CONFIG.env.VITE_POSTHOG_API_HOST,
+        person_profiles: 'identified_only',
+        capture_pageview: false, // We handle page views manually for better control
+        capture_pageleave: true,
+      });
     }
   }, []);
 
-  return <>{children}</>;
+  // Use PostHog's native React provider
+  return (
+    <PostHogProviderNative client={posthog}>{children}</PostHogProviderNative>
+  );
 }

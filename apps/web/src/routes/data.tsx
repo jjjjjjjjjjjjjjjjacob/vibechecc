@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { BaseLayout } from '@/components/layouts/base-layout';
 import { seo } from '@/utils/seo';
-import { APP_NAME } from '@/config/app';
+import { APP_NAME } from '@/utils/bindings';
 
 export const Route = createFileRoute('/data')({
   head: () => ({

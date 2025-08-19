@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/use-posthog';
+import { trackEvents } from '@/lib/track-events';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
@@ -40,7 +40,6 @@ export const Route = createFileRoute('/vibes/create')({
 function CreateVibe() {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { trackEvents } = usePostHog();
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [tags, setTags] = React.useState<string[]>([]);

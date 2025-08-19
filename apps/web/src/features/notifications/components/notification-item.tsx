@@ -8,7 +8,7 @@ import { useMarkNotificationAsReadMutation } from '@/queries';
 import type { Notification } from '@vibechecc/types';
 import type { Id } from '@vibechecc/convex/dataModel';
 import { useHeaderNavStore } from '@/stores/header-nav-store';
-import { usePostHog } from '@/hooks/use-posthog';
+import { trackEvents } from '@/lib/track-events';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -21,7 +21,6 @@ export function NotificationItem({
 }: NotificationItemProps) {
   const markAsReadMutation = useMarkNotificationAsReadMutation();
   const setNavState = useHeaderNavStore((state) => state.setNavState);
-  const { trackEvents } = usePostHog();
 
   const handleMarkAsRead = (method: 'click' | 'button' = 'button') => {
     if (!notification.read && notification._id) {

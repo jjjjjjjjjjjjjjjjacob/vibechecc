@@ -10,7 +10,7 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 }));
 
 // Mock PostHog hook
-vi.mock('@/hooks/use-posthog', () => ({
+vi.mock('posthog-js/react', () => ({
   usePostHog: vi.fn(),
 }));
 
@@ -21,25 +21,30 @@ vi.mock('@/lib/survey-manager', () => ({
   },
 }));
 
+// Mock track events
+vi.mock('@/lib/track-events', () => ({
+  trackEvents: {
+    userSignedUp: vi.fn(),
+    userSignedIn: vi.fn(),
+  },
+}));
+
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog } from '@/hooks/use-posthog';
+import { usePostHog } from 'posthog-js/react';
 import { trackSurveyEvents } from '@/lib/survey-manager';
+import { trackEvents } from '@/lib/track-events';
 
 const mockUseUser = useUser as any;
 const mockUsePostHog = usePostHog as any;
 const mockTrackSurveyEvents = trackSurveyEvents as any;
+const mockTrackEvents = trackEvents as any;
 
 describe('ClerkPostHogIntegration Signup Tracking', () => {
-  const mockTrackEvents = {
-    userSignedUp: vi.fn(),
-    userSignedIn: vi.fn(),
-  };
-
   const mockPostHogMethods = {
     identify: vi.fn(),
     setPersonProperties: vi.fn(),
     reset: vi.fn(),
-    trackEvents: mockTrackEvents,
+    reloadFeatureFlags: vi.fn(),
   };
 
   beforeEach(() => {
@@ -69,6 +74,12 @@ describe('ClerkPostHogIntegration Signup Tracking', () => {
 
     render(<ClerkPostHogIntegration />);
 
+    // userSignedIn is called first
+    expect(mockTrackEvents.userSignedIn).toHaveBeenCalledWith(
+      'user_123',
+      'clerk'
+    );
+    // Then userSignedUp is called for recent signups
     expect(mockTrackEvents.userSignedUp).toHaveBeenCalledWith(
       'user_123',
       'clerk'
@@ -92,6 +103,12 @@ describe('ClerkPostHogIntegration Signup Tracking', () => {
 
     render(<ClerkPostHogIntegration />);
 
+    // userSignedIn is called first
+    expect(mockTrackEvents.userSignedIn).toHaveBeenCalledWith(
+      'user_456',
+      'clerk'
+    );
+    // Then userSignedUp is called for recent signups
     expect(mockTrackEvents.userSignedUp).toHaveBeenCalledWith(
       'user_456',
       'clerk'
@@ -138,6 +155,12 @@ describe('ClerkPostHogIntegration Signup Tracking', () => {
 
     render(<ClerkPostHogIntegration />);
 
+    // userSignedIn is called first
+    expect(mockTrackEvents.userSignedIn).toHaveBeenCalledWith(
+      'user_101',
+      'clerk'
+    );
+    // Then userSignedUp is called for recent signups
     expect(mockTrackEvents.userSignedUp).toHaveBeenCalledWith(
       'user_101',
       'clerk'

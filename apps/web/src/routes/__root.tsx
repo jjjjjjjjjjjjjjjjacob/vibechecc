@@ -41,7 +41,7 @@ import { EnvironmentAccessGuard } from '@/components/environment-access-guard';
 import { NewUserSurvey } from '@/components/new-user-survey';
 import appCss from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
-import { APP_CONFIG } from '@/config/app';
+import { APP_CONFIG } from '@/utils/bindings';
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
