@@ -80,6 +80,10 @@ const schema = defineSchema({
     visibility: v.optional(v.union(v.literal('public'), v.literal('deleted'))), // Default 'public', 'deleted' for soft delete
     updatedAt: v.optional(v.string()), // Track when vibe was last updated
 
+    // Share tracking fields
+    shareCount: v.optional(v.number()), // Total number of times this vibe has been shared
+    lastSharedAt: v.optional(v.number()), // Timestamp of most recent share
+
     // Admin moderation fields
     moderationReason: v.optional(v.string()), // Reason for moderation action
     moderatedAt: v.optional(v.string()), // Timestamp of moderation
@@ -92,6 +96,8 @@ const schema = defineSchema({
     .index('byVisibility', ['visibility']) // Index for filtering by visibility
     .index('byCreatedByAndVisibility', ['createdById', 'visibility']) // Index for user's public vibes
     .index('byUpdatedAt', ['updatedAt']) // NEW: Index for recent content queries
+    .index('byShareCount', ['shareCount']) // NEW: Index for sorting by share popularity
+    .index('byLastSharedAt', ['lastSharedAt']) // NEW: Index for recently shared content
     .searchIndex('searchTitle', {
       searchField: 'title',
       filterFields: ['createdById', 'tags', 'visibility'],
@@ -259,6 +265,87 @@ const schema = defineSchema({
     .index('byUser', ['userId', 'createdAt'])
     .index('byUserAndRead', ['userId', 'read', 'createdAt'])
     .index('byUserAndType', ['userId', 'type', 'createdAt']),
+
+  // Social connections table to track OAuth connections with social platforms
+  socialConnections: defineTable({
+    userId: v.string(), // External ID of user who owns this connection
+    platform: v.union(
+      v.literal('twitter'),
+      v.literal('instagram'),
+      v.literal('tiktok')
+    ), // Social platform type
+    platformUserId: v.string(), // User ID on the social platform
+    platformUsername: v.optional(v.string()), // Username on the social platform
+    accessToken: v.optional(v.string()), // OAuth access token (encrypted)
+    refreshToken: v.optional(v.string()), // OAuth refresh token (encrypted)
+    tokenExpiresAt: v.optional(v.number()), // When the access token expires
+    connectionStatus: v.union(
+      v.literal('connected'),
+      v.literal('disconnected'),
+      v.literal('expired'),
+      v.literal('error')
+    ), // Status of the connection
+    connectedAt: v.number(), // When the connection was established
+    lastSyncAt: v.optional(v.number()), // Last time data was synced from platform
+    metadata: v.optional(v.any()), // Additional platform-specific data
+
+    // Error tracking
+    lastError: v.optional(v.string()), // Last error message if connection failed
+    errorCount: v.optional(v.number()), // Number of consecutive errors
+  })
+    .index('byUser', ['userId'])
+    .index('byUserAndPlatform', ['userId', 'platform'])
+    .index('byPlatformUserId', ['platform', 'platformUserId'])
+    .index('byStatus', ['connectionStatus'])
+    .index('byConnectedAt', ['connectedAt']),
+
+  // Share events table for tracking and analytics
+  shareEvents: defineTable({
+    contentType: v.union(v.literal('vibe'), v.literal('profile')), // Type of content shared
+    contentId: v.string(), // ID of the content (vibeId or userId)
+    userId: v.optional(v.string()), // External ID of user who shared (optional for anonymous)
+    platform: v.union(
+      v.literal('twitter'),
+      v.literal('instagram'),
+      v.literal('tiktok'),
+      v.literal('clipboard'),
+      v.literal('native')
+    ), // Platform shared to
+    shareType: v.union(
+      v.literal('story'),
+      v.literal('feed'),
+      v.literal('direct'),
+      v.literal('copy')
+    ), // Type of share action
+
+    // Tracking metadata
+    sessionId: v.optional(v.string()), // Session identifier for tracking
+    referrer: v.optional(v.string()), // Referrer URL
+    userAgent: v.optional(v.string()), // User agent string
+    ipAddress: v.optional(v.string()), // IP address (if tracked)
+
+    // UTM tracking
+    utmSource: v.optional(v.string()),
+    utmMedium: v.optional(v.string()),
+    utmCampaign: v.optional(v.string()),
+    utmTerm: v.optional(v.string()),
+    utmContent: v.optional(v.string()),
+
+    // Event metadata
+    success: v.boolean(), // Whether the share was successful
+    errorMessage: v.optional(v.string()), // Error message if share failed
+    metadata: v.optional(v.any()), // Additional event-specific data
+
+    createdAt: v.number(), // Timestamp of the share event
+  })
+    .index('byContent', ['contentType', 'contentId'])
+    .index('byUser', ['userId', 'createdAt'])
+    .index('byPlatform', ['platform', 'createdAt'])
+    .index('byShareType', ['shareType', 'createdAt'])
+    .index('bySuccess', ['success', 'createdAt'])
+    .index('byCreatedAt', ['createdAt'])
+    .index('byUserAndPlatform', ['userId', 'platform', 'createdAt'])
+    .index('byContentAndPlatform', ['contentType', 'contentId', 'platform']),
 });
 export default schema;
 
@@ -271,6 +358,8 @@ const _trendingSearches = schema.tables.trendingSearches.validator;
 const _searchMetrics = schema.tables.searchMetrics.validator;
 const _follows = schema.tables.follows.validator;
 const _notification = schema.tables.notifications.validator;
+const _socialConnection = schema.tables.socialConnections.validator;
+const _shareEvent = schema.tables.shareEvents.validator;
 
 export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
@@ -281,6 +370,8 @@ export type TrendingSearches = Infer<typeof _trendingSearches>;
 export type SearchMetrics = Infer<typeof _searchMetrics>;
 export type Follow = Infer<typeof _follows>;
 export type Notification = Infer<typeof _notification>;
+export type SocialConnection = Infer<typeof _socialConnection>;
+export type ShareEvent = Infer<typeof _shareEvent>;
 
 export const createVibeSchema = v.object({
   title: vibe.fields.title,

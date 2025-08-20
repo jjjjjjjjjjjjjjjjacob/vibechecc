@@ -28,6 +28,7 @@ import { EmojiRatingDisplayPopover } from '@/features/ratings/components/emoji-r
 import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
 import { EmojiReactions } from '@/features/ratings/components/emoji-reaction';
 import { useVibeImageUrl } from '@/hooks/use-vibe-image-url';
+import { ShareButton } from '@/components/social/share-button';
 
 type VibeCardVariant =
   | 'default'
@@ -367,26 +368,50 @@ export function VibeCard({
                     </div>
                   )}
 
-                  {/* Tags */}
-                  {vibe.tags && vibe.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {vibe.tags.slice(0, 3).map((tag) => (
-                        <Link
-                          key={tag}
-                          to="/search"
-                          search={{ tags: [tag] }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Badge
-                            variant="outline"
-                            className="hover:bg-secondary/80 cursor-pointer text-xs transition-colors"
+                  {/* Tags and Share Button */}
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Tags */}
+                    <div className="flex flex-1 flex-wrap gap-1">
+                      {vibe.tags && vibe.tags.length > 0 ? (
+                        vibe.tags.slice(0, 3).map((tag) => (
+                          <Link
+                            key={tag}
+                            to="/search"
+                            search={{ tags: [tag] }}
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            #{tag}
-                          </Badge>
-                        </Link>
-                      ))}
+                            <Badge
+                              variant="outline"
+                              className="hover:bg-secondary/80 cursor-pointer text-xs transition-colors"
+                            >
+                              #{tag}
+                            </Badge>
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="flex-1" />
+                      )}
                     </div>
-                  )}
+
+                    {/* Share Button */}
+                    <ShareButton
+                      contentType="vibe"
+                      variant="ghost"
+                      size="sm"
+                      showCount={vibe.shareCount ? true : false}
+                      currentShareCount={vibe.shareCount}
+                      vibe={vibe}
+                      author={vibe.createdBy || undefined}
+                      ratings={
+                        topEmojiRatings?.map((r) => ({
+                          emoji: r.emoji,
+                          value: r.averageValue,
+                          tags: r.tags || [],
+                          count: r.count,
+                        })) || undefined
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -932,17 +957,43 @@ export function VibeCard({
                   )}
                 </div>
 
-                {/* Emoji Reactions - only show if there are reactions and not compact */}
-                {emojiReactions.length > 0 && finalVariant !== 'compact' && (
-                  <div className="w-full min-w-0 overflow-hidden">
-                    <EmojiReactions
-                      reactions={emojiReactions}
-                      onReact={handleQuickReact}
-                      showAddButton={true}
-                      onRatingSubmit={handleEmojiRating}
-                      vibeTitle={vibe.title}
-                      vibeId={vibe.id}
-                      className="min-w-0"
+                {/* Emoji Reactions and Share Button */}
+                {finalVariant !== 'compact' && (
+                  <div className="flex w-full items-center justify-between gap-2">
+                    {/* Emoji Reactions */}
+                    {emojiReactions.length > 0 ? (
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <EmojiReactions
+                          reactions={emojiReactions}
+                          onReact={handleQuickReact}
+                          showAddButton={true}
+                          onRatingSubmit={handleEmojiRating}
+                          vibeTitle={vibe.title}
+                          vibeId={vibe.id}
+                          className="min-w-0"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex-1" />
+                    )}
+
+                    {/* Share Button */}
+                    <ShareButton
+                      contentType="vibe"
+                      variant="ghost"
+                      size="sm"
+                      showCount={vibe.shareCount ? true : false}
+                      currentShareCount={vibe.shareCount}
+                      vibe={vibe}
+                      author={vibe.createdBy || undefined}
+                      ratings={
+                        topEmojiRatings?.map((r) => ({
+                          emoji: r.emoji,
+                          value: r.averageValue,
+                          tags: r.tags || [],
+                          count: r.count,
+                        })) || undefined
+                      }
                     />
                   </div>
                 )}

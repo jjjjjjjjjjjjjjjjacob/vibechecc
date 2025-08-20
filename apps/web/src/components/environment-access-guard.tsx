@@ -199,7 +199,7 @@ export function EnvironmentAccessGuard({
         <div className="space-y-6 text-center">
           <div
             data-state={loadingState}
-            className="flex flex-col items-center space-y-2 transition duration-800 data-[state=fade-out]:scale-105 data-[state=fade-out]:opacity-0"
+            className="flex flex-col items-center space-y-2 transition duration-800 data-[state=fade-out]:scale-110 data-[state=fade-out]:opacity-0"
           >
             <p
               data-state={loadingState}
