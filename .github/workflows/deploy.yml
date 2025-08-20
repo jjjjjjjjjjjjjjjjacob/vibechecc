@@ -230,7 +230,7 @@ jobs:
           VITE_POSTHOG_REGION: 'US Cloud'
           VITE_APP_NAME: ${{ vars.VITE_APP_NAME }}
           VITE_APP_DOMAIN: ${{ format('{0}.io', vars.VITE_APP_NAME) }}
-          VITE_APP_SUBDOMAIN: ${{ (inputs.environment == 'development') && 'dev' || (inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number)) || '' }}
+          VITE_APP_SUBDOMAIN: ${{ inputs.environment == 'development' && 'dev' || (inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number) || '') }}
           VITE_APP_TWITTER_HANDLE: ${{ format('@{0}', vars.VITE_APP_NAME) }}
         run: |
           echo "Building frontend for Cloudflare Workers using Nx..."
@@ -251,6 +251,7 @@ jobs:
 
           echo "Build successful. Output structure:"
           ls -la apps/web/.output/
+
       - name: Add Ephemeral Environment to Wrangler Config
         if: inputs.environment == 'ephemeral'
         working-directory: apps/web
@@ -286,6 +287,10 @@ jobs:
         run: |
           ENV_NAME="${{ inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number) || inputs.environment }}"
           echo "Updating secrets for environment: $ENV_NAME"
+          echo "${{ vars.VITE_APP_NAME }}" | bunx wrangler secret put VITE_APP_NAME --env $ENV_NAME
+          echo "${{ format('{0}.io', vars.VITE_APP_NAME) }}" | bunx wrangler secret put VITE_APP_DOMAIN --env $ENV_NAME
+          echo "${{ format('@{0}', vars.VITE_APP_NAME) }}" | bunx wrangler secret put VITE_APP_TWITTER_HANDLE --env $ENV_NAME
+          echo "${{ inputs.environment == 'development' && 'dev' || (inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number) || '') }}" | bunx wrangler secret put VITE_APP_SUBDOMAIN --env $ENV_NAME
           echo "${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" | bunx wrangler secret put VITE_CLERK_PUBLISHABLE_KEY --env $ENV_NAME
           echo "${{ secrets.VITE_CONVEX_URL }}" | bunx wrangler secret put VITE_CONVEX_URL --env $ENV_NAME
           echo "${{ secrets.CLERK_SECRET_KEY }}" | bunx wrangler secret put CLERK_SECRET_KEY --env $ENV_NAME
