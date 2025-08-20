@@ -504,7 +504,7 @@ export function Header() {
                       className="bg-theme-primary/10 hover:bg-theme-primary/20 h-10 w-10 rounded-lg transition-all hover:scale-105"
                       onClick={() => setNavState(null)}
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-4 w-4" strokeWidth={3} />
                     </Button>
                   </Link>
                 </SignedIn>
