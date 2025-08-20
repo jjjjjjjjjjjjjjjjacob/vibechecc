@@ -1,5 +1,7 @@
 # vibechecc
 
+## v0.1.0
+
 vibechecc is a modern social application where users can:
 
 - Share "vibes" (life experiences, thoughts, situations) with the community
