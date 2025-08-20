@@ -1,6 +1,6 @@
 {
   "name": "@vibechecc/utils",
-  "version": "0.1.0-beta.0",
+  "version": "0.1.0-beta.6",
   "description": "Shared utility functions for the vibechecc workspace",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
