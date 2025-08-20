@@ -602,14 +602,11 @@ export const getByUser = query({
     // For own profile, show all non-deleted vibes
     let query;
     if (isOwnProfile) {
+      // Use index and then filter for non-deleted
       query = ctx.db
         .query('vibes')
-        .filter((q) =>
-          q.and(
-            q.eq(q.field('createdById'), args.userId),
-            q.neq(q.field('visibility'), 'deleted')
-          )
-        );
+        .withIndex('createdBy', (q) => q.eq('createdById', args.userId))
+        .filter((q) => q.neq(q.field('visibility'), 'deleted'));
     } else {
       query = ctx.db
         .query('vibes')
@@ -1670,6 +1667,105 @@ export const getTopRatedLightweight = query({
       vibes: topRatedVibes,
       continueCursor: vibes.continueCursor,
       isDone: vibes.isDone,
+    };
+  },
+});
+
+// Get most interacted-with vibe (for onboarding demo)
+export const getMostRatedVibe = query({
+  handler: async (ctx) => {
+    // Get public vibes
+    const vibes = await ctx.db
+      .query('vibes')
+      .withIndex('byVisibility', (q) => q.eq('visibility', 'public'))
+      .order('desc')
+      .take(200);
+
+    if (vibes.length === 0) {
+      return null;
+    }
+
+    // Calculate total interactions for each vibe (ratings + emoji ratings)
+    const vibesWithInteractionCount = await Promise.all(
+      vibes.map(async (vibe) => {
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe._id))
+          .collect();
+
+        // Note: emojiRatings functionality is part of the ratings table
+        // Calculate total interaction score
+        const totalInteractions = ratings.length;
+
+        return { ...vibe, totalRatings: ratings.length, totalInteractions };
+      })
+    );
+
+    // Sort by total interactions to find the most interacted-with
+    const sortedVibes = vibesWithInteractionCount.sort(
+      (a, b) => b.totalInteractions - a.totalInteractions
+    );
+
+    const mostInteractedVibe = sortedVibes[0];
+
+    // Get creator details
+    const creator = mostInteractedVibe.createdById
+      ? await ctx.db
+          .query('users')
+          .filter((q) =>
+            q.eq(q.field('externalId'), mostInteractedVibe.createdById)
+          )
+          .first()
+      : null;
+
+    // Get ratings with emoji reactions
+    const ratings = await ctx.db
+      .query('ratings')
+      .withIndex('vibe', (q) => q.eq('vibeId', mostInteractedVibe.id))
+      .order('desc')
+      .collect();
+
+    // Calculate average rating
+    const averageRating =
+      ratings.length > 0
+        ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
+        : 0;
+
+    // Calculate emoji aggregates from ratings that have emoji
+    const emojiAggregates: Record<
+      string,
+      { emoji: string; count: number; totalValue: number }
+    > = {};
+
+    for (const rating of ratings) {
+      if (rating.emoji) {
+        if (!emojiAggregates[rating.emoji]) {
+          emojiAggregates[rating.emoji] = {
+            emoji: rating.emoji,
+            count: 0,
+            totalValue: 0,
+          };
+        }
+        emojiAggregates[rating.emoji].count++;
+        emojiAggregates[rating.emoji].totalValue += rating.value;
+      }
+    }
+
+    const topEmojis = Object.values(emojiAggregates)
+      .map((agg) => ({
+        emoji: agg.emoji,
+        value: agg.totalValue / agg.count,
+        count: agg.count,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+    return {
+      ...mostInteractedVibe,
+      createdBy: creator,
+      emojiRatings: topEmojis,
+      averageRating,
+      totalRatings: mostInteractedVibe.totalRatings,
     };
   },
 });

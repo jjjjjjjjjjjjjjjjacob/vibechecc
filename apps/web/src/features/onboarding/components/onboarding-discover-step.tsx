@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Heart, Eye, UserPlus, Users, Sparkles } from '@/components/ui/icons';
-import { useVibes } from '@/queries';
+import { useQuery } from '@tanstack/react-query';
+import { convexQuery } from '@convex-dev/react-query';
+import { api } from '@vibechecc/convex';
 import { EmojiRatingSelector } from '@/features/ratings/components/emoji-rating-selector';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import type { User, EmojiRating } from '@vibechecc/types';
+import type { EmojiRating } from '@vibechecc/types';
+import { computeUserDisplayName } from '@/utils/user-utils';
 
 interface OnboardingDiscoverStepProps {
   onNext: () => void;
@@ -16,44 +19,50 @@ interface OnboardingDiscoverStepProps {
 export function OnboardingDiscoverStep({
   onNext,
 }: OnboardingDiscoverStepProps) {
-  const { data: vibes } = useVibes();
   const [hasInteracted, setHasInteracted] = React.useState(false);
   const [isFollowing, setIsFollowing] = React.useState(false);
   const [currentSection, setCurrentSection] = React.useState(0);
 
-  // Mock data for demonstrations
-  const mockUser: User = {
-    externalId: 'demo-user',
-    username: 'alex_vibes',
-    full_name: 'Alex Johnson',
-    image_url:
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face',
-    onboardingCompleted: true,
-    interests: ['photography', 'travel', 'coffee'],
-  };
+  // Fetch real top-rated vibe
+  const { data: mostRatedVibe } = useQuery(
+    convexQuery(api.vibes.getMostRatedVibe, {})
+  );
 
-  const mockEmojiRatings: EmojiRating[] = [
-    { emoji: '🔥', value: 4.8, count: 23 },
-    { emoji: '😍', value: 4.6, count: 18 },
-    { emoji: '☕', value: 4.2, count: 12 },
-  ];
+  // Fetch real most followed user
+  const { data: mostFollowedUser } = useQuery(
+    convexQuery(api.users.getMostFollowedUser, {})
+  );
 
-  // Get a featured vibe for demonstration
-  const demoVibe = vibes?.[0] || {
+  // Use real data if available, otherwise use fallback
+  const demoVibe = mostRatedVibe || {
     id: 'demo',
     title: 'Morning Coffee Ritual',
     description:
       'The perfect way to start your day with mindful coffee brewing',
     image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085',
     tags: ['morning', 'coffee', 'mindful'],
-    createdBy: mockUser,
+    createdBy: null,
     averageRating: 4.5,
     totalRatings: 12,
-    reactions: [
-      { emoji: '☕', count: 8 },
-      { emoji: '🌅', count: 5 },
-      { emoji: '❤️', count: 3 },
-    ],
+    emojiRatings: [
+      { emoji: '☕', value: 4.5, count: 8 },
+      { emoji: '🌅', value: 4.2, count: 5 },
+      { emoji: '❤️', value: 4.8, count: 3 },
+    ] as EmojiRating[],
+  };
+
+  const demoUser = mostFollowedUser || {
+    externalId: 'demo-user',
+    username: 'alex_vibes',
+    full_name: 'Alex Johnson',
+    first_name: 'Alex',
+    last_name: 'Johnson',
+    image_url:
+      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face',
+    onboardingCompleted: true,
+    interests: ['photography', 'travel', 'coffee'],
+    followerCount: 1200,
+    vibesCount: 43,
   };
 
   const handleFollowToggle = () => {
@@ -67,16 +76,23 @@ export function OnboardingDiscoverStep({
     review: string;
     tags?: string[];
   }) => {
-    // Mock submission - don't make real API calls
+    // Mock submission for demo - track interaction
     setHasInteracted(true);
   };
 
-  // Auto-advance through sections for demo
+  // Remove auto-advance - now user controlled
+  // Add keyboard navigation
   React.useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSection((prev) => (prev + 1) % 3);
-    }, 4000);
-    return () => clearInterval(timer);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        setCurrentSection((prev) => (prev - 1 + 3) % 3);
+      } else if (event.key === 'ArrowRight') {
+        setCurrentSection((prev) => (prev + 1) % 3);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const features = [
@@ -118,11 +134,12 @@ export function OnboardingDiscoverStep({
             }`}
           >
             <Card
-              className={`h-full p-4 text-center transition-all duration-300 ${
+              className={`hover:border-theme-primary/30 hover:bg-theme-primary/5 h-full cursor-pointer p-4 text-center transition-all duration-300 ${
                 currentSection === feature.section
                   ? 'border-theme-primary/50 bg-theme-primary/5'
                   : ''
               }`}
+              onClick={() => setCurrentSection(feature.section)}
             >
               <CardContent className="flex h-full flex-col justify-between space-y-3">
                 <div className="space-y-3">
@@ -164,16 +181,30 @@ export function OnboardingDiscoverStep({
                 <div className="space-y-3">
                   <div className="from-theme-secondary/20 to-theme-primary/20 flex aspect-video items-center justify-center rounded-lg bg-gradient-to-r">
                     <div className="space-y-2 text-center">
-                      <div className="text-4xl">☕</div>
+                      <div className="text-4xl">
+                        {demoVibe.emojiRatings?.[0]?.emoji || '☕'}
+                      </div>
                       <h3 className="text-xl font-semibold">
                         {demoVibe.title}
                       </h3>
+                      {demoVibe.createdBy && (
+                        <p className="text-muted-foreground text-sm">
+                          by @{demoVibe.createdBy.username}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <p className="text-muted-foreground">
                     {demoVibe.description}
                   </p>
+
+                  <div className="text-muted-foreground flex items-center gap-4 text-sm">
+                    <span>{demoVibe.totalRatings || 0} ratings</span>
+                    <span>
+                      ⭐ {demoVibe.averageRating?.toFixed(1) || '4.5'}
+                    </span>
+                  </div>
 
                   <div className="flex flex-wrap gap-2">
                     {demoVibe.tags?.map((tag) => (
@@ -187,27 +218,28 @@ export function OnboardingDiscoverStep({
                 {/* Emoji Rating Demo */}
                 <div className="border-t pt-4">
                   <EmojiRatingSelector
-                    topEmojis={mockEmojiRatings}
+                    topEmojis={demoVibe.emojiRatings || []}
                     onSubmit={handleEmojiRating}
                     vibeTitle={demoVibe.title}
                     className="mb-4"
                   />
 
-                  {mockEmojiRatings.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium lowercase">
-                        current ratings:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {mockEmojiRatings.map((rating, index) => (
-                          <EmojiRatingDisplay
-                            key={`${rating.emoji}-${index}`}
-                            rating={rating}
-                          />
-                        ))}
+                  {demoVibe.emojiRatings &&
+                    demoVibe.emojiRatings.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium lowercase">
+                          top-rated emotions:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {demoVibe.emojiRatings.map((rating, index) => (
+                            <EmojiRatingDisplay
+                              key={`${rating.emoji}-${index}`}
+                              rating={rating}
+                            />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </CardContent>
             </Card>
@@ -230,24 +262,26 @@ export function OnboardingDiscoverStep({
                 <div className="bg-secondary/30 flex items-center gap-4 rounded-lg p-4">
                   <Avatar className="h-16 w-16">
                     <AvatarImage
-                      src={mockUser.image_url}
-                      alt={mockUser.username}
+                      src={demoUser.image_url}
+                      alt={demoUser.username}
                     />
                     <AvatarFallback>
-                      {mockUser.username?.[0]?.toUpperCase()}
+                      {demoUser.username?.[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1 space-y-2">
                     <div className="space-y-1">
-                      <h3 className="font-semibold">{mockUser.full_name}</h3>
+                      <h3 className="font-semibold">
+                        {computeUserDisplayName(demoUser)}
+                      </h3>
                       <p className="text-muted-foreground text-sm">
-                        @{mockUser.username}
+                        @{demoUser.username}
                       </p>
                     </div>
 
                     <div className="flex flex-wrap gap-1">
-                      {mockUser.interests?.map((interest) => (
+                      {demoUser.interests?.map((interest) => (
                         <Badge
                           key={interest}
                           variant="outline"
@@ -275,8 +309,8 @@ export function OnboardingDiscoverStep({
                     </Button>
 
                     <div className="text-muted-foreground text-center text-xs">
-                      <div>1.2k followers</div>
-                      <div>43 vibes</div>
+                      <div>{demoUser.followerCount || 0} followers</div>
+                      <div>{demoUser.vibesCount || 0} vibes</div>
                     </div>
                   </div>
                 </div>
@@ -344,19 +378,24 @@ export function OnboardingDiscoverStep({
       </div>
 
       {/* Progress Indicators */}
-      <div className="flex justify-center gap-2">
-        {[0, 1, 2].map((index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSection(index)}
-            className={`h-2 w-8 rounded-full transition-all ${
-              currentSection === index
-                ? 'bg-theme-primary'
-                : 'bg-muted-foreground/20 hover:bg-muted-foreground/40'
-            }`}
-            aria-label={`Go to section ${index + 1}`}
-          />
-        ))}
+      <div className="space-y-2 text-center">
+        <div className="flex justify-center gap-3">
+          {[0, 1, 2].map((index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSection(index)}
+              className={`h-3 w-12 rounded-full transition-all duration-300 ${
+                currentSection === index
+                  ? 'bg-theme-primary scale-110 shadow-lg'
+                  : 'bg-muted-foreground/20 hover:bg-muted-foreground/40 hover:scale-105'
+              }`}
+              aria-label={`Go to section ${index + 1}: ${features[index].title}`}
+            />
+          ))}
+        </div>
+        <p className="text-muted-foreground text-xs">
+          click cards above or use arrow keys to navigate
+        </p>
       </div>
 
       {/* Success Message */}

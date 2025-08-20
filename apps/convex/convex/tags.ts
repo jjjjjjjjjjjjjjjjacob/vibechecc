@@ -129,6 +129,104 @@ export const rebuildTagCounts = internalMutation({
 // Export helper for tests
 export { rebuildTagCountsHelper };
 
+// Seed tags with zero counts for production
+export const seedTagsWithZeroCounts = internalMutation({
+  args: { tagNames: v.array(v.string()) },
+  handler: async (ctx, { tagNames }) => {
+    const now = Date.now();
+    let createdCount = 0;
+
+    for (const tagName of tagNames) {
+      const normalizedTag = tagName.toLowerCase().trim();
+
+      // Check if tag already exists
+      const existingTag = await ctx.db
+        .query('tags')
+        .withIndex('byName', (q) => q.eq('name', normalizedTag))
+        .first();
+
+      if (!existingTag) {
+        await ctx.db.insert('tags', {
+          name: normalizedTag,
+          count: 0,
+          createdAt: now,
+          lastUsed: now,
+        });
+        createdCount++;
+      }
+    }
+
+    return {
+      totalTagsToSeed: tagNames.length,
+      newTagsCreated: createdCount,
+      message: `Seeded ${createdCount} new tags with 0 counts`,
+    };
+  },
+});
+
+// Seed tags with preserved counts from another environment
+export const seedTagsWithCounts = internalMutation({
+  args: {
+    tags: v.array(
+      v.object({
+        name: v.string(),
+        count: v.number(),
+      })
+    ),
+  },
+  handler: async (ctx, { tags }) => {
+    const now = Date.now();
+    let createdCount = 0;
+    let updatedCount = 0;
+
+    for (const tag of tags) {
+      const normalizedTag = tag.name.toLowerCase().trim();
+
+      // Check if tag already exists
+      const existingTag = await ctx.db
+        .query('tags')
+        .withIndex('byName', (q) => q.eq('name', normalizedTag))
+        .first();
+
+      if (existingTag) {
+        // Update existing tag with the count from dev
+        await ctx.db.patch(existingTag._id, {
+          count: tag.count,
+          lastUsed: now,
+        });
+        updatedCount++;
+      } else {
+        // Create new tag with the count from dev
+        await ctx.db.insert('tags', {
+          name: normalizedTag,
+          count: tag.count,
+          createdAt: now,
+          lastUsed: now,
+        });
+        createdCount++;
+      }
+    }
+
+    return {
+      totalTagsToSeed: tags.length,
+      newTagsCreated: createdCount,
+      tagsUpdated: updatedCount,
+      message: `Created ${createdCount} new tags and updated ${updatedCount} existing tags with counts from dev`,
+    };
+  },
+});
+
+// Get all tags for seeding purposes
+export const getAllTags = query({
+  handler: async (ctx) => {
+    const tags = await ctx.db.query('tags').collect();
+    return tags.map((tag) => ({
+      name: tag.name,
+      count: tag.count,
+    }));
+  },
+});
+
 // Search tags
 export const searchTags = query({
   args: {

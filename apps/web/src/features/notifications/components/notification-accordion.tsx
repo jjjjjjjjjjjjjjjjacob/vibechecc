@@ -110,7 +110,7 @@ export function NotificationAccordion() {
   const unreadCounts = unreadCountsByType
     ? {
         all: Object.values(unreadCountsByType).reduce<number>(
-          (sum, count) => sum + count,
+          (sum, count) => sum + (count as number),
           0
         ),
         likes: unreadCountsByType.rating || 0,

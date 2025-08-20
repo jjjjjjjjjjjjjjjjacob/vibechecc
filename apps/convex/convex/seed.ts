@@ -1,72 +1,7 @@
 import { action, internalMutation } from './_generated/server';
 import { internal } from './_generated/api';
-import type { Doc } from './_generated/dataModel';
 import { v } from 'convex/values';
 import { nanoid } from 'nanoid';
-
-// Full OpenMoji dataset - using consolidated emoji list
-import { allOpenMojiEmojis } from './seed/emojis/all_openmoji';
-
-import type { Emoji } from './schema';
-
-// Use full OpenMoji dataset (3000+ emojis with keywords)
-const allEmojis = allOpenMojiEmojis;
-
-// Helper to get unicode from emoji character
-function getUnicodeFromEmoji(emoji: string): string {
-  return emoji
-    .split('')
-    .map((char) => {
-      const code = char.codePointAt(0);
-      return code
-        ? 'U+' + code.toString(16).toUpperCase().padStart(4, '0')
-        : '';
-    })
-    .filter(Boolean)
-    .join(' ');
-}
-
-// Helper function to determine sentiment based on emoji characteristics
-function getSentiment(emoji: Omit<Emoji, 'sentiment'>): Emoji['sentiment'] {
-  const { name, keywords } = emoji;
-  const text = `${name} ${keywords.join(' ')}`.toLowerCase();
-
-  // Positive indicators
-  if (
-    text.includes('smile') ||
-    text.includes('happy') ||
-    text.includes('joy') ||
-    text.includes('love') ||
-    text.includes('heart') ||
-    text.includes('star') ||
-    text.includes('celebrate') ||
-    text.includes('party') ||
-    text.includes('win') ||
-    text.includes('success') ||
-    text.includes('thumbs up') ||
-    text.includes('good')
-  ) {
-    return 'positive';
-  }
-
-  // Negative indicators
-  if (
-    text.includes('sad') ||
-    text.includes('cry') ||
-    text.includes('angry') ||
-    text.includes('fear') ||
-    text.includes('sick') ||
-    text.includes('dead') ||
-    text.includes('thumbs down') ||
-    text.includes('bad') ||
-    text.includes('hate')
-  ) {
-    return 'negative';
-  }
-
-  // Default to neutral
-  return 'neutral';
-}
 
 // Main seed action - comprehensive development data
 export const seed = action({
@@ -82,16 +17,22 @@ export const seed = action({
         ctx as unknown as { runMutation: (fn: unknown) => Promise<unknown> }
       ).runMutation(internal.seed.clearAllData);
 
-      // Step 2: Seed emoji database
+      // Step 2: Import emoji-mart data
       // eslint-disable-next-line no-console
-      console.log('Step 2: Seeding emoji database...');
+      console.log('Step 2: Importing emoji-mart data...');
       const emojiResult = (await (
         ctx as unknown as { runMutation: (fn: unknown) => Promise<unknown> }
-      ).runMutation(internal.seed.seedEmojis)) as unknown as {
-        count: number;
+      ).runMutation(
+        internal.migrations['import_emoji_mart_data'].importEmojiMartData
+      )) as unknown as {
+        imported: number;
+        skipped: number;
+        total: number;
       };
       // eslint-disable-next-line no-console
-      console.log(`Seeded ${emojiResult.count} emojis`);
+      console.log(
+        `Imported ${emojiResult.imported} new emojis, skipped ${emojiResult.skipped} existing (${emojiResult.total} total)`
+      );
 
       // Step 3: Create users (20 for good development data)
       // eslint-disable-next-line no-console
@@ -162,7 +103,9 @@ export const seed = action({
       // eslint-disable-next-line no-console
       console.log('\n=== Seed Summary ===');
       // eslint-disable-next-line no-console
-      console.log(`✅ Emojis: ${emojiResult.count}`);
+      console.log(
+        `✅ Emojis: ${emojiResult.imported} imported, ${emojiResult.total} total`
+      );
       // eslint-disable-next-line no-console
       console.log(`✅ Users: ${userResult.count}`);
       // eslint-disable-next-line no-console
@@ -210,27 +153,6 @@ export const clearAllData = internalMutation({
       // eslint-disable-next-line no-console
       console.log(`Cleared ${items.length} items from ${table}`);
     }
-  },
-});
-
-// Seed emojis mutation
-export const seedEmojis = internalMutation({
-  handler: async (ctx) => {
-    let count = 0;
-
-    for (const emojiData of allEmojis) {
-      // Add sentiment to the emoji data
-      const completeEmoji = {
-        ...emojiData,
-        sentiment: getSentiment(emojiData),
-        unicode: getUnicodeFromEmoji(emojiData.emoji),
-      };
-
-      await ctx.db.insert('emojis', completeEmoji as unknown as Doc<'emojis'>);
-      count++;
-    }
-
-    return { count };
   },
 });
 
@@ -2067,6 +1989,405 @@ export const seedSearchMetrics = internalMutation({
     }
 
     return { count: metricsCount };
+  },
+});
+
+// Internal mutation for seeding production tags
+export const seedProductionTagsInternal = internalMutation({
+  args: { tagNames: v.array(v.string()) },
+  handler: async (ctx, { tagNames }) => {
+    const now = Date.now();
+    let createdCount = 0;
+
+    for (const tagName of tagNames) {
+      const normalizedTag = tagName.toLowerCase().trim();
+
+      // Check if tag already exists
+      const existingTag = await ctx.db
+        .query('tags')
+        .withIndex('byName', (q) => q.eq('name', normalizedTag))
+        .first();
+
+      if (!existingTag) {
+        await ctx.db.insert('tags', {
+          name: normalizedTag,
+          count: 0,
+          createdAt: now,
+          lastUsed: now,
+        });
+        createdCount++;
+      }
+    }
+
+    return {
+      totalTagsToSeed: tagNames.length,
+      newTagsCreated: createdCount,
+      message: `Seeded ${createdCount} new tags with 0 counts for production`,
+    };
+  },
+});
+
+// Seed production tags with zero counts
+export const seedProductionTags = action({
+  handler: async (
+    ctx
+  ): Promise<{
+    totalTagsToSeed: number;
+    newTagsCreated: number;
+    message: string;
+  }> => {
+    // All tag names from development environment
+    const tagNames = [
+      'humor',
+      'relationships',
+      'procrastination',
+      'technology',
+      'adulting',
+      'communication',
+      'chaos',
+      'grocery shopping',
+      'overthinking',
+      'anxiety',
+      'organization',
+      'avoidance',
+      'self awareness',
+      'routine',
+      'food delivery',
+      'productivity',
+      'meditation',
+      'food',
+      'work',
+      'self acceptance',
+      'performance',
+      'apps',
+      'internal monologue',
+      'philosophy',
+      'autocorrect',
+      'music taste',
+      'self discovery',
+      'spotify',
+      'relatable',
+      'entertainment',
+      'connection',
+      'frustration',
+      'authenticity',
+      'domestic life',
+      'digital overwhelm',
+      'navigation',
+      'waiting',
+      'work from home',
+      'professional persona',
+      'personal data',
+      'life philosophy',
+      'music algorithm',
+      'late night',
+      'circadian rhythm',
+      'sleep schedule',
+      'online shopping',
+      'irony',
+      'digital wellness',
+      'phone addiction',
+      'screen time',
+      'personal habits',
+      'data analysis',
+      'music',
+      'decision fatigue',
+      'cereal',
+      'existentialism',
+      'metaphors',
+      'enlightenment',
+      'digital hoarding',
+      'files',
+      'delivery',
+      'modern life',
+      'diy',
+      'home repair',
+      'adulting fails',
+      'tools',
+      'youtube university',
+      'acceptance',
+      'target',
+      'impulse buying',
+      'shopping',
+      'budgeting fails',
+      'consumerism',
+      'decision making',
+      'texting',
+      'communication fails',
+      'modern problems',
+      'sleep',
+      'streaming',
+      'supernatural',
+      'mystery',
+      'comedy',
+      'google search',
+      'existential crisis',
+      'search history',
+      'internet habits',
+      'moral dilemmas',
+      'society',
+      'shopping carts',
+      'civic duty',
+      'parking lots',
+      'laundry',
+      'chores',
+      'domestic chaos',
+      'uber',
+      'strangers',
+      'life advice',
+      'transportation',
+      'human connection',
+      'skincare',
+      'beauty routine',
+      'self care',
+      'expensive habits',
+      'vanity',
+      'personality',
+      'mental health',
+      'psychology',
+      'identity',
+      'time management',
+      'self reflection',
+      'laundry mysteries',
+      'conspiracy theories',
+      'missing socks',
+      'domestic mysteries',
+      'household chaos',
+      'coffee shop',
+      'barista',
+      'therapy',
+      'caffeine',
+      'spontaneity',
+      'planning',
+      'personality quirks',
+      'archaeology humor',
+      'apartment living',
+      'clutter',
+      'time capsule',
+      'analysis paralysis',
+      'investigation',
+      'financial decisions',
+      'weather',
+      'prediction',
+      'obsessive behavior',
+      'car',
+      'storage',
+      'automotive lifestyle',
+      'mess',
+      'eating habits',
+      'weekly routine',
+      'multitasking',
+      'self deception',
+      'night owl',
+      'sleep hygiene',
+      'time zones',
+      'narration',
+      'self observation',
+      'documentary',
+      'consciousness',
+      'emotional state',
+      'ai concern',
+      'happiness',
+      'expectations',
+      'tiktok',
+      'cats',
+      'satisfaction',
+      'houseplants',
+      'plant care',
+      'anthropomorphism',
+      'labor unions',
+      'responsibility',
+      'passwords',
+      'cybersecurity',
+      'security',
+      'digital hygiene',
+      'mirrors',
+      'lighting',
+      'self image',
+      'confidence',
+      'appearance',
+      'photography',
+      'algorithms',
+      'care',
+      'zoom meetings',
+      'acting',
+      'browser history',
+      'internet searches',
+      'random questions',
+      'curiosity',
+      'main character',
+      'drama',
+      'everyday theater',
+      'ai',
+      'workplace humor',
+      'digital rebellion',
+      'meditation',
+      'zen',
+      'apps',
+      'spiritual enlightenment',
+      'intervention',
+      'technology irony',
+      'healthy eating',
+      'salad',
+      'pretending',
+      'food choices',
+      'netflix',
+      'viewing history',
+      'poor decisions',
+      'entertainment choices',
+      'laundromat',
+      'existence',
+      'contemplation',
+      'google maps',
+      'technology fails',
+      'commitment issues',
+      'bad luck',
+      'superpower',
+      'retail experience',
+      'fitness tracker',
+      'exercise',
+      'health goals',
+      'passive aggression',
+      'technology judgment',
+      'motivation',
+      'parking',
+      'acceptance',
+      'inner peace',
+      'imperfection',
+      'driving skills',
+      'email',
+      'inbox management',
+      'spam',
+      'unsubscribe',
+      'technology conspiracy',
+      'microwave',
+      'food preparation',
+      'kitchen appliances',
+      'social battery',
+      'introversion',
+      'social energy',
+      'recharging',
+      'alone time',
+      'social anxiety',
+      'spreadsheets',
+      'productivity paradox',
+      'self sabotage',
+      'insomnia',
+      'embarrassing memories',
+      'late night thoughts',
+      'brain updates',
+      'sleep disruption',
+      'text analysis',
+      'detective work',
+      'mystery solving',
+      'phone battery',
+      'technology problems',
+      'boundary issues',
+      'charging',
+      'electronic devices',
+      'self checkout',
+      'patience',
+      'retail technology',
+      'ai confusion',
+      'diversity',
+      'identity crisis',
+      'music algorithm',
+      'passive aggressive',
+      'emotional language',
+      'social skills',
+      'hidden meanings',
+      'amazon cart',
+      'regret',
+      'past decisions',
+      'consumer culture',
+      'digital archaeology',
+      'simple pleasures',
+      'excitement',
+      'sponges',
+      'cleaning supplies',
+      'adulting',
+      'navigation',
+      'spatial awareness',
+      'trust issues',
+      'geography',
+      'direction sense',
+      'internal gps',
+      'vulnerability',
+      'social strategy',
+      'emotional intelligence',
+      'boundaries',
+      'sharing',
+      'notifications',
+      'unread messages',
+      'phone management',
+      'technology stress',
+      'chaos',
+      'dysfunction',
+      'peace',
+      'authenticity',
+      'technology partnership',
+      'communication chaos',
+      'digital comedy',
+      'unexpected friendship',
+      'video calls',
+      'dual identity',
+      'zoom personality',
+      'performance art',
+      'time rebellion',
+      'abstract living',
+      'basic',
+      'popular culture',
+      'trends',
+      'unapologetic',
+      'search suggestions',
+      'digital confession',
+      'internet habits',
+      'personal data',
+    ];
+
+    return await ctx.runMutation(internal.seed.seedProductionTagsInternal, {
+      tagNames,
+    });
+  },
+});
+
+// Seed production tags with zero counts using tag names array
+export const seedProductionTagsFromArray = action({
+  args: { tagNames: v.array(v.string()) },
+  handler: async (
+    ctx,
+    { tagNames }
+  ): Promise<{
+    totalTagsToSeed: number;
+    newTagsCreated: number;
+    message: string;
+  }> => {
+    return await ctx.runMutation(internal.tags.seedTagsWithZeroCounts, {
+      tagNames,
+    });
+  },
+});
+
+// Seed production tags with counts preserved from dev
+export const seedProductionTagsWithCounts = action({
+  args: {
+    tags: v.array(
+      v.object({
+        name: v.string(),
+        count: v.number(),
+      })
+    ),
+  },
+  handler: async (
+    ctx,
+    { tags }
+  ): Promise<{
+    totalTagsToSeed: number;
+    newTagsCreated: number;
+    tagsUpdated: number;
+    message: string;
+  }> => {
+    return await ctx.runMutation(internal.tags.seedTagsWithCounts, { tags });
   },
 });
 

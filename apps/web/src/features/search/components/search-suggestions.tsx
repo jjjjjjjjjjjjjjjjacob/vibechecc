@@ -105,8 +105,16 @@ export function SearchSuggestions({
                 key={`suggestion-recent-${search.term}`}
                 value={`recent-${search.term}`}
                 onSelect={() => onSelect(search.term, 'recent')}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onSelect(search.term, 'recent');
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  onSelect(search.term, 'recent');
+                }}
                 className={cn(
-                  'data-[selected=true]:bg-muted/80 flex h-9 items-center gap-2'
+                  'data-[selected=true]:bg-muted/80 flex h-9 cursor-pointer touch-manipulation items-center gap-2'
                 )}
                 style={{
                   animationDelay: `${currentIndex * 30}ms`,
@@ -132,8 +140,16 @@ export function SearchSuggestions({
                 key={`suggestion-trending-${search.term}`}
                 value={`trending-${search.term}`}
                 onSelect={() => onSelect(search.term, 'trending')}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onSelect(search.term, 'trending');
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  onSelect(search.term, 'trending');
+                }}
                 className={cn(
-                  'data-[selected=true]:bg-muted/80 flex h-9 items-center gap-2'
+                  'data-[selected=true]:bg-muted/80 flex h-9 cursor-pointer touch-manipulation items-center gap-2'
                 )}
                 style={{
                   animationDelay: `${currentIndex * 30}ms`,
@@ -167,8 +183,16 @@ export function SearchSuggestions({
                 key={`suggestion-tags-${tag.term}`}
                 value={`tag-${tag.term}`}
                 onSelect={() => onSelect(tag.term, 'tag')}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onSelect(tag.term, 'tag');
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  onSelect(tag.term, 'tag');
+                }}
                 className={cn(
-                  'data-[selected=true]:bg-muted/80 flex h-9 items-center gap-2'
+                  'data-[selected=true]:bg-muted/80 flex h-9 cursor-pointer touch-manipulation items-center gap-2'
                 )}
                 style={{
                   animationDelay: `${currentIndex * 30}ms`,
@@ -195,8 +219,16 @@ export function SearchSuggestions({
         <CommandItem
           value="browse all vibes"
           onSelect={() => onSelect('/vibes')}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            onSelect('/vibes');
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            onSelect('/vibes');
+          }}
           className={cn(
-            'data-[selected=true]:bg-muted/80 flex h-9 items-center gap-2',
+            'data-[selected=true]:bg-muted/80 flex h-9 cursor-pointer touch-manipulation items-center gap-2',
             'animate-in fade-in-0 slide-in-from-left-1'
           )}
           style={{

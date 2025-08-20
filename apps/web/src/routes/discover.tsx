@@ -1,4 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Link,
+  useSearch,
+  useNavigate,
+} from '@tanstack/react-router';
 import { lazy, Suspense, useMemo } from 'react';
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +15,7 @@ import {
   useAllTags,
   useVibesByTag,
   useCurrentUser,
+  useUserVibes,
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from '@/components/ui/icons';
@@ -21,6 +27,8 @@ import {
 import type { Vibe } from '@/types';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
+import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';
+import { useUser } from '@clerk/tanstack-react-start';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -53,6 +61,19 @@ const VibeCategoryRow = lazy(() =>
 
 export const Route = createFileRoute('/discover')({
   component: DiscoverPage,
+  validateSearch: (
+    search: Record<string, unknown>
+  ): {
+    celebrate?: string;
+    vibeId?: string;
+    vibeTitle?: string;
+    isFirstVibe?: string;
+  } => ({
+    celebrate: search.celebrate as string | undefined,
+    vibeId: search.vibeId as string | undefined,
+    vibeTitle: search.vibeTitle as string | undefined,
+    isFirstVibe: search.isFirstVibe as string | undefined,
+  }),
 });
 
 interface EmojiCollection {
@@ -116,9 +137,41 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
 ];
 
 function DiscoverPage() {
+  const search = useSearch({ from: '/discover' });
+  const navigate = useNavigate();
+  const { user } = useUser();
+
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
+
+  // Celebration dialog state
+  const [showCelebration, setShowCelebration] = React.useState(false);
+
+  // Get user vibes to check if this was first vibe
+  const { data: _userVibes } = useUserVibes(user?.id || '');
+
+  // Handle celebration from search params
+  React.useEffect(() => {
+    if (search.celebrate === 'true' && search.vibeId) {
+      setShowCelebration(true);
+      // Clear the search params after showing celebration
+      navigate({
+        to: '/discover',
+        search: {
+          celebrate: undefined,
+          vibeId: undefined,
+          vibeTitle: undefined,
+          isFirstVibe: undefined,
+        },
+        replace: true,
+      });
+    }
+  }, [search.celebrate, search.vibeId, navigate]);
+
+  const handleCelebrationClose = () => {
+    setShowCelebration(false);
+  };
 
   // Apply user's color themes when user data changes
   React.useEffect(() => {
@@ -135,62 +188,92 @@ function DiscoverPage() {
   }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
   return (
-    <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
-            discover all the vibes
-          </h1>
-          <p className="text-muted-foreground drop-shadow-sm">
-            explore curated collections based on emoji ratings
-          </p>
-        </div>
+    <>
+      {/* Celebration Dialog */}
+      {showCelebration && search.vibeId && (
+        <VibeCreatedCelebrationV2
+          isOpen={showCelebration}
+          onClose={handleCelebrationClose}
+          vibe={{
+            id: search.vibeId,
+            title: search.vibeTitle || 'Your vibe',
+            description: '',
+            tags: [],
+            createdAt: new Date().toISOString(),
+            createdById: user?.id || '',
+            visibility: 'public' as const,
+            ratings: [],
+          }}
+          author={{
+            externalId: user?.id || '',
+            username: user?.username || '',
+            first_name: user?.firstName || '',
+            last_name: user?.lastName || '',
+            image_url: user?.imageUrl || '',
+            onboardingCompleted: true,
+          }}
+          ratings={[]}
+          isFirstVibe={search.isFirstVibe === 'true'}
+        />
+      )}
 
-        {/* Featured Collections Grid */}
-        <section className="mb-12">
-          <h2 className="text-primary mb-6 text-2xl font-semibold lowercase">
-            featured collections
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {FEATURED_COLLECTIONS.map((collection) => (
-              <FeaturedCollectionVibeList
+      <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
+              discover all the vibes
+            </h1>
+            <p className="text-muted-foreground drop-shadow-sm">
+              explore curated collections based on emoji ratings
+            </p>
+          </div>
+
+          {/* Featured Collections Grid */}
+          <section className="mb-12">
+            <h2 className="text-primary mb-6 text-2xl font-semibold lowercase">
+              featured collections
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {FEATURED_COLLECTIONS.map((collection) => (
+                <FeaturedCollectionVibeList
+                  key={collection.emoji}
+                  collection={collection}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* New Section */}
+          <NewSection />
+
+          {/* Trending Section */}
+          <TrendingSection />
+
+          {/* Recent Arrivals Section */}
+          <RecentArrivalsSection />
+
+          {/* Unrated Section */}
+          <UnratedSection />
+
+          {/* Community Favorites Section */}
+          <CommunityFavoritesSection />
+
+          {/* Popular Tags Section */}
+          <PopularTagsSection />
+
+          {/* Top Rated Collections with VibeCategoryRow */}
+          <section>
+            {FEATURED_COLLECTIONS.slice(0, 4).map((collection) => (
+              <EmojiCollectionSection
                 key={collection.emoji}
                 collection={collection}
               />
             ))}
-          </div>
-        </section>
-
-        {/* New Section */}
-        <NewSection />
-
-        {/* Trending Section */}
-        <TrendingSection />
-
-        {/* Recent Arrivals Section */}
-        <RecentArrivalsSection />
-
-        {/* Unrated Section */}
-        <UnratedSection />
-
-        {/* Community Favorites Section */}
-        <CommunityFavoritesSection />
-
-        {/* Popular Tags Section */}
-        <PopularTagsSection />
-
-        {/* Top Rated Collections with VibeCategoryRow */}
-        <section>
-          {FEATURED_COLLECTIONS.slice(0, 4).map((collection) => (
-            <EmojiCollectionSection
-              key={collection.emoji}
-              collection={collection}
-            />
-          ))}
-        </section>
+          </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

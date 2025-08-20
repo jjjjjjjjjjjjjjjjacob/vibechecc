@@ -23,6 +23,15 @@ import {
 import { cn } from '@/utils/tailwind-utils';
 import { formatDistanceToNow } from '@/utils/date-utils';
 
+interface SocialConnection {
+  _id: string;
+  platform: 'twitter' | 'instagram' | 'tiktok';
+  platformUserId: string;
+  platformUsername?: string;
+  connectionStatus: 'connected' | 'disconnected' | 'expired' | 'error';
+  connectedAt?: number;
+}
+
 interface SocialConnectionsListProps {
   className?: string;
 }
@@ -53,9 +62,8 @@ export function SocialConnectionsList({
     string | null
   >(null);
 
-  const connections = useConvexQuery(
-    api.social.connections.getSocialConnections
-  );
+  const connections =
+    useConvexQuery(api.social.connections.getSocialConnections) ?? [];
   const disconnectMutation = useConvexMutation(
     api.social.connections.disconnectSocialAccount
   );
@@ -125,7 +133,7 @@ export function SocialConnectionsList({
         <CardDescription>manage your connected social accounts</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {connections.map((connection) => {
+        {connections.map((connection: SocialConnection) => {
           const Icon = platformIcons[connection.platform];
           const isDisconnecting = disconnectingPlatform === connection.platform;
           const isConnected = connection.connectionStatus === 'connected';

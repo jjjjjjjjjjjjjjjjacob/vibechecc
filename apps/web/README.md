@@ -27,7 +27,7 @@ A modern social web application built with TanStack Start where users can share 
 
 ## Tech Stack
 
-- **Frontend**: TanStack Start, shadcn/ui, Tailwind CSS v4, TanStack Query/Router, Framer Motion
+- **Frontend**: TanStack Start, shadcn/ui, Tailwind CSS v4, TanStack Query/Router, tw-animate-css
 - **Backend**: Convex (real-time DB + serverless functions), Clerk (auth)
 - **Infrastructure**: Cloudflare Workers, Terraform, ngrok (local webhooks)
 - **Development**: Bun, Nx, Vitest, TypeScript, ESLint, Prettier
@@ -747,7 +747,7 @@ import { EmojiRatingDisplay } from '@/features/ratings/components';
 
 - **Emoji Reactions**: Circular buttons with hover states and animations
 - **Emoji Ratings**: 1-5 scale ratings with required review text
-- **Visual Display**: Compact and expanded modes with framer-motion animations
+- **Visual Display**: Compact and expanded modes with CSS animations
 - **Backward Compatibility**: Falls back to star ratings when no emoji ratings exist
 - **Database Schema**: Separate `emojiRatings` table with proper indexes
 

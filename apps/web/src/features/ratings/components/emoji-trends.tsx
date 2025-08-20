@@ -87,6 +87,7 @@ export function EmojiTrends({ className }: { className?: string }) {
 
         <Link
           to="/discover"
+          search={{}}
           className="text-muted-foreground hover:text-foreground mt-4 block text-center text-sm transition-colors"
         >
           Explore all emoji collections →

@@ -12,6 +12,7 @@ import {
   Bell,
   LogIn,
   LogOut,
+  Plus,
 } from '@/components/ui/icons';
 import { useCallback, useState, useEffect, useRef, RefObject } from 'react';
 import { cn } from '../utils/tailwind-utils';
@@ -366,6 +367,7 @@ export function Header() {
                   </Link>
                   <Link
                     to="/discover"
+                    search={{}}
                     className={cn(
                       'hover:text-foreground/80 lowercase transition-colors',
                       location.pathname === '/discover'
@@ -406,6 +408,21 @@ export function Header() {
               </div>
 
               <div className={cn('ml-auto flex items-center gap-2')}>
+                {/* Desktop: Create button first */}
+                <SignedIn>
+                  <Link to="/vibes/create" className="hidden sm:block">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="bg-theme-primary/10 hover:bg-theme-primary/20 rounded-full px-4 transition-all hover:scale-105"
+                      onClick={() => setNavState(null)}
+                    >
+                      <Plus className="mr-1.5 h-4 w-4" />
+                      create
+                    </Button>
+                  </Link>
+                </SignedIn>
+
                 <Button
                   ref={searchButtonRef}
                   variant="ghost"
@@ -476,6 +493,20 @@ export function Header() {
                       </div>
                     </Button>
                   </div>
+                </SignedIn>
+
+                {/* Mobile: Create button after notifications */}
+                <SignedIn>
+                  <Link to="/vibes/create" className="sm:hidden">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="bg-theme-primary/10 hover:bg-theme-primary/20 h-10 w-10 rounded-lg transition-all hover:scale-105"
+                      onClick={() => setNavState(null)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </Link>
                 </SignedIn>
 
                 <Button
@@ -630,6 +661,7 @@ export function Header() {
                     </Link>
                     <Link
                       to="/discover"
+                      search={{}}
                       className={cn(
                         'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
                       )}
@@ -639,30 +671,6 @@ export function Header() {
                     >
                       discover
                     </Link>
-                    <SignedIn>
-                      <Link
-                        to="/vibes/my-vibes"
-                        className={cn(
-                          'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
-                        )}
-                        onClick={() => {
-                          setNavState(null);
-                        }}
-                      >
-                        my vibes
-                      </Link>
-                      <Link
-                        to="/profile"
-                        className={cn(
-                          'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
-                        )}
-                        onClick={() => {
-                          setNavState(null);
-                        }}
-                      >
-                        profile
-                      </Link>
-                    </SignedIn>
                     <button
                       className="hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left lowercase transition-all duration-150"
                       onClick={() => {

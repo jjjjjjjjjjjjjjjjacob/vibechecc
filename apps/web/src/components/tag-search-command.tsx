@@ -61,7 +61,17 @@ export function TagSearchCommand({
                     onTagSelect(tag.tag);
                     setSearchValue('');
                   }}
-                  className="flex items-center justify-between"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    onTagSelect(tag.tag);
+                    setSearchValue('');
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    onTagSelect(tag.tag);
+                    setSearchValue('');
+                  }}
+                  className="flex cursor-pointer touch-manipulation items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
                     <Hash className="text-muted-foreground h-3 w-3" />
@@ -89,10 +99,21 @@ export function TagSearchCommand({
               <Hash className="h-3 w-3" />
               {tag}
               <button
-                onClick={() => onTagRemove(tag)}
-                className="hover:bg-muted ml-1 rounded-full p-0.5"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onTagRemove(tag);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onTagRemove(tag);
+                }}
+                className="hover:bg-destructive/20 ml-1 inline-flex h-5 w-5 touch-manipulation items-center justify-center rounded-sm transition-colors"
+                aria-label={`Remove ${tag} tag`}
               >
-                <X className="h-3 w-3" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </Badge>
           ))}

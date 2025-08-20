@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { X, Hash } from '@/components/ui/icons';
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
@@ -49,7 +48,12 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
+  const handleRemoveTag = (
+    tagToRemove: string,
+    e?: React.MouseEvent | React.TouchEvent
+  ) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     onTagsChange(tags.filter((tag) => tag !== tagToRemove));
   };
 
@@ -71,18 +75,19 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
           <Badge
             key={tag}
             variant="secondary"
-            className="flex items-center gap-1"
+            className="group flex items-center gap-1 pr-1"
           >
             <Hash className="h-3 w-3" />
             {tag}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleRemoveTag(tag)}
-              className="h-3 w-3 p-0 hover:bg-transparent"
+            <button
+              type="button"
+              onClick={(e) => handleRemoveTag(tag, e)}
+              onTouchEnd={(e) => handleRemoveTag(tag, e)}
+              className="hover:bg-destructive/20 -mr-0.5 ml-1 inline-flex h-5 w-5 touch-manipulation items-center justify-center rounded-sm transition-colors"
+              aria-label={`Remove ${tag} tag`}
             >
-              <X className="h-3 w-3" />
-            </Button>
+              <X className="h-3.5 w-3.5" />
+            </button>
           </Badge>
         ))}
       </div>
@@ -93,7 +98,10 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
           onValueChange={setInputValue}
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          onBlur={() => {
+            // Delay hiding to allow touch/click events to fire
+            setTimeout(() => setShowSuggestions(false), 300);
+          }}
           showBorder={showSuggestions}
         />
         {showSuggestions && (
@@ -101,8 +109,12 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
             <CommandEmpty>
               {inputValue ? (
                 <div
-                  className="cursor-pointer px-2 py-1.5 text-sm"
+                  className="cursor-pointer touch-manipulation px-2 py-1.5 text-sm"
                   onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleAddTag(inputValue);
+                  }}
+                  onTouchEnd={(e) => {
                     e.preventDefault();
                     handleAddTag(inputValue);
                   }}
@@ -135,7 +147,15 @@ export function TagInput({ tags, onTagsChange, placeholder }: TagInputProps) {
                     key={tag.name}
                     value={tag.name}
                     onSelect={() => handleAddTag(tag.name)}
-                    className="cursor-pointer"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleAddTag(tag.name);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      handleAddTag(tag.name);
+                    }}
+                    className="cursor-pointer touch-manipulation"
                   >
                     <Hash className="mr-2 h-4 w-4" />
                     <span className="flex-1">{tag.name}</span>

@@ -44,7 +44,7 @@ vibechecc/
 - [TanStack Query](https://tanstack.com/query) (server state)
 - [TanStack Router](https://tanstack.com/router)
 - [Lucide React](https://lucide.dev/) (icons)
-- [Framer Motion](https://framer.com/motion/) (animations)
+- [tw-animate-css](https://github.com/unocss/unocss) (animations)
 
 ### Backend
 
@@ -300,7 +300,7 @@ The application now includes a comprehensive emoji rating system that enhances u
 
 - **Compact mode**: Shows emoji with rating value and count in vibe cards
 - **Expanded mode**: Shows emoji with "out of 5" text, scale visualization, and tags
-- **Smooth animations**: Using framer-motion for hover effects and transitions
+- **Smooth animations**: Using CSS animations for hover effects and transitions
 - **Partial ratings support**: Visual representation of partial ratings (e.g., 3.5 out of 5)
 
 #### Integration Points

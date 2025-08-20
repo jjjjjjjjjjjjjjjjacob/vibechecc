@@ -520,10 +520,11 @@ export function useFollowingVibesInfinite(
 
 // ONBOARDING QUERIES
 
-// Debug authentication (temporary)
+// Debug authentication (development only)
 export function useDebugAuth() {
   return useQuery({
     ...convexQuery(api.users.debugAuth, {}),
+    enabled: import.meta.env.DEV, // Only run in development
   });
 }
 

@@ -51,6 +51,9 @@ export {
   Sparkles,
   Zap,
   Save,
+  PartyPopper,
+  Rocket,
+  Share2,
 } from 'lucide-react';
 
 // Status and feedback icons
@@ -96,6 +99,9 @@ export {
 // Theme and visual icons
 export { Sun, Moon, Laptop, Palette } from 'lucide-react';
 
+// Device and info icons
+export { Maximize2, Info, Smartphone, Monitor } from 'lucide-react';
+
 // Analytics and trends icons
 export { TrendingUp, Flame, Download } from 'lucide-react';
 
@@ -110,6 +116,9 @@ export { Twitter, Instagram } from 'lucide-react';
 
 // Emoji and reactions
 export { Smile } from 'lucide-react';
+
+// Celebration and special icons
+export { Trophy, Crown, Music2, Type } from 'lucide-react';
 
 // Re-export commonly used icon components with better names
 export {

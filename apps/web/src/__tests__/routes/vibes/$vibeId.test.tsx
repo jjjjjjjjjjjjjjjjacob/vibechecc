@@ -8,48 +8,9 @@ import * as React from 'react';
 // Import the component directly instead of extracting from Route
 import VibePage from '@/routes/vibes/$vibeId';
 
-// Mock Clerk
-vi.mock('@clerk/tanstack-react-start', () => ({
-  useUser: () => ({ user: { id: 'test-user' } }),
-  SignedIn: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  SignedOut: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  SignInButton: ({ children, ...props }: any) =>
-    React.createElement(
-      'button',
-      { ...props, 'data-testid': 'sign-in-button' },
-      children || 'Sign In'
-    ),
-  SignUpButton: ({ children, ...props }: any) =>
-    React.createElement(
-      'button',
-      { ...props, 'data-testid': 'sign-up-button' },
-      children || 'Sign Up'
-    ),
-  ClerkProvider: ({ children }: { children: React.ReactNode }) => children,
-  UserButton: ({ ...props }: any) =>
-    React.createElement(
-      'button',
-      { ...props, 'data-testid': 'user-button' },
-      'User'
-    ),
-}));
+// Clerk is already mocked in vitest.setup.ts
 
-// Mock Convex
-vi.mock('@convex-dev/react-query', () => ({
-  convexQuery: vi.fn((query: any, args: any) => ({
-    queryKey: ['convex', 'query', query, args],
-    queryFn: () => {
-      // Handle different query types
-      if (query && typeof query === 'string') {
-        if (query.includes('getUrl')) {
-          return Promise.resolve('https://example.com/image.jpg');
-        }
-      }
-      return Promise.resolve(null);
-    },
-    enabled: true,
-  })),
-}));
+// Convex is already mocked in vitest.setup.ts
 
 // Mock queries
 const mockVibe = {
@@ -217,12 +178,7 @@ vi.mock('@/features/ratings/components/emoji-rating-popover', () => ({
   },
 }));
 
-vi.mock('react-hot-toast', () => ({
-  default: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+// react-hot-toast is mocked as sonner in vitest.setup.ts
 
 describe('Vibe Detail Page - Rating Flow Integration', () => {
   let queryClient: QueryClient;
