@@ -32,7 +32,7 @@ variable "pr_number" {
 }
 
 variable "app_name" {
-  description = "The name of the application (e.g., 'vibechecc', 'viberatr')"
+  description = "The name of the application (e.g., 'vibechecc')"
   type        = string
   default     = "vibechecc"
 }

@@ -1,11 +1,11 @@
-# A/B Testing Setup: vibechecc vs viberatr
+# A/B Testing Setup: vibechecc vs vibechecc-alt
 
 ## Overview
 
 This repository is configured to support A/B testing between two app name variants:
 
 - **vibechecc** (main branch) - Original name
-- **viberatr** (main-alt branch) - Alternative name for testing
+- **vibechecc-alt** (main-alt branch) - Alternative name for testing
 
 Both deployments share the same Convex backend database and functionality, allowing for direct comparison of user engagement metrics between the two brandings.
 
@@ -13,7 +13,7 @@ Both deployments share the same Convex backend database and functionality, allow
 
 ```
 ┌─────────────────┐           ┌─────────────────┐
-│  vibechecc.com  │           │  viberatr.com   │
+│  vibechecc.com  │           │  vibechecc-alt.com   │
 │   (main branch) │           │ (main-alt branch)│
 └────────┬────────┘           └────────┬────────┘
          │                              │
@@ -42,12 +42,12 @@ VITE_APP_DOMAIN=vibechecc.com
 VITE_APP_TWITTER_HANDLE=@vibechecc
 ```
 
-**Main-Alt Branch (viberatr):**
+**Main-Alt Branch (vibechecc-alt):**
 
 ```bash
-VITE_APP_NAME=viberatr
-VITE_APP_DOMAIN=viberatr.com
-VITE_APP_TWITTER_HANDLE=@viberatr
+VITE_APP_NAME=vibechecc-alt
+VITE_APP_DOMAIN=vibechecc-alt.com
+VITE_APP_TWITTER_HANDLE=@vibechecc-alt
 ```
 
 ### GitHub Actions Secrets
@@ -55,7 +55,7 @@ VITE_APP_TWITTER_HANDLE=@viberatr
 Both environments share most secrets but use separate GitHub environments:
 
 - `main` environment - for vibechecc
-- `main-alt` environment - for viberatr
+- `main-alt` environment - for vibechecc-alt
 
 **Shared Secrets (same values in both environments):**
 
@@ -76,7 +76,7 @@ git checkout main
 git push origin main
 ```
 
-### Deploying viberatr
+### Deploying vibechecc-alt
 
 ```bash
 git checkout main-alt
@@ -119,7 +119,7 @@ Only the app name and branding should differ between deployments.
 Both deployments use separate Terraform workspaces:
 
 - `production` workspace - vibechecc infrastructure
-- `production-alt` workspace - viberatr infrastructure
+- `production-alt` workspace - vibechecc-alt infrastructure
 
 This provides separate:
 
@@ -141,10 +141,10 @@ While sharing:
 bun run dev
 ```
 
-### Test as viberatr
+### Test as vibechecc-alt
 
 ```bash
-VITE_APP_NAME=viberatr VITE_APP_DOMAIN=viberatr.com bun run dev
+VITE_APP_NAME=vibechecc-alt VITE_APP_DOMAIN=viberatr.com bun run dev
 ```
 
 ## Monitoring
@@ -166,7 +166,7 @@ git checkout main
 git revert HEAD
 git push origin main
 
-# For viberatr
+# For vibechecc-alt
 git checkout main-alt
 git revert HEAD
 git push origin main-alt

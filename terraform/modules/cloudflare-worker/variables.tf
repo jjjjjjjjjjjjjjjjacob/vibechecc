@@ -31,7 +31,7 @@ variable "cloudflare_worker_hostname" {
 }
 
 variable "app_name" {
-  description = "The name of the application (e.g., 'vibechecc', 'viberatr')"
+  description = "The name of the application (e.g., 'vibechecc', 'vibechecc-alt')"
   type        = string
 }
 
