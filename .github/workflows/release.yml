@@ -143,17 +143,32 @@ jobs:
 
           if [ -z "$PREV_TAG" ]; then
             # First release - no previous tag
-            gh release create "$TAG_NAME" \
-              --generate-notes \
-              --title "$RELEASE_TITLE" \
-              --prerelease=${{ inputs.prerelease }} \
-              --verify-tag || true
+            if [ "${{ inputs.prerelease }}" = "true" ]; then
+              gh release create "$TAG_NAME" \
+                --generate-notes \
+                --title "$RELEASE_TITLE" \
+                --prerelease \
+                --verify-tag || true
+            else
+              gh release create "$TAG_NAME" \
+                --generate-notes \
+                --title "$RELEASE_TITLE" \
+                --verify-tag || true
+            fi
           else
             # Normal release with previous tag for comparison
-            gh release create "$TAG_NAME" \
-              --generate-notes \
-              --notes-start-tag "$PREV_TAG" \
-              --title "$RELEASE_TITLE" \
-              --prerelease=${{ inputs.prerelease }} \
-              --verify-tag || true
+            if [ "${{ inputs.prerelease }}" = "true" ]; then
+              gh release create "$TAG_NAME" \
+                --generate-notes \
+                --notes-start-tag "$PREV_TAG" \
+                --title "$RELEASE_TITLE" \
+                --prerelease \
+                --verify-tag || true
+            else
+              gh release create "$TAG_NAME" \
+                --generate-notes \
+                --notes-start-tag "$PREV_TAG" \
+                --title "$RELEASE_TITLE" \
+                --verify-tag || true
+            fi
           fi

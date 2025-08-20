@@ -40,6 +40,8 @@ if [ "$TF_VAR_environment" = "ephemeral" ]; then
   PREFIX="pr-$PR_NUMBER"
 elif [ "$TF_VAR_environment" = "production" ]; then
   PREFIX="prod"
+elif [ "$TF_VAR_environment" = "production-alt" ]; then
+  PREFIX="prod-alt"
 elif [ "$TF_VAR_environment" = "development" ]; then
   PREFIX="dev"
 else
@@ -146,6 +148,8 @@ CNAME_RECORD_ID=$(jq -r --arg prefix "$PREFIX.$TF_VAR_cloudflare_zone" '.result[
 # Extract Worker script name
 if [ "$TF_VAR_environment" = "ephemeral" ]; then
   WORKER_SCRIPT_NAME="vibechecc-pr-$PR_NUMBER-web"
+elif [ "$TF_VAR_environment" = "production-alt" ]; then
+  WORKER_SCRIPT_NAME="${APP_NAME}-${TF_VAR_environment}-web"
 else
   WORKER_SCRIPT_NAME="vibechecc-$TF_VAR_environment-web"
 fi
@@ -228,10 +232,10 @@ if [ -n "$WORKER_SCRIPT_EXISTS" ] && [ "$WORKER_SCRIPT_EXISTS" != "null" ]; then
 fi
 
 # Import Workers route if it exists
-if [ "$TF_VAR_environment" != "production" ]; then
-  ROUTE_PATTERN="$PREFIX.$TF_VAR_cloudflare_zone/*"
-else
+if [ "$TF_VAR_environment" = "production" ]; then
   ROUTE_PATTERN="$TF_VAR_cloudflare_zone/*"
+else
+  ROUTE_PATTERN="$PREFIX.$TF_VAR_cloudflare_zone/*"
 fi
 
 # Only check for Workers route if we need to import it
