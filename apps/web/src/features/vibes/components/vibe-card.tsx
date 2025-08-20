@@ -879,26 +879,58 @@ export function VibeCard({
             <CardContent
               className={cn('p-4', finalVariant === 'compact' && 'p-3')}
             >
-              <h3
+              <div
                 className={cn(
-                  'leading-tight font-bold',
-                  (() => {
-                    switch (finalVariant) {
-                      case 'feed-masonry':
-                      case 'feed-single':
-                        return 'line-clamp-3 text-lg';
-                      case 'feed-grid':
-                        return 'line-clamp-2 text-base';
-                      case 'compact':
-                        return 'line-clamp-1 text-base';
-                      default:
-                        return 'line-clamp-1 text-lg';
-                    }
-                  })()
+                  'flex items-start justify-between gap-2',
+                  finalVariant === 'compact' && 'items-center'
                 )}
               >
-                {vibe.title}
-              </h3>
+                <h3
+                  className={cn(
+                    'min-w-0 flex-1 leading-tight font-bold',
+                    (() => {
+                      switch (finalVariant) {
+                        case 'feed-masonry':
+                        case 'feed-single':
+                          return 'line-clamp-3 text-lg';
+                        case 'feed-grid':
+                          return 'line-clamp-2 text-base';
+                        case 'compact':
+                          return 'line-clamp-1 text-base';
+                        default:
+                          return 'line-clamp-1 text-lg';
+                      }
+                    })()
+                  )}
+                >
+                  {vibe.title}
+                </h3>
+
+                {/* Share button for compact variant */}
+                {finalVariant === 'compact' && (
+                  <div
+                    className="flex-shrink-0"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <ShareButton
+                      contentType="vibe"
+                      variant="ghost"
+                      size="sm"
+                      showCount={false}
+                      vibe={vibe}
+                      author={vibe.createdBy || undefined}
+                      ratings={
+                        topEmojiRatings?.map((r) => ({
+                          emoji: r.emoji,
+                          value: r.averageValue,
+                          tags: r.tags || [],
+                          count: r.count,
+                        })) || undefined
+                      }
+                    />
+                  </div>
+                )}
+              </div>
 
               {finalVariant !== 'compact' && (
                 <p
@@ -958,7 +990,7 @@ export function VibeCard({
                 </div>
 
                 {/* Emoji Reactions and Share Button */}
-                {finalVariant !== 'compact' && (
+                {finalVariant !== 'compact' ? (
                   <div className="flex w-full items-center justify-between gap-2">
                     {/* Emoji Reactions */}
                     {emojiReactions.length > 0 ? (
@@ -996,7 +1028,7 @@ export function VibeCard({
                       }
                     />
                   </div>
-                )}
+                ) : null}
               </>
             )}
           </CardFooter>
