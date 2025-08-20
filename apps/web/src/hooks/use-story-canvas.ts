@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import toast from '@/utils/toast';
 import type { Vibe, User, EmojiRating, Rating } from '@vibechecc/types';
-import { computeUserDisplayName } from '@/utils/user-utils';
+import { computeUserDisplayName, getUserAvatarUrl } from '@/utils/user-utils';
 import { format } from '@/utils/date-utils';
 // QRCode removed - not compatible with Cloudflare Workers
 import { extractThemeColors, hexToRgba } from '@/utils/theme-color-extractor';
@@ -35,6 +35,10 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
       imageUrl?: string | null,
       layoutOption?: LayoutOption
     ): Promise<Blob | null> => {
+      console.log(
+        '[useStoryCanvas] Starting generation with layout:',
+        layoutOption?.value
+      );
       setIsGenerating(true);
 
       try {
@@ -157,27 +161,93 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
         // Author section with avatar
         const authorY = cardY + 60;
 
-        // Avatar circle with border
-        ctx.strokeStyle = storyColors.primary;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(contentX + 48, authorY + 48, 48, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Avatar background
-        ctx.fillStyle = storyColors.muted;
-        ctx.beginPath();
-        ctx.arc(contentX + 48, authorY + 48, 45, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Draw initials for author
+        // Get user display name (needed for both avatar and text)
         const displayName = computeUserDisplayName(author);
-        const initials = displayName.slice(0, 2).toUpperCase();
-        ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
-        ctx.fillStyle = storyColors.foreground;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(initials, contentX + 48, authorY + 48);
+
+        // Get user avatar URL
+        const userAvatarUrl = getUserAvatarUrl(author);
+        let avatarDrawn = false;
+
+        // Try to load and draw user avatar if available
+        if (userAvatarUrl) {
+          try {
+            console.log('[useStoryCanvas] Loading user avatar:', userAvatarUrl);
+            const avatarImg = new Image();
+            avatarImg.crossOrigin = 'anonymous';
+
+            // Add timeout to prevent hanging
+            const loadPromise = new Promise((resolve, reject) => {
+              const timeout = setTimeout(() => {
+                console.error('[useStoryCanvas] User avatar load timeout');
+                reject(new Error('Image load timeout'));
+              }, 3000); // 3 second timeout
+
+              avatarImg.onload = () => {
+                clearTimeout(timeout);
+                console.log('[useStoryCanvas] User avatar loaded successfully');
+                resolve(avatarImg);
+              };
+
+              avatarImg.onerror = () => {
+                clearTimeout(timeout);
+                console.error('[useStoryCanvas] User avatar load failed');
+                reject(new Error('Image load failed'));
+              };
+
+              avatarImg.src = userAvatarUrl;
+            });
+
+            await loadPromise;
+
+            // Draw avatar circle with clipping
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(contentX + 48, authorY + 48, 45, 0, Math.PI * 2);
+            ctx.clip();
+
+            // Draw the avatar image (centered and cropped to circle)
+            const imgSize = Math.min(avatarImg.width, avatarImg.height);
+            const sx = (avatarImg.width - imgSize) / 2;
+            const sy = (avatarImg.height - imgSize) / 2;
+
+            ctx.drawImage(
+              avatarImg,
+              sx,
+              sy,
+              imgSize,
+              imgSize,
+              contentX + 48 - 45,
+              authorY + 48 - 45,
+              90,
+              90
+            );
+            ctx.restore();
+
+            // No border for avatar
+
+            avatarDrawn = true;
+          } catch {
+            // Fall back to initials if image fails to load
+            avatarDrawn = false;
+          }
+        }
+
+        // Draw initials as fallback if no avatar or loading failed
+        if (!avatarDrawn) {
+          // Avatar background
+          ctx.fillStyle = storyColors.muted;
+          ctx.beginPath();
+          ctx.arc(contentX + 48, authorY + 48, 45, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Draw initials for author
+          const initials = displayName.slice(0, 2).toUpperCase();
+          ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = storyColors.foreground;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(initials, contentX + 48, authorY + 48);
+        }
 
         // Author name and username
         ctx.textAlign = 'left';
@@ -228,11 +298,27 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
             try {
               const vibeImg = new Image();
               vibeImg.crossOrigin = 'anonymous';
-              await new Promise((resolve, reject) => {
-                vibeImg.onload = resolve;
-                vibeImg.onerror = reject;
+
+              // Add timeout to prevent hanging
+              const loadPromise = new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                  reject(new Error('Vibe image load timeout'));
+                }, 3000); // 3 second timeout
+
+                vibeImg.onload = () => {
+                  clearTimeout(timeout);
+                  resolve(vibeImg);
+                };
+
+                vibeImg.onerror = () => {
+                  clearTimeout(timeout);
+                  reject(new Error('Vibe image load failed'));
+                };
+
                 vibeImg.src = vibeImageUrl!;
               });
+
+              await loadPromise;
 
               // Fixed dimensions for the image container (object-cover behavior)
               const imageContainerWidth = contentWidth;
@@ -900,7 +986,8 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
             0.95
           );
         });
-      } catch {
+      } catch (error) {
+        console.error('[useStoryCanvas] Failed to generate image:', error);
         toast.error('failed to generate image');
         return null;
       } finally {

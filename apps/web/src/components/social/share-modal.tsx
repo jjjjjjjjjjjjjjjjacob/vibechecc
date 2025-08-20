@@ -140,9 +140,9 @@ export function ShareModal({
     );
   };
 
-  // Generate preview images when step changes to customize
+  // Generate thumbnails immediately when modal opens
   useEffect(() => {
-    if (currentStep === 'customize' && !isGenerating && !allLayoutsReady) {
+    if (open && !isGenerating && !allLayoutsReady && previewUrls.size === 0) {
       setAllLayoutsReady(false);
 
       // Generate all layouts in parallel
@@ -175,19 +175,16 @@ export function ShareModal({
       });
     }
 
-    return () => {
-      if (!open) {
-        // Clean up all URLs when modal closes
-        previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
-        setPreviewUrls(new Map());
-        previewUrlsRef.current = new Map();
-        setAllLayoutsReady(false);
-        setCurrentStep('platform');
-        setSelectedPlatform(null);
-      }
-    };
+    // Clean up when modal closes
+    if (!open && previewUrls.size > 0) {
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      setPreviewUrls(new Map());
+      previewUrlsRef.current = new Map();
+      setAllLayoutsReady(false);
+      setCurrentStep('platform');
+      setSelectedPlatform(null);
+    }
   }, [
-    currentStep,
     open,
     vibe,
     author,
@@ -197,6 +194,7 @@ export function ShareModal({
     generateCanvasImage,
     isGenerating,
     allLayoutsReady,
+    previewUrls.size,
   ]);
 
   const handlePlatformSelect = (platform: Platform) => {
