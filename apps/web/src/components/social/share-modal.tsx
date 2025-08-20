@@ -47,6 +47,15 @@ interface ShareModalProps {
   ratings?: (EmojiRating | Rating)[];
 }
 
+interface SocialConnection {
+  _id: string;
+  platform: 'twitter' | 'instagram' | 'tiktok';
+  platformUserId: string;
+  platformUsername?: string;
+  connectionStatus: 'connected' | 'disconnected' | 'expired' | 'error';
+  connectedAt?: number;
+}
+
 type ShareStep = 'platform' | 'customize';
 type StoryLayout = 'expanded' | 'minimal';
 type Platform = 'twitter' | 'instagram' | 'tiktok';
@@ -126,7 +135,7 @@ export function ShareModal({
   // Check if platforms are connected
   const isConnected = (platform: Platform) => {
     return socialConnections?.some(
-      (conn) =>
+      (conn: SocialConnection) =>
         conn.platform === platform && conn.connectionStatus === 'connected'
     );
   };
@@ -282,7 +291,8 @@ export function ShareModal({
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
                 {socialConnections?.some(
-                  (conn) => conn.connectionStatus === 'connected'
+                  (conn: SocialConnection) =>
+                    conn.connectionStatus === 'connected'
                 )
                   ? 'connected accounts will share directly. unconnected accounts will download the image.'
                   : 'connect your social accounts in settings for easier sharing'}

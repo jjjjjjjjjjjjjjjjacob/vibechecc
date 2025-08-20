@@ -146,27 +146,24 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Configure Convex
-        working-directory: apps/convex
-        env:
-          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-        run: bunx convex dev --configure=existing --project ${{ secrets.CONVEX_PROJECT_SLUG }} --dev-deployment cloud --once
+      # Skip configuration - CONVEX_DEPLOY_KEY handles authentication
+      # - name: Configure Convex (commented out - using CONVEX_DEPLOY_KEY instead)
 
       # Set Convex environment variables for backend (now in apps/convex)
       - name: Set Environment Variables
         working-directory: apps/convex
         env:
-          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT_NAME }}
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: |
-          bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set CLERK_FRONTEND_API_URL ${{ secrets.CLERK_FRONTEND_API_URL }}
-          bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set CLERK_WEBHOOK_SECRET ${{ secrets.CLERK_WEBHOOK_SECRET }}
+          echo "Setting environment variables for Convex deployment"
+          bunx convex env set CLERK_FRONTEND_API_URL ${{ secrets.CLERK_FRONTEND_API_URL }}
+          bunx convex env set CLERK_WEBHOOK_SECRET ${{ secrets.CLERK_WEBHOOK_SECRET }}
           # Set alternative webhook secret if available (for main-alt environment)
           if [ -n "${{ secrets.CLERK_WEBHOOK_SECRET_ALT }}" ]; then
-            bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set CLERK_WEBHOOK_SECRET_ALT ${{ secrets.CLERK_WEBHOOK_SECRET_ALT }}
+            bunx convex env set CLERK_WEBHOOK_SECRET_ALT ${{ secrets.CLERK_WEBHOOK_SECRET_ALT }}
           fi
-          bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set POSTHOG_API_KEY ${{ secrets.VITE_POSTHOG_API_KEY }}
-          bunx convex env --deployment-name ${{ secrets.CONVEX_DEPLOYMENT_NAME }} set POSTHOG_HOST ${{ secrets.POSTHOG_HOST }}
+          bunx convex env set POSTHOG_API_KEY ${{ secrets.VITE_POSTHOG_API_KEY }}
+          bunx convex env set POSTHOG_HOST ${{ secrets.POSTHOG_HOST }}
 
       # Build and deploy Convex backend
       - name: Build Convex Backend
@@ -175,13 +172,25 @@ jobs:
       - name: Deploy Convex
         working-directory: apps/convex
         env:
-          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT_NAME }}
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: |
           if [ "${{ inputs.environment }}" = "production" ] || [ "${{ inputs.environment }}" = "production-alt" ]; then
-            bunx convex deploy -y
+            echo "Deploying to Convex using deploy key"
+            echo "Environment: ${{ inputs.environment }}"
+            echo "Branch: ${{ inputs.branch }}"
+            
+            # CONVEX_DEPLOY_KEY determines the deployment target
+            # Using -y to skip confirmation and --typecheck disable to speed up deployment
+            bunx convex deploy -y --typecheck disable
+            
+            if [ $? -ne 0 ]; then
+              echo "ERROR: Convex deployment failed"
+              exit 1
+            fi
+            
+            echo "Convex deployment complete"
           else
-            echo "Skipping Convex deployment for non-production environment"
+            echo "Skipping Convex deployment for non-production environment: ${{ inputs.environment }}"
           fi
 
   deploy-cloudflare:

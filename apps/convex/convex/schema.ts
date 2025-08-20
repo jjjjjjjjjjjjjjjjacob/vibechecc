@@ -61,6 +61,7 @@ const schema = defineSchema({
     isAdmin: v.optional(v.boolean()), // Whether user has admin privileges
   })
     .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
+    .index('byUsername', ['username']) // Index for username lookups
     .searchIndex('searchUsername', {
       searchField: 'username',
     })
@@ -143,7 +144,7 @@ const schema = defineSchema({
     name: v.string(),
     keywords: v.array(v.string()),
     category: v.string(),
-    subcategory: v.optional(v.string()), // For OpenMoji subcategories
+    subcategory: v.optional(v.string()), // Emoji subcategory
     version: v.optional(v.string()), // Emoji version (e.g., "15.0")
     color: v.string(), // Hex color for UI theming
     sentiment: v.optional(

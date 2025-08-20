@@ -28,7 +28,7 @@ const TanStackRouterDevtools = import.meta.env.DEV
     )
   : () => null;
 import { Toaster } from '@/components/ui/sonner';
-import type { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DefaultCatchBoundary } from '@/components/default-catch-boundary';
 import { NotFound } from '@/components/not-found';
 import { Header } from '@/components/header';
@@ -224,9 +224,11 @@ function RootComponent() {
   return (
     <ClerkProviderWrapper>
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
-        <RootDocument>
-          <Outlet />
-        </RootDocument>
+        <QueryClientProvider client={context.queryClient}>
+          <RootDocument>
+            <Outlet />
+          </RootDocument>
+        </QueryClientProvider>
       </ConvexProviderWithClerk>
     </ClerkProviderWrapper>
   );

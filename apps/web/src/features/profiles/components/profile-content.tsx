@@ -157,7 +157,7 @@ export function ProfileContent() {
     return (
       <div className="from-background via-background min-h-screen bg-gradient-to-br to-purple-950/10">
         <div className="container mx-auto px-4 py-8">
-          <DebugAuth />
+          {import.meta.env.DEV && <DebugAuth />}
           <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border px-4 py-3">
             <p>failed to load user profile. please try again later.</p>
           </div>

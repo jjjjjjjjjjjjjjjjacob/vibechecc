@@ -90,7 +90,6 @@ export function OnboardingProfileStep({
       // Execute all updates in parallel
       if (promises.length > 0) {
         await Promise.all(promises);
-        toast.success('Profile updated successfully!');
       }
 
       onNext();

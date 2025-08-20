@@ -195,14 +195,23 @@ export function UserInterestsSection({
                     className="from-theme-primary to-theme-secondary text-primary-foreground bg-gradient-to-r px-2 py-1 text-xs"
                   >
                     <span className="lowercase">{interest}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeInterest(interest)}
-                      className="text-primary-foreground/80 hover:text-primary-foreground ml-1 h-auto p-0 hover:bg-transparent"
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        removeInterest(interest);
+                      }}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        removeInterest(interest);
+                      }}
+                      className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-destructive/20 ml-1 inline-flex h-4 w-4 touch-manipulation items-center justify-center rounded-sm transition-colors"
+                      aria-label={`Remove ${interest} interest`}
                     >
-                      <X className="h-2.5 w-2.5" />
-                    </Button>
+                      <X className="h-3 w-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
@@ -247,7 +256,23 @@ export function UserInterestsSection({
                             setSearchOpen(false);
                             setSearchValue('');
                           }}
-                          className="cursor-pointer"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            if (!localInterests.includes(tag)) {
+                              toggleInterest(tag);
+                            }
+                            setSearchOpen(false);
+                            setSearchValue('');
+                          }}
+                          onTouchEnd={(e) => {
+                            e.preventDefault();
+                            if (!localInterests.includes(tag)) {
+                              toggleInterest(tag);
+                            }
+                            setSearchOpen(false);
+                            setSearchValue('');
+                          }}
+                          className="cursor-pointer touch-manipulation"
                         >
                           <span className="lowercase">{tag}</span>
                           {localInterests.includes(tag) && (

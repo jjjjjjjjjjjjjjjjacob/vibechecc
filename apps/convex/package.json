@@ -5,6 +5,12 @@
   "type": "module",
   "main": "convex/_generated/api.js",
   "types": "convex/_generated/api.d.ts",
+  "scripts": {
+    "sync:tags": "bun run ../../scripts/sync-tags.ts",
+    "sync:tags:export": "../../scripts/export-dev-tags.sh",
+    "sync:tags:seed": "../../scripts/seed-prod-tags.sh",
+    "sync:tags:all": "../../scripts/sync-tags-to-prod.sh"
+  },
   "exports": {
     ".": {
       "types": "./convex/_generated/api.d.ts",

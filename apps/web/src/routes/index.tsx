@@ -105,7 +105,7 @@ function Home() {
                       variant="outline"
                       className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
                     >
-                      <Link to="/discover">
+                      <Link to="/discover" search={{}}>
                         <Sparkles className="mr-2 h-4 w-4" />
                         browse vibes anyway
                       </Link>
@@ -130,7 +130,7 @@ function Home() {
                           variant="outline"
                           className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
                         >
-                          <Link to="/discover">
+                          <Link to="/discover" search={{}}>
                             <Sparkles className="mr-2 h-4 w-4" />
                             discover vibes
                           </Link>

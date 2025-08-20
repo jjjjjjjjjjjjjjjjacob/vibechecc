@@ -149,8 +149,64 @@ export const getByUsername = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query('users')
-      .filter((q) => q.eq(q.field('username'), args.username))
+      .withIndex('byUsername', (q) => q.eq('username', args.username))
       .first();
+  },
+});
+
+// Get most interacted-with user (for onboarding demo)
+export const getMostFollowedUser = query({
+  handler: async (ctx) => {
+    // Get users with completed onboarding
+    const users = await ctx.db
+      .query('users')
+      .filter((q) => q.eq(q.field('onboardingCompleted'), true))
+      .order('desc')
+      .take(200);
+
+    if (users.length === 0) {
+      return null;
+    }
+
+    // Calculate interaction score for each user (followers + total vibe interactions)
+    const usersWithInteractionScore = await Promise.all(
+      users.map(async (user) => {
+        // Get user's vibes
+        const vibes = await ctx.db
+          .query('vibes')
+          .withIndex('createdBy', (q) => q.eq('createdById', user.externalId))
+          .collect();
+
+        // Get total ratings on user's vibes
+        let totalVibeInteractions = 0;
+        for (const vibe of vibes) {
+          const ratings = await ctx.db
+            .query('ratings')
+            .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+            .collect();
+
+          totalVibeInteractions += ratings.length;
+        }
+
+        // Calculate total interaction score: followers + vibe interactions
+        const totalInteractionScore =
+          (user.followerCount ?? 0) + totalVibeInteractions;
+
+        return {
+          ...user,
+          vibesCount: vibes.length,
+          totalVibeInteractions,
+          totalInteractionScore,
+        };
+      })
+    );
+
+    // Sort by total interaction score to find the most interacted-with
+    const sortedUsers = usersWithInteractionScore.sort(
+      (a, b) => b.totalInteractionScore - a.totalInteractionScore
+    );
+
+    return sortedUsers[0];
   },
 });
 

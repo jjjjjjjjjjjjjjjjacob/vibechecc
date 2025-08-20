@@ -407,60 +407,6 @@ vi.mock('@tanstack/react-router', () => ({
   Outlet: () => null,
 }));
 
-// Mock framer-motion
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({
-      children,
-      ...props
-    }: {
-      children?: React.ReactNode;
-      [key: string]: unknown;
-    }) => React.createElement('div', props, children),
-    span: ({
-      children,
-      ...props
-    }: {
-      children?: React.ReactNode;
-      [key: string]: unknown;
-    }) => React.createElement('span', props, children),
-    button: ({
-      children,
-      ...props
-    }: {
-      children?: React.ReactNode;
-      [key: string]: unknown;
-    }) => React.createElement('button', props, children),
-    a: ({
-      children,
-      ...props
-    }: {
-      children?: React.ReactNode;
-      [key: string]: unknown;
-    }) => React.createElement('a', props, children),
-  },
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-  useAnimation: () => ({
-    start: vi.fn(),
-    set: vi.fn(),
-    stop: vi.fn(),
-    mount: vi.fn(),
-  }),
-  useMotionValue: () => ({
-    get: () => 0,
-    set: vi.fn(),
-  }),
-  useTransform: () => 0,
-  useSpring: () => 0,
-  useScroll: () => ({
-    scrollY: { get: () => 0 },
-    scrollX: { get: () => 0 },
-    scrollYProgress: { get: () => 0 },
-    scrollXProgress: { get: () => 0 },
-  }),
-  useInView: () => true,
-}));
-
 // Mock posthog
 vi.mock('@/lib/posthog', () => ({
   trackEvents: {

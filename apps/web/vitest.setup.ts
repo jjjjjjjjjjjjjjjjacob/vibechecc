@@ -46,6 +46,7 @@ vi.mock('lucide-react', () => {
     'Heart',
     'Home',
     'Image',
+    'Instagram',
     'ImageIcon',
     'Info',
     'Laptop',
@@ -58,7 +59,11 @@ vi.mock('lucide-react', () => {
     'MessageCircle',
     'MessageSquare',
     'Moon',
+    'Maximize2',
+    'Minimize2',
+    'Monitor',
     'MoreHorizontal',
+    'Music2',
     'Palette',
     'PanelLeftIcon',
     'Plus',
@@ -67,14 +72,19 @@ vi.mock('lucide-react', () => {
     'SearchIcon',
     'Settings',
     'Settings2',
+    'Share2',
     'Shield',
     'SlidersHorizontal',
+    'Smartphone',
     'Sparkles',
     'Star',
     'Sun',
     'Tag',
     'Trash2',
     'TrendingUp',
+    'Trophy',
+    'Twitter',
+    'Type',
     'User',
     'UserMinus',
     'UserPlus',
@@ -82,6 +92,9 @@ vi.mock('lucide-react', () => {
     'X',
     'XIcon',
     'Zap',
+    'ZoomIn',
+    'ZoomOut',
+    'Minimize2',
   ];
 
   // Create exports object with all icon names mapped to MockIcon
@@ -111,6 +124,8 @@ vi.mock('@clerk/tanstack-react-start', () => ({
     sessionId: 'test-session',
     getToken: vi.fn().mockResolvedValue('test-token'),
   }),
+  SignedIn: ({ children }: any) => children,
+  SignedOut: ({ children: _children }: any) => null, // Return null for signed out state in tests
   SignInButton: ({ children }: any) =>
     React.createElement('div', null, children),
   SignUpButton: ({ children }: any) =>
@@ -151,6 +166,11 @@ const api = {
   },
   files: {
     getUrl: 'files.getUrl',
+  },
+  social: {
+    connections: {
+      getSocialConnections: 'social.connections.getSocialConnections',
+    },
   },
 };
 
@@ -287,6 +307,10 @@ vi.mock('@convex-dev/react-query', () => ({
       };
     }
 
+    if (queryString.includes('getSocialConnections')) {
+      return [];
+    }
+
     return {
       data: undefined,
       isLoading: false,
@@ -404,39 +428,6 @@ vi.mock('@tanstack/react-router', () => ({
 (globalThis as any).setMockRouteParams = (params: any) => {
   mockRouteParams = params;
 };
-
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) =>
-      React.createElement('div', props, children),
-    span: ({ children, ...props }: any) =>
-      React.createElement('span', props, children),
-    button: ({ children, ...props }: any) =>
-      React.createElement('button', props, children),
-    a: ({ children, ...props }: any) =>
-      React.createElement('a', props, children),
-  },
-  AnimatePresence: ({ children }: any) => children,
-  useAnimation: () => ({
-    start: vi.fn(),
-    set: vi.fn(),
-    stop: vi.fn(),
-    mount: vi.fn(),
-  }),
-  useMotionValue: () => ({
-    get: () => 0,
-    set: vi.fn(),
-  }),
-  useTransform: () => 0,
-  useSpring: () => 0,
-  useScroll: () => ({
-    scrollY: { get: () => 0 },
-    scrollX: { get: () => 0 },
-    scrollYProgress: { get: () => 0 },
-    scrollXProgress: { get: () => 0 },
-  }),
-  useInView: () => true,
-}));
 
 vi.mock('@/lib/posthog', () => ({
   trackEvents: {
