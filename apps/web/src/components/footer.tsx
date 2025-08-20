@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { cn } from '@/utils/tailwind-utils';
-import { APP_NAME } from '@/config/app';
+import { APP_NAME } from '@/utils/bindings';
 
 export interface FooterProps {
   className?: string;

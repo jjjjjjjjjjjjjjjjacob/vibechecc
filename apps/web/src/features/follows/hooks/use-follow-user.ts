@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@vibechecc/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { toast } from 'sonner';
-import { trackEvents } from '@/lib/posthog';
+import { trackEvents } from '@/lib/track-events';
 
 interface UseFollowUserOptions {
   onSuccess?: () => void;

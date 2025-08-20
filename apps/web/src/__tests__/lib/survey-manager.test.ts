@@ -2,31 +2,27 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { surveyManager, trackSurveyEvents } from '@/lib/survey-manager';
-import { analytics } from '@/lib/posthog';
+import posthog from 'posthog-js';
 
-// Mock PostHog analytics
-vi.mock('@/lib/posthog', () => ({
-  analytics: {
-    isInitialized: vi.fn(),
+// Mock PostHog
+vi.mock('posthog-js', () => ({
+  default: {
+    isFeatureEnabled: vi.fn(),
     setPersonProperties: vi.fn(),
     capture: vi.fn(),
-    getInstance: vi.fn(),
-    isFeatureEnabled: vi.fn(),
   },
 }));
 
-const mockAnalytics = analytics as any;
+const mockPostHog = posthog as any;
 
 describe('SurveyManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     // Reset mocks to their default behavior
-    mockAnalytics.isInitialized.mockReturnValue(true);
-    mockAnalytics.setPersonProperties.mockImplementation(() => {});
-    mockAnalytics.capture.mockImplementation(() => {});
-    mockAnalytics.getInstance.mockReturnValue({});
-    mockAnalytics.isFeatureEnabled.mockReturnValue(true);
+    mockPostHog.setPersonProperties.mockImplementation(() => {});
+    mockPostHog.capture.mockImplementation(() => {});
+    mockPostHog.isFeatureEnabled.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -34,28 +30,16 @@ describe('SurveyManager', () => {
   });
 
   describe('triggerNewUserSurvey', () => {
-    it('should not trigger survey if PostHog is not initialized', async () => {
-      mockAnalytics.isInitialized.mockReturnValue(false);
-
-      await surveyManager.triggerNewUserSurvey('user123');
-
-      expect(mockAnalytics.setPersonProperties).not.toHaveBeenCalled();
-      expect(mockAnalytics.capture).not.toHaveBeenCalled();
-    });
-
     it('should set user properties and track trigger event', async () => {
-      mockAnalytics.isInitialized.mockReturnValue(true);
-      mockAnalytics.getInstance.mockReturnValue({});
-
       await surveyManager.triggerNewUserSurvey('user123', 'test@example.com');
 
-      expect(mockAnalytics.setPersonProperties).toHaveBeenCalledWith({
+      expect(mockPostHog.setPersonProperties).toHaveBeenCalledWith({
         is_new_user: true,
         signup_date: expect.any(String),
         survey_eligible: true,
       });
 
-      expect(mockAnalytics.capture).toHaveBeenCalledWith('survey_triggered', {
+      expect(mockPostHog.capture).toHaveBeenCalledWith('survey_triggered', {
         survey_type: 'new_user_onboarding',
         user_id: 'user123',
         trigger_method: 'post_signup',
@@ -63,14 +47,13 @@ describe('SurveyManager', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      mockAnalytics.isInitialized.mockReturnValue(true);
-      mockAnalytics.setPersonProperties.mockImplementation(() => {
+      mockPostHog.setPersonProperties.mockImplementation(() => {
         throw new Error('Network error');
       });
 
       await surveyManager.triggerNewUserSurvey('user123');
 
-      expect(mockAnalytics.capture).toHaveBeenCalledWith('survey_error', {
+      expect(mockPostHog.capture).toHaveBeenCalledWith('survey_error', {
         error_type: 'trigger_failed',
         error_message: 'Network error',
         survey_type: 'new_user_onboarding',
@@ -86,14 +69,14 @@ describe('SurveyManager', () => {
     it('should record survey completion and set user properties', () => {
       surveyManager.recordSurveyResponse(mockResponses, 'user123');
 
-      expect(mockAnalytics.capture).toHaveBeenCalledWith('survey_completed', {
+      expect(mockPostHog.capture).toHaveBeenCalledWith('survey_completed', {
         survey_type: 'new_user_onboarding',
         user_id: 'user123',
         responses: mockResponses,
         completion_date: expect.any(String),
       });
 
-      expect(mockAnalytics.setPersonProperties).toHaveBeenCalledWith({
+      expect(mockPostHog.setPersonProperties).toHaveBeenCalledWith({
         discovery_channel: 'social_media',
         survey_completed: true,
         survey_completion_date: expect.any(String),
@@ -103,7 +86,7 @@ describe('SurveyManager', () => {
     it('should track discovery insights', () => {
       surveyManager.recordSurveyResponse(mockResponses, 'user123');
 
-      expect(mockAnalytics.capture).toHaveBeenCalledWith(
+      expect(mockPostHog.capture).toHaveBeenCalledWith(
         'user_discovery_channel',
         {
           channel: 'social_media',
@@ -114,7 +97,7 @@ describe('SurveyManager', () => {
     it('should handle errors gracefully', () => {
       // Create a spy that throws on first call, succeeds on second
       let callCount = 0;
-      mockAnalytics.capture.mockImplementation(() => {
+      mockPostHog.capture.mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           throw new Error('Network error');
@@ -124,7 +107,7 @@ describe('SurveyManager', () => {
       surveyManager.recordSurveyResponse(mockResponses, 'user123');
 
       // The error handling code should capture the error
-      expect(mockAnalytics.capture).toHaveBeenCalledWith('survey_error', {
+      expect(mockPostHog.capture).toHaveBeenCalledWith('survey_error', {
         error_type: 'response_recording_failed',
         error_message: 'Network error',
       });
@@ -135,7 +118,7 @@ describe('SurveyManager', () => {
     it('should track survey dismissal', () => {
       surveyManager.recordSurveyDismissed('user123', 'skipped');
 
-      expect(mockAnalytics.capture).toHaveBeenCalledWith('survey_dismissed', {
+      expect(mockPostHog.capture).toHaveBeenCalledWith('survey_dismissed', {
         survey_type: 'new_user_onboarding',
         user_id: 'user123',
         dismissal_reason: 'skipped',
@@ -146,7 +129,7 @@ describe('SurveyManager', () => {
     it('should use default reason when none provided', () => {
       surveyManager.recordSurveyDismissed('user123');
 
-      expect(mockAnalytics.capture).toHaveBeenCalledWith('survey_dismissed', {
+      expect(mockPostHog.capture).toHaveBeenCalledWith('survey_dismissed', {
         survey_type: 'new_user_onboarding',
         user_id: 'user123',
         dismissal_reason: 'closed',
@@ -157,21 +140,13 @@ describe('SurveyManager', () => {
 
   describe('isEligibleForNewUserSurvey', () => {
     it('should return true when feature flag is enabled', () => {
-      mockAnalytics.isInitialized.mockReturnValue(true);
-      mockAnalytics.isFeatureEnabled.mockReturnValue(true);
+      mockPostHog.isFeatureEnabled.mockReturnValue(true);
 
       expect(surveyManager.isEligibleForNewUserSurvey()).toBe(true);
     });
 
     it('should return false when feature flag is disabled', () => {
-      mockAnalytics.isInitialized.mockReturnValue(true);
-      mockAnalytics.isFeatureEnabled.mockReturnValue(false);
-
-      expect(surveyManager.isEligibleForNewUserSurvey()).toBe(false);
-    });
-
-    it('should return false when PostHog is not initialized', () => {
-      mockAnalytics.isInitialized.mockReturnValue(false);
+      mockPostHog.isFeatureEnabled.mockReturnValue(false);
 
       expect(surveyManager.isEligibleForNewUserSurvey()).toBe(false);
     });

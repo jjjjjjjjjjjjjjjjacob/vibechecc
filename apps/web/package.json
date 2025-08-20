@@ -10,7 +10,7 @@
     "build": "bun run fonts:optimize && vite build --config vite.config.ts",
     "preview": "vite preview --config vite.config.ts",
     "typecheck": "tsc --noEmit",
-    "wrangler:dev": "wrangler dev --port 3000",
+    "wrangler:dev": "vite build && wrangler dev --port 3000",
     "wrangler:deploy": "wrangler deploy",
     "clean": "rm -rf .turbo node_modules dist",
     "fonts:optimize": "node scripts/optimize-fonts-hybrid.js",

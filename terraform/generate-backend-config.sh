@@ -46,8 +46,8 @@ if [ -f ".envrc" ] && grep -q "APP_NAME=" .envrc; then
 fi
 
 # Determine the state key based on APP_NAME
-if [ "$APP_NAME" = "viberatr" ]; then
-    STATE_KEY="viberatr/terraform.state"
+if [ -n "$APP_NAME" ] && [ "$APP_NAME" != "vibechecc" ]; then
+    STATE_KEY="$APP_NAME/terraform.state"
     echo "Using override state key: $STATE_KEY (APP_NAME=$APP_NAME)"
 else
     STATE_KEY="vibechecc/terraform.tfstate"

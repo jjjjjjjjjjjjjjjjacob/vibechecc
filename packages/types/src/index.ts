@@ -113,6 +113,8 @@ export interface Vibe {
   tags?: string[];
   viewCount?: number;
   visibility?: 'public' | 'deleted'; // From Convex schema
+  shareCount?: number; // Number of times this vibe has been shared
+  lastSharedAt?: number; // Timestamp of most recent share
 }
 
 export interface Follow {

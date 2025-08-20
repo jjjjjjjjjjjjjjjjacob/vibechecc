@@ -1,6 +1,6 @@
 name: Production Alt Deployment
 
-# This workflow deploys the 'viberatr' variant for A/B testing
+# This workflow deploys the 'production-alt' variant for A/B testing
 # Both main and main-alt share the same Convex backend deployment
 on:
   push:

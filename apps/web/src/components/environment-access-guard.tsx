@@ -3,15 +3,14 @@ import * as React from 'react';
 import { SignInButton, useUser } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
 import { LogIn } from '@/components/ui/icons';
-import { useFeatureFlagEnabled } from 'posthog-js/react';
-import posthog from 'posthog-js';
 import {
   useThemeStore,
   type PrimaryColorTheme,
   type SecondaryColorTheme,
 } from '@/stores/theme-store';
-import { APP_NAME } from '@/config/app';
+import { APP_NAME, APP_DOMAIN } from '@/utils/bindings';
 import { cn } from '@/utils';
+import { useFeatureFlagEnabled, useFeatureFlagPayload } from 'posthog-js/react';
 
 interface EnvironmentAccessGuardProps {
   children: ReactNode;
@@ -27,45 +26,51 @@ type LoadingState =
   | 'access-denied' // State 3 (alt): Access denied
   | 'content'; // Final: Show content
 
+const taglines = [
+  'what am i doing here',
+  'professional vibe checker',
+  "careful don't vibe too hard",
+  "it's a vibe",
+  'no chill only vibes',
+  'vibe now or vibe later',
+  "it's a thing to do",
+  'the nothing app',
+  'who told you about this',
+];
+
 /**
  * Component that restricts access to dev and ephemeral environments
- * based on PostHog feature flags
+ * based on server-side PostHog feature flags
  */
 export function EnvironmentAccessGuard({
   children,
   fallback,
 }: EnvironmentAccessGuardProps) {
   const [loadingState, setLoadingState] = useState<LoadingState>('theme-check');
+  // Initialize with 0 to avoid hydration mismatch, will be randomized on client
   const [taglineIndex, setTaglineIndex] = useState(0);
+
+  const isFeatureFlagEnabled = useFeatureFlagEnabled('dev-environment-access');
+  const featureFlagPayload = useFeatureFlagPayload('dev-environment-access');
+
+  const isFeatureFlagChecked = isFeatureFlagEnabled !== undefined;
+  // Check if APP_SUBDOMAIN matches 'dev' or 'pr-*' using regex
+  const appSubdomain = import.meta.env.VITE_APP_SUBDOMAIN as string | undefined;
+  const isDevOrPrEnv = !!appSubdomain && /^(dev|pr-\w+)/.test(appSubdomain);
+  const hasAccess =
+    !isDevOrPrEnv || (isFeatureFlagEnabled && !!featureFlagPayload);
 
   // Set random tagline only on client side to avoid hydration mismatch
   React.useEffect(() => {
-    setTaglineIndex(Math.floor(Math.random() * 9));
+    setTaglineIndex(Math.floor(Math.random() * taglines.length));
   }, []);
 
   const { isLoaded: isUserLoaded, user, isSignedIn } = useUser();
 
-  // Use PostHog React hook for feature flag
-  const hasAccess = useFeatureFlagEnabled('dev-environment-access');
+  // Create a key that changes when user signs in/out to force re-evaluation
+  const userStateKey = `${isSignedIn}-${user?.id || 'anonymous'}`;
 
   const { isInitialized, initialize, applyThemeToDocument } = useThemeStore();
-
-  // Core access logic
-  const isFeatureFlagChecked = hasAccess !== undefined;
-
-  // Reload feature flags when auth state changes
-  React.useEffect(() => {
-    if (isUserLoaded) {
-      // When signing in or out, reload feature flags
-      posthog.reloadFeatureFlags();
-
-      // Reset to access-check state if we're in access-denied state
-      // This allows re-evaluation after auth changes
-      if (loadingState === 'access-denied' || loadingState === 'content') {
-        setLoadingState('access-check');
-      }
-    }
-  }, [isSignedIn, isUserLoaded, loadingState]); // Include all dependencies
 
   // Theme is fully ready when initialized
   const isThemeReady = isInitialized;
@@ -107,6 +112,19 @@ export function EnvironmentAccessGuard({
     applyThemeToDocument,
   ]);
 
+  // Reset state when user changes (sign in/out)
+  const previousUserStateKeyRef = React.useRef(userStateKey);
+  React.useEffect(() => {
+    if (previousUserStateKeyRef.current !== userStateKey) {
+      previousUserStateKeyRef.current = userStateKey;
+      // Only reset if we're in a final state
+      if (loadingState === 'content' || loadingState === 'access-denied') {
+        // Go back to access check to re-evaluate permissions
+        setLoadingState('access-check');
+      }
+    }
+  }, [userStateKey, loadingState]);
+
   // State progression logic
   React.useEffect(() => {
     // State 2 -> State 2.5/3-alt: Once access is determined
@@ -117,6 +135,19 @@ export function EnvironmentAccessGuard({
       } else if (hasAccess === false) {
         setLoadingState('access-denied');
       }
+    }
+
+    // Reset to access-check if flags change while showing content
+    // This handles the case where user signs in/out
+    if (
+      loadingState === 'content' &&
+      isFeatureFlagChecked &&
+      !hasAccess &&
+      isDevOrPrEnv
+    ) {
+      setLoadingState('access-denied');
+    } else if (loadingState === 'access-denied' && hasAccess) {
+      setLoadingState('post-check-fade-out');
     }
 
     // State 2.5 -> State 3: After dots fade out
@@ -133,20 +164,15 @@ export function EnvironmentAccessGuard({
     if (loadingState === 'fade-out') {
       setTimeout(() => setLoadingState('content'), 1300);
     }
-  }, [loadingState, isThemeReady, isFeatureFlagChecked, hasAccess]);
+  }, [
+    loadingState,
+    isThemeReady,
+    isFeatureFlagChecked,
+    hasAccess,
+    isDevOrPrEnv,
+  ]);
 
   const welcomeMessage = React.useMemo(() => {
-    const taglines = [
-      'what am i doing here',
-      'professional vibe checker',
-      "careful don't vibe too hard",
-      "it's a vibe",
-      'no chill only vibes',
-      'vibe now or vibe later',
-      "it's a thing to do",
-      'the nothing app',
-      'who told you about this',
-    ];
     const selectedTagline = taglines[taglineIndex % taglines.length];
     return selectedTagline;
   }, [taglineIndex]);
@@ -173,7 +199,7 @@ export function EnvironmentAccessGuard({
         <div className="space-y-6 text-center">
           <div
             data-state={loadingState}
-            className="flex flex-col items-center space-y-2 transition duration-800 data-[state=fade-out]:scale-105 data-[state=fade-out]:opacity-0"
+            className="flex flex-col items-center space-y-2 transition duration-800 data-[state=fade-out]:scale-110 data-[state=fade-out]:opacity-0"
           >
             <p
               data-state={loadingState}
@@ -181,9 +207,7 @@ export function EnvironmentAccessGuard({
                 'inline-flex w-full items-center justify-center bg-transparent text-4xl font-bold transition duration-500 data-[state=fade-out]:opacity-0'
               )}
             >
-              {Array.from(
-                typeof APP_NAME === 'string' ? APP_NAME : 'vibechecc'
-              ).map((char, i) => (
+              {Array.from(APP_NAME).map((char, i) => (
                 <span
                   data-state={loadingState}
                   className={cn(
@@ -287,7 +311,7 @@ export function EnvironmentAccessGuard({
         <div className="mx-auto max-w-md space-y-8 p-6 text-center">
           <div className="space-y-4">
             <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
-              vibechecc
+              {APP_NAME}
             </span>
             <div className="space-y-2">
               <h1 className="text-foreground text-2xl font-semibold">
@@ -304,7 +328,7 @@ export function EnvironmentAccessGuard({
             <SignInButton mode="modal">
               <Button className="from-theme-primary to-theme-secondary h-12 w-full bg-gradient-to-r text-base font-semibold text-white transition-all hover:scale-[1.02] hover:shadow-lg">
                 <LogIn className="mr-2 h-5 w-5" />
-                sign in to vibechecc
+                sign in to {APP_NAME}
               </Button>
             </SignInButton>
           </div>
@@ -313,10 +337,10 @@ export function EnvironmentAccessGuard({
             <p>
               if you believe this is an error, please contact{' '}
               <a
-                href="mailto:admin@vibechecc.io"
+                href={`mailto:admin@${APP_DOMAIN}`}
                 className="text-theme-primary hover:text-theme-primary/80 underline transition-colors"
               >
-                admin@vibechecc.io
+                admin@{APP_DOMAIN}
               </a>
             </p>
           </div>

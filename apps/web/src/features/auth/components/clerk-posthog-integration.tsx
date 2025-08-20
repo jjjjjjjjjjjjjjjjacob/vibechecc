@@ -1,21 +1,18 @@
-'use client';
-
 import { useEffect, useRef } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
-import { usePostHog as usePostHogNative } from 'posthog-js/react';
-import { usePostHog } from '@/hooks/use-posthog';
+import { usePostHog } from 'posthog-js/react';
+import { trackEvents } from '@/lib/track-events';
 import { trackSurveyEvents } from '@/lib/survey-manager';
 
 export function ClerkPostHogIntegration() {
   const { user, isSignedIn } = useUser();
-  const posthog = usePostHogNative();
-  const { trackEvents } = usePostHog();
+  const posthog = usePostHog();
   const hasTriggeredSurvey = useRef(false);
 
   useEffect(() => {
     if (isSignedIn && user) {
       // Identify the user in PostHog using native hook
-      posthog?.identify(user.id, {
+      posthog.identify(user.id, {
         email: user.primaryEmailAddress?.emailAddress,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -25,7 +22,7 @@ export function ClerkPostHogIntegration() {
       });
 
       // Set additional person properties using native hook
-      posthog?.setPersonProperties({
+      posthog.setPersonProperties({
         email: user.primaryEmailAddress?.emailAddress,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -37,6 +34,10 @@ export function ClerkPostHogIntegration() {
           user.primaryPhoneNumber?.verification?.status === 'verified',
         twoFactorEnabled: user.twoFactorEnabled,
       });
+
+      // Reload feature flags after identifying the user
+      // This ensures feature flags are updated based on the new user identity
+      posthog.reloadFeatureFlags();
 
       // Track sign in event (this will fire on every page load for signed-in users)
       // You might want to add additional logic to only track actual sign-in events
@@ -65,9 +66,15 @@ export function ClerkPostHogIntegration() {
       }
     } else if (!isSignedIn) {
       // Reset PostHog when user signs out using native hook
-      posthog?.reset();
+      posthog.reset();
+
+      // Reload feature flags after reset to get anonymous user flags
+      // Small delay to ensure reset completes first
+      setTimeout(() => {
+        posthog.reloadFeatureFlags();
+      }, 100);
     }
-  }, [isSignedIn, user, posthog, trackEvents]);
+  }, [isSignedIn, user, posthog]);
 
   return null; // This component doesn't render anything
 }

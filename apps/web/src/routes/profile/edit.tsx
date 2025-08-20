@@ -28,6 +28,8 @@ import {
   type PrimaryColorTheme,
   type SecondaryColorTheme,
 } from '@/stores/theme-store';
+import { SocialConnectionsList } from '@/components/social/connections/social-connections-list';
+import { ConnectSocialButton } from '@/components/social/connections/connect-social-button';
 
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
@@ -386,6 +388,32 @@ function ProfileEdit() {
                       }}
                       className="w-full"
                     />
+                  </div>
+
+                  <div className="space-y-4 pt-4">
+                    <div>
+                      <h3 className="mb-3 text-sm font-medium">
+                        social connections
+                      </h3>
+                      <SocialConnectionsList className="mb-4" />
+                      <div className="flex flex-wrap gap-2">
+                        <ConnectSocialButton
+                          platform="twitter"
+                          size="sm"
+                          variant="outline"
+                        />
+                        <ConnectSocialButton
+                          platform="instagram"
+                          size="sm"
+                          variant="outline"
+                        />
+                        <ConnectSocialButton
+                          platform="tiktok"
+                          size="sm"
+                          variant="outline"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex flex-col gap-2 pt-4 sm:flex-row">

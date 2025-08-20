@@ -1,4 +1,4 @@
-import { analytics } from './posthog';
+import posthog from 'posthog-js';
 
 export interface NewUserSurveyData {
   discoveryChannel: string;
@@ -27,7 +27,7 @@ class SurveyManager {
     userId: string,
     _userEmail?: string
   ): Promise<void> {
-    if (!analytics.isInitialized()) {
+    if (typeof window === 'undefined') {
       // eslint-disable-next-line no-console
       console.warn('PostHog not initialized, cannot trigger survey');
       return;
@@ -35,14 +35,14 @@ class SurveyManager {
 
     try {
       // Set user properties that can be used for survey targeting
-      analytics.setPersonProperties({
+      posthog.setPersonProperties({
         is_new_user: true,
         signup_date: new Date().toISOString(),
         survey_eligible: true,
       });
 
       // Track survey trigger event
-      analytics.capture('survey_triggered', {
+      posthog.capture('survey_triggered', {
         survey_type: 'new_user_onboarding',
         user_id: userId,
         trigger_method: 'post_signup',
@@ -50,7 +50,7 @@ class SurveyManager {
 
       // Use PostHog's survey API to show survey
       // Note: This requires PostHog surveys to be enabled in your project
-      const _posthogInstance = analytics.getInstance();
+      // PostHog instance is available globally as 'posthog'
 
       // Set a delay before showing the survey
       setTimeout(() => {
@@ -59,7 +59,7 @@ class SurveyManager {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('Failed to trigger new user survey:', error);
-      analytics.capture('survey_error', {
+      posthog.capture('survey_error', {
         error_type: 'trigger_failed',
         error_message: error instanceof Error ? error.message : 'Unknown error',
         survey_type: 'new_user_onboarding',
@@ -74,7 +74,7 @@ class SurveyManager {
   private showSurveyIfEligible(userId: string): void {
     try {
       // Track that the survey is ready to be shown
-      analytics.capture('survey_ready_to_show', {
+      posthog.capture('survey_ready_to_show', {
         survey_type: 'new_user_onboarding',
         user_id: userId,
         show_method: 'custom_react_component',
@@ -94,7 +94,7 @@ class SurveyManager {
   recordSurveyResponse(responses: NewUserSurveyData, userId: string): void {
     try {
       // Track the survey completion
-      analytics.capture('survey_completed', {
+      posthog.capture('survey_completed', {
         survey_type: 'new_user_onboarding',
         user_id: userId,
         responses,
@@ -102,7 +102,7 @@ class SurveyManager {
       });
 
       // Set user properties based on responses for better targeting
-      analytics.setPersonProperties({
+      posthog.setPersonProperties({
         discovery_channel: responses.discoveryChannel,
         survey_completed: true,
         survey_completion_date: new Date().toISOString(),
@@ -113,7 +113,7 @@ class SurveyManager {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('Failed to record survey response:', error);
-      analytics.capture('survey_error', {
+      posthog.capture('survey_error', {
         error_type: 'response_recording_failed',
         error_message: error instanceof Error ? error.message : 'Unknown error',
       });
@@ -127,7 +127,7 @@ class SurveyManager {
     userId: string,
     reason: 'closed' | 'skipped' | 'timeout' = 'closed'
   ): void {
-    analytics.capture('survey_dismissed', {
+    posthog.capture('survey_dismissed', {
       survey_type: 'new_user_onboarding',
       user_id: userId,
       dismissal_reason: reason,
@@ -135,7 +135,7 @@ class SurveyManager {
     });
 
     // Mark user as having seen the survey to prevent re-showing
-    analytics.setPersonProperties({
+    posthog.setPersonProperties({
       survey_dismissed: true,
       survey_dismissed_date: new Date().toISOString(),
       survey_dismissal_reason: reason,
@@ -146,15 +146,15 @@ class SurveyManager {
    * Checks if user has already completed or dismissed the survey
    */
   hasUserCompletedOrDismissedSurvey(): boolean {
-    if (!analytics.isInitialized()) {
+    if (typeof window === 'undefined') {
       return false;
     }
 
     try {
-      const posthogInstance = analytics.getInstance();
+      // Check if survey response exists using native PostHog methods
       const personProps =
-        posthogInstance.get_property('survey_completed') ||
-        posthogInstance.get_property('survey_dismissed');
+        posthog.get_property('survey_completed') ||
+        posthog.get_property('survey_dismissed');
       return !!personProps;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -168,7 +168,7 @@ class SurveyManager {
    */
   private trackDiscoveryInsights(responses: NewUserSurveyData): void {
     // Track discovery channel for marketing attribution
-    analytics.capture('user_discovery_channel', {
+    posthog.capture('user_discovery_channel', {
       channel: responses.discoveryChannel,
     });
   }
@@ -178,12 +178,12 @@ class SurveyManager {
    * Uses PostHog feature flag for flexible targeting and A/B testing
    */
   isEligibleForNewUserSurvey(): boolean {
-    if (!analytics.isInitialized()) {
+    if (typeof window === 'undefined') {
       return false;
     }
 
     // Check PostHog feature flag for survey eligibility
-    return analytics.isFeatureEnabled('show-new-user-survey');
+    return posthog?.isFeatureEnabled('show-new-user-survey') ?? false;
   }
 
   /**

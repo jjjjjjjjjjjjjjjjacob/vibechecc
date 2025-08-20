@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { APP_URL } from '@/config/app';
+import { APP_URL } from '@/utils/bindings';
 
 export const Route = createFileRoute('/sitemap/xml')({
   loader: async () => {

@@ -11,7 +11,7 @@ import {
 import { EmojiSearchCollapsible } from './emoji-search-collapsible';
 import { RatingPopover } from './rating-popover';
 import { AuthPromptDialog } from '@/features/auth';
-import { trackEvents } from '@/lib/posthog';
+import { trackEvents } from '@/lib/track-events';
 
 interface EmojiReactionProps {
   reaction: EmojiReactionType;

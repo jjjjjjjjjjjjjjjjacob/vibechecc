@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@vibechecc/convex';
 import { useUser } from '@clerk/tanstack-react-start';
-import { trackEvents } from '@/lib/posthog';
+import { trackEvents } from '@/lib/track-events';
 
 export function useSearchTracking() {
   const { user } = useUser();

@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MasonryFeed } from '@/components/masonry-feed';
 import { UserProfileView } from '@/features/profiles/components/user-profile-view';
 import { useUser } from '@clerk/tanstack-react-start';
-import { trackEvents } from '@/lib/posthog';
+import { trackEvents } from '@/lib/track-events';
 
 export const Route = createFileRoute('/users/$username')({
   component: UserProfile,

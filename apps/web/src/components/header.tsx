@@ -44,8 +44,8 @@ import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
 import { Separator } from '@/components/ui/separator';
 import { TabAccordion, TabAccordionContent } from './tab-accordion';
 import { ProfileSnapshotCard } from './profile-snapshot-card';
-import { usePostHog } from '@/hooks/use-posthog';
-import { APP_NAME } from '@/config/app';
+import { trackEvents } from '@/lib/track-events';
+import { APP_NAME } from '@/utils/bindings';
 
 export function Header() {
   const { resolvedTheme, setTheme, setColorTheme, setSecondaryColorTheme } =
@@ -60,7 +60,6 @@ export function Header() {
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
   const { isAdmin } = useAdminAuth();
-  const { trackEvents } = usePostHog();
 
   // Check if Convex context is available - call useConvex at top level
   const convex = useConvex();
@@ -224,14 +223,7 @@ export function Header() {
         setNavHasMounted(true);
       }, 200);
     },
-    [
-      pageNavState,
-      navState,
-      setPageNavState,
-      setNavState,
-      trackEvents,
-      unreadCount,
-    ]
+    [pageNavState, navState, setPageNavState, setNavState, unreadCount]
   );
 
   // Block mounting during transitions for consistent animations

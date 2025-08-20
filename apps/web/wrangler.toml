@@ -14,17 +14,19 @@ directory = "./.output/public"
 [observability]
 enabled = true
 
+# Compiled during CI/CD, uncomment for local builds 
+
 # Production Environment
-[env.production]
-name = "vibechecc-production-web"
+# [env.production]
+# name = "vibechecc-production-web"
 # Secrets should be set via `npx wrangler secret put --env production`
 
-# Production Alt Environment (for viberatr)
-[env.production-alt]
-name = "viberatr-production-alt-web"
+# Production Alt Environment (for A/B testing name)
+# [env.production-alt]
+# name = "vibechecc-alt-production-alt-web"
 # Secrets should be set via `npx wrangler secret put --env production-alt`
 
 # Development Environment
-[env.development]
-name = "vibechecc-development-web"
+# [env.development]
+# name = "vibechecc-development-web"
 # Secrets should be set via `npx wrangler secret put --env development`

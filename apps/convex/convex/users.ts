@@ -737,6 +737,99 @@ export const deleteFromClerk = internalMutation({
   },
 });
 
+/**
+ * Track session events (sign-in/sign-out) to PostHog via server-side HTTP API
+ * This ensures reliable session tracking from Clerk webhooks
+ */
+export const trackSessionEvent = internalAction({
+  args: {
+    userId: v.string(),
+    eventType: v.union(
+      v.literal('session_created'),
+      v.literal('session_ended')
+    ),
+    timestamp: v.number(),
+    metadata: v.optional(
+      v.object({
+        sessionId: v.optional(v.string()),
+        clientId: v.optional(v.string()),
+        status: v.optional(v.string()),
+        abandonedAt: v.optional(v.number()),
+        endedAt: v.optional(v.number()),
+      })
+    ),
+  },
+  handler: async (ctx, { userId, eventType, timestamp, metadata }) => {
+    if (!POSTHOG_API_KEY) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'PostHog API key not configured, skipping server-side session tracking'
+      );
+      return { success: false, reason: 'no_api_key' };
+    }
+
+    try {
+      // Map event type to PostHog event name
+      const posthogEventName =
+        eventType === 'session_created' ? 'user_signed_in' : 'user_signed_out';
+
+      // Track the session event
+      const sessionPayload = {
+        api_key: POSTHOG_API_KEY,
+        event: posthogEventName,
+        distinct_id: userId,
+        properties: {
+          session_id: metadata?.sessionId,
+          client_id: metadata?.clientId,
+          status: metadata?.status,
+          abandoned_at: metadata?.abandonedAt
+            ? new Date(metadata.abandonedAt).toISOString()
+            : undefined,
+          ended_at: metadata?.endedAt
+            ? new Date(metadata.endedAt).toISOString()
+            : undefined,
+          timestamp: new Date(timestamp).toISOString(),
+          source: 'server_webhook',
+          $lib: 'convex-server',
+          $lib_version: '1.0.0',
+        },
+      };
+
+      const response = await fetch(`${POSTHOG_HOST}/capture/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sessionPayload),
+      });
+
+      if (!response.ok) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `Failed to track ${eventType} to PostHog:`,
+          response.status,
+          response.statusText
+        );
+        return {
+          success: false,
+          reason: 'http_error',
+          status: response.status,
+        };
+      }
+
+      // eslint-disable-next-line no-console
+      console.log(
+        `Successfully tracked ${eventType} for user ${userId} to PostHog`
+      );
+      return { success: true, userId, eventType };
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Error tracking ${eventType} to PostHog:`, error);
+      return { success: false, reason: 'network_error', error: String(error) };
+    }
+  },
+});
+
 // Create user for seeding purposes (bypasses authentication) - SECURED
 export const createForSeed = mutation({
   args: {

@@ -1,4 +1,4 @@
-import { APP_TWITTER_HANDLE } from '@/config/app';
+import { APP_TWITTER_HANDLE } from '@/utils/bindings';
 
 export const seo = ({
   title,
