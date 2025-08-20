@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
-import { AlertTriangle, Edit, Trash2 } from '@/components/ui/icons';
+import { AlertTriangle, Edit, Trash2, Share2 } from '@/components/ui/icons';
 import { ShareModal } from '@/components/social/share-modal';
 import { VibeDetailSkeleton } from '@/components/skeletons/vibe-detail-skeleton';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
@@ -498,31 +498,44 @@ function VibePage() {
               )}
             </div>
 
-            {/* Action buttons for vibe owner */}
-            {isOwner && (
-              <div className="flex gap-2">
-                <Link
-                  to="/vibes/$vibeId/edit"
-                  params={{ vibeId }}
-                  className="inline-block"
-                >
-                  <Button variant="outline" size="sm">
-                    <Edit className="mr-2 h-4 w-4" />
-                    edit
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              {/* Share button - always visible */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowShareModal(true)}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                share
+              </Button>
+
+              {/* Edit/Delete buttons for vibe owner */}
+              {isOwner && (
+                <>
+                  <Link
+                    to="/vibes/$vibeId/edit"
+                    params={{ vibeId }}
+                    className="inline-block"
+                  >
+                    <Button variant="outline" size="sm">
+                      <Edit className="mr-2 h-4 w-4" />
+                      edit
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDeleteVibe}
+                    disabled={deleteVibeMutation.isPending}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {deleteVibeMutation.isPending ? 'deleting...' : 'delete'}
                   </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDeleteVibe}
-                  disabled={deleteVibeMutation.isPending}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {deleteVibeMutation.isPending ? 'deleting...' : 'delete'}
-                </Button>
-              </div>
-            )}
+                </>
+              )}
+            </div>
           </div>
 
           {/* Top Emoji Ratings */}
