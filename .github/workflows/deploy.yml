@@ -230,9 +230,9 @@ jobs:
           VITE_POSTHOG_REGION: 'US Cloud'
           VITE_APP_NAME: ${{ vars.VITE_APP_NAME }}
           VITE_APP_DOMAIN: ${{ format('{0}.io', vars.VITE_APP_NAME) }}
-          VITE_APP_SUBDOMAIN: ${{ inputs.environment == 'development' && 'dev' || (inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number) || '') }}
+          VITE_APP_SUBDOMAIN: ${{ (inputs.environment == 'development') && 'dev' || (inputs.environment == 'ephemeral' && format('pr-{0}', inputs.pr_number)) || '' }}
           VITE_APP_TWITTER_HANDLE: ${{ format('@{0}', vars.VITE_APP_NAME) }}
-        run:
+        run: |
           echo "Building frontend for Cloudflare Workers using Nx..."
           bun nx build @vibechecc/web
 
@@ -251,7 +251,6 @@ jobs:
 
           echo "Build successful. Output structure:"
           ls -la apps/web/.output/
-
       - name: Add Ephemeral Environment to Wrangler Config
         if: inputs.environment == 'ephemeral'
         working-directory: apps/web
