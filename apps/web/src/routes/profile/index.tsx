@@ -234,14 +234,14 @@ function Profile() {
                       <Button
                         variant="outline"
                         asChild
-                        className="flex-1 transition-transform hover:scale-[1.02] sm:flex-none"
+                        className="flex-1 transition-transform duration-150 hover:scale-[1.01] sm:flex-none"
                       >
                         <Link to="/profile/edit">edit profile</Link>
                       </Button>
                       <Button
                         variant="secondary"
                         asChild
-                        className="flex-1 transition-transform hover:scale-[1.02] sm:flex-none"
+                        className="flex-1 transition-transform duration-150 hover:scale-[1.01] sm:flex-none"
                       >
                         <Link to="/profile/preview">preview profile</Link>
                       </Button>
@@ -251,7 +251,7 @@ function Profile() {
                         variant="ghost"
                         size="sm"
                         asChild
-                        className="transition-transform hover:scale-[1.02]"
+                        className="transition-transform duration-150 hover:scale-[1.01]"
                       >
                         <Link to="/onboarding">
                           <Sparkles className="mr-2 h-4 w-4" />
@@ -263,7 +263,7 @@ function Profile() {
                           variant="ghost"
                           size="sm"
                           asChild
-                          className="transition-transform hover:scale-[1.02]"
+                          className="transition-transform duration-150 hover:scale-[1.01]"
                         >
                           <Link to="/admin">
                             <Shield className="mr-2 h-4 w-4" />

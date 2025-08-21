@@ -51,7 +51,8 @@
     },
     "changelog": {
       "workspaceChangelog": {
-        "createRelease": "github"
+        "createRelease": false,
+        "file": "CHANGELOG.md"
       }
     },
     "git": {

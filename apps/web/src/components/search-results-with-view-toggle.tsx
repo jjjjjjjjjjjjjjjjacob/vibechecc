@@ -3,7 +3,7 @@ import { VibeCard } from '@/features/vibes/components/vibe-card';
 // VibeList component doesn't exist, we'll use VibeCard with list variant
 import { Button } from '@/components/ui/button';
 import { LayoutGrid, List } from '@/components/ui/icons';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 import { cn } from '@/utils/tailwind-utils';
 
 type ViewMode = 'grid' | 'list';

@@ -236,7 +236,7 @@ export function TagsTable({
                   daysSince > 30
                     ? 'text-destructive'
                     : daysSince > 7
-                      ? 'text-yellow-600'
+                      ? 'text-yellow-600 dark:text-yellow-400'
                       : 'text-muted-foreground'
                 )}
               >

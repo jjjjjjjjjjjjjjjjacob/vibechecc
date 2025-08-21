@@ -55,7 +55,7 @@ export function SearchEmptyState({
       {query && (
         <Card className="bg-card/30 mb-6 w-full max-w-md p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-yellow-500" />
+            <Sparkles className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
             <span className="text-sm font-medium">Search tips</span>
           </div>
           <ul className="text-muted-foreground space-y-1 text-sm">

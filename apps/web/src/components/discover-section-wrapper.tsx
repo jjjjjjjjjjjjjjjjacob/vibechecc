@@ -6,7 +6,7 @@ import {
 } from '@/components/vibe-category-row';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from '@/components/ui/icons';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {

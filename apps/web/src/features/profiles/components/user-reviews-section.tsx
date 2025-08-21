@@ -103,7 +103,7 @@ export function UserReviewsSection({
         your reviews
       </h2>
 
-      <div className="space-y-3">
+      <div className="space-y-3 sm:space-y-4">
         {displayedReviews.map((rating) => {
           if (!rating) return null;
 
@@ -155,9 +155,9 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
 
   return (
     <Link to="/vibes/$vibeId" params={{ vibeId: vibe.id }}>
-      <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+      <Card className="overflow-hidden transition-shadow duration-200 hover:shadow-md">
         <CardContent className="p-0">
-          <div className="flex gap-3 p-4">
+          <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
             {/* Reviewer Avatar (current user) */}
             <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage
@@ -182,7 +182,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
             {/* Content */}
             <div className="min-w-0 flex-1">
               {/* Header */}
-              <div className="mb-1 flex items-center gap-2">
+              <div className="mb-2 flex items-center gap-2 sm:mb-1">
                 <span className="truncate text-sm font-medium">
                   @
                   {currentUser.username ||
@@ -198,12 +198,12 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
               </div>
 
               {/* Review Text */}
-              <div className="mb-3">
+              <div className="mb-3 sm:mb-2">
                 <p className="text-sm leading-relaxed">{rating.review}</p>
               </div>
 
               {/* Rating and Vibe Image */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <EmojiRatingDisplay
                   rating={{
                     emoji: rating.emoji,
@@ -216,7 +216,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="relative h-8 w-8 cursor-pointer overflow-hidden rounded">
+                    <div className="relative h-8 w-8 flex-shrink-0 cursor-pointer overflow-hidden rounded">
                       {usePlaceholder ? (
                         <SimpleVibePlaceholder title={vibe.title} />
                       ) : (

@@ -157,6 +157,20 @@ These rules override default AI behavior when working on this codebase.
 3. Use proper authentication checks
 4. Follow existing security patterns
 
+## Implementation Plans
+
+Before starting work on any major feature or fix, check the relevant implementation plan in `.agent/plans/`:
+
+- `ui-ux-improvements.md` - UI/UX enhancements and mobile improvements
+- `social-community-features.md` - Social media integration, leaderboards, trophies
+- `rating-review-improvements.md` - Rating system fixes and enhancements
+- `auth-onboarding-improvements.md` - Authentication flow and onboarding analytics
+- `discovery-recommendations.md` - Discovery page and recommendation algorithms
+- `technical-fixes.md` - Release notes and technical infrastructure fixes
+
+These plans contain detailed implementation steps, dependencies, and success criteria.
+Update plans with learnings as work progresses.
+
 ## Quality Standards
 
 1. Full TypeScript coverage required

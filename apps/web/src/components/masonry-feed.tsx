@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { JSMasonryLayout, useMasonryLayout } from '@/components/masonry-layout';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 
 interface MasonryFeedProps {
   vibes: Vibe[];

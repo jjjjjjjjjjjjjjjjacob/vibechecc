@@ -184,7 +184,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
     if (!data || typeof data !== 'object' || !('pages' in data) || !data.pages)
       return [];
     return (
-      data as { pages: Array<{ vibes?: import('@/types').Vibe[] }> }
+      data as { pages: Array<{ vibes?: import('@vibechecc/types').Vibe[] }> }
     ).pages.flatMap((page) => page?.vibes || []);
   }, [data]); // Include full data object for proper dependency tracking
 

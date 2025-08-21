@@ -1,6 +1,5 @@
 import { Circle } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
-import { useThemeStore } from '@/stores/theme-store';
 import { useEffect, useState } from 'react';
 import toast from '@/utils/toast';
 
@@ -27,7 +26,6 @@ export function StarRating({
   step = 0.2,
   showValue = false,
 }: StarRatingProps) {
-  const { resolvedTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
   const [hoverValue, setHoverValue] = useState(0);
   const circles = [1, 2, 3, 4, 5];
@@ -105,12 +103,8 @@ export function StarRating({
     );
   }
 
-  const activeColor =
-    resolvedTheme === 'dark' ? 'text-purple-400' : 'text-purple-500';
-  const hoverColor =
-    resolvedTheme === 'dark'
-      ? 'hover:text-purple-300'
-      : 'hover:text-purple-400';
+  const activeColor = 'text-theme-primary';
+  const hoverColor = 'hover:text-theme-primary/80';
 
   // Determine which circles should be filled
   const displayValue = hoverValue || value;

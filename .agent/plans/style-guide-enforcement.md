@@ -1,15 +1,19 @@
 # Structural Remediation Implementation Plan
 
 ## Overview
+
 This plan addresses structural maladies identified in the audit of `@apps/web/` and `@apps/convex/`. The implementation is divided into 4 phases with specific tasks, dependencies, and validation steps.
 
 ## Phase 1: File Naming Standardization
+
 **Duration:** 1-2 days | **Priority:** 🔴 Critical | **Risk:** Low
 
 ### 1.1 Web App File Renames
 
 #### Task: Rename PascalCase Components
+
 **Files to rename:**
+
 ```bash
 # From → To
 apps/web/src/components/IconLink.tsx → apps/web/src/components/icon-link.tsx
@@ -17,13 +21,16 @@ apps/web/src/hooks/useOfflineIndicator.tsx → apps/web/src/hooks/use-offline-in
 ```
 
 **Implementation Steps:**
+
 1. **Verify no active usage:**
+
    ```bash
    grep -r "IconLink" apps/web/src --exclude-dir=node_modules
    grep -r "useOfflineIndicator" apps/web/src --exclude-dir=node_modules
    ```
 
 2. **Execute renames:**
+
    ```bash
    git mv apps/web/src/components/IconLink.tsx apps/web/src/components/icon-link.tsx
    git mv apps/web/src/hooks/useOfflineIndicator.tsx apps/web/src/hooks/use-offline-indicator.tsx
@@ -40,7 +47,9 @@ apps/web/src/hooks/useOfflineIndicator.tsx → apps/web/src/hooks/use-offline-in
 ### 1.2 Convex Backend File Renames
 
 #### Task: Rename camelCase Files
+
 **Files to rename:**
+
 ```bash
 # From → To
 apps/convex/convex/emojiMetadata.ts → apps/convex/convex/emoji-metadata.ts
@@ -53,12 +62,15 @@ apps/convex/convex/users_auth_debug.test.ts → apps/convex/convex/users-auth-de
 ```
 
 **Implementation Steps:**
+
 1. **Check imports/references:**
+
    ```bash
    grep -r "emojiMetadata\|emojiRatings\|searchOptimized\|cleanupSearchHistory\|debugSearchHistory" apps/convex/convex --exclude-dir=node_modules
    ```
 
 2. **Execute renames:**
+
    ```bash
    git mv apps/convex/convex/emojiMetadata.ts apps/convex/convex/emoji-metadata.ts
    git mv apps/convex/convex/emojiRatings.ts apps/convex/convex/emoji-ratings.ts
@@ -72,6 +84,7 @@ apps/convex/convex/users_auth_debug.test.ts → apps/convex/convex/users-auth-de
 3. **Update imports in files that reference renamed modules**
 
 4. **Update Convex schema generation:**
+
    ```bash
    cd apps/convex && bun convex codegen
    ```
@@ -83,6 +96,7 @@ apps/convex/convex/users_auth_debug.test.ts → apps/convex/convex/users-auth-de
    ```
 
 ### 1.3 Phase 1 Completion Criteria
+
 - [ ] All files follow kebab-case naming convention
 - [ ] No broken imports remain
 - [ ] All tests pass
@@ -92,12 +106,15 @@ apps/convex/convex/users_auth_debug.test.ts → apps/convex/convex/users-auth-de
 ---
 
 ## Phase 2: Component Reorganization
+
 **Duration:** 3-5 days | **Priority:** 🟡 Medium | **Risk:** Medium
 
 ### 2.1 Remove Orphaned Files
 
 #### Task: Delete Confirmed Unused Files
+
 **Files to remove:**
+
 ```bash
 # Confirmed unused (verified no imports)
 apps/web/src/components/icon-link.tsx
@@ -107,7 +124,9 @@ apps/convex/convex/debug-search-history.ts
 ```
 
 **Implementation Steps:**
+
 1. **Final verification:**
+
    ```bash
    # Verify no imports exist
    grep -r "icon-link\|use-offline-indicator\|cleanup-search-history\|debug-search-history" . --exclude-dir=node_modules
@@ -124,27 +143,33 @@ apps/convex/convex/debug-search-history.ts
 ### 2.2 Consolidate Duplicate Search Components
 
 #### Task: Remove Legacy Emoji Search Component
+
 **Remove:** `apps/web/src/features/ratings/components/emoji-search-command.tsx`
 **Keep:** `apps/web/src/features/ratings/components/emoji-search-command-v2.tsx`
 
 **Implementation Steps:**
+
 1. **Verify usage patterns:**
+
    ```bash
    grep -r "emoji-search-command" apps/web/src --exclude="emoji-search-command-v2"
    ```
 
 2. **Update imports to use v2:**
+
    ```bash
    # Find and replace all imports
    find apps/web/src -name "*.tsx" -o -name "*.ts" | xargs sed -i 's/emoji-search-command"/emoji-search-command-v2"/g'
    ```
 
 3. **Remove legacy component:**
+
    ```bash
    git rm apps/web/src/features/ratings/components/emoji-search-command.tsx
    ```
 
 4. **Rename v2 to standard name:**
+
    ```bash
    git mv apps/web/src/features/ratings/components/emoji-search-command-v2.tsx apps/web/src/features/ratings/components/emoji-search-command.tsx
    ```
@@ -157,7 +182,9 @@ apps/convex/convex/debug-search-history.ts
 ### 2.3 Move Misplaced Components
 
 #### Task: Reorganize Search Components
+
 **Moves required:**
+
 ```bash
 # Search components to feature directory
 apps/web/src/components/search-results-with-view-toggle.tsx → apps/web/src/features/search/components/
@@ -165,12 +192,15 @@ apps/web/src/components/tag-search-command.tsx → apps/web/src/features/search/
 ```
 
 **Implementation Steps:**
+
 1. **Check imports:**
+
    ```bash
    grep -r "search-results-with-view-toggle\|tag-search-command" apps/web/src
    ```
 
 2. **Move files:**
+
    ```bash
    git mv apps/web/src/components/search-results-with-view-toggle.tsx apps/web/src/features/search/components/
    git mv apps/web/src/components/tag-search-command.tsx apps/web/src/features/search/components/
@@ -186,7 +216,9 @@ apps/web/src/components/tag-search-command.tsx → apps/web/src/features/search/
 ### 2.4 Standardize Test Organization
 
 #### Task: Adopt Co-located Testing Pattern
+
 **Moves required:**
+
 ```bash
 # Centralized tests → Co-located
 apps/web/src/__tests__/routes/search.test.tsx → apps/web/src/routes/search.test.tsx
@@ -195,11 +227,13 @@ apps/web/src/features/search/__tests__/ → apps/web/src/features/search/compone
 ```
 
 **Implementation Steps:**
+
 1. **Move test files:**
+
    ```bash
    git mv apps/web/src/__tests__/routes/search.test.tsx apps/web/src/routes/search.test.tsx
    git mv apps/web/src/__tests__/features/auth/clerk-posthog-integration.test.tsx apps/web/src/features/auth/components/
-   
+
    # Move search tests to components directory
    for file in apps/web/src/features/search/__tests__/*.test.tsx; do
      filename=$(basename "$file")
@@ -208,6 +242,7 @@ apps/web/src/features/search/__tests__/ → apps/web/src/features/search/compone
    ```
 
 2. **Remove empty test directories:**
+
    ```bash
    rmdir apps/web/src/__tests__/routes
    rmdir apps/web/src/__tests__/features/auth
@@ -219,7 +254,9 @@ apps/web/src/features/search/__tests__/ → apps/web/src/features/search/compone
 ### 2.5 Backend File Organization
 
 #### Task: Create Utilities Directory
+
 **New structure:**
+
 ```bash
 apps/convex/convex/utilities/
 ├── migration-helpers.ts
@@ -227,7 +264,9 @@ apps/convex/convex/utilities/
 ```
 
 **Implementation Steps:**
+
 1. **Create utilities directory:**
+
    ```bash
    mkdir -p apps/convex/convex/utilities
    ```
@@ -238,6 +277,7 @@ apps/convex/convex/utilities/
    ```
 
 ### 2.6 Phase 2 Completion Criteria
+
 - [ ] All orphaned files removed
 - [ ] Duplicate components consolidated
 - [ ] Components in correct feature directories
@@ -249,20 +289,25 @@ apps/convex/convex/utilities/
 ---
 
 ## Phase 3: Major Refactoring
+
 **Duration:** 1-2 weeks | **Priority:** 🟢 Lower | **Risk:** High
 
 ### 3.1 Consolidate Search Implementation
 
 #### Task: Choose Single Search Approach
+
 **Decision:** Keep `search-optimized.ts`, remove `search.ts`
 
 **Implementation Steps:**
+
 1. **Analyze usage:**
+
    ```bash
    grep -r "searchAll\|searchAllOptimized" apps/web/src
    ```
 
 2. **Update frontend to use optimized version:**
+
    ```bash
    find apps/web/src -name "*.tsx" -o -name "*.ts" | xargs sed -i 's/api\.search\.searchAll/api.search.searchAllOptimized/g'
    ```
@@ -273,6 +318,7 @@ apps/convex/convex/utilities/
    - Update exports
 
 4. **Remove legacy search file:**
+
    ```bash
    git rm apps/convex/convex/search.ts
    ```
@@ -290,6 +336,7 @@ apps/convex/convex/utilities/
 **Target:** `apps/convex/convex/seed.ts` (2,120 lines)
 
 **New structure:**
+
 ```bash
 apps/convex/convex/seed/
 ├── index.ts (main seed functions)
@@ -303,7 +350,9 @@ apps/convex/convex/seed/
 ```
 
 **Implementation Steps:**
+
 1. **Create directory structure:**
+
    ```bash
    mkdir -p apps/convex/convex/seed/data
    mkdir -p apps/convex/convex/seed/utils
@@ -338,6 +387,7 @@ apps/convex/convex/seed/
 **Target:** `apps/convex/convex/users.ts` (1,003 lines)
 
 **New structure:**
+
 ```bash
 apps/convex/convex/users/
 ├── index.ts (main exports)
@@ -348,7 +398,9 @@ apps/convex/convex/users/
 ```
 
 **Implementation Steps:**
+
 1. **Create directory structure:**
+
    ```bash
    mkdir -p apps/convex/convex/users
    ```
@@ -376,9 +428,11 @@ apps/convex/convex/users/
 ### 3.3 Schema Organization
 
 #### Task: Break Down Monolithic Schema
+
 **Target:** `apps/convex/convex/schema.ts` (395 lines)
 
 **New structure:**
+
 ```bash
 apps/convex/convex/schema/
 ├── index.ts (main schema export)
@@ -389,7 +443,9 @@ apps/convex/convex/schema/
 ```
 
 **Implementation Steps:**
+
 1. **Create directory structure:**
+
    ```bash
    mkdir -p apps/convex/convex/schema
    ```
@@ -416,6 +472,7 @@ apps/convex/convex/schema/
    - Export unified schema
 
 ### 3.4 Phase 3 Completion Criteria
+
 - [ ] Single search implementation chosen and integrated
 - [ ] Seed file broken into logical modules
 - [ ] Users file split by functionality
@@ -428,16 +485,19 @@ apps/convex/convex/schema/
 ---
 
 ## Phase 4: Quality Improvements
+
 **Duration:** 3-5 days | **Priority:** 🟢 Lower | **Risk:** Low
 
 ### 4.0 Theme Color Standardization
 
 #### Task: Replace Hardcoded Colors with Theme Variables
+
 **Priority:** 🔴 Critical | **Risk:** Low
 
 **Files with hardcoded colors to fix:**
 
-##### Tailwind Color Classes (bg-*, text-*, border-*)
+##### Tailwind Color Classes (bg-_, text-_, border-\*)
+
 ```bash
 # Critical violations - using specific color values
 apps/web/src/routes/vibes/$vibeId/edit.tsx
@@ -486,6 +546,7 @@ apps/web/src/styles/app.css
 ```
 
 ##### Hex Colors
+
 ```bash
 apps/web/src/lib/basic-emojis.ts
   - Lines 3-22: Hardcoded hex colors (#FFD700, #FF69B4, etc.)
@@ -497,6 +558,7 @@ apps/web/src/utils/theme-color-extractor.ts
 ```
 
 ##### HSL Usage (Acceptable - Using CSS Variables)
+
 ```bash
 apps/web/src/routes/search.tsx
   - Line 533: to-[hsl(var(--theme-primary))]/10 → CORRECT usage
@@ -508,27 +570,28 @@ apps/web/src/routes/discover.tsx
 **Implementation Steps:**
 
 1. **Create theme color mapping guide:**
+
    ```typescript
    // Color replacements mapping
    const colorMappings = {
      // Status colors
      'green-*': 'theme-success',
-     'red-*': 'theme-destructive', 
+     'red-*': 'theme-destructive',
      'orange-*': 'theme-warning',
      'yellow-*': 'theme-warning',
-     
+
      // Primary colors
      'blue-*': 'theme-primary',
      'purple-*': 'theme-primary',
      'pink-*': 'theme-secondary',
-     
+
      // Neutral colors
      'gray-*': 'muted-foreground or background',
      'slate-*': 'muted or muted-foreground',
-     
+
      // Special cases
      'emerald-*': 'theme-primary',
-     'cyan-*': 'theme-secondary'
+     'cyan-*': 'theme-secondary',
    };
    ```
 
@@ -538,6 +601,7 @@ apps/web/src/routes/discover.tsx
    - Verify visual consistency
 
 3. **Add CSS variables for special cases:**
+
    ```css
    /* For star ratings - add to app.css */
    --star-rating-filled: hsl(var(--theme-warning));
@@ -550,12 +614,13 @@ apps/web/src/routes/discover.tsx
    - Brand logos or third-party requirements
 
 5. **Validation:**
+
    ```bash
    # Check for remaining violations
    grep -r "text-\(red\|blue\|green\|yellow\|purple\|pink\|orange\|gray\|slate\)-[0-9]" apps/web/src
    grep -r "bg-\(red\|blue\|green\|yellow\|purple\|pink\|orange\|gray\|slate\)-[0-9]" apps/web/src
    grep -r "border-\(red\|blue\|green\|yellow\|purple\|pink\|orange\|gray\|slate\)-[0-9]" apps/web/src
-   
+
    # Visual testing
    bun run dev
    # Test in light and dark modes
@@ -563,6 +628,7 @@ apps/web/src/routes/discover.tsx
    ```
 
 ### 4.0 Phase 4.0 Completion Criteria
+
 - [ ] All hardcoded Tailwind color classes replaced with theme variables
 - [ ] CSS variables added for special cases (star ratings, etc.)
 - [ ] Visual consistency maintained across light/dark modes
@@ -572,7 +638,9 @@ apps/web/src/routes/discover.tsx
 ### 4.1 Create Barrel Exports
 
 #### Task: Add Consistent Index Files
+
 **Add index.ts files to:**
+
 ```bash
 apps/web/src/features/search/components/index.ts
 apps/web/src/features/ratings/components/index.ts
@@ -587,12 +655,14 @@ apps/web/src/features/onboarding/components/index.ts
 ```
 
 **Implementation Steps:**
+
 1. **Create barrel export files:**
+
    ```bash
    # For each feature directory
    for feature in search ratings profiles notifications follows vibes theming admin auth onboarding; do
      echo "// Export all components from this feature" > apps/web/src/features/$feature/components/index.ts
-     
+
      # Auto-generate exports
      for file in apps/web/src/features/$feature/components/*.tsx; do
        if [[ -f "$file" && "$(basename "$file")" != "index.tsx" ]]; then
@@ -612,7 +682,9 @@ apps/web/src/features/onboarding/components/index.ts
 ### 4.2 Establish Architecture Patterns
 
 #### Task: Document and Enforce Patterns
+
 **Create documentation:**
+
 ```bash
 .agent/docs/architecture-patterns.mdc
 .agent/docs/component-organization.mdc
@@ -620,6 +692,7 @@ apps/web/src/features/onboarding/components/index.ts
 ```
 
 **Implementation Steps:**
+
 1. **Document feature-based organization:**
    - Create guidelines for component placement
    - Define feature boundary rules
@@ -633,6 +706,7 @@ apps/web/src/features/onboarding/components/index.ts
    - Establish import path conventions
 
 ### 4.3 Phase 4 Completion Criteria
+
 - [ ] All features have barrel exports
 - [ ] Architecture documentation created
 - [ ] Import patterns standardized
@@ -645,6 +719,7 @@ apps/web/src/features/onboarding/components/index.ts
 ## Implementation Timeline & Dependencies
 
 ### Critical Path
+
 1. **Phase 1** (1-2 days) → **Phase 2** (3-5 days) → **Phase 3** (1-2 weeks) → **Phase 4** (3-5 days)
 2. **Total Duration:** 2-3 weeks
 3. **Dependencies:**
@@ -653,21 +728,25 @@ apps/web/src/features/onboarding/components/index.ts
    - Phase 4 depends on Phase 3 completion
 
 ### Risk Mitigation
+
 - **Phase 1 & 2:** Low risk, mostly file moves
 - **Phase 3:** High risk, requires careful testing
 - **Phase 4:** Low risk, additive changes
 
 ### Validation Checkpoints
+
 - After each phase: Run full test suite
 - After Phase 3: Manual integration testing
 - After Phase 4: Performance validation
 
 ### Rollback Plan
+
 - Each phase is a separate git commit
 - Can rollback individual phases if issues arise
 - Maintain detailed change log for tracking
 
 ## Success Metrics
+
 - [ ] 100% kebab-case file naming compliance
 - [ ] Zero orphaned/unused files
 - [ ] Zero duplicate functionality
@@ -678,6 +757,7 @@ apps/web/src/features/onboarding/components/index.ts
 - [ ] Comprehensive barrel exports
 
 ## Next Steps
+
 1. Review and approve implementation plan
 2. Create feature branch for Phase 1
 3. Execute Phase 1 tasks
