@@ -28,6 +28,8 @@ import { Route as VibesCreateRouteImport } from './routes/vibes/create'
 import { Route as VibesVibeIdRouteImport } from './routes/vibes/$vibeId'
 import { Route as UsersUsernameRouteImport } from './routes/users.$username'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
+import { Route as SignUpSsoCallbackRouteImport } from './routes/sign-up/sso-callback'
+import { Route as SignInSsoCallbackRouteImport } from './routes/sign-in/sso-callback'
 import { Route as RatingsRatingIdRouteImport } from './routes/ratings/$ratingId'
 import { Route as ProfilePreviewRouteImport } from './routes/profile/preview'
 import { Route as ProfileEditRouteImport } from './routes/profile/edit'
@@ -133,6 +135,16 @@ const SitemapXmlRoute = SitemapXmlRouteImport.update({
   path: '/sitemap/xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignUpSsoCallbackRoute = SignUpSsoCallbackRouteImport.update({
+  id: '/sso-callback',
+  path: '/sso-callback',
+  getParentRoute: () => SignUpRoute,
+} as any)
+const SignInSsoCallbackRoute = SignInSsoCallbackRouteImport.update({
+  id: '/sso-callback',
+  path: '/sso-callback',
+  getParentRoute: () => SignInRoute,
+} as any)
 const RatingsRatingIdRoute = RatingsRatingIdRouteImport.update({
   id: '/ratings/$ratingId',
   path: '/ratings/$ratingId',
@@ -188,8 +200,8 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/search': typeof SearchRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/sign-in': typeof SignInRouteWithChildren
+  '/sign-up': typeof SignUpRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin/emojis': typeof AdminEmojisRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -199,6 +211,8 @@ export interface FileRoutesByFullPath {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
+  '/sign-in/sso-callback': typeof SignInSsoCallbackRoute
+  '/sign-up/sso-callback': typeof SignUpSsoCallbackRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
@@ -216,8 +230,8 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/sign-in': typeof SignInRouteWithChildren
+  '/sign-up': typeof SignUpRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin/emojis': typeof AdminEmojisRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -227,6 +241,8 @@ export interface FileRoutesByTo {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
+  '/sign-in/sso-callback': typeof SignInSsoCallbackRoute
+  '/sign-up/sso-callback': typeof SignUpSsoCallbackRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
@@ -247,8 +263,8 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/search': typeof SearchRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/sign-in': typeof SignInRouteWithChildren
+  '/sign-up': typeof SignUpRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin/emojis': typeof AdminEmojisRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -258,6 +274,8 @@ export interface FileRoutesById {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
+  '/sign-in/sso-callback': typeof SignInSsoCallbackRoute
+  '/sign-up/sso-callback': typeof SignUpSsoCallbackRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
   '/vibes/$vibeId': typeof VibesVibeIdRouteWithChildren
@@ -290,6 +308,8 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/preview'
     | '/ratings/$ratingId'
+    | '/sign-in/sso-callback'
+    | '/sign-up/sso-callback'
     | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
@@ -318,6 +338,8 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/preview'
     | '/ratings/$ratingId'
+    | '/sign-in/sso-callback'
+    | '/sign-up/sso-callback'
     | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
@@ -348,6 +370,8 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/preview'
     | '/ratings/$ratingId'
+    | '/sign-in/sso-callback'
+    | '/sign-up/sso-callback'
     | '/sitemap/xml'
     | '/users/$username'
     | '/vibes/$vibeId'
@@ -368,8 +392,8 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRouteWithChildren
   SearchRoute: typeof SearchRoute
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
+  SignInRoute: typeof SignInRouteWithChildren
+  SignUpRoute: typeof SignUpRouteWithChildren
   TermsRoute: typeof TermsRoute
   RatingsRatingIdRoute: typeof RatingsRatingIdRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
@@ -515,6 +539,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapXmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sign-up/sso-callback': {
+      id: '/sign-up/sso-callback'
+      path: '/sso-callback'
+      fullPath: '/sign-up/sso-callback'
+      preLoaderRoute: typeof SignUpSsoCallbackRouteImport
+      parentRoute: typeof SignUpRoute
+    }
+    '/sign-in/sso-callback': {
+      id: '/sign-in/sso-callback'
+      path: '/sso-callback'
+      fullPath: '/sign-in/sso-callback'
+      preLoaderRoute: typeof SignInSsoCallbackRouteImport
+      parentRoute: typeof SignInRoute
+    }
     '/ratings/$ratingId': {
       id: '/ratings/$ratingId'
       path: '/ratings/$ratingId'
@@ -616,6 +654,28 @@ const ProfileRouteChildren: ProfileRouteChildren = {
 const ProfileRouteWithChildren =
   ProfileRoute._addFileChildren(ProfileRouteChildren)
 
+interface SignInRouteChildren {
+  SignInSsoCallbackRoute: typeof SignInSsoCallbackRoute
+}
+
+const SignInRouteChildren: SignInRouteChildren = {
+  SignInSsoCallbackRoute: SignInSsoCallbackRoute,
+}
+
+const SignInRouteWithChildren =
+  SignInRoute._addFileChildren(SignInRouteChildren)
+
+interface SignUpRouteChildren {
+  SignUpSsoCallbackRoute: typeof SignUpSsoCallbackRoute
+}
+
+const SignUpRouteChildren: SignUpRouteChildren = {
+  SignUpSsoCallbackRoute: SignUpSsoCallbackRoute,
+}
+
+const SignUpRouteWithChildren =
+  SignUpRoute._addFileChildren(SignUpRouteChildren)
+
 interface VibesVibeIdRouteChildren {
   VibesVibeIdEditRoute: typeof VibesVibeIdEditRoute
 }
@@ -637,8 +697,8 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRouteWithChildren,
   SearchRoute: SearchRoute,
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
+  SignInRoute: SignInRouteWithChildren,
+  SignUpRoute: SignUpRouteWithChildren,
   TermsRoute: TermsRoute,
   RatingsRatingIdRoute: RatingsRatingIdRoute,
   SitemapXmlRoute: SitemapXmlRoute,

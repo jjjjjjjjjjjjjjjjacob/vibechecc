@@ -78,12 +78,22 @@ jobs:
       - name: Initialize Terraform with backend
         working-directory: terraform
         run: |
-          terraform init -backend-config=backend.tfvars
+          terraform init -backend-config=backend.tfvars -input=false
 
       - name: Create or select workspace
         working-directory: terraform
         run: |
-          terraform workspace select ${{ steps.env.outputs.workspace }} || terraform workspace new ${{ steps.env.outputs.workspace }}
+          # List existing workspaces for debugging
+          echo "Existing workspaces:"
+          terraform workspace list
+
+          # Try to select the workspace, if it doesn't exist, create it
+          if terraform workspace select ${{ steps.env.outputs.workspace }} 2>/dev/null; then
+            echo "Selected existing workspace: ${{ steps.env.outputs.workspace }}"
+          else
+            echo "Creating new workspace: ${{ steps.env.outputs.workspace }}"
+            terraform workspace new ${{ steps.env.outputs.workspace }}
+          fi
 
       - name: Import existing Cloudflare resources
         id: import_resources
@@ -115,7 +125,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
         run: |
-          terraform apply -auto-approve
+          terraform apply -auto-approve -input=false
 
   deploy-convex:
     runs-on: ubuntu-latest
