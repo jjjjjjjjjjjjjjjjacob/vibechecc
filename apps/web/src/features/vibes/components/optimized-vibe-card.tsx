@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { VibeCard } from './vibe-card';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 import type { RatingDisplayMode } from '@/components/vibe-category-row';
 
 interface OptimizedVibeCardProps {

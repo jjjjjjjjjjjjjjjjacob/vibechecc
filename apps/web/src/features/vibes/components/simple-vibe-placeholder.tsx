@@ -36,9 +36,7 @@ export function SimpleVibePlaceholder({
   // If not mounted yet, return a simple placeholder to avoid hydration mismatch
   if (!mounted) {
     return (
-      <div
-        className={cn('relative h-full w-full bg-zinc-800', className)}
-      ></div>
+      <div className={cn('bg-muted relative h-full w-full', className)}></div>
     );
   }
 

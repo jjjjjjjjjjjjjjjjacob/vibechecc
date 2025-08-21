@@ -20,7 +20,7 @@ import {
   getUserAvatarUrl,
   getUserInitials,
 } from '@/utils/user-utils';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 import type { RatingDisplayMode } from '@/components/vibe-category-row';
 import { RatingPopover } from '@/features/ratings/components/rating-popover';
 import { AuthPromptDialog } from '@/features/auth';
@@ -318,7 +318,7 @@ export function VibeCard({
                     <img
                       src={imageUrl}
                       alt={vibe.title}
-                      className="h-full w-full object-cover transition-transform duration-200 hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-200 will-change-transform hover:scale-[1.02]"
                       onError={() => setImageError(true)}
                     />
                   )}
@@ -490,7 +490,7 @@ export function VibeCard({
       <>
         <div
           className={cn(
-            'group relative overflow-hidden rounded-lg transition-all duration-200 hover:shadow-md',
+            'group relative overflow-hidden rounded-lg transition-shadow duration-200 will-change-transform hover:shadow-md',
             'h-24 sm:h-28',
             className
           )}
@@ -515,7 +515,7 @@ export function VibeCard({
                 <img
                   src={imageUrl}
                   alt={vibe.title}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-200 will-change-transform group-hover:scale-[1.02]"
                   onError={() => setImageError(true)}
                 />
               )}
@@ -765,7 +765,7 @@ export function VibeCard({
     <>
       <Card
         className={cn(
-          'bg-popover/20 border-border/50 relative overflow-hidden transition-all duration-200 hover:shadow-md',
+          'bg-popover/20 border-border/50 relative overflow-hidden transition-shadow duration-200 will-change-transform hover:shadow-md',
           'h-full',
           finalVariant === 'feed-masonry' && 'break-inside-avoid',
           className
@@ -788,7 +788,7 @@ export function VibeCard({
                   e.stopPropagation();
                 }}
               >
-                <Avatar className="h-6 w-6 shadow-md transition-transform hover:scale-110">
+                <Avatar className="h-6 w-6 shadow-md transition-transform duration-150 will-change-transform hover:scale-[1.05]">
                   <AvatarImage
                     src={getUserAvatarUrl(vibe.createdBy)}
                     alt={computeUserDisplayName(vibe.createdBy)}
@@ -869,7 +869,7 @@ export function VibeCard({
                   <img
                     src={imageUrl}
                     alt={vibe.title}
-                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-200 will-change-transform hover:scale-[1.02]"
                     onError={() => setImageError(true)}
                   />
                 )}

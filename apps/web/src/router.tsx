@@ -34,7 +34,9 @@ export function createRouter() {
     },
     mutationCache: new MutationCache({
       onError: (error) => {
-        toast(error.message, { className: 'bg-red-500 text-white' });
+        toast(error.message, {
+          className: 'bg-destructive text-destructive-foreground',
+        });
       },
     }),
   });

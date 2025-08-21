@@ -206,6 +206,35 @@
   .animation-delay-400 {
     animation-delay: 400ms;
   }
+
+  /* Performance-optimized transitions */
+  .transition-fast {
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .transition-transform-fast {
+    transition-property: transform;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .transition-shadow-fast {
+    transition-property: box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Mobile-optimized utility classes */
+  @media (max-width: 768px) {
+    .mobile-no-transform {
+      transform: none !important;
+    }
+
+    .mobile-fast-transition {
+      transition-duration: 100ms !important;
+    }
+  }
 }
 
 /* Accordion animations */
@@ -641,6 +670,22 @@
 
   .animate-bounce-light {
     animation-duration: 0.8s; /* Slightly faster bounce */
+  }
+
+  /* Reduce expensive transforms on mobile */
+  .hover\:scale-\[1\.02\]:hover,
+  .hover\:scale-105:hover,
+  .group-hover\:scale-\[1\.02\]:hover {
+    transform: scale(1.01) !important; /* Smaller scale on mobile */
+  }
+
+  /* Disable complex transforms on very small screens */
+  @media (max-width: 480px) {
+    .hover\:scale-\[1\.02\]:hover,
+    .hover\:scale-105:hover,
+    .group-hover\:scale-\[1\.02\]:hover {
+      transform: none !important;
+    }
   }
 }
 

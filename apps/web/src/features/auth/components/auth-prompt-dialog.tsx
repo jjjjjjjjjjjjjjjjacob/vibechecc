@@ -46,9 +46,9 @@ export function AuthPromptDialog({
             <SignUpButton mode="modal">
               <Button
                 variant="outline"
-                className="bg-secondary/50 h-12 w-full border-2 border-pink-200/20 text-base font-semibold backdrop-blur-sm transition-all hover:scale-[1.02] hover:border-none hover:border-transparent hover:bg-gradient-to-r hover:from-violet-500 hover:to-pink-500"
+                className="bg-secondary/50 border-theme-primary/20 hover:from-theme-primary hover:to-theme-secondary h-12 w-full border-2 text-base font-semibold backdrop-blur-sm transition-all hover:scale-[1.02] hover:border-none hover:border-transparent hover:bg-gradient-to-r"
               >
-                <Sparkles className="mr-2 h-4 w-4 text-violet-200" />
+                <Sparkles className="text-theme-primary/70 mr-2 h-4 w-4" />
                 create new account
               </Button>
             </SignUpButton>

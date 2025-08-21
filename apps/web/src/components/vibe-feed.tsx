@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { MasonryFeed } from '@/components/masonry-feed';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 
 interface VibeFeedData {
   vibes: Vibe[];
