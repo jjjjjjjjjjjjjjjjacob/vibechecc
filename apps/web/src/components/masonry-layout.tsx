@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
+import { useMediaQuery } from '@/hooks';
 
 interface MasonryLayoutProps {
   children: React.ReactNode[];
@@ -140,17 +141,11 @@ export function JSMasonryLayout({
  */
 export function useMasonryLayout() {
   const [shouldUseMasonry, setShouldUseMasonry] = React.useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   React.useEffect(() => {
-    const checkSupport = () => {
-      // Use masonry on medium screens and larger (768px+) for better layout
-      setShouldUseMasonry(window.innerWidth >= 768);
-    };
-
-    checkSupport();
-    window.addEventListener('resize', checkSupport);
-    return () => window.removeEventListener('resize', checkSupport);
-  }, []);
+    setShouldUseMasonry(!isMobile);
+  }, [isMobile]);
 
   return shouldUseMasonry;
 }

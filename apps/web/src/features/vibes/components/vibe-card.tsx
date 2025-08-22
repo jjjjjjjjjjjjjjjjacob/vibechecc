@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate, useLocation } from '@tanstack/react-router';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
 import { useUser } from '@clerk/tanstack-react-start';
 import { trackEvents } from '@/lib/track-events';
@@ -29,6 +30,10 @@ import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rat
 import { EmojiReactions } from '@/features/ratings/components/emoji-reaction';
 import { useVibeImageUrl } from '@/hooks/use-vibe-image-url';
 import { ShareButton } from '@/components/social/share-button';
+import {
+  BoostIndicator,
+  HighBoostIndicator,
+} from '@/components/boost-indicator';
 
 type VibeCardVariant =
   | 'default'
@@ -37,7 +42,10 @@ type VibeCardVariant =
   | 'feed-masonry'
   | 'feed-single'
   | 'list'
-  | 'search-result';
+  | 'search-result'
+  | 'mobile-story'
+  | 'mobile-square'
+  | 'mobile-optimized';
 
 interface VibeCardProps {
   vibe?: Vibe;
@@ -46,6 +54,9 @@ interface VibeCardProps {
   className?: string;
   delay?: number;
   loading?: boolean;
+  // Mobile optimization props
+  enableFadeIn?: boolean;
+  optimizeForTouch?: boolean;
   // Legacy props for backward compatibility
   compact?: boolean;
   layout?: 'masonry' | 'grid' | 'single';
@@ -58,12 +69,124 @@ export function VibeCard({
   className,
   delay = 0,
   loading = false,
+  enableFadeIn = false,
+  optimizeForTouch = false,
   // Legacy prop support
   compact,
   layout,
 }: VibeCardProps) {
-  // Determine final variant based on new and legacy props
+  const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get image URL (handles both legacy URLs and storage IDs)
+  const { data: imageUrl, isLoading: isImageLoading } = useVibeImageUrl(
+    vibe || {}
+  );
+
+  // Extract feed type from URL for analytics
+  const feedType = React.useMemo(() => {
+    const path = location.pathname.split('/');
+    if (path[1] === 'feed' && path[2]) {
+      return path[2];
+    }
+    return undefined;
+  }, [location.pathname]);
+
+  // Card expansion state with localStorage persistence
+  const [isExpanded, setIsExpanded] = React.useState(() => {
+    if (!vibe) return false;
+    try {
+      const stored = localStorage.getItem('expandedVibes');
+      if (stored) {
+        const expandedVibes = JSON.parse(stored);
+        return !!expandedVibes[vibe.id];
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+    return false;
+  });
+
+  // Track if this card has been clicked once (for click-to-expand)
+  const [hasBeenClicked, setHasBeenClicked] = React.useState(false);
+
+  // Save expansion state to localStorage
+  const saveExpansionState = React.useCallback(
+    (vibeId: string, expanded: boolean) => {
+      try {
+        const stored = localStorage.getItem('expandedVibes');
+        const expandedVibes = stored ? JSON.parse(stored) : {};
+
+        if (expanded) {
+          expandedVibes[vibeId] = Date.now();
+        } else {
+          delete expandedVibes[vibeId];
+        }
+
+        localStorage.setItem('expandedVibes', JSON.stringify(expandedVibes));
+      } catch (e) {
+        // Ignore localStorage errors
+      }
+    },
+    []
+  );
+
+  // Handle card click - first click expands, second click navigates
+  const handleCardClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      if (!vibe) return;
+
+      // Don't handle clicks on interactive elements
+      const target = e.target as HTMLElement;
+      if (
+        target.closest('button') ||
+        target.closest('a') ||
+        target.closest('[role="button"]')
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!isExpanded && !hasBeenClicked) {
+        // First click - expand the card
+        setIsExpanded(true);
+        setHasBeenClicked(true);
+        saveExpansionState(vibe.id, true);
+
+        // Track PostHog event
+        trackEvents.vibeCardExpanded({
+          vibeId: vibe.id,
+          feedType,
+          vibeTitle: vibe.title,
+          hasImage: !!imageUrl,
+          timestamp: Date.now(),
+        });
+      } else if (isExpanded) {
+        // Second click - navigate to detail page
+        trackEvents.vibeViewed(vibe.id);
+        navigate({ to: '/vibes/$vibeId', params: { vibeId: vibe.id } });
+      }
+    },
+    [
+      vibe,
+      isExpanded,
+      hasBeenClicked,
+      imageUrl,
+      feedType,
+      navigate,
+      saveExpansionState,
+    ]
+  );
+
   const finalVariant = React.useMemo(() => {
+    // Auto-select mobile variants when on mobile and no specific variant is set
+    if (variant === 'default' && isMobile) {
+      return 'mobile-optimized';
+    }
+
     // If new variant prop is provided, use it
     if (variant !== 'default') return variant;
 
@@ -74,7 +197,7 @@ export function VibeCard({
     if (layout === 'single') return 'feed-single';
 
     return 'default';
-  }, [variant, compact, layout]);
+  }, [variant, compact, layout, isMobile]);
   const [imageError, setImageError] = React.useState(false);
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
@@ -85,14 +208,20 @@ export function VibeCard({
   const [showRatingPopover, setShowRatingPopover] = React.useState(false);
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const [isAvatarHovered, setIsAvatarHovered] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(!enableFadeIn);
   const { user } = useUser();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
   const { data: emojiMetadataArray } = useEmojiMetadata();
 
-  // Get image URL (handles both legacy URLs and storage IDs)
-  const { data: imageUrl, isLoading: isImageLoading } = useVibeImageUrl(
-    vibe || {}
-  );
+  // Fade-in animation effect
+  React.useEffect(() => {
+    if (enableFadeIn && delay > 0) {
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [enableFadeIn, delay]);
 
   // Fetch emoji rating data - get all unique emoji reactions for this vibe
   const { data: topEmojiRatings, isLoading: isTopEmojiRatingsLoading } =
@@ -168,6 +297,10 @@ export function VibeCard({
         case 'feed-single':
           return 12;
         case 'feed-grid':
+          return 8;
+        case 'mobile-story':
+        case 'mobile-square':
+        case 'mobile-optimized':
           return 8;
         default:
           return 10;
@@ -368,10 +501,10 @@ export function VibeCard({
                     </div>
                   )}
 
-                  {/* Tags and Share Button */}
+                  {/* Tags, Boost Indicator, and Share Button */}
                   <div className="flex items-center justify-between gap-2">
-                    {/* Tags */}
-                    <div className="flex flex-1 flex-wrap gap-1">
+                    {/* Tags and Boost Indicator */}
+                    <div className="flex flex-1 flex-wrap items-center gap-1">
                       {vibe.tags && vibe.tags.length > 0 ? (
                         vibe.tags.slice(0, 3).map((tag) => (
                           <Link
@@ -391,6 +524,33 @@ export function VibeCard({
                       ) : (
                         <div className="flex-1" />
                       )}
+
+                      {/* Boost Score Indicator */}
+                      {(vibe.boostScore !== undefined &&
+                        vibe.boostScore !== 0) ||
+                      (vibe.totalBoosts !== undefined &&
+                        vibe.totalBoosts > 0) ||
+                      (vibe.totalDampens !== undefined &&
+                        vibe.totalDampens > 0) ? (
+                        <>
+                          {/* High boost special indicator for scores >= 10 */}
+                          {vibe.boostScore !== undefined &&
+                          vibe.boostScore >= 10 ? (
+                            <HighBoostIndicator
+                              boostScore={vibe.boostScore}
+                              className="ml-1"
+                            />
+                          ) : (
+                            <BoostIndicator
+                              boostScore={vibe.boostScore}
+                              totalBoosts={vibe.totalBoosts}
+                              totalDampens={vibe.totalDampens}
+                              size="sm"
+                              className="ml-1"
+                            />
+                          )}
+                        </>
+                      ) : null}
                     </div>
 
                     {/* Share Button */}
@@ -651,7 +811,364 @@ export function VibeCard({
     );
   }
 
-  // Main card variants skeleton (default, feed-masonry, feed-grid, feed-single, compact)
+  // Mobile Story variant (9:16 aspect ratio for story-like experience)
+  if (finalVariant === 'mobile-story') {
+    if (loading) {
+      return (
+        <Card
+          className={cn(
+            'bg-popover/20 border-border/50 relative overflow-hidden',
+            'mx-auto aspect-[9/16] w-full max-w-sm',
+            className
+          )}
+        >
+          <Skeleton className="h-full w-full" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute right-4 bottom-4 left-4 space-y-2">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </Card>
+      );
+    }
+
+    if (!vibe) return null;
+
+    return (
+      <>
+        <Card
+          className={cn(
+            'bg-popover/20 border-border/50 relative overflow-hidden transition-all duration-200',
+            'group mx-auto aspect-[9/16] w-full max-w-sm cursor-pointer',
+            enableFadeIn && !isVisible && 'opacity-0',
+            enableFadeIn && isVisible && 'animate-in fade-in duration-300',
+            optimizeForTouch &&
+              'transform-gpu will-change-transform hover:scale-[1.02]',
+            className
+          )}
+        >
+          <Link
+            to="/vibes/$vibeId"
+            params={{ vibeId: vibe.id }}
+            onClick={() => trackEvents.vibeViewed(vibe.id)}
+            className="block h-full w-full"
+          >
+            {/* Background image */}
+            <div className="absolute inset-0">
+              {usePlaceholder ? (
+                <SimpleVibePlaceholder
+                  title={vibe.title}
+                  className="h-full w-full"
+                />
+              ) : (
+                <img
+                  src={imageUrl}
+                  alt={vibe.title}
+                  className="h-full w-full object-cover transition-transform duration-300 will-change-transform group-hover:scale-[1.05]"
+                  onError={() => setImageError(true)}
+                />
+              )}
+            </div>
+
+            {/* Gradient overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+            {/* Avatar in top-left */}
+            {vibe.createdBy && (
+              <div className="absolute top-4 left-4 z-10">
+                <Avatar className="h-10 w-10 border-2 border-white/30">
+                  <AvatarImage
+                    src={getUserAvatarUrl(vibe.createdBy)}
+                    alt={computeUserDisplayName(vibe.createdBy)}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-background/50 text-sm">
+                    {getUserInitials(vibe.createdBy)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            )}
+
+            {/* Content overlay - positioned at bottom */}
+            <div className="absolute right-0 bottom-0 left-0 space-y-3 p-4">
+              {/* Title and description */}
+              <div className="space-y-2">
+                <h3 className="line-clamp-2 text-lg leading-tight font-bold text-white">
+                  {vibe.title}
+                </h3>
+                {vibe.description && (
+                  <p className="line-clamp-2 text-sm text-white/80">
+                    {vibe.description}
+                  </p>
+                )}
+                <p className="text-sm text-white/60">
+                  {vibe.createdBy
+                    ? computeUserDisplayName(vibe.createdBy)
+                    : 'Unknown'}
+                </p>
+              </div>
+
+              {/* Rating display */}
+              <div className="flex items-center justify-between">
+                {primaryEmojiRating ? (
+                  <button
+                    className={cn(
+                      'flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 backdrop-blur-sm transition-colors',
+                      optimizeForTouch && 'min-h-[44px] min-w-[44px]'
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEmojiRatingClick(
+                        primaryEmojiRating.emoji,
+                        primaryEmojiRating.value
+                      );
+                    }}
+                  >
+                    <span className="text-lg">{primaryEmojiRating.emoji}</span>
+                    <span className="font-medium text-white">
+                      {primaryEmojiRating.value.toFixed(1)}
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    className={cn(
+                      'rounded-full bg-white/15 px-4 py-2 text-sm text-white/80 backdrop-blur-sm',
+                      optimizeForTouch && 'min-h-[44px]'
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!user?.id) {
+                        setShowAuthDialog(true);
+                      } else {
+                        setShowRatingPopover(true);
+                      }
+                    }}
+                  >
+                    rate this
+                  </button>
+                )}
+
+                <ShareButton
+                  contentType="vibe"
+                  variant="ghost"
+                  size="sm"
+                  showCount={false}
+                  vibe={vibe}
+                  author={vibe.createdBy || undefined}
+                  className={cn(
+                    'text-white hover:bg-white/20',
+                    optimizeForTouch && 'min-h-[44px] min-w-[44px]'
+                  )}
+                />
+              </div>
+            </div>
+          </Link>
+        </Card>
+
+        {/* Hidden popovers */}
+        <RatingPopover
+          open={showRatingPopover}
+          onOpenChange={(open) => {
+            setShowRatingPopover(open);
+            if (!open) {
+              setSelectedEmojiForRating(null);
+              setPreselectedRatingValue(null);
+            }
+          }}
+          onSubmit={handleEmojiRating}
+          isSubmitting={createEmojiRatingMutation.isPending}
+          vibeTitle={vibe.title}
+          emojiMetadata={emojiMetadataRecord}
+          preSelectedEmoji={selectedEmojiForRating || undefined}
+          preSelectedValue={preselectedRatingValue || undefined}
+        >
+          <div style={{ display: 'none' }} />
+        </RatingPopover>
+
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to rate vibes"
+          description="join vibechecc to share your reactions and ratings with the community"
+        />
+      </>
+    );
+  }
+
+  // Mobile Square variant (1:1 aspect ratio for social media sharing)
+  if (finalVariant === 'mobile-square') {
+    if (loading) {
+      return (
+        <Card
+          className={cn(
+            'bg-popover/20 border-border/50 relative overflow-hidden',
+            'aspect-square w-full',
+            className
+          )}
+        >
+          <Skeleton className="h-full w-full" />
+          <div className="absolute right-4 bottom-4 left-4 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-8 w-20 rounded-full" />
+          </div>
+        </Card>
+      );
+    }
+
+    if (!vibe) return null;
+
+    return (
+      <>
+        <Card
+          className={cn(
+            'bg-popover/20 border-border/50 group relative overflow-hidden transition-all duration-200',
+            'aspect-square w-full cursor-pointer',
+            enableFadeIn && !isVisible && 'opacity-0',
+            enableFadeIn && isVisible && 'animate-in fade-in duration-300',
+            optimizeForTouch &&
+              'transform-gpu will-change-transform hover:scale-[1.02]',
+            className
+          )}
+        >
+          <Link
+            to="/vibes/$vibeId"
+            params={{ vibeId: vibe.id }}
+            onClick={() => trackEvents.vibeViewed(vibe.id)}
+            className="block h-full w-full"
+          >
+            {/* Background image */}
+            <div className="absolute inset-0">
+              {usePlaceholder ? (
+                <SimpleVibePlaceholder
+                  title={vibe.title}
+                  className="h-full w-full"
+                />
+              ) : (
+                <img
+                  src={imageUrl}
+                  alt={vibe.title}
+                  className="h-full w-full object-cover transition-transform duration-300 will-change-transform group-hover:scale-[1.05]"
+                  onError={() => setImageError(true)}
+                />
+              )}
+            </div>
+
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+            {/* Avatar in top-left */}
+            {vibe.createdBy && (
+              <div className="absolute top-3 left-3 z-10">
+                <Avatar className="h-8 w-8 border-2 border-white/30">
+                  <AvatarImage
+                    src={getUserAvatarUrl(vibe.createdBy)}
+                    alt={computeUserDisplayName(vibe.createdBy)}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-background/50 text-xs">
+                    {getUserInitials(vibe.createdBy)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            )}
+
+            {/* Content overlay - bottom section */}
+            <div className="absolute right-0 bottom-0 left-0 space-y-2 p-3">
+              <h3 className="line-clamp-2 text-base leading-tight font-bold text-white">
+                {vibe.title}
+              </h3>
+
+              <div className="flex items-center justify-between">
+                {primaryEmojiRating ? (
+                  <button
+                    className={cn(
+                      'flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur-sm',
+                      optimizeForTouch && 'min-h-[44px]'
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEmojiRatingClick(
+                        primaryEmojiRating.emoji,
+                        primaryEmojiRating.value
+                      );
+                    }}
+                  >
+                    <span className="text-sm">{primaryEmojiRating.emoji}</span>
+                    <span className="text-sm font-medium text-white">
+                      {primaryEmojiRating.value.toFixed(1)}
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    className={cn(
+                      'rounded-full bg-white/15 px-3 py-1.5 text-sm text-white/80 backdrop-blur-sm',
+                      optimizeForTouch && 'min-h-[44px]'
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!user?.id) {
+                        setShowAuthDialog(true);
+                      } else {
+                        setShowRatingPopover(true);
+                      }
+                    }}
+                  >
+                    rate
+                  </button>
+                )}
+
+                <ShareButton
+                  contentType="vibe"
+                  variant="ghost"
+                  size="sm"
+                  showCount={false}
+                  vibe={vibe}
+                  author={vibe.createdBy || undefined}
+                  className={cn(
+                    'h-8 w-8 text-white hover:bg-white/20',
+                    optimizeForTouch && 'min-h-[44px] min-w-[44px]'
+                  )}
+                />
+              </div>
+            </div>
+          </Link>
+        </Card>
+
+        {/* Hidden popovers */}
+        <RatingPopover
+          open={showRatingPopover}
+          onOpenChange={(open) => {
+            setShowRatingPopover(open);
+            if (!open) {
+              setSelectedEmojiForRating(null);
+              setPreselectedRatingValue(null);
+            }
+          }}
+          onSubmit={handleEmojiRating}
+          isSubmitting={createEmojiRatingMutation.isPending}
+          vibeTitle={vibe.title}
+          emojiMetadata={emojiMetadataRecord}
+          preSelectedEmoji={selectedEmojiForRating || undefined}
+          preSelectedValue={preselectedRatingValue || undefined}
+        >
+          <div style={{ display: 'none' }} />
+        </RatingPopover>
+
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to rate vibes"
+          description="join vibechecc to share your reactions and ratings with the community"
+        />
+      </>
+    );
+  }
+
+  // Main card variants skeleton (default, feed-masonry, feed-grid, feed-single, compact, mobile-optimized)
   if (loading) {
     return (
       <Card
@@ -764,274 +1281,326 @@ export function VibeCard({
   return (
     <>
       <Card
+        data-has-image={!!imageUrl}
+        data-is-mobile={isMobile}
+        data-expanded={isExpanded}
+        onClick={handleCardClick}
         className={cn(
-          'bg-popover/20 border-border/50 relative overflow-hidden transition-shadow duration-200 will-change-transform hover:shadow-md',
-          'h-full',
+          'group/vibe-card cursor-pointer',
+          'bg-popover/20 border-border/50 relative overflow-hidden transition duration-500 will-change-transform hover:shadow-md',
+          'min-h-16 transition-all hover:data-[has-image=true]:min-h-148',
+          isExpanded && 'data-[has-image=true]:min-h-148',
           finalVariant === 'feed-masonry' && 'break-inside-avoid',
+          enableFadeIn && !isVisible && 'opacity-0',
+          enableFadeIn && isVisible && 'animate-in fade-in duration-300',
+          optimizeForTouch && 'transform-gpu',
           className
         )}
       >
-        {/* Avatar positioned absolutely in upper left corner */}
-        {vibe.createdBy && (
-          <div
-            className="absolute top-2 left-2 z-10"
-            onMouseEnter={() => setIsAvatarHovered(true)}
-            onMouseLeave={() => setIsAvatarHovered(false)}
-            role="group"
-          >
-            {vibe.createdBy.username ? (
-              <Link
-                to="/users/$username"
-                params={{ username: vibe.createdBy.username }}
-                className="flex items-center gap-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                <Avatar className="h-6 w-6 shadow-md transition-transform duration-150 will-change-transform hover:scale-[1.05]">
-                  <AvatarImage
-                    src={getUserAvatarUrl(vibe.createdBy)}
-                    alt={computeUserDisplayName(vibe.createdBy)}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="bg-background/50 border-none text-xs">
-                    {getUserInitials(vibe.createdBy)}
-                  </AvatarFallback>
-                </Avatar>
-                {isAvatarHovered && (
-                  <span
-                    className={cn(
-                      'bg-background/50 animate-in fade-in slide-in-from-left-2 rounded-full px-2 py-1 text-xs font-medium shadow-md backdrop-blur-sm duration-200'
-                    )}
-                  >
-                    {computeUserDisplayName(vibe.createdBy)}
-                  </span>
-                )}
-              </Link>
-            ) : (
-              <Avatar className="ring-background h-8 w-8 shadow-md ring-2">
-                <AvatarImage
-                  src={getUserAvatarUrl(vibe.createdBy)}
-                  alt={computeUserDisplayName(vibe.createdBy)}
-                  className="object-cover"
-                />
-                <AvatarFallback>
-                  {getUserInitials(vibe.createdBy)}
-                </AvatarFallback>
-              </Avatar>
-            )}
-          </div>
-        )}
-
-        <div className="block h-full">
-          <Link
-            to="/vibes/$vibeId"
-            params={{ vibeId: vibe.id }}
-            onClick={() => {
-              // Track vibe view when clicked
-              trackEvents.vibeViewed(vibe.id);
-            }}
-          >
-            <div className="relative">
-              <div
-                className={cn(
-                  'relative overflow-hidden',
-                  // Dynamic aspect ratio based on variant and image presence
-                  usePlaceholder
-                    ? (() => {
-                        switch (finalVariant) {
-                          case 'feed-masonry':
-                            return 'aspect-[4/3]';
-                          case 'compact':
-                            return 'aspect-[4/3]';
-                          default:
-                            return 'aspect-video';
-                        }
-                      })()
-                    : (() => {
-                        switch (finalVariant) {
-                          case 'feed-single':
-                            return 'sm:aspect-video';
-                          case 'feed-masonry':
-                          case 'feed-grid':
-                            return 'aspect-[3/4]';
-                          case 'compact':
-                            return 'aspect-[4/3]';
-                          default:
-                            return 'aspect-video';
-                        }
-                      })()
-                )}
-              >
-                {usePlaceholder ? (
-                  <SimpleVibePlaceholder title={vibe.title} />
-                ) : (
-                  <img
-                    src={imageUrl}
-                    alt={vibe.title}
-                    className="h-full w-full object-cover transition-transform duration-200 will-change-transform hover:scale-[1.02]"
-                    onError={() => setImageError(true)}
-                  />
-                )}
-              </div>
-            </div>
-
-            <CardContent
-              className={cn('p-4', finalVariant === 'compact' && 'p-3')}
-            >
-              <div
-                className={cn(
-                  'flex items-start justify-between gap-2',
-                  finalVariant === 'compact' && 'items-center'
-                )}
-              >
-                <h3
-                  className={cn(
-                    'min-w-0 flex-1 leading-tight font-bold',
-                    (() => {
-                      switch (finalVariant) {
-                        case 'feed-masonry':
-                        case 'feed-single':
-                          return 'line-clamp-3 text-lg';
-                        case 'feed-grid':
-                          return 'line-clamp-2 text-base';
-                        case 'compact':
-                          return 'line-clamp-1 text-base';
-                        default:
-                          return 'line-clamp-1 text-lg';
-                      }
-                    })()
-                  )}
-                >
-                  {vibe.title}
-                </h3>
-
-                {/* Share button for compact variant */}
-                {finalVariant === 'compact' && (
-                  <div
-                    className="flex-shrink-0"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <ShareButton
-                      contentType="vibe"
-                      variant="ghost"
-                      size="sm"
-                      showCount={false}
-                      vibe={vibe}
-                      author={vibe.createdBy || undefined}
-                      ratings={
-                        topEmojiRatings?.map((r) => ({
-                          emoji: r.emoji,
-                          value: r.averageValue,
-                          tags: r.tags || [],
-                          count: r.count,
-                        })) || undefined
-                      }
-                    />
-                  </div>
-                )}
-              </div>
-
-              {finalVariant !== 'compact' && (
-                <p
-                  className={cn(
-                    'text-muted-foreground mt-2 text-sm leading-relaxed',
-                    (() => {
-                      switch (finalVariant) {
-                        case 'feed-masonry':
-                        case 'feed-single':
-                          return 'line-clamp-5';
-                        case 'feed-grid':
-                          return 'line-clamp-3';
-                        default:
-                          return 'line-clamp-2';
-                      }
-                    })()
-                  )}
-                >
-                  {vibe.description}
-                </p>
+        <div
+          className={cn(
+            'absolute top-0 h-full w-full overflow-hidden',
+            // Dynamic aspect ratio based on variant and image presence
+            usePlaceholder
+              ? (() => {
+                  switch (finalVariant) {
+                    case 'feed-masonry':
+                      return 'aspect-[4/3]';
+                    case 'compact':
+                      return 'aspect-[4/3]';
+                    case 'mobile-optimized':
+                      return isMobile ? 'aspect-[4/5]' : 'aspect-[4/3]';
+                    default:
+                      return 'aspect-video';
+                  }
+                })()
+              : (() => {
+                  switch (finalVariant) {
+                    case 'feed-single':
+                      return 'sm:aspect-video';
+                    case 'feed-masonry':
+                    case 'feed-grid':
+                      return 'aspect-[3/4]';
+                    case 'compact':
+                      return 'aspect-[4/3]';
+                    case 'mobile-optimized':
+                      return isMobile ? 'aspect-[4/5]' : 'aspect-[3/4]';
+                    default:
+                      return 'aspect-video';
+                  }
+                })()
+          )}
+        >
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt={vibe.title}
+              className={cn(
+                'h-full w-full object-cover transition duration-200 will-change-transform',
+                'group-hover/vibe-card:opacity-100 hover:scale-[1.02]'
               )}
-            </CardContent>
-          </Link>
-
-          <CardFooter
+              onError={() => setImageError(true)}
+            />
+          )}
+          <div
+            data-has-image={!!imageUrl}
             className={cn(
-              'flex flex-col items-start gap-3 p-4 pt-0',
-              finalVariant === 'compact' && 'p-3 pt-0'
+              'absolute inset-0 h-full w-full transition-opacity duration-200',
+              'data-[has-image=true]:opacity-80',
+              'group-hover/vibe-card:data-[has-image=true]:opacity-0',
+              'data-[has-image=false]:opacity-100'
             )}
           >
-            {/* Show skeleton while ratings are loading */}
-            {isRatingsLoading ? (
-              <RatingSkeleton />
-            ) : (
-              <>
-                {/* Emoji Rating Display - Show cycling display if no ratings yet */}
-                <div className="w-full">
-                  {primaryEmojiRating ? (
-                    <EmojiRatingDisplayPopover
-                      rating={primaryEmojiRating}
-                      allRatings={emojiRatings}
-                      onEmojiClick={handleEmojiRatingClick}
-                      vibeId={vibe.id}
-                      showScale={finalVariant !== 'compact'}
-                      size={finalVariant === 'compact' ? 'sm' : 'md'}
-                    />
+            <SimpleVibePlaceholder hideText title={vibe.title} />
+          </div>
+        </div>
+        <div className="block h-full">
+          <CardContent className="m-0 bg-transparent p-0">
+            <Card className="m-0 w-full rounded-none border-none bg-transparent p-4">
+              {/* Avatar positioned absolutely in upper left corner */}
+              {vibe.createdBy && (
+                <div
+                  onMouseEnter={() => setIsAvatarHovered(true)}
+                  onMouseLeave={() => setIsAvatarHovered(false)}
+                  role="group"
+                >
+                  {vibe.createdBy.username ? (
+                    <Link
+                      to="/users/$username"
+                      params={{ username: vibe.createdBy.username }}
+                      className="flex items-center gap-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        navigate({
+                          to: '/users/$username',
+                          params: { username: vibe.createdBy.username },
+                        });
+                      }}
+                    >
+                      <Avatar
+                        className={cn(
+                          'shadow-md transition-transform duration-150 will-change-transform hover:scale-[1.05]',
+                          optimizeForTouch || isMobile ? 'h-8 w-8' : 'h-6 w-6'
+                        )}
+                      >
+                        <AvatarImage
+                          src={getUserAvatarUrl(vibe.createdBy)}
+                          alt={computeUserDisplayName(vibe.createdBy)}
+                          className="object-cover"
+                        />
+                        <AvatarFallback
+                          className={cn(
+                            'bg-background/50 border-none',
+                            optimizeForTouch || isMobile ? 'text-sm' : 'text-xs'
+                          )}
+                        >
+                          {getUserInitials(vibe.createdBy)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span
+                        className={cn(
+                          'bg-background/50 animate-in fade-in slide-in-from-left-2 rounded-full px-2 py-1 text-xs font-medium shadow-md backdrop-blur-sm duration-200'
+                        )}
+                      >
+                        {computeUserDisplayName(vibe.createdBy)}
+                      </span>
+                    </Link>
                   ) : (
-                    <EmojiRatingCycleDisplay
-                      onSubmit={handleEmojiRating}
-                      isSubmitting={createEmojiRatingMutation.isPending}
-                      vibeTitle={vibe.title}
-                      emojiMetadata={emojiMetadataRecord}
-                      showBeTheFirst={emojiRatings.length === 0}
-                      delay={delay}
-                    />
+                    <Avatar className="ring-background h-8 w-8 shadow-md ring-2">
+                      <AvatarImage
+                        src={getUserAvatarUrl(vibe.createdBy)}
+                        alt={computeUserDisplayName(vibe.createdBy)}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>
+                        {getUserInitials(vibe.createdBy)}
+                      </AvatarFallback>
+                    </Avatar>
                   )}
                 </div>
-
-                {/* Emoji Reactions and Share Button */}
-                {finalVariant !== 'compact' ? (
-                  <div className="flex w-full items-center justify-between gap-2">
-                    {/* Emoji Reactions */}
-                    {emojiReactions.length > 0 ? (
-                      <div className="min-w-0 flex-1 overflow-hidden">
-                        <EmojiReactions
-                          reactions={emojiReactions}
-                          onReact={handleQuickReact}
-                          showAddButton={true}
-                          onRatingSubmit={handleEmojiRating}
-                          vibeTitle={vibe.title}
-                          vibeId={vibe.id}
-                          className="min-w-0"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex-1" />
+              )}
+              <div className="relative overflow-hidden rounded-md bg-transparent">
+                <div className="relative">
+                  <CardContent
+                    className={cn(
+                      'z-50 bg-transparent px-0 py-1',
+                      finalVariant === 'compact' && 'px-0 py-1'
                     )}
+                  >
+                    <div
+                      className={cn(
+                        'flex items-start justify-between gap-2',
+                        finalVariant === 'compact' && 'items-center'
+                      )}
+                    >
+                      <h3
+                        className={cn(
+                          'min-w-0 flex-1 leading-tight font-bold',
+                          (() => {
+                            switch (finalVariant) {
+                              case 'feed-masonry':
+                              case 'feed-single':
+                                return 'line-clamp-3 text-lg';
+                              case 'feed-grid':
+                                return 'line-clamp-2 text-base';
+                              case 'compact':
+                                return 'line-clamp-1 text-base';
+                              default:
+                                return 'line-clamp-1 text-lg';
+                            }
+                          })()
+                        )}
+                      >
+                        {vibe.title}
+                      </h3>
 
-                    {/* Share Button */}
-                    <ShareButton
-                      contentType="vibe"
-                      variant="ghost"
-                      size="sm"
-                      showCount={vibe.shareCount ? true : false}
-                      currentShareCount={vibe.shareCount}
-                      vibe={vibe}
-                      author={vibe.createdBy || undefined}
-                      ratings={
-                        topEmojiRatings?.map((r) => ({
-                          emoji: r.emoji,
-                          value: r.averageValue,
-                          tags: r.tags || [],
-                          count: r.count,
-                        })) || undefined
-                      }
-                    />
-                  </div>
-                ) : null}
-              </>
-            )}
-          </CardFooter>
+                      {/* Share button for compact variant */}
+                      {finalVariant === 'compact' && (
+                        <div
+                          className="flex-shrink-0"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <ShareButton
+                            contentType="vibe"
+                            variant="ghost"
+                            size={
+                              optimizeForTouch || isMobile ? 'default' : 'sm'
+                            }
+                            showCount={false}
+                            vibe={vibe}
+                            author={vibe.createdBy || undefined}
+                            ratings={
+                              topEmojiRatings?.map((r) => ({
+                                emoji: r.emoji,
+                                value: r.averageValue,
+                                tags: r.tags || [],
+                                count: r.count,
+                              })) || undefined
+                            }
+                            className={cn(
+                              optimizeForTouch || isMobile
+                                ? 'min-h-[44px] min-w-[44px]'
+                                : ''
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {finalVariant !== 'compact' && (
+                      <p
+                        className={cn(
+                          'text-secondary-foreground mt-2 text-sm leading-relaxed',
+                          (() => {
+                            switch (finalVariant) {
+                              case 'feed-masonry':
+                              case 'feed-single':
+                                return 'line-clamp-5';
+                              case 'feed-grid':
+                                return 'line-clamp-3';
+                              default:
+                                return 'line-clamp-2';
+                            }
+                          })()
+                        )}
+                      >
+                        {vibe.description}
+                      </p>
+                    )}
+                  </CardContent>
+                </div>
+
+                <CardFooter
+                  className={cn(
+                    'flex flex-col items-start gap-3 bg-transparent p-0',
+                    finalVariant === 'compact' && 'p-3 pt-0'
+                  )}
+                >
+                  {/* Show skeleton while ratings are loading */}
+                  {isRatingsLoading ? (
+                    <RatingSkeleton />
+                  ) : (
+                    <>
+                      {/* Emoji Rating Display - Show cycling display if no ratings yet */}
+                      <div className="w-full">
+                        {primaryEmojiRating ? (
+                          <EmojiRatingDisplayPopover
+                            rating={primaryEmojiRating}
+                            allRatings={emojiRatings}
+                            onEmojiClick={handleEmojiRatingClick}
+                            vibeId={vibe.id}
+                            showScale={finalVariant !== 'compact'}
+                            size={finalVariant === 'compact' ? 'sm' : 'md'}
+                          />
+                        ) : (
+                          <EmojiRatingCycleDisplay
+                            onSubmit={handleEmojiRating}
+                            isSubmitting={createEmojiRatingMutation.isPending}
+                            vibeTitle={vibe.title}
+                            emojiMetadata={emojiMetadataRecord}
+                            showBeTheFirst={emojiRatings.length === 0}
+                            delay={delay}
+                          />
+                        )}
+                      </div>
+
+                      {/* Emoji Reactions and Share Button */}
+                      {finalVariant !== 'compact' ? (
+                        <div className="flex w-full items-center justify-between gap-2">
+                          {/* Emoji Reactions */}
+                          {emojiReactions.length > 0 ? (
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                              <EmojiReactions
+                                reactions={emojiReactions}
+                                onReact={handleQuickReact}
+                                showAddButton={true}
+                                onRatingSubmit={handleEmojiRating}
+                                vibeTitle={vibe.title}
+                                vibeId={vibe.id}
+                                className="min-w-0"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex-1" />
+                          )}
+
+                          {/* Share Button */}
+                          <ShareButton
+                            contentType="vibe"
+                            variant="ghost"
+                            size={
+                              optimizeForTouch || isMobile ? 'default' : 'sm'
+                            }
+                            showCount={vibe.shareCount ? true : false}
+                            currentShareCount={vibe.shareCount}
+                            vibe={vibe}
+                            author={vibe.createdBy || undefined}
+                            ratings={
+                              topEmojiRatings?.map((r) => ({
+                                emoji: r.emoji,
+                                value: r.averageValue,
+                                tags: r.tags || [],
+                                count: r.count,
+                              })) || undefined
+                            }
+                            className={cn(
+                              optimizeForTouch || isMobile
+                                ? 'min-h-[44px] min-w-[44px]'
+                                : ''
+                            )}
+                          />
+                        </div>
+                      ) : null}
+                    </>
+                  )}
+                </CardFooter>
+              </div>
+            </Card>
+          </CardContent>
         </div>
       </Card>
 

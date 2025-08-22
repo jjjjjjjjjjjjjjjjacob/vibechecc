@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
+import type { Id } from '@vibechecc/convex/dataModel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +12,10 @@ import {
 } from '@/components/ui/tooltip';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import { useUserRatings } from '@/queries';
+import { RatingShareButton } from '@/components/social/rating-share-button';
+import { RatingDootButton } from '@/features/ratings/components/rating-doot-button';
+import { BoostButton } from '@/features/ratings/components/boost-button';
+import { useUserRatings, useBulkRatingVoteScores, useBulkUserRatingVoteStatuses } from '@/queries';
 import type { User, Rating } from '@vibechecc/types';
 import { MessageSquare } from '@/components/ui/icons';
 
@@ -31,6 +35,18 @@ export function UserReviewsSection({
   const { data: userRatings, isLoading: reviewsLoading } = useUserRatings(
     user.externalId
   );
+  
+  // Get rating IDs for fetching vote data
+  const ratingIds = React.useMemo(() => {
+    if (!userRatings) return [];
+    return userRatings
+      .filter(r => r && r._id)
+      .map(r => r!._id as Id<'ratings'>);
+  }, [userRatings]);
+
+  // Fetch vote scores and statuses for all ratings
+  const { data: voteScores } = useBulkRatingVoteScores(ratingIds);
+  const { data: voteStatuses } = useBulkUserRatingVoteStatuses(ratingIds);
 
   // Filter only ratings that have review text
   const ratingsWithReviews =
@@ -118,6 +134,8 @@ export function UserReviewsSection({
               key={`${rating.vibeId}-${rating.createdAt}`}
               rating={completeRating}
               currentUser={user}
+              netScore={voteScores?.[rating._id || '']?.netScore || 0}
+              voteStatus={voteStatuses?.[rating._id || ''] || { voteType: null, boosted: false, dampened: false }}
             />
           );
         })}
@@ -143,9 +161,15 @@ export function UserReviewsSection({
 interface ReviewCardProps {
   rating: Rating;
   currentUser: User;
+  netScore: number;
+  voteStatus: {
+    voteType: 'boost' | 'dampen' | null;
+    boosted: boolean;
+    dampened: boolean;
+  };
 }
 
-function ReviewCard({ rating, currentUser }: ReviewCardProps) {
+function ReviewCard({ rating, currentUser, netScore, voteStatus }: ReviewCardProps) {
   const vibe = rating.vibe;
   const usePlaceholder = !vibe?.image;
 
@@ -204,15 +228,58 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
 
               {/* Rating and Vibe Image */}
               <div className="flex items-center justify-between gap-2">
-                <EmojiRatingDisplay
-                  rating={{
-                    emoji: rating.emoji,
-                    value: rating.value,
-                    count: undefined,
-                  }}
-                  showScale={false}
-                  size="sm"
-                />
+                <div className="flex items-center gap-2">
+                  <EmojiRatingDisplay
+                    rating={{
+                      emoji: rating.emoji,
+                      value: rating.value,
+                      count: undefined,
+                    }}
+                    showScale={false}
+                    size="sm"
+                  />
+                  {rating._id && (
+                    <>
+                      <RatingDootButton
+                        ratingId={rating._id as Id<'ratings'>}
+                        netScore={netScore}
+                        voteStatus={voteStatus}
+                        isOwnRating={true} // This is the user's own review section
+                        variant="ghost"
+                        size="sm"
+                      />
+                      <BoostButton
+                        contentId={rating._id as Id<'ratings'>}
+                        contentType="rating"
+                        currentBoostScore={0}
+                        boostCost={50}
+                        dampenCost={25}
+                        userPoints={0}
+                        userBoostAction={null}
+                        isOwnContent={true}
+                        variant="ghost"
+                        size="sm"
+                      />
+                    </>
+                  )}
+                  <RatingShareButton
+                    rating={rating}
+                    vibe={{
+                      ...vibe,
+                      ratings: [],
+                      createdBy: vibe.createdBy ? {
+                        externalId: vibe.createdBy.id,
+                        id: vibe.createdBy.id,
+                        username: vibe.createdBy.name,
+                        full_name: vibe.createdBy.name,
+                        image_url: vibe.createdBy.avatar,
+                      } : null,
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8"
+                  />
+                </div>
 
                 <Tooltip>
                   <TooltipTrigger asChild>

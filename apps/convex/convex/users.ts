@@ -731,6 +731,111 @@ export const listAll = internalQuery({
 
 // WEBHOOK MUTATIONS FOR CLERK INTEGRATION
 
+// SECURITY: Handle Apple ID connection with proper validation
+export const handleAppleIdConnection = internalMutation({
+  args: {
+    userId: v.string(),
+    appleAccount: v.object({
+      accountId: v.string(),
+      provider: v.string(),
+      email: v.optional(v.string()),
+      firstName: v.optional(v.string()),
+      lastName: v.optional(v.string()),
+      imageUrl: v.optional(v.string()),
+      verificationStatus: v.optional(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+  },
+  handler: async (ctx, { userId, appleAccount }) => {
+    // SECURITY: Validate Apple ID provider using centralized validator
+    SecurityValidators.validateAppleProvider(appleAccount.provider);
+
+    // SECURITY: Validate userId format using centralized validator
+    const validatedUserId = SecurityValidators.validateClerkUserId(userId);
+
+    // SECURITY: Validate Apple email if provided (handles relay emails)
+    const validatedEmail = SecurityValidators.validateAppleEmail(appleAccount.email);
+
+    // Get existing user or create if needed
+    let user = await userByExternalId(ctx, validatedUserId);
+    
+    // SECURITY: Apple ID specific user creation with privacy considerations
+    if (!user) {
+      // Create user with Apple ID defaults and validated data
+      const validatedFirstName = appleAccount.firstName ? 
+        SecurityValidators.validateString(appleAccount.firstName, { maxLength: 50, fieldName: 'First name' }) : 
+        undefined;
+      const validatedLastName = appleAccount.lastName ? 
+        SecurityValidators.validateString(appleAccount.lastName, { maxLength: 50, fieldName: 'Last name' }) : 
+        undefined;
+      const validatedImageUrl = appleAccount.imageUrl ? 
+        SecurityValidators.validateUrl(appleAccount.imageUrl) : 
+        undefined;
+
+      const userAttributes = {
+        externalId: validatedUserId,
+        // SECURITY: Ensure null values are converted to undefined for Convex
+        first_name: validatedFirstName || undefined,
+        last_name: validatedLastName || undefined,
+        image_url: validatedImageUrl || undefined,
+        profile_image_url: validatedImageUrl || undefined,
+        created_at: appleAccount.createdAt,
+        updated_at: appleAccount.updatedAt,
+      };
+
+      const newUserId = await ctx.db.insert('users', userAttributes);
+      user = await ctx.db.get(newUserId);
+
+      // eslint-disable-next-line no-console
+      console.log(`Created new user from Apple ID: ${validatedUserId} (email: ${validatedEmail ? 'provided' : 'not provided'})`);
+    } else {
+      // SECURITY: Update existing user with Apple ID data (if provided)
+      const updates: Partial<{
+        first_name: string;
+        last_name: string;
+        image_url: string;
+        profile_image_url: string;
+        updated_at: number;
+      }> = {
+        updated_at: appleAccount.updatedAt,
+      };
+
+      // PRIVACY: Only update if Apple provides the data (respects user privacy settings)
+      if (appleAccount.firstName && !user.first_name) {
+        const validatedFirstName = SecurityValidators.validateString(appleAccount.firstName, { maxLength: 50, fieldName: 'First name' });
+        if (validatedFirstName) updates.first_name = validatedFirstName;
+      }
+      if (appleAccount.lastName && !user.last_name) {
+        const validatedLastName = SecurityValidators.validateString(appleAccount.lastName, { maxLength: 50, fieldName: 'Last name' });
+        if (validatedLastName) updates.last_name = validatedLastName;
+      }
+      if (appleAccount.imageUrl && !user.image_url) {
+        const validatedImageUrl = SecurityValidators.validateUrl(appleAccount.imageUrl);
+        if (validatedImageUrl) {
+          updates.image_url = validatedImageUrl;
+          updates.profile_image_url = validatedImageUrl;
+        }
+      }
+
+      if (Object.keys(updates).length > 1) { // More than just updated_at
+        await ctx.db.patch(user._id, updates);
+        // eslint-disable-next-line no-console
+        console.log(`Updated existing user from Apple ID: ${validatedUserId} (email: ${validatedEmail ? 'provided' : 'not provided'})`);
+      }
+    }
+
+    return {
+      success: true,
+      userId: validatedUserId,
+      userExists: !!user,
+      appleProvider: appleAccount.provider,
+      hasAppleEmail: !!validatedEmail,
+      isAppleRelay: validatedEmail ? validatedEmail.includes('@privaterelay.appleid.com') : false,
+    };
+  },
+});
+
 // Internal mutation for webhook upsert events (user.created, user.updated)
 export const upsertFromClerk = internalMutation({
   args: { data: v.any() as Validator<UserJSON> }, // no runtime validation, trust Clerk

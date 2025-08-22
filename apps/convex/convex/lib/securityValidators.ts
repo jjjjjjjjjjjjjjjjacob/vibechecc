@@ -295,6 +295,92 @@ export class SecurityValidators {
       }
     }
   }
+
+  /**
+   * SECURITY: Validates Apple ID provider string to prevent spoofing
+   */
+  static validateAppleProvider(provider: string | undefined): string {
+    if (!provider) {
+      throw new Error('Apple provider is required');
+    }
+
+    const validated = this.validateString(provider, {
+      minLength: 5,
+      maxLength: 50,
+      required: true,
+      fieldName: 'Apple provider',
+    });
+
+    // SECURITY: Strict validation of Apple provider strings
+    const validAppleProviders = [
+      'apple',
+      'oauth_apple',
+      'apple_oauth',
+      'oauth_apple_id',
+      'apple_id'
+    ];
+
+    const normalizedProvider = validated!.toLowerCase().replace(/[-_]/g, '');
+    const isValidApple = validAppleProviders.some(valid => 
+      normalizedProvider.includes(valid.replace(/[-_]/g, ''))
+    );
+
+    if (!isValidApple) {
+      throw new Error('Invalid Apple provider format');
+    }
+
+    return validated!;
+  }
+
+  /**
+   * SECURITY: Validates Apple relay email format to handle privacy emails
+   */
+  static validateAppleEmail(email: string | undefined): string | null {
+    if (!email) return null;
+
+    const validated = this.validateString(email, {
+      maxLength: 100,
+      pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      fieldName: 'Apple email',
+    });
+
+    if (validated) {
+      // SECURITY: Detect Apple's private relay emails
+      const isAppleRelay = validated.includes('@privaterelay.appleid.com');
+      
+      // Log Apple relay detection for monitoring (but don't block)
+      if (isAppleRelay) {
+        // eslint-disable-next-line no-console
+        console.log('Apple private relay email detected - preserving privacy');
+      }
+    }
+
+    return validated;
+  }
+
+  /**
+   * SECURITY: Validates Clerk user ID format to prevent injection
+   */
+  static validateClerkUserId(userId: string | undefined): string {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
+    const validated = this.validateString(userId, {
+      minLength: 5,
+      maxLength: 50,
+      pattern: /^[a-zA-Z0-9_-]+$/,
+      required: true,
+      fieldName: 'User ID',
+    });
+
+    // SECURITY: Validate Clerk user ID format (typically user_xxx or similar)
+    if (!validated!.startsWith('user_') && !validated!.match(/^[a-zA-Z0-9_-]{5,}$/)) {
+      throw new Error('Invalid user ID format');
+    }
+
+    return validated!;
+  }
 }
 
 /**

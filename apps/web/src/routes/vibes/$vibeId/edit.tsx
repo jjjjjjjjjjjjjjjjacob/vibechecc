@@ -10,6 +10,7 @@ import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { TagInput } from '@/components/tag-input';
 import { ImageUpload } from '@/components/image-upload';
+import { GradientPicker } from '@/components/gradient-picker';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { cn } from '@/utils/tailwind-utils';
 import {
@@ -23,6 +24,8 @@ import {
 } from '@/components/ui/icons';
 import type { Id } from '@vibechecc/convex/dataModel';
 import toast from '@/utils/toast';
+import { generateRandomGradient } from '@/utils/gradient-utils';
+import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -58,6 +61,11 @@ function EditVibe() {
   const [imageStorageId, setImageStorageId] =
     React.useState<Id<'_storage'> | null>(null);
   const [currentImageUrl, setCurrentImageUrl] = React.useState<string>('');
+  const [gradient, setGradient] = React.useState<{
+    from: string;
+    to: string;
+    direction: string;
+  }>(() => generateRandomGradient());
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState('');
   const [validationErrors, setValidationErrors] = React.useState<
@@ -75,14 +83,20 @@ function EditVibe() {
       description: description || vibe.description,
       image: currentImageUrl || vibe.image,
       tags: tags.length > 0 ? tags : vibe.tags,
+      gradientFrom: gradient.from,
+      gradientTo: gradient.to,
+      gradientDirection: gradient.direction,
     };
-  }, [vibe, description, currentImageUrl, tags]);
+  }, [vibe, description, currentImageUrl, tags, gradient]);
 
   // Track original values to detect changes (excluding title which is read-only)
   const [originalValues, setOriginalValues] = React.useState({
     description: '',
     tags: [] as string[],
     imageUrl: '',
+    gradientFrom: '',
+    gradientTo: '',
+    gradientDirection: '',
   });
 
   // Initialize form with vibe data
@@ -92,11 +106,21 @@ function EditVibe() {
         description: vibe.description || '',
         tags: vibe.tags || [],
         imageUrl: vibe.image || '',
+        gradientFrom: vibe.gradientFrom || gradient.from,
+        gradientTo: vibe.gradientTo || gradient.to,
+        gradientDirection: vibe.gradientDirection || gradient.direction,
       };
 
       setDescription(initialValues.description);
       setTags(initialValues.tags);
       setCurrentImageUrl(initialValues.imageUrl);
+      if (vibe.gradientFrom && vibe.gradientTo) {
+        setGradient({
+          from: vibe.gradientFrom,
+          to: vibe.gradientTo,
+          direction: vibe.gradientDirection || 'to-br',
+        });
+      }
       setOriginalValues(initialValues);
     }
   }, [vibe]);
@@ -106,10 +130,13 @@ function EditVibe() {
     const hasChanges =
       description !== originalValues.description ||
       JSON.stringify(tags) !== JSON.stringify(originalValues.tags) ||
-      currentImageUrl !== originalValues.imageUrl;
+      currentImageUrl !== originalValues.imageUrl ||
+      gradient.from !== originalValues.gradientFrom ||
+      gradient.to !== originalValues.gradientTo ||
+      gradient.direction !== originalValues.gradientDirection;
 
     setHasUnsavedChanges(hasChanges);
-  }, [description, tags, currentImageUrl, originalValues]);
+  }, [description, tags, currentImageUrl, gradient, originalValues]);
 
   // Real-time validation
   React.useEffect(() => {
@@ -220,6 +247,9 @@ function EditVibe() {
         description: description.trim(),
         image: imageStorageId || undefined,
         tags: tags.length > 0 ? tags : undefined,
+        gradientFrom: gradient.from,
+        gradientTo: gradient.to,
+        gradientDirection: gradient.direction,
       });
 
       toast.success('vibe updated successfully!');
@@ -326,6 +356,14 @@ function EditVibe() {
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span>Tags updated</span>
+                      </div>
+                    )}
+                    {(gradient.from !== originalValues.gradientFrom ||
+                      gradient.to !== originalValues.gradientTo ||
+                      gradient.direction !== originalValues.gradientDirection) && (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <span>Gradient updated</span>
                       </div>
                     )}
                     {!hasUnsavedChanges && (
@@ -444,6 +482,38 @@ function EditVibe() {
                 disabled={isSubmitting}
                 initialImageUrl={currentImageUrl}
               />
+
+              {/* Gradient Picker Section - Only show if no image */}
+              {!currentImageUrl && !imageStorageId && (
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">
+                    vibe gradient
+                    <span className="text-muted-foreground ml-1 font-normal">
+                      (customize your vibe's appearance)
+                    </span>
+                  </Label>
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <GradientPicker
+                        value={gradient}
+                        onChange={setGradient}
+                      />
+                    </div>
+                    <div className="h-24 w-24 overflow-hidden rounded-lg border-2">
+                      <SimpleVibePlaceholder
+                        title={vibe?.title || 'preview'}
+                        gradientFrom={gradient.from}
+                        gradientTo={gradient.to}
+                        gradientDirection={gradient.direction}
+                        hideText
+                      />
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    this gradient will be shown when no image is uploaded
+                  </p>
+                </div>
+              )}
 
               {/* Tags Section */}
               <div className="space-y-3">

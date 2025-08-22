@@ -12,9 +12,17 @@ import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { TagInput } from '@/components/tag-input';
 import { ImageUpload } from '@/components/image-upload';
+import { GradientPicker } from '@/components/gradient-picker';
 import { cn } from '@/utils/tailwind-utils';
 import { Circle, Sparkles } from '@/components/ui/icons';
 import type { Id } from '@vibechecc/convex/dataModel';
+import { showPointsToast } from '@/utils/points-toast';
+import { 
+  generateRandomGradient, 
+  generateGradientStyle,
+  gradientPresets 
+} from '@/utils/gradient-utils';
+import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -44,6 +52,11 @@ function CreateVibe() {
   const [tags, setTags] = React.useState<string[]>([]);
   const [imageStorageId, setImageStorageId] =
     React.useState<Id<'_storage'> | null>(null);
+  const [gradient, setGradient] = React.useState<{
+    from: string;
+    to: string;
+    direction: string;
+  }>(() => generateRandomGradient());
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState('');
   const createVibeMutation = useCreateVibeMutation();
@@ -74,10 +87,23 @@ function CreateVibe() {
         description: description.trim(),
         image: imageStorageId || undefined,
         tags: tags.length > 0 ? tags : undefined,
+        gradientFrom: gradient.from,
+        gradientTo: gradient.to,
+        gradientDirection: gradient.direction,
       });
 
       // Track vibe creation (result is the document ID)
       trackEvents.vibeCreated((result as string) || 'unknown', tags);
+
+      // Show points earned toast
+      const pointsEarned = isFirstVibe ? 200 : 100; // More points for first vibe
+      showPointsToast('earned', pointsEarned, 'vibe created!', {
+        showAction: true,
+        actionLabel: 'view vibe',
+        onAction: () => {
+          navigate({ to: `/vibes/${result}` });
+        },
+      });
 
       setIsSubmitting(false);
 
@@ -201,6 +227,104 @@ function CreateVibe() {
                   onImageRemove={handleImageRemove}
                   disabled={isSubmitting}
                 />
+
+                {/* Gradient Picker Section - Only show if no image */}
+                {!imageStorageId && (
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">
+                      vibe gradient
+                      <span className="text-muted-foreground ml-1 font-normal">
+                        (customize your vibe's appearance)
+                      </span>
+                    </Label>
+                    
+                    {/* Preview */}
+                    <div className="relative h-32 w-full overflow-hidden rounded-xl border-2">
+                      <SimpleVibePlaceholder
+                        title={title || 'your vibe'}
+                        gradientFrom={gradient.from}
+                        gradientTo={gradient.to}
+                        gradientDirection={gradient.direction}
+                        className="h-full w-full"
+                      />
+                    </div>
+                    
+                    {/* Gradient Presets Grid */}
+                    <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+                      {gradientPresets.slice(0, 12).map((preset) => (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => setGradient({
+                            from: preset.from,
+                            to: preset.to,
+                            direction: preset.direction,
+                          })}
+                          className={cn(
+                            'group relative aspect-square w-full overflow-hidden rounded-lg border-2 transition-all',
+                            gradient.from === preset.from && 
+                            gradient.to === preset.to && 
+                            gradient.direction === preset.direction
+                              ? 'border-primary ring-2 ring-primary/20 scale-95'
+                              : 'border-border hover:border-primary/50 hover:scale-105'
+                          )}
+                          style={{
+                            background: generateGradientStyle(
+                              preset.from,
+                              preset.to,
+                              preset.direction
+                            ),
+                          }}
+                        >
+                          {gradient.from === preset.from && 
+                           gradient.to === preset.to && 
+                           gradient.direction === preset.direction && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                              <div className="h-3 w-3 rounded-full bg-white" />
+                            </div>
+                          )}
+                          <span className="absolute inset-x-0 bottom-0 bg-black/60 px-1 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            {preset.name}
+                          </span>
+                        </button>
+                      ))}
+                      
+                      {/* Random Gradient Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const random = generateRandomGradient();
+                          setGradient(random);
+                        }}
+                        className="group relative aspect-square w-full overflow-hidden rounded-lg border-2 border-dashed border-border transition-all hover:border-primary/50 hover:scale-105"
+                      >
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                          <Sparkles className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                        </div>
+                        <span className="absolute inset-x-0 bottom-0 bg-black/60 px-1 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          random
+                        </span>
+                      </button>
+                    </div>
+                    
+                    {/* Advanced Customization */}
+                    <details className="group">
+                      <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+                        advanced customization
+                      </summary>
+                      <div className="mt-3 rounded-lg border p-3 space-y-3">
+                        <GradientPicker
+                          value={gradient}
+                          onChange={setGradient}
+                        />
+                      </div>
+                    </details>
+                    
+                    <p className="text-muted-foreground text-xs">
+                      this gradient will be shown when no image is uploaded
+                    </p>
+                  </div>
+                )}
 
                 {/* Tags Section */}
                 <div className="space-y-3">

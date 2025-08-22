@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   useTopRatedEmojiVibes,
   useVibesPaginated,
+  useVibesInfinite,
   useTopRatedVibes,
   useAllTags,
   useVibesByTag,
@@ -29,6 +30,8 @@ import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';
 import { useUser } from '@clerk/tanstack-react-start';
+import { TrendingSignupCta } from '@/features/auth/components/signup-cta';
+import { useSignupCtaPlacement } from '@/features/auth/hooks/use-signup-cta-placement';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -141,6 +144,11 @@ function DiscoverPage() {
   const navigate = useNavigate();
   const { user } = useUser();
 
+  // CTA placement hooks
+  const { isAuthenticated } = useSignupCtaPlacement({
+    enableSearchCta: true,
+  });
+
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
@@ -249,6 +257,19 @@ function DiscoverPage() {
 
           {/* Trending Section */}
           <TrendingSection />
+
+          {/* Boosted Section */}
+          <BoostedSection />
+
+          {/* Controversial Section */}
+          <ControversialSection />
+
+          {/* Trending CTA for unauthenticated users */}
+          {!isAuthenticated && (
+            <div className="mb-12">
+              <TrendingSignupCta className="animate-fade-in-up" />
+            </div>
+          )}
 
           {/* Recent Arrivals Section */}
           <RecentArrivalsSection />
@@ -368,15 +389,14 @@ function NewSection() {
   );
 }
 
-// Trending Section Component
+// Trending Section Component - Now uses hot algorithm
 function TrendingSection() {
-  const { data, isLoading, error } = useVibesPaginated(20);
+  const { data, isLoading, error } = useVibesInfinite(
+    { sort: 'hot', limit: 12 },
+    { enabled: true }
+  );
 
-  const trendingVibes = useMemo(() => {
-    if (!data?.vibes) return [];
-    // Filter for vibes with good engagement (rating count >= 3) and limit to 12
-    return data.vibes.filter((vibe) => vibe.ratings?.length >= 3).slice(0, 12);
-  }, [data]);
+  const trendingVibes = data?.pages?.flatMap(page => page.vibes) || [];
 
   return (
     <DiscoverSectionWrapper
@@ -389,6 +409,54 @@ function TrendingSection() {
       isLoading={isLoading}
       error={error}
       priority
+      ratingDisplayMode="most-rated"
+    />
+  );
+}
+
+// Boosted Section Component
+function BoostedSection() {
+  const { data, isLoading, error } = useVibesInfinite(
+    { sort: 'boosted', limit: 10 },
+    { enabled: true }
+  );
+
+  const boostedVibes = data?.pages?.flatMap(page => page.vibes) || [];
+
+  return (
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-sans">🚀</span> most boosted
+        </>
+      }
+      vibes={boostedVibes as Vibe[]}
+      isLoading={isLoading}
+      error={error}
+      ratingDisplayMode="most-rated"
+    />
+  );
+}
+
+// Controversial Section Component
+function ControversialSection() {
+  const { data, isLoading, error } = useVibesInfinite(
+    { sort: 'controversial', limit: 8 },
+    { enabled: true }
+  );
+
+  const controversialVibes = data?.pages?.flatMap(page => page.vibes) || [];
+
+  return (
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-sans">⚡</span> controversial
+        </>
+      }
+      vibes={controversialVibes as Vibe[]}
+      isLoading={isLoading}
+      error={error}
       ratingDisplayMode="most-rated"
     />
   );

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-export type FeedTab = 'for-you' | 'hot' | 'new' | 'unrated';
+export type FeedTab = 'for-you' | 'hot' | 'boosted' | 'controversial' | 'new' | 'unrated';
 export type NavState = 'nav' | 'profile' | 'search' | 'notifications' | null;
 export type PageNavState = 'tabs' | 'vibe' | null;
 

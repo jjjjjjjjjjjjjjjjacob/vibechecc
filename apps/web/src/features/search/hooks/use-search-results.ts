@@ -18,6 +18,9 @@ const VALID_CONVEX_SORT_OPTIONS = [
   'name',
   'creation_date',
   'interaction_time',
+  'hot',
+  'boosted',
+  'controversial',
 ] as const;
 
 // Helper to filter SearchFilters to only include Convex-compatible options

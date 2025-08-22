@@ -13,11 +13,22 @@ import {
   LogIn,
   LogOut,
   Plus,
-} from '@/components/ui/icons';
+  Flame,
+  Clock,
+  Sparkles,
+  Star,
+} from 'lucide-react';
 import { useCallback, useState, useEffect, useRef, RefObject } from 'react';
 import { cn } from '../utils/tailwind-utils';
 import { ThemeToggle } from '@/features/theming/components/theme-toggle';
 import { FeedTabs } from './feed-tabs';
+import {
+  TabsDraggable,
+  TabsDraggableList,
+  TabsDraggableTrigger,
+} from '@/components/ui/tabs-draggable';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
 import {
   useHeaderNavStore,
   type NavState,
@@ -55,12 +66,16 @@ export function Header() {
   const setNavState = useHeaderNavStore((state) => state.setNavState);
   const pageNavState = useHeaderNavStore((state) => state.pageNavState);
   const setPageNavState = useHeaderNavStore((state) => state.setPageNavState);
+  const feedTab = useHeaderNavStore((state) => state.feedTab);
+  const setFeedTab = useHeaderNavStore((state) => state.setFeedTab);
   const [isHydrated, setIsHydrated] = useState(false);
   const [navHasMounted, setNavHasMounted] = useState(false);
   const searchButtonRef = useRef<HTMLButtonElement | null>(null);
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
   const { isAdmin } = useAdminAuth();
+  const isMobile = useIsMobile();
+  const { data: followStats } = useCurrentUserFollowStats();
 
   // Check if Convex context is available - call useConvex at top level
   const convex = useConvex();
@@ -282,6 +297,54 @@ export function Header() {
       setPageNavState(null);
     }
   }, [isVibePage, pageNavState, setPageNavState]);
+
+  // Mobile feed tabs configuration (same as home-feed.tsx but filtered)
+  const allFeedTabs = [
+    {
+      id: 'for-you' as const,
+      label: 'for you',
+      icon: <Sparkles className="h-4 w-4" />,
+      description:
+        followStats?.following > 0
+          ? `personalized vibes from ${followStats.following} ${followStats.following === 1 ? 'person' : 'people'} you follow`
+          : 'discover and follow people to see personalized content',
+      requiresAuth: true,
+      mobileVisible: true,
+    },
+    {
+      id: 'hot' as const,
+      label: 'hot',
+      icon: <Flame className="h-4 w-4" />,
+      description: 'boost score + recency + engagement algorithm',
+      requiresAuth: false,
+      mobileVisible: true,
+    },
+    {
+      id: 'new' as const,
+      label: 'new',
+      icon: <Clock className="h-4 w-4" />,
+      description: 'freshly posted vibes',
+      requiresAuth: false,
+      mobileVisible: true,
+    },
+    {
+      id: 'unrated' as const,
+      label: 'unrated',
+      icon: <Star className="h-4 w-4" />,
+      description: "vibes that haven't been rated yet",
+      requiresAuth: false,
+      mobileVisible: true,
+    },
+  ];
+
+  // Filter tabs based on device and auth
+  const mobileFeedTabs = isMobile
+    ? allFeedTabs.filter((tab) => tab.mobileVisible)
+    : allFeedTabs;
+
+  const availableMobileTabs = clerkUser?.id
+    ? mobileFeedTabs
+    : mobileFeedTabs.filter((tab) => !tab.requiresAuth);
 
   const profileItems = [
     {
@@ -584,7 +647,34 @@ export function Header() {
                 data-has-mounted={navHasMounted}
                 className="w-fit transition delay-200 duration-300 data-[has-mounted=false]:translate-y-5 data-[has-mounted=false]:opacity-0 data-[has-mounted=true]:translate-y-0 data-[has-mounted=true]:opacity-100"
               >
-                <FeedTabs tooltipSide="bottom" />
+                {isMobile ? (
+                  <TabsDraggable
+                    value={feedTab}
+                    onValueChange={(value) =>
+                      setFeedTab(value as typeof feedTab)
+                    }
+                    className="flex flex-col"
+                  >
+                    <TabsDraggableList
+                      className="mb-0 py-0"
+                      indicatorRailsClassName="bg-transparent backdrop-blur-none h-10 p-0 items-center"
+                      indicatorClassName="bg-transparent border border-secondary-foreground/50 py-0"
+                    >
+                      {availableMobileTabs.map((tab) => (
+                        <TabsDraggableTrigger
+                          key={tab.id}
+                          value={tab.id}
+                          icon={tab.icon}
+                          className="h-fit py-0"
+                        >
+                          {tab.label}
+                        </TabsDraggableTrigger>
+                      ))}
+                    </TabsDraggableList>
+                  </TabsDraggable>
+                ) : (
+                  <FeedTabs tooltipSide="bottom" />
+                )}
               </div>
             </TabAccordionContent>
             <TabAccordionContent value="vibe" className="pb-0">

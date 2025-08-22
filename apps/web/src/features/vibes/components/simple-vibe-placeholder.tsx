@@ -1,17 +1,24 @@
 import { useThemeStore } from '@/stores/theme-store';
 import { cn } from '@/utils/tailwind-utils';
+import { generateGradientStyle, getConsistentGradient, isLightGradient } from '@/utils/gradient-utils';
 import { useEffect, useState } from 'react';
 
 interface SimplePlaceholderProps {
   title?: string;
   className?: string;
   hideText?: boolean;
+  gradientFrom?: string;
+  gradientTo?: string;
+  gradientDirection?: string;
 }
 
 export function SimpleVibePlaceholder({
   title,
   className,
   hideText = false,
+  gradientFrom,
+  gradientTo,
+  gradientDirection,
 }: SimplePlaceholderProps) {
   const { resolvedTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
@@ -21,17 +28,26 @@ export function SimpleVibePlaceholder({
     setMounted(true);
   }, []);
 
-  // Generate a consistent color based on the title
-  const getColorIndex = (title?: string) => {
-    if (!title) return 0;
-    let hash = 0;
-    for (let i = 0; i < title.length; i++) {
-      hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  // Get gradient colors - either custom or generated
+  const getGradient = () => {
+    if (gradientFrom && gradientTo) {
+      return {
+        from: gradientFrom,
+        to: gradientTo,
+        direction: gradientDirection || 'to-br',
+      };
     }
-    return Math.abs(hash % 6); // 0-5 for our color palette
+    
+    // Generate consistent gradient based on title
+    return getConsistentGradient(title);
   };
 
-  const colorIndex = getColorIndex(title);
+  const gradient = getGradient();
+  
+  // Determine text color based on gradient luminance
+  const textColor = gradient.from && gradient.to && isLightGradient(gradient.from, gradient.to)
+    ? 'text-gray-900'
+    : 'text-white';
 
   // If not mounted yet, return a simple placeholder to avoid hydration mismatch
   if (!mounted) {
@@ -40,53 +56,23 @@ export function SimpleVibePlaceholder({
     );
   }
 
-  // Define background classes based on color index and theme
-  const getBgClass = () => {
-    const isDark = resolvedTheme === 'dark';
-
-    switch (colorIndex) {
-      case 0:
-        return isDark
-          ? 'bg-gradient-to-br from-pink-500 to-rose-400'
-          : 'bg-gradient-to-br from-pink-300 to-rose-200';
-      case 1:
-        return isDark
-          ? 'bg-gradient-to-br from-blue-500 to-sky-400'
-          : 'bg-gradient-to-br from-blue-300 to-sky-200';
-      case 2:
-        return isDark
-          ? 'bg-gradient-to-br from-green-500 to-emerald-400'
-          : 'bg-gradient-to-br from-green-300 to-emerald-200';
-      case 3:
-        return isDark
-          ? 'bg-gradient-to-br from-yellow-500 to-amber-400'
-          : 'bg-gradient-to-br from-yellow-300 to-amber-200';
-      case 4:
-        return isDark
-          ? 'bg-gradient-to-br from-purple-500 to-violet-400'
-          : 'bg-gradient-to-br from-purple-300 to-violet-200';
-      case 5:
-        return isDark
-          ? 'bg-gradient-to-br from-orange-500 to-red-400'
-          : 'bg-gradient-to-br from-orange-300 to-red-200';
-      default:
-        return isDark
-          ? 'bg-gradient-to-br from-pink-500 to-rose-400'
-          : 'bg-gradient-to-br from-pink-300 to-rose-200';
-    }
-  };
+  // Generate inline style for custom gradient
+  const gradientStyle = generateGradientStyle(gradient.from, gradient.to, gradient.direction);
 
   return (
     <div
       className={cn(
         'relative flex h-full w-full items-center justify-center overflow-hidden',
-        getBgClass(),
         className
       )}
+      style={{ background: gradientStyle }}
     >
       {title && !hideText && (
         <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
-          <span className="line-clamp-3 text-lg font-medium text-white drop-shadow-md">
+          <span className={cn(
+            'line-clamp-3 text-lg font-medium drop-shadow-md',
+            textColor
+          )}>
             {title}
           </span>
         </div>

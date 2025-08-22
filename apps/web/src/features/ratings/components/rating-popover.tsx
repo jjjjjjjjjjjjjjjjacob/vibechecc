@@ -29,6 +29,7 @@ import { FlipClockDigit } from './flip-clock-digit';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui';
+import toast from '@/utils/toast';
 
 interface RatingPopoverProps {
   children: React.ReactNode;
@@ -46,6 +47,7 @@ interface RatingPopoverProps {
   preSelectedValue?: number;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
+  isOwner?: boolean;
 }
 
 // Creative placeholder templates
@@ -71,6 +73,7 @@ export function RatingPopover({
   preSelectedValue,
   onOpenChange,
   open: controlledOpen,
+  isOwner = false,
 }: RatingPopoverProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
@@ -203,6 +206,15 @@ export function RatingPopover({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
+    // Prevent opening if user is owner
+    if (newOpen && isOwner) {
+      toast.error('you cannot rate your own vibe', {
+        duration: 3000,
+        icon: '🚫',
+      });
+      return;
+    }
+    
     setOpen(newOpen);
     if (!newOpen) {
       setError(null);
@@ -293,7 +305,7 @@ export function RatingPopover({
                     style={
                       isMouseDown
                         ? {
-                            animation: 'shimmy 0.3s ease-in-out infinite',
+                            animation: 'shimmy 1.0s ease-in-out infinite',
                           }
                         : hasSelectedRating
                           ? {

@@ -271,6 +271,17 @@ export const deleteVibe = mutation({
       .collect();
 
     for (const rating of vibeRatings) {
+      // Delete likes on this rating first
+      const ratingsLikes = await ctx.db
+        .query('ratingLikes')
+        .withIndex('byRating', (q) => q.eq('ratingId', rating._id))
+        .collect();
+      
+      for (const like of ratingsLikes) {
+        await ctx.db.delete(like._id);
+      }
+      
+      // Then delete the rating itself
       await ctx.db.delete(rating._id);
     }
 

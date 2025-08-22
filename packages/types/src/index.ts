@@ -115,6 +115,11 @@ export interface Vibe {
   visibility?: 'public' | 'deleted'; // From Convex schema
   shareCount?: number; // Number of times this vibe has been shared
   lastSharedAt?: number; // Timestamp of most recent share
+  
+  // Boost/dampen system fields
+  boostScore?: number; // Current boost score (can be negative for dampens)
+  totalBoosts?: number; // Total number of boosts received
+  totalDampens?: number; // Total number of dampens received
 }
 
 export interface Follow {

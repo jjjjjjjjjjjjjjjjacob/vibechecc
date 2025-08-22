@@ -1,22 +1,24 @@
 import { Toaster as Sonner, type ToasterProps } from 'sonner';
+import { useHeaderNavStore } from '@/stores';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { useEffect } from 'react';
 
 const Toaster = ({ ...props }: ToasterProps) => {
+  const navState = useHeaderNavStore((state) => state.navState);
+  const isMobile = useMediaQuery('(max-width: 640px)');
+
   return (
     <Sonner
       theme="dark"
-      className="toaster group"
+      position={isMobile ? 'top-center' : 'top-right'}
+      offset={{ top: 64 }}
+      {...props}
       toastOptions={{
-        classNames: {
-          toast:
-            'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
-          description: 'group-[.toast]:text-muted-foreground',
-          actionButton:
-            'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-          cancelButton:
-            'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+        style: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(4px)',
         },
       }}
-      {...props}
     />
   );
 };

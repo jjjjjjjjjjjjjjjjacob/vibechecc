@@ -15,6 +15,7 @@ interface EmojiRatingSelectorProps {
   vibeTitle?: string;
   emojiMetadata?: Record<string, EmojiRatingMetadata>;
   className?: string;
+  isOwner?: boolean;
 }
 
 const DEFAULT_EMOJIS = [
@@ -37,6 +38,7 @@ export function EmojiRatingSelector({
   vibeTitle,
   emojiMetadata = {},
   className,
+  isOwner = false,
 }: EmojiRatingSelectorProps) {
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);
@@ -107,6 +109,7 @@ export function EmojiRatingSelector({
         isSubmitting={isSubmitting}
         vibeTitle={vibeTitle}
         emojiMetadata={emojiMetadata}
+        isOwner={isOwner}
         preSelectedEmoji={
           isHovered && currentEmojiData.emoji !== '❓'
             ? currentEmojiData.emoji

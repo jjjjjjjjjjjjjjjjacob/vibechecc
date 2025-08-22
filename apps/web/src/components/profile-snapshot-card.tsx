@@ -3,14 +3,24 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
 import { useUser } from '@clerk/tanstack-react-start';
-import { useCurrentUser } from '../queries';
+import { useCurrentUser, useUserPointsStats, usePointsHistory } from '../queries';
 import { FollowStats } from '@/features/follows/components';
 import { useHeaderNavStore } from '@/stores/header-nav-store';
+import { VibePointsChart } from './vibe-points-chart';
+import { VibePointsDisplay } from './vibe-points-display';
 
 export function ProfileSnapshotCard() {
   const { user: clerkUser } = useUser();
   const { data: convexUser } = useCurrentUser();
   const setNavState = useHeaderNavStore((state) => state.setNavState);
+  
+  // Points data queries
+  const { data: pointsStats } = useUserPointsStats(convexUser?.externalId || '', {
+    enabled: !!convexUser?.externalId,
+  });
+  const { data: pointsHistory } = usePointsHistory(convexUser?.externalId || '', 30, {
+    enabled: !!convexUser?.externalId,
+  });
 
   if (!clerkUser || !convexUser) return null;
 
@@ -76,6 +86,18 @@ export function ProfileSnapshotCard() {
               />
             </div>
 
+            {/* Points Display */}
+            {pointsStats && (
+              <div className="mb-4">
+                <VibePointsDisplay
+                  currentBalance={pointsStats.currentBalance}
+                  level={pointsStats.level}
+                  streakDays={pointsStats.streakDays}
+                  variant="compact"
+                />
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
               <Button
                 asChild
@@ -95,6 +117,16 @@ export function ProfileSnapshotCard() {
             </div>
           </div>
         </div>
+
+        {/* Points Chart - Desktop Only */}
+        {pointsHistory && pointsHistory.length > 0 && (
+          <div className="mt-6">
+            <VibePointsChart
+              data={pointsHistory}
+              showTitle={true}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

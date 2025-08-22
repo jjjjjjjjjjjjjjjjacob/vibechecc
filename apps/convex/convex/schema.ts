@@ -81,9 +81,19 @@ const schema = defineSchema({
     visibility: v.optional(v.union(v.literal('public'), v.literal('deleted'))), // Default 'public', 'deleted' for soft delete
     updatedAt: v.optional(v.string()), // Track when vibe was last updated
 
+    // Color gradient fields for custom vibe appearance
+    gradientFrom: v.optional(v.string()), // Starting color for gradient (hex or color name)
+    gradientTo: v.optional(v.string()), // Ending color for gradient (hex or color name)
+    gradientDirection: v.optional(v.string()), // Gradient direction (e.g., 'to-br', 'to-r', 'to-b')
+
     // Share tracking fields
     shareCount: v.optional(v.number()), // Total number of times this vibe has been shared
     lastSharedAt: v.optional(v.number()), // Timestamp of most recent share
+
+    // Boost/dampen system fields
+    boostScore: v.optional(v.number()), // Current boost score (can be negative for dampens)
+    totalBoosts: v.optional(v.number()), // Total number of boosts received
+    totalDampens: v.optional(v.number()), // Total number of dampens received
 
     // Admin moderation fields
     moderationReason: v.optional(v.string()), // Reason for moderation action
@@ -99,6 +109,8 @@ const schema = defineSchema({
     .index('byUpdatedAt', ['updatedAt']) // NEW: Index for recent content queries
     .index('byShareCount', ['shareCount']) // NEW: Index for sorting by share popularity
     .index('byLastSharedAt', ['lastSharedAt']) // NEW: Index for recently shared content
+    .index('byBoostScore', ['boostScore']) // NEW: Index for sorting by boost score
+    .index('byTotalBoosts', ['totalBoosts']) // NEW: Index for sorting by total boosts
     .searchIndex('searchTitle', {
       searchField: 'title',
       filterFields: ['createdById', 'tags', 'visibility'],
@@ -118,6 +130,11 @@ const schema = defineSchema({
     createdAt: v.string(),
     updatedAt: v.optional(v.string()),
 
+    // Boost/dampen system fields
+    netScore: v.optional(v.number()), // Net score: boosts - dampens (can be negative)
+    boostCount: v.optional(v.number()), // Total number of boosts received
+    dampenCount: v.optional(v.number()), // Total number of dampens received
+
     // Admin moderation fields
     flagged: v.optional(v.boolean()), // Whether review is flagged
     moderationReason: v.optional(v.string()), // Reason for moderation
@@ -127,11 +144,14 @@ const schema = defineSchema({
     .index('user', ['userId'])
     .index('vibeAndUser', ['vibeId', 'userId'])
     .index('vibeAndEmoji', ['vibeId', 'emoji'])
+    .index('vibeUserEmoji', ['vibeId', 'userId', 'emoji'])
     .index('byCreatedAt', ['createdAt'])
     .index('byUserAndEmoji', ['userId', 'emoji'])
     .index('byValue', ['value'])
     .index('byVibeAndValue', ['vibeId', 'value']) // NEW: Compound index for rating-based sorting
     .index('byValueAndVibe', ['value', 'vibeId']) // NEW: Index for filtering by rating value
+    .index('byNetScore', ['netScore']) // NEW: Index for sorting by net score
+    .index('byBoostCount', ['boostCount']) // NEW: Index for sorting by boost count
     .searchIndex('searchReview', {
       searchField: 'review',
       filterFields: ['vibeId', 'userId', 'emoji', 'value'],
@@ -154,6 +174,7 @@ const schema = defineSchema({
         v.literal('neutral')
       )
     ),
+    tags: v.optional(v.array(v.string())), // Tags associated with the emoji
     // emoji-mart specific fields
     shortcodes: v.optional(v.array(v.string())), // Alternative shortcodes like :smile:
     emoticons: v.optional(v.array(v.string())), // Text emoticons like :) or :-D
@@ -347,6 +368,94 @@ const schema = defineSchema({
     .index('byCreatedAt', ['createdAt'])
     .index('byUserAndPlatform', ['userId', 'platform', 'createdAt'])
     .index('byContentAndPlatform', ['contentType', 'contentId', 'platform']),
+
+  // Rating votes table to track user boost/dampen votes on emoji ratings
+  ratingVotes: defineTable({
+    ratingId: v.id('ratings'), // ID of the rating being voted on
+    userId: v.string(), // External ID of user who voted
+    voteType: v.union(v.literal('boost'), v.literal('dampen')), // Type of vote
+    createdAt: v.number(), // Timestamp when vote was created
+  })
+    .index('byRating', ['ratingId'])
+    .index('byUser', ['userId', 'createdAt'])
+    .index('byRatingAndUser', ['ratingId', 'userId']), // Unique constraint index
+
+  // Rating likes table to track user likes on emoji ratings (DEPRECATED - kept for migration)
+  ratingLikes: defineTable({
+    ratingId: v.id('ratings'), // ID of the rating being liked
+    userId: v.string(), // External ID of user who liked the rating
+    createdAt: v.number(), // Timestamp when like was created
+  })
+    .index('byRating', ['ratingId'])
+    .index('byUser', ['userId', 'createdAt'])
+    .index('byRatingAndUser', ['ratingId', 'userId']), // Unique constraint index
+
+  // User points system for gamification
+  userPoints: defineTable({
+    userId: v.string(), // External ID of user
+    totalPointsEarned: v.number(), // Lifetime points earned
+    currentBalance: v.number(), // Current spendable points
+    protectedPoints: v.optional(v.number()), // Points that can't be dampened (starter bonus, level-ups)
+    dailyEarnedPoints: v.number(), // Points earned today
+    dailyPostCount: v.number(), // Posts made today
+    dailyReviewCount: v.number(), // Reviews written today
+    dailyDampenCount: v.optional(v.number()), // Times user dampened content today
+    lastResetDate: v.string(), // Date of last daily reset (YYYY-MM-DD)
+    level: v.number(), // User level based on total points
+    multiplier: v.number(), // Current multiplier for point earnings
+    streakDays: v.number(), // Consecutive days of activity
+    lastActivityDate: v.string(), // Date of last activity (YYYY-MM-DD)
+    karmaScore: v.optional(v.number()), // Karma/reputation score for moderating dampen power
+  })
+    .index('byUserId', ['userId'])
+    .index('byLevel', ['level'])
+    .index('byTotalPoints', ['totalPointsEarned'])
+    .index('byStreak', ['streakDays']),
+
+  // Point transaction history for transparency and auditing
+  pointTransactions: defineTable({
+    userId: v.string(), // External ID of user
+    type: v.union(v.literal('earned'), v.literal('spent'), v.literal('transfer')), // Transaction type
+    action: v.union(
+      v.literal('post_vibe'),
+      v.literal('write_review'),
+      v.literal('receive_review'),
+      v.literal('boost'),
+      v.literal('dampen'),
+      v.literal('daily_bonus'),
+      v.literal('level_up'),
+      v.literal('receive_boost'),
+      v.literal('receive_dampen'),
+      v.literal('transfer_boost'),
+      v.literal('transfer_dampen')
+    ), // Action that triggered the transaction
+    targetId: v.optional(v.string()), // ID of target (vibeId, ratingId, etc.)
+    fromUserId: v.optional(v.string()), // External ID of user who sent points (for transfers)
+    toUserId: v.optional(v.string()), // External ID of user who received points (for transfers)
+    amount: v.number(), // Points amount (positive for earned, negative for spent)
+    multiplier: v.number(), // Multiplier applied at time of transaction
+    balanceAfter: v.number(), // User's balance after this transaction
+    timestamp: v.number(), // Transaction timestamp
+    metadata: v.optional(v.any()), // Additional transaction data
+  })
+    .index('byUser', ['userId', 'timestamp'])
+    .index('byTimestamp', ['timestamp'])
+    .index('byUserAndType', ['userId', 'type', 'timestamp'])
+    .index('byAction', ['action', 'timestamp']),
+
+  // Daily points history for analytics and charts
+  pointsHistory: defineTable({
+    userId: v.string(), // External ID of user
+    date: v.string(), // Date (YYYY-MM-DD)
+    pointsEarned: v.number(), // Total points earned on this date
+    pointsSpent: v.number(), // Total points spent on this date
+    netChange: v.number(), // Net point change for the day
+    endingBalance: v.number(), // Balance at end of day
+    activityCount: v.number(), // Number of activities (posts + reviews)
+  })
+    .index('byUserAndDate', ['userId', 'date'])
+    .index('byDate', ['date'])
+    .index('byUserAndNetChange', ['userId', 'netChange']),
 });
 export default schema;
 
@@ -361,6 +470,11 @@ const _follows = schema.tables.follows.validator;
 const _notification = schema.tables.notifications.validator;
 const _socialConnection = schema.tables.socialConnections.validator;
 const _shareEvent = schema.tables.shareEvents.validator;
+const _ratingVote = schema.tables.ratingVotes.validator;
+const _ratingLike = schema.tables.ratingLikes.validator;
+const _userPoints = schema.tables.userPoints.validator;
+const _pointTransaction = schema.tables.pointTransactions.validator;
+const _pointsHistory = schema.tables.pointsHistory.validator;
 
 export type User = Infer<typeof _user>;
 export type Vibe = Infer<typeof vibe>;
@@ -373,6 +487,11 @@ export type Follow = Infer<typeof _follows>;
 export type Notification = Infer<typeof _notification>;
 export type SocialConnection = Infer<typeof _socialConnection>;
 export type ShareEvent = Infer<typeof _shareEvent>;
+export type RatingVote = Infer<typeof _ratingVote>;
+export type RatingLike = Infer<typeof _ratingLike>;
+export type UserPoints = Infer<typeof _userPoints>;
+export type PointTransaction = Infer<typeof _pointTransaction>;
+export type PointsHistory = Infer<typeof _pointsHistory>;
 
 export const createVibeSchema = v.object({
   title: vibe.fields.title,
@@ -380,6 +499,9 @@ export const createVibeSchema = v.object({
   image: v.optional(v.union(v.string(), v.id('_storage'))),
   tags: v.optional(vibe.fields.tags),
   createdById: vibe.fields.createdById,
+  gradientFrom: v.optional(vibe.fields.gradientFrom),
+  gradientTo: v.optional(vibe.fields.gradientTo),
+  gradientDirection: v.optional(vibe.fields.gradientDirection),
 });
 
 export const createRatingSchema = v.object({

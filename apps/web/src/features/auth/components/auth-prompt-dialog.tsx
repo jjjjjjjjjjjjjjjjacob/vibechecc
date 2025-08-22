@@ -26,9 +26,9 @@ export function AuthPromptDialog({
 }: AuthPromptDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background/60 drop-shadow-primary/30 border-none drop-shadow-xl/50 backdrop-blur sm:max-w-[425px]">
-        <DialogHeader className="flex text-center sm:text-left">
-          <DialogTitle className="bg-gradient-to-r from-violet-600 via-pink-600 to-orange-600 bg-clip-text text-3xl font-bold text-transparent">
+      <DialogContent className="bg-background/80 drop-shadow-primary/30 border-none drop-shadow-xl/50 backdrop-blur sm:max-w-[425px]">
+        <DialogHeader className="flex text-left sm:text-left">
+          <DialogTitle className="from-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-3xl font-bold text-transparent">
             {title}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground/90 mt-2 text-base">
@@ -38,7 +38,7 @@ export function AuthPromptDialog({
         <div className="mt-6 space-y-4">
           <div className="space-y-3">
             <SignInButton mode="modal">
-              <Button className="h-12 w-full border-transparent bg-gradient-to-r from-violet-600 to-pink-600 text-base font-semibold text-white transition-all hover:scale-[1.02] hover:border-transparent hover:from-violet-700 hover:to-pink-700 hover:shadow-lg hover:shadow-violet-500/25">
+              <Button className="from-theme-primary to-theme-secondary hover:from-theme-primary/80 hover:to-theme-secondary/80 hover:shadow-theme-primary/25 h-12 w-full border-transparent bg-gradient-to-r text-base font-semibold text-white transition-all hover:scale-[1.02] hover:border-transparent hover:shadow-lg">
                 <LogIn className="mr-2 h-5 w-5" />
                 sign in to vibechecc
               </Button>
@@ -58,7 +58,7 @@ export function AuthPromptDialog({
               <span className="border-gradient-to-r via-primary/20 w-full border-t-2 from-transparent to-transparent" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-gradient-to-r from-violet-600 to-pink-600 bg-clip-text px-3 font-semibold text-transparent">
+              <span className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text px-3 font-semibold text-transparent">
                 or
               </span>
             </div>

@@ -10,6 +10,8 @@ const TabsDraggableContext = React.createContext<{
   parallaxRatio?: number;
   indicatorDragOffset?: number;
   isDragging?: boolean;
+  swipeThreshold?: number;
+  scrollVelocityThreshold?: number;
 }>({
   activeTabIndex: 0,
   setActiveTabIndex: () => {},
@@ -18,6 +20,8 @@ const TabsDraggableContext = React.createContext<{
   parallaxRatio: 0.5,
   indicatorDragOffset: 0,
   isDragging: false,
+  swipeThreshold: 0.3,
+  scrollVelocityThreshold: 50,
 });
 
 interface TabsDraggableProps {
@@ -28,6 +32,8 @@ interface TabsDraggableProps {
   children: React.ReactNode;
   parallaxMode?: boolean; // Enable parallax effect between selector and content
   parallaxRatio?: number; // Ratio for content movement (0.5 = content moves half speed of selector)
+  swipeThreshold?: number; // Threshold percentage for swipe to change tabs (default: 0.3 = 30%)
+  scrollVelocityThreshold?: number; // Threshold for vertical scroll velocity to disable horizontal swipes (default: 50)
 }
 
 const TabsDraggable = React.forwardRef<HTMLDivElement, TabsDraggableProps>(
@@ -40,6 +46,8 @@ const TabsDraggable = React.forwardRef<HTMLDivElement, TabsDraggableProps>(
       children,
       parallaxMode = false,
       parallaxRatio = 0.5,
+      swipeThreshold = 0.3,
+      scrollVelocityThreshold = 50,
     },
     ref
   ) => {
@@ -91,6 +99,8 @@ const TabsDraggable = React.forwardRef<HTMLDivElement, TabsDraggableProps>(
           parallaxRatio,
           indicatorDragOffset,
           isDragging,
+          swipeThreshold,
+          scrollVelocityThreshold,
         }}
       >
         <div ref={ref} className={cn('flex flex-col', className)}>
@@ -121,6 +131,8 @@ interface TabsDraggableListProps {
   ) => void;
   setIndicatorDragOffset?: (offset: number) => void;
   setIsDragging?: (isDragging: boolean) => void;
+  indicatorRailsClassName?: string;
+  indicatorClassName?: string;
 }
 
 const TabsDraggableList = React.forwardRef<
@@ -134,6 +146,8 @@ const TabsDraggableList = React.forwardRef<
       setTabs,
       setIndicatorDragOffset: parentSetIndicatorDragOffset,
       setIsDragging: parentSetIsDragging,
+      indicatorRailsClassName,
+      indicatorClassName,
     },
     ref
   ) => {
@@ -342,15 +356,21 @@ const TabsDraggableList = React.forwardRef<
     let tabIndex = -1;
 
     return (
-      <div ref={ref} className={cn('relative', className)}>
-        <div className="flex items-center justify-center px-4 py-2">
-          <div className="bg-muted/50 relative inline-flex gap-2 rounded-full p-1 backdrop-blur-sm">
+      <div ref={ref} className={cn('relative py-2', className)}>
+        <div className="flex items-center justify-center">
+          <div
+            className={cn(
+              'bg-muted/50 relative inline-flex gap-2 rounded-xl p-1 backdrop-blur-sm',
+              indicatorRailsClassName
+            )}
+          >
             {/* Tab Indicator - visual background */}
             <div
               ref={indicatorRef}
               className={cn(
-                'bg-background absolute inset-y-1 rounded-full shadow-sm',
-                !isDragging && 'transition-transform duration-300 ease-out'
+                'bg-background absolute inset-y-1 rounded-xl shadow-sm',
+                !isDragging && 'transition-transform duration-300 ease-out',
+                indicatorClassName
               )}
               style={{
                 transform: indicatorTransform,
@@ -444,7 +464,7 @@ const TabsDraggableTrigger = React.forwardRef<
       ref={ref}
       onClick={onClick}
       className={cn(
-        'relative z-10 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors',
+        'relative z-10 flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors',
         dataState === 'active'
           ? 'text-foreground'
           : 'text-muted-foreground hover:text-foreground/80',
@@ -493,10 +513,8 @@ const TabsDraggableContent = React.forwardRef<
     return `translateX(${contentOffset}px)`;
   }, [parallaxMode, indicatorDragOffset, parallaxRatio]);
 
-  // Only render if this content is active
-  if (!isActive) {
-    return null;
-  }
+  // Always render content for swipeable container
+  // The container will handle positioning and visibility
 
   return (
     <div
@@ -538,10 +556,17 @@ const TabsDraggableContentContainer = React.forwardRef<
     parallaxMode,
     parallaxRatio,
     indicatorDragOffset,
+    swipeThreshold = 0.3,
+    scrollVelocityThreshold = 50,
   } = context;
 
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragOffset, setDragOffset] = React.useState(0);
+
+  // Track vertical scroll velocity to disable horizontal swipes during fast scrolling
+  const [verticalScrollVelocity, setVerticalScrollVelocity] = React.useState(0);
+  const lastScrollY = React.useRef(0);
+  const lastScrollTime = React.useRef(Date.now());
 
   // Calculate content offset based on mode
   const contentOffset = React.useMemo(() => {
@@ -574,8 +599,39 @@ const TabsDraggableContentContainer = React.forwardRef<
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
+  // Track vertical scroll velocity to disable horizontal swipes during fast scrolling
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const currentTime = Date.now();
+      const currentScrollY = window.scrollY;
+      const timeDiff = currentTime - lastScrollTime.current;
+      const scrollDiff = currentScrollY - lastScrollY.current;
+
+      if (timeDiff > 0) {
+        const velocity = Math.abs(scrollDiff / timeDiff);
+        setVerticalScrollVelocity(velocity);
+
+        // Reset velocity after a delay to allow horizontal swipes again
+        setTimeout(() => {
+          setVerticalScrollVelocity(0);
+        }, 150);
+      }
+
+      lastScrollY.current = currentScrollY;
+      lastScrollTime.current = currentTime;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Content dragging handlers
   const handleContentDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    // Don't start horizontal drag if user is scrolling vertically fast
+    if (verticalScrollVelocity > scrollVelocityThreshold) {
+      return;
+    }
+
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     dragStartX.current = clientX - dragOffset;
     lastX.current = clientX;
@@ -627,7 +683,7 @@ const TabsDraggableContentContainer = React.forwardRef<
 
     setIsDragging(false);
 
-    const threshold = containerWidth * 0.3; // 30% threshold
+    const threshold = containerWidth * swipeThreshold; // Use configurable threshold
     const velocity = velocityX.current;
 
     let newIndex = activeTabIndex;
@@ -662,6 +718,7 @@ const TabsDraggableContentContainer = React.forwardRef<
     dragOffset,
     onTabChange,
     setActiveTabIndex,
+    swipeThreshold,
   ]);
 
   // Global mouse/touch event listeners
@@ -742,16 +799,24 @@ const TabsDraggableContentContainer = React.forwardRef<
           width: `${tabs.length * 100}%`,
         }}
       >
-        {tabs.map((_, index) => (
+        {tabs.map((tab, index) => (
           <div
-            key={index}
+            key={tab.id}
             className="flex h-full items-center justify-center"
             style={{
               width: `${100 / tabs.length}%`,
             }}
           >
             <div className="flex h-full w-full items-center justify-center">
-              {children}
+              {React.Children.toArray(children).find((child) => {
+                if (
+                  React.isValidElement(child) &&
+                  child.props.value === tab.id
+                ) {
+                  return child;
+                }
+                return null;
+              })}
             </div>
           </div>
         ))}

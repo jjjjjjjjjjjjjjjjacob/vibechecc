@@ -540,6 +540,421 @@ useEffect(() => {
 - **Feed Systems**: When working with infinite scroll feeds and custom content states
 - **Follow/Social Features**: When integrating follow system with other features
 
+## Rating Share Functionality Implementation Patterns
+
+### Context
+
+Implemented comprehensive rating share functionality allowing users to share their emoji ratings on social media with beautifully designed share cards. This includes canvas generation, share modals, Web Share API integration, and mobile-optimized sharing.
+
+### Key Patterns Discovered
+
+#### 1. Canvas-Based Share Image Generation
+
+**Pattern**: Extend existing canvas generation patterns for specialized use cases
+
+```typescript
+export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) {
+  const generateRatingShareImage = useCallback(
+    async (
+      rating: Rating,
+      vibe: Vibe,
+      shareUrl: string,
+      layoutOption?: RatingShareLayoutOption
+    ): Promise<Blob | null> => {
+      // Canvas generation with theme-aware colors
+      const colors = extractThemeColors();
+      const isDarkMode = detectThemeMode();
+      
+      // Multiple layout options for different aspect ratios
+      const layout = layoutOption || defaultLayout;
+      
+      // Generate image with proper error handling
+      return generateCanvas(canvas, ctx, storyColors);
+    },
+    []
+  );
+}
+```
+
+**Benefits**: 
+- Reuses existing canvas infrastructure
+- Supports multiple aspect ratios (1:1, 9:16, 16:9)
+- Theme-aware color adaptation
+- Efficient blob generation
+
+#### 2. Multi-Layout Share Modal Pattern
+
+**Pattern**: Tabbed interface with preview generation for different social media formats
+
+```typescript
+const layoutOptions: RatingShareLayoutOption[] = [
+  {
+    value: 'detailed',
+    description: 'full review with vibe context',
+    aspectRatio: '1:1',
+    includeVibePreview: true,
+  },
+  {
+    value: 'story',
+    description: 'vertical format for stories',
+    aspectRatio: '9:16',
+    includeVibePreview: true,
+  },
+];
+
+// Generate all layouts in parallel for instant preview
+useEffect(() => {
+  const generatePromises = layoutOptions.map(async (layout) => {
+    const blob = await generateRatingShareImage(rating, vibe, shareUrl, layout);
+    return { layout: layout.value, url: blob ? URL.createObjectURL(blob) : null };
+  });
+  
+  Promise.all(generatePromises).then(setPreviewUrls);
+}, [open]);
+```
+
+**Why**: Provides instant preview switching without regeneration delays.
+
+#### 3. Progressive Share Button Integration
+
+**Pattern**: Add share buttons to existing rating displays without disrupting layout
+
+```typescript
+// In vibe detail page reviews
+<div className="flex items-center justify-between">
+  <EmojiRatingDisplay rating={rating} showScale={false} size="sm" />
+  <RatingShareButton
+    rating={rating}
+    vibe={vibe}
+    variant="ghost"
+    size="sm"
+  />
+</div>
+
+// In user profile reviews  
+<div className="flex items-center gap-2">
+  <EmojiRatingDisplay rating={rating} showScale={false} size="sm" />
+  <RatingShareButton
+    rating={rating}
+    vibe={mockVibe}
+    variant="ghost"
+    size="sm"
+    className="h-8 w-8"
+  />
+</div>
+```
+
+**Benefits**: Non-intrusive integration that maintains existing UI patterns.
+
+#### 4. Web Share API with Graceful Fallback
+
+**Pattern**: Progressive enhancement for native sharing capabilities
+
+```typescript
+const shareImage = useCallback(
+  async (blob: Blob, shareData?: ShareData) => {
+    if (!navigator.share) {
+      downloadImage(blob); // Fallback to download
+      return false;
+    }
+
+    if (!navigator.canShare?.({ files: [new File([blob], filename)] })) {
+      downloadImage(blob); // Fallback to download  
+      return false;
+    }
+
+    try {
+      await navigator.share({
+        ...shareData,
+        files: [new File([blob], filename, { type: 'image/png' })],
+      });
+      return true;
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        downloadImage(blob); // Fallback to download
+      }
+      return false;
+    }
+  },
+  [filename]
+);
+```
+
+**Benefits**: Seamless experience across desktop and mobile devices.
+
+### Component Architecture Insights
+
+#### 1. Specialized Share Components
+
+**Pattern**: Create domain-specific share components that extend base functionality
+
+```typescript
+// Base share infrastructure
+export function ShareButton({ contentType, vibe, author, ratings }) {
+  // Generic share for vibes
+}
+
+// Specialized rating share
+export function RatingShareButton({ rating, vibe }) {
+  const [showShareModal, setShowShareModal] = useState(false);
+  
+  return (
+    <>
+      <Button onClick={() => setShowShareModal(true)}>
+        <Share2 className="h-4 w-4" />
+      </Button>
+      <RatingShareModal
+        rating={rating}
+        vibe={vibe}
+        open={showShareModal}
+        onOpenChange={setShowShareModal}
+      />
+    </>
+  );
+}
+```
+
+**Benefits**: Focused functionality while reusing shared infrastructure.
+
+#### 2. Type-Safe Mock Data Handling
+
+**Pattern**: Handle incomplete type data with safe transformations
+
+```typescript
+// When vibe object doesn't match full Vibe interface
+<RatingShareButton
+  rating={rating}
+  vibe={{
+    ...partialVibe,
+    ratings: [], // Required property
+    createdBy: partialVibe.createdBy ? {
+      externalId: partialVibe.createdBy.id,
+      id: partialVibe.createdBy.id,
+      username: partialVibe.createdBy.name,
+      // Transform partial data to full interface
+    } : null,
+  }}
+/>
+```
+
+**Why**: Ensures type safety while working with incomplete data from different contexts.
+
+### Canvas Generation Patterns
+
+#### 1. Theme-Aware Canvas Rendering
+
+**Pattern**: Adapt canvas colors based on current theme mode
+
+```typescript
+const storyColors = isDarkMode
+  ? {
+      background: '#0a0a0a',
+      foreground: '#fafafa',
+      primary: colors.themePrimary || '#ec4899',
+      // Dark mode palette
+    }
+  : {
+      background: '#fafafa', 
+      foreground: '#0a0a0a',
+      primary: colors.themePrimary || '#ec4899',
+      // Light mode palette
+    };
+```
+
+**Benefits**: Generated images match user's theme preference.
+
+#### 2. Responsive Canvas Layouts
+
+**Pattern**: Adjust content layout based on aspect ratio
+
+```typescript
+// Different content strategies per aspect ratio
+if (layout.aspectRatio === '9:16') {
+  // Story format - more vertical space for content
+  const maxLines = 8;
+  const cardHeight = 1500;
+} else if (layout.aspectRatio === '1:1') {
+  // Square format - balanced layout
+  const maxLines = 4;
+  const cardHeight = 750;
+}
+```
+
+**Benefits**: Optimized content for different social media formats.
+
+#### 3. User Avatar Handling with Fallbacks
+
+**Pattern**: Robust avatar loading with graceful degradation
+
+```typescript
+// Try to load user avatar with timeout
+if (avatarUrl) {
+  try {
+    const avatarImg = await loadImageWithTimeout(avatarUrl, 3000);
+    // Draw avatar circle with clipping
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(avatarImg, ...);
+    ctx.restore();
+    avatarDrawn = true;
+  } catch {
+    avatarDrawn = false;
+  }
+}
+
+// Fallback to initials
+if (!avatarDrawn) {
+  // Draw initials in colored circle
+  const initials = displayName.slice(0, 2).toUpperCase();
+  // ... draw initials
+}
+```
+
+**Benefits**: Always shows some form of user identification.
+
+### Export and Import Patterns
+
+#### 1. Centralized Component Exports
+
+**Pattern**: Create index files for easy component discovery
+
+```typescript
+// /components/social/index.ts
+export { ShareButton } from './share-button';
+export { ShareModal } from './share-modal';
+export { RatingShareButton } from './rating-share-button';
+export { RatingShareModal } from './rating-share-modal';
+
+// /hooks/index.ts  
+export { useRatingShareCanvas } from './use-rating-share-canvas';
+export { useStoryCanvas } from './use-story-canvas';
+```
+
+**Benefits**: Clear API surface and easier imports for consumers.
+
+### Performance Considerations
+
+#### 1. Parallel Canvas Generation
+
+**Pattern**: Generate all layout previews simultaneously for instant switching
+
+```typescript
+// Generate all layouts in parallel when modal opens
+const generatePromises = layoutOptions.map(async (layout) => {
+  const blob = await generateRatingShareImage(rating, vibe, shareUrl, layout);
+  return blob ? { layout: layout.value, url: URL.createObjectURL(blob) } : null;
+});
+
+Promise.all(generatePromises).then((results) => {
+  const newUrls = new Map();
+  results.forEach((result) => {
+    if (result) newUrls.set(result.layout, result.url);
+  });
+  setPreviewUrls(newUrls);
+});
+```
+
+**Benefits**: Better user experience with instant layout switching.
+
+#### 2. Blob URL Management
+
+**Pattern**: Proper cleanup of generated blob URLs to prevent memory leaks
+
+```typescript
+useEffect(() => {
+  // Clean up when modal closes
+  if (!open && previewUrls.size > 0) {
+    previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    setPreviewUrls(new Map());
+    previewUrlsRef.current = new Map();
+  }
+}, [open]);
+```
+
+**Benefits**: Prevents memory leaks from accumulated blob URLs.
+
+### Error Handling Patterns
+
+#### 1. Graceful Canvas Generation Failure
+
+**Pattern**: Comprehensive error handling with user feedback
+
+```typescript
+try {
+  // Canvas generation logic
+  return await generateCanvasBlob();
+} catch (error) {
+  console.error('[useRatingShareCanvas] Failed to generate image:', error);
+  toast.error('failed to generate rating share image');
+  return null;
+} finally {
+  setIsGenerating(false);
+}
+```
+
+**Benefits**: Clear user feedback when generation fails.
+
+#### 2. Image Loading Timeouts
+
+**Pattern**: Prevent hanging on slow/failed image loads
+
+```typescript
+const loadPromise = new Promise((resolve, reject) => {
+  const timeout = setTimeout(() => {
+    reject(new Error('Image load timeout'));
+  }, 3000);
+
+  img.onload = () => {
+    clearTimeout(timeout);
+    resolve(img);
+  };
+
+  img.onerror = () => {
+    clearTimeout(timeout);
+    reject(new Error('Image load failed'));
+  };
+});
+```
+
+**Benefits**: Prevents UI freezing on network issues.
+
+### Future Enhancement Opportunities
+
+1. **Multiple Image Formats**: Support JPG, WebP for different platform requirements
+2. **Template System**: User-customizable share card templates
+3. **Batch Sharing**: Share multiple ratings at once
+4. **Analytics Integration**: Track share success rates and popular formats
+5. **Dynamic Branding**: Custom app branding based on user preferences
+
+### Best Practices Established
+
+1. **Always provide fallbacks** for Web Share API limitations
+2. **Generate previews in parallel** for better UX
+3. **Handle incomplete type data** gracefully with safe transformations  
+4. **Use theme-aware colors** for generated images
+5. **Implement proper blob cleanup** to prevent memory leaks
+6. **Provide multiple aspect ratios** for different social platforms
+7. **Add timeout handling** for network-dependent operations
+8. **Use progressive enhancement** for mobile vs desktop experiences
+
+### Debugging Tips
+
+1. **Canvas Issues**: Check browser console for detailed canvas errors
+2. **Type Mismatches**: Use `as any` temporarily to identify specific property issues
+3. **Share API**: Test on actual mobile devices for full Web Share API behavior
+4. **Image Generation**: Verify theme color extraction works across different themes
+5. **Memory Leaks**: Monitor blob URL creation/cleanup in browser dev tools
+
+### Applicable Situations
+
+- **Social Sharing Features**: When building shareable content generation
+- **Canvas-Based Image Generation**: When creating dynamic images from user data
+- **Mobile-First Sharing**: When implementing cross-platform share capabilities
+- **Multi-Format Content**: When supporting different social media aspect ratios
+- **Progressive Enhancement**: When building features that work better on mobile
+
 ## TanStack Router beforeLoad Redirect Patterns
 
 ### Context
@@ -865,3 +1280,385 @@ Could add import restrictions in ESLint config:
 - **Theme system migrations**: When moving from hardcoded to semantic colors
 - **File naming standardization**: When enforcing consistent naming conventions
 - **Quality assurance workflows**: When establishing systematic code quality checks
+
+## Mobile Feed Card Optimization Patterns
+
+### Context
+
+Implemented comprehensive mobile-first design optimizations for the vibechecc feed cards, including new mobile-specific variants, touch interactions, fade-in animations, and performance enhancements. This work extends the existing robust VibeCard variant system with mobile-optimized layouts and interactions.
+
+### Key Patterns Implemented
+
+#### 1. Mobile-First Card Variants
+
+**New Card Variants Added**:
+
+```typescript
+type VibeCardVariant =
+  | 'mobile-story'      // 9:16 aspect ratio for story-like experience
+  | 'mobile-square'     // 1:1 aspect ratio for social media sharing
+  | 'mobile-optimized'; // 4:5 aspect ratio with mobile-first design
+```
+
+**Auto-Selection Pattern**: Automatically select mobile variants when on mobile devices:
+
+```typescript
+const finalVariant = React.useMemo(() => {
+  // Auto-select mobile variants when on mobile and no specific variant is set
+  if (variant === 'default' && isMobile) {
+    return 'mobile-optimized';
+  }
+  // ... existing variant logic
+}, [variant, compact, layout, isMobile]);
+```
+
+**Why**: Provides optimized mobile experience without breaking existing desktop layouts.
+
+#### 2. Story-Format Cards (9:16 Aspect Ratio)
+
+**Pattern**: Full-screen mobile story experience with overlay content
+
+```typescript
+// Mobile Story variant implementation
+<Card className={cn(
+  'aspect-[9/16] w-full max-w-sm mx-auto group cursor-pointer',
+  enableFadeIn && !isVisible && 'opacity-0',
+  enableFadeIn && isVisible && 'animate-in fade-in duration-300',
+  optimizeForTouch && 'transform-gpu will-change-transform hover:scale-[1.02]'
+)}>
+  {/* Background image with gradient overlay */}
+  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+  
+  {/* Content overlay at bottom */}
+  <div className="absolute bottom-0 left-0 right-0 p-4 space-y-3">
+    <h3 className="text-white font-bold text-lg leading-tight line-clamp-2">
+      {vibe.title}
+    </h3>
+    {/* Interactive elements with proper touch targets */}
+  </div>
+</Card>
+```
+
+**Benefits**:
+- Instagram/TikTok-style vertical experience
+- Better mobile readability with gradient overlays
+- Optimized content hierarchy for limited space
+
+#### 3. Square Format Cards (1:1 Aspect Ratio)
+
+**Pattern**: Compact square format optimized for social media grid layouts
+
+```typescript
+// Mobile Square variant - optimized for Instagram-style grids
+<Card className={cn(
+  'aspect-square w-full cursor-pointer',
+  enableFadeIn && isVisible && 'animate-in fade-in duration-300',
+  optimizeForTouch && 'transform-gpu will-change-transform hover:scale-[1.02]'
+)}>
+  {/* Compact content layout */}
+</Card>
+```
+
+**Use Cases**:
+- Social media snippet generation
+- Grid-based feed layouts
+- Compact preview modes
+
+#### 4. Touch Interaction Optimizations
+
+**Pattern**: Ensure all interactive elements meet 44px minimum touch target requirement
+
+```typescript
+// Touch-optimized button sizing
+<button
+  className={cn(
+    'flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 backdrop-blur-sm',
+    optimizeForTouch && 'min-h-[44px] min-w-[44px]'
+  )}
+>
+  {/* Button content */}
+</button>
+
+// Touch-optimized avatar sizing
+<Avatar className={cn(
+  'shadow-md transition-transform duration-150 will-change-transform hover:scale-[1.05]',
+  optimizeForTouch || isMobile ? 'h-8 w-8' : 'h-6 w-6'
+)}>
+```
+
+**Benefits**:
+- Meets accessibility standards for touch targets
+- Better mobile usability
+- Prevents accidental taps
+
+#### 5. Fade-In Animation System
+
+**Pattern**: Staggered fade-in animations for better perceived performance
+
+```typescript
+// Component-level fade-in state
+const [isVisible, setIsVisible] = React.useState(!enableFadeIn);
+
+// Delayed animation trigger
+React.useEffect(() => {
+  if (enableFadeIn && delay > 0) {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, delay);
+    return () => clearTimeout(timer);
+  }
+}, [enableFadeIn, delay]);
+
+// CSS classes for animation
+<Card className={cn(
+  enableFadeIn && !isVisible && 'opacity-0',
+  enableFadeIn && isVisible && 'animate-in fade-in duration-300'
+)}>
+```
+
+**Usage in Feed**:
+
+```typescript
+// Staggered delays for smooth appearance
+{vibes.map((vibe, index) => (
+  <VibeCard
+    key={vibe.id}
+    vibe={vibe}
+    enableFadeIn={enableFadeIn}
+    delay={enableFadeIn ? index * 100 : 0} // 100ms stagger
+  />
+))}
+```
+
+**Benefits**:
+- Improved perceived performance
+- Smooth visual experience
+- Progressive content revelation
+
+### Component Architecture Insights
+
+#### 1. Mobile-Aware Variant Selection
+
+**Pattern**: Feed components automatically adapt to mobile viewport
+
+```typescript
+// MasonryFeed mobile adaptation
+const getVibeCardVariant = () => {
+  // On mobile, prefer mobile-optimized variants
+  if (isMobile) {
+    return preferredMobileVariant;
+  }
+  
+  // Desktop variants
+  return shouldUseMasonry ? 'feed-masonry' : 'feed-single';
+};
+```
+
+#### 2. Performance-Optimized Transforms
+
+**Pattern**: Use `transform-gpu` and `will-change-transform` for smooth animations
+
+```typescript
+<Card className={cn(
+  'transition-all duration-200',
+  optimizeForTouch && 'transform-gpu will-change-transform hover:scale-[1.02]'
+)}>
+```
+
+**Benefits**:
+- Hardware acceleration for smoother animations
+- Better mobile performance
+- Reduced layout thrashing
+
+#### 3. Responsive Masonry Layout Configuration
+
+**Pattern**: Mobile-specific column configurations and spacing
+
+```typescript
+<JSMasonryLayout
+  columns={{
+    default: 1,
+    sm: (() => {
+      // Mobile variants prefer single column for better UX
+      if (isMobile && (preferredMobileVariant === 'mobile-story' || preferredMobileVariant === 'mobile-square')) {
+        return 1;
+      }
+      return variant === 'search' ? 2 : 1;
+    })(),
+    md: variant === 'search' ? 3 : 2,
+    lg: variant === 'search' ? 4 : 3,
+    xl: variant === 'search' ? 5 : 4,
+  }}
+  gap={isMobile && preferredMobileVariant === 'mobile-story' ? '16px' : '20px'}
+/>
+```
+
+### Mobile Skeleton Loading Patterns
+
+**Pattern**: Variant-aware skeleton loading states
+
+```typescript
+const getAspectRatio = () => {
+  if (isMobile) {
+    switch (preferredMobileVariant) {
+      case 'mobile-story':
+        return 'aspect-[9/16]';
+      case 'mobile-square':
+        return 'aspect-square';
+      case 'mobile-optimized':
+        return 'aspect-[4/5]';
+      default:
+        return 'aspect-[4/5]';
+    }
+  }
+  return useMasonry ? 'aspect-[3/4]' : 'aspect-video';
+};
+```
+
+### Props Interface Enhancements
+
+**Pattern**: Backward-compatible props with mobile optimization flags
+
+```typescript
+interface VibeCardProps {
+  // ... existing props
+  // Mobile optimization props
+  enableFadeIn?: boolean;
+  optimizeForTouch?: boolean;
+}
+
+interface MasonryFeedProps {
+  // ... existing props
+  // Mobile optimization props
+  enableFadeIn?: boolean;
+  optimizeForTouch?: boolean;
+  preferredMobileVariant?: 'mobile-optimized' | 'mobile-story' | 'mobile-square';
+}
+```
+
+### Performance Considerations
+
+#### 1. GPU Acceleration
+
+**Pattern**: Use CSS transforms and `will-change` for mobile animations
+
+```css
+.transform-gpu {
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+.will-change-transform {
+  will-change: transform; /* Optimize for transform changes */
+}
+```
+
+#### 2. Reduced Gradient Complexity
+
+**Pattern**: Simpler gradients on mobile for better performance
+
+```typescript
+// Mobile story variant uses simpler gradient
+<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+// vs complex gradients avoided on mobile
+```
+
+#### 3. Lazy Loading Friendly
+
+**Pattern**: Cards work well with intersection observer lazy loading
+
+```typescript
+// Staggered animations work with lazy loading
+delay={enableFadeIn ? index * 100 : 0}
+```
+
+### Accessibility Improvements
+
+#### 1. Touch Target Compliance
+
+**Pattern**: All interactive elements meet 44px minimum
+
+```typescript
+optimizeForTouch && 'min-h-[44px] min-w-[44px]'
+```
+
+#### 2. Proper ARIA Labels
+
+**Pattern**: Descriptive button labels for screen readers
+
+```typescript
+aria-label={`View ${primaryEmojiRating.emoji} rating details`}
+```
+
+#### 3. Keyboard Navigation
+
+**Pattern**: Full keyboard support maintained
+
+```typescript
+onKeyDown={(e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    e.stopPropagation();
+    handleEmojiRatingClick(...);
+  }
+}}
+```
+
+### Testing and Backward Compatibility
+
+#### 1. Progressive Enhancement
+
+**Pattern**: Mobile features enhance but don't break desktop
+
+```typescript
+// Default behavior maintained when mobile flags are false
+optimizeForTouch = false,  // Doesn't affect desktop
+enableFadeIn = false,      // Opt-in animation
+```
+
+#### 2. Variant Fallbacks
+
+**Pattern**: Graceful fallback to existing variants
+
+```typescript
+// If mobile variant not supported, fall back to existing logic
+if (variant === 'default' && isMobile) {
+  return 'mobile-optimized';
+}
+// ... existing variant logic unchanged
+```
+
+### Future Enhancement Opportunities
+
+1. **Haptic Feedback**: Browser vibration API for touch interactions
+2. **Swipe Gestures**: Touch gesture support for card interactions
+3. **Dynamic Aspect Ratios**: Content-aware aspect ratio selection
+4. **Performance Metrics**: Real-time mobile performance monitoring
+5. **A/B Testing**: Mobile variant performance comparison
+
+### Best Practices Established
+
+1. **Always use isMobile hook** for viewport detection instead of CSS-only solutions
+2. **Provide mobile-specific props** for granular control over mobile experience
+3. **Maintain backward compatibility** with existing variant system
+4. **Use staggered animations** for better perceived performance
+5. **Ensure 44px touch targets** for all interactive mobile elements
+6. **Test across viewport sizes** to ensure responsive behavior
+7. **Use GPU acceleration** for smooth mobile animations
+8. **Implement fade-in delays** to create natural content flow
+
+### Debugging Tips
+
+1. **Mobile Viewport Testing**: Use browser dev tools responsive mode to test all variants
+2. **Touch Target Validation**: Inspect elements to verify 44px minimum dimensions
+3. **Animation Performance**: Monitor frame rates during card animations
+4. **Variant Selection Logic**: Add console.logs to verify correct variant selection
+5. **Aspect Ratio Issues**: Check CSS aspect-ratio support across browsers
+
+### Applicable Situations
+
+- **Mobile-first feed design**: When optimizing feed experiences for mobile users
+- **Social media integration**: When cards need to work across different aspect ratios
+- **Performance-critical mobile apps**: When smooth animations and interactions are crucial
+- **Cross-platform content**: When content needs to work on both web and mobile seamlessly
+- **Progressive enhancement**: When adding mobile features to existing desktop experiences

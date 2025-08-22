@@ -4,6 +4,7 @@ import {
   Outlet,
   useLocation,
 } from '@tanstack/react-router';
+import type { Id } from '@vibechecc/convex/dataModel';
 import * as React from 'react';
 import {
   useVibe,
@@ -14,6 +15,8 @@ import {
   useTopEmojiRatings,
   useMostInteractedEmoji,
   useDeleteVibeMutation,
+  useBulkRatingVoteScores,
+  useBulkUserRatingVoteStatuses,
 } from '@/queries';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +25,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { AlertTriangle, Edit, Trash2, Share2 } from '@/components/ui/icons';
 import { ShareModal } from '@/components/social/share-modal';
+import { RatingShareButton } from '@/components/social/rating-share-button';
+import { RatingDootButton } from '@/features/ratings/components/rating-doot-button';
+import { BoostButton } from '@/features/ratings/components/boost-button';
 import { VibeDetailSkeleton } from '@/components/skeletons/vibe-detail-skeleton';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import {
@@ -32,11 +38,17 @@ import {
 import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import toast from '@/utils/toast';
 import { AuthPromptDialog } from '@/features/auth/components/auth-prompt-dialog';
+import { SignupCta, InteractionGateCta } from '@/features/auth/components/signup-cta';
+import { useSignupCtaPlacement, useAnonymousInteractionTracking } from '@/features/auth/hooks/use-signup-cta-placement';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { RatingPopover } from '@/features/ratings/components/rating-popover';
 import { EmojiRatingSelector } from '@/features/ratings/components/emoji-rating-selector';
+import { EmojiRatingSelectorWithConfirmation } from '@/features/ratings/components/emoji-rating-selector-with-confirmation';
+import { RatingWithConfirmation } from '@/features/ratings/components/rating-with-confirmation';
 import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
 import { useVibeImageUrl } from '@/hooks/use-vibe-image-url';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { VibeDetailMobile } from '@/features/vibes/components/vibe-detail-mobile';
 import {
   Accordion,
   AccordionContent,
@@ -60,6 +72,14 @@ function VibePage() {
   const { data: emojiMetadataArray } = useEmojiMetadata();
   const [review, setReview] = React.useState('');
   const { user: _user } = useUser();
+  const isMobile = useIsMobile();
+  
+  // CTA placement hooks
+  const { placement: ctaPlacement, isAuthenticated } = useSignupCtaPlacement({
+    enableVibeDetailCta: true,
+    enableInteractionGate: true,
+  });
+  const { trackVibeView, trackRatingAttempt } = useAnonymousInteractionTracking();
   const addRatingMutation = useAddRatingMutation();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
   const deleteVibeMutation = useDeleteVibeMutation();
@@ -127,6 +147,22 @@ function VibePage() {
       {} as Record<string, (typeof emojiMetadataArray)[0]>
     );
   }, [emojiMetadataArray]);
+
+  // Check if current user owns this vibe
+  const isOwner = _user?.id && vibe && vibe.createdById === _user.id;
+
+  // Get rating IDs for fetching vote data
+  const ratingIds = React.useMemo(() => {
+    if (!vibe?.ratings) return [];
+    return vibe.ratings
+      .filter(r => r._id)
+      .map(r => r._id as Id<'ratings'>);
+  }, [vibe?.ratings]);
+
+  // Fetch vote scores and statuses for all ratings
+  const { data: voteScores } = useBulkRatingVoteScores(ratingIds);
+  const { data: voteStatuses } = useBulkUserRatingVoteStatuses(ratingIds);
+  
 
   // Extract context keywords from vibe for emoji suggestions
   const _contextKeywords = React.useMemo(() => {
@@ -229,6 +265,13 @@ function VibePage() {
 
     return similar.slice(0, 4); // Limit to 4 similar vibes
   }, [vibe, allVibesData?.vibes]);
+
+  // Track vibe view for anonymous users
+  React.useEffect(() => {
+    if (!isAuthenticated && vibe) {
+      trackVibeView(vibe.id);
+    }
+  }, [vibe, isAuthenticated, trackVibeView]);
 
   // Check if we're on the edit route
   const isEditRoute = location.pathname.endsWith('/edit');
@@ -428,9 +471,73 @@ function VibePage() {
     }
   };
 
-  // Check if current user owns this vibe
-  const isOwner = _user?.id && vibe && vibe.createdById === _user.id;
+  // Use mobile layout on mobile devices
+  if (isMobile) {
+    return (
+      <>
+        <VibeDetailMobile
+          vibe={vibe}
+          imageUrl={imageUrl}
+          isImageLoading={isImageLoading}
+          isOwner={isOwner}
+          mostInteractedEmoji={mostInteractedEmoji}
+          emojiRatings={emojiRatings}
+          emojiMetadataRecord={emojiMetadataRecord}
+          onEmojiRatingClick={handleEmojiRatingClick}
+          onEmojiRating={handleEmojiRating}
+          onDelete={handleDeleteVibe}
+          onShare={() => setShowShareModal(true)}
+          isPendingRating={createEmojiRatingMutation.isPending}
+          isPendingDelete={deleteVibeMutation.isPending}
+        />
+        
+        {/* Hidden Popover and Modals for mobile */}
+        <RatingPopover
+          open={showRatingPopover}
+          onOpenChange={(open) => {
+            setShowRatingPopover(open);
+            if (!open) {
+              setSelectedEmojiForRating(null);
+              setPreselectedRatingValue(null);
+            }
+          }}
+          onSubmit={handleEmojiRating}
+          isSubmitting={createEmojiRatingMutation.isPending}
+          vibeTitle={vibe.title}
+          emojiMetadata={emojiMetadataRecord}
+          preSelectedEmoji={selectedEmojiForRating || undefined}
+          preSelectedValue={preselectedRatingValue || undefined}
+        >
+          <div style={{ display: 'none' }} />
+        </RatingPopover>
 
+        <ShareModal
+          open={showShareModal}
+          onOpenChange={setShowShareModal}
+          contentType="vibe"
+          vibe={vibe}
+          author={vibe.createdBy || undefined}
+          ratings={
+            emojiRatings.map((r) => ({
+              emoji: r.emoji,
+              value: r.value,
+              tags: r.tags || [],
+              count: r.count,
+            }))
+          }
+        />
+
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to interact with vibes"
+          description="join vibechecc to rate vibes, share your reactions, and connect with the community"
+        />
+      </>
+    );
+  }
+
+  // Desktop layout
   return (
     <div className="container mx-auto mb-8">
       <div className="grid w-full grid-cols-3 gap-8 transition-all duration-300">
@@ -493,6 +600,7 @@ function VibePage() {
                     isSubmitting={createEmojiRatingMutation.isPending}
                     vibeTitle={vibe.title}
                     emojiMetadata={emojiMetadataRecord}
+                    isOwner={!!isOwner}
                   />
                 </div>
               )}
@@ -509,6 +617,22 @@ function VibePage() {
                 <Share2 className="mr-2 h-4 w-4" />
                 share
               </Button>
+
+              {/* Boost button for vibe - visible to non-owners */}
+              {!isOwner && (
+                <BoostButton
+                  contentId={vibe.id as Id<'vibes'>}
+                  contentType="vibe"
+                  currentBoostScore={0}
+                  boostCost={100}
+                  dampenCost={50}
+                  userPoints={0}
+                  userBoostAction={null}
+                  isOwnContent={false}
+                  variant="outline"
+                  size="sm"
+                />
+              )}
 
               {/* Edit/Delete buttons for vibe owner */}
               {isOwner && (
@@ -584,24 +708,26 @@ function VibePage() {
               <p className="text-muted-foreground mb-2 text-sm">
                 no ratings yet
               </p>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  if (!_user?.id) {
-                    setAuthDialogType('rate');
-                    setShowAuthDialog(true);
-                  } else {
-                    // Scroll to rating selector or open emoji picker
-                    const ratingSection = document.querySelector(
-                      '[data-rating-selector]'
-                    );
-                    ratingSection?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-              >
-                be the first to rate
-              </Button>
+              {!isOwner && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    if (!_user?.id) {
+                      setAuthDialogType('rate');
+                      setShowAuthDialog(true);
+                    } else {
+                      // Scroll to rating selector or open emoji picker
+                      const ratingSection = document.querySelector(
+                        '[data-rating-selector]'
+                      );
+                      ratingSection?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  be the first to rate
+                </Button>
+              )}
             </div>
           )}
 
@@ -654,13 +780,23 @@ function VibePage() {
           {/* Rate & Review This Vibe */}
           <div className="mb-6" data-rating-selector>
             <SignedIn>
-              <EmojiRatingSelector
-                topEmojis={emojiRatings}
-                onSubmit={handleEmojiRating}
-                isSubmitting={createEmojiRatingMutation.isPending}
-                vibeTitle={vibe.title}
-                emojiMetadata={emojiMetadataRecord}
-              />
+              {isOwner ? (
+                <div className="bg-secondary/20 rounded-lg p-4 text-center">
+                  <p className="text-muted-foreground">
+                    you cannot rate your own vibe
+                  </p>
+                </div>
+              ) : (
+                <EmojiRatingSelectorWithConfirmation
+                  vibeId={vibe.id}
+                  topEmojis={emojiRatings}
+                  onSubmit={handleEmojiRating}
+                  isSubmitting={createEmojiRatingMutation.isPending}
+                  vibeTitle={vibe.title}
+                  emojiMetadata={emojiMetadataRecord}
+                  isOwner={!!isOwner}
+                />
+              )}
             </SignedIn>
 
             <SignedOut>
@@ -673,6 +809,7 @@ function VibePage() {
                   size="lg"
                   className="w-full"
                   onClick={() => {
+                    trackRatingAttempt(vibeId);
                     setAuthDialogType('rate');
                     setShowAuthDialog(true);
                   }}
@@ -680,6 +817,14 @@ function VibePage() {
                   <span className="mr-2 text-2xl">❓</span>
                   sign in to rate with an emoji
                 </Button>
+
+                {/* Interaction Gate CTA */}
+                {ctaPlacement.showOnInteraction && (
+                  <InteractionGateCta
+                    featureBlocked="emoji rating"
+                    className="mt-4"
+                  />
+                )}
               </div>
             </SignedOut>
           </div>
@@ -789,7 +934,40 @@ function VibePage() {
                                   }}
                                   showScale={false}
                                   size="sm"
+                                  onEmojiClick={handleEmojiRatingClick}
                                 />
+                                <div className="flex items-center gap-1">
+                                  {rating._id && (
+                                    <>
+                                      <RatingDootButton
+                                        ratingId={rating._id as Id<'ratings'>}
+                                        netScore={voteScores?.[rating._id]?.netScore || 0}
+                                        voteStatus={voteStatuses?.[rating._id] || { voteType: null, boosted: false, dampened: false }}
+                                        isOwnRating={rating.user?.externalId === _user?.id}
+                                        variant="ghost"
+                                        size="sm"
+                                      />
+                                      <BoostButton
+                                        contentId={rating._id as Id<'ratings'>}
+                                        contentType="rating"
+                                        currentBoostScore={0}
+                                        boostCost={50}
+                                        dampenCost={25}
+                                        userPoints={0}
+                                        userBoostAction={null}
+                                        isOwnContent={rating.user?.externalId === _user?.id}
+                                        variant="ghost"
+                                        size="sm"
+                                      />
+                                    </>
+                                  )}
+                                  <RatingShareButton
+                                    rating={rating}
+                                    vibe={vibe}
+                                    variant="ghost"
+                                    size="sm"
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -809,6 +987,22 @@ function VibePage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Vibe Detail CTA for unauthenticated users */}
+          {!isAuthenticated && ctaPlacement.showInVibeDetail && (
+            <div className="mb-8">
+              <SignupCta
+                variant="engagement"
+                context="vibe_detail"
+                placement="vibe-detail-bottom"
+                triggerData={{
+                  vibesViewed: 1,
+                  interactionAttempted: false,
+                }}
+                className="animate-fade-in-up"
+              />
+            </div>
+          )}
         </div>
 
         {/* Similar Vibes Sidebar */}
@@ -836,12 +1030,13 @@ function VibePage() {
       <AuthPromptDialog
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}
-        title="sign in to rate"
-        description="you must sign in to rate and review vibes"
+        title="viber over here 🔥"
+        description="if you vibe this effortlessly you should probably sign up"
       />
 
       {/* Emoji Rating Popover for clicking on top ratings */}
-      <RatingPopover
+      <RatingWithConfirmation
+        vibeId={vibe.id}
         open={showRatingPopover}
         onSubmit={handleEmojiRating}
         isSubmitting={createEmojiRatingMutation.isPending}
@@ -849,6 +1044,7 @@ function VibePage() {
         emojiMetadata={emojiMetadataRecord}
         preSelectedEmoji={selectedEmojiForRating || undefined}
         preSelectedValue={preselectedRatingValue || undefined}
+        isOwner={!!isOwner}
         onOpenChange={(open) => {
           setShowRatingPopover(open);
           if (!open) {
@@ -858,7 +1054,7 @@ function VibePage() {
         }}
       >
         <div />
-      </RatingPopover>
+      </RatingWithConfirmation>
 
       {/* Share Modal */}
       {vibe && vibe.createdBy && (

@@ -17,6 +17,7 @@ interface EmojiRatingCycleDisplayProps {
   variant?: 'color' | 'gradient';
   showBeTheFirst?: boolean;
   delay?: number;
+  isOwner?: boolean;
 }
 
 const DEFAULT_EMOJIS = [
@@ -40,6 +41,7 @@ export function EmojiRatingCycleDisplay({
   className,
   showBeTheFirst = false,
   delay = 0,
+  isOwner = false,
   // variant = 'color',
 }: EmojiRatingCycleDisplayProps) {
   // Start at a random emoji index for visual variety
@@ -87,12 +89,18 @@ export function EmojiRatingCycleDisplay({
     const totalDelay = delay + randomInitialDelay;
 
     if (totalDelay > 0) {
+      let interval: NodeJS.Timeout | null = null;
+      
       const delayTimeout = setTimeout(() => {
-        const interval = startCycling();
-        return () => clearInterval(interval);
+        interval = startCycling();
       }, totalDelay);
 
-      return () => clearTimeout(delayTimeout);
+      return () => {
+        clearTimeout(delayTimeout);
+        if (interval) {
+          clearInterval(interval);
+        }
+      };
     } else {
       const interval = startCycling();
       return () => clearInterval(interval);
@@ -105,6 +113,7 @@ export function EmojiRatingCycleDisplay({
       isSubmitting={isSubmitting}
       vibeTitle={vibeTitle}
       emojiMetadata={emojiMetadata}
+      isOwner={isOwner}
       preSelectedEmoji={
         isHovered && currentEmoji !== '❓' ? currentEmoji : undefined
       }

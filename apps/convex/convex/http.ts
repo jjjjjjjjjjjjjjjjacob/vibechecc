@@ -51,15 +51,45 @@ async function syncUserOAuthConnections(
 
       const platform = platformMapping[account.provider] || null;
 
-      // Skip unsupported platforms (like Apple sign-in) or accounts without user IDs
-      if (!platform) {
-        // Only log for truly unsupported providers, not Apple
-        if (!account.provider.includes('apple')) {
+      // SECURITY: Handle Apple ID authentication properly
+      if (account.provider.includes('apple')) {
+        // Apple ID requires special handling due to privacy-focused approach
+        try {
+          await ctx.runMutation(internal.users.handleAppleIdConnection, {
+            userId: userData.id,
+            appleAccount: {
+              accountId: account.id,
+              provider: account.provider,
+              email: account.email_address,
+              firstName: account.first_name,
+              lastName: account.last_name,
+              imageUrl: account.image_url,
+              verificationStatus: account.verification?.status,
+              createdAt: (account as any).created_at || Date.now(),
+              updatedAt: (account as any).updated_at || Date.now(),
+            },
+          });
+
           // eslint-disable-next-line no-console
           console.log(
-            `Skipping unsupported OAuth provider: ${account.provider}`
+            `Successfully processed Apple ID connection for user ${userData.id}`
+          );
+        } catch (appleError) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `Failed to process Apple ID connection for user ${userData.id}:`,
+            appleError
           );
         }
+        continue; // Apple ID doesn't need social platform tracking
+      }
+
+      // Skip other unsupported platforms
+      if (!platform) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `Skipping unsupported OAuth provider: ${account.provider}`
+        );
         continue;
       }
 
@@ -200,6 +230,15 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
       // Sync OAuth connections if present
       await syncUserOAuthConnections(ctx, userData);
 
+      // SECURITY: Determine signup method from external accounts
+      let signupMethod = 'clerk';
+      const hasAppleAuth = (userData.external_accounts || []).some(account => 
+        account.provider.toLowerCase().includes('apple')
+      );
+      if (hasAppleAuth) {
+        signupMethod = 'apple_id';
+      }
+
       // Track signup to PostHog
       await ctx.runAction(internal.users.trackUserSignup, {
         userId: userData.id,
@@ -207,7 +246,7 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
         username: userData.username || undefined,
         firstName: userData.first_name || undefined,
         lastName: userData.last_name || undefined,
-        signupMethod: 'clerk',
+        signupMethod,
         createdAt: userData.created_at,
       });
 

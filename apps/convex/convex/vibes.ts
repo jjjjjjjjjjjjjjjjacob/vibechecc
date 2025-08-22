@@ -70,7 +70,10 @@ export const getFilteredVibes = query({
             v.literal('top_rated'),
             v.literal('most_rated'),
             v.literal('name'),
-            v.literal('creation_date')
+            v.literal('creation_date'),
+            v.literal('hot'),
+            v.literal('boosted'),
+            v.literal('controversial')
           )
         ),
         minRatingCount: v.optional(v.number()),
@@ -121,6 +124,16 @@ export const getFilteredVibes = query({
         break;
       case 'name':
         // Note: Convex doesn't support ordering by text fields directly
+        vibesQuery = ctx.db.query('vibes').order('desc');
+        break;
+      case 'boosted':
+        // Sort by boost score descending (highest boosted first)
+        vibesQuery = ctx.db.query('vibes').withIndex('byBoostScore', (q) => q.gte('boostScore', 0)).order('desc');
+        break;
+      case 'hot':
+      case 'controversial':
+        // For hot and controversial, we need to fetch vibes and sort by computed scores
+        // Use recent order first, then apply scoring algorithm
         vibesQuery = ctx.db.query('vibes').order('desc');
         break;
     }
@@ -315,7 +328,7 @@ export const getFilteredVibes = query({
       });
     }
 
-    // Sort if needed (for rating-based sorts)
+    // Sort if needed (for rating-based sorts and boost score sorts)
     if (filters.sort === 'rating_desc') {
       vibesWithEmojiRatings.sort(
         (a, b) =>
@@ -359,6 +372,61 @@ export const getFilteredVibes = query({
               : 0) || 0
           );
         return scoreB - scoreA;
+      });
+    } else if (filters.sort === 'boosted') {
+      // Sort by boost score descending (highest boost first)
+      vibesWithEmojiRatings.sort((a, b) => {
+        const boostA = a.boostScore || 0;
+        const boostB = b.boostScore || 0;
+        return boostB - boostA;
+      });
+    } else if (filters.sort === 'hot') {
+      // Hot algorithm: combine boost score with recency and engagement
+      // Reddit-style hot score algorithm
+      vibesWithEmojiRatings.sort((a, b) => {
+        const now = Date.now();
+        const ageInHours = (now - new Date(a.createdAt).getTime()) / (1000 * 60 * 60);
+        const ageInHoursB = (now - new Date(b.createdAt).getTime()) / (1000 * 60 * 60);
+        
+        // Get engagement metrics
+        const ratingCountA = ('ratingCount' in a && typeof a.ratingCount === 'number') ? a.ratingCount : 0;
+        const ratingCountB = ('ratingCount' in b && typeof b.ratingCount === 'number') ? b.ratingCount : 0;
+        const boostA = a.boostScore || 0;
+        const boostB = b.boostScore || 0;
+        
+        // Hot score = (boosts + rating engagement) / (age + 2)^1.5
+        // The +2 prevents division by zero and gives newer content a boost
+        const hotScoreA = (boostA + ratingCountA) / Math.pow(ageInHours + 2, 1.5);
+        const hotScoreB = (boostB + ratingCountB) / Math.pow(ageInHoursB + 2, 1.5);
+        
+        return hotScoreB - hotScoreA;
+      });
+    } else if (filters.sort === 'controversial') {
+      // Controversial algorithm: high engagement with mixed boost/dampen scores
+      vibesWithEmojiRatings.sort((a, b) => {
+        const boostA = a.totalBoosts || 0;
+        const dampenA = a.totalDampens || 0;
+        const boostB = b.totalBoosts || 0;
+        const dampenB = b.totalDampens || 0;
+        
+        // Controversial score: activity level * controversy ratio
+        // High controversy = similar amounts of boosts and dampens
+        const totalActivityA = boostA + dampenA;
+        const totalActivityB = boostB + dampenB;
+        
+        if (totalActivityA === 0 && totalActivityB === 0) return 0;
+        if (totalActivityA === 0) return 1;
+        if (totalActivityB === 0) return -1;
+        
+        // Controversy ratio: closer to 0.5 = more controversial
+        const controversyRatioA = Math.abs((boostA / totalActivityA) - 0.5);
+        const controversyRatioB = Math.abs((boostB / totalActivityB) - 0.5);
+        
+        // Invert ratio so lower values (more controversial) rank higher
+        const controversyScoreA = (0.5 - controversyRatioA) * totalActivityA;
+        const controversyScoreB = (0.5 - controversyRatioB) * totalActivityB;
+        
+        return controversyScoreB - controversyScoreA;
       });
     }
 
@@ -752,6 +820,9 @@ export const create = mutation({
     description: v.string(),
     image: v.optional(v.union(v.string(), v.id('_storage'))),
     tags: v.optional(v.array(v.string())),
+    gradientFrom: v.optional(v.string()),
+    gradientTo: v.optional(v.string()),
+    gradientDirection: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // SECURITY: Check authentication and validate input
@@ -840,6 +911,9 @@ export const create = mutation({
       createdAt: now,
       tags: tags || [],
       visibility: 'public', // Default to public visibility
+      gradientFrom: args.gradientFrom,
+      gradientTo: args.gradientTo,
+      gradientDirection: args.gradientDirection,
     });
 
     // Update tag usage counts
@@ -884,6 +958,20 @@ export const create = mutation({
       // Don't fail the vibe creation if notification creation fails
       // eslint-disable-next-line no-console
       console.error('Failed to create new vibe notifications:', error);
+    }
+
+    // Award points for posting a vibe
+    try {
+      if (identity) {
+        await ctx.scheduler.runAfter(0, internal.userPoints.awardPointsForVibe, {
+          userId: identity.subject,
+          vibeId: id,
+        });
+      }
+    } catch (error) {
+      // Don't fail the vibe creation if points award fails
+      // eslint-disable-next-line no-console
+      console.error('Failed to award points for vibe creation:', error);
     }
 
     return id;
@@ -2419,7 +2507,10 @@ export const getFollowingVibes = query({
             v.literal('rating_desc'),
             v.literal('rating_asc'),
             v.literal('top_rated'),
-            v.literal('most_rated')
+            v.literal('most_rated'),
+            v.literal('hot'),
+            v.literal('boosted'),
+            v.literal('controversial')
           )
         ),
       })
@@ -2533,7 +2624,7 @@ export const getFollowingVibes = query({
         );
       }
 
-      // Apply rating-based sorting
+      // Apply rating-based sorting and boost score sorting
       if (filters.sort === 'rating_desc') {
         ratingFilteredVibes.sort((a, b) => b.averageRating - a.averageRating);
       } else if (filters.sort === 'rating_asc') {
@@ -2545,6 +2636,51 @@ export const getFollowingVibes = query({
           const scoreA = a.averageRating * Math.log1p(a.ratingCount);
           const scoreB = b.averageRating * Math.log1p(b.ratingCount);
           return scoreB - scoreA;
+        });
+      } else if (filters.sort === 'boosted') {
+        // Sort by boost score descending
+        ratingFilteredVibes.sort((a, b) => {
+          const boostA = a.vibe.boostScore || 0;
+          const boostB = b.vibe.boostScore || 0;
+          return boostB - boostA;
+        });
+      } else if (filters.sort === 'hot') {
+        // Hot algorithm: combine boost score with recency and engagement
+        ratingFilteredVibes.sort((a, b) => {
+          const now = Date.now();
+          const ageInHours = (now - new Date(a.vibe.createdAt).getTime()) / (1000 * 60 * 60);
+          const ageInHoursB = (now - new Date(b.vibe.createdAt).getTime()) / (1000 * 60 * 60);
+          
+          const boostA = a.vibe.boostScore || 0;
+          const boostB = b.vibe.boostScore || 0;
+          
+          const hotScoreA = (boostA + a.ratingCount) / Math.pow(ageInHours + 2, 1.5);
+          const hotScoreB = (boostB + b.ratingCount) / Math.pow(ageInHoursB + 2, 1.5);
+          
+          return hotScoreB - hotScoreA;
+        });
+      } else if (filters.sort === 'controversial') {
+        // Controversial algorithm: high engagement with mixed boost/dampen scores
+        ratingFilteredVibes.sort((a, b) => {
+          const boostA = a.vibe.totalBoosts || 0;
+          const dampenA = a.vibe.totalDampens || 0;
+          const boostB = b.vibe.totalBoosts || 0;
+          const dampenB = b.vibe.totalDampens || 0;
+          
+          const totalActivityA = boostA + dampenA;
+          const totalActivityB = boostB + dampenB;
+          
+          if (totalActivityA === 0 && totalActivityB === 0) return 0;
+          if (totalActivityA === 0) return 1;
+          if (totalActivityB === 0) return -1;
+          
+          const controversyRatioA = Math.abs((boostA / totalActivityA) - 0.5);
+          const controversyRatioB = Math.abs((boostB / totalActivityB) - 0.5);
+          
+          const controversyScoreA = (0.5 - controversyRatioA) * totalActivityA;
+          const controversyScoreB = (0.5 - controversyRatioB) * totalActivityB;
+          
+          return controversyScoreB - controversyScoreA;
         });
       }
 
@@ -2698,6 +2834,9 @@ export const updateVibe = mutation({
     description: v.optional(v.string()),
     image: v.optional(v.union(v.string(), v.id('_storage'))),
     tags: v.optional(v.array(v.string())),
+    gradientFrom: v.optional(v.string()),
+    gradientTo: v.optional(v.string()),
+    gradientDirection: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Check if user is authenticated
@@ -2735,6 +2874,9 @@ export const updateVibe = mutation({
     if (args.description !== undefined)
       updateData.description = args.description;
     if (args.tags !== undefined) updateData.tags = args.tags;
+    if (args.gradientFrom !== undefined) updateData.gradientFrom = args.gradientFrom;
+    if (args.gradientTo !== undefined) updateData.gradientTo = args.gradientTo;
+    if (args.gradientDirection !== undefined) updateData.gradientDirection = args.gradientDirection;
 
     // Handle image updates
     if (args.image !== undefined) {

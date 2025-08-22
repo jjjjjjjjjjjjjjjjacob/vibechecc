@@ -1,18 +1,31 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { cn } from '@/utils/tailwind-utils';
+import { usePlaceholderTracking } from '@/hooks/use-performance-tracking';
 
 interface VibeCardSkeletonProps {
   compact?: boolean;
+  trackingId?: string;
 }
 
-export function VibeCardSkeleton({ compact }: VibeCardSkeletonProps) {
+export function VibeCardSkeleton({ compact, trackingId }: VibeCardSkeletonProps) {
+  const componentName = trackingId || `vibe-card-skeleton${compact ? '-compact' : ''}`;
+  const { visibilityRef, trackInteraction } = usePlaceholderTracking(componentName, {
+    trackVisibility: true,
+    trackInteraction: true,
+    minVisibilityTime: 300,
+  });
   return (
-    <Card className={cn('overflow-hidden', !compact && 'h-full')}>
+    <Card 
+      ref={visibilityRef}
+      className={cn('overflow-hidden', !compact && 'h-full')}
+      onClick={() => trackInteraction('card_click')}
+    >
       {/* Image skeleton */}
       <div className="relative">
         <Skeleton
           className={cn('w-full', compact ? 'aspect-[4/3]' : 'aspect-video')}
+          onClick={() => trackInteraction('image_click')}
         />
       </div>
 

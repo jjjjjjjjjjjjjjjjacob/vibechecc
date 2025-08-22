@@ -30,6 +30,7 @@ import {
 } from '@/stores/theme-store';
 import { SocialConnectionsList } from '@/components/social/connections/social-connections-list';
 import { ConnectSocialButton } from '@/components/social/connections/connect-social-button';
+import { AppleIdStatus } from '@/features/auth/components/apple-id-error-handler';
 
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getWebRequest();
@@ -393,9 +394,17 @@ function ProfileEdit() {
                   <div className="space-y-4 pt-4">
                     <div>
                       <h3 className="mb-3 text-sm font-medium">
-                        social connections
+                        authentication & connections
                       </h3>
-                      <SocialConnectionsList className="mb-4" />
+                      <div className="space-y-3">
+                        <AppleIdStatus />
+                        <div>
+                          <h4 className="mb-2 text-xs font-medium text-muted-foreground">
+                            social connections
+                          </h4>
+                          <SocialConnectionsList className="mb-4" />
+                        </div>
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         <ConnectSocialButton
                           platform="twitter"

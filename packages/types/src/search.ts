@@ -26,6 +26,9 @@ export interface VibeSearchResult extends BaseSearchResult {
     name: string;
     avatar?: string;
   };
+  boostScore?: number;
+  totalBoosts?: number;
+  totalDampens?: number;
 }
 
 export interface UserSearchResult extends BaseSearchResult {
@@ -94,7 +97,10 @@ export type SearchSortOption =
   | 'oldest'
   | 'name'
   | 'creation_date'
-  | 'interaction_time';
+  | 'interaction_time'
+  | 'hot'
+  | 'boosted'
+  | 'controversial';
 
 // Search request/response
 export interface SearchRequest {

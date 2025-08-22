@@ -11,6 +11,7 @@ import {
 } from '@convex-dev/react-query';
 import { useConvex } from 'convex/react';
 import type { FunctionReference, FunctionArgs } from 'convex/server';
+import type { Id } from '@vibechecc/convex/dataModel';
 import { api } from '@vibechecc/convex';
 // import { useAuth } from '@clerk/tanstack-react-start';
 
@@ -659,6 +660,89 @@ export function useCreateColumnMutation() {
   });
 }
 
+// Query to get current user's ratings for a specific vibe
+export function useUserVibeRatings(vibeId: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getUserVibeRatings, { vibeId }),
+    enabled: options?.enabled !== false && !!vibeId,
+  });
+}
+
+// Mutation to toggle boost on a rating
+export function useToggleRatingBoostMutation() {
+  const convex = useConvex();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ ratingId }: { ratingId: Id<'ratings'> }) => {
+      const result = await convex.mutation(api.emojiRatings.toggleRatingBoost, { ratingId });
+      return result;
+    },
+    onSuccess: () => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['rating-votes'] });
+      queryClient.invalidateQueries({ queryKey: ['rating-likes'] }); // Legacy compatibility
+      queryClient.invalidateQueries({ queryKey: ['convexQuery'] });
+    },
+  });
+}
+
+// Mutation to toggle dampen on a rating
+export function useToggleRatingDampenMutation() {
+  const convex = useConvex();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ ratingId }: { ratingId: Id<'ratings'> }) => {
+      const result = await convex.mutation(api.emojiRatings.toggleRatingDampen, { ratingId });
+      return result;
+    },
+    onSuccess: () => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['rating-votes'] });
+      queryClient.invalidateQueries({ queryKey: ['rating-likes'] }); // Legacy compatibility
+      queryClient.invalidateQueries({ queryKey: ['convexQuery'] });
+    },
+  });
+}
+
+// Query to get vote scores for multiple ratings
+export function useBulkRatingVoteScores(ratingIds: Id<'ratings'>[], options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getBulkRatingVoteScores, { ratingIds }),
+    enabled: options?.enabled !== false && ratingIds.length > 0,
+  });
+}
+
+// Query to get user's vote status for multiple ratings
+export function useBulkUserRatingVoteStatuses(ratingIds: Id<'ratings'>[], options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getBulkUserRatingVoteStatuses, { ratingIds }),
+    enabled: options?.enabled !== false && ratingIds.length > 0,
+  });
+}
+
+// Legacy function - kept for backward compatibility during transition
+export function useToggleRatingLikeMutation() {
+  // Redirect to boost for backward compatibility
+  return useToggleRatingBoostMutation();
+}
+
+// Legacy queries - kept for backward compatibility during transition
+export function useBulkRatingLikeCounts(ratingIds: Id<'ratings'>[], options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getBulkRatingLikeCounts, { ratingIds }),
+    enabled: options?.enabled !== false && ratingIds.length > 0,
+  });
+}
+
+export function useBulkUserRatingLikeStatuses(ratingIds: Id<'ratings'>[], options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getBulkUserRatingLikeStatuses, { ratingIds }),
+    enabled: options?.enabled !== false && ratingIds.length > 0,
+  });
+}
+
 // FOLLOW SYSTEM QUERIES
 export * from './features/follows/hooks';
 
@@ -771,7 +855,10 @@ export function useVibesInfinite(
       | 'top_rated'
       | 'most_rated'
       | 'name'
-      | 'creation_date';
+      | 'creation_date'
+      | 'hot'
+      | 'boosted'
+      | 'controversial';
     minRatingCount?: number;
     maxRatingCount?: number;
     followingOnly?: boolean;
@@ -857,5 +944,105 @@ export function useVibesPaginatedGeneric(
       filters: filterOptions,
     }),
     enabled,
+  });
+}
+
+// VIBE POINTS SYSTEM QUERIES
+
+// Query to get user's points statistics
+export function useUserPointsStats(userId: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.vibePoints.getUserPointsStats, { userId }),
+    enabled: options?.enabled !== false && !!userId,
+  });
+}
+
+// Query to get points history for charts
+export function usePointsHistory(userId: string, days: number = 30, options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.vibePoints.getPointsHistory, { userId, days }),
+    enabled: options?.enabled !== false && !!userId,
+  });
+}
+
+// Query to get points leaderboard
+export function usePointsLeaderboard(limit: number = 10, options?: { enabled?: boolean }) {
+  return useQuery({
+    ...convexQuery(api.vibePoints.getLeaderboard, { limit }),
+    enabled: options?.enabled !== false,
+  });
+}
+
+// Mutation to boost content
+export function useBoostContentMutation() {
+  const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.vibePoints.boostContent);
+
+  return useMutation({
+    mutationFn: convexMutation,
+    onSuccess: (_result, variables) => {
+      // Invalidate points stats
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibePoints.getUserPointsStats],
+      });
+      
+      // Invalidate points history
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibePoints.getPointsHistory],
+      });
+      
+      // Invalidate the specific content that was boosted
+      if (variables?.contentType === 'vibe' && variables?.contentId) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'convexQuery',
+            api.vibes.getById,
+            { id: variables.contentId },
+          ],
+        });
+      }
+      
+      // Invalidate leaderboard
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibePoints.getLeaderboard],
+      });
+    },
+  });
+}
+
+// Mutation to dampen content
+export function useDampenContentMutation() {
+  const queryClient = useQueryClient();
+  const convexMutation = useConvexMutation(api.vibePoints.dampenContent);
+
+  return useMutation({
+    mutationFn: convexMutation,
+    onSuccess: (_result, variables) => {
+      // Invalidate points stats
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibePoints.getUserPointsStats],
+      });
+      
+      // Invalidate points history
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibePoints.getPointsHistory],
+      });
+      
+      // Invalidate the specific content that was dampened
+      if (variables?.contentType === 'vibe' && variables?.contentId) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'convexQuery',
+            api.vibes.getById,
+            { id: variables.contentId },
+          ],
+        });
+      }
+      
+      // Invalidate leaderboard
+      queryClient.invalidateQueries({
+        queryKey: ['convexQuery', api.vibePoints.getLeaderboard],
+      });
+    },
   });
 }

@@ -4,6 +4,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { JSMasonryLayout, useMasonryLayout } from '@/components/masonry-layout';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { FeedSignupCta } from '@/features/auth/components/signup-cta';
+import { useSignupCtaPlacement, useAnonymousInteractionTracking } from '@/features/auth/hooks/use-signup-cta-placement';
 import type { Vibe } from '@vibechecc/types';
 
 interface MasonryFeedProps {
@@ -20,6 +23,10 @@ interface MasonryFeedProps {
   emptyStateDescription?: string;
   emptyStateAction?: React.ReactNode;
   showLoadMoreTarget?: boolean;
+  // Mobile optimization props
+  enableFadeIn?: boolean;
+  optimizeForTouch?: boolean;
+  preferredMobileVariant?: 'mobile-optimized' | 'mobile-story' | 'mobile-square';
 }
 
 export function MasonryFeed({
@@ -36,9 +43,20 @@ export function MasonryFeed({
   emptyStateDescription = 'try adjusting your filters or check back later',
   emptyStateAction,
   showLoadMoreTarget = true,
+  enableFadeIn = false,
+  optimizeForTouch = true,
+  preferredMobileVariant = 'mobile-optimized',
 }: MasonryFeedProps) {
   const shouldUseMasonry = useMasonryLayout();
+  const isMobile = useIsMobile();
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
+  
+  // CTA placement hooks
+  const { shouldShowFeedCta, isAuthenticated, vibesViewed } = useSignupCtaPlacement({
+    feedThreshold: 3,
+    enableFeedCta: variant === 'feed', // Only show on main feed
+  });
+  const { trackVibeView } = useAnonymousInteractionTracking();
 
   // Intersection observer for infinite scroll
   React.useEffect(() => {
@@ -70,6 +88,40 @@ export function MasonryFeed({
     return shouldUseMasonry ? 'feed-masonry' : 'feed-single';
   };
 
+  // Create vibes array with CTAs injected at strategic positions
+  const vibesWithCtas = React.useMemo(() => {
+    if (isAuthenticated || variant !== 'feed') {
+      return vibes;
+    }
+
+    const result: (Vibe | { type: 'cta'; id: string; index: number })[] = [];
+    
+    vibes.forEach((vibe, index) => {
+      result.push(vibe);
+      
+      // Add CTA after viewing 3rd, 7th, 15th vibe, etc.
+      const ctaPositions = [2, 6, 14, 25, 40]; // 0-indexed positions
+      if (ctaPositions.includes(index) && shouldShowFeedCta(index + 1)) {
+        result.push({
+          type: 'cta',
+          id: `feed-cta-${index}`,
+          index: index + 1,
+        });
+      }
+    });
+
+    return result;
+  }, [vibes, isAuthenticated, variant, shouldShowFeedCta]);
+
+  // Track vibe views for anonymous users
+  React.useEffect(() => {
+    if (!isAuthenticated && vibes.length > 0) {
+      vibes.forEach((vibe) => {
+        trackVibeView(vibe.id);
+      });
+    }
+  }, [vibes, isAuthenticated, trackVibeView]);
+
   // Error state
   if (error) {
     return (
@@ -89,7 +141,12 @@ export function MasonryFeed({
   if (isLoading && vibes.length === 0) {
     return (
       <div className={cn('w-full', className)}>
-        <FeedSkeleton useMasonry={shouldUseMasonry} variant={variant} />
+        <FeedSkeleton 
+          useMasonry={shouldUseMasonry} 
+          variant={variant} 
+          isMobile={isMobile}
+          preferredMobileVariant={preferredMobileVariant}
+        />
       </div>
     );
   }
@@ -108,6 +165,16 @@ export function MasonryFeed({
         {emptyStateAction && (
           <div className="flex justify-center">{emptyStateAction}</div>
         )}
+        
+        {/* Empty State CTA for unauthenticated users */}
+        {!isAuthenticated && variant === 'feed' && (
+          <div className="mt-8">
+            <FeedSignupCta
+              vibesViewed={0}
+              className="mx-auto max-w-md animate-fade-in-up"
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -120,34 +187,77 @@ export function MasonryFeed({
         <JSMasonryLayout
           columns={{
             default: 1,
-            sm: variant === 'search' ? 2 : 1,
+            sm: (() => {
+              // Mobile variants prefer single column for better UX
+              if (isMobile && (preferredMobileVariant === 'mobile-story' || preferredMobileVariant === 'mobile-square')) {
+                return 1;
+              }
+              return variant === 'search' ? 2 : 1;
+            })(),
             md: variant === 'search' ? 3 : 2,
             lg: variant === 'search' ? 4 : 3,
             xl: variant === 'search' ? 5 : 4,
           }}
-          gap="20px"
+          gap={isMobile && preferredMobileVariant === 'mobile-story' ? '16px' : '20px'}
           className="w-full"
         >
-          {vibes.map((vibe) => (
-            <VibeCard
-              key={vibe.id}
-              vibe={vibe}
-              variant={getVibeCardVariant()}
-              ratingDisplayMode={ratingDisplayMode}
-            />
-          ))}
+          {vibesWithCtas.map((item, index) => {
+            if ('type' in item && item.type === 'cta') {
+              return (
+                <FeedSignupCta
+                  key={item.id}
+                  vibesViewed={item.index}
+                  className="animate-fade-in-up"
+                />
+              );
+            }
+            
+            const vibe = item as Vibe;
+            return (
+              <VibeCard
+                key={vibe.id}
+                vibe={vibe}
+                variant={getVibeCardVariant()}
+                ratingDisplayMode={ratingDisplayMode}
+                enableFadeIn={enableFadeIn}
+                optimizeForTouch={optimizeForTouch}
+                delay={enableFadeIn ? index * 50 : 0}
+              />
+            );
+          })}
         </JSMasonryLayout>
       ) : (
         // Mobile single column layout
-        <div className="space-y-5">
-          {vibes.map((vibe) => (
-            <VibeCard
-              key={vibe.id}
-              vibe={vibe}
-              variant={getVibeCardVariant()}
-              ratingDisplayMode={ratingDisplayMode}
-            />
-          ))}
+        <div className={cn(
+          // Adjust spacing based on mobile variant
+          preferredMobileVariant === 'mobile-story' ? 'space-y-4' : 'space-y-5',
+          // Center mobile-story cards
+          preferredMobileVariant === 'mobile-story' && 'flex flex-col items-center'
+        )}>
+          {vibesWithCtas.map((item, index) => {
+            if ('type' in item && item.type === 'cta') {
+              return (
+                <FeedSignupCta
+                  key={item.id}
+                  vibesViewed={item.index}
+                  className="animate-fade-in-up"
+                />
+              );
+            }
+            
+            const vibe = item as Vibe;
+            return (
+              <VibeCard
+                key={vibe.id}
+                vibe={vibe}
+                variant={getVibeCardVariant()}
+                ratingDisplayMode={ratingDisplayMode}
+                enableFadeIn={enableFadeIn}
+                optimizeForTouch={optimizeForTouch}
+                delay={enableFadeIn ? index * 100 : 0}
+              />
+            );
+          })}
         </div>
       )}
 
@@ -170,17 +280,39 @@ export function MasonryFeed({
 function FeedSkeleton({
   useMasonry,
   variant = 'feed',
+  isMobile = false,
+  preferredMobileVariant = 'mobile-optimized',
 }: {
   useMasonry: boolean;
   variant?: 'feed' | 'search' | 'category';
+  isMobile?: boolean;
+  preferredMobileVariant?: 'mobile-optimized' | 'mobile-story' | 'mobile-square';
 }) {
   const skeletonCount = variant === 'search' ? 15 : 12;
+  
+  // Determine aspect ratio based on mobile variant
+  const getAspectRatio = () => {
+    if (isMobile) {
+      switch (preferredMobileVariant) {
+        case 'mobile-story':
+          return 'aspect-[9/16]';
+        case 'mobile-square':
+          return 'aspect-square';
+        case 'mobile-optimized':
+          return 'aspect-[4/5]';
+        default:
+          return 'aspect-[4/5]';
+      }
+    }
+    return useMasonry ? 'aspect-[3/4]' : 'aspect-video';
+  };
+  
   const skeletons = Array.from({ length: skeletonCount }, (_, i) => (
-    <Card key={i} className="overflow-hidden">
+    <Card key={i} className={cn('overflow-hidden', isMobile && preferredMobileVariant === 'mobile-story' && 'max-w-sm mx-auto')}>
       <Skeleton
-        className={cn('w-full', useMasonry ? 'aspect-[3/4]' : 'aspect-video')}
+        className={cn('w-full', getAspectRatio())}
       />
-      <div className="space-y-3 p-4">
+      <div className={cn('space-y-3 p-4', preferredMobileVariant === 'mobile-story' && 'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 text-white')}>
         <Skeleton className="h-5 w-3/4" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-2/3" />
