@@ -28,17 +28,19 @@ export function useSignupCtaPlacement(options: UseCTAPlacementOptions = {}) {
 
   // Use individual stable selectors to avoid object recreation
   const vibesViewed = useAnonymousUserStore((state) => state.vibesViewed);
-  const sessionStartTime = useAnonymousUserStore((state) => state.sessionStartTime);
-  
+  const sessionStartTime = useAnonymousUserStore(
+    (state) => state.sessionStartTime
+  );
+
   // Use stable selectors for action counts
-  const ratingAttempts = useAnonymousUserStore((state) => 
-    state.actions.filter(a => a.type === 'rating_attempt').length
+  const ratingAttempts = useAnonymousUserStore(
+    (state) => state.actions.filter((a) => a.type === 'rating_attempt').length
   );
-  const followAttempts = useAnonymousUserStore((state) => 
-    state.actions.filter(a => a.type === 'follow_attempt').length
+  const followAttempts = useAnonymousUserStore(
+    (state) => state.actions.filter((a) => a.type === 'follow_attempt').length
   );
-  const searchAttempts = useAnonymousUserStore((state) => 
-    state.actions.filter(a => a.type === 'search').length
+  const searchAttempts = useAnonymousUserStore(
+    (state) => state.actions.filter((a) => a.type === 'search').length
   );
 
   const {
@@ -53,8 +55,10 @@ export function useSignupCtaPlacement(options: UseCTAPlacementOptions = {}) {
   } = options;
 
   // Use the store's shouldShowCta function instead of duplicating logic
-  const shouldShowCtaFromStore = useAnonymousUserStore((state) => state.shouldShowCta);
-  
+  const shouldShowCtaFromStore = useAnonymousUserStore(
+    (state) => state.shouldShowCta
+  );
+
   // Calculate derived values once
   const derivedValues = useMemo(() => {
     if (isAuthenticated) {
@@ -66,14 +70,13 @@ export function useSignupCtaPlacement(options: UseCTAPlacementOptions = {}) {
       };
     }
 
-    const sessionTimeMinutes = sessionStartTime > 0 
-      ? (Date.now() - sessionStartTime) / (1000 * 60) 
-      : 0;
-    
+    const sessionTimeMinutes =
+      sessionStartTime > 0 ? (Date.now() - sessionStartTime) / (1000 * 60) : 0;
+
     const hasAttemptedInteraction = ratingAttempts > 0 || followAttempts > 0;
     const hasEngagedWithSearch = searchAttempts > 0;
     const hasSpentTimeOnSite = sessionTimeMinutes >= 2; // 2 minutes minimum
-    
+
     return {
       sessionTimeMinutes,
       hasAttemptedInteraction,
@@ -101,16 +104,35 @@ export function useSignupCtaPlacement(options: UseCTAPlacementOptions = {}) {
       };
     }
 
-    const { hasAttemptedInteraction, hasEngagedWithSearch, hasSpentTimeOnSite } = derivedValues;
+    const {
+      hasAttemptedInteraction,
+      hasEngagedWithSearch,
+      hasSpentTimeOnSite,
+    } = derivedValues;
     const hasViewedEnoughVibes = vibesViewed >= feedThreshold;
 
     return {
-      showInFeed: enableFeedCta && hasViewedEnoughVibes && shouldShowCtaFromStore('feed-cta', 'after_vibe_views'),
-      showInVibeDetail: enableVibeDetailCta && vibesViewed >= 2 && shouldShowCtaFromStore('vibe-detail-cta', 'vibe_detail'),
-      showInProfile: enableProfileCta && hasSpentTimeOnSite && shouldShowCtaFromStore('profile-cta', 'social_discovery'),
-      showInSearch: enableSearchCta && hasEngagedWithSearch && shouldShowCtaFromStore('search-cta', 'search_context'),
+      showInFeed:
+        enableFeedCta &&
+        hasViewedEnoughVibes &&
+        shouldShowCtaFromStore('feed-cta', 'after_vibe_views'),
+      showInVibeDetail:
+        enableVibeDetailCta &&
+        vibesViewed >= 2 &&
+        shouldShowCtaFromStore('vibe-detail-cta', 'vibe_detail'),
+      showInProfile:
+        enableProfileCta &&
+        hasSpentTimeOnSite &&
+        shouldShowCtaFromStore('profile-cta', 'social_discovery'),
+      showInSearch:
+        enableSearchCta &&
+        hasEngagedWithSearch &&
+        shouldShowCtaFromStore('search-cta', 'search_context'),
       showOnInteraction: enableInteractionGate && hasAttemptedInteraction,
-      showInEmptyStates: enableEmptyStateCta && hasSpentTimeOnSite && shouldShowCtaFromStore('empty-state-cta', 'empty_state'),
+      showInEmptyStates:
+        enableEmptyStateCta &&
+        hasSpentTimeOnSite &&
+        shouldShowCtaFromStore('empty-state-cta', 'empty_state'),
     };
   }, [
     isAuthenticated,
@@ -127,21 +149,37 @@ export function useSignupCtaPlacement(options: UseCTAPlacementOptions = {}) {
   ]);
 
   // Helper functions - memoized to prevent recreating on every render
-  const shouldShowFeedCta = useCallback((currentVibeIndex: number) => {
-    return placement.showInFeed && currentVibeIndex > 0 && currentVibeIndex % feedThreshold === 0;
-  }, [placement.showInFeed, feedThreshold]);
+  const shouldShowFeedCta = useCallback(
+    (currentVibeIndex: number) => {
+      return (
+        placement.showInFeed &&
+        currentVibeIndex > 0 &&
+        currentVibeIndex % feedThreshold === 0
+      );
+    },
+    [placement.showInFeed, feedThreshold]
+  );
 
-  const shouldShowScrollCta = useCallback((scrollPercentage: number) => {
-    return placement.showInFeed && scrollPercentage >= scrollThreshold;
-  }, [placement.showInFeed, scrollThreshold]);
+  const shouldShowScrollCta = useCallback(
+    (scrollPercentage: number) => {
+      return placement.showInFeed && scrollPercentage >= scrollThreshold;
+    },
+    [placement.showInFeed, scrollThreshold]
+  );
 
-  const shouldShowInteractionGate = useCallback((_interactionType: 'rating' | 'follow' | 'like') => {
-    return placement.showOnInteraction && !isAuthenticated;
-  }, [placement.showOnInteraction, isAuthenticated]);
+  const shouldShowInteractionGate = useCallback(
+    (_interactionType: 'rating' | 'follow' | 'like') => {
+      return placement.showOnInteraction && !isAuthenticated;
+    },
+    [placement.showOnInteraction, isAuthenticated]
+  );
 
-  const shouldShowEmptyStateCta = useCallback((_context: 'no_results' | 'no_content' | 'no_following') => {
-    return placement.showInEmptyStates;
-  }, [placement.showInEmptyStates]);
+  const shouldShowEmptyStateCta = useCallback(
+    (_context: 'no_results' | 'no_content' | 'no_following') => {
+      return placement.showInEmptyStates;
+    },
+    [placement.showInEmptyStates]
+  );
 
   return {
     placement,
@@ -161,51 +199,66 @@ export function useAnonymousInteractionTracking() {
   const { user } = useUser();
   const addAction = useAnonymousUserStore((state) => state.addAction);
 
-  const trackVibeView = useCallback((vibeId: string) => {
-    if (!user) {
-      addAction({
-        type: 'vibe_view',
-        targetId: vibeId,
-      });
-    }
-  }, [user, addAction]);
+  const trackVibeView = useCallback(
+    (vibeId: string) => {
+      if (!user) {
+        addAction({
+          type: 'vibe_view',
+          targetId: vibeId,
+        });
+      }
+    },
+    [user, addAction]
+  );
 
-  const trackRatingAttempt = useCallback((vibeId: string) => {
-    if (!user) {
-      addAction({
-        type: 'rating_attempt',
-        targetId: vibeId,
-      });
-    }
-  }, [user, addAction]);
+  const trackRatingAttempt = useCallback(
+    (vibeId: string) => {
+      if (!user) {
+        addAction({
+          type: 'rating_attempt',
+          targetId: vibeId,
+        });
+      }
+    },
+    [user, addAction]
+  );
 
-  const trackFollowAttempt = useCallback((userId: string) => {
-    if (!user) {
-      addAction({
-        type: 'follow_attempt',
-        targetId: userId,
-      });
-    }
-  }, [user, addAction]);
+  const trackFollowAttempt = useCallback(
+    (userId: string) => {
+      if (!user) {
+        addAction({
+          type: 'follow_attempt',
+          targetId: userId,
+        });
+      }
+    },
+    [user, addAction]
+  );
 
-  const trackSearch = useCallback((query: string) => {
-    if (!user) {
-      addAction({
-        type: 'search',
-        targetId: query,
-        data: { query },
-      });
-    }
-  }, [user, addAction]);
+  const trackSearch = useCallback(
+    (query: string) => {
+      if (!user) {
+        addAction({
+          type: 'search',
+          targetId: query,
+          data: { query },
+        });
+      }
+    },
+    [user, addAction]
+  );
 
-  const trackVibeLike = useCallback((vibeId: string) => {
-    if (!user) {
-      addAction({
-        type: 'vibe_like',
-        targetId: vibeId,
-      });
-    }
-  }, [user, addAction]);
+  const trackVibeLike = useCallback(
+    (vibeId: string) => {
+      if (!user) {
+        addAction({
+          type: 'vibe_like',
+          targetId: vibeId,
+        });
+      }
+    },
+    [user, addAction]
+  );
 
   return {
     trackVibeView,

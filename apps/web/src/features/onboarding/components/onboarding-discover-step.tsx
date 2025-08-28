@@ -7,7 +7,7 @@ import { Heart, Eye, UserPlus, Users, Sparkles } from '@/components/ui/icons';
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
 import { api } from '@vibechecc/convex';
-import { EmojiRatingSelector } from '@/features/ratings/components/emoji-rating-selector';
+import { RevolvingRateReviewButton } from '@/features/ratings/components/revolving-rate-review-button';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import type { EmojiRating } from '@vibechecc/types';
 import { computeUserDisplayName } from '@/utils/user-utils';
@@ -217,10 +217,11 @@ export function OnboardingDiscoverStep({
 
                 {/* Emoji Rating Demo */}
                 <div className="border-t pt-4">
-                  <EmojiRatingSelector
+                  <RevolvingRateReviewButton
+                    vibeId={demoVibe.id}
                     topEmojis={demoVibe.emojiRatings || []}
-                    onSubmit={handleEmojiRating}
                     vibeTitle={demoVibe.title}
+                    existingUserRatings={[]}
                     className="mb-4"
                   />
 
@@ -235,6 +236,10 @@ export function OnboardingDiscoverStep({
                             <EmojiRatingDisplay
                               key={`${rating.emoji}-${index}`}
                               rating={rating}
+                              vibeId={demoVibe.id}
+                              variant="compact"
+                              existingUserRatings={[]}
+                              emojiMetadata={{}}
                             />
                           ))}
                         </div>

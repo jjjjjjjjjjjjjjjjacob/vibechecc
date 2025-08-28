@@ -25,16 +25,16 @@ interface VibePointsChartProps {
   showTitle?: boolean;
 }
 
-export function VibePointsChart({ 
-  data, 
+export function VibePointsChart({
+  data,
   className,
-  showTitle = true 
+  showTitle = true,
 }: VibePointsChartProps) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
     });
   };
 
@@ -53,15 +53,19 @@ export function VibePointsChart({
         </p>
         {payload.map((entry: any, index: number) => (
           <div key={index} className="flex items-center gap-2 text-xs">
-            <div 
-              className="h-2 w-2 rounded-full" 
+            <div
+              className="h-2 w-2 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
             <span className="text-muted-foreground capitalize">
               {entry.dataKey}:
             </span>
             <span className="text-foreground font-medium">
-              {entry.dataKey === 'earned' ? '+' : entry.dataKey === 'spent' ? '-' : ''}
+              {entry.dataKey === 'earned'
+                ? '+'
+                : entry.dataKey === 'spent'
+                  ? '-'
+                  : ''}
               {entry.value}
             </span>
           </div>
@@ -91,30 +95,30 @@ export function VibePointsChart({
                 bottom: 5,
               }}
             >
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                className="stroke-muted" 
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="stroke-muted"
                 opacity={0.3}
               />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 tickFormatter={formatDate}
                 className="text-muted-foreground text-xs"
                 axisLine={false}
                 tickLine={false}
                 fontSize={10}
               />
-              <YAxis 
+              <YAxis
                 className="text-muted-foreground text-xs"
                 axisLine={false}
                 tickLine={false}
                 fontSize={10}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
+              <Legend
                 wrapperStyle={{
                   fontSize: '12px',
-                  paddingTop: '8px'
+                  paddingTop: '8px',
                 }}
                 iconType="circle"
               />
@@ -123,8 +127,16 @@ export function VibePointsChart({
                 dataKey="earned"
                 stroke="hsl(var(--theme-primary))"
                 strokeWidth={2}
-                dot={{ fill: 'hsl(var(--theme-primary))', strokeWidth: 2, r: 3 }}
-                activeDot={{ r: 4, stroke: 'hsl(var(--theme-primary))', strokeWidth: 2 }}
+                dot={{
+                  fill: 'hsl(var(--theme-primary))',
+                  strokeWidth: 2,
+                  r: 3,
+                }}
+                activeDot={{
+                  r: 4,
+                  stroke: 'hsl(var(--theme-primary))',
+                  strokeWidth: 2,
+                }}
                 name="earned"
               />
               <Line
@@ -133,7 +145,11 @@ export function VibePointsChart({
                 stroke="hsl(var(--destructive))"
                 strokeWidth={2}
                 dot={{ fill: 'hsl(var(--destructive))', strokeWidth: 2, r: 3 }}
-                activeDot={{ r: 4, stroke: 'hsl(var(--destructive))', strokeWidth: 2 }}
+                activeDot={{
+                  r: 4,
+                  stroke: 'hsl(var(--destructive))',
+                  strokeWidth: 2,
+                }}
                 name="spent"
               />
               <Line
@@ -143,7 +159,11 @@ export function VibePointsChart({
                 strokeWidth={1}
                 strokeDasharray="5 5"
                 dot={false}
-                activeDot={{ r: 3, stroke: 'hsl(var(--muted-foreground))', strokeWidth: 2 }}
+                activeDot={{
+                  r: 3,
+                  stroke: 'hsl(var(--muted-foreground))',
+                  strokeWidth: 2,
+                }}
                 name="balance"
               />
             </LineChart>

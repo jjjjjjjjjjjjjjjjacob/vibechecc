@@ -7,7 +7,10 @@ import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Plus, Sparkles } from '@/components/ui/icons';
 import { useHeroTaglineExperiment } from '@/hooks/use-hero-tagline-experiment';
-import { usePlaceholderTracking, useTimeToInteractive } from '@/hooks/use-performance-tracking';
+import {
+  usePlaceholderTracking,
+  useTimeToInteractive,
+} from '@/hooks/use-performance-tracking';
 import { APP_NAME } from '@/utils/bindings';
 
 interface HeroSectionProps {
@@ -18,20 +21,23 @@ interface HeroSectionProps {
 }
 
 function HeroButtonsSkeleton() {
-  const { visibilityRef, trackInteraction } = usePlaceholderTracking('hero-buttons-skeleton', {
-    trackVisibility: true,
-    trackInteraction: true,
-    minVisibilityTime: 200,
-  });
+  const { visibilityRef, trackInteraction } = usePlaceholderTracking(
+    'hero-buttons-skeleton',
+    {
+      trackVisibility: true,
+      trackInteraction: true,
+      minVisibilityTime: 200,
+    }
+  );
 
   return (
     <div ref={visibilityRef} className="flex gap-3">
-      <div 
-        className="h-10 w-32 rounded-md bg-white/10 animate-pulse"
+      <div
+        className="h-10 w-32 animate-pulse rounded-md bg-white/10"
         onClick={() => trackInteraction('skeleton_click')}
       />
-      <div 
-        className="h-10 w-36 rounded-md bg-white/10 animate-pulse"
+      <div
+        className="h-10 w-36 animate-pulse rounded-md bg-white/10"
         onClick={() => trackInteraction('skeleton_click')}
       />
     </div>
@@ -67,27 +73,36 @@ export function HeroSection({
     }
   }, [hasMounted, trackTaglineView]);
 
-  const handleCtaClick = React.useCallback((
-    ctaType: 'primary' | 'secondary',
-    action: 'create' | 'discover' | 'signup',
-    ctaText: string
-  ) => {
-    trackFirstInteraction('cta_click', action);
-    trackCtaClick(ctaType, ctaText);
-    
-    // Track specific conversion types
-    switch (action) {
-      case 'create':
-        trackVibeCreationConversion();
-        break;
-      case 'discover':
-        trackDiscoveryConversion();
-        break;
-      case 'signup':
-        trackSignupConversion();
-        break;
-    }
-  }, [trackFirstInteraction, trackCtaClick, trackVibeCreationConversion, trackDiscoveryConversion, trackSignupConversion]);
+  const handleCtaClick = React.useCallback(
+    (
+      ctaType: 'primary' | 'secondary',
+      action: 'create' | 'discover' | 'signup',
+      ctaText: string
+    ) => {
+      trackFirstInteraction('cta_click', action);
+      trackCtaClick(ctaType, ctaText);
+
+      // Track specific conversion types
+      switch (action) {
+        case 'create':
+          trackVibeCreationConversion();
+          break;
+        case 'discover':
+          trackDiscoveryConversion();
+          break;
+        case 'signup':
+          trackSignupConversion();
+          break;
+      }
+    },
+    [
+      trackFirstInteraction,
+      trackCtaClick,
+      trackVibeCreationConversion,
+      trackDiscoveryConversion,
+      trackSignupConversion,
+    ]
+  );
 
   return (
     <section className="container mx-auto px-4 py-8">
@@ -102,10 +117,9 @@ export function HeroSection({
             {variant.headline}
           </h1>
           <p className="mb-6 text-lg opacity-90 md:text-xl">
-            {variant.description.includes(APP_NAME) 
-              ? variant.description 
-              : variant.description.replace('vibechecc', APP_NAME)
-            }
+            {variant.description.includes(APP_NAME)
+              ? variant.description
+              : variant.description.replace('vibechecc', APP_NAME)}
           </p>
 
           {/* Show skeleton while Clerk is loading, unless it times out */}
@@ -123,7 +137,13 @@ export function HeroSection({
                     asChild
                     variant="outline"
                     className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
-                    onClick={() => handleCtaClick('secondary', 'discover', 'browse vibes anyway')}
+                    onClick={() =>
+                      handleCtaClick(
+                        'secondary',
+                        'discover',
+                        'browse vibes anyway'
+                      )
+                    }
                   >
                     <Link to="/discover" search={{}}>
                       <Sparkles className="mr-2 h-4 w-4" />
@@ -139,7 +159,13 @@ export function HeroSection({
                         asChild
                         variant="outline"
                         className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
-                        onClick={() => handleCtaClick('primary', 'create', variant.cta?.primary || 'create vibe')}
+                        onClick={() =>
+                          handleCtaClick(
+                            'primary',
+                            'create',
+                            variant.cta?.primary || 'create vibe'
+                          )
+                        }
                       >
                         <Link to="/vibes/create">
                           <Plus className="mr-2 h-4 w-4" />
@@ -150,7 +176,13 @@ export function HeroSection({
                         asChild
                         variant="outline"
                         className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
-                        onClick={() => handleCtaClick('secondary', 'discover', variant.cta?.secondary || 'discover vibes')}
+                        onClick={() =>
+                          handleCtaClick(
+                            'secondary',
+                            'discover',
+                            variant.cta?.secondary || 'discover vibes'
+                          )
+                        }
                       >
                         <Link to="/discover" search={{}}>
                           <Sparkles className="mr-2 h-4 w-4" />
@@ -168,7 +200,9 @@ export function HeroSection({
                           asChild
                           variant="outline"
                           className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
-                          onClick={() => handleCtaClick('primary', 'signup', 'sign up')}
+                          onClick={() =>
+                            handleCtaClick('primary', 'signup', 'sign up')
+                          }
                         >
                           <Link to="/sign-up">
                             <Plus className="mr-2 h-4 w-4" />
@@ -179,7 +213,13 @@ export function HeroSection({
                           asChild
                           variant="outline"
                           className="bg-secondary/10 hover:bg-primary-foreground/20 border-white/20 text-white"
-                          onClick={() => handleCtaClick('secondary', 'discover', variant.cta?.secondary || 'discover vibes')}
+                          onClick={() =>
+                            handleCtaClick(
+                              'secondary',
+                              'discover',
+                              variant.cta?.secondary || 'discover vibes'
+                            )
+                          }
                         >
                           <Link to="/discover" search={{}}>
                             <Sparkles className="mr-2 h-4 w-4" />

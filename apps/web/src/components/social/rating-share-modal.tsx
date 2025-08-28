@@ -171,7 +171,8 @@ export function RatingShareModal({
   const handleShare = async () => {
     if (!generatedBlob) return;
 
-    const raterName = rating.rater?.username || rating.user?.username || 'someone';
+    const raterName =
+      rating.rater?.username || rating.user?.username || 'someone';
     const shareData = {
       title: `${rating.emoji} ${rating.value}/5 rating by @${raterName}`,
       text: `Check out this ${rating.emoji} ${rating.value}/5 rating for "${vibe.title}"`,

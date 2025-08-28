@@ -2,7 +2,11 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useAbTest, useBinaryAbTest, useMultivariateTest } from '@/hooks/use-ab-testing';
+import {
+  useAbTest,
+  useBinaryAbTest,
+  useMultivariateTest,
+} from '@/hooks/use-ab-testing';
 import { trackEvents } from '@/lib/track-events';
 
 // Mock PostHog hooks
@@ -23,8 +27,12 @@ vi.mock('@/lib/track-events', () => ({
   },
 }));
 
-const mockUseFeatureFlagEnabled = vi.mocked(await import('posthog-js/react')).useFeatureFlagEnabled;
-const mockUseFeatureFlagPayload = vi.mocked(await import('posthog-js/react')).useFeatureFlagPayload;
+const mockUseFeatureFlagEnabled = vi.mocked(
+  await import('posthog-js/react')
+).useFeatureFlagEnabled;
+const mockUseFeatureFlagPayload = vi.mocked(
+  await import('posthog-js/react')
+).useFeatureFlagPayload;
 
 describe('useAbTest', () => {
   beforeEach(() => {
@@ -110,7 +118,7 @@ describe('useBinaryAbTest', () => {
     mockUseFeatureFlagEnabled.mockReturnValue(true);
     mockUseFeatureFlagPayload.mockReturnValue({ variant: 'test' });
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useBinaryAbTest('binary-test', {
         variantAName: 'Original',
         variantBName: 'New Design',
@@ -135,7 +143,7 @@ describe('useMultivariateTest', () => {
 
     const variants = ['variant-a', 'variant-b', 'variant-c'];
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useMultivariateTest('multivariate-test', variants)
     );
 

@@ -42,7 +42,10 @@ export function ShareButton({
         variant={variant}
         size={size}
         className={cn('gap-2', className)}
-        onClick={() => setShowShareModal(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowShareModal(true);
+        }}
       >
         <Share className="h-4 w-4" />
         {showCount && shareCount > 0 && (

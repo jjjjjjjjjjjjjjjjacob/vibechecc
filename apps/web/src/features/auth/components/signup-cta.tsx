@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react';
 import { SignInButton, SignUpButton } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Sparkles, 
-  Heart, 
-  Users, 
-  TrendingUp, 
-  Star, 
+import {
+  Sparkles,
+  Heart,
+  Users,
+  TrendingUp,
+  Star,
   MessageCircle,
-  X
+  X,
 } from '@/components/ui/icons';
 import { cn } from '@/utils';
 import { useAnonymousUserStore } from '@/stores';
@@ -41,17 +47,17 @@ const getProgressiveVariant = (
   if (sessionTimeMinutes < 2 && vibesViewed < 3) {
     return 'gentle';
   }
-  
+
   // Level 2: Engaged browsing (2-5 minutes, 3-7 vibes)
   if (sessionTimeMinutes < 5 && vibesViewed < 8) {
     return 'interested';
   }
-  
+
   // Level 3: Highly engaged (5+ minutes, 8+ vibes, or attempted interaction)
   if (sessionTimeMinutes >= 5 || vibesViewed >= 8 || hasAttemptedInteraction) {
     return 'committed';
   }
-  
+
   return baseVariant;
 };
 
@@ -115,7 +121,8 @@ const ctaVariants = {
   },
   committed: {
     title: 'ready to join the conversation?',
-    description: 'you seem to love what you see! become part of our vibrant community',
+    description:
+      'you seem to love what you see! become part of our vibrant community',
     primaryCta: 'start creating',
     secondaryCta: 'sign in',
     icon: TrendingUp,
@@ -123,43 +130,72 @@ const ctaVariants = {
   },
 };
 
-export function SignupCta({ 
-  variant, 
-  context, 
-  placement, 
-  triggerData, 
+export function SignupCta({
+  variant,
+  context,
+  placement,
+  triggerData,
   onDismiss,
-  className 
+  className,
 }: SignupCtaProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [hasTrackedImpression, setHasTrackedImpression] = useState(false);
-  const { recordCtaInteraction, dismissCta, shouldShowCta, vibesViewed, sessionStartTime, actions, assignAbTest } = useAnonymousUserStore();
+  const {
+    recordCtaInteraction,
+    dismissCta,
+    shouldShowCta,
+    vibesViewed,
+    sessionStartTime,
+    actions,
+    assignAbTest,
+  } = useAnonymousUserStore();
   const isMobile = useIsMobile();
-  
+
   // A/B test for CTA messaging
-  const messagingVariant = assignAbTest('cta_messaging_v1', ['default', 'urgent', 'social_proof']);
-  const colorVariant = assignAbTest('cta_colors_v1', ['gradient', 'solid', 'outline']);
-  const mobileLayoutVariant = assignAbTest('mobile_layout_v1', ['stacked', 'compact', 'sticky']);
-  
+  const messagingVariant = assignAbTest('cta_messaging_v1', [
+    'default',
+    'urgent',
+    'social_proof',
+  ]);
+  const colorVariant = assignAbTest('cta_colors_v1', [
+    'gradient',
+    'solid',
+    'outline',
+  ]);
+  const mobileLayoutVariant = assignAbTest('mobile_layout_v1', [
+    'stacked',
+    'compact',
+    'sticky',
+  ]);
+
   // Calculate engagement metrics for progressive messaging
   const sessionTimeMinutes = (Date.now() - sessionStartTime) / (1000 * 60);
-  const hasAttemptedInteraction = actions.some(a => 
-    a.type === 'rating_attempt' || a.type === 'follow_attempt'
+  const hasAttemptedInteraction = actions.some(
+    (a) => a.type === 'rating_attempt' || a.type === 'follow_attempt'
   );
-  
+
   // Determine effective variant based on engagement (for applicable base variants)
-  const shouldUseProgressive = ['engagement', 'minimal', 'social'].includes(variant);
-  const effectiveVariant = shouldUseProgressive 
-    ? getProgressiveVariant(variant as keyof typeof ctaVariants, sessionTimeMinutes, vibesViewed, hasAttemptedInteraction)
+  const shouldUseProgressive = ['engagement', 'minimal', 'social'].includes(
+    variant
+  );
+  const effectiveVariant = shouldUseProgressive
+    ? getProgressiveVariant(
+        variant as keyof typeof ctaVariants,
+        sessionTimeMinutes,
+        vibesViewed,
+        hasAttemptedInteraction
+      )
     : variant;
-  
+
   let ctaConfig = ctaVariants[effectiveVariant as keyof typeof ctaVariants];
-  
+
   // Apply A/B test variations
   if (messagingVariant === 'urgent') {
     ctaConfig = {
       ...ctaConfig,
-      title: ctaConfig.title.includes('?') ? ctaConfig.title : `${ctaConfig.title}!`,
+      title: ctaConfig.title.includes('?')
+        ? ctaConfig.title
+        : `${ctaConfig.title}!`,
       primaryCta: `${ctaConfig.primaryCta} now`,
     };
   } else if (messagingVariant === 'social_proof') {
@@ -169,7 +205,7 @@ export function SignupCta({
       badge: ctaConfig.badge || 'popular',
     };
   }
-  
+
   const ctaId = `signup-cta-${effectiveVariant}-${context}`;
   const IconComponent = ctaConfig.icon;
 
@@ -177,7 +213,7 @@ export function SignupCta({
   useEffect(() => {
     const shouldShow = shouldShowCta(ctaId, context);
     setIsVisible(shouldShow);
-    
+
     // Track impression
     if (shouldShow && !hasTrackedImpression) {
       recordCtaInteraction({
@@ -186,7 +222,7 @@ export function SignupCta({
         placement,
         action: 'impression',
       });
-      
+
       trackEvents.funnelStepCompleted(
         'signup_funnel',
         'cta_shown',
@@ -207,10 +243,19 @@ export function SignupCta({
           ...triggerData,
         }
       );
-      
+
       setHasTrackedImpression(true);
     }
-  }, [ctaId, context, placement, variant, triggerData, recordCtaInteraction, shouldShowCta, hasTrackedImpression]);
+  }, [
+    ctaId,
+    context,
+    placement,
+    variant,
+    triggerData,
+    recordCtaInteraction,
+    shouldShowCta,
+    hasTrackedImpression,
+  ]);
 
   const handleCtaClick = (action: 'signup' | 'signin') => {
     recordCtaInteraction({
@@ -219,7 +264,7 @@ export function SignupCta({
       placement,
       action: 'click',
     });
-    
+
     trackEvents.experimentAction(
       'signup_cta_experiment',
       effectiveVariant,
@@ -248,7 +293,7 @@ export function SignupCta({
       placement,
       action: 'dismiss',
     });
-    
+
     trackEvents.funnelDropoff(
       'signup_funnel',
       'cta_dismissed',
@@ -264,7 +309,7 @@ export function SignupCta({
         hasAttemptedInteraction,
       }
     );
-    
+
     setIsVisible(false);
     onDismiss?.();
   };
@@ -278,109 +323,132 @@ export function SignupCta({
   const isMobileCompact = isMobile && mobileLayoutVariant === 'compact';
 
   return (
-    <Card className={cn(
-      'relative border-2 border-dashed border-theme-primary/20 bg-gradient-to-br from-background/95 to-theme-primary/5 backdrop-blur-sm',
-      'hover:border-theme-primary/40 hover:shadow-lg hover:shadow-theme-primary/10 transition-all duration-300',
-      {
-        // Mobile sticky variant - fixed bottom positioning
-        'fixed bottom-4 left-4 right-4 z-50 shadow-2xl': isMobileSticky,
-        // Mobile compact variant - smaller padding and text
-        'text-sm': isMobileCompact,
-        // Default responsive behavior
-        'mx-auto max-w-sm': isMobile && mobileLayoutVariant === 'stacked',
-      },
-      className
-    )}>
+    <Card
+      className={cn(
+        'border-theme-primary/20 from-background/95 to-theme-primary/5 relative border-2 border-dashed bg-gradient-to-br backdrop-blur-sm',
+        'hover:border-theme-primary/40 hover:shadow-theme-primary/10 transition-all duration-300 hover:shadow-lg',
+        {
+          // Mobile sticky variant - fixed bottom positioning
+          'fixed right-4 bottom-4 left-4 z-50 shadow-2xl': isMobileSticky,
+          // Mobile compact variant - smaller padding and text
+          'text-sm': isMobileCompact,
+          // Default responsive behavior
+          'mx-auto max-w-sm': isMobile && mobileLayoutVariant === 'stacked',
+        },
+        className
+      )}
+    >
       {onDismiss && (
         <Button
           variant="ghost"
-          size={isMobileCompact ? "sm" : "sm"}
+          size={isMobileCompact ? 'sm' : 'sm'}
           onClick={handleDismiss}
           className={cn(
-            "absolute top-2 right-2 p-0 hover:bg-muted/50",
-            isMobileCompact ? "h-5 w-5" : "h-6 w-6"
+            'hover:bg-muted/50 absolute top-2 right-2 p-0',
+            isMobileCompact ? 'h-5 w-5' : 'h-6 w-6'
           )}
         >
-          <X className={cn(isMobileCompact ? "h-2.5 w-2.5" : "h-3 w-3")} />
+          <X className={cn(isMobileCompact ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
         </Button>
       )}
-      
-      <CardHeader className={cn("pb-3", isMobileCompact && "pb-2 px-3 pt-3")}>
-        <div className={cn(
-          "flex items-center gap-3",
-          isMobileCompact && "gap-2"
-        )}>
+
+      <CardHeader className={cn('pb-3', isMobileCompact && 'px-3 pt-3 pb-2')}>
+        <div
+          className={cn('flex items-center gap-3', isMobileCompact && 'gap-2')}
+        >
           {!isMobileCompact && (
-            <div className={cn(
-              "flex items-center justify-center rounded-full bg-gradient-to-r from-theme-primary to-theme-secondary",
-              isMobileCompact ? "h-8 w-8" : "h-10 w-10"
-            )}>
-              <IconComponent className={cn(
-                "text-white",
-                isMobileCompact ? "h-4 w-4" : "h-5 w-5"
-              )} />
+            <div
+              className={cn(
+                'from-theme-primary to-theme-secondary flex items-center justify-center rounded-full bg-gradient-to-r',
+                isMobileCompact ? 'h-8 w-8' : 'h-10 w-10'
+              )}
+            >
+              <IconComponent
+                className={cn(
+                  'text-white',
+                  isMobileCompact ? 'h-4 w-4' : 'h-5 w-5'
+                )}
+              />
             </div>
           )}
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <CardTitle className={cn(
-                "font-semibold",
-                isMobileCompact ? "text-base" : "text-lg"
-              )}>
-                {isMobileCompact && <IconComponent className="inline h-4 w-4 mr-1" />}
+              <CardTitle
+                className={cn(
+                  'font-semibold',
+                  isMobileCompact ? 'text-base' : 'text-lg'
+                )}
+              >
+                {isMobileCompact && (
+                  <IconComponent className="mr-1 inline h-4 w-4" />
+                )}
                 {ctaConfig.title}
               </CardTitle>
               {ctaConfig.badge && (
-                <Badge variant="secondary" className={cn(
-                  "font-medium",
-                  isMobileCompact ? "text-xs" : "text-xs"
-                )}>
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    'font-medium',
+                    isMobileCompact ? 'text-xs' : 'text-xs'
+                  )}
+                >
                   {ctaConfig.badge}
                 </Badge>
               )}
             </div>
-            <CardDescription className={cn(
-              "text-muted-foreground",
-              isMobileCompact ? "text-xs" : "text-sm"
-            )}>
+            <CardDescription
+              className={cn(
+                'text-muted-foreground',
+                isMobileCompact ? 'text-xs' : 'text-sm'
+              )}
+            >
               {ctaConfig.description}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      
-      <CardContent className={cn("pt-0", isMobileCompact && "px-3 pb-3")}>
-        <div className={cn(
-          "flex gap-3",
-          isMobileCompact ? "flex-row" : "flex-col gap-3 sm:flex-row"
-        )}>
+
+      <CardContent className={cn('pt-0', isMobileCompact && 'px-3 pb-3')}>
+        <div
+          className={cn(
+            'flex gap-3',
+            isMobileCompact ? 'flex-row' : 'flex-col gap-3 sm:flex-row'
+          )}
+        >
           <SignUpButton mode="modal">
-            <Button 
+            <Button
               onClick={() => handleCtaClick('signup')}
               className={cn(
-                "font-semibold transition-all hover:scale-[1.02] hover:shadow-lg",
-                isMobileCompact ? "h-8 flex-1 text-sm" : "h-10 flex-1",
-                "text-white",
+                'font-semibold transition-all hover:scale-[1.02] hover:shadow-lg',
+                isMobileCompact ? 'h-8 flex-1 text-sm' : 'h-10 flex-1',
+                'text-white',
                 {
-                  'bg-gradient-to-r from-theme-primary to-theme-secondary hover:shadow-theme-primary/25': colorVariant === 'gradient',
-                  'bg-theme-primary hover:bg-theme-primary/90 hover:shadow-theme-primary/25': colorVariant === 'solid',
-                  'bg-transparent border-2 border-theme-primary text-theme-primary hover:bg-theme-primary hover:text-white': colorVariant === 'outline',
+                  'from-theme-primary to-theme-secondary hover:shadow-theme-primary/25 bg-gradient-to-r':
+                    colorVariant === 'gradient',
+                  'bg-theme-primary hover:bg-theme-primary/90 hover:shadow-theme-primary/25':
+                    colorVariant === 'solid',
+                  'border-theme-primary text-theme-primary hover:bg-theme-primary border-2 bg-transparent hover:text-white':
+                    colorVariant === 'outline',
                 }
               )}
             >
-              <Sparkles className={cn("mr-2", isMobileCompact ? "h-3 w-3" : "h-4 w-4")} />
-              {isMobileCompact ? (ctaConfig.primaryCta.split(' ')[0] || ctaConfig.primaryCta) : ctaConfig.primaryCta}
+              <Sparkles
+                className={cn('mr-2', isMobileCompact ? 'h-3 w-3' : 'h-4 w-4')}
+              />
+              {isMobileCompact
+                ? ctaConfig.primaryCta.split(' ')[0] || ctaConfig.primaryCta
+                : ctaConfig.primaryCta}
             </Button>
           </SignUpButton>
-          
+
           {!isMobileCompact && (
             <SignInButton mode="modal">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => handleCtaClick('signin')}
                 className={cn(
-                  "border-theme-primary/20 text-theme-primary hover:bg-theme-primary/5 hover:border-theme-primary/40",
-                  isMobileCompact ? "h-8 flex-1 text-sm" : "h-10 flex-1"
+                  'border-theme-primary/20 text-theme-primary hover:bg-theme-primary/5 hover:border-theme-primary/40',
+                  isMobileCompact ? 'h-8 flex-1 text-sm' : 'h-10 flex-1'
                 )}
               >
                 {ctaConfig.secondaryCta}
@@ -388,17 +456,17 @@ export function SignupCta({
             </SignInButton>
           )}
         </div>
-        
+
         {/* Additional context-specific content */}
         {variant === 'engagement' && triggerData?.vibesViewed && (
-          <div className="mt-3 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-3 flex items-center justify-center gap-1 text-xs">
             <MessageCircle className="h-3 w-3" />
             <span>you've viewed {triggerData.vibesViewed} vibes so far</span>
           </div>
         )}
-        
+
         {variant === 'feature-gate' && triggerData?.featureBlocked && (
-          <div className="mt-3 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-3 flex items-center justify-center gap-1 text-xs">
             <Star className="h-3 w-3" />
             <span>unlock {triggerData.featureBlocked} and more</span>
           </div>
@@ -409,7 +477,13 @@ export function SignupCta({
 }
 
 // Convenience components for specific contexts
-export function FeedSignupCta({ vibesViewed, className }: { vibesViewed: number; className?: string }) {
+export function FeedSignupCta({
+  vibesViewed,
+  className,
+}: {
+  vibesViewed: number;
+  className?: string;
+}) {
   return (
     <SignupCta
       variant="engagement"
@@ -421,14 +495,14 @@ export function FeedSignupCta({ vibesViewed, className }: { vibesViewed: number;
   );
 }
 
-export function InteractionGateCta({ 
-  featureBlocked, 
-  onDismiss, 
-  className 
-}: { 
-  featureBlocked: string; 
-  onDismiss?: () => void; 
-  className?: string; 
+export function InteractionGateCta({
+  featureBlocked,
+  onDismiss,
+  className,
+}: {
+  featureBlocked: string;
+  onDismiss?: () => void;
+  className?: string;
 }) {
   return (
     <SignupCta

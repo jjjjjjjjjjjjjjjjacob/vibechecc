@@ -391,9 +391,7 @@ export function Header() {
           )}
         >
           <TabAccordion
-            value={
-              navState ?? (!navState ? pageNavState : undefined) ?? undefined
-            }
+            value={navState || pageNavState || undefined}
             onValueChange={(val) => {
               // Only set navState for actual nav items, not page states
               if (['search', 'notifications', 'nav', 'profile'].includes(val)) {

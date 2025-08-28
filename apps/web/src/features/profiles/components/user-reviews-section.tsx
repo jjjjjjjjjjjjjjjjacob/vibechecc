@@ -15,7 +15,11 @@ import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-d
 import { RatingShareButton } from '@/components/social/rating-share-button';
 import { RatingDootButton } from '@/features/ratings/components/rating-doot-button';
 import { BoostButton } from '@/features/ratings/components/boost-button';
-import { useUserRatings, useBulkRatingVoteScores, useBulkUserRatingVoteStatuses } from '@/queries';
+import {
+  useUserRatings,
+  useBulkRatingVoteScores,
+  useBulkUserRatingVoteStatuses,
+} from '@/queries';
 import type { User, Rating } from '@vibechecc/types';
 import { MessageSquare } from '@/components/ui/icons';
 
@@ -35,13 +39,13 @@ export function UserReviewsSection({
   const { data: userRatings, isLoading: reviewsLoading } = useUserRatings(
     user.externalId
   );
-  
+
   // Get rating IDs for fetching vote data
   const ratingIds = React.useMemo(() => {
     if (!userRatings) return [];
     return userRatings
-      .filter(r => r && r._id)
-      .map(r => r!._id as Id<'ratings'>);
+      .filter((r) => r && r._id)
+      .map((r) => r!._id as Id<'ratings'>);
   }, [userRatings]);
 
   // Fetch vote scores and statuses for all ratings
@@ -135,7 +139,13 @@ export function UserReviewsSection({
               rating={completeRating}
               currentUser={user}
               netScore={voteScores?.[rating._id || '']?.netScore || 0}
-              voteStatus={voteStatuses?.[rating._id || ''] || { voteType: null, boosted: false, dampened: false }}
+              voteStatus={
+                voteStatuses?.[rating._id || ''] || {
+                  voteType: null,
+                  boosted: false,
+                  dampened: false,
+                }
+              }
             />
           );
         })}
@@ -169,7 +179,12 @@ interface ReviewCardProps {
   };
 }
 
-function ReviewCard({ rating, currentUser, netScore, voteStatus }: ReviewCardProps) {
+function ReviewCard({
+  rating,
+  currentUser,
+  netScore,
+  voteStatus,
+}: ReviewCardProps) {
   const vibe = rating.vibe;
   const usePlaceholder = !vibe?.image;
 
@@ -267,13 +282,15 @@ function ReviewCard({ rating, currentUser, netScore, voteStatus }: ReviewCardPro
                     vibe={{
                       ...vibe,
                       ratings: [],
-                      createdBy: vibe.createdBy ? {
-                        externalId: vibe.createdBy.id,
-                        id: vibe.createdBy.id,
-                        username: vibe.createdBy.name,
-                        full_name: vibe.createdBy.name,
-                        image_url: vibe.createdBy.avatar,
-                      } : null,
+                      createdBy: vibe.createdBy
+                        ? {
+                            externalId: vibe.createdBy.id,
+                            id: vibe.createdBy.id,
+                            username: vibe.createdBy.name,
+                            full_name: vibe.createdBy.name,
+                            image_url: vibe.createdBy.avatar,
+                          }
+                        : null,
                     }}
                     variant="ghost"
                     size="sm"

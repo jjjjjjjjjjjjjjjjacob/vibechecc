@@ -585,9 +585,13 @@ function SearchResultsPage() {
                     </SelectTrigger>
                     <SelectContent className="bg-background/90 backdrop-blur-sm">
                       <SelectItem value="relevance">most relevant</SelectItem>
-                      <SelectItem value="hot">hot (boost + engagement)</SelectItem>
+                      <SelectItem value="hot">
+                        hot (boost + engagement)
+                      </SelectItem>
                       <SelectItem value="boosted">most boosted</SelectItem>
-                      <SelectItem value="controversial">controversial</SelectItem>
+                      <SelectItem value="controversial">
+                        controversial
+                      </SelectItem>
                       <SelectItem value="rating_desc">highest rated</SelectItem>
                       <SelectItem value="top_rated">top rated</SelectItem>
                       <SelectItem value="most_rated">most rated</SelectItem>

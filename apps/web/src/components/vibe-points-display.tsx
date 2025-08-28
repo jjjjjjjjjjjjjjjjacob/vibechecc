@@ -33,7 +33,7 @@ export function VibePointsDisplay({
   if (variant === 'minimal') {
     return (
       <div className={cn('flex items-center gap-1 text-xs', className)}>
-        {showIcons && <Sparkles className="h-3 w-3 text-theme-primary" />}
+        {showIcons && <Sparkles className="text-theme-primary h-3 w-3" />}
         <span className="font-medium">{formatPoints(currentBalance)}</span>
       </div>
     );
@@ -43,8 +43,10 @@ export function VibePointsDisplay({
     return (
       <div className={cn('flex items-center gap-2', className)}>
         <div className="flex items-center gap-1">
-          {showIcons && <Sparkles className="h-3.5 w-3.5 text-theme-primary" />}
-          <span className="text-sm font-medium">{formatPoints(currentBalance)}</span>
+          {showIcons && <Sparkles className="text-theme-primary h-3.5 w-3.5" />}
+          <span className="text-sm font-medium">
+            {formatPoints(currentBalance)}
+          </span>
         </div>
         <Badge variant="outline" className="text-xs">
           L{level}
@@ -52,7 +54,7 @@ export function VibePointsDisplay({
         {streakDays > 0 && (
           <div className="flex items-center gap-1">
             {showIcons && <Flame className="h-3 w-3 text-orange-500" />}
-            <span className="text-xs text-muted-foreground">{streakDays}</span>
+            <span className="text-muted-foreground text-xs">{streakDays}</span>
           </div>
         )}
       </div>
@@ -64,16 +66,18 @@ export function VibePointsDisplay({
     <div className={cn('flex items-center gap-3', className)}>
       {/* Points Balance */}
       <div className="flex items-center gap-1.5">
-        {showIcons && <Sparkles className="h-4 w-4 text-theme-primary" />}
+        {showIcons && <Sparkles className="text-theme-primary h-4 w-4" />}
         <div className="flex flex-col">
-          <span className="text-sm font-semibold">{formatPoints(currentBalance)}</span>
-          <span className="text-xs text-muted-foreground">points</span>
+          <span className="text-sm font-semibold">
+            {formatPoints(currentBalance)}
+          </span>
+          <span className="text-muted-foreground text-xs">points</span>
         </div>
       </div>
 
       {/* Level Badge */}
-      <Badge 
-        variant="secondary" 
+      <Badge
+        variant="secondary"
         className="bg-theme-primary text-primary-foreground hover:bg-theme-primary/90"
       >
         <Trophy className="mr-1 h-3 w-3" />
@@ -86,7 +90,7 @@ export function VibePointsDisplay({
           {showIcons && <Flame className="h-4 w-4 text-orange-500" />}
           <div className="flex flex-col">
             <span className="text-sm font-medium">{streakDays}</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {streakDays === 1 ? 'day' : 'days'}
             </span>
           </div>

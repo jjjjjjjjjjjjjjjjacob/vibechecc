@@ -3,7 +3,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
 import { useUser } from '@clerk/tanstack-react-start';
-import { showPointsToast, showInsufficientPointsToast } from '@/utils/points-toast';
+import {
+  showPointsToast,
+  showInsufficientPointsToast,
+} from '@/utils/points-toast';
 import { useBoostContentMutation, useDampenContentMutation } from '@/queries';
 import toast from '@/utils/toast';
 import type { Id } from '@vibechecc/convex/dataModel';
@@ -44,9 +47,12 @@ export function BoostButton({
   const { user } = useUser();
   const boostContentMutation = useBoostContentMutation();
   const dampenContentMutation = useDampenContentMutation();
-  const [optimisticAction, setOptimisticAction] = React.useState(initialBoostAction);
-  const [optimisticScore, setOptimisticScore] = React.useState(currentBoostScore);
-  const isLoading = boostContentMutation.isPending || dampenContentMutation.isPending;
+  const [optimisticAction, setOptimisticAction] =
+    React.useState(initialBoostAction);
+  const [optimisticScore, setOptimisticScore] =
+    React.useState(currentBoostScore);
+  const isLoading =
+    boostContentMutation.isPending || dampenContentMutation.isPending;
 
   // Update state when props change
   React.useEffect(() => {
@@ -91,7 +97,7 @@ export function BoostButton({
 
     // Optimistic update
     setOptimisticAction(newAction);
-    setOptimisticScore(prev => prev + scoreDelta);
+    setOptimisticScore((prev) => prev + scoreDelta);
 
     try {
       const result = await boostContentMutation.mutateAsync({
@@ -99,9 +105,9 @@ export function BoostButton({
         contentType,
         action: newAction ? 'boost' : 'remove',
       });
-      
+
       onBoostChange?.(newAction, optimisticScore + scoreDelta);
-      
+
       if (newAction === 'boost') {
         // Show message with point transfer info
         if (result.message) {
@@ -115,12 +121,11 @@ export function BoostButton({
       } else {
         showPointsToast('earned', Math.floor(boostCost * 0.5), 'boost removed');
       }
-      
     } catch (error) {
       // Revert optimistic update on error
       setOptimisticAction(initialBoostAction);
       setOptimisticScore(currentBoostScore);
-      
+
       toast.error('failed to boost content', {
         duration: 3000,
         icon: '❌',
@@ -165,7 +170,7 @@ export function BoostButton({
 
     // Optimistic update
     setOptimisticAction(newAction);
-    setOptimisticScore(prev => prev + scoreDelta);
+    setOptimisticScore((prev) => prev + scoreDelta);
 
     try {
       const result = await dampenContentMutation.mutateAsync({
@@ -173,9 +178,9 @@ export function BoostButton({
         contentType,
         action: newAction ? 'dampen' : 'remove',
       });
-      
+
       onBoostChange?.(newAction, optimisticScore + scoreDelta);
-      
+
       if (newAction === 'dampen') {
         // Show message with point penalty info
         if (result.message) {
@@ -187,14 +192,17 @@ export function BoostButton({
           showPointsToast('spent', dampenCost, 'content dampened');
         }
       } else {
-        showPointsToast('earned', Math.floor(dampenCost * 0.5), 'dampen removed');
+        showPointsToast(
+          'earned',
+          Math.floor(dampenCost * 0.5),
+          'dampen removed'
+        );
       }
-      
     } catch (error) {
       // Revert optimistic update on error
       setOptimisticAction(initialBoostAction);
       setOptimisticScore(currentBoostScore);
-      
+
       toast.error('failed to dampen content', {
         duration: 3000,
         icon: '❌',
@@ -218,10 +226,20 @@ export function BoostButton({
           isBoostActive && 'text-theme-primary hover:text-theme-primary',
           className
         )}
-        aria-label={isBoostActive ? `Remove boost (refund ${Math.floor(boostCost * 0.5)} points)` : `Boost content (${boostCost} points)`}
-        title={showCostOnHover ? (isBoostActive ? `Remove boost (refund ${Math.floor(boostCost * 0.5)} points)` : `Boost content (${boostCost} points)`) : undefined}
+        aria-label={
+          isBoostActive
+            ? `Remove boost (refund ${Math.floor(boostCost * 0.5)} points)`
+            : `Boost content (${boostCost} points)`
+        }
+        title={
+          showCostOnHover
+            ? isBoostActive
+              ? `Remove boost (refund ${Math.floor(boostCost * 0.5)} points)`
+              : `Boost content (${boostCost} points)`
+            : undefined
+        }
       >
-        <ArrowUp 
+        <ArrowUp
           className={cn(
             'h-3.5 w-3.5 transition-all',
             isBoostActive && 'fill-current'
@@ -231,11 +249,14 @@ export function BoostButton({
 
       {/* Score Display */}
       {optimisticScore !== 0 && (
-        <span className={cn(
-          'text-xs font-medium px-1',
-          optimisticScore > 0 ? 'text-theme-primary' : 'text-destructive'
-        )}>
-          {optimisticScore > 0 ? '+' : ''}{optimisticScore}
+        <span
+          className={cn(
+            'px-1 text-xs font-medium',
+            optimisticScore > 0 ? 'text-theme-primary' : 'text-destructive'
+          )}
+        >
+          {optimisticScore > 0 ? '+' : ''}
+          {optimisticScore}
         </span>
       )}
 
@@ -250,10 +271,20 @@ export function BoostButton({
           isDampenActive && 'text-destructive hover:text-destructive',
           className
         )}
-        aria-label={isDampenActive ? `Remove dampen (refund ${Math.floor(dampenCost * 0.5)} points)` : `Dampen content (${dampenCost} points)`}
-        title={showCostOnHover ? (isDampenActive ? `Remove dampen (refund ${Math.floor(dampenCost * 0.5)} points)` : `Dampen content (${dampenCost} points)`) : undefined}
+        aria-label={
+          isDampenActive
+            ? `Remove dampen (refund ${Math.floor(dampenCost * 0.5)} points)`
+            : `Dampen content (${dampenCost} points)`
+        }
+        title={
+          showCostOnHover
+            ? isDampenActive
+              ? `Remove dampen (refund ${Math.floor(dampenCost * 0.5)} points)`
+              : `Dampen content (${dampenCost} points)`
+            : undefined
+        }
       >
-        <ArrowDown 
+        <ArrowDown
           className={cn(
             'h-3.5 w-3.5 transition-all',
             isDampenActive && 'fill-current'

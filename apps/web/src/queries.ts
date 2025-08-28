@@ -661,7 +661,10 @@ export function useCreateColumnMutation() {
 }
 
 // Query to get current user's ratings for a specific vibe
-export function useUserVibeRatings(vibeId: string, options?: { enabled?: boolean }) {
+export function useUserVibeRatings(
+  vibeId: string,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     ...convexQuery(api.emojiRatings.getUserVibeRatings, { vibeId }),
     enabled: options?.enabled !== false && !!vibeId,
@@ -672,10 +675,12 @@ export function useUserVibeRatings(vibeId: string, options?: { enabled?: boolean
 export function useToggleRatingBoostMutation() {
   const convex = useConvex();
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ ratingId }: { ratingId: Id<'ratings'> }) => {
-      const result = await convex.mutation(api.emojiRatings.toggleRatingBoost, { ratingId });
+      const result = await convex.mutation(api.emojiRatings.toggleRatingBoost, {
+        ratingId,
+      });
       return result;
     },
     onSuccess: () => {
@@ -691,10 +696,13 @@ export function useToggleRatingBoostMutation() {
 export function useToggleRatingDampenMutation() {
   const convex = useConvex();
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ ratingId }: { ratingId: Id<'ratings'> }) => {
-      const result = await convex.mutation(api.emojiRatings.toggleRatingDampen, { ratingId });
+      const result = await convex.mutation(
+        api.emojiRatings.toggleRatingDampen,
+        { ratingId }
+      );
       return result;
     },
     onSuccess: () => {
@@ -707,7 +715,10 @@ export function useToggleRatingDampenMutation() {
 }
 
 // Query to get vote scores for multiple ratings
-export function useBulkRatingVoteScores(ratingIds: Id<'ratings'>[], options?: { enabled?: boolean }) {
+export function useBulkRatingVoteScores(
+  ratingIds: Id<'ratings'>[],
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     ...convexQuery(api.emojiRatings.getBulkRatingVoteScores, { ratingIds }),
     enabled: options?.enabled !== false && ratingIds.length > 0,
@@ -715,9 +726,14 @@ export function useBulkRatingVoteScores(ratingIds: Id<'ratings'>[], options?: { 
 }
 
 // Query to get user's vote status for multiple ratings
-export function useBulkUserRatingVoteStatuses(ratingIds: Id<'ratings'>[], options?: { enabled?: boolean }) {
+export function useBulkUserRatingVoteStatuses(
+  ratingIds: Id<'ratings'>[],
+  options?: { enabled?: boolean }
+) {
   return useQuery({
-    ...convexQuery(api.emojiRatings.getBulkUserRatingVoteStatuses, { ratingIds }),
+    ...convexQuery(api.emojiRatings.getBulkUserRatingVoteStatuses, {
+      ratingIds,
+    }),
     enabled: options?.enabled !== false && ratingIds.length > 0,
   });
 }
@@ -729,16 +745,24 @@ export function useToggleRatingLikeMutation() {
 }
 
 // Legacy queries - kept for backward compatibility during transition
-export function useBulkRatingLikeCounts(ratingIds: Id<'ratings'>[], options?: { enabled?: boolean }) {
+export function useBulkRatingLikeCounts(
+  ratingIds: Id<'ratings'>[],
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     ...convexQuery(api.emojiRatings.getBulkRatingLikeCounts, { ratingIds }),
     enabled: options?.enabled !== false && ratingIds.length > 0,
   });
 }
 
-export function useBulkUserRatingLikeStatuses(ratingIds: Id<'ratings'>[], options?: { enabled?: boolean }) {
+export function useBulkUserRatingLikeStatuses(
+  ratingIds: Id<'ratings'>[],
+  options?: { enabled?: boolean }
+) {
   return useQuery({
-    ...convexQuery(api.emojiRatings.getBulkUserRatingLikeStatuses, { ratingIds }),
+    ...convexQuery(api.emojiRatings.getBulkUserRatingLikeStatuses, {
+      ratingIds,
+    }),
     enabled: options?.enabled !== false && ratingIds.length > 0,
   });
 }
@@ -950,25 +974,35 @@ export function useVibesPaginatedGeneric(
 // VIBE POINTS SYSTEM QUERIES
 
 // Query to get user's points statistics
-export function useUserPointsStats(userId: string, options?: { enabled?: boolean }) {
+export function useUserPointsStats(
+  userId: string,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
-    ...convexQuery(api.vibePoints.getUserPointsStats, { userId }),
+    ...convexQuery(api.userPoints.getUserPointsStats, { userId }),
     enabled: options?.enabled !== false && !!userId,
   });
 }
 
 // Query to get points history for charts
-export function usePointsHistory(userId: string, days: number = 30, options?: { enabled?: boolean }) {
+export function usePointsHistory(
+  userId: string,
+  days: number = 30,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
-    ...convexQuery(api.vibePoints.getPointsHistory, { userId, days }),
+    ...convexQuery(api.userPoints.getPointsHistory, { userId, days }),
     enabled: options?.enabled !== false && !!userId,
   });
 }
 
 // Query to get points leaderboard
-export function usePointsLeaderboard(limit: number = 10, options?: { enabled?: boolean }) {
+export function usePointsLeaderboard(
+  limit: number = 10,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
-    ...convexQuery(api.vibePoints.getLeaderboard, { limit }),
+    ...convexQuery(api.userPoints.getLeaderboard, { limit }),
     enabled: options?.enabled !== false,
   });
 }
@@ -976,21 +1010,21 @@ export function usePointsLeaderboard(limit: number = 10, options?: { enabled?: b
 // Mutation to boost content
 export function useBoostContentMutation() {
   const queryClient = useQueryClient();
-  const convexMutation = useConvexMutation(api.vibePoints.boostContent);
+  const convexMutation = useConvexMutation(api.userPoints.boostContent);
 
   return useMutation({
     mutationFn: convexMutation,
     onSuccess: (_result, variables) => {
       // Invalidate points stats
       queryClient.invalidateQueries({
-        queryKey: ['convexQuery', api.vibePoints.getUserPointsStats],
+        queryKey: ['convexQuery', api.userPoints.getUserPointsStats],
       });
-      
+
       // Invalidate points history
       queryClient.invalidateQueries({
-        queryKey: ['convexQuery', api.vibePoints.getPointsHistory],
+        queryKey: ['convexQuery', api.userPoints.getPointsHistory],
       });
-      
+
       // Invalidate the specific content that was boosted
       if (variables?.contentType === 'vibe' && variables?.contentId) {
         queryClient.invalidateQueries({
@@ -1001,10 +1035,10 @@ export function useBoostContentMutation() {
           ],
         });
       }
-      
+
       // Invalidate leaderboard
       queryClient.invalidateQueries({
-        queryKey: ['convexQuery', api.vibePoints.getLeaderboard],
+        queryKey: ['convexQuery', api.userPoints.getLeaderboard],
       });
     },
   });
@@ -1013,21 +1047,21 @@ export function useBoostContentMutation() {
 // Mutation to dampen content
 export function useDampenContentMutation() {
   const queryClient = useQueryClient();
-  const convexMutation = useConvexMutation(api.vibePoints.dampenContent);
+  const convexMutation = useConvexMutation(api.userPoints.dampenContent);
 
   return useMutation({
     mutationFn: convexMutation,
     onSuccess: (_result, variables) => {
       // Invalidate points stats
       queryClient.invalidateQueries({
-        queryKey: ['convexQuery', api.vibePoints.getUserPointsStats],
+        queryKey: ['convexQuery', api.userPoints.getUserPointsStats],
       });
-      
+
       // Invalidate points history
       queryClient.invalidateQueries({
-        queryKey: ['convexQuery', api.vibePoints.getPointsHistory],
+        queryKey: ['convexQuery', api.userPoints.getPointsHistory],
       });
-      
+
       // Invalidate the specific content that was dampened
       if (variables?.contentType === 'vibe' && variables?.contentId) {
         queryClient.invalidateQueries({
@@ -1038,10 +1072,10 @@ export function useDampenContentMutation() {
           ],
         });
       }
-      
+
       // Invalidate leaderboard
       queryClient.invalidateQueries({
-        queryKey: ['convexQuery', api.vibePoints.getLeaderboard],
+        queryKey: ['convexQuery', api.userPoints.getLeaderboard],
       });
     },
   });

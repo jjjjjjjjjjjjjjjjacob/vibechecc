@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { api } from '@vibechecc/convex';
 import { convexQuery } from '@convex-dev/react-query';
@@ -474,8 +474,11 @@ function ReviewResultListCard({
                     value: result.rating,
                     count: undefined,
                   }}
-                  showScale={false}
+                  vibeId={result.vibeId}
+                  variant="compact"
                   size="sm"
+                  existingUserRatings={[]}
+                  emojiMetadata={{}}
                 />
               </div>
             </div>

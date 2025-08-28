@@ -24,7 +24,11 @@ describe('Analytics Infrastructure Validation', () => {
 
   describe('A/B Testing Events', () => {
     it('should track experiment exposure with correct parameters', () => {
-      trackEvents.experimentExposed('hero_tagline_test', 'variant_b', 'Emotional Tagline');
+      trackEvents.experimentExposed(
+        'hero_tagline_test',
+        'variant_b',
+        'Emotional Tagline'
+      );
 
       expect(posthog.capture).toHaveBeenCalledWith('experiment_exposed', {
         experiment_key: 'hero_tagline_test',
@@ -96,12 +100,9 @@ describe('Analytics Infrastructure Validation', () => {
     });
 
     it('should track component performance events', () => {
-      trackEvents.componentPerformance(
-        'home-page',
-        'rerender',
-        undefined,
-        { render_count: 3 }
-      );
+      trackEvents.componentPerformance('home-page', 'rerender', undefined, {
+        render_count: 3,
+      });
 
       expect(posthog.capture).toHaveBeenCalledWith('component_performance', {
         component_name: 'home-page',
@@ -159,12 +160,7 @@ describe('Analytics Infrastructure Validation', () => {
     });
 
     it('should track user journey completion', () => {
-      trackEvents.userJourneyCompleted(
-        'rating_journey',
-        1500,
-        4,
-        'user123'
-      );
+      trackEvents.userJourneyCompleted('rating_journey', 1500, 4, 'user123');
 
       expect(posthog.capture).toHaveBeenCalledWith('user_journey_completed', {
         journey_type: 'rating_journey',
@@ -201,12 +197,15 @@ describe('Analytics Infrastructure Validation', () => {
     it('should track viral coefficient calculations', () => {
       trackEvents.viralCoefficientCalculated('weekly', 1.2, 100, 120);
 
-      expect(posthog.capture).toHaveBeenCalledWith('viral_coefficient_calculated', {
-        period: 'weekly',
-        coefficient: 1.2,
-        invites_sent: 100,
-        conversions: 120,
-      });
+      expect(posthog.capture).toHaveBeenCalledWith(
+        'viral_coefficient_calculated',
+        {
+          period: 'weekly',
+          coefficient: 1.2,
+          invites_sent: 100,
+          conversions: 120,
+        }
+      );
     });
   });
 
@@ -214,10 +213,13 @@ describe('Analytics Infrastructure Validation', () => {
     it('should track engagement session start', () => {
       trackEvents.engagementSessionStarted('browse', 'home_page');
 
-      expect(posthog.capture).toHaveBeenCalledWith('engagement_session_started', {
-        session_type: 'browse',
-        entry_point: 'home_page',
-      });
+      expect(posthog.capture).toHaveBeenCalledWith(
+        'engagement_session_started',
+        {
+          session_type: 'browse',
+          entry_point: 'home_page',
+        }
+      );
     });
 
     it('should track engagement session end', () => {
@@ -234,13 +236,16 @@ describe('Analytics Infrastructure Validation', () => {
     it('should track rating engagement analysis', () => {
       trackEvents.ratingEngagementAnalyzed('daily', 150, 45, 4.2, 0.75);
 
-      expect(posthog.capture).toHaveBeenCalledWith('rating_engagement_analyzed', {
-        period: 'daily',
-        total_ratings: 150,
-        unique_raters: 45,
-        average_rating: 4.2,
-        engagement_rate: 0.75,
-      });
+      expect(posthog.capture).toHaveBeenCalledWith(
+        'rating_engagement_analyzed',
+        {
+          period: 'daily',
+          total_ratings: 150,
+          unique_raters: 45,
+          average_rating: 4.2,
+          engagement_rate: 0.75,
+        }
+      );
     });
   });
 
@@ -278,7 +283,9 @@ describe('Analytics Infrastructure Validation', () => {
 
 describe('Hero Tagline Variants Configuration', () => {
   it('should have properly configured tagline variants', async () => {
-    const { HERO_TAGLINE_VARIANTS } = await import('@/hooks/use-hero-tagline-experiment');
+    const { HERO_TAGLINE_VARIANTS } = await import(
+      '@/hooks/use-hero-tagline-experiment'
+    );
 
     expect(HERO_TAGLINE_VARIANTS).toBeDefined();
     expect(Object.keys(HERO_TAGLINE_VARIANTS)).toContain('control');
@@ -286,7 +293,7 @@ describe('Hero Tagline Variants Configuration', () => {
     expect(Object.keys(HERO_TAGLINE_VARIANTS)).toContain('social');
 
     // Validate variant structure
-    Object.values(HERO_TAGLINE_VARIANTS).forEach(variant => {
+    Object.values(HERO_TAGLINE_VARIANTS).forEach((variant) => {
       expect(variant).toHaveProperty('id');
       expect(variant).toHaveProperty('headline');
       expect(variant).toHaveProperty('description');
@@ -297,14 +304,20 @@ describe('Hero Tagline Variants Configuration', () => {
   });
 
   it('should have distinct content for each variant', async () => {
-    const { HERO_TAGLINE_VARIANTS } = await import('@/hooks/use-hero-tagline-experiment');
+    const { HERO_TAGLINE_VARIANTS } = await import(
+      '@/hooks/use-hero-tagline-experiment'
+    );
 
-    const headlines = Object.values(HERO_TAGLINE_VARIANTS).map(v => v.headline);
-    const descriptions = Object.values(HERO_TAGLINE_VARIANTS).map(v => v.description);
+    const headlines = Object.values(HERO_TAGLINE_VARIANTS).map(
+      (v) => v.headline
+    );
+    const descriptions = Object.values(HERO_TAGLINE_VARIANTS).map(
+      (v) => v.description
+    );
 
     // Ensure all headlines are unique
     expect(new Set(headlines).size).toBe(headlines.length);
-    
+
     // Ensure all descriptions are unique
     expect(new Set(descriptions).size).toBe(descriptions.length);
   });
@@ -332,9 +345,11 @@ describe('Analytics Event Types Validation', () => {
       'cohortRetentionTracked',
     ];
 
-    requiredFunctions.forEach(funcName => {
+    requiredFunctions.forEach((funcName) => {
       expect(trackEvents).toHaveProperty(funcName);
-      expect(typeof trackEvents[funcName as keyof typeof trackEvents]).toBe('function');
+      expect(typeof trackEvents[funcName as keyof typeof trackEvents]).toBe(
+        'function'
+      );
     });
   });
 });

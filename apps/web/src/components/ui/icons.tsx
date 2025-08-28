@@ -99,7 +99,7 @@ export {
 } from 'lucide-react';
 
 // Theme and visual icons
-export { Sun, Moon, Laptop, Palette } from 'lucide-react';
+export { Sun, Moon, Laptop, Palette, Shuffle } from 'lucide-react';
 
 // Device and info icons
 export { Maximize2, Info, Smartphone, Monitor } from 'lucide-react';

@@ -1,14 +1,13 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import * as React from 'react';
 import { useUserVibes } from '@/queries';
-import { VibeGrid } from '@/features/vibes/components/vibe-grid';
 import { CreateVibeButton } from '@/features/vibes/components/create-vibe-button';
 import { useUser } from '@clerk/tanstack-react-start';
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
-import { VibeGridSkeleton } from '@/components/skeletons/vibe-grid-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MasonryFeed } from '@/components/masonry-feed';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -44,7 +43,7 @@ function MyVibes() {
           </div>
           <Skeleton className="h-10 w-32" />
         </div>
-        <VibeGridSkeleton />
+        <MasonryFeed vibes={[]} isLoading />
       </div>
     );
   }
@@ -84,8 +83,7 @@ function MyVibes() {
         </div>
         <CreateVibeButton />
       </div>
-
-      <VibeGrid vibes={vibes} />
+      <MasonryFeed vibes={vibes} variant="feed" />
     </div>
   );
 }

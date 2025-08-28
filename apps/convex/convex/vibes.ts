@@ -39,6 +39,39 @@ type VibeWithEmojiData = Doc<'vibes'> & {
   hasEmojiFilter: boolean;
 };
 
+// Type definition for grouped emoji ratings
+type GroupedEmojiRating = {
+  emoji: string;
+  averageValue: number;
+  count: number;
+  totalValue: number;
+};
+
+// Helper function to group ratings by emoji with counts and averages
+function groupRatingsByEmoji(ratings: Doc<'ratings'>[]): GroupedEmojiRating[] {
+  const emojiGroups = new Map<string, { totalValue: number; count: number }>();
+  
+  for (const rating of ratings) {
+    const existing = emojiGroups.get(rating.emoji);
+    if (existing) {
+      existing.totalValue += rating.value;
+      existing.count += 1;
+    } else {
+      emojiGroups.set(rating.emoji, {
+        totalValue: rating.value,
+        count: 1,
+      });
+    }
+  }
+  
+  return Array.from(emojiGroups.entries()).map(([emoji, { totalValue, count }]) => ({
+    emoji,
+    averageValue: totalValue / count,
+    count,
+    totalValue,
+  }));
+}
+
 // Simple get all vibes (for backwards compatibility)
 export const getAllSimple = query({
   handler: async (ctx) => {
@@ -86,10 +119,13 @@ export const getFilteredVibes = query({
     const limit = args.limit ?? 20;
     const filters = args.filters || {};
 
+    // Check authentication for current user ratings
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
+
     // If followingOnly is requested, get following user IDs
     let followingIds: string[] = [];
     if (filters.followingOnly) {
-      const identity = await ctx.auth.getUserIdentity();
       if (!identity) {
         return {
           vibes: [],
@@ -480,18 +516,26 @@ export const getFilteredVibes = query({
       const creator = creatorMap.get(vibe.createdById);
       const ratings = allRatings[index];
 
-      const ratingDetails = ratings.map((rating) => ({
-        user: ratingUserMap.get(rating.userId),
-        emoji: rating.emoji,
-        value: rating.value,
-        review: rating.review,
-        createdAt: rating.createdAt,
-      }));
+      // Group ratings by emoji instead of returning individual ratings
+      const emojiRatings = groupRatingsByEmoji(ratings);
+
+      // Include current user's ratings if authenticated
+      const currentUserRatings = userId 
+        ? ratings.filter(r => r.userId === userId).map(rating => ({
+            id: rating._id,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+            updatedAt: rating.updatedAt,
+          }))
+        : undefined;
 
       return {
         ...vibe,
         createdBy: creator,
-        ratings: ratingDetails,
+        emojiRatings,
+        currentUserRatings,
       };
     });
 
@@ -511,6 +555,10 @@ export const getAll = query({
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 20; // Default to 20 vibes to limit reads
+
+    // Check authentication for current user ratings
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
 
     // Get vibes with pagination
     const vibesQuery = ctx.db.query('vibes').order('desc');
@@ -566,18 +614,26 @@ export const getAll = query({
       const creator = creatorMap.get(vibe.createdById);
       const ratings = allRatings[index];
 
-      const ratingDetails = ratings.map((rating) => ({
-        user: ratingUserMap.get(rating.userId),
-        emoji: rating.emoji,
-        value: rating.value,
-        review: rating.review,
-        createdAt: rating.createdAt,
-      }));
+      // Group ratings by emoji instead of returning individual ratings
+      const emojiRatings = groupRatingsByEmoji(ratings);
+
+      // Include current user's ratings if authenticated
+      const currentUserRatings = userId 
+        ? ratings.filter(r => r.userId === userId).map(rating => ({
+            id: rating._id,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+            updatedAt: rating.updatedAt,
+          }))
+        : undefined;
 
       return {
         ...vibe,
         createdBy: creator,
-        ratings: ratingDetails,
+        emojiRatings,
+        currentUserRatings,
       };
     });
 
@@ -613,7 +669,8 @@ export const getById = query({
         ...vibe,
         isDeleted: true,
         createdBy: null,
-        ratings: [],
+        emojiRatings: [],
+        currentUserRatings: undefined,
       };
     }
 
@@ -638,23 +695,27 @@ export const getById = query({
       )
       .collect();
 
-    // Create lookup map for O(1) user access
-    const userMap = new Map(users.map((user) => [user.externalId, user]));
+    // Group ratings by emoji instead of returning individual ratings
+    const emojiRatings = groupRatingsByEmoji(ratings);
 
-    const ratingDetails = ratings.map((rating) => ({
-      _id: rating._id,
-      user: userMap.get(rating.userId) || null,
-      emoji: rating.emoji,
-      value: rating.value,
-      review: rating.review,
-      createdAt: rating.createdAt,
-    }));
+    // Include current user's ratings if authenticated
+    const currentUserRatings = identity?.subject 
+      ? ratings.filter(r => r.userId === identity.subject).map(rating => ({
+          id: rating._id,
+          emoji: rating.emoji,
+          value: rating.value,
+          review: rating.review,
+          createdAt: rating.createdAt,
+          updatedAt: rating.updatedAt,
+        }))
+      : undefined;
 
     return {
       ...vibe,
       isDeleted: false,
       createdBy: creator,
-      ratings: ratingDetails,
+      emojiRatings,
+      currentUserRatings,
     };
   },
 });
@@ -665,6 +726,7 @@ export const getByUser = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     const isOwnProfile = identity?.subject === args.userId;
+    const currentUserId = identity?.subject;
 
     // SECURITY: For non-own profiles, only show public vibes
     // For own profile, show all non-deleted vibes
@@ -732,18 +794,26 @@ export const getByUser = query({
       const creator = creatorMap.get(vibe.createdById);
       const vibeRatings = ratingsByVibeId.get(vibe.id) || [];
 
-      const ratingDetails = vibeRatings.map((rating) => ({
-        user: ratingUserMap.get(rating.userId) || null,
-        emoji: rating.emoji,
-        value: rating.value,
-        review: rating.review,
-        createdAt: rating.createdAt,
-      }));
+      // Group ratings by emoji instead of returning individual ratings
+      const emojiRatings = groupRatingsByEmoji(vibeRatings);
+
+      // Include current user's ratings if authenticated
+      const currentUserRatings = currentUserId 
+        ? vibeRatings.filter(r => r.userId === currentUserId).map(rating => ({
+            id: rating._id,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+            updatedAt: rating.updatedAt,
+          }))
+        : undefined;
 
       return {
         ...vibe,
         createdBy: creator,
-        ratings: ratingDetails,
+        emojiRatings,
+        currentUserRatings,
       };
     });
   },
@@ -782,28 +852,13 @@ export const getUserRatedVibes = query({
           .filter((q) => q.eq(q.field('vibeId'), vibe.id))
           .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
         };
       })
     );
@@ -1422,34 +1477,19 @@ export const getByTag = query({
           )
           .first();
 
-        // Get limited ratings for performance
+        // Get all ratings for grouping by emoji
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(5);
+          .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
         };
       })
     );
@@ -1910,30 +1950,15 @@ export const getTopRated = query({
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(5);
+          .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
         };
       })
     );
@@ -2193,29 +2218,13 @@ export const getTopRatedByEmoji = query({
               vibeEmojiRatings.length
             : args.minValue;
 
-        // Get limited ratings for performance
-        const ratingDetails = await Promise.all(
-          ratings.slice(0, 5).map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const groupedEmojiRatings = groupRatingsByEmoji(ratings);
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings: groupedEmojiRatings,
           averageRating,
           emojiRating: {
             emoji: args.emoji,
@@ -2453,30 +2462,28 @@ export const getForYouFeed = query({
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(10);
+          .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
+
+        // Include current user's ratings if authenticated
+        const currentUserRatings = ratings
+          .filter(r => r.userId === identity.subject)
+          .map(rating => ({
+            id: rating._id,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+            updatedAt: rating.updatedAt,
+          }));
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
+          currentUserRatings,
         };
       })
     );
@@ -2703,30 +2710,28 @@ export const getFollowingVibes = query({
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(10);
+          .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
+
+        // Include current user's ratings if authenticated
+        const currentUserRatings = ratings
+          .filter(r => r.userId === identity.subject)
+          .map(rating => ({
+            id: rating._id,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+            updatedAt: rating.updatedAt,
+          }));
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
+          currentUserRatings,
         };
       })
     );

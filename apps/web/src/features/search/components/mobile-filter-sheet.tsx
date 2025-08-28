@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { SlidersHorizontal, X } from '@/components/ui/icons';
-import { EmojiSearchCommand } from '@/features/ratings/components/emoji-search-index';
+import { EmojiSearchCollapsible as EmojiSearchCommand } from '@/features/ratings/components/emoji-search-collapsible';
 import { EmojiPillFilters } from '@/features/ratings/components/emoji-pill-filters';
 import { RatingRangeSlider } from '@/features/ratings/components/rating-range-slider';
 import { TagSearchCommand } from '@/components/tag-search-command';

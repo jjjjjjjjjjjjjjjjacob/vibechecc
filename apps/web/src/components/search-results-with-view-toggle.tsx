@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 // VibeList component doesn't exist, we'll use VibeCard with list variant
 import { Button } from '@/components/ui/button';
 import { LayoutGrid, List } from '@/components/ui/icons';

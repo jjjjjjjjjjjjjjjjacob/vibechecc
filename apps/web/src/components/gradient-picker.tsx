@@ -23,11 +23,7 @@ interface GradientPickerProps {
     to?: string;
     direction?: string;
   };
-  onChange: (gradient: {
-    from: string;
-    to: string;
-    direction: string;
-  }) => void;
+  onChange: (gradient: { from: string; to: string; direction: string }) => void;
   className?: string;
 }
 
@@ -53,7 +49,7 @@ export function GradientPicker({
     setIsOpen(false);
   };
 
-  const handlePresetSelect = (preset: typeof gradientPresets[0]) => {
+  const handlePresetSelect = (preset: (typeof gradientPresets)[0]) => {
     setFrom(preset.from);
     setTo(preset.to);
     setDirection(preset.direction);
@@ -107,7 +103,7 @@ export function GradientPicker({
             <TabsTrigger value="presets">presets</TabsTrigger>
             <TabsTrigger value="custom">custom</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="presets" className="space-y-3">
             <div className="grid grid-cols-3 gap-2">
               {gradientPresets.map((preset) => (
@@ -130,15 +126,16 @@ export function GradientPicker({
               ))}
             </div>
           </TabsContent>
-          
+
           <TabsContent value="custom" className="space-y-4">
             <div className="space-y-3">
-              <div className="h-20 w-full rounded-md border"
+              <div
+                className="h-20 w-full rounded-md border"
                 style={{
                   background: generateGradientStyle(from, to, direction),
                 }}
               />
-              
+
               <div className="space-y-2">
                 <Label htmlFor="from-color">from color</Label>
                 <div className="flex gap-2">
@@ -157,7 +154,7 @@ export function GradientPicker({
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="to-color">to color</Label>
                 <div className="flex gap-2">
@@ -176,7 +173,7 @@ export function GradientPicker({
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label>direction</Label>
                 <div className="grid grid-cols-4 gap-1">
@@ -194,7 +191,7 @@ export function GradientPicker({
                   ))}
                 </div>
               </div>
-              
+
               <div className="flex gap-2 pt-2">
                 <Button
                   variant="outline"
@@ -205,11 +202,7 @@ export function GradientPicker({
                   <Shuffle className="mr-2 h-4 w-4" />
                   randomize
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={handleApply}
-                  className="flex-1"
-                >
+                <Button size="sm" onClick={handleApply} className="flex-1">
                   apply
                 </Button>
               </div>

@@ -29,7 +29,7 @@ import {
   Check,
 } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { useStoryCanvas, type LayoutOption } from '@/hooks/use-story-canvas';
 import { useVibeImageUrl } from '@/hooks/use-vibe-image-url';
 import { StoryImagePreview } from '@/components/social/story-image-preview';

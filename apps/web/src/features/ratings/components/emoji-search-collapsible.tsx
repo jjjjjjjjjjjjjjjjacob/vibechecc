@@ -23,15 +23,12 @@ interface EmojiSearchCollapsibleProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   maxHeight?: string;
-  expandButtonVariant?: 'text' | 'circle';
+  expandButtonVariant?: 'text' | 'circle' | 'none';
   'data-testid'?: string;
 }
 
 export function EmojiSearchCollapsible({
   onSelect,
-  searchValue: _searchValue,
-  onSearchChange: _onSearchChange,
-  className: _className,
   open: openProp,
   onOpenChange: onOpenChangeProp,
   showCategories = false,
@@ -39,7 +36,6 @@ export function EmojiSearchCollapsible({
   dynamicWidth = false,
   perLine,
   maxHeight,
-  'data-testid': _dataTestId,
 }: EmojiSearchCollapsibleProps) {
   const { user } = useUser();
   const { resolvedTheme } = useThemeStore();
@@ -73,7 +69,7 @@ export function EmojiSearchCollapsible({
   };
 
   return (
-    <div className="flex w-full flex-col items-center border-0">
+    <div className="emoji-picker flex w-full flex-col items-center border-0">
       <div
         data-open={open}
         className={cn(
@@ -120,7 +116,10 @@ export function EmojiSearchCollapsible({
         <Button
           variant="ghost"
           className="mt-2 w-full justify-center py-2 text-sm hover:no-underline"
-          onClick={() => setOpen(!open)}
+          onClick={(e) => {
+            e.preventDefault();
+            setOpen(!open);
+          }}
         >
           <span className="lowercase">show all emojis</span>
           <ChevronUp
@@ -134,7 +133,10 @@ export function EmojiSearchCollapsible({
         <Button
           variant="secondary"
           className="border-border/20 hover:border-border/50 absolute right-2 bottom-2 h-fit w-fit rounded-full p-2"
-          onClick={() => setOpen(!open)}
+          onClick={(e) => {
+            e.preventDefault();
+            setOpen(!open);
+          }}
         >
           <ChevronUp
             data-open={open}

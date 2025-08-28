@@ -2,12 +2,17 @@ import * as React from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+// import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { JSMasonryLayout, useMasonryLayout } from '@/components/masonry-layout';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FeedSignupCta } from '@/features/auth/components/signup-cta';
-import { useSignupCtaPlacement, useAnonymousInteractionTracking } from '@/features/auth/hooks/use-signup-cta-placement';
-import type { Vibe } from '@vibechecc/types';
+import {
+  useSignupCtaPlacement,
+  useAnonymousInteractionTracking,
+} from '@/features/auth/hooks/use-signup-cta-placement';
+import { useEmojiMetadata, useCreateEmojiRatingMutation } from '@/queries';
+import type { Vibe, EmojiRatingMetadata } from '@vibechecc/types';
 
 interface MasonryFeedProps {
   vibes: Vibe[];
@@ -26,7 +31,12 @@ interface MasonryFeedProps {
   // Mobile optimization props
   enableFadeIn?: boolean;
   optimizeForTouch?: boolean;
-  preferredMobileVariant?: 'mobile-optimized' | 'mobile-story' | 'mobile-square';
+  preferredMobileVariant?:
+    | 'mobile-optimized'
+    | 'mobile-story'
+    | 'mobile-square';
+  // Data props to avoid N+1 queries
+  onRefetch?: () => void;
 }
 
 export function MasonryFeed({
@@ -46,16 +56,44 @@ export function MasonryFeed({
   enableFadeIn = false,
   optimizeForTouch = true,
   preferredMobileVariant = 'mobile-optimized',
+  onRefetch,
 }: MasonryFeedProps) {
   const shouldUseMasonry = useMasonryLayout();
   const isMobile = useIsMobile();
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
-  
+
+  // Fetch emoji metadata once for entire feed
+  const { data: emojiMetadataArray } = useEmojiMetadata();
+  const createEmojiRatingMutation = useCreateEmojiRatingMutation();
+
+  // Convert emoji metadata array to record
+  const emojiMetadata = React.useMemo(() => {
+    if (!emojiMetadataArray) return {};
+    return emojiMetadataArray.reduce(
+      (acc: Record<string, EmojiRatingMetadata>, metadata: EmojiRatingMetadata) => {
+        acc[metadata.emoji] = metadata;
+        return acc;
+      },
+      {}
+    );
+  }, [emojiMetadataArray]);
+
+  // Handle emoji rating at feed level
+  const handleEmojiRating = React.useCallback(
+    async (data: { emoji: string; value: number; review: string; tags?: string[] }) => {
+      // This would need the vibeId, so we'll pass this function to the cards
+      // The actual implementation will be in the card components
+      throw new Error('This should be handled by individual cards');
+    },
+    [createEmojiRatingMutation, onRefetch]
+  );
+
   // CTA placement hooks
-  const { shouldShowFeedCta, isAuthenticated, vibesViewed } = useSignupCtaPlacement({
-    feedThreshold: 3,
-    enableFeedCta: variant === 'feed', // Only show on main feed
-  });
+  const { shouldShowFeedCta, isAuthenticated, vibesViewed } =
+    useSignupCtaPlacement({
+      feedThreshold: 3,
+      enableFeedCta: variant === 'feed', // Only show on main feed
+    });
   const { trackVibeView } = useAnonymousInteractionTracking();
 
   // Intersection observer for infinite scroll
@@ -95,10 +133,10 @@ export function MasonryFeed({
     }
 
     const result: (Vibe | { type: 'cta'; id: string; index: number })[] = [];
-    
+
     vibes.forEach((vibe, index) => {
       result.push(vibe);
-      
+
       // Add CTA after viewing 3rd, 7th, 15th vibe, etc.
       const ctaPositions = [2, 6, 14, 25, 40]; // 0-indexed positions
       if (ctaPositions.includes(index) && shouldShowFeedCta(index + 1)) {
@@ -141,9 +179,9 @@ export function MasonryFeed({
   if (isLoading && vibes.length === 0) {
     return (
       <div className={cn('w-full', className)}>
-        <FeedSkeleton 
-          useMasonry={shouldUseMasonry} 
-          variant={variant} 
+        <FeedSkeleton
+          useMasonry={shouldUseMasonry}
+          variant={variant}
           isMobile={isMobile}
           preferredMobileVariant={preferredMobileVariant}
         />
@@ -165,13 +203,13 @@ export function MasonryFeed({
         {emptyStateAction && (
           <div className="flex justify-center">{emptyStateAction}</div>
         )}
-        
+
         {/* Empty State CTA for unauthenticated users */}
         {!isAuthenticated && variant === 'feed' && (
           <div className="mt-8">
             <FeedSignupCta
               vibesViewed={0}
-              className="mx-auto max-w-md animate-fade-in-up"
+              className="animate-fade-in-up mx-auto max-w-md"
             />
           </div>
         )}
@@ -189,7 +227,11 @@ export function MasonryFeed({
             default: 1,
             sm: (() => {
               // Mobile variants prefer single column for better UX
-              if (isMobile && (preferredMobileVariant === 'mobile-story' || preferredMobileVariant === 'mobile-square')) {
+              if (
+                isMobile &&
+                (preferredMobileVariant === 'mobile-story' ||
+                  preferredMobileVariant === 'mobile-square')
+              ) {
                 return 1;
               }
               return variant === 'search' ? 2 : 1;
@@ -198,7 +240,11 @@ export function MasonryFeed({
             lg: variant === 'search' ? 4 : 3,
             xl: variant === 'search' ? 5 : 4,
           }}
-          gap={isMobile && preferredMobileVariant === 'mobile-story' ? '16px' : '20px'}
+          gap={
+            isMobile && preferredMobileVariant === 'mobile-story'
+              ? '12px'
+              : '12px'
+          }
           className="w-full"
         >
           {vibesWithCtas.map((item, index) => {
@@ -211,7 +257,7 @@ export function MasonryFeed({
                 />
               );
             }
-            
+
             const vibe = item as Vibe;
             return (
               <VibeCard
@@ -222,18 +268,34 @@ export function MasonryFeed({
                 enableFadeIn={enableFadeIn}
                 optimizeForTouch={optimizeForTouch}
                 delay={enableFadeIn ? index * 50 : 0}
+                emojiMetadata={emojiMetadata}
+                currentUserRatings={vibe.currentUserRatings}
+                onEmojiRating={async (data) => {
+                  await createEmojiRatingMutation.mutateAsync({
+                    vibeId: vibe.id,
+                    emoji: data.emoji,
+                    value: data.value,
+                    review: data.review,
+                  });
+                  onRefetch?.();
+                }}
               />
             );
           })}
         </JSMasonryLayout>
       ) : (
         // Mobile single column layout
-        <div className={cn(
-          // Adjust spacing based on mobile variant
-          preferredMobileVariant === 'mobile-story' ? 'space-y-4' : 'space-y-5',
-          // Center mobile-story cards
-          preferredMobileVariant === 'mobile-story' && 'flex flex-col items-center'
-        )}>
+        <div
+          className={cn(
+            // Adjust spacing based on mobile variant
+            preferredMobileVariant === 'mobile-story'
+              ? 'space-y-4'
+              : 'space-y-5',
+            // Center mobile-story cards
+            preferredMobileVariant === 'mobile-story' &&
+              'flex flex-col items-center'
+          )}
+        >
           {vibesWithCtas.map((item, index) => {
             if ('type' in item && item.type === 'cta') {
               return (
@@ -244,7 +306,7 @@ export function MasonryFeed({
                 />
               );
             }
-            
+
             const vibe = item as Vibe;
             return (
               <VibeCard
@@ -255,6 +317,17 @@ export function MasonryFeed({
                 enableFadeIn={enableFadeIn}
                 optimizeForTouch={optimizeForTouch}
                 delay={enableFadeIn ? index * 100 : 0}
+                emojiMetadata={emojiMetadata}
+                currentUserRatings={vibe.currentUserRatings}
+                onEmojiRating={async (data) => {
+                  await createEmojiRatingMutation.mutateAsync({
+                    vibeId: vibe.id,
+                    emoji: data.emoji,
+                    value: data.value,
+                    review: data.review,
+                  });
+                  onRefetch?.();
+                }}
               />
             );
           })}
@@ -286,10 +359,13 @@ function FeedSkeleton({
   useMasonry: boolean;
   variant?: 'feed' | 'search' | 'category';
   isMobile?: boolean;
-  preferredMobileVariant?: 'mobile-optimized' | 'mobile-story' | 'mobile-square';
+  preferredMobileVariant?:
+    | 'mobile-optimized'
+    | 'mobile-story'
+    | 'mobile-square';
 }) {
   const skeletonCount = variant === 'search' ? 15 : 12;
-  
+
   // Determine aspect ratio based on mobile variant
   const getAspectRatio = () => {
     if (isMobile) {
@@ -306,13 +382,25 @@ function FeedSkeleton({
     }
     return useMasonry ? 'aspect-[3/4]' : 'aspect-video';
   };
-  
+
   const skeletons = Array.from({ length: skeletonCount }, (_, i) => (
-    <Card key={i} className={cn('overflow-hidden', isMobile && preferredMobileVariant === 'mobile-story' && 'max-w-sm mx-auto')}>
-      <Skeleton
-        className={cn('w-full', getAspectRatio())}
-      />
-      <div className={cn('space-y-3 p-4', preferredMobileVariant === 'mobile-story' && 'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 text-white')}>
+    <Card
+      key={i}
+      className={cn(
+        'overflow-hidden',
+        isMobile &&
+          preferredMobileVariant === 'mobile-story' &&
+          'mx-auto max-w-sm'
+      )}
+    >
+      <Skeleton className={cn('w-full', getAspectRatio())} />
+      <div
+        className={cn(
+          'space-y-3 p-4',
+          preferredMobileVariant === 'mobile-story' &&
+            'absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 text-white'
+        )}
+      >
         <Skeleton className="h-5 w-3/4" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-2/3" />
@@ -331,7 +419,7 @@ function FeedSkeleton({
         : { default: 1, sm: 2, md: 2, lg: 3, xl: 4 };
 
     return (
-      <JSMasonryLayout columns={columns} gap="20px" className="w-full">
+      <JSMasonryLayout columns={columns} gap="12px" className="w-full">
         {skeletons}
       </JSMasonryLayout>
     );

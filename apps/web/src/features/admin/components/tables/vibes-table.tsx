@@ -109,9 +109,10 @@ export function VibesTable({
   });
 
   const _getAverageRating = (vibe: Vibe) => {
-    if (!vibe.ratings || vibe.ratings.length === 0) return 0;
-    const sum = vibe.ratings.reduce((acc, rating) => acc + rating.value, 0);
-    return Math.round((sum / vibe.ratings.length) * 10) / 10;
+    if (!vibe.emojiRatings || vibe.emojiRatings.length === 0) return 0;
+    const totalValue = vibe.emojiRatings.reduce((acc, rating) => acc + (rating.averageValue * rating.count), 0);
+    const totalCount = vibe.emojiRatings.reduce((acc, rating) => acc + rating.count, 0);
+    return totalCount > 0 ? Math.round((totalValue / totalCount) * 10) / 10 : 0;
   };
 
   const columns: ColumnDef<Vibe>[] = [
@@ -211,7 +212,7 @@ export function VibesTable({
         const vibe = row.original;
         return (
           <ExpandableRatingsCell
-            ratings={vibe.ratings || []}
+            ratings={vibe.currentUserRatings || []}
             previewCount={2}
           />
         );

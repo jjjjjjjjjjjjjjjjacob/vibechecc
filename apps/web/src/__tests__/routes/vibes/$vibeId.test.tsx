@@ -80,12 +80,12 @@ vi.mock('@/features/auth', () => ({
 }));
 
 // Mock the emoji rating components with proper integration
-let _mockRatingPopoverOpen = false;
+let _mockRatingDialogOpen = false;
 
-vi.mock('@/features/ratings/components/emoji-rating-selector', () => ({
-  EmojiRatingSelector: () => {
+vi.mock('@/features/ratings/components/revolving-rate-review-button', () => ({
+  RevolvingRateReviewButton: () => {
     const openPopover = () => {
-      _mockRatingPopoverOpen = true;
+      _mockRatingDialogOpen = true;
     };
 
     return (
@@ -99,8 +99,8 @@ vi.mock('@/features/ratings/components/emoji-rating-selector', () => ({
   },
 }));
 
-vi.mock('@/features/ratings/components/emoji-rating-popover', () => ({
-  RatingPopover: ({
+vi.mock('@/features/ratings/components/rate-and-review-dialog', () => ({
+  RateAndReviewDialog: ({
     onSubmit,
     isSubmitting,
     open: controlledOpen,
@@ -144,7 +144,7 @@ vi.mock('@/features/ratings/components/emoji-rating-popover', () => ({
         {children}
         {isOpen && (
           <div data-testid="dialog-content" key={forceRender}>
-            <h2>rate with emoji</h2>
+            <h2>rate & review</h2>
             <div>
               <p>select an emoji</p>
               {['🔥', '😍', '😱'].map((emoji) => (
@@ -194,7 +194,7 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     user = userEvent.setup();
     vi.clearAllMocks();
     // Reset mock state
-    _mockRatingPopoverOpen = false;
+    _mockRatingDialogOpen = false;
   });
 
   const renderWithRouter = () => {

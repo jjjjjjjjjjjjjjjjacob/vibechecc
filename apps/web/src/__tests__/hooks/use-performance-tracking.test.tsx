@@ -48,7 +48,7 @@ describe('usePlaceholderTracking', () => {
   });
 
   it('should track render time on mount', () => {
-    const { unmount } = renderHook(() => 
+    const { unmount } = renderHook(() =>
       usePlaceholderTracking('test-component')
     );
 
@@ -63,7 +63,7 @@ describe('usePlaceholderTracking', () => {
   });
 
   it('should track interaction delays', () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       usePlaceholderTracking('test-component')
     );
 
@@ -82,12 +82,12 @@ describe('usePlaceholderTracking', () => {
   });
 
   it('should setup intersection observer for visibility tracking', () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       usePlaceholderTracking('test-component', { trackVisibility: true })
     );
 
     const mockElement = document.createElement('div');
-    
+
     act(() => {
       result.current.visibilityRef(mockElement);
     });
@@ -113,7 +113,10 @@ describe('useLoadingStateTracking', () => {
 
     // Start loading
     rerender({ isLoading: true });
-    expect(trackEvents.loadingStateChanged).toHaveBeenCalledWith('test-state', 'started');
+    expect(trackEvents.loadingStateChanged).toHaveBeenCalledWith(
+      'test-state',
+      'started'
+    );
 
     mockPerformance.now.mockReturnValue(1500);
 
@@ -134,7 +137,7 @@ describe('useComponentPerformance', () => {
   });
 
   it('should track component mount and unmount', () => {
-    const { unmount } = renderHook(() => 
+    const { unmount } = renderHook(() =>
       useComponentPerformance('test-component')
     );
 
@@ -155,7 +158,7 @@ describe('useComponentPerformance', () => {
   });
 
   it('should track rerenders', () => {
-    const { rerender } = renderHook(() => 
+    const { rerender } = renderHook(() =>
       useComponentPerformance('test-component', { trackRerender: true })
     );
 
@@ -182,7 +185,8 @@ describe('useTimeToInteractive', () => {
 
   it('should track time to interactive', () => {
     const { rerender } = renderHook(
-      ({ isInteractive }) => useTimeToInteractive('test-component', isInteractive),
+      ({ isInteractive }) =>
+        useTimeToInteractive('test-component', isInteractive),
       { initialProps: { isInteractive: false } }
     );
 
@@ -197,7 +201,7 @@ describe('useTimeToInteractive', () => {
   });
 
   it('should track first interaction', () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useTimeToInteractive('test-component', true)
     );
 

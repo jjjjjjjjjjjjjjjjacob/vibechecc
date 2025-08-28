@@ -20,8 +20,9 @@ export interface TaglineVariant {
 export const HERO_TAGLINE_VARIANTS: Record<string, TaglineVariant> = {
   control: {
     id: 'control',
-    headline: 'we\'re vibing here',
-    description: 'welcome to vibechecc, where you can discover, share, and rate vibes because that\'s a thing you can do',
+    headline: "we're vibing here",
+    description:
+      "welcome to vibechecc, where you can discover, share, and rate vibes because that's a thing you can do",
     cta: {
       primary: 'create vibe',
       secondary: 'discover vibes',
@@ -30,7 +31,8 @@ export const HERO_TAGLINE_VARIANTS: Record<string, TaglineVariant> = {
   emotional: {
     id: 'emotional',
     headline: 'share your energy',
-    description: 'connect with others through authentic experiences and discover what moves you',
+    description:
+      'connect with others through authentic experiences and discover what moves you',
     cta: {
       primary: 'share your vibe',
       secondary: 'explore vibes',
@@ -39,7 +41,8 @@ export const HERO_TAGLINE_VARIANTS: Record<string, TaglineVariant> = {
   social: {
     id: 'social',
     headline: 'vibe with your tribe',
-    description: 'join a community where every moment matters and genuine connections spark',
+    description:
+      'join a community where every moment matters and genuine connections spark',
     cta: {
       primary: 'join the vibe',
       secondary: 'find your tribe',
@@ -57,7 +60,7 @@ export const HERO_TAGLINE_VARIANTS: Record<string, TaglineVariant> = {
   playful: {
     id: 'playful',
     headline: 'good vibes only',
-    description: 'where life\'s best moments get the recognition they deserve',
+    description: "where life's best moments get the recognition they deserve",
     cta: {
       primary: 'spread good vibes',
       secondary: 'discover amazing moments',
@@ -78,7 +81,9 @@ export function useHeroTaglineExperiment() {
     }
   );
 
-  const activeVariant = HERO_TAGLINE_VARIANTS[experiment.currentVariant] || HERO_TAGLINE_VARIANTS.control;
+  const activeVariant =
+    HERO_TAGLINE_VARIANTS[experiment.currentVariant] ||
+    HERO_TAGLINE_VARIANTS.control;
 
   // Track specific tagline interactions
   const trackTaglineView = useCallback(() => {
@@ -88,19 +93,22 @@ export function useHeroTaglineExperiment() {
     });
   }, [experiment, activeVariant]);
 
-  const trackCtaClick = useCallback((ctaType: 'primary' | 'secondary', ctaText: string) => {
-    experiment.trackAction('cta_clicked', {
-      cta_type: ctaType,
-      cta_text: ctaText,
-      headline: activeVariant.headline,
-    });
-    
-    // Also track as conversion for measuring effectiveness
-    experiment.trackConversion('cta_engagement', 1, {
-      cta_type: ctaType,
-      cta_text: ctaText,
-    });
-  }, [experiment, activeVariant]);
+  const trackCtaClick = useCallback(
+    (ctaType: 'primary' | 'secondary', ctaText: string) => {
+      experiment.trackAction('cta_clicked', {
+        cta_type: ctaType,
+        cta_text: ctaText,
+        headline: activeVariant.headline,
+      });
+
+      // Also track as conversion for measuring effectiveness
+      experiment.trackConversion('cta_engagement', 1, {
+        cta_type: ctaType,
+        cta_text: ctaText,
+      });
+    },
+    [experiment, activeVariant]
+  );
 
   const trackSignupConversion = useCallback(() => {
     experiment.trackConversion('signup', 1, {
@@ -140,14 +148,10 @@ export function useTaglineElementTest(
   element: 'headline' | 'description' | 'cta',
   variants: string[]
 ) {
-  const experiment = useMultivariateTest(
-    `hero_${element}_test`,
-    variants,
-    {
-      defaultVariant: variants[0],
-      trackingEnabled: true,
-    }
-  );
+  const experiment = useMultivariateTest(`hero_${element}_test`, variants, {
+    defaultVariant: variants[0],
+    trackingEnabled: true,
+  });
 
   const trackElementView = useCallback(() => {
     experiment.trackAction('element_viewed', {
@@ -156,13 +160,16 @@ export function useTaglineElementTest(
     });
   }, [experiment, element]);
 
-  const trackElementInteraction = useCallback((interactionType: string) => {
-    experiment.trackAction('element_interaction', {
-      element,
-      interaction_type: interactionType,
-      variant: experiment.currentVariant,
-    });
-  }, [experiment, element]);
+  const trackElementInteraction = useCallback(
+    (interactionType: string) => {
+      experiment.trackAction('element_interaction', {
+        element,
+        interaction_type: interactionType,
+        variant: experiment.currentVariant,
+      });
+    },
+    [experiment, element]
+  );
 
   return {
     variant: experiment.currentVariant,
@@ -179,17 +186,17 @@ export function useTaglineElementTest(
 export function useSeasonalTaglineExperiment() {
   const currentMonth = new Date().getMonth();
   const currentHour = new Date().getHours();
-  
+
   // Determine if we should show seasonal variants
   const isHolidaySeason = currentMonth === 11 || currentMonth === 0; // Dec/Jan
   const isSummer = currentMonth >= 5 && currentMonth <= 7; // Jun-Aug
   const isEvening = currentHour >= 18 || currentHour <= 6;
 
-  let seasonalVariants = Object.keys(HERO_TAGLINE_VARIANTS);
-  
+  const seasonalVariants = Object.keys(HERO_TAGLINE_VARIANTS);
+
   // Add seasonal context to tracking
   const baseExperiment = useHeroTaglineExperiment();
-  
+
   const trackSeasonalView = useCallback(() => {
     trackEvents.experimentAction(
       'hero_tagline_seasonal',
@@ -203,7 +210,14 @@ export function useSeasonalTaglineExperiment() {
         hour: currentHour,
       }
     );
-  }, [baseExperiment.variantId, isHolidaySeason, isSummer, isEvening, currentMonth, currentHour]);
+  }, [
+    baseExperiment.variantId,
+    isHolidaySeason,
+    isSummer,
+    isEvening,
+    currentMonth,
+    currentHour,
+  ]);
 
   return {
     ...baseExperiment,

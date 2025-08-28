@@ -20,7 +20,9 @@ export interface RatingShareLayoutOption {
   aspectRatio: '1:1' | '9:16' | '16:9';
 }
 
-export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) {
+export function useRatingShareCanvas(
+  options: UseRatingShareCanvasOptions = {}
+) {
   const { filename = 'rating-share.png' } = options;
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
@@ -251,7 +253,8 @@ export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) 
         ctx.fillStyle = storyColors.cardForeground || storyColors.foreground;
         ctx.fillText(raterDisplayName, contentX + 80, contentY + 10);
 
-        const raterUsername = (rating.rater as any)?.username || (rating.user as any)?.username;
+        const raterUsername =
+          (rating.rater as any)?.username || (rating.user as any)?.username;
         if (raterUsername) {
           ctx.font = '18px system-ui, -apple-system, sans-serif';
           ctx.fillStyle = storyColors.mutedForeground;
@@ -264,7 +267,7 @@ export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) 
         ctx.font = '64px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        
+
         const emojiCenterX = contentX + contentWidth / 2;
         ctx.fillText(rating.emoji, emojiCenterX, contentY + 40);
 
@@ -369,7 +372,7 @@ export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) 
           // Vibe title
           ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
           ctx.fillStyle = storyColors.cardForeground || storyColors.foreground;
-          
+
           // Word wrap vibe title
           const titleWords = vibe.title.split(' ');
           let titleLine = '';
@@ -404,7 +407,9 @@ export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) 
             ctx.fillStyle = storyColors.mutedForeground;
             const authorName = computeUserDisplayName(vibe.createdBy);
             const authorUsername = vibe.createdBy.username;
-            const authorText = authorUsername ? `by ${authorName} (@${authorUsername})` : `by ${authorName}`;
+            const authorText = authorUsername
+              ? `by ${authorName} (@${authorUsername})`
+              : `by ${authorName}`;
             ctx.fillText(authorText, contentX, contentY);
             contentY += 30;
           }
@@ -412,7 +417,10 @@ export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) 
           // Vibe description (truncated)
           if (vibe.description) {
             ctx.font = '20px system-ui, -apple-system, sans-serif';
-            ctx.fillStyle = hexToRgba(storyColors.cardForeground || storyColors.foreground, 0.8);
+            ctx.fillStyle = hexToRgba(
+              storyColors.cardForeground || storyColors.foreground,
+              0.8
+            );
 
             const descWords = vibe.description.split(' ');
             let descLine = '';
@@ -436,9 +444,12 @@ export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) 
             }
             if (descLineCount < maxDescLines && descLine) {
               // Add ellipsis if we're at max lines
-              const finalLine = descLineCount === maxDescLines - 1 && descWords.length > descWords.indexOf(descLine.trim().split(' ').pop() || '') + 1
-                ? descLine.trim() + '...'
-                : descLine.trim();
+              const finalLine =
+                descLineCount === maxDescLines - 1 &&
+                descWords.length >
+                  descWords.indexOf(descLine.trim().split(' ').pop() || '') + 1
+                  ? descLine.trim() + '...'
+                  : descLine.trim();
               ctx.fillText(finalLine, contentX, descY);
               descY += 28;
             }
@@ -449,7 +460,7 @@ export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) 
 
         // Footer with date and app info
         const footerY = cardY + cardHeight - 80;
-        
+
         // Date
         ctx.font = '16px system-ui, -apple-system, sans-serif';
         ctx.fillStyle = storyColors.mutedForeground;
@@ -483,7 +494,10 @@ export function useRatingShareCanvas(options: UseRatingShareCanvasOptions = {}) 
           );
         });
       } catch (error) {
-        console.error('[useRatingShareCanvas] Failed to generate image:', error);
+        console.error(
+          '[useRatingShareCanvas] Failed to generate image:',
+          error
+        );
         toast.error('failed to generate rating share image');
         return null;
       } finally {

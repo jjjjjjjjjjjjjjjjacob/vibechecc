@@ -26,7 +26,7 @@ import {
   type SecondaryColorTheme,
 } from '@/stores/theme-store';
 import type { Vibe } from '@vibechecc/types';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';
 import { useUser } from '@clerk/tanstack-react-start';
@@ -139,7 +139,7 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
   },
 ];
 
-function DiscoverPage() {
+function DiscoverPageDev() {
   const search = useSearch({ from: '/discover' });
   const navigate = useNavigate();
   const { user } = useUser();
@@ -298,6 +298,13 @@ function DiscoverPage() {
   );
 }
 
+// Wrapper: feature-flag the discover page to development only
+function DiscoverPage() {
+  const isDev = import.meta.env?.DEV;
+  if (!isDev) return null;
+  return <DiscoverPageDev />;
+}
+
 // Component for emoji collection sections using VibeCategoryRow
 function EmojiCollectionSection({
   collection,
@@ -396,7 +403,7 @@ function TrendingSection() {
     { enabled: true }
   );
 
-  const trendingVibes = data?.pages?.flatMap(page => page.vibes) || [];
+  const trendingVibes = data?.pages?.flatMap((page) => page.vibes) || [];
 
   return (
     <DiscoverSectionWrapper
@@ -421,7 +428,7 @@ function BoostedSection() {
     { enabled: true }
   );
 
-  const boostedVibes = data?.pages?.flatMap(page => page.vibes) || [];
+  const boostedVibes = data?.pages?.flatMap((page) => page.vibes) || [];
 
   return (
     <DiscoverSectionWrapper
@@ -445,7 +452,7 @@ function ControversialSection() {
     { enabled: true }
   );
 
-  const controversialVibes = data?.pages?.flatMap(page => page.vibes) || [];
+  const controversialVibes = data?.pages?.flatMap((page) => page.vibes) || [];
 
   return (
     <DiscoverSectionWrapper
@@ -503,7 +510,7 @@ function UnratedSection() {
     if (!data?.vibes) return [];
     // Filter for unrated vibes and limit to 10
     return data.vibes
-      .filter((v) => !v.ratings || v.ratings.length === 0)
+      .filter((v) => !v.emojiRatings || v.emojiRatings.length === 0)
       .slice(0, 10);
   }, [data]);
 

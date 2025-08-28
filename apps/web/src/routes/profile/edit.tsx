@@ -399,7 +399,7 @@ function ProfileEdit() {
                       <div className="space-y-3">
                         <AppleIdStatus />
                         <div>
-                          <h4 className="mb-2 text-xs font-medium text-muted-foreground">
+                          <h4 className="text-muted-foreground mb-2 text-xs font-medium">
                             social connections
                           </h4>
                           <SocialConnectionsList className="mb-4" />

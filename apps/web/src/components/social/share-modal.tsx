@@ -225,7 +225,15 @@ export function ShareModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        onOpenChange(next);
+        if (!next) {
+          window.dispatchEvent(new CustomEvent('vibe-overlay-closed'));
+        }
+      }}
+    >
       <DialogContent
         className="max-h-[85vh] w-[95vw] max-w-2xl overflow-y-auto p-4 sm:w-full sm:p-6"
         shouldScaleBackground
@@ -256,7 +264,10 @@ export function ShareModal({
                 return (
                   <button
                     key={platform}
-                    onClick={() => handlePlatformSelect(platform as Platform)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlatformSelect(platform as Platform);
+                    }}
                     className={cn(
                       'border-border bg-background hover:bg-muted group relative flex items-center gap-4 rounded-lg border p-4 text-left transition-colors',
                       config.color
@@ -303,7 +314,10 @@ export function ShareModal({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setCurrentStep('platform')}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentStep('platform');
+              }}
               className="mb-2"
             >
               ← back to platforms
@@ -327,6 +341,7 @@ export function ShareModal({
                       setSelectedLayout(value as StoryLayout)
                     }
                     className="h-[400px] sm:h-[500px]"
+                    parallaxMode
                   >
                     <TabsDraggableList className="mb-4">
                       {layoutOptions.map((option) => (
@@ -351,24 +366,14 @@ export function ShareModal({
                           <TabsDraggableContent
                             key={option.value}
                             value={option.value}
-                            className="p-4"
+                            className="m-auto flex flex-col items-center justify-center p-4"
                           >
                             {previewUrls.get(option.value) ? (
                               <img
                                 src={previewUrls.get(option.value)}
                                 alt="Story preview"
-                                role="button"
-                                tabIndex={0}
-                                className="h-auto max-h-[300px] w-auto cursor-pointer select-none sm:max-h-[400px]"
-                                onClick={() => setShowPreview(true)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    setShowPreview(true);
-                                  }
-                                }}
+                                className="h-auto max-h-[300px] w-auto select-none sm:max-h-[400px]"
                                 draggable={false}
-                                aria-label="Click to expand preview"
                               />
                             ) : (
                               <div className="flex h-[300px] w-full flex-col items-center justify-center gap-4 select-none sm:h-[400px]">
@@ -382,7 +387,10 @@ export function ShareModal({
                         ))}
                       </TabsDraggableContentContainer>
                       <button
-                        onClick={() => setShowPreview(true)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPreview(true);
+                        }}
                         className="bg-background/80 border-border hover:bg-background/90 absolute top-4 right-4 z-10 rounded-lg border p-1.5 backdrop-blur-sm transition-colors"
                         aria-label="Maximize preview"
                       >
@@ -439,18 +447,8 @@ export function ShareModal({
                               <img
                                 src={previewUrls.get(option.value)}
                                 alt="Story preview"
-                                role="button"
-                                tabIndex={0}
-                                className="h-auto max-h-[300px] w-auto cursor-pointer select-none sm:max-h-[400px]"
-                                onClick={() => setShowPreview(true)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    setShowPreview(true);
-                                  }
-                                }}
+                                className="h-auto max-h-[300px] w-auto select-none sm:max-h-[400px]"
                                 draggable={false}
-                                aria-label="Click to expand preview"
                               />
                             ) : (
                               <div className="flex h-[300px] w-full flex-col items-center justify-center gap-4 select-none sm:h-[400px]">
@@ -464,7 +462,10 @@ export function ShareModal({
                         ))}
                       </TabsDraggableContentContainer>
                       <button
-                        onClick={() => setShowPreview(true)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPreview(true);
+                        }}
                         className="bg-background/80 border-border hover:bg-background/90 absolute top-4 right-4 z-10 rounded-lg border p-1.5 backdrop-blur-sm transition-colors"
                         aria-label="Maximize preview"
                       >
@@ -521,18 +522,8 @@ export function ShareModal({
                               <img
                                 src={previewUrls.get(option.value)}
                                 alt="Story preview"
-                                role="button"
-                                tabIndex={0}
-                                className="h-auto max-h-[300px] w-auto cursor-pointer select-none sm:max-h-[400px]"
-                                onClick={() => setShowPreview(true)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    setShowPreview(true);
-                                  }
-                                }}
+                                className="h-auto max-h-[300px] w-auto select-none sm:max-h-[400px]"
                                 draggable={false}
-                                aria-label="Click to expand preview"
                               />
                             ) : (
                               <div className="flex h-[300px] w-full flex-col items-center justify-center gap-4 select-none sm:h-[400px]">
@@ -546,7 +537,10 @@ export function ShareModal({
                         ))}
                       </TabsDraggableContentContainer>
                       <button
-                        onClick={() => setShowPreview(true)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPreview(true);
+                        }}
                         className="bg-background/80 border-border hover:bg-background/90 absolute top-4 right-4 z-10 rounded-lg border p-1.5 backdrop-blur-sm transition-colors"
                         aria-label="Maximize preview"
                       >

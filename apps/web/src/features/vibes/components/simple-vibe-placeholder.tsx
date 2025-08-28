@@ -1,6 +1,9 @@
-import { useThemeStore } from '@/stores/theme-store';
 import { cn } from '@/utils/tailwind-utils';
-import { generateGradientStyle, getConsistentGradient, isLightGradient } from '@/utils/gradient-utils';
+import {
+  generateGradientClasses,
+  generateGradientStyle,
+  isLightGradient,
+} from '@/utils/gradient-utils';
 import { useEffect, useState } from 'react';
 
 interface SimplePlaceholderProps {
@@ -10,6 +13,7 @@ interface SimplePlaceholderProps {
   gradientFrom?: string;
   gradientTo?: string;
   gradientDirection?: string;
+  textColorOverride?: 'auto' | 'white' | 'black';
 }
 
 export function SimpleVibePlaceholder({
@@ -19,8 +23,8 @@ export function SimpleVibePlaceholder({
   gradientFrom,
   gradientTo,
   gradientDirection,
+  textColorOverride = 'auto',
 }: SimplePlaceholderProps) {
-  const { resolvedTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch by only rendering after mount
@@ -28,26 +32,31 @@ export function SimpleVibePlaceholder({
     setMounted(true);
   }, []);
 
-  // Get gradient colors - either custom or generated
-  const getGradient = () => {
-    if (gradientFrom && gradientTo) {
-      return {
-        from: gradientFrom,
-        to: gradientTo,
-        direction: gradientDirection || 'to-br',
-      };
-    }
-    
-    // Generate consistent gradient based on title
-    return getConsistentGradient(title);
-  };
+  // Build Tailwind gradient classes from vibe or fallback to theme
+  const direction = gradientDirection || 'to-br';
+  const gradientDirectionClass = generateGradientClasses(
+    gradientFrom,
+    gradientTo,
+    direction
+  );
+  const colorClasses =
+    gradientFrom && gradientTo
+      ? cn(`from-[${gradientFrom}]`, `to-[${gradientTo}]`)
+      : 'from-theme-primary to-theme-secondary';
 
-  const gradient = getGradient();
-  
-  // Determine text color based on gradient luminance
-  const textColor = gradient.from && gradient.to && isLightGradient(gradient.from, gradient.to)
-    ? 'text-gray-900'
-    : 'text-white';
+  const gradientClassName = cn(colorClasses, gradientDirectionClass);
+
+  // Determine text color based on background type and override
+  const textColor = (() => {
+    if (textColorOverride === 'white') return 'text-white/90';
+    if (textColorOverride === 'black') return 'text-black/70';
+    if (gradientFrom && gradientTo) {
+      return isLightGradient(gradientFrom, gradientTo)
+        ? 'text-black/70'
+        : 'text-white/90';
+    }
+    return 'text-white/90';
+  })();
 
   // If not mounted yet, return a simple placeholder to avoid hydration mismatch
   if (!mounted) {
@@ -56,23 +65,29 @@ export function SimpleVibePlaceholder({
     );
   }
 
-  // Generate inline style for custom gradient
-  const gradientStyle = generateGradientStyle(gradient.from, gradient.to, gradient.direction);
+  // Build inline gradient style when explicit colors are provided
+  const backgroundStyle =
+    gradientFrom && gradientTo
+      ? generateGradientStyle(gradientFrom, gradientTo, direction)
+      : undefined;
 
   return (
     <div
       className={cn(
         'relative flex h-full w-full items-center justify-center overflow-hidden',
+        gradientClassName,
         className
       )}
-      style={{ background: gradientStyle }}
+      style={backgroundStyle ? { background: backgroundStyle } : undefined}
     >
       {title && !hideText && (
         <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
-          <span className={cn(
-            'line-clamp-3 text-lg font-medium drop-shadow-md',
-            textColor
-          )}>
+          <span
+            className={cn(
+              'line-clamp-3 text-lg font-medium drop-shadow-md',
+              textColor
+            )}
+          >
             {title}
           </span>
         </div>

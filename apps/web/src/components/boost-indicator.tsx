@@ -80,11 +80,13 @@ export function BoostIndicator({
           {isPositive && <TrendingUp className={iconSizes[size]} />}
           {isNegative && <TrendingDown className={iconSizes[size]} />}
           {!isPositive && !isNegative && hasActivity && (
-            <div className={cn('rounded-full bg-current', {
-              'h-1.5 w-1.5': size === 'sm',
-              'h-2 w-2': size === 'md',
-              'h-2.5 w-2.5': size === 'lg',
-            })} />
+            <div
+              className={cn('rounded-full bg-current', {
+                'h-1.5 w-1.5': size === 'sm',
+                'h-2 w-2': size === 'md',
+                'h-2.5 w-2.5': size === 'lg',
+              })}
+            />
           )}
         </>
       )}
@@ -100,10 +102,10 @@ interface HighBoostIndicatorProps {
   className?: string;
 }
 
-export function HighBoostIndicator({ 
-  boostScore, 
+export function HighBoostIndicator({
+  boostScore,
   threshold = 10,
-  className 
+  className,
 }: HighBoostIndicatorProps) {
   if (boostScore < threshold) {
     return null;
@@ -112,7 +114,7 @@ export function HighBoostIndicator({
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-theme-primary to-theme-secondary px-2 py-1 text-xs font-bold text-primary-foreground shadow-md',
+        'from-theme-primary to-theme-secondary text-primary-foreground inline-flex items-center gap-1 rounded-full bg-gradient-to-r px-2 py-1 text-xs font-bold shadow-md',
         className
       )}
     >

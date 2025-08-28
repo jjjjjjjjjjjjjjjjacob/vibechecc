@@ -266,34 +266,34 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-background text-foreground">
+      <body className="!bg-background text-foreground">
         <PostHogProvider>
           <AppleIdErrorHandler>
             <div className="relative flex min-h-screen flex-col">
               <PostHogPageTracker />
               <ClerkPostHogIntegration />
-            {isAdminRoute ? (
-              // Admin routes - no header/footer, no guards
-              <>{children}</>
-            ) : (
-              // Regular app routes - with header/footer and guards
-              <>
-                <EnvironmentAccessGuard>
-                  <OnboardingGuard>
-                    <Header />
-                    <LoadingIndicator />
+              {isAdminRoute ? (
+                // Admin routes - no header/footer, no guards
+                <>{children}</>
+              ) : (
+                // Regular app routes - with header/footer and guards
+                <>
+                  <EnvironmentAccessGuard>
+                    <OnboardingGuard>
+                      <Header />
+                      <LoadingIndicator />
 
-                    <main className="flex-1" data-vaul-drawer-wrapper>
-                      {children}
-                    </main>
-                    <NewUserSurvey />
-                  </OnboardingGuard>
-                </EnvironmentAccessGuard>
+                      <main className="flex-1" data-vaul-drawer-wrapper>
+                        {children}
+                      </main>
+                      <NewUserSurvey />
+                    </OnboardingGuard>
+                  </EnvironmentAccessGuard>
 
-                <Footer />
-              </>
-            )}
-            <Toaster />
+                  <Footer />
+                </>
+              )}
+              <Toaster />
             </div>
           </AppleIdErrorHandler>
         </PostHogProvider>

@@ -251,12 +251,14 @@ export function HomeFeed({ className }: HomeFeedProps) {
 
   // Flatten all pages to get vibes array - optimized with better memoization
   const vibes = React.useMemo(() => {
-    if (!data || typeof data !== 'object' || !('pages' in data) || !data.pages)
+    if (!data?.pages) {
       return [];
+    }
     // Set as initialized since query is now available
-    return (
+    const vibes = (
       data as { pages: Array<{ vibes?: import('@vibechecc/types').Vibe[] }> }
     ).pages.flatMap((page) => page?.vibes || []);
+    return vibes;
   }, [data?.pages]); // Only depend on pages, not the full data object
 
   // For "for you" tab, use custom empty state component
@@ -516,7 +518,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
             <TabsDraggableList
               ref={tabsRef}
               className={cn(
-                'mr-auto pt-0 pb-1 opacity-0 transition duration-300 group-data-[show-tabs=false]/feed-tabs:delay-1000',
+                'mr-auto pt-0 pb-2 opacity-0 transition duration-300 group-data-[show-tabs=false]/feed-tabs:delay-1000',
                 'group-data-[show-tabs=false]/feed-tabs:-translate-y-5 group-data-[show-tabs=false]/feed-tabs:opacity-0 group-data-[show-tabs=true]/feed-tabs:translate-y-0 group-data-[show-tabs=true]/feed-tabs:opacity-100'
               )}
               indicatorRailsClassName="bg-transparent backdrop-blur-none h-10 p-0 items-center"

@@ -46,53 +46,65 @@ export function usePlaceholderTracking(
   useEffect(() => {
     if (options.trackVisibility !== false && isVisible) {
       visibilityStartRef.current = performance.now();
-      
+
       return () => {
         if (visibilityStartRef.current) {
-          const visibilityDuration = performance.now() - visibilityStartRef.current;
+          const visibilityDuration =
+            performance.now() - visibilityStartRef.current;
           const minTime = options.minVisibilityTime || 100;
-          
+
           if (visibilityDuration >= minTime) {
             trackEvents.placeholderPerformance(
-              componentName, 
-              'visibility', 
+              componentName,
+              'visibility',
               visibilityDuration
             );
           }
         }
       };
     }
-  }, [isVisible, componentName, options.trackVisibility, options.minVisibilityTime]);
+  }, [
+    isVisible,
+    componentName,
+    options.trackVisibility,
+    options.minVisibilityTime,
+  ]);
 
   // Intersection observer for visibility tracking
-  const visibilityRef = useCallback((node: HTMLElement | null) => {
-    if (!node || options.trackVisibility === false) return;
+  const visibilityRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (!node || options.trackVisibility === false) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setIsVisible(entry.isIntersecting);
+        },
+        { threshold: 0.1 }
+      );
 
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [options.trackVisibility]);
+      observer.observe(node);
+      return () => observer.disconnect();
+    },
+    [options.trackVisibility]
+  );
 
   // Track interaction delays
-  const trackInteraction = useCallback((interactionType: string) => {
-    if (!hasInteracted && startTimeRef.current) {
-      const interactionDelay = performance.now() - startTimeRef.current;
-      setHasInteracted(true);
-      
-      trackEvents.placeholderPerformance(
-        componentName,
-        'interaction',
-        interactionDelay,
-        { interaction_type: interactionType }
-      );
-    }
-  }, [componentName, hasInteracted]);
+  const trackInteraction = useCallback(
+    (interactionType: string) => {
+      if (!hasInteracted && startTimeRef.current) {
+        const interactionDelay = performance.now() - startTimeRef.current;
+        setHasInteracted(true);
+
+        trackEvents.placeholderPerformance(
+          componentName,
+          'interaction',
+          interactionDelay,
+          { interaction_type: interactionType }
+        );
+      }
+    },
+    [componentName, hasInteracted]
+  );
 
   return {
     visibilityRef,
@@ -118,7 +130,7 @@ export function useLoadingStateTracking(
 
   useEffect(() => {
     const wasLoading = wasLoadingRef.current;
-    
+
     if (isLoading && !wasLoading) {
       // Started loading
       loadingStartRef.current = performance.now();
@@ -135,13 +147,13 @@ export function useLoadingStateTracking(
       }
       loadingStartRef.current = undefined;
     }
-    
+
     wasLoadingRef.current = isLoading;
   }, [isLoading, stateName, options.trackTransitions, options.trackDuration]);
 
   return {
-    loadingDuration: loadingStartRef.current 
-      ? performance.now() - loadingStartRef.current 
+    loadingDuration: loadingStartRef.current
+      ? performance.now() - loadingStartRef.current
       : 0,
   };
 }
@@ -171,63 +183,62 @@ export function useComponentPerformance(
     return () => {
       if (mountTimeRef.current && options.trackRender !== false) {
         const lifetime = performance.now() - mountTimeRef.current;
-        trackEvents.componentPerformance(
-          componentName, 
-          'unmount', 
-          lifetime,
-          { render_count: renderCountRef.current }
-        );
+        trackEvents.componentPerformance(componentName, 'unmount', lifetime, {
+          render_count: renderCountRef.current,
+        });
       }
     };
   }, [componentName, options.trackRender]);
 
-  // Track rerenders  
+  // Track rerenders
   React.useLayoutEffect(() => {
     renderCountRef.current += 1;
-    
+
     if (renderCountRef.current > 1 && options.trackRerender !== false) {
       // Debounce tracking to prevent flooding
       const timeoutId = setTimeout(() => {
-        trackEvents.componentPerformance(
-          componentName,
-          'rerender',
-          undefined,
-          { render_count: renderCountRef.current }
-        );
+        trackEvents.componentPerformance(componentName, 'rerender', undefined, {
+          render_count: renderCountRef.current,
+        });
       }, 100);
-      
+
       return () => clearTimeout(timeoutId);
     }
   });
 
   // Track prop changes
-  const trackPropChange = useCallback((props: Record<string, unknown>) => {
-    if (options.trackProps === false) return;
+  const trackPropChange = useCallback(
+    (props: Record<string, unknown>) => {
+      if (options.trackProps === false) return;
 
-    const trackedProps = options.propNames 
-      ? Object.fromEntries(
-          Object.entries(props).filter(([key]) => options.propNames!.includes(key))
-        )
-      : props;
+      const trackedProps = options.propNames
+        ? Object.fromEntries(
+            Object.entries(props).filter(([key]) =>
+              options.propNames!.includes(key)
+            )
+          )
+        : props;
 
-    const changedProps = Object.keys(trackedProps).filter(
-      key => trackedProps[key] !== lastPropsRef.current[key]
-    );
-
-    if (changedProps.length > 0) {
-      trackEvents.componentPerformance(
-        componentName,
-        'prop_change',
-        undefined,
-        { 
-          changed_props: changedProps,
-          render_count: renderCountRef.current 
-        }
+      const changedProps = Object.keys(trackedProps).filter(
+        (key) => trackedProps[key] !== lastPropsRef.current[key]
       );
-    }
 
-    lastPropsRef.current = trackedProps;
-  }, [componentName, options.trackProps, options.propNames]);
+      if (changedProps.length > 0) {
+        trackEvents.componentPerformance(
+          componentName,
+          'prop_change',
+          undefined,
+          {
+            changed_props: changedProps,
+            render_count: renderCountRef.current,
+          }
+        );
+      }
+
+      lastPropsRef.current = trackedProps;
+    },
+    [componentName, options.trackProps, options.propNames]
+  );
 
   return {
     renderCount: renderCountRef.current,
@@ -263,25 +274,26 @@ export function useTimeToInteractive(
     }
   }, [isInteractive, hasTrackedTTI, componentName]);
 
-  const trackFirstInteraction = useCallback((
-    interactionType: string,
-    target?: string
-  ) => {
-    if (options.trackFirstInteraction !== false && startTimeRef.current) {
-      const timeToFirstInteraction = performance.now() - startTimeRef.current;
-      trackEvents.firstInteraction(
-        componentName,
-        interactionType,
-        timeToFirstInteraction,
-        { target }
-      );
-    }
-  }, [componentName, options.trackFirstInteraction]);
+  const trackFirstInteraction = useCallback(
+    (interactionType: string, target?: string) => {
+      if (options.trackFirstInteraction !== false && startTimeRef.current) {
+        const timeToFirstInteraction = performance.now() - startTimeRef.current;
+        trackEvents.firstInteraction(
+          componentName,
+          interactionType,
+          timeToFirstInteraction,
+          { target }
+        );
+      }
+    },
+    [componentName, options.trackFirstInteraction]
+  );
 
   return {
     trackFirstInteraction,
-    timeToInteractive: startTimeRef.current && isInteractive 
-      ? performance.now() - startTimeRef.current 
-      : null,
+    timeToInteractive:
+      startTimeRef.current && isInteractive
+        ? performance.now() - startTimeRef.current
+        : null,
   };
 }

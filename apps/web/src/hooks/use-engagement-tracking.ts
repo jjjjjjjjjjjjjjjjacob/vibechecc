@@ -20,66 +20,79 @@ export function useFunnelTracking(funnelName: string, steps: string[]) {
     startTimeRef.current = performance.now();
   }, []);
 
-  const startStep = useCallback((stepIndex: number, userId?: string) => {
-    if (stepIndex < 0 || stepIndex >= steps.length) return;
-    
-    setCurrentStep(stepIndex);
-    stepTimesRef.current[stepIndex] = performance.now();
-    
-    trackEvents.funnelStepCompleted(
-      funnelName,
-      steps[stepIndex],
-      stepIndex,
-      userId,
-      {
-        step_start_time: performance.now(),
-        funnel_start_time: startTimeRef.current,
-      }
-    );
-  }, [funnelName, steps]);
+  const startStep = useCallback(
+    (stepIndex: number, userId?: string) => {
+      if (stepIndex < 0 || stepIndex >= steps.length) return;
 
-  const completeStep = useCallback((stepIndex: number, userId?: string) => {
-    if (stepIndex < 0 || stepIndex >= steps.length) return;
-    
-    setCompletedSteps(prev => new Set([...prev, stepIndex]));
-    
-    const stepDuration = stepTimesRef.current[stepIndex] 
-      ? performance.now() - stepTimesRef.current[stepIndex]
-      : 0;
+      setCurrentStep(stepIndex);
+      stepTimesRef.current[stepIndex] = performance.now();
 
-    trackEvents.funnelStepCompleted(
-      funnelName,
-      steps[stepIndex],
-      stepIndex,
-      userId,
-      {
-        step_duration: stepDuration,
-        total_duration: startTimeRef.current ? performance.now() - startTimeRef.current : 0,
-        completion_rate: (completedSteps.size + 1) / steps.length,
-      }
-    );
-  }, [funnelName, steps, completedSteps.size]);
+      trackEvents.funnelStepCompleted(
+        funnelName,
+        steps[stepIndex],
+        stepIndex,
+        userId,
+        {
+          step_start_time: performance.now(),
+          funnel_start_time: startTimeRef.current,
+        }
+      );
+    },
+    [funnelName, steps]
+  );
 
-  const trackDropoff = useCallback((
-    stepIndex: number, 
-    reason?: string,
-    properties?: Record<string, unknown>
-  ) => {
-    if (stepIndex < 0 || stepIndex >= steps.length) return;
-    
-    trackEvents.funnelDropoff(
-      funnelName,
-      steps[stepIndex],
-      stepIndex,
-      reason,
-      {
-        completed_steps: completedSteps.size,
-        completion_rate: completedSteps.size / steps.length,
-        time_spent: startTimeRef.current ? performance.now() - startTimeRef.current : 0,
-        ...properties,
-      }
-    );
-  }, [funnelName, steps, completedSteps.size]);
+  const completeStep = useCallback(
+    (stepIndex: number, userId?: string) => {
+      if (stepIndex < 0 || stepIndex >= steps.length) return;
+
+      setCompletedSteps((prev) => new Set([...prev, stepIndex]));
+
+      const stepDuration = stepTimesRef.current[stepIndex]
+        ? performance.now() - stepTimesRef.current[stepIndex]
+        : 0;
+
+      trackEvents.funnelStepCompleted(
+        funnelName,
+        steps[stepIndex],
+        stepIndex,
+        userId,
+        {
+          step_duration: stepDuration,
+          total_duration: startTimeRef.current
+            ? performance.now() - startTimeRef.current
+            : 0,
+          completion_rate: (completedSteps.size + 1) / steps.length,
+        }
+      );
+    },
+    [funnelName, steps, completedSteps.size]
+  );
+
+  const trackDropoff = useCallback(
+    (
+      stepIndex: number,
+      reason?: string,
+      properties?: Record<string, unknown>
+    ) => {
+      if (stepIndex < 0 || stepIndex >= steps.length) return;
+
+      trackEvents.funnelDropoff(
+        funnelName,
+        steps[stepIndex],
+        stepIndex,
+        reason,
+        {
+          completed_steps: completedSteps.size,
+          completion_rate: completedSteps.size / steps.length,
+          time_spent: startTimeRef.current
+            ? performance.now() - startTimeRef.current
+            : 0,
+          ...properties,
+        }
+      );
+    },
+    [funnelName, steps, completedSteps.size]
+  );
 
   return {
     currentStep,
@@ -101,31 +114,37 @@ export function useUserJourneyTracking(journeyType: string) {
   const startTimeRef = useRef<number | undefined>(undefined);
   const entryPointRef = useRef<string | undefined>(undefined);
 
-  const startJourney = useCallback((entryPoint: string, userId?: string) => {
-    setIsActive(true);
-    setStepsCompleted(0);
-    startTimeRef.current = performance.now();
-    entryPointRef.current = entryPoint;
-    
-    trackEvents.userJourneyStarted(journeyType, entryPoint, userId);
-  }, [journeyType]);
+  const startJourney = useCallback(
+    (entryPoint: string, userId?: string) => {
+      setIsActive(true);
+      setStepsCompleted(0);
+      startTimeRef.current = performance.now();
+      entryPointRef.current = entryPoint;
 
-  const completeJourney = useCallback((userId?: string) => {
-    if (!startTimeRef.current) return;
-    
-    const completionTime = performance.now() - startTimeRef.current;
-    setIsActive(false);
-    
-    trackEvents.userJourneyCompleted(
-      journeyType,
-      completionTime,
-      stepsCompleted,
-      userId
-    );
-  }, [journeyType, stepsCompleted]);
+      trackEvents.userJourneyStarted(journeyType, entryPoint, userId);
+    },
+    [journeyType]
+  );
+
+  const completeJourney = useCallback(
+    (userId?: string) => {
+      if (!startTimeRef.current) return;
+
+      const completionTime = performance.now() - startTimeRef.current;
+      setIsActive(false);
+
+      trackEvents.userJourneyCompleted(
+        journeyType,
+        completionTime,
+        stepsCompleted,
+        userId
+      );
+    },
+    [journeyType, stepsCompleted]
+  );
 
   const incrementStep = useCallback(() => {
-    setStepsCompleted(prev => prev + 1);
+    setStepsCompleted((prev) => prev + 1);
   }, []);
 
   return {
@@ -134,7 +153,9 @@ export function useUserJourneyTracking(journeyType: string) {
     startJourney,
     completeJourney,
     incrementStep,
-    journeyDuration: startTimeRef.current ? performance.now() - startTimeRef.current : 0,
+    journeyDuration: startTimeRef.current
+      ? performance.now() - startTimeRef.current
+      : 0,
   };
 }
 
@@ -145,57 +166,80 @@ export function useSocialSharingTracking() {
   const shareAttemptsRef = useRef<Record<string, number>>({});
   const shareCompletionsRef = useRef<Record<string, number>>({});
 
-  const trackShareAttempt = useCallback((
-    contentType: 'vibe' | 'rating' | 'profile',
-    contentId: string,
-    platform: string,
-    method: 'native' | 'manual' | 'copy_link'
-  ) => {
-    const key = `${contentType}-${contentId}-${platform}`;
-    shareAttemptsRef.current[key] = (shareAttemptsRef.current[key] || 0) + 1;
-    
-    trackEvents.shareAttempted(contentType, contentId, platform, method);
-  }, []);
+  const trackShareAttempt = useCallback(
+    (
+      contentType: 'vibe' | 'rating' | 'profile',
+      contentId: string,
+      platform: string,
+      method: 'native' | 'manual' | 'copy_link'
+    ) => {
+      const key = `${contentType}-${contentId}-${platform}`;
+      shareAttemptsRef.current[key] = (shareAttemptsRef.current[key] || 0) + 1;
 
-  const trackShareCompletion = useCallback((
-    contentType: 'vibe' | 'rating' | 'profile',
-    contentId: string,
-    platform: string,
-    method: 'native' | 'manual' | 'copy_link'
-  ) => {
-    const key = `${contentType}-${contentId}-${platform}`;
-    shareCompletionsRef.current[key] = (shareCompletionsRef.current[key] || 0) + 1;
-    
-    trackEvents.shareCompleted(contentType, contentId, platform, method);
-  }, []);
+      trackEvents.shareAttempted(contentType, contentId, platform, method);
+    },
+    []
+  );
 
-  const trackShareClickback = useCallback((
-    contentType: 'vibe' | 'rating' | 'profile',
-    contentId: string,
-    platform: string,
-    referrerUserId?: string
-  ) => {
-    trackEvents.shareClickback(contentType, contentId, platform, referrerUserId);
-  }, []);
+  const trackShareCompletion = useCallback(
+    (
+      contentType: 'vibe' | 'rating' | 'profile',
+      contentId: string,
+      platform: string,
+      method: 'native' | 'manual' | 'copy_link'
+    ) => {
+      const key = `${contentType}-${contentId}-${platform}`;
+      shareCompletionsRef.current[key] =
+        (shareCompletionsRef.current[key] || 0) + 1;
 
-  const calculateViralCoefficient = useCallback((
-    period: 'daily' | 'weekly' | 'monthly',
-    invitesSent: number,
-    conversions: number
-  ) => {
-    const coefficient = conversions / invitesSent || 0;
-    trackEvents.viralCoefficientCalculated(period, coefficient, invitesSent, conversions);
-    return coefficient;
-  }, []);
+      trackEvents.shareCompleted(contentType, contentId, platform, method);
+    },
+    []
+  );
+
+  const trackShareClickback = useCallback(
+    (
+      contentType: 'vibe' | 'rating' | 'profile',
+      contentId: string,
+      platform: string,
+      referrerUserId?: string
+    ) => {
+      trackEvents.shareClickback(
+        contentType,
+        contentId,
+        platform,
+        referrerUserId
+      );
+    },
+    []
+  );
+
+  const calculateViralCoefficient = useCallback(
+    (
+      period: 'daily' | 'weekly' | 'monthly',
+      invitesSent: number,
+      conversions: number
+    ) => {
+      const coefficient = conversions / invitesSent || 0;
+      trackEvents.viralCoefficientCalculated(
+        period,
+        coefficient,
+        invitesSent,
+        conversions
+      );
+      return coefficient;
+    },
+    []
+  );
 
   return {
     trackShareAttempt,
     trackShareCompletion,
     trackShareClickback,
     calculateViralCoefficient,
-    getShareAttempts: (contentId: string, platform: string) => 
+    getShareAttempts: (contentId: string, platform: string) =>
       shareAttemptsRef.current[`${contentId}-${platform}`] || 0,
-    getShareCompletions: (contentId: string, platform: string) => 
+    getShareCompletions: (contentId: string, platform: string) =>
       shareCompletionsRef.current[`${contentId}-${platform}`] || 0,
   };
 }
@@ -211,32 +255,38 @@ export function useEngagementSession(
   const startTimeRef = useRef<number | undefined>(undefined);
   const entryPointRef = useRef<string | undefined>(undefined);
 
-  const startSession = useCallback((entryPoint: string) => {
-    setIsActive(true);
-    setActionsCompleted(0);
-    startTimeRef.current = performance.now();
-    entryPointRef.current = entryPoint;
-    
-    trackEvents.engagementSessionStarted(sessionType, entryPoint);
-  }, [sessionType]);
+  const startSession = useCallback(
+    (entryPoint: string) => {
+      setIsActive(true);
+      setActionsCompleted(0);
+      startTimeRef.current = performance.now();
+      entryPointRef.current = entryPoint;
 
-  const endSession = useCallback((exitPoint?: string) => {
-    if (!startTimeRef.current || !isActive) return;
-    
-    const duration = performance.now() - startTimeRef.current;
-    setIsActive(false);
-    
-    trackEvents.engagementSessionEnded(
-      sessionType,
-      duration,
-      actionsCompleted,
-      exitPoint
-    );
-  }, [sessionType, actionsCompleted, isActive]);
+      trackEvents.engagementSessionStarted(sessionType, entryPoint);
+    },
+    [sessionType]
+  );
+
+  const endSession = useCallback(
+    (exitPoint?: string) => {
+      if (!startTimeRef.current || !isActive) return;
+
+      const duration = performance.now() - startTimeRef.current;
+      setIsActive(false);
+
+      trackEvents.engagementSessionEnded(
+        sessionType,
+        duration,
+        actionsCompleted,
+        exitPoint
+      );
+    },
+    [sessionType, actionsCompleted, isActive]
+  );
 
   const trackAction = useCallback(() => {
     if (isActive) {
-      setActionsCompleted(prev => prev + 1);
+      setActionsCompleted((prev) => prev + 1);
     }
   }, [isActive]);
 
@@ -255,9 +305,10 @@ export function useEngagementSession(
     startSession,
     endSession,
     trackAction,
-    sessionDuration: startTimeRef.current && isActive 
-      ? performance.now() - startTimeRef.current 
-      : 0,
+    sessionDuration:
+      startTimeRef.current && isActive
+        ? performance.now() - startTimeRef.current
+        : 0,
   };
 }
 
@@ -278,37 +329,36 @@ export function useRatingEngagementAnalytics() {
   const trackRating = useCallback((rating: number, userId?: string) => {
     analyticsRef.current.totalRatings += 1;
     analyticsRef.current.ratingSum += rating;
-    
+
     if (userId) {
       analyticsRef.current.uniqueRaters.add(userId);
     }
   }, []);
 
-  const analyzeEngagement = useCallback((
-    period: 'daily' | 'weekly' | 'monthly',
-    totalPossibleRaters: number
-  ) => {
-    const { totalRatings, uniqueRaters, ratingSum } = analyticsRef.current;
-    const averageRating = totalRatings > 0 ? ratingSum / totalRatings : 0;
-    const engagementRate = totalPossibleRaters > 0 
-      ? uniqueRaters.size / totalPossibleRaters 
-      : 0;
+  const analyzeEngagement = useCallback(
+    (period: 'daily' | 'weekly' | 'monthly', totalPossibleRaters: number) => {
+      const { totalRatings, uniqueRaters, ratingSum } = analyticsRef.current;
+      const averageRating = totalRatings > 0 ? ratingSum / totalRatings : 0;
+      const engagementRate =
+        totalPossibleRaters > 0 ? uniqueRaters.size / totalPossibleRaters : 0;
 
-    trackEvents.ratingEngagementAnalyzed(
-      period,
-      totalRatings,
-      uniqueRaters.size,
-      averageRating,
-      engagementRate
-    );
+      trackEvents.ratingEngagementAnalyzed(
+        period,
+        totalRatings,
+        uniqueRaters.size,
+        averageRating,
+        engagementRate
+      );
 
-    return {
-      totalRatings,
-      uniqueRaters: uniqueRaters.size,
-      averageRating,
-      engagementRate,
-    };
-  }, []);
+      return {
+        totalRatings,
+        uniqueRaters: uniqueRaters.size,
+        averageRating,
+        engagementRate,
+      };
+    },
+    []
+  );
 
   const resetAnalytics = useCallback(() => {
     analyticsRef.current = {
@@ -325,9 +375,10 @@ export function useRatingEngagementAnalytics() {
     currentStats: {
       totalRatings: analyticsRef.current.totalRatings,
       uniqueRaters: analyticsRef.current.uniqueRaters.size,
-      averageRating: analyticsRef.current.totalRatings > 0 
-        ? analyticsRef.current.ratingSum / analyticsRef.current.totalRatings 
-        : 0,
+      averageRating:
+        analyticsRef.current.totalRatings > 0
+          ? analyticsRef.current.ratingSum / analyticsRef.current.totalRatings
+          : 0,
     },
   };
 }
@@ -336,34 +387,47 @@ export function useRatingEngagementAnalytics() {
  * Hook for cohort analysis tracking
  */
 export function useCohortTracking(cohortName: string) {
-  const cohortUsersRef = useRef<Map<string, { date: string; properties: Record<string, unknown> }>>(new Map());
+  const cohortUsersRef = useRef<
+    Map<string, { date: string; properties: Record<string, unknown> }>
+  >(new Map());
 
-  const addUserToCohort = useCallback((
-    userId: string,
-    cohortDate: string,
-    userProperties?: Record<string, unknown>
-  ) => {
-    cohortUsersRef.current.set(userId, { date: cohortDate, properties: userProperties || {} });
-    trackEvents.cohortUserAdded(cohortName, userId, cohortDate, userProperties);
-  }, [cohortName]);
+  const addUserToCohort = useCallback(
+    (
+      userId: string,
+      cohortDate: string,
+      userProperties?: Record<string, unknown>
+    ) => {
+      cohortUsersRef.current.set(userId, {
+        date: cohortDate,
+        properties: userProperties || {},
+      });
+      trackEvents.cohortUserAdded(
+        cohortName,
+        userId,
+        cohortDate,
+        userProperties
+      );
+    },
+    [cohortName]
+  );
 
-  const trackCohortRetention = useCallback((
-    period: number,
-    activeUsers: number
-  ) => {
-    const totalUsers = cohortUsersRef.current.size;
-    const retentionRate = totalUsers > 0 ? activeUsers / totalUsers : 0;
-    
-    trackEvents.cohortRetentionTracked(
-      cohortName,
-      period,
-      retentionRate,
-      activeUsers,
-      totalUsers
-    );
+  const trackCohortRetention = useCallback(
+    (period: number, activeUsers: number) => {
+      const totalUsers = cohortUsersRef.current.size;
+      const retentionRate = totalUsers > 0 ? activeUsers / totalUsers : 0;
 
-    return { retentionRate, activeUsers, totalUsers };
-  }, [cohortName]);
+      trackEvents.cohortRetentionTracked(
+        cohortName,
+        period,
+        retentionRate,
+        activeUsers,
+        totalUsers
+      );
+
+      return { retentionRate, activeUsers, totalUsers };
+    },
+    [cohortName]
+  );
 
   return {
     addUserToCohort,

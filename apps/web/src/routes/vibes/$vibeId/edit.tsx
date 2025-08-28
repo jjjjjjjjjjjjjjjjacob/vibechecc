@@ -11,7 +11,7 @@ import { getWebRequest } from '@tanstack/react-start/server';
 import { TagInput } from '@/components/tag-input';
 import { ImageUpload } from '@/components/image-upload';
 import { GradientPicker } from '@/components/gradient-picker';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { cn } from '@/utils/tailwind-utils';
 import {
   Circle,
@@ -360,7 +360,8 @@ function EditVibe() {
                     )}
                     {(gradient.from !== originalValues.gradientFrom ||
                       gradient.to !== originalValues.gradientTo ||
-                      gradient.direction !== originalValues.gradientDirection) && (
+                      gradient.direction !==
+                        originalValues.gradientDirection) && (
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span>Gradient updated</span>
@@ -494,10 +495,7 @@ function EditVibe() {
                   </Label>
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <GradientPicker
-                        value={gradient}
-                        onChange={setGradient}
-                      />
+                      <GradientPicker value={gradient} onChange={setGradient} />
                     </div>
                     <div className="h-24 w-24 overflow-hidden rounded-lg border-2">
                       <SimpleVibePlaceholder

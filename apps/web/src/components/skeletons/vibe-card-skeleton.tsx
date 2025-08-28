@@ -8,15 +8,22 @@ interface VibeCardSkeletonProps {
   trackingId?: string;
 }
 
-export function VibeCardSkeleton({ compact, trackingId }: VibeCardSkeletonProps) {
-  const componentName = trackingId || `vibe-card-skeleton${compact ? '-compact' : ''}`;
-  const { visibilityRef, trackInteraction } = usePlaceholderTracking(componentName, {
-    trackVisibility: true,
-    trackInteraction: true,
-    minVisibilityTime: 300,
-  });
+export function VibeCardSkeleton({
+  compact,
+  trackingId,
+}: VibeCardSkeletonProps) {
+  const componentName =
+    trackingId || `vibe-card-skeleton${compact ? '-compact' : ''}`;
+  const { visibilityRef, trackInteraction } = usePlaceholderTracking(
+    componentName,
+    {
+      trackVisibility: true,
+      trackInteraction: true,
+      minVisibilityTime: 300,
+    }
+  );
   return (
-    <Card 
+    <Card
       ref={visibilityRef}
       className={cn('overflow-hidden', !compact && 'h-full')}
       onClick={() => trackInteraction('card_click')}

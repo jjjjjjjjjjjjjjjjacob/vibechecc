@@ -15,15 +15,22 @@ import {
 import { cn } from '@/utils/tailwind-utils';
 
 function TabAccordion({ ...props }: React.ComponentProps<typeof Tabs>) {
+  // Determine if this is controlled or uncontrolled
+  const isControlled = props.value !== undefined;
+
+  // For the accordion, we need to provide a consistent controlled/uncontrolled pattern
+  const accordionProps = {
+    type: 'single' as const,
+    orientation: props.orientation,
+    dir: props.dir,
+    onValueChange: props.onValueChange,
+    ...(isControlled
+      ? { value: props.value }
+      : { defaultValue: props.defaultValue }),
+  };
+
   return (
-    <Accordion
-      value={props.value}
-      defaultValue={props.defaultValue}
-      onValueChange={props.onValueChange}
-      orientation={props.orientation}
-      dir={props.dir}
-      type="single"
-    >
+    <Accordion {...accordionProps}>
       <Tabs {...props} />
     </Accordion>
   );

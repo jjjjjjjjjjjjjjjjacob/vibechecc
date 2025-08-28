@@ -1,18 +1,16 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
-import { RatingPopover } from './rating-popover';
-import type { EmojiRatingMetadata } from '@vibechecc/types';
+import { RateAndReviewDialog } from './rate-and-review-dialog';
+import type { EmojiRatingMetadata, Rating, CurrentUserRating } from '@vibechecc/types';
+import type { UnifiedEmojiRatingHandler } from './emoji-reaction';
 
 interface EmojiRatingCycleDisplayProps {
-  onSubmit: (data: {
-    emoji: string;
-    value: number;
-    review: string;
-    tags?: string[];
-  }) => Promise<void>;
+  vibeId: string;
+  onEmojiClick: UnifiedEmojiRatingHandler;
   isSubmitting?: boolean;
   vibeTitle?: string;
   emojiMetadata?: Record<string, EmojiRatingMetadata>;
+  existingUserRatings: CurrentUserRating[];
   className?: string;
   variant?: 'color' | 'gradient';
   showBeTheFirst?: boolean;
@@ -34,10 +32,12 @@ const DEFAULT_EMOJIS = [
 ];
 
 export function EmojiRatingCycleDisplay({
-  onSubmit,
+  vibeId,
+  onEmojiClick,
   isSubmitting = false,
   vibeTitle,
   emojiMetadata = {},
+  existingUserRatings,
   className,
   showBeTheFirst = false,
   delay = 0,
@@ -90,7 +90,7 @@ export function EmojiRatingCycleDisplay({
 
     if (totalDelay > 0) {
       let interval: NodeJS.Timeout | null = null;
-      
+
       const delayTimeout = setTimeout(() => {
         interval = startCycling();
       }, totalDelay);
@@ -108,15 +108,15 @@ export function EmojiRatingCycleDisplay({
   }, [emojiOptions.length, isHovered, delay, randomInitialDelay]);
 
   return (
-    <RatingPopover
-      onSubmit={onSubmit}
-      isSubmitting={isSubmitting}
+    <RateAndReviewDialog
+      vibeId={vibeId}
       vibeTitle={vibeTitle}
-      emojiMetadata={emojiMetadata}
       isOwner={isOwner}
       preSelectedEmoji={
         isHovered && currentEmoji !== '❓' ? currentEmoji : undefined
       }
+      existingUserRatings={existingUserRatings}
+      emojiMetadata={emojiMetadata}
     >
       <div
         role="button"
@@ -128,6 +128,7 @@ export function EmojiRatingCycleDisplay({
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -156,6 +157,6 @@ export function EmojiRatingCycleDisplay({
               : 'click to rate'}
         </span>
       </div>
-    </RatingPopover>
+    </RateAndReviewDialog>
   );
 }

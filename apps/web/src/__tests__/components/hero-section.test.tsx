@@ -17,9 +17,10 @@ jest.mock('@/utils/bindings', () => ({
   APP_NAME: 'TestApp',
 }));
 
-const mockUseHeroTaglineExperiment = useHeroTaglineExperiment as jest.MockedFunction<
-  typeof useHeroTaglineExperiment
->;
+const mockUseHeroTaglineExperiment =
+  useHeroTaglineExperiment as jest.MockedFunction<
+    typeof useHeroTaglineExperiment
+  >;
 
 const mockPerformanceHooks = {
   trackFirstInteraction: jest.fn(),
@@ -32,8 +33,9 @@ jest.mock('@/hooks/use-performance-tracking', () => ({
 const defaultMockExperiment = {
   variant: {
     id: 'control',
-    headline: 'we\'re vibing here',
-    description: 'welcome to vibechecc, where you can discover, share, and rate vibes because that\'s a thing you can do',
+    headline: "we're vibing here",
+    description:
+      "welcome to vibechecc, where you can discover, share, and rate vibes because that's a thing you can do",
     cta: {
       primary: 'create vibe',
       secondary: 'discover vibes',
@@ -49,11 +51,7 @@ const defaultMockExperiment = {
 };
 
 function renderWithRouter(component: React.ReactElement) {
-  return render(
-    <MemoryRouter>
-      {component}
-    </MemoryRouter>
-  );
+  return render(<MemoryRouter>{component}</MemoryRouter>);
 }
 
 describe('HeroSection', () => {
@@ -72,7 +70,7 @@ describe('HeroSection', () => {
       />
     );
 
-    expect(screen.getByText('we\'re vibing here')).toBeInTheDocument();
+    expect(screen.getByText("we're vibing here")).toBeInTheDocument();
     expect(screen.getByText(/welcome to TestApp/)).toBeInTheDocument();
   });
 
@@ -82,7 +80,8 @@ describe('HeroSection', () => {
       variant: {
         id: 'emotional',
         headline: 'share your energy',
-        description: 'connect with others through authentic experiences and discover what moves you',
+        description:
+          'connect with others through authentic experiences and discover what moves you',
         cta: {
           primary: 'share your vibe',
           secondary: 'explore vibes',
@@ -101,7 +100,9 @@ describe('HeroSection', () => {
     );
 
     expect(screen.getByText('share your energy')).toBeInTheDocument();
-    expect(screen.getByText(/connect with others through authentic experiences/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/connect with others through authentic experiences/)
+    ).toBeInTheDocument();
   });
 
   it('shows skeleton when Clerk is not loaded', () => {
@@ -177,7 +178,9 @@ describe('HeroSection', () => {
       'primary',
       'create vibe'
     );
-    expect(defaultMockExperiment.trackVibeCreationConversion).toHaveBeenCalled();
+    expect(
+      defaultMockExperiment.trackVibeCreationConversion
+    ).toHaveBeenCalled();
     expect(mockPerformanceHooks.trackFirstInteraction).toHaveBeenCalledWith(
       'cta_click',
       'create'
@@ -194,7 +197,9 @@ describe('HeroSection', () => {
       />
     );
 
-    expect(screen.getByText('authentication service is currently unavailable')).toBeInTheDocument();
+    expect(
+      screen.getByText('authentication service is currently unavailable')
+    ).toBeInTheDocument();
     expect(screen.getByText('browse vibes anyway')).toBeInTheDocument();
   });
 

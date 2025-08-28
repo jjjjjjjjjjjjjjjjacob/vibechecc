@@ -5,7 +5,7 @@ import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
-import { RatingPopover } from './rating-popover';
+import { RateAndReviewDialog } from './rate-and-review-dialog';
 
 // Mock useUser from Clerk
 vi.mock('@clerk/tanstack-react-start', () => ({
@@ -235,11 +235,12 @@ const createWrapper = () => {
   );
 };
 
-describe('RatingPopover', () => {
+describe('RateAndReviewDialog', () => {
   const mockOnSubmit = vi.fn();
   const mockOnOpenChange = vi.fn();
 
   const defaultProps = {
+    vibeId: 'test-vibe-1',
     onSubmit: mockOnSubmit,
     onOpenChange: mockOnOpenChange,
     open: true,
@@ -261,9 +262,9 @@ describe('RatingPopover', () => {
   const renderComponent = (props = {}) => {
     return render(
       <Wrapper>
-        <RatingPopover {...defaultProps} {...props}>
+        <RateAndReviewDialog {...defaultProps} {...props}>
           <button>Rate with Emoji</button>
-        </RatingPopover>
+        </RateAndReviewDialog>
       </Wrapper>
     );
   };
@@ -273,9 +274,9 @@ describe('RatingPopover', () => {
     expect(screen.getByText('Rate with Emoji')).toBeInTheDocument();
   });
 
-  it('renders popover content with title', () => {
+  it('renders dialog content with title', () => {
     renderComponent();
-    expect(screen.getByText('rating')).toBeInTheDocument();
+    expect(screen.getByText('rate & review')).toBeInTheDocument();
     expect(screen.getByText('"Test Vibe"')).toBeInTheDocument();
   });
 

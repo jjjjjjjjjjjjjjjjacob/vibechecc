@@ -55,44 +55,76 @@ const TabsDraggable = React.forwardRef<HTMLDivElement, TabsDraggableProps>(
       { id: string; label: string; icon?: React.ReactNode }[]
     >([]);
 
-    const [activeTabIndex, setActiveTabIndex] = React.useState(() => {
-      if (value) {
-        const index = tabs.findIndex((tab) => tab.id === value);
-        return index !== -1 ? index : 0;
-      }
-      if (defaultValue) {
-        const index = tabs.findIndex((tab) => tab.id === defaultValue);
-        return index !== -1 ? index : 0;
-      }
-      return 0;
-    });
-
+    // Determine if component is controlled or uncontrolled
+    const isControlled = value !== undefined;
+    const [internalActiveTabIndex, setInternalActiveTabIndex] =
+      React.useState(0);
     const [indicatorDragOffset, setIndicatorDragOffset] = React.useState(0);
     const [isDragging, setIsDragging] = React.useState(false);
 
-    React.useEffect(() => {
-      if (value) {
+    // Get the actual active tab index
+    const activeTabIndex = React.useMemo(() => {
+      if (isControlled && value && tabs.length > 0) {
         const index = tabs.findIndex((tab) => tab.id === value);
+        return index !== -1 ? index : 0;
+      }
+      return internalActiveTabIndex;
+    }, [isControlled, value, tabs, internalActiveTabIndex]);
+
+    // Handle initial tab selection for uncontrolled mode
+    React.useEffect(() => {
+      if (!isControlled && tabs.length > 0 && defaultValue) {
+        const index = tabs.findIndex((tab) => tab.id === defaultValue);
         if (index !== -1) {
-          setActiveTabIndex(index);
+          setInternalActiveTabIndex(index);
         }
       }
-    }, [value, tabs]);
+    }, [isControlled, defaultValue, tabs]);
 
     const handleTabChange = React.useCallback(
       (tabId: string) => {
-        if (onValueChange) {
-          onValueChange(tabId);
+        if (isControlled) {
+          // In controlled mode, always call onValueChange
+          if (onValueChange) {
+            onValueChange(tabId);
+          }
+        } else {
+          // In uncontrolled mode, update internal state and optionally call onValueChange
+          const newIndex = tabs.findIndex((tab) => tab.id === tabId);
+          if (newIndex !== -1) {
+            setInternalActiveTabIndex(newIndex);
+          }
+          if (onValueChange) {
+            onValueChange(tabId);
+          }
         }
       },
-      [onValueChange]
+      [isControlled, onValueChange, tabs]
+    );
+
+    const handleSetActiveTabIndex = React.useCallback(
+      (index: number) => {
+        if (isControlled) {
+          // In controlled mode, call onValueChange with the tab id
+          if (onValueChange && tabs[index]) {
+            onValueChange(tabs[index].id);
+          }
+        } else {
+          // In uncontrolled mode, update internal state
+          setInternalActiveTabIndex(index);
+          if (onValueChange && tabs[index]) {
+            onValueChange(tabs[index].id);
+          }
+        }
+      },
+      [isControlled, onValueChange, tabs]
     );
 
     return (
       <TabsDraggableContext.Provider
         value={{
           activeTabIndex,
-          setActiveTabIndex,
+          setActiveTabIndex: handleSetActiveTabIndex,
           tabs,
           onTabChange: handleTabChange,
           parallaxMode,
@@ -357,10 +389,10 @@ const TabsDraggableList = React.forwardRef<
 
     return (
       <div ref={ref} className={cn('relative py-2', className)}>
-        <div className="flex items-center justify-center">
+        <div className="flex w-full items-center justify-center">
           <div
             className={cn(
-              'bg-muted/50 relative inline-flex gap-2 rounded-xl p-1 backdrop-blur-sm',
+              'bg-muted/50 relative inline-flex items-center gap-2 rounded-xl p-1 backdrop-blur-sm',
               indicatorRailsClassName
             )}
           >
@@ -461,10 +493,12 @@ const TabsDraggableTrigger = React.forwardRef<
 
   return (
     <button
+      type="button"
+      role="tab"
       ref={ref}
       onClick={onClick}
       className={cn(
-        'relative z-10 flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors',
+        'relative z-10 flex flex-nowrap items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
         dataState === 'active'
           ? 'text-foreground'
           : 'text-muted-foreground hover:text-foreground/80',
@@ -489,20 +523,14 @@ interface TabsDraggableContentProps {
 const TabsDraggableContent = React.forwardRef<
   HTMLDivElement,
   TabsDraggableContentProps
->(({ value, className, style, children }, ref) => {
+>(({ value: _value, className, style, children }, ref) => {
   const context = React.useContext(TabsDraggableContext);
   const {
-    activeTabIndex,
-    tabs,
     parallaxMode,
     parallaxRatio,
     indicatorDragOffset,
     isDragging = false,
   } = context;
-
-  // Find current tab index
-  const currentTabIndex = tabs.findIndex((tab) => tab.id === value);
-  const isActive = currentTabIndex === activeTabIndex;
 
   // Calculate parallax transform if enabled
   const parallaxTransform = React.useMemo(() => {
@@ -521,9 +549,7 @@ const TabsDraggableContent = React.forwardRef<
       ref={ref}
       className={cn(
         'flex h-full w-full items-center justify-center',
-        parallaxMode &&
-          !isDragging &&
-          'transition-transform duration-300 ease-out',
+        !isDragging && 'transition-transform duration-300 ease-out',
         className
       )}
       style={{
@@ -541,12 +567,13 @@ interface TabsDraggableContentContainerProps {
   className?: string;
   style?: React.CSSProperties;
   children: React.ReactNode;
+  sectionGap?: number; // Horizontal gap between panels in pixels
 }
 
 const TabsDraggableContentContainer = React.forwardRef<
   HTMLDivElement,
   TabsDraggableContentContainerProps
->(({ className, style, children }, _ref) => {
+>(({ className, style, children, sectionGap = 0 }, _ref) => {
   const context = React.useContext(TabsDraggableContext);
   const {
     activeTabIndex,
@@ -558,10 +585,58 @@ const TabsDraggableContentContainer = React.forwardRef<
     indicatorDragOffset,
     swipeThreshold = 0.3,
     scrollVelocityThreshold = 50,
+    isDragging: indicatorIsDragging = false,
   } = context;
 
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragOffset, setDragOffset] = React.useState(0);
+  
+  // Transition state management
+  const [transitioningToIndex, setTransitioningToIndex] = React.useState<number | null>(null);
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  
+  // Gesture detection and scroll locking
+  const [touchStartDirection, setTouchStartDirection] = React.useState<'horizontal' | 'vertical' | null>(null);
+  const [isScrollLocked, setIsScrollLocked] = React.useState(false);
+  const initialTouchPos = React.useRef<{ x: number; y: number } | null>(null);
+  const savedScrollY = React.useRef(0);
+
+  // Determine whether any dragging is happening (content drag or indicator drag in parallax mode)
+  const isAnyDragging = isDragging || indicatorIsDragging;
+
+  // While dragging, also expand the neighbor tab in the drag direction so it's visible during the slide
+  const neighborIndex: number | null = React.useMemo(() => {
+    if (!isAnyDragging && !isTransitioning) return null;
+
+    if (parallaxMode) {
+      const offset = indicatorDragOffset || 0;
+      if (offset === 0) return null;
+      // Fix parallax direction: indicator moves right => show next tab (right)
+      const direction = offset > 0 ? 1 : -1;
+      const candidate = activeTabIndex + direction;
+      if (candidate < 0 || candidate >= tabs.length) return null;
+      return candidate;
+    }
+
+    // For normal drag mode
+    if (dragOffset !== 0) {
+      const direction = dragOffset > 0 ? -1 : 1; // content dragged right shows previous; left shows next
+      const candidate = activeTabIndex + direction;
+      if (candidate >= 0 && candidate < tabs.length) {
+        return candidate;
+      }
+    }
+    
+    return null;
+  }, [
+    isAnyDragging,
+    isTransitioning,
+    parallaxMode,
+    indicatorDragOffset,
+    dragOffset,
+    activeTabIndex,
+    tabs.length,
+  ]);
 
   // Track vertical scroll velocity to disable horizontal swipes during fast scrolling
   const [verticalScrollVelocity, setVerticalScrollVelocity] = React.useState(0);
@@ -583,6 +658,29 @@ const TabsDraggableContentContainer = React.forwardRef<
   const dragStartX = React.useRef(0);
   const velocityX = React.useRef(0);
   const lastX = React.useRef(0);
+  
+  // Scroll locking functions
+  const lockBodyScroll = React.useCallback(() => {
+    if (!isScrollLocked) {
+      savedScrollY.current = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${savedScrollY.current}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      setIsScrollLocked(true);
+    }
+  }, [isScrollLocked]);
+  
+  const unlockBodyScroll = React.useCallback(() => {
+    if (isScrollLocked) {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, savedScrollY.current);
+      setIsScrollLocked(false);
+    }
+  }, [isScrollLocked]);
 
   const [containerWidth, setContainerWidth] = React.useState(0);
 
@@ -632,17 +730,113 @@ const TabsDraggableContentContainer = React.forwardRef<
       return;
     }
 
+    // Check if this event originated from a nested TabsDraggable
+    const target = e.target as HTMLElement;
+    const nestedTabsContainer = target.closest(
+      '[data-tabs-draggable-container]'
+    );
+    const currentTabsContainer = containerRef.current;
+
+    // If the event comes from a nested TabsDraggable that's not this one, don't handle it
+    if (nestedTabsContainer && nestedTabsContainer !== currentTabsContainer) {
+      return;
+    }
+
+    // Highest priority: Don't interfere with form elements, but allow tab triggers
+    const isFormElement =
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.closest('input, textarea, select, [contenteditable="true"]') ||
+      target.isContentEditable ||
+      target.matches('[role="textbox"], [role="combobox"]');
+
+    // Allow tab triggers to work, but prevent dragging on other buttons and form elements
+    const isTabTrigger =
+      target.closest('[role="tab"]') || target.closest('button[data-state]');
+    const shouldPreventDrag =
+      isFormElement || (target.tagName === 'BUTTON' && !isTabTrigger);
+
+    if (shouldPreventDrag) {
+      // Don't start dragging, but let the interactive element handle the event normally
+      return;
+    }
+
+    // Also check if any focused element exists - don't interfere with keyboard input
+    const activeEl = document.activeElement as HTMLElement;
+    if (
+      activeEl &&
+      (activeEl.tagName === 'INPUT' ||
+        activeEl.tagName === 'TEXTAREA' ||
+        activeEl.isContentEditable ||
+        activeEl.closest('input, textarea, [contenteditable="true"]'))
+    ) {
+      return;
+    }
+
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    // Store initial touch position for gesture detection
+    initialTouchPos.current = { x: clientX, y: clientY };
+    
     dragStartX.current = clientX - dragOffset;
     lastX.current = clientX;
     setIsDragging(true);
+    setTouchStartDirection(null); // Reset direction detection
+
+    // Prevent event from bubbling to parent TabsDraggable components
+    e.stopPropagation();
   };
 
   const handleContentDrag = React.useCallback(
     (e: MouseEvent | TouchEvent) => {
       if (!isDragging) return;
 
+      // Don't interfere with focused input elements during drag
+      if (
+        document.activeElement &&
+        (document.activeElement.tagName === 'INPUT' ||
+          document.activeElement.tagName === 'TEXTAREA' ||
+          (document.activeElement as HTMLElement).isContentEditable)
+      ) {
+        return;
+      }
+
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      
+      // Gesture direction detection on first move
+      if (touchStartDirection === null && initialTouchPos.current) {
+        const deltaX = Math.abs(clientX - initialTouchPos.current.x);
+        const deltaY = Math.abs(clientY - initialTouchPos.current.y);
+        
+        // Only determine direction if there's significant movement
+        if (deltaX > 5 || deltaY > 5) {
+          const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+          
+          if (angle > 60) {
+            // Vertical gesture - don't handle horizontal swipe
+            setTouchStartDirection('vertical');
+            setIsDragging(false);
+            return;
+          } else if (angle < 30) {
+            // Horizontal gesture - lock vertical scroll
+            setTouchStartDirection('horizontal');
+            lockBodyScroll();
+          }
+        }
+      }
+      
+      // If this was determined to be a vertical gesture, ignore it
+      if (touchStartDirection === 'vertical') {
+        return;
+      }
+
+      // Prevent event from bubbling to parent TabsDraggable components
+      e.stopPropagation();
+      e.preventDefault();
+
       const offset = clientX - dragStartX.current;
 
       // Calculate velocity for momentum
@@ -650,7 +844,8 @@ const TabsDraggableContentContainer = React.forwardRef<
       lastX.current = clientX;
 
       // Apply elastic resistance at boundaries
-      const maxOffset = -(tabs.length - 1) * containerWidth;
+      const stride = containerWidth + sectionGap; // distance from panel to panel including gap
+      const maxOffset = -(tabs.length - 1) * stride;
       let elasticOffset = offset;
 
       if (activeTabIndex === 0 && offset > 0) {
@@ -662,7 +857,7 @@ const TabsDraggableContentContainer = React.forwardRef<
       }
 
       // Calculate the actual position considering the active tab
-      const basePosition = -activeTabIndex * containerWidth;
+      const basePosition = -activeTabIndex * stride;
       const currentPosition = basePosition + elasticOffset;
 
       // Constrain to maximum elastic bounds (2% overscroll)
@@ -675,13 +870,18 @@ const TabsDraggableContentContainer = React.forwardRef<
 
       setDragOffset(elasticOffset);
     },
-    [isDragging, activeTabIndex, tabs.length, containerWidth]
+    [isDragging, activeTabIndex, tabs.length, containerWidth, sectionGap, touchStartDirection, lockBodyScroll]
   );
 
   const handleContentDragEnd = React.useCallback(() => {
     if (!isDragging) return;
 
     setIsDragging(false);
+    
+    // Unlock body scroll if it was locked
+    unlockBodyScroll();
+    setTouchStartDirection(null);
+    initialTouchPos.current = null;
 
     const threshold = containerWidth * swipeThreshold; // Use configurable threshold
     const velocity = velocityX.current;
@@ -703,6 +903,18 @@ const TabsDraggableContentContainer = React.forwardRef<
           : Math.min(tabs.length - 1, activeTabIndex + 1);
     }
 
+    // Handle transition if tab is changing
+    if (newIndex !== activeTabIndex) {
+      setTransitioningToIndex(newIndex);
+      setIsTransitioning(true);
+      
+      // Clear transition state after animation completes
+      setTimeout(() => {
+        setTransitioningToIndex(null);
+        setIsTransitioning(false);
+      }, 300);
+    }
+
     // Animate to final position
     setActiveTabIndex(newIndex);
     setDragOffset(0);
@@ -719,6 +931,7 @@ const TabsDraggableContentContainer = React.forwardRef<
     onTabChange,
     setActiveTabIndex,
     swipeThreshold,
+    unlockBodyScroll,
   ]);
 
   // Global mouse/touch event listeners
@@ -732,10 +945,14 @@ const TabsDraggableContentContainer = React.forwardRef<
     };
 
     if (isDragging) {
-      document.addEventListener('mousemove', handleGlobalMove);
-      document.addEventListener('touchmove', handleGlobalMove);
-      document.addEventListener('mouseup', handleGlobalEnd);
-      document.addEventListener('touchend', handleGlobalEnd);
+      document.addEventListener('mousemove', handleGlobalMove, {
+        passive: false,
+      });
+      document.addEventListener('touchmove', handleGlobalMove, {
+        passive: false,
+      });
+      document.addEventListener('mouseup', handleGlobalEnd, { passive: true });
+      document.addEventListener('touchend', handleGlobalEnd, { passive: true });
 
       return () => {
         document.removeEventListener('mousemove', handleGlobalMove);
@@ -745,81 +962,119 @@ const TabsDraggableContentContainer = React.forwardRef<
       };
     }
   }, [isDragging, handleContentDrag, handleContentDragEnd]);
+  
+  // Handle transition when activeTabIndex changes (from button clicks, etc)
+  const prevActiveTabIndexRef = React.useRef(activeTabIndex);
+  React.useEffect(() => {
+    const prevIndex = prevActiveTabIndexRef.current;
+    if (prevIndex !== activeTabIndex && !isDragging && !indicatorIsDragging) {
+      // Tab changed programmatically (button click, keyboard, etc)
+      setTransitioningToIndex(activeTabIndex);
+      setIsTransitioning(true);
+      
+      // Clear transition state after animation completes
+      const timeoutId = setTimeout(() => {
+        setTransitioningToIndex(null);
+        setIsTransitioning(false);
+      }, 300);
+      
+      // Cleanup timeout on unmount or state change
+      return () => clearTimeout(timeoutId);
+    }
+    prevActiveTabIndexRef.current = activeTabIndex;
+  }, [activeTabIndex, isDragging, indicatorIsDragging]);
+  
+  // Cleanup scroll lock on unmount
+  React.useEffect(() => {
+    return () => {
+      unlockBodyScroll();
+    };
+  }, [unlockBodyScroll]);
 
   // Calculate positions
+  const stride = containerWidth + sectionGap;
   const contentTransform = parallaxMode
-    ? `translateX(${-activeTabIndex * containerWidth + contentOffset}px)`
-    : `translateX(${-activeTabIndex * containerWidth + dragOffset}px)`;
+    ? `translateX(${-(activeTabIndex * stride) + contentOffset}px)`
+    : `translateX(${-(activeTabIndex * stride) + dragOffset}px)`;
 
   return (
     <div
       ref={containerRef}
-      role="region"
-      tabIndex={0}
-      className={cn(
-        'relative min-h-[300px] cursor-default overflow-hidden sm:min-h-[400px]',
-        className
-      )}
+      className={cn('relative overflow-hidden', className)}
       style={style}
+      data-tabs-draggable-container
       onMouseDown={parallaxMode ? undefined : handleContentDragStart}
       onTouchStart={parallaxMode ? undefined : handleContentDragStart}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          // For keyboard access, we'll just switch to the next/previous tab
-          if (e.key === 'Enter') {
-            const nextIndex = Math.min(activeTabIndex + 1, tabs.length - 1);
-            if (nextIndex !== activeTabIndex) {
-              setActiveTabIndex(nextIndex);
-              if (onTabChange && tabs[nextIndex]) {
-                onTabChange(tabs[nextIndex].id);
-              }
-            }
-          } else if (e.key === ' ') {
-            const prevIndex = Math.max(activeTabIndex - 1, 0);
-            if (prevIndex !== activeTabIndex) {
-              setActiveTabIndex(prevIndex);
-              if (onTabChange && tabs[prevIndex]) {
-                onTabChange(tabs[prevIndex].id);
-              }
-            }
-          }
-        }
-      }}
-      aria-label="Swipe or drag to navigate between tab content"
     >
+      <style>
+        {`
+          input,
+          textarea,
+          button,
+          select,
+          [contenteditable="true"] {
+            pointer-events: auto !important;
+            touch-action: auto !important;
+            user-select: auto !important;
+          }
+        `}
+      </style>
+
       <div
         ref={contentRef}
         className={cn(
-          'flex h-full',
+          'flex items-center justify-center',
           !isDragging && 'transition-transform duration-300 ease-out'
         )}
         style={{
           transform: contentTransform,
-          width: `${tabs.length * 100}%`,
+          width: sectionGap > 0 ? undefined : `${tabs.length * 100}%`,
+          columnGap: sectionGap > 0 ? `${sectionGap}px` : undefined,
         }}
       >
-        {tabs.map((tab, index) => (
-          <div
-            key={tab.id}
-            className="flex h-full items-center justify-center"
-            style={{
-              width: `${100 / tabs.length}%`,
-            }}
-          >
-            <div className="flex h-full w-full items-center justify-center">
-              {React.Children.toArray(children).find((child) => {
-                if (
-                  React.isValidElement(child) &&
-                  child.props.value === tab.id
-                ) {
-                  return child;
-                }
-                return null;
-              })}
+        {tabs.map((tab, index) => {
+          // Enhanced visibility logic: show active, neighbor (during drag), and transitioning tabs
+          const isVisible =
+            index === activeTabIndex ||
+            (neighborIndex !== null && index === neighborIndex) ||
+            (transitioningToIndex !== null && index === transitioningToIndex);
+            
+          return (
+            <div
+              key={tab.id}
+              className={cn(
+                'min-h-0', // Allow shrinking
+                isVisible ? 'h-auto' : 'h-0 overflow-hidden'
+              )}
+              style={{
+                width:
+                  sectionGap > 0 && containerWidth > 0
+                    ? `${containerWidth}px`
+                    : `${100 / tabs.length}%`,
+              }}
+            >
+              <div
+                className={cn(
+                  'w-full',
+                  isVisible ? 'h-auto' : 'h-0 overflow-hidden'
+                )}
+                style={{
+                  pointerEvents: 'auto',
+                }}
+              >
+                {React.Children.toArray(children).find((child) => {
+                  if (
+                    React.isValidElement(child) &&
+                    (child.props as { value?: string }).value === tab.id
+                  ) {
+                    return child;
+                  }
+                  return null;
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

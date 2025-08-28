@@ -3,7 +3,12 @@ import { persist } from 'zustand/middleware';
 
 export interface AnonymousAction {
   id: string;
-  type: 'vibe_view' | 'vibe_like' | 'rating_attempt' | 'follow_attempt' | 'search';
+  type:
+    | 'vibe_view'
+    | 'vibe_like'
+    | 'rating_attempt'
+    | 'follow_attempt'
+    | 'search';
   targetId: string;
   data?: Record<string, unknown>;
   timestamp: number;
@@ -27,30 +32,32 @@ interface AnonymousUserState {
   // Anonymous session tracking
   sessionId: string;
   sessionStartTime: number;
-  
+
   // User actions before signup
   actions: AnonymousAction[];
-  
+
   // CTA tracking
   ctaInteractions: CtaInteraction[];
   dismissedCtas: Set<string>;
   lastCtaShownAt: number;
-  
+
   // Engagement metrics
   vibesViewed: number;
   searchesPerformed: number;
   timeSpentOnSite: number;
-  
+
   // A/B testing
   abTestAssignments: ABTestAssignment[];
-  
+
   // Private mode token for carryover
   privateToken: string | null;
-  
+
   // Actions
   initializeSession: () => void;
   addAction: (action: Omit<AnonymousAction, 'id' | 'timestamp'>) => void;
-  recordCtaInteraction: (interaction: Omit<CtaInteraction, 'timestamp'>) => void;
+  recordCtaInteraction: (
+    interaction: Omit<CtaInteraction, 'timestamp'>
+  ) => void;
   dismissCta: (ctaId: string) => void;
   shouldShowCta: (ctaId: string, context: string) => boolean;
   assignAbTest: (testId: string, variants: string[]) => string;
@@ -119,8 +126,14 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
 
         set((state) => ({
           actions: [...state.actions, action],
-          vibesViewed: action.type === 'vibe_view' ? state.vibesViewed + 1 : state.vibesViewed,
-          searchesPerformed: action.type === 'search' ? state.searchesPerformed + 1 : state.searchesPerformed,
+          vibesViewed:
+            action.type === 'vibe_view'
+              ? state.vibesViewed + 1
+              : state.vibesViewed,
+          searchesPerformed:
+            action.type === 'search'
+              ? state.searchesPerformed + 1
+              : state.searchesPerformed,
         }));
       },
 
@@ -132,7 +145,10 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
 
         set((state) => ({
           ctaInteractions: [...state.ctaInteractions, interaction],
-          lastCtaShownAt: interaction.action === 'impression' ? Date.now() : state.lastCtaShownAt,
+          lastCtaShownAt:
+            interaction.action === 'impression'
+              ? Date.now()
+              : state.lastCtaShownAt,
         }));
       },
 
@@ -144,7 +160,7 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
 
       shouldShowCta: (ctaId, context) => {
         const state = get();
-        
+
         // Don't show if dismissed
         if (state.dismissedCtas.has(ctaId)) {
           return false;
@@ -153,7 +169,7 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
         // Rate limiting: don't show CTAs too frequently
         const timeSinceLastCta = Date.now() - state.lastCtaShownAt;
         const minInterval = 30000; // 30 seconds minimum between CTAs
-        
+
         if (timeSinceLastCta < minInterval) {
           return false;
         }
@@ -163,7 +179,9 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
           case 'after_vibe_views':
             return state.vibesViewed >= 3;
           case 'after_interaction_attempt':
-            return state.actions.some(a => a.type === 'rating_attempt' || a.type === 'follow_attempt');
+            return state.actions.some(
+              (a) => a.type === 'rating_attempt' || a.type === 'follow_attempt'
+            );
           case 'scroll_engagement':
             return state.vibesViewed >= 5;
           default:
@@ -173,38 +191,42 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
 
       assignAbTest: (testId, variants) => {
         const state = get();
-        
+
         // Check if already assigned
-        const existing = state.abTestAssignments.find(a => a.testId === testId);
+        const existing = state.abTestAssignments.find(
+          (a) => a.testId === testId
+        );
         if (existing) {
           return existing.variant;
         }
-        
+
         // Assign variant based on session ID for consistency
         const hash = state.sessionId.split('').reduce((a, b) => {
-          a = ((a << 5) - a) + b.charCodeAt(0);
+          a = (a << 5) - a + b.charCodeAt(0);
           return a & a;
         }, 0);
-        
+
         const variantIndex = Math.abs(hash) % variants.length;
         const variant = variants[variantIndex];
-        
+
         const assignment: ABTestAssignment = {
           testId,
           variant,
           assignedAt: Date.now(),
         };
-        
+
         set((state) => ({
           abTestAssignments: [...state.abTestAssignments, assignment],
         }));
-        
+
         return variant;
       },
 
       getAbTestVariant: (testId) => {
         const state = get();
-        const assignment = state.abTestAssignments.find(a => a.testId === testId);
+        const assignment = state.abTestAssignments.find(
+          (a) => a.testId === testId
+        );
         return assignment?.variant || null;
       },
 
@@ -263,8 +285,10 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Convert array back to Set after rehydration
-          state.dismissedCtas = new Set(state.dismissedCtas as unknown as string[]);
-          
+          state.dismissedCtas = new Set(
+            state.dismissedCtas as unknown as string[]
+          );
+
           // Initialize session if it doesn't exist
           if (!state.sessionId) {
             state.initializeSession();

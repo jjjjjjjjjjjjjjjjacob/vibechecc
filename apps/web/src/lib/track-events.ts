@@ -46,7 +46,7 @@ export const trackEvents = {
 
   vibeViewed: (vibeId: string) =>
     safeCapture('vibe_viewed', { vibe_id: vibeId }),
-    
+
   vibeCardExpanded: (data: {
     vibeId: string;
     feedType?: string;

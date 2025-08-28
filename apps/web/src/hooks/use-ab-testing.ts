@@ -4,7 +4,11 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { useFeatureFlagEnabled, useFeatureFlagPayload, usePostHog } from 'posthog-js/react';
+import {
+  useFeatureFlagEnabled,
+  useFeatureFlagPayload,
+  usePostHog,
+} from 'posthog-js/react';
 import { trackEvents } from '@/lib/track-events';
 
 export interface ExperimentVariant {
@@ -32,15 +36,20 @@ export function useAbTest(config: ExperimentConfig) {
   // Determine the active variant
   const activeVariant = useMemo(() => {
     if (!isEnabled) {
-      return config.variants.find(v => v.id === config.defaultVariant) || config.variants[0];
+      return (
+        config.variants.find((v) => v.id === config.defaultVariant) ||
+        config.variants[0]
+      );
     }
 
     // If payload contains variant info, use that
     if (payload && typeof payload === 'object' && 'variant' in payload) {
       const variantId = (payload as { variant: string }).variant;
-      return config.variants.find(v => v.id === variantId) || 
-             config.variants.find(v => v.id === config.defaultVariant) || 
-             config.variants[0];
+      return (
+        config.variants.find((v) => v.id === variantId) ||
+        config.variants.find((v) => v.id === config.defaultVariant) ||
+        config.variants[0]
+      );
     }
 
     // Default to first variant if enabled but no specific variant
@@ -59,36 +68,39 @@ export function useAbTest(config: ExperimentConfig) {
   }, [config.flagKey, config.trackingEnabled, activeVariant]);
 
   // Conversion tracking function
-  const trackConversion = useCallback((
-    conversionGoal: string,
-    value?: number,
-    properties?: Record<string, unknown>
-  ) => {
-    if (activeVariant) {
-      trackEvents.experimentConversion(
-        config.flagKey,
-        activeVariant.id,
-        conversionGoal,
-        value,
-        properties
-      );
-    }
-  }, [config.flagKey, activeVariant]);
+  const trackConversion = useCallback(
+    (
+      conversionGoal: string,
+      value?: number,
+      properties?: Record<string, unknown>
+    ) => {
+      if (activeVariant) {
+        trackEvents.experimentConversion(
+          config.flagKey,
+          activeVariant.id,
+          conversionGoal,
+          value,
+          properties
+        );
+      }
+    },
+    [config.flagKey, activeVariant]
+  );
 
   // User action tracking for the experiment
-  const trackAction = useCallback((
-    action: string,
-    properties?: Record<string, unknown>
-  ) => {
-    if (activeVariant) {
-      trackEvents.experimentAction(
-        config.flagKey,
-        activeVariant.id,
-        action,
-        properties
-      );
-    }
-  }, [config.flagKey, activeVariant]);
+  const trackAction = useCallback(
+    (action: string, properties?: Record<string, unknown>) => {
+      if (activeVariant) {
+        trackEvents.experimentAction(
+          config.flagKey,
+          activeVariant.id,
+          action,
+          properties
+        );
+      }
+    },
+    [config.flagKey, activeVariant]
+  );
 
   return {
     variant: activeVariant,
@@ -145,7 +157,7 @@ export function useMultivariateTest(
 ) {
   const config: ExperimentConfig = {
     flagKey,
-    variants: variants.map(variant => ({ id: variant, name: variant })),
+    variants: variants.map((variant) => ({ id: variant, name: variant })),
     defaultVariant: options.defaultVariant || variants[0],
     trackingEnabled: options.trackingEnabled,
   };
@@ -187,12 +199,12 @@ export function useFeatureRollout(
     }
   }, [isEnabled, options]);
 
-  const trackFeatureUsage = useCallback((
-    action: string,
-    properties?: Record<string, unknown>
-  ) => {
-    trackEvents.featureRolloutAction(flagKey, action, properties);
-  }, [flagKey]);
+  const trackFeatureUsage = useCallback(
+    (action: string, properties?: Record<string, unknown>) => {
+      trackEvents.featureRolloutAction(flagKey, action, properties);
+    },
+    [flagKey]
+  );
 
   return {
     isEnabled,

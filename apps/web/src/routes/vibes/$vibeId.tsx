@@ -29,7 +29,7 @@ import { RatingShareButton } from '@/components/social/rating-share-button';
 import { RatingDootButton } from '@/features/ratings/components/rating-doot-button';
 import { BoostButton } from '@/features/ratings/components/boost-button';
 import { VibeDetailSkeleton } from '@/components/skeletons/vibe-detail-skeleton';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import {
   computeUserDisplayName,
   getUserAvatarUrl,
@@ -38,13 +38,18 @@ import {
 import { useUser, SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 import toast from '@/utils/toast';
 import { AuthPromptDialog } from '@/features/auth/components/auth-prompt-dialog';
-import { SignupCta, InteractionGateCta } from '@/features/auth/components/signup-cta';
-import { useSignupCtaPlacement, useAnonymousInteractionTracking } from '@/features/auth/hooks/use-signup-cta-placement';
+import {
+  SignupCta,
+  InteractionGateCta,
+} from '@/features/auth/components/signup-cta';
+import {
+  useSignupCtaPlacement,
+  useAnonymousInteractionTracking,
+} from '@/features/auth/hooks/use-signup-cta-placement';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import { RatingPopover } from '@/features/ratings/components/rating-popover';
-import { EmojiRatingSelector } from '@/features/ratings/components/emoji-rating-selector';
-import { EmojiRatingSelectorWithConfirmation } from '@/features/ratings/components/emoji-rating-selector-with-confirmation';
-import { RatingWithConfirmation } from '@/features/ratings/components/rating-with-confirmation';
+import type { UnifiedEmojiRatingHandler } from '@/features/ratings/components/emoji-reaction';
+import { RateAndReviewDialog } from '@/features/ratings/components/rate-and-review-dialog';
+import { RevolvingRateReviewButton } from '@/features/ratings/components/revolving-rate-review-button';
 import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
 import { useVibeImageUrl } from '@/hooks/use-vibe-image-url';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -73,13 +78,14 @@ function VibePage() {
   const [review, setReview] = React.useState('');
   const { user: _user } = useUser();
   const isMobile = useIsMobile();
-  
+
   // CTA placement hooks
   const { placement: ctaPlacement, isAuthenticated } = useSignupCtaPlacement({
     enableVibeDetailCta: true,
     enableInteractionGate: true,
   });
-  const { trackVibeView, trackRatingAttempt } = useAnonymousInteractionTracking();
+  const { trackVibeView, trackRatingAttempt } =
+    useAnonymousInteractionTracking();
   const addRatingMutation = useAddRatingMutation();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
   const deleteVibeMutation = useDeleteVibeMutation();
@@ -87,13 +93,9 @@ function VibePage() {
   const [_authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
     'react'
   );
-  const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
-    string | null
-  >(null);
-  const [preselectedRatingValue, setPreselectedRatingValue] = React.useState<
-    number | null
-  >(null);
-  const [showRatingPopover, setShowRatingPopover] = React.useState(false);
+  const [showRatingDialog, setShowRatingDialog] = React.useState(false);
+  const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<string | null>(null);
+  const [preselectedRatingValue, setPreselectedRatingValue] = React.useState<number | null>(null);
   const [showShareModal, setShowShareModal] = React.useState(false);
 
   // Get image URL (handles both legacy URLs and storage IDs)
@@ -153,16 +155,13 @@ function VibePage() {
 
   // Get rating IDs for fetching vote data
   const ratingIds = React.useMemo(() => {
-    if (!vibe?.ratings) return [];
-    return vibe.ratings
-      .filter(r => r._id)
-      .map(r => r._id as Id<'ratings'>);
-  }, [vibe?.ratings]);
+    if (!vibe?.currentUserRatings) return [];
+    return vibe.currentUserRatings.filter((r) => r._id).map((r) => r._id as Id<'ratings'>);
+  }, [vibe?.currentUserRatings]);
 
   // Fetch vote scores and statuses for all ratings
   const { data: voteScores } = useBulkRatingVoteScores(ratingIds);
   const { data: voteStatuses } = useBulkUserRatingVoteStatuses(ratingIds);
-  
 
   // Extract context keywords from vibe for emoji suggestions
   const _contextKeywords = React.useMemo(() => {
@@ -330,9 +329,9 @@ function VibePage() {
     );
   }
 
-  const _averageRating = vibe.ratings.length
-    ? vibe.ratings.reduce((sum: number, r) => sum + (r.value || 0), 0) /
-      vibe.ratings.length
+  const _averageRating = vibe.emojiRatings && vibe.emojiRatings.length
+    ? vibe.emojiRatings.reduce((sum, r) => sum + (r.averageValue * r.count), 0) /
+      vibe.emojiRatings.reduce((sum, r) => sum + r.count, 0)
     : 0;
 
   const _handleSubmitRating = async (e: React.FormEvent) => {
@@ -406,34 +405,6 @@ function VibePage() {
     }
   };
 
-  // Handle emoji rating submission
-  const handleEmojiRating = async (data: {
-    emoji: string;
-    value: number;
-    review: string;
-    tags?: string[];
-  }) => {
-    try {
-      await createEmojiRatingMutation.mutateAsync({
-        vibeId: vibe.id,
-        emoji: data.emoji,
-        value: data.value,
-        review: data.review,
-      });
-
-      toast.success(
-        `vibe rated ${data.value} ${data.emoji}! review submitted.`,
-        {
-          duration: 3000,
-          icon: data.emoji,
-        }
-      );
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to submit emoji rating:', error);
-      throw error; // Re-throw to let popover handle error state
-    }
-  };
 
   const handleEmojiRatingClick = (emoji: string, value?: number) => {
     if (!_user?.id) {
@@ -449,7 +420,15 @@ function VibePage() {
       setPreselectedRatingValue(value);
     }
 
-    setShowRatingPopover(true);
+    setShowRatingDialog(true);
+  };
+
+  // Adapter for unified handler
+  const handleEmojiRatingClickUnified: UnifiedEmojiRatingHandler = async ({
+    emoji,
+    value,
+  }) => {
+    handleEmojiRatingClick(emoji, value);
   };
 
   const handleDeleteVibe = async () => {
@@ -484,47 +463,42 @@ function VibePage() {
           emojiRatings={emojiRatings}
           emojiMetadataRecord={emojiMetadataRecord}
           onEmojiRatingClick={handleEmojiRatingClick}
-          onEmojiRating={handleEmojiRating}
           onDelete={handleDeleteVibe}
           onShare={() => setShowShareModal(true)}
-          isPendingRating={createEmojiRatingMutation.isPending}
           isPendingDelete={deleteVibeMutation.isPending}
         />
-        
-        {/* Hidden Popover and Modals for mobile */}
-        <RatingPopover
-          open={showRatingPopover}
+
+        {/* Hidden Dialog for mobile rating clicks */}
+        <RateAndReviewDialog
+          vibeId={vibe.id}
+          open={showRatingDialog}
           onOpenChange={(open) => {
-            setShowRatingPopover(open);
+            setShowRatingDialog(open);
             if (!open) {
               setSelectedEmojiForRating(null);
               setPreselectedRatingValue(null);
             }
           }}
-          onSubmit={handleEmojiRating}
-          isSubmitting={createEmojiRatingMutation.isPending}
           vibeTitle={vibe.title}
-          emojiMetadata={emojiMetadataRecord}
           preSelectedEmoji={selectedEmojiForRating || undefined}
           preSelectedValue={preselectedRatingValue || undefined}
+          existingUserRatings={vibe.currentUserRatings}
+          emojiMetadata={emojiMetadataRecord}
         >
           <div style={{ display: 'none' }} />
-        </RatingPopover>
+        </RateAndReviewDialog>
 
         <ShareModal
           open={showShareModal}
           onOpenChange={setShowShareModal}
-          contentType="vibe"
           vibe={vibe}
           author={vibe.createdBy || undefined}
-          ratings={
-            emojiRatings.map((r) => ({
-              emoji: r.emoji,
-              value: r.value,
-              tags: r.tags || [],
-              count: r.count,
-            }))
-          }
+          ratings={emojiRatings.map((r) => ({
+            emoji: r.emoji,
+            value: r.value,
+            tags: r.tags || [],
+            count: r.count,
+          }))}
         />
 
         <AuthPromptDialog
@@ -589,17 +563,22 @@ function VibePage() {
               {mostInteractedEmoji ? (
                 <EmojiRatingDisplay
                   rating={mostInteractedEmoji}
-                  showScale={true}
-                  onEmojiClick={handleEmojiRatingClick}
+                  vibeId={vibe.id}
+                  variant="scale"
+                  onEmojiClick={handleEmojiRatingClickUnified}
                   size="lg"
+                  existingUserRatings={vibe.currentUserRatings || []}
+                  emojiMetadata={emojiMetadataRecord}
                 />
               ) : (
                 <div className="mt-2">
                   <EmojiRatingCycleDisplay
-                    onSubmit={handleEmojiRating}
+                    vibeId={vibe.id}
+                    onEmojiClick={handleEmojiRatingClickUnified}
                     isSubmitting={createEmojiRatingMutation.isPending}
                     vibeTitle={vibe.title}
                     emojiMetadata={emojiMetadataRecord}
+                    existingUserRatings={vibe.currentUserRatings || []}
                     isOwner={!!isOwner}
                   />
                 </div>
@@ -674,8 +653,11 @@ function VibePage() {
                   <div key={`${rating.emoji}-${index}`}>
                     <EmojiRatingDisplay
                       rating={rating}
-                      showScale={true}
-                      onEmojiClick={handleEmojiRatingClick}
+                      vibeId={vibe.id}
+                      variant="scale"
+                      onEmojiClick={handleEmojiRatingClickUnified}
+                      existingUserRatings={vibe.currentUserRatings}
+                      emojiMetadata={emojiMetadataRecord}
                     />
                   </div>
                 ))}
@@ -692,8 +674,11 @@ function VibePage() {
                           <div key={`${rating.emoji}-${index + 3}`}>
                             <EmojiRatingDisplay
                               rating={rating}
-                              showScale={true}
-                              onEmojiClick={handleEmojiRatingClick}
+                              vibeId={vibe.id}
+                              variant="scale"
+                              onEmojiClick={handleEmojiRatingClickUnified}
+                              existingUserRatings={vibe.currentUserRatings}
+                              emojiMetadata={emojiMetadataRecord}
                             />
                           </div>
                         ))}
@@ -787,13 +772,12 @@ function VibePage() {
                   </p>
                 </div>
               ) : (
-                <EmojiRatingSelectorWithConfirmation
+                <RevolvingRateReviewButton
                   vibeId={vibe.id}
                   topEmojis={emojiRatings}
-                  onSubmit={handleEmojiRating}
-                  isSubmitting={createEmojiRatingMutation.isPending}
                   vibeTitle={vibe.title}
                   emojiMetadata={emojiMetadataRecord}
+                  existingUserRatings={vibe.currentUserRatings}
                   isOwner={!!isOwner}
                 />
               )}
@@ -833,9 +817,9 @@ function VibePage() {
           <Card className="m-0 border-none bg-transparent">
             <CardContent className="p-0">
               <h2 className="mb-4 text-xl font-bold lowercase">reviews</h2>
-              {vibe.ratings.filter((r) => r.review).length > 0 ? (
+              {(vibe.currentUserRatings || []).filter((r) => r.review).length > 0 ? (
                 <div className="space-y-2">
-                  {vibe.ratings
+                  {(vibe.currentUserRatings || [])
                     .filter((r) => r.review)
                     .sort(
                       (a, b) =>
@@ -930,20 +914,32 @@ function VibePage() {
                                   rating={{
                                     emoji: rating.emoji || '😊',
                                     value: rating.value || 3,
-                                    count: undefined,
+                                    count: 1,
                                   }}
-                                  showScale={false}
+                                  vibeId={vibe.id}
+                                  variant="compact"
                                   size="sm"
-                                  onEmojiClick={handleEmojiRatingClick}
+                                  onEmojiClick={handleEmojiRatingClickUnified}
                                 />
                                 <div className="flex items-center gap-1">
                                   {rating._id && (
                                     <>
                                       <RatingDootButton
                                         ratingId={rating._id as Id<'ratings'>}
-                                        netScore={voteScores?.[rating._id]?.netScore || 0}
-                                        voteStatus={voteStatuses?.[rating._id] || { voteType: null, boosted: false, dampened: false }}
-                                        isOwnRating={rating.user?.externalId === _user?.id}
+                                        netScore={
+                                          voteScores?.[rating._id]?.netScore ||
+                                          0
+                                        }
+                                        voteStatus={
+                                          voteStatuses?.[rating._id] || {
+                                            voteType: null,
+                                            boosted: false,
+                                            dampened: false,
+                                          }
+                                        }
+                                        isOwnRating={
+                                          rating.user?.externalId === _user?.id
+                                        }
                                         variant="ghost"
                                         size="sm"
                                       />
@@ -955,7 +951,9 @@ function VibePage() {
                                         dampenCost={25}
                                         userPoints={0}
                                         userBoostAction={null}
-                                        isOwnContent={rating.user?.externalId === _user?.id}
+                                        isOwnContent={
+                                          rating.user?.externalId === _user?.id
+                                        }
                                         variant="ghost"
                                         size="sm"
                                       />
@@ -1034,19 +1032,18 @@ function VibePage() {
         description="if you vibe this effortlessly you should probably sign up"
       />
 
-      {/* Emoji Rating Popover for clicking on top ratings */}
-      <RatingWithConfirmation
+      {/* Rating Dialog for clicking on top ratings */}
+      <RateAndReviewDialog
         vibeId={vibe.id}
-        open={showRatingPopover}
-        onSubmit={handleEmojiRating}
-        isSubmitting={createEmojiRatingMutation.isPending}
+        open={showRatingDialog}
         vibeTitle={vibe.title}
-        emojiMetadata={emojiMetadataRecord}
         preSelectedEmoji={selectedEmojiForRating || undefined}
         preSelectedValue={preselectedRatingValue || undefined}
         isOwner={!!isOwner}
+        existingUserRatings={vibe.currentUserRatings}
+        emojiMetadata={emojiMetadataRecord}
         onOpenChange={(open) => {
-          setShowRatingPopover(open);
+          setShowRatingDialog(open);
           if (!open) {
             setSelectedEmojiForRating(null);
             setPreselectedRatingValue(null);
@@ -1054,7 +1051,7 @@ function VibePage() {
         }}
       >
         <div />
-      </RatingWithConfirmation>
+      </RateAndReviewDialog>
 
       {/* Share Modal */}
       {vibe && vibe.createdBy && (
@@ -1063,7 +1060,12 @@ function VibePage() {
           onOpenChange={setShowShareModal}
           vibe={vibe}
           author={vibe.createdBy}
-          ratings={vibe.ratings || []}
+          ratings={emojiRatings.map((r) => ({
+            emoji: r.emoji,
+            value: r.value,
+            tags: r.tags || [],
+            count: r.count,
+          }))}
         />
       )}
     </div>

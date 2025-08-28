@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import type { Vibe } from '@vibechecc/types';
 import { cn } from '@/utils/tailwind-utils';
 

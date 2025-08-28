@@ -30,8 +30,7 @@ import {
 } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
-import { EmojiRatingSelectorWithConfirmation } from '@/features/ratings/components/emoji-rating-selector-with-confirmation';
+import { RevolvingRateReviewButton } from '@/features/ratings/components/revolving-rate-review-button';
 import { RatingDootButton } from '@/features/ratings/components/rating-doot-button';
 import { RatingShareButton } from '@/components/social/rating-share-button';
 import { BoostButton } from '@/features/ratings/components/boost-button';
@@ -73,15 +72,8 @@ interface VibeDetailMobileProps {
     }
   >;
   onEmojiRatingClick: (emoji: string, value?: number) => void;
-  onEmojiRating: (data: {
-    emoji: string;
-    value: number;
-    review: string;
-    tags?: string[];
-  }) => Promise<void>;
   onDelete: () => Promise<void>;
   onShare: () => void;
-  isPendingRating: boolean;
   isPendingDelete: boolean;
 }
 
@@ -94,26 +86,24 @@ export function VibeDetailMobile({
   emojiRatings,
   emojiMetadataRecord,
   onEmojiRatingClick,
-  onEmojiRating,
   onDelete,
   onShare,
-  isPendingRating,
   isPendingDelete,
 }: VibeDetailMobileProps) {
   const { user } = useUser();
   const [activeTab, setActiveTab] = React.useState('overview');
 
   const ratingIds = React.useMemo(() => {
-    if (!vibe?.ratings) return [];
-    return vibe.ratings.filter((r) => r._id).map((r) => r._id as Id<'ratings'>);
-  }, [vibe?.ratings]);
+    if (!vibe?.currentUserRatings) return [];
+    return vibe.currentUserRatings.filter((r) => r._id).map((r) => r._id as Id<'ratings'>);
+  }, [vibe?.currentUserRatings]);
 
   const { data: voteScores } = useBulkRatingVoteScores(ratingIds);
   const { data: voteStatuses } = useBulkUserRatingVoteStatuses(ratingIds);
 
-  const reviewsWithText = vibe.ratings.filter((r) => r.review);
+  const reviewsWithText = (vibe.currentUserRatings || []).filter((r) => r.review);
   const reviewCount = reviewsWithText.length;
-  const totalRatings = vibe.ratings.length;
+  const totalRatings = vibe.emojiRatings.reduce((sum, r) => sum + r.count, 0);
 
   return (
     <div className="bg-background flex min-h-screen flex-col">
@@ -248,18 +238,22 @@ export function VibeDetailMobile({
               <div className="bg-background/95 inline-block rounded-full px-4 py-2 backdrop-blur">
                 <EmojiRatingDisplay
                   rating={mostInteractedEmoji}
-                  showScale={true}
+                  vibeId={vibe.id}
                   onEmojiClick={onEmojiRatingClick}
+                  existingUserRatings={vibe.currentUserRatings || []}
+                  emojiMetadata={emojiMetadataRecord}
                   size="lg"
+                  variant="scale"
                 />
               </div>
             ) : (
               <div className="mt-2">
-                <EmojiRatingCycleDisplay
-                  onSubmit={onEmojiRating}
-                  isSubmitting={isPendingRating}
+                <RevolvingRateReviewButton
+                  vibeId={vibe.id}
+                  topEmojis={emojiRatings}
                   vibeTitle={vibe.title}
                   emojiMetadata={emojiMetadataRecord}
+                  existingUserRatings={vibe.currentUserRatings || []}
                   isOwner={isOwner}
                 />
               </div>
@@ -340,13 +334,12 @@ export function VibeDetailMobile({
                         </p>
                       </div>
                     ) : (
-                      <EmojiRatingSelectorWithConfirmation
+                      <RevolvingRateReviewButton
                         vibeId={vibe.id}
                         topEmojis={emojiRatings}
-                        onSubmit={onEmojiRating}
-                        isSubmitting={isPendingRating}
                         vibeTitle={vibe.title}
                         emojiMetadata={emojiMetadataRecord}
+                        existingUserRatings={vibe.currentUserRatings || []}
                         isOwner={isOwner}
                       />
                     )}
@@ -423,9 +416,12 @@ export function VibeDetailMobile({
                       <CardContent className="p-4">
                         <EmojiRatingDisplay
                           rating={rating}
-                          showScale={true}
+                          vibeId={vibe.id}
                           onEmojiClick={onEmojiRatingClick}
+                          existingUserRatings={vibe.currentUserRatings || []}
+                          emojiMetadata={emojiMetadataRecord}
                           size="md"
+                          variant="scale"
                         />
                         <div className="mt-2 flex items-center justify-between">
                           <span className="text-muted-foreground text-sm">
@@ -640,13 +636,12 @@ export function VibeDetailMobile({
             <div className="p-4">
               <SignedIn>
                 {!isOwner && (
-                  <EmojiRatingSelectorWithConfirmation
+                  <RevolvingRateReviewButton
                     vibeId={vibe.id}
                     topEmojis={emojiRatings}
-                    onSubmit={onEmojiRating}
-                    isSubmitting={isPendingRating}
                     vibeTitle={vibe.title}
                     emojiMetadata={emojiMetadataRecord}
+                    existingUserRatings={vibe.currentUserRatings || []}
                     isOwner={isOwner}
                   />
                 )}

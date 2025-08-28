@@ -19,24 +19,28 @@ export function AppleIdErrorHandler({ children }: AppleIdErrorHandlerProps) {
     if (!isLoaded || !isSignedIn || !user) return;
 
     // SECURITY: Check if user has Apple ID authentication
-    const hasAppleAuth = user.externalAccounts?.some((account: any) => 
+    const hasAppleAuth = user.externalAccounts?.some((account: any) =>
       account.provider?.toLowerCase().includes('apple')
     );
 
     if (hasAppleAuth) {
       // PRIVACY: Inform user about Apple's privacy features
-      const hasPrivateEmail = user.externalAccounts?.some((account: any) => 
+      const hasPrivateEmail = user.externalAccounts?.some((account: any) =>
         account.emailAddress?.includes('@privaterelay.appleid.com')
       );
 
       if (hasPrivateEmail) {
-        toast.info("apple privacy protection active - we're using your private relay email to protect your privacy");
+        toast.info(
+          "apple privacy protection active - we're using your private relay email to protect your privacy"
+        );
       }
 
       // SECURITY: Handle missing profile information gracefully
       const hasMissingInfo = !user.firstName && !user.lastName;
       if (hasMissingInfo) {
-        toast.info("complete your profile - add your name and interests to get the best experience");
+        toast.info(
+          'complete your profile - add your name and interests to get the best experience'
+        );
       }
     }
   }, [isLoaded, isSignedIn, user]);
@@ -45,10 +49,12 @@ export function AppleIdErrorHandler({ children }: AppleIdErrorHandlerProps) {
   useEffect(() => {
     const handleAppleAuthError = (error: ErrorEvent) => {
       const message = error.message?.toLowerCase();
-      
+
       if (message?.includes('apple') || message?.includes('oauth')) {
         // SECURITY: Don't expose internal error details to users
-        toast.error("sign in issue - there was a problem signing in with apple id. please try again.");
+        toast.error(
+          'sign in issue - there was a problem signing in with apple id. please try again.'
+        );
       }
     };
 
@@ -68,13 +74,15 @@ export function AppleIdStatus() {
 
   if (!user) return null;
 
-  const appleAccount = user.externalAccounts?.find((account: any) => 
+  const appleAccount = user.externalAccounts?.find((account: any) =>
     account.provider?.toLowerCase().includes('apple')
   );
 
   if (!appleAccount) return null;
 
-  const isPrivateRelay = appleAccount.emailAddress?.includes('@privaterelay.appleid.com');
+  const isPrivateRelay = appleAccount.emailAddress?.includes(
+    '@privaterelay.appleid.com'
+  );
   const verificationStatus = appleAccount.verification?.status;
 
   return (
