@@ -72,6 +72,38 @@ function groupRatingsByEmoji(ratings: Doc<'ratings'>[]): GroupedEmojiRating[] {
   }));
 }
 
+// Helper function to convert hex to RGB
+function hexToRgb(hex: string) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+}
+
+// Helper function to check if a gradient is light or dark
+function isLightGradient(from: string, to: string) {
+  const fromRgb = hexToRgb(from);
+  const toRgb = hexToRgb(to);
+
+  if (!fromRgb || !toRgb) {
+    return true; // Default to light
+  }
+
+  // Calculate luminance
+  const fromLuminance =
+    (0.299 * fromRgb.r + 0.587 * fromRgb.g + 0.114 * fromRgb.b) / 255;
+  const toLuminance =
+    (0.299 * toRgb.r + 0.587 * toRgb.g + 0.114 * toRgb.b) / 255;
+
+  const avgLuminance = (fromLuminance + toLuminance) / 2;
+  console.log('avgLuminance', avgLuminance);
+  return avgLuminance > 0.9;
+}
+
 // Simple get all vibes (for backwards compatibility)
 export const getAllSimple = query({
   handler: async (ctx) => {
@@ -878,6 +910,11 @@ export const create = mutation({
     gradientFrom: v.optional(v.string()),
     gradientTo: v.optional(v.string()),
     gradientDirection: v.optional(v.string()),
+    textContrastMode: v.optional(v.union(
+      v.literal('light'),
+      v.literal('dark'), 
+      v.literal('auto')
+    )),
   },
   handler: async (ctx, args) => {
     // SECURITY: Check authentication and validate input
@@ -956,6 +993,12 @@ export const create = mutation({
       }
     }
 
+    // Calculate text contrast mode based on gradient or user override
+    const textContrastMode = args.textContrastMode || 
+      (args.gradientFrom && args.gradientTo 
+        ? (isLightGradient(args.gradientFrom, args.gradientTo) ? 'light' : 'dark')
+        : 'auto');
+
     const _vibeId = await ctx.db.insert('vibes', {
       id,
       title,
@@ -969,6 +1012,7 @@ export const create = mutation({
       gradientFrom: args.gradientFrom,
       gradientTo: args.gradientTo,
       gradientDirection: args.gradientDirection,
+      textContrastMode,
     });
 
     // Update tag usage counts

@@ -14,6 +14,7 @@ interface SimplePlaceholderProps {
   gradientTo?: string;
   gradientDirection?: string;
   textColorOverride?: 'auto' | 'white' | 'black';
+  textContrastMode?: 'light' | 'dark' | 'auto';
 }
 
 export function SimpleVibePlaceholder({
@@ -24,6 +25,7 @@ export function SimpleVibePlaceholder({
   gradientTo,
   gradientDirection,
   textColorOverride = 'auto',
+  textContrastMode,
 }: SimplePlaceholderProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -46,10 +48,25 @@ export function SimpleVibePlaceholder({
 
   const gradientClassName = cn(colorClasses, gradientDirectionClass);
 
-  // Determine text color based on background type and override
+  // Determine text color based on textContrastMode, then textColorOverride, then auto-detection
   const textColor = (() => {
+    // Priority 1: textContrastMode
+    if (textContrastMode === 'light') return 'text-black/70';
+    if (textContrastMode === 'dark') return 'text-white/90';
+    if (textContrastMode === 'auto') {
+      if (gradientFrom && gradientTo) {
+        return isLightGradient(gradientFrom, gradientTo)
+          ? 'text-black/70'
+          : 'text-white/90';
+      }
+      return 'text-white/90';
+    }
+
+    // Priority 2: textColorOverride (backward compatibility)
     if (textColorOverride === 'white') return 'text-white/90';
     if (textColorOverride === 'black') return 'text-black/70';
+
+    // Priority 3: Auto-detection based on gradient
     if (gradientFrom && gradientTo) {
       return isLightGradient(gradientFrom, gradientTo)
         ? 'text-black/70'

@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/icons';
 import type { Id } from '@vibechecc/convex/dataModel';
 import toast from '@/utils/toast';
-import { generateRandomGradient } from '@/utils/gradient-utils';
+import { getConsistentGradient } from '@/utils/gradient-utils';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 
 // Server function to check authentication
@@ -65,7 +65,7 @@ function EditVibe() {
     from: string;
     to: string;
     direction: string;
-  }>(() => generateRandomGradient());
+  }>(() => getConsistentGradient());
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState('');
   const [validationErrors, setValidationErrors] = React.useState<
@@ -102,25 +102,36 @@ function EditVibe() {
   // Initialize form with vibe data
   React.useEffect(() => {
     if (vibe && !vibe.isDeleted) {
+      // Auto-generate gradient if none exists and no image
+      const needsGradient =
+        !vibe.gradientFrom && !vibe.gradientTo && !vibe.image;
+      const autoGradient = needsGradient
+        ? getConsistentGradient(vibe.id)
+        : null;
+
       const initialValues = {
         description: vibe.description || '',
         tags: vibe.tags || [],
         imageUrl: vibe.image || '',
-        gradientFrom: vibe.gradientFrom || gradient.from,
-        gradientTo: vibe.gradientTo || gradient.to,
-        gradientDirection: vibe.gradientDirection || gradient.direction,
+        gradientFrom: vibe.gradientFrom || autoGradient?.from || gradient.from,
+        gradientTo: vibe.gradientTo || autoGradient?.to || gradient.to,
+        gradientDirection:
+          vibe.gradientDirection ||
+          autoGradient?.direction ||
+          gradient.direction,
       };
 
       setDescription(initialValues.description);
       setTags(initialValues.tags);
       setCurrentImageUrl(initialValues.imageUrl);
-      if (vibe.gradientFrom && vibe.gradientTo) {
-        setGradient({
-          from: vibe.gradientFrom,
-          to: vibe.gradientTo,
-          direction: vibe.gradientDirection || 'to-br',
-        });
-      }
+
+      // Set gradient (either existing, auto-generated, or current state)
+      setGradient({
+        from: initialValues.gradientFrom,
+        to: initialValues.gradientTo,
+        direction: initialValues.gradientDirection,
+      });
+
       setOriginalValues(initialValues);
     }
   }, [vibe]);

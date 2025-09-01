@@ -15,6 +15,7 @@ interface ShareButtonProps {
   vibe?: Vibe;
   author?: User;
   ratings?: (EmojiRating | Rating)[];
+  textContrast?: 'light' | 'dark';
 }
 
 export function ShareButton({
@@ -27,9 +28,22 @@ export function ShareButton({
   vibe,
   author,
   ratings,
+  textContrast,
 }: ShareButtonProps) {
   const [shareCount] = useState(currentShareCount);
   const [showShareModal, setShowShareModal] = useState(false);
+
+  // Helper function to get contrast-aware button classes (no background for share button)
+  const getContrastAwareClasses = (textContrast?: 'light' | 'dark') => {
+    if (!textContrast) return '';
+
+    if (textContrast === 'light') {
+      return 'text-black/90 hover:text-black border-black/20 hover:bg-white/20';
+    } else if (textContrast === 'dark') {
+      return 'text-white/90 hover:text-white border-white/20 hover:bg-white/20';
+    }
+    return '';
+  };
 
   // Ensure we have required props for vibe sharing
   if (contentType === 'vibe' && (!vibe || !author)) {
@@ -39,11 +53,15 @@ export function ShareButton({
   return (
     <>
       <Button
-        variant={variant}
+        variant="ghost"
         size={size}
-        className={cn('gap-2', className)}
+        className={cn(
+          'm-0 aspect-square gap-2 p-0',
+          getContrastAwareClasses(textContrast),
+          className
+        )}
         onClick={(e) => {
-          e.stopPropagation();
+          e.preventDefault();
           setShowShareModal(true);
         }}
       >

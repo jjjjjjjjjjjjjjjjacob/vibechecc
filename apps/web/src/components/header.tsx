@@ -17,6 +17,7 @@ import {
   Clock,
   Sparkles,
   Star,
+  Home,
 } from 'lucide-react';
 import { useCallback, useState, useEffect, useRef, RefObject } from 'react';
 import { cn } from '../utils/tailwind-utils';
@@ -49,7 +50,12 @@ import {
 } from '@/stores/theme-store';
 import { GlobalSearchCommand } from '@/features/search/components/global-search-command';
 import { useSearchShortcuts } from '@/features/search/hooks/use-search-shortcuts';
-import { useCurrentUser, useUnreadNotificationCount } from '../queries';
+import {
+  useCurrentUser,
+  useUnreadNotificationCount,
+  useVibe,
+} from '../queries';
+import { useFeatureFlagEnabled, useFeatureFlagPayload } from 'posthog-js/react';
 import { NotificationAccordion as NotificationMenu } from '@/features/notifications/components/notification-accordion';
 import { useConvex } from 'convex/react';
 import { useAdminAuth } from '@/features/admin/hooks/use-admin-auth';
@@ -85,6 +91,14 @@ export function Header() {
   const { data: unreadCount } = useUnreadNotificationCount({
     enabled: !!clerkUser && convexAvailable,
   });
+
+  // Check discover page access feature flag
+  const discoverFlagEnabled = useFeatureFlagEnabled('discover-page-access');
+  const discoverFlagPayload = useFeatureFlagPayload('discover-page-access');
+  const showDiscoverLink = !!clerkUser && discoverFlagEnabled && !!discoverFlagPayload;
+  
+  // Only show home link when there are other navigation items visible or user is signed in
+  const showHomeLink = !!clerkUser || showDiscoverLink;
 
   // Track hydration to avoid SSR mismatches
   useEffect(() => {
@@ -289,6 +303,13 @@ export function Header() {
     (match) => match.routeId === '/vibes/$vibeId'
   );
 
+  // Get vibeId from route params when on vibe page
+  const vibeMatch = matches.find((match) => match.routeId === '/vibes/$vibeId');
+  const vibeId = vibeMatch?.params?.vibeId as string | undefined;
+
+  // Fetch vibe data when on vibe page
+  const { data: currentVibe } = useVibe(vibeId || '', { enabled: !!vibeId });
+
   // Handle graceful transition into vibe page state
   useEffect(() => {
     if (isVibePage && pageNavState !== 'vibe') {
@@ -414,31 +435,35 @@ export function Header() {
                 </Link>
 
                 <nav className="hidden items-center gap-6 text-sm md:flex">
-                  <Link
-                    to="/"
-                    className={cn(
-                      'hover:text-foreground/80 lowercase transition-colors',
-                      location.pathname === '/'
-                        ? 'text-foreground font-medium'
-                        : 'text-foreground/60'
-                    )}
-                    onClick={() => setNavState(null)}
-                  >
-                    home
-                  </Link>
-                  <Link
-                    to="/discover"
-                    search={{}}
-                    className={cn(
-                      'hover:text-foreground/80 lowercase transition-colors',
-                      location.pathname === '/discover'
-                        ? 'text-foreground font-medium'
-                        : 'text-foreground/60'
-                    )}
-                    onClick={() => setNavState(null)}
-                  >
-                    discover
-                  </Link>
+                  {showHomeLink && (
+                    <Link
+                      to="/"
+                      className={cn(
+                        'hover:text-foreground/80 lowercase transition-colors',
+                        location.pathname === '/'
+                          ? 'text-foreground font-medium'
+                          : 'text-foreground/60'
+                      )}
+                      onClick={() => setNavState(null)}
+                    >
+                      home
+                    </Link>
+                  )}
+                  {showDiscoverLink && (
+                    <Link
+                      to="/discover"
+                      search={{}}
+                      className={cn(
+                        'hover:text-foreground/80 lowercase transition-colors',
+                        location.pathname === '/discover'
+                          ? 'text-foreground font-medium'
+                          : 'text-foreground/60'
+                      )}
+                      onClick={() => setNavState(null)}
+                    >
+                      discover
+                    </Link>
+                  )}
                   <SignedIn>
                     <Link
                       to="/vibes/my-vibes"
@@ -569,44 +594,8 @@ export function Header() {
                     </Button>
                   </Link>
                 </SignedIn>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 rounded-lg sm:hidden"
-                  onClick={() => {
-                    if (navState === 'nav') {
-                      setNavState(null);
-                      return;
-                    }
-                    handleNavTransition('nav', 'nav');
-                  }}
-                >
-                  <div className="relative h-5 w-5">
-                    <Menu
-                      className={cn(
-                        'absolute inset-0 m-auto h-5 w-5 transition duration-200',
-                        navState === 'nav'
-                          ? 'scale-95 opacity-0'
-                          : 'scale-100 opacity-100'
-                      )}
-                    />
-                    <ChevronUp
-                      className={cn(
-                        'absolute inset-0 m-auto h-5 w-5 transition-all duration-200',
-                        navState === 'nav'
-                          ? 'scale-100 opacity-100'
-                          : 'scale-95 opacity-0'
-                      )}
-                    />
-                  </div>
-                  <span className="sr-only">toggle menu</span>
-                </Button>
-
                 <SignedOut>
-                  <div className="hidden sm:block">
-                    <ThemeToggle />
-                  </div>
+                  <ThemeToggle />
                 </SignedOut>
 
                 <SignedIn>
@@ -682,15 +671,18 @@ export function Header() {
                     data-has-mounted={navHasMounted}
                     className="col-span-3 opacity-100 transition delay-250 duration-300 data-[has-mounted=false]:scale-95 data-[has-mounted=false]:opacity-0 sm:col-span-2"
                   >
-                    <div className="text-muted-foreground py-3 text-sm">
+                    <div className="text-muted-foreground flex items-center py-3 text-sm">
                       <Link
                         to="/"
-                        className="hover:text-foreground transition-colors"
+                        className="hover:text-foreground flex flex-shrink-0 items-center gap-1 transition-colors"
                       >
+                        <Home className="h-4 w-4" />
                         home
                       </Link>
-                      <span className="mx-2">/</span>
-                      <span>vibe</span>
+                      <span className="mx-2 flex-shrink-0">/</span>
+                      <span className="min-w-0 truncate lowercase">
+                        {currentVibe?.title || 'vibe'}
+                      </span>
                     </div>
                   </div>
                   <div
@@ -723,53 +715,6 @@ export function Header() {
                 className="translate-y-0 opacity-100 transition delay-200 duration-200 data-[has-mounted=false]:translate-y-10 data-[has-mounted=false]:opacity-0"
               >
                 <NotificationMenu />
-              </div>
-            </TabAccordionContent>
-            <TabAccordionContent value="nav" className="container !px-2 pb-2">
-              <div className={cn('text-sm')}>
-                <div
-                  data-has-mounted={navHasMounted}
-                  className={cn(
-                    'opacity-100 transition delay-200 duration-200 ease-in-out data-[has-mounted=false]:opacity-0',
-                    'translate-x-0 data-[has-mounted=false]:-translate-x-4'
-                  )}
-                >
-                  {/* Left side - Hamburger menu content */}
-                  <nav className="space-y-1">
-                    <Link
-                      to="/"
-                      className={cn(
-                        'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
-                      )}
-                      onClick={() => {
-                        setNavState(null);
-                      }}
-                    >
-                      home
-                    </Link>
-                    <Link
-                      to="/discover"
-                      search={{}}
-                      className={cn(
-                        'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
-                      )}
-                      onClick={() => {
-                        setNavState(null);
-                      }}
-                    >
-                      discover
-                    </Link>
-                    <button
-                      className="hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left lowercase transition-all duration-150"
-                      onClick={() => {
-                        handleNavTransition('search', 'nav');
-                      }}
-                    >
-                      <Search className="h-4 w-4" />
-                      <span>search</span>
-                    </button>
-                  </nav>
-                </div>
               </div>
             </TabAccordionContent>
             <TabAccordionContent

@@ -70,7 +70,10 @@ export function MasonryFeed({
   const emojiMetadata = React.useMemo(() => {
     if (!emojiMetadataArray) return {};
     return emojiMetadataArray.reduce(
-      (acc: Record<string, EmojiRatingMetadata>, metadata: EmojiRatingMetadata) => {
+      (
+        acc: Record<string, EmojiRatingMetadata>,
+        metadata: EmojiRatingMetadata
+      ) => {
         acc[metadata.emoji] = metadata;
         return acc;
       },
@@ -80,7 +83,12 @@ export function MasonryFeed({
 
   // Handle emoji rating at feed level
   const handleEmojiRating = React.useCallback(
-    async (data: { emoji: string; value: number; review: string; tags?: string[] }) => {
+    async (data: {
+      emoji: string;
+      value: number;
+      review: string;
+      tags?: string[];
+    }) => {
       // This would need the vibeId, so we'll pass this function to the cards
       // The actual implementation will be in the card components
       throw new Error('This should be handled by individual cards');
@@ -289,8 +297,8 @@ export function MasonryFeed({
           className={cn(
             // Adjust spacing based on mobile variant
             preferredMobileVariant === 'mobile-story'
-              ? 'space-y-4'
-              : 'space-y-5',
+              ? 'space-y-2'
+              : 'space-y-2',
             // Center mobile-story cards
             preferredMobileVariant === 'mobile-story' &&
               'flex flex-col items-center'

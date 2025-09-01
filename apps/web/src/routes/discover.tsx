@@ -3,9 +3,11 @@ import {
   Link,
   useSearch,
   useNavigate,
+  Navigate,
 } from '@tanstack/react-router';
 import { lazy, Suspense, useMemo } from 'react';
 import * as React from 'react';
+import { useFeatureFlagEnabled, useFeatureFlagPayload } from 'posthog-js/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -29,9 +31,9 @@ import type { Vibe } from '@vibechecc/types';
 import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';
-import { useUser } from '@clerk/tanstack-react-start';
 import { TrendingSignupCta } from '@/features/auth/components/signup-cta';
 import { useSignupCtaPlacement } from '@/features/auth/hooks/use-signup-cta-placement';
+import { useUser } from '@clerk/tanstack-react-start';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -228,7 +230,7 @@ function DiscoverPageDev() {
       <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
-          <div className="mb-8 text-center">
+          <div className="mb-8 text-left">
             <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
               discover all the vibes
             </h1>
@@ -298,10 +300,25 @@ function DiscoverPageDev() {
   );
 }
 
-// Wrapper: feature-flag the discover page to development only
+// Feature-flag the discover page to signed-in users with access
 function DiscoverPage() {
-  const isDev = import.meta.env?.DEV;
-  if (!isDev) return null;
+  const { isSignedIn, isLoaded } = useUser();
+  const isFeatureFlagEnabled = useFeatureFlagEnabled('discover-page-access');
+  const featureFlagPayload = useFeatureFlagPayload('discover-page-access');
+
+  // Check both flag and payload (following EnvironmentAccessGuard pattern)
+  const hasAccess = isSignedIn && isFeatureFlagEnabled && !!featureFlagPayload;
+
+  // Wait for auth and feature flag to load
+  if (!isLoaded || isFeatureFlagEnabled === undefined) {
+    return null;
+  }
+
+  // Redirect if no access
+  if (!hasAccess) {
+    return <Navigate to="/" />;
+  }
+
   return <DiscoverPageDev />;
 }
 
@@ -691,7 +708,7 @@ function FeaturedCollectionVibeList({
             Array.from({ length: 3 }).map((_, index) => (
               <VibeCard
                 key={`skeleton-${index}`}
-                variant="list"
+                variant="compact"
                 loading={true}
               />
             ))
@@ -704,7 +721,7 @@ function FeaturedCollectionVibeList({
               <VibeCard
                 key={vibe.id}
                 vibe={vibe}
-                variant="list"
+                variant="compact"
                 ratingDisplayMode={collection.ratingDisplayMode || 'most-rated'}
               />
             ))

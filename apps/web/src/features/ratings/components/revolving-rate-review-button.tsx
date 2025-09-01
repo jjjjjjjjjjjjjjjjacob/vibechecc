@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import { RateAndReviewDialog } from './rate-and-review-dialog';
-import type { EmojiRating, EmojiRatingMetadata, CurrentUserRating } from '@vibechecc/types';
+import type {
+  EmojiRating,
+  EmojiRatingMetadata,
+  CurrentUserRating,
+} from '@vibechecc/types';
 
 interface RevolvingRateReviewButtonProps {
   vibeId: string;
@@ -42,8 +46,12 @@ export function RevolvingRateReviewButton({
   const [currentEmojiIndex, setCurrentEmojiIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);
   const [showDialog, setShowDialog] = React.useState(false);
-  const [preSelectedEmoji, setPreSelectedEmoji] = React.useState<string | undefined>();
-  const [preSelectedValue, setPreSelectedValue] = React.useState<number | undefined>();
+  const [preSelectedEmoji, setPreSelectedEmoji] = React.useState<
+    string | undefined
+  >();
+  const [preSelectedValue, setPreSelectedValue] = React.useState<
+    number | undefined
+  >();
 
   // Create emoji options for cycling animation
   const emojiOptions = React.useMemo(() => {

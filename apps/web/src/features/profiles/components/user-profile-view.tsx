@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { Id } from '@vibechecc/convex/dataModel';
 import {
   Card,
   CardContent,
@@ -22,7 +23,14 @@ import {
   Instagram,
 } from '@/components/ui/icons';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ReviewCard } from '@/features/ratings/components/review-card';
+import {
+  TabsDraggable,
+  TabsDraggableContent,
+  TabsDraggableList,
+  TabsDraggableTrigger,
+  TabsDraggableContentContainer,
+} from '@/components/ui/tabs-draggable';
 import { Button } from '@/components/ui/button';
 import {
   useThemeStore,
@@ -38,6 +46,11 @@ import {
   FollowersModal,
   FollowingModal,
 } from '@/features/follows/components';
+import {
+  useBulkRatingVoteScores,
+  useBulkUserRatingVoteStatuses,
+} from '@/queries';
+import type { UnifiedEmojiRatingHandler } from '@/features/ratings/components/emoji-reaction';
 
 interface UserProfileViewProps {
   user: {
@@ -140,6 +153,45 @@ export function UserProfileView({
   const profileContainerRef = React.useRef<HTMLDivElement>(null);
   const { user: clerkUser } = useUser();
 
+  // Debug logging for UserProfileView data
+  React.useEffect(() => {
+    console.log('[UserProfileView] Component data:', {
+      user: {
+        id: user?._id || user?.id,
+        externalId: user?.externalId,
+        username: user?.username,
+        hasUser: !!user,
+      },
+      userVibes: {
+        count: userVibes?.length || 0,
+        isLoading: vibesLoading,
+        hasData: !!userVibes,
+        firstFew:
+          userVibes?.slice(0, 3).map((v) => ({ id: v.id, title: v.title })) ||
+          [],
+      },
+      userRatings: {
+        count: userRatings?.length || 0,
+        isLoading: ratingsLoading,
+        hasData: !!userRatings,
+        isDefined: userRatings !== undefined,
+      },
+      receivedRatings: {
+        count: receivedRatings?.length || 0,
+        isLoading: receivedRatingsLoading,
+        hasData: !!receivedRatings,
+      },
+    });
+  }, [
+    user,
+    userVibes,
+    vibesLoading,
+    userRatings,
+    ratingsLoading,
+    receivedRatings,
+    receivedRatingsLoading,
+  ]);
+
   // Modal states for follow system
   const [isFollowersModalOpen, setIsFollowersModalOpen] = React.useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = React.useState(false);
@@ -166,6 +218,24 @@ export function UserProfileView({
   const isOwnProfile = currentUserId
     ? currentUserId === user.externalId
     : clerkUser?.id === user.externalId;
+
+  // Get rating IDs for vote data
+  const ratingIds = React.useMemo(() => {
+    const allRatings = [...(userRatings || []), ...(receivedRatings || [])];
+    return allRatings
+      .filter((r) => r && r._id)
+      .map((r) => r!._id as Id<'ratings'>);
+  }, [userRatings, receivedRatings]);
+
+  // Fetch vote scores and statuses
+  const { data: voteScores } = useBulkRatingVoteScores(ratingIds);
+  const { data: voteStatuses } = useBulkUserRatingVoteStatuses(ratingIds);
+
+  // Handle unified emoji rating
+  const handleUnifiedEmojiRating: UnifiedEmojiRatingHandler = async (data) => {
+    // In profile view, we don't allow rating - this is just for display
+    return Promise.resolve();
+  };
 
   // Get user's theme colors
   const userTheme = React.useMemo(
@@ -406,480 +476,350 @@ export function UserProfileView({
           </div>
 
           {/* Modern Navigation */}
-          <Tabs defaultValue="vibes" className="w-full">
+          <TabsDraggable defaultValue="vibes" className="w-full">
             <div className="mt-12 mb-8 flex justify-center">
-              <TabsList className="gap-1 rounded-lg border-0 bg-transparent p-1.5 shadow-2xl backdrop-blur-md">
-                <TabsTrigger
+              <TabsDraggableList 
+                className="gap-1 rounded-lg border-0 bg-transparent p-1.5 shadow-2xl backdrop-blur-md"
+                indicatorClassName="from-theme-primary to-theme-secondary bg-gradient-to-r shadow-lg"
+              >
+                <TabsDraggableTrigger
                   value="vibes"
-                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
+                  icon={<Heart className="h-4 w-4" />}
+                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:data-[dragging=false]:data-[transitioning=false]:bg-gradient-to-r data-[state=active]:data-[dragging=false]:data-[transitioning=false]:shadow-lg"
                 >
-                  <Heart className="h-4 w-4" />
                   vibes
-                </TabsTrigger>
+                </TabsDraggableTrigger>
                 {userRatings !== undefined && (
-                  <TabsTrigger
+                  <TabsDraggableTrigger
                     value="reviews"
-                    className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
+                    icon={<Star className="h-4 w-4" />}
+                    className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:data-[dragging=false]:data-[transitioning=false]:bg-gradient-to-r data-[state=active]:data-[dragging=false]:data-[transitioning=false]:shadow-lg"
                   >
-                    <Star className="h-4 w-4" />
                     reviews
-                  </TabsTrigger>
+                  </TabsDraggableTrigger>
                 )}
-                <TabsTrigger
+                <TabsDraggableTrigger
                   value="about"
-                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md !border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-lg"
+                  icon={<Sparkles className="h-4 w-4" />}
+                  className="data-[state=active]:from-theme-primary data-[state=active]:to-theme-secondary hover:bg-foreground/10 data-[state=active]:text-primary-foreground w-28 rounded-md !border-0 px-5 py-3 font-medium lowercase transition-all duration-200 data-[state=active]:data-[dragging=false]:data-[transitioning=false]:bg-gradient-to-r data-[state=active]:data-[dragging=false]:data-[transitioning=false]:shadow-lg"
                 >
-                  <Sparkles className="h-4 w-4" />
                   about
-                </TabsTrigger>
-              </TabsList>
+                </TabsDraggableTrigger>
+              </TabsDraggableList>
             </div>
 
-            {/* Vibes Tab */}
-            <TabsContent value="vibes" className="mt-8 space-y-0">
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h2
-                    className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
-                  >
-                    created vibes
-                  </h2>
-                  <p className="text-muted-foreground/80 text-base">
-                    {vibeCount}{' '}
-                    {vibeCount === 1 ? 'unique vibe' : 'unique vibes'} shared
-                    with the community
-                  </p>
-                </div>
-
-                <div>
-                  <MasonryFeed
-                    vibes={userVibes || []}
-                    isLoading={vibesLoading}
-                    variant="category"
-                    ratingDisplayMode="most-rated"
-                    showLoadMoreTarget={false}
-                    emptyStateTitle="no vibes yet"
-                    emptyStateDescription={`${user.username} hasn't created any vibes yet. check back later for amazing content ✨`}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Reviews Tab */}
-            {userRatings !== undefined && (
-              <TabsContent value="reviews" className="mt-8 space-y-0">
+            {/* Tab Content Container */}
+            <TabsDraggableContentContainer className="mt-8">
+              {/* Vibes Tab */}
+              <TabsDraggableContent value="vibes" className="space-y-0">
                 <div className="space-y-8">
                   <div className="text-center">
                     <h2
                       className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
                     >
-                      review activity
+                      created vibes
                     </h2>
                     <p className="text-muted-foreground/80 text-base">
-                      community feedback and ratings
+                      {vibeCount}{' '}
+                      {vibeCount === 1 ? 'unique vibe' : 'unique vibes'} shared
+                      with the community
                     </p>
                   </div>
 
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    {/* Reviews Given */}
-                    <Card
-                      className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
-                    >
-                      <CardHeader className="pb-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`from-theme-primary to-theme-secondary rounded-lg bg-gradient-to-r p-2`}
-                          >
-                            <TrendingUp className="text-primary-foreground h-4 w-4" />
-                          </div>
-                          <div>
-                            <CardTitle
-                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase`}
-                            >
-                              reviews given
-                            </CardTitle>
-                            <CardDescription className="text-muted-foreground/80 text-sm">
-                              {givenRatingsCount} thoughtful{' '}
-                              {givenRatingsCount === 1 ? 'review' : 'reviews'}
-                            </CardDescription>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        {ratingsLoading ? (
-                          <div className="space-y-4">
-                            {[...Array(3)].map((_, i) => (
-                              <div key={i} className="flex items-start gap-3">
-                                <Skeleton className="h-12 w-12 rounded" />
-                                <div className="flex-1 space-y-2">
-                                  <Skeleton className="h-4 w-full" />
-                                  <Skeleton className="h-4 w-3/4" />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : userRatings && userRatings.length > 0 ? (
-                          <div className="space-y-4">
-                            {userRatings.slice(0, 5).map((rating, index) => (
-                              <div
-                                key={
-                                  rating?._id ||
-                                  `rating-${rating?.vibeId}-${rating?.userId}-${index}`
-                                }
-                                className="border-border bg-card/60 rounded-lg border p-4"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <img
-                                    src={rating?.vibe?.image || ''}
-                                    alt={rating?.vibe?.title || ''}
-                                    className="h-12 w-12 rounded-lg object-cover"
-                                  />
-                                  <div className="flex-1">
-                                    <div className="mb-1 flex items-center gap-2">
-                                      <h4 className="text-sm font-medium">
-                                        {rating?.vibe?.title || 'Unknown'}
-                                      </h4>
-                                      {rating?.emoji ? (
-                                        <EmojiRatingDisplay
-                                          rating={{
-                                            emoji: rating.emoji,
-                                            value: rating.value || 0,
-                                            count: 1,
-                                          }}
-                                          showScale={false}
-                                        />
-                                      ) : (
-                                        <div className="flex items-center gap-1">
-                                          {[...Array(5)].map((_, i) => (
-                                            <Star
-                                              key={i}
-                                              className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400' : 'text-muted-foreground'}`}
-                                            />
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                    {rating?.review && (
-                                      <p className="text-muted-foreground text-sm">
-                                        {rating.review}
-                                      </p>
-                                    )}
-                                    <p className="text-muted-foreground mt-1 text-xs">
-                                      {rating?.createdAt
-                                        ? new Date(
-                                            rating.createdAt
-                                          ).toLocaleDateString()
-                                        : ''}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                            {userRatings.length > 5 && (
-                              <p className="text-muted-foreground text-center text-sm">
-                                and {userRatings.length - 5} more reviews...
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="py-8 text-center">
-                            <div className="mb-4 text-4xl opacity-50">💭</div>
-                            <p className="text-muted-foreground/80">
-                              no reviews given yet
-                            </p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                  <div>
+                    <MasonryFeed
+                      vibes={userVibes || []}
+                      isLoading={vibesLoading}
+                      variant="category"
+                      ratingDisplayMode="most-rated"
+                      showLoadMoreTarget={false}
+                      emptyStateTitle="no vibes yet"
+                      emptyStateDescription={`${user.username} hasn't created any vibes yet. check back later for amazing content ✨`}
+                    />
+                  </div>
+                </div>
+              </TabsDraggableContent>
 
-                    {/* Reviews Received */}
-                    <Card
-                      className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
-                    >
-                      <CardHeader className="pb-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`from-theme-primary to-theme-secondary rounded-lg bg-gradient-to-r p-2`}
-                          >
-                            <Star className="text-primary-foreground h-4 w-4" />
-                          </div>
-                          <div>
-                            <CardTitle
-                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase`}
+              {/* Reviews Tab */}
+              {userRatings !== undefined && (
+                <TabsDraggableContent value="reviews" className="space-y-0">
+                  <div className="space-y-8">
+                    <div className="text-center">
+                      <h2
+                        className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
+                      >
+                        review activity
+                      </h2>
+                      <p className="text-muted-foreground/80 text-base">
+                        community feedback and ratings
+                      </p>
+                    </div>
+
+                    <div className="grid gap-6 lg:grid-cols-2">
+                      {/* Reviews Given */}
+                      <Card
+                        className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
+                      >
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`from-theme-primary to-theme-secondary rounded-lg bg-gradient-to-r p-2`}
                             >
-                              reviews received
-                            </CardTitle>
-                            <CardDescription className="text-muted-foreground/80 text-sm">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>
-                                  {receivedRatingsCount} community{' '}
-                                  {receivedRatingsCount === 1
-                                    ? 'review'
-                                    : 'reviews'}
-                                </span>
-                                {averageReceivedRating > 0 && (
-                                  <span className="inline-flex items-center gap-1 rounded-full border border-yellow-400/30 bg-yellow-400/20 px-2 py-1 text-xs font-medium">
-                                    <Star className="h-3 w-3 fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400" />
-                                    <span className="text-yellow-600 dark:text-yellow-400">
-                                      {averageReceivedRating.toFixed(1)} avg
-                                    </span>
-                                  </span>
-                                )}
-                              </div>
-                            </CardDescription>
+                              <TrendingUp className="text-primary-foreground h-4 w-4" />
+                            </div>
+                            <div>
+                              <CardTitle
+                                className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase`}
+                              >
+                                reviews given
+                              </CardTitle>
+                              <CardDescription className="text-muted-foreground/80 text-sm">
+                                {givenRatingsCount} thoughtful{' '}
+                                {givenRatingsCount === 1 ? 'review' : 'reviews'}
+                              </CardDescription>
+                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        {receivedRatingsLoading ? (
-                          <div className="space-y-4">
-                            {[...Array(3)].map((_, i) => (
-                              <div key={i} className="flex items-start gap-3">
-                                <Skeleton className="h-8 w-8 rounded-full" />
-                                <div className="flex-1 space-y-2">
-                                  <Skeleton className="h-4 w-full" />
-                                  <Skeleton className="h-4 w-3/4" />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : receivedRatings && receivedRatings.length > 0 ? (
-                          <div className="space-y-4">
-                            {receivedRatings
-                              .slice(0, 5)
-                              .map((rating, index) => (
-                                <div
-                                  key={
-                                    rating?._id ||
-                                    `received-rating-${rating?.vibeId}-${rating?.userId}-${index}`
-                                  }
-                                  className="border-border bg-card/60 rounded-lg border p-4"
-                                >
-                                  <div className="flex items-start gap-3">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarImage
-                                        src={rating.rater?.image_url}
-                                      />
-                                      <AvatarFallback>
-                                        {rating.rater?.username?.[0] || '?'}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1">
-                                      <div className="mb-1 flex items-center gap-2">
-                                        <span className="text-sm font-medium">
-                                          {rating.rater?.username || 'Unknown'}
-                                        </span>
-                                        {rating?.emoji ? (
-                                          <EmojiRatingDisplay
-                                            rating={{
-                                              emoji: rating.emoji,
-                                              value: rating.value || 0,
-                                              count: 1,
-                                            }}
-                                            showScale={false}
-                                          />
-                                        ) : (
-                                          <div className="flex items-center gap-1">
-                                            {[...Array(5)].map((_, i) => (
-                                              <Star
-                                                key={i}
-                                                className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400' : 'text-muted-foreground'}`}
-                                              />
-                                            ))}
-                                          </div>
-                                        )}
-                                      </div>
-                                      <p className="text-muted-foreground mb-1 text-sm">
-                                        on "
-                                        {(
-                                          rating as {
-                                            vibe?: { title?: string };
-                                          }
-                                        ).vibe?.title || 'Unknown'}
-                                        "
-                                      </p>
-                                      {rating?.review && (
-                                        <p className="text-muted-foreground text-sm">
-                                          {rating.review}
-                                        </p>
-                                      )}
-                                      <p className="text-muted-foreground mt-1 text-xs">
-                                        {rating?.createdAt
-                                          ? new Date(
-                                              rating.createdAt
-                                            ).toLocaleDateString()
-                                          : ''}
-                                      </p>
-                                    </div>
+                        </CardHeader>
+                        <CardContent>
+                          {ratingsLoading ? (
+                            <div className="space-y-4">
+                              {[...Array(3)].map((_, i) => (
+                                <div key={i} className="flex items-start gap-3">
+                                  <Skeleton className="h-12 w-12 rounded" />
+                                  <div className="flex-1 space-y-2">
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-3/4" />
                                   </div>
                                 </div>
                               ))}
-                            {receivedRatings.length > 5 && (
-                              <p className="text-muted-foreground text-center text-sm">
-                                and {receivedRatings.length - 5} more reviews...
+                            </div>
+                          ) : userRatings && userRatings.length > 0 ? (
+                            <div className="space-y-3">
+                              {userRatings.slice(0, 5).map((rating, index) => {
+                                if (!rating) return null;
+                                return (
+                                  <ReviewCard
+                                    key={
+                                      rating._id ||
+                                      `rating-${rating.vibeId}-${rating.userId}-${index}`
+                                    }
+                                    rating={{
+                                      ...rating,
+                                      user: user,
+                                    }}
+                                    vibe={{
+                                      id: rating.vibeId,
+                                      title: rating.vibe?.title || 'Unknown',
+                                      currentUserRatings: [],
+                                    }}
+                                    currentUserId={currentUserId}
+                                    voteScore={
+                                      voteScores?.[rating._id || ''] ||
+                                      undefined
+                                    }
+                                    voteStatus={
+                                      voteStatuses?.[rating._id || ''] ||
+                                      undefined
+                                    }
+                                    onEmojiClick={handleUnifiedEmojiRating}
+                                    emojiMetadata={{}}
+                                    isOwnRating={true}
+                                    showActions={true}
+                                  />
+                                );
+                              })}
+                              {userRatings.length > 5 && (
+                                <p className="text-muted-foreground text-center text-sm">
+                                  and {userRatings.length - 5} more reviews...
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="py-8 text-center">
+                              <div className="mb-4 text-4xl opacity-50">💭</div>
+                              <p className="text-muted-foreground/80">
+                                no reviews given yet
                               </p>
-                            )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      {/* Reviews Received */}
+                      <Card
+                        className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
+                      >
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`from-theme-primary to-theme-secondary rounded-lg bg-gradient-to-r p-2`}
+                            >
+                              <Star className="text-primary-foreground h-4 w-4" />
+                            </div>
+                            <div>
+                              <CardTitle
+                                className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase`}
+                              >
+                                reviews received
+                              </CardTitle>
+                              <CardDescription className="text-muted-foreground/80 text-sm">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span>
+                                    {receivedRatingsCount} community{' '}
+                                    {receivedRatingsCount === 1
+                                      ? 'review'
+                                      : 'reviews'}
+                                  </span>
+                                  {averageReceivedRating > 0 && (
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-yellow-400/30 bg-yellow-400/20 px-2 py-1 text-xs font-medium">
+                                      <Star className="h-3 w-3 fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400" />
+                                      <span className="text-yellow-600 dark:text-yellow-400">
+                                        {averageReceivedRating.toFixed(1)} avg
+                                      </span>
+                                    </span>
+                                  )}
+                                </div>
+                              </CardDescription>
+                            </div>
                           </div>
-                        ) : (
-                          <div className="py-8 text-center">
-                            <div className="mb-4 text-4xl opacity-50">⭐</div>
-                            <p className="text-muted-foreground/80">
-                              no reviews received yet
+                        </CardHeader>
+                        <CardContent>
+                          {receivedRatingsLoading ? (
+                            <div className="space-y-4">
+                              {[...Array(3)].map((_, i) => (
+                                <div key={i} className="flex items-start gap-3">
+                                  <Skeleton className="h-8 w-8 rounded-full" />
+                                  <div className="flex-1 space-y-2">
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-3/4" />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : receivedRatings && receivedRatings.length > 0 ? (
+                            <div className="space-y-3">
+                              {receivedRatings
+                                .slice(0, 5)
+                                .map((rating, index) => {
+                                  if (!rating) return null;
+                                  return (
+                                    <ReviewCard
+                                      key={
+                                        rating._id ||
+                                        `received-rating-${rating.vibeId}-${rating.userId}-${index}`
+                                      }
+                                      rating={rating}
+                                      vibe={{
+                                        id: rating.vibeId,
+                                        title:
+                                          (rating as any).vibe?.title ||
+                                          'Unknown',
+                                        currentUserRatings: [],
+                                      }}
+                                      currentUserId={currentUserId}
+                                      voteScore={
+                                        voteScores?.[rating._id || ''] ||
+                                        undefined
+                                      }
+                                      voteStatus={
+                                        voteStatuses?.[rating._id || ''] ||
+                                        undefined
+                                      }
+                                      onEmojiClick={handleUnifiedEmojiRating}
+                                      emojiMetadata={{}}
+                                      isOwnRating={false}
+                                      showActions={true}
+                                    />
+                                  );
+                                })}
+                              {receivedRatings.length > 5 && (
+                                <p className="text-muted-foreground text-center text-sm">
+                                  and {receivedRatings.length - 5} more
+                                  reviews...
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="py-8 text-center">
+                              <div className="mb-4 text-4xl opacity-50">⭐</div>
+                              <p className="text-muted-foreground/80">
+                                no reviews received yet
+                              </p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                </TabsDraggableContent>
+              )}
+
+              {/* About Tab */}
+              <TabsDraggableContent value="about" className="space-y-0">
+                <div className="space-y-8">
+                  <div className="text-center">
+                    <h2
+                      className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
+                    >
+                      about {displayName.toLowerCase()}
+                    </h2>
+                    <p className="text-muted-foreground/80 text-base">
+                      community presence and personality insights
+                    </p>
+                  </div>
+
+                  <div className="grid gap-6 lg:grid-cols-3">
+                    {/* Profile Details */}
+                    <Card
+                      className={`bg-background/60 border-theme-primary/20 shadow-xl backdrop-blur-md`}
+                    >
+                      <CardContent className="space-y-6 p-6">
+                        {user.bio && (
+                          <div>
+                            <h3
+                              className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                            >
+                              bio
+                            </h3>
+                            <p className="text-muted-foreground leading-relaxed">
+                              {user.bio}
                             </p>
                           </div>
                         )}
+
+                        {user.interests && user.interests.length > 0 && (
+                          <div>
+                            <h3
+                              className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                            >
+                              interests
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                              {user.interests.map((interest) => (
+                                <Badge
+                                  key={interest}
+                                  variant="secondary"
+                                  className="themed-pills text-foreground"
+                                >
+                                  {interest}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div>
+                          <h3
+                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                          >
+                            member since
+                          </h3>
+                          <p className="text-muted-foreground">{joinDate}</p>
+                        </div>
                       </CardContent>
                     </Card>
-                  </div>
-                </div>
-              </TabsContent>
-            )}
 
-            {/* About Tab */}
-            <TabsContent value="about" className="mt-8 space-y-0">
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h2
-                    className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
-                  >
-                    about {displayName.toLowerCase()}
-                  </h2>
-                  <p className="text-muted-foreground/80 text-base">
-                    community presence and personality insights
-                  </p>
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-3">
-                  {/* Profile Details */}
-                  <Card
-                    className={`bg-background/60 border-theme-primary/20 shadow-xl backdrop-blur-md`}
-                  >
-                    <CardContent className="space-y-6 p-6">
-                      {user.bio && (
-                        <div>
-                          <h3
-                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
-                          >
-                            bio
-                          </h3>
-                          <p className="text-muted-foreground leading-relaxed">
-                            {user.bio}
-                          </p>
-                        </div>
-                      )}
-
-                      {user.interests && user.interests.length > 0 && (
-                        <div>
-                          <h3
-                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
-                          >
-                            interests
-                          </h3>
-                          <div className="flex flex-wrap gap-2">
-                            {user.interests.map((interest) => (
-                              <Badge
-                                key={interest}
-                                variant="secondary"
-                                className="themed-pills text-foreground"
-                              >
-                                {interest}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div>
-                        <h3
-                          className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
-                        >
-                          member since
-                        </h3>
-                        <p className="text-muted-foreground">{joinDate}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Community Stats */}
-                  <Card
-                    className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
-                  >
-                    <CardContent className="p-6">
-                      <h3
-                        className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
-                      >
-                        community impact
-                      </h3>
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="text-center">
-                          <div
-                            className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
-                          >
-                            <p
-                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
-                            >
-                              {vibeCount}
-                            </p>
-                            <p className="text-muted-foreground mt-1 text-sm lowercase">
-                              vibes created
-                            </p>
-                          </div>
-                        </div>
-                        {userRatings !== undefined && (
-                          <div className="text-center">
-                            <div
-                              className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
-                            >
-                              <p
-                                className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
-                              >
-                                {givenRatingsCount}
-                              </p>
-                              <p className="text-muted-foreground mt-1 text-sm lowercase">
-                                reviews given
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        <div className="text-center">
-                          <div
-                            className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
-                          >
-                            <p
-                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
-                            >
-                              {receivedRatingsCount}
-                            </p>
-                            <p className="text-muted-foreground mt-1 text-sm lowercase">
-                              reviews received
-                            </p>
-                          </div>
-                        </div>
-                        {averageReceivedRating > 0 && (
-                          <div className="text-center">
-                            <div
-                              className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
-                            >
-                              <div className="flex items-center justify-center gap-1 text-2xl font-bold">
-                                <Star className="h-5 w-5 fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400" />
-                                <span
-                                  className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-transparent`}
-                                >
-                                  {averageReceivedRating.toFixed(1)}
-                                </span>
-                              </div>
-                              <p className="text-muted-foreground mt-1 text-sm lowercase">
-                                average rating
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Emoji Personality */}
-                  {emojiStats && emojiStats.totalEmojiRatings > 0 && (
+                    {/* Community Stats */}
                     <Card
                       className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
                     >
@@ -887,65 +827,145 @@ export function UserProfileView({
                         <h3
                           className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
                         >
-                          emoji personality
+                          community impact
                         </h3>
-                        <div className="space-y-4">
-                          {emojiStats.mostUsedEmoji && (
-                            <div className="text-center">
-                              <p className="text-muted-foreground mb-2 text-xs lowercase">
-                                signature emoji
-                              </p>
-                              <div
-                                className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-4`}
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="text-center">
+                            <div
+                              className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
+                            >
+                              <p
+                                className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
                               >
-                                <span className="mb-2 block text-3xl">
-                                  {emojiStats.mostUsedEmoji.emoji}
-                                </span>
-                                <p className="text-xs font-medium">
-                                  used {emojiStats.mostUsedEmoji.count} times
+                                {vibeCount}
+                              </p>
+                              <p className="text-muted-foreground mt-1 text-sm lowercase">
+                                vibes created
+                              </p>
+                            </div>
+                          </div>
+                          {userRatings !== undefined && (
+                            <div className="text-center">
+                              <div
+                                className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
+                              >
+                                <p
+                                  className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
+                                >
+                                  {givenRatingsCount}
                                 </p>
-                                <p className="text-muted-foreground text-xs">
-                                  {emojiStats.mostUsedEmoji.averageValue.toFixed(
-                                    1
-                                  )}
-                                  /5 average
+                                <p className="text-muted-foreground mt-1 text-sm lowercase">
+                                  reviews given
                                 </p>
                               </div>
                             </div>
                           )}
-
-                          {emojiStats.topEmojis.length > 0 && (
-                            <div>
-                              <p className="text-muted-foreground mb-2 text-center text-xs lowercase">
-                                emoji collection
+                          <div className="text-center">
+                            <div
+                              className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
+                            >
+                              <p
+                                className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent`}
+                              >
+                                {receivedRatingsCount}
                               </p>
-                              <div className="flex flex-wrap justify-center gap-2">
-                                {emojiStats.topEmojis
-                                  .slice(0, 6)
-                                  .map((stat) => (
-                                    <div
-                                      key={stat.emoji}
-                                      className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border flex items-center gap-1 rounded-full border bg-gradient-to-r px-2 py-1`}
-                                    >
-                                      <span className="text-sm">
-                                        {stat.emoji}
-                                      </span>
-                                      <span className="text-muted-foreground text-xs font-medium">
-                                        {stat.count}
-                                      </span>
-                                    </div>
-                                  ))}
+                              <p className="text-muted-foreground mt-1 text-sm lowercase">
+                                reviews received
+                              </p>
+                            </div>
+                          </div>
+                          {averageReceivedRating > 0 && (
+                            <div className="text-center">
+                              <div
+                                className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
+                              >
+                                <div className="flex items-center justify-center gap-1 text-2xl font-bold">
+                                  <Star className="h-5 w-5 fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400" />
+                                  <span
+                                    className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-transparent`}
+                                  >
+                                    {averageReceivedRating.toFixed(1)}
+                                  </span>
+                                </div>
+                                <p className="text-muted-foreground mt-1 text-sm lowercase">
+                                  average rating
+                                </p>
                               </div>
                             </div>
                           )}
                         </div>
                       </CardContent>
                     </Card>
-                  )}
+
+                    {/* Emoji Personality */}
+                    {emojiStats && emojiStats.totalEmojiRatings > 0 && (
+                      <Card
+                        className={`bg-background/80 border-theme-primary/20 shadow-xl backdrop-blur-md`}
+                      >
+                        <CardContent className="p-6">
+                          <h3
+                            className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                          >
+                            emoji personality
+                          </h3>
+                          <div className="space-y-4">
+                            {emojiStats.mostUsedEmoji && (
+                              <div className="text-center">
+                                <p className="text-muted-foreground mb-2 text-xs lowercase">
+                                  signature emoji
+                                </p>
+                                <div
+                                  className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-4`}
+                                >
+                                  <span className="mb-2 block text-3xl">
+                                    {emojiStats.mostUsedEmoji.emoji}
+                                  </span>
+                                  <p className="text-xs font-medium">
+                                    used {emojiStats.mostUsedEmoji.count} times
+                                  </p>
+                                  <p className="text-muted-foreground text-xs">
+                                    {emojiStats.mostUsedEmoji.averageValue.toFixed(
+                                      1
+                                    )}
+                                    /5 average
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {emojiStats.topEmojis.length > 0 && (
+                              <div>
+                                <p className="text-muted-foreground mb-2 text-center text-xs lowercase">
+                                  emoji collection
+                                </p>
+                                <div className="flex flex-wrap justify-center gap-2">
+                                  {emojiStats.topEmojis
+                                    .slice(0, 6)
+                                    .map((stat) => (
+                                      <div
+                                        key={stat.emoji}
+                                        className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border flex items-center gap-1 rounded-full border bg-gradient-to-r px-2 py-1`}
+                                      >
+                                        <span className="text-sm">
+                                          {stat.emoji}
+                                        </span>
+                                        <span className="text-muted-foreground text-xs font-medium">
+                                          {stat.count}
+                                        </span>
+                                      </div>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+              </TabsDraggableContent>
+            </TabsDraggableContentContainer>
+          </TabsDraggable>
         </div>
       </div>
 

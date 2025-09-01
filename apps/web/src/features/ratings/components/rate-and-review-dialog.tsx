@@ -730,6 +730,7 @@ export function RateAndReviewDialog({
                         }, 250);
                       }}
                       mobileSlider={true}
+                      maintainValueOnLeave={true}
                       className="w-full"
                     />
                   </div>

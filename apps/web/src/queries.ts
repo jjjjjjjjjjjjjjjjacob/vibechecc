@@ -671,6 +671,17 @@ export function useUserVibeRatings(
   });
 }
 
+// Query to get ALL ratings for a specific vibe
+export function useAllRatingsForVibe(
+  vibeId: string,
+  options?: { enabled?: boolean }
+) {
+  return useQuery({
+    ...convexQuery(api.emojiRatings.getAllRatingsForVibe, { vibeId }),
+    enabled: options?.enabled !== false && !!vibeId,
+  });
+}
+
 // Mutation to toggle boost on a rating
 export function useToggleRatingBoostMutation() {
   const convex = useConvex();

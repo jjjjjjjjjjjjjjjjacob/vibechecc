@@ -84,6 +84,45 @@ export const getUserVibeRatings = query({
   },
 });
 
+// Get ALL ratings for a vibe (for displaying all user ratings)
+export const getAllRatingsForVibe = query({
+  args: { vibeId: v.string() },
+  handler: async (ctx, args) => {
+    const ratings = await ctx.db
+      .query('ratings')
+      .withIndex('vibe', (q) => q.eq('vibeId', args.vibeId))
+      .collect();
+
+    // Get all users who rated this vibe in a single query
+    const userIds = [...new Set(ratings.map(r => r.userId))];
+    const users = await Promise.all(
+      userIds.map(async (userId) => {
+        const user = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) => q.eq('externalId', userId))
+          .first();
+        return user;
+      })
+    );
+
+    // Create a user map for efficient lookup
+    const userMap = new Map(users.filter(u => u).map(u => [u!.externalId, u]));
+
+    // Return ratings with user details
+    return ratings.map(rating => ({
+      _id: rating._id,
+      vibeId: rating.vibeId,
+      userId: rating.userId,
+      emoji: rating.emoji,
+      value: rating.value,
+      review: rating.review,
+      createdAt: rating.createdAt,
+      updatedAt: rating.updatedAt,
+      user: userMap.get(rating.userId) || null,
+    }));
+  },
+});
+
 // Create or update rating with emoji
 export const createOrUpdateEmojiRating = mutation({
   args: {
@@ -589,24 +628,70 @@ export const toggleRatingBoost = mutation({
       throw new Error('You cannot boost your own rating');
     }
 
-    // Get voter's points to check if they can afford the transfer
-    const voterPoints = await ctx.db
+    // Get or create voter's points
+    let voterPoints = await ctx.db
       .query('userPoints')
       .withIndex('byUserId', (q) => q.eq('userId', identity.subject))
       .first();
 
     if (!voterPoints) {
-      throw new Error('User points not found. Please try refreshing the page.');
+      // Initialize voter's user points inline
+      const today = new Date().toISOString().split('T')[0];
+      const starterPoints = 50;
+      const userPointsId = await ctx.db.insert('userPoints', {
+        userId: identity.subject,
+        totalPointsEarned: starterPoints,
+        currentBalance: starterPoints,
+        protectedPoints: 50, // MIN_PROTECTED_POINTS + extra protection
+        dailyEarnedPoints: 0,
+        dailyPostCount: 0,
+        dailyReviewCount: 0,
+        dailyDampenCount: 0,
+        lastResetDate: today,
+        level: 1,
+        multiplier: 1.0,
+        streakDays: 0,
+        lastActivityDate: today,
+        karmaScore: 0,
+      });
+      voterPoints = await ctx.db.get(userPointsId);
+      
+      if (!voterPoints) {
+        throw new Error('Failed to initialize user points');
+      }
     }
 
-    // Get rating author's points for level calculation
-    const authorPoints = await ctx.db
+    // Get or create rating author's points for level calculation
+    let authorPoints = await ctx.db
       .query('userPoints')
       .withIndex('byUserId', (q) => q.eq('userId', rating.userId))
       .first();
 
     if (!authorPoints) {
-      throw new Error('Rating author points not found.');
+      // Initialize author's user points inline
+      const today = new Date().toISOString().split('T')[0];
+      const starterPoints = 50;
+      const userPointsId = await ctx.db.insert('userPoints', {
+        userId: rating.userId,
+        totalPointsEarned: starterPoints,
+        currentBalance: starterPoints,
+        protectedPoints: 50, // MIN_PROTECTED_POINTS + extra protection
+        dailyEarnedPoints: 0,
+        dailyPostCount: 0,
+        dailyReviewCount: 0,
+        dailyDampenCount: 0,
+        lastResetDate: today,
+        level: 1,
+        multiplier: 1.0,
+        streakDays: 0,
+        lastActivityDate: today,
+        karmaScore: 0,
+      });
+      authorPoints = await ctx.db.get(userPointsId);
+      
+      if (!authorPoints) {
+        throw new Error('Failed to initialize rating author points');
+      }
     }
 
     // Calculate transfer amount based on levels

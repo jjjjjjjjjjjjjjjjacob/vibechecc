@@ -55,7 +55,7 @@ export {
   Save,
   PartyPopper,
   Rocket,
-  Share2,
+  Share,
 } from 'lucide-react';
 
 // Status and feedback icons

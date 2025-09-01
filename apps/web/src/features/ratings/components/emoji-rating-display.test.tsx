@@ -81,7 +81,14 @@ describe('EmojiRatingDisplay', () => {
   };
 
   it('renders compact mode without scale by default', () => {
-    render(<EmojiRatingDisplay rating={mockRating} vibeId="test-vibe-1" existingUserRatings={[]} emojiMetadata={{}} />);
+    render(
+      <EmojiRatingDisplay
+        rating={mockRating}
+        vibeId="test-vibe-1"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
+      />
+    );
 
     expect(screen.getByText('😍')).toBeInTheDocument();
     expect(screen.getByText(/3\.5/)).toBeInTheDocument();
@@ -89,7 +96,15 @@ describe('EmojiRatingDisplay', () => {
   });
 
   it('renders with scale when showScale is true', () => {
-    render(<EmojiRatingDisplay rating={mockRating} vibeId="test-vibe-1" variant="scale" existingUserRatings={[]} emojiMetadata={{}} />);
+    render(
+      <EmojiRatingDisplay
+        rating={mockRating}
+        vibeId="test-vibe-1"
+        variant="scale"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
+      />
+    );
 
     expect(screen.getByText(/3\.5/)).toBeInTheDocument();
     expect(screen.getByText('(10)')).toBeInTheDocument();
@@ -104,7 +119,14 @@ describe('EmojiRatingDisplay', () => {
       value: 5,
     };
 
-    render(<EmojiRatingDisplay rating={ratingWithoutCount} vibeId="test-vibe-1" existingUserRatings={[]} emojiMetadata={{}} />);
+    render(
+      <EmojiRatingDisplay
+        rating={ratingWithoutCount}
+        vibeId="test-vibe-1"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
+      />
+    );
 
     expect(screen.getByText('🔥')).toBeInTheDocument();
     expect(screen.getByText('5.0')).toBeInTheDocument();
@@ -118,7 +140,15 @@ describe('EmojiRatingDisplay', () => {
       count: 5,
     };
 
-    render(<EmojiRatingDisplay rating={wholeRating} vibeId="test-vibe-1" variant="scale" existingUserRatings={[]} emojiMetadata={{}} />);
+    render(
+      <EmojiRatingDisplay
+        rating={wholeRating}
+        vibeId="test-vibe-1"
+        variant="scale"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
+      />
+    );
 
     // Should render the rating value and scale correctly
     expect(screen.getByText(/4/)).toBeInTheDocument();
@@ -126,4 +156,3 @@ describe('EmojiRatingDisplay', () => {
     expect(screen.getByRole('button', { name: 'Rate' })).toBeInTheDocument();
   });
 });
-

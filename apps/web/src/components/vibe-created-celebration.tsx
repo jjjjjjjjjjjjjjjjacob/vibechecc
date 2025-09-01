@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/tabs-draggable';
 import {
   ArrowRight,
-  Share2,
+  Share,
   Trophy,
   Instagram,
   Twitter,
@@ -457,7 +457,7 @@ export function VibeCreatedCelebrationV2({
                   )}
                   style={{ transitionDelay: '500ms' }}
                 >
-                  <Share2 className="mr-2 h-4 w-4" />
+                  <Share className="mr-2 h-4 w-4" />
                   share vibe
                 </Button>
               </div>

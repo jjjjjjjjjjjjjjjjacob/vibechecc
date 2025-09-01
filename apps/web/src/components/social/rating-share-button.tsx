@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Share2 } from 'lucide-react';
+import { Share } from 'lucide-react';
 import { cn } from '@/utils/tailwind-utils';
 import { RatingShareModal } from './rating-share-modal';
 import type { Rating, Vibe } from '@vibechecc/types';
@@ -37,7 +37,7 @@ export function RatingShareButton({
         }}
         aria-label={`Share ${rating.emoji} ${rating.value}/5 rating`}
       >
-        <Share2 className="h-4 w-4" />
+        <Share className="h-4 w-4" />
         {showLabel && <span className="text-xs">share</span>}
       </Button>
 

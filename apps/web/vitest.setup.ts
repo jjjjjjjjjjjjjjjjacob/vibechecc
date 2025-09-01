@@ -72,7 +72,7 @@ vi.mock('lucide-react', () => {
     'SearchIcon',
     'Settings',
     'Settings2',
-    'Share2',
+    'Share',
     'Shield',
     'SlidersHorizontal',
     'Smartphone',

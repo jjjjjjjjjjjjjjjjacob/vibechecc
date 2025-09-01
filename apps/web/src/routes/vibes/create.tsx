@@ -123,6 +123,12 @@ function CreateVibe() {
         gradientFrom: gradient.from,
         gradientTo: gradient.to,
         gradientDirection: gradient.direction,
+        textContrastMode:
+          textColor === 'auto'
+            ? undefined
+            : textColor === 'white'
+              ? 'dark'
+              : 'light',
       });
 
       // Track vibe creation (result is the document ID)
@@ -197,11 +203,11 @@ function CreateVibe() {
         <div className="container mx-auto px-4 py-4 sm:py-8">
           <div className="mx-auto max-w-3xl">
             {/* Header with gradient text */}
-            <div className="my-6 text-center">
-              <h1 className="animate-gradient-text drop-shadow-theme-secondary/10 from-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-lg sm:text-4xl">
+            <div className="my-10 text-center">
+              <h1 className="animate-gradient-text drop-shadow-theme-secondary/10 from-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-4xl font-bold text-transparent lowercase drop-shadow-lg sm:text-5xl">
                 create a new vibe
               </h1>
-              <p className="text-muted-foreground mt-2 text-sm">
+              <p className="text-muted-foreground mt-3 text-base">
                 share your moment bc why not
               </p>
             </div>
@@ -212,12 +218,12 @@ function CreateVibe() {
               </div>
             )}
 
-            {/* Main form card - Reddit-like style */}
-            <div className="bg-background animate-in fade-in-0 slide-in-from-bottom-4 rounded-lg border p-4 shadow-sm duration-500">
-              <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Main form card - Modern style */}
+            <div className="bg-background/60 animate-in fade-in-0 slide-in-from-bottom-4 border-border/50 rounded-2xl border p-6 shadow-2xl ring-1 shadow-black/5 ring-white/5 backdrop-blur-xl duration-500 sm:p-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Tabbed Content for Details and Visuals */}
                 <TabsDraggable value={activeTab} onValueChange={setActiveTab}>
-                  <TabsDraggableList className="mb-4">
+                  <TabsDraggableList className="mb-6">
                     <TabsDraggableTrigger
                       icon={<BookText className="h-4 w-4" />}
                       value="details"
@@ -234,12 +240,12 @@ function CreateVibe() {
 
                   <TabsDraggableContentContainer>
                     <TabsDraggableContent value="details">
-                      <div className="w-full space-y-6">
+                      <div className="w-full space-y-8">
                         {/* Title Section */}
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           <Label
                             htmlFor="title"
-                            className="text-sm font-medium"
+                            className="text-foreground/90 text-sm font-medium"
                           >
                             title
                           </Label>
@@ -249,19 +255,21 @@ function CreateVibe() {
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="give your vibe a catchy title"
                             className={cn(
-                              'h-9 border bg-transparent text-sm transition-all',
-                              'focus:border-theme-primary focus:ring-theme-primary/20 focus:ring-1',
-                              title && 'border-theme-primary/50'
+                              'bg-background/50 h-12 rounded-xl border-2 text-base backdrop-blur-sm transition-all duration-200',
+                              'focus:border-theme-primary focus:ring-theme-primary/20 focus:bg-background/80 focus:ring-2',
+                              'hover:border-border/80 hover:bg-background/60',
+                              title &&
+                                'border-theme-primary/60 bg-background/80'
                             )}
                             required
                           />
                         </div>
 
                         {/* Description Section */}
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           <Label
                             htmlFor="description"
-                            className="text-sm font-medium"
+                            className="text-foreground/90 text-sm font-medium"
                           >
                             description
                           </Label>
@@ -272,20 +280,25 @@ function CreateVibe() {
                             placeholder="describe your vibe in detail..."
                             rows={4}
                             className={cn(
-                              'resize-none border bg-transparent text-sm transition-all',
-                              'focus:border-theme-primary focus:ring-theme-primary/20 focus:ring-1',
-                              description && 'border-theme-primary/50'
+                              'bg-background/50 resize-none rounded-xl border-2 text-base backdrop-blur-sm transition-all duration-200',
+                              'focus:border-theme-primary focus:ring-theme-primary/20 focus:bg-background/80 focus:ring-2',
+                              'hover:border-border/80 hover:bg-background/60',
+                              description &&
+                                'border-theme-primary/60 bg-background/80'
                             )}
                             required
                           />
-                          <div className="text-muted-foreground flex items-center justify-between text-xs">
+                          <div className="text-muted-foreground flex items-center justify-between text-sm">
                             <span>{description.length} characters</span>
                           </div>
                         </div>
 
                         {/* Tags Section */}
-                        <div className="space-y-3">
-                          <Label htmlFor="tags" className="text-sm font-medium">
+                        <div className="space-y-4">
+                          <Label
+                            htmlFor="tags"
+                            className="text-foreground/90 text-sm font-medium"
+                          >
                             tags
                           </Label>
                           <TagInput
@@ -298,7 +311,7 @@ function CreateVibe() {
                     </TabsDraggableContent>
 
                     <TabsDraggableContent value="visuals">
-                      <div className="w-full space-y-6">
+                      <div className="w-full space-y-8">
                         {/* Image Upload Section */}
                         <ImageUpload
                           onImageUpload={handleImageUpload}
@@ -308,13 +321,13 @@ function CreateVibe() {
 
                         {/* Gradient Section - Only show if no image */}
                         {!imageStorageId && (
-                          <div className="space-y-3">
-                            <Label className="text-sm font-medium">
+                          <div className="space-y-4">
+                            <Label className="text-foreground/90 text-sm font-medium">
                               gradient
                             </Label>
 
                             {/* Preview with Advanced Controls Accordion */}
-                            <div className="relative h-48 w-full overflow-hidden rounded-2xl border-2 sm:h-56">
+                            <div className="border-border/50 relative h-48 w-full overflow-hidden rounded-2xl border-2 shadow-lg sm:h-56">
                               <SimpleVibePlaceholder
                                 title={title || 'your vibe'}
                                 gradientFrom={gradient.from}
@@ -657,8 +670,8 @@ function CreateVibe() {
                             <div className="space-y-3">
                               {/* Recently Used - Show if there are any */}
                               {recentGradients.length > 0 && (
-                                <div>
-                                  <Label className="text-muted-foreground mb-2 block text-xs font-medium">
+                                <div className="rounded-xl">
+                                  <Label className="text-muted-foreground mb-3 block text-sm font-medium">
                                     recently used
                                   </Label>
                                   <div className="flex gap-1 overflow-x-auto pb-2">
@@ -702,8 +715,8 @@ function CreateVibe() {
                               )}
 
                               {/* Gradient Presets */}
-                              <div>
-                                <Label className="text-muted-foreground mb-2 block text-xs font-medium">
+                              <div className="rounded-xl">
+                                <Label className="text-muted-foreground mb-3 block text-sm font-medium">
                                   presets
                                 </Label>
                                 <div className="grid grid-cols-8 gap-1">
@@ -770,13 +783,13 @@ function CreateVibe() {
                 </TabsDraggable>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 border-t pt-6">
+                <div className="border-border/50 flex gap-4 border-t pt-8">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => navigate({ to: '/' })}
                     disabled={isSubmitting}
-                    className="h-11 flex-1 transition-all hover:scale-105 sm:h-12"
+                    className="hover:border-border/80 h-12 flex-1 rounded-xl border-2 font-medium transition-all duration-200 hover:scale-[1.02] sm:h-14"
                   >
                     cancel
                   </Button>
@@ -786,11 +799,11 @@ function CreateVibe() {
                       isSubmitting || !title.trim() || !description.trim()
                     }
                     className={cn(
-                      'h-11 flex-1 transition-all sm:h-12',
-                      'bg-gradient-to-r from-purple-600 to-pink-600',
-                      'hover:from-purple-700 hover:to-pink-700',
-                      'disabled:from-gray-600 disabled:to-gray-600',
-                      !isSubmitting && 'hover:scale-105'
+                      'h-12 flex-1 rounded-xl font-medium transition-all duration-200 sm:h-14',
+                      'bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg shadow-purple-500/25',
+                      'hover:from-purple-700 hover:to-pink-700 hover:shadow-xl hover:shadow-purple-500/30',
+                      'disabled:from-gray-600 disabled:to-gray-600 disabled:shadow-none',
+                      !isSubmitting && 'hover:scale-[1.02]'
                     )}
                   >
                     {isSubmitting ? (
@@ -810,7 +823,7 @@ function CreateVibe() {
             </div>
 
             {/* Bottom hint */}
-            <p className="text-muted-foreground mt-6 text-center text-xs">
+            <p className="text-muted-foreground mt-8 text-center text-sm opacity-80">
               your vibe will be visible to everyone on vibechecc
             </p>
           </div>

@@ -19,7 +19,6 @@ import { FeedLayout } from '@/components/layouts';
 import { useVibesInfinite, useForYouFeedInfinite } from '@/queries';
 import { useCurrentUserFollowStats } from '@/features/follows/hooks/use-follow-stats';
 import { ForYouEmptyState } from '@/components/for-you-empty-state';
-import { VibeCardSkeleton } from '@/components/skeletons/vibe-card-skeleton';
 import {
   Flame,
   Sparkles,
@@ -271,6 +270,109 @@ export function HomeFeed({ className }: HomeFeedProps) {
     fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // Individual query hooks for each tab to maintain separate data states
+  const forYouQuery = useForYouFeedInfinite({
+    enabled: !!user?.id && isMobile,
+    queryKeyPrefix: ['home-feed', 'for-you', 'mobile'],
+  });
+
+  const hotQuery = useVibesInfinite(
+    { sort: 'hot' as const, limit: 20 },
+    {
+      enabled: isMobile,
+      queryKeyPrefix: ['home-feed', 'mobile'],
+      queryKeyName: 'hot',
+    }
+  );
+
+  const boostedQuery = useVibesInfinite(
+    { sort: 'boosted' as const, limit: 20 },
+    {
+      enabled: isMobile,
+      queryKeyPrefix: ['home-feed', 'mobile'],
+      queryKeyName: 'boosted',
+    }
+  );
+
+  const controversialQuery = useVibesInfinite(
+    { sort: 'controversial' as const, limit: 20 },
+    {
+      enabled: isMobile,
+      queryKeyPrefix: ['home-feed', 'mobile'],
+      queryKeyName: 'controversial',
+    }
+  );
+
+  const newQuery = useVibesInfinite(
+    { sort: 'recent' as const, limit: 20 },
+    {
+      enabled: isMobile,
+      queryKeyPrefix: ['home-feed', 'mobile'],
+      queryKeyName: 'new',
+    }
+  );
+
+  const unratedQuery = useVibesInfinite(
+    { sort: 'recent' as const, maxRatingCount: 0, limit: 20 },
+    {
+      enabled: isMobile,
+      queryKeyPrefix: ['home-feed', 'mobile'],
+      queryKeyName: 'unrated',
+    }
+  );
+
+  // Memoized tab data for each tab
+  const tabDataMap = React.useMemo(() => {
+    const map = new Map<
+      typeof feedTab,
+      {
+        vibes: import('@vibechecc/types').Vibe[];
+        isLoading: boolean;
+        error: unknown;
+        hasNextPage?: boolean;
+        isFetchingNextPage?: boolean;
+        fetchNextPage: () => void;
+      }
+    >();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const processQuery = (tabId: typeof feedTab, query: any) => {
+      const tabVibes = query.data?.pages
+        ? query.data.pages.flatMap(
+            (page: any) => page?.vibes?.filter(Boolean) || []
+          )
+        : [];
+
+      map.set(tabId, {
+        vibes: tabVibes,
+        isLoading: query.isLoading,
+        error: query.error,
+        hasNextPage: query.hasNextPage,
+        isFetchingNextPage: query.isFetchingNextPage,
+        fetchNextPage: query.fetchNextPage,
+      });
+    };
+
+    if (user?.id) {
+      processQuery('for-you', forYouQuery);
+    }
+    processQuery('hot', hotQuery);
+    processQuery('boosted', boostedQuery);
+    processQuery('controversial', controversialQuery);
+    processQuery('new', newQuery);
+    processQuery('unrated', unratedQuery);
+
+    return map;
+  }, [
+    user?.id,
+    forYouQuery,
+    hotQuery,
+    boostedQuery,
+    controversialQuery,
+    newQuery,
+    unratedQuery,
+  ]);
+
   // Render feed content for a specific tab (mobile only)
   const renderMobileFeedContent = React.useCallback(
     (tabId: typeof feedTab) => {
@@ -279,8 +381,6 @@ export function HomeFeed({ className }: HomeFeedProps) {
         switch (tabId) {
           case 'for-you':
             return {
-              usePersonalizedFeed: true,
-              enabled: !!user?.id,
               emptyTitle: 'your personalized feed is empty',
               emptyDescription:
                 'start following users to see their vibes in your personalized feed!',
@@ -288,8 +388,6 @@ export function HomeFeed({ className }: HomeFeedProps) {
             };
           case 'hot':
             return {
-              filters: { sort: 'hot' as const, limit: 20 },
-              enabled: true,
               emptyTitle: 'no hot vibes right now',
               emptyDescription:
                 'be the first to create and rate vibes to get the community started!',
@@ -301,8 +399,6 @@ export function HomeFeed({ className }: HomeFeedProps) {
             };
           case 'boosted':
             return {
-              filters: { sort: 'boosted' as const, limit: 20 },
-              enabled: true,
               emptyTitle: 'no boosted vibes yet',
               emptyDescription:
                 'vibes with high boost scores will appear here when the community starts boosting content!',
@@ -314,8 +410,6 @@ export function HomeFeed({ className }: HomeFeedProps) {
             };
           case 'controversial':
             return {
-              filters: { sort: 'controversial' as const, limit: 20 },
-              enabled: true,
               emptyTitle: 'no controversial vibes found',
               emptyDescription:
                 'vibes with mixed reactions and high engagement will appear here!',
@@ -327,8 +421,6 @@ export function HomeFeed({ className }: HomeFeedProps) {
             };
           case 'new':
             return {
-              filters: { sort: 'recent' as const, limit: 20 },
-              enabled: true,
               emptyTitle: 'no new vibes yet',
               emptyDescription:
                 'be the first to share something amazing with the community!',
@@ -340,12 +432,6 @@ export function HomeFeed({ className }: HomeFeedProps) {
             };
           case 'unrated':
             return {
-              filters: {
-                sort: 'recent' as const,
-                maxRatingCount: 0,
-                limit: 20,
-              },
-              enabled: true,
               emptyTitle: 'no unrated vibes found',
               emptyDescription:
                 'all vibes have been rated! check back later for new content.',
@@ -359,38 +445,31 @@ export function HomeFeed({ className }: HomeFeedProps) {
       };
 
       const tabConfig = getTabQueryConfig();
+      const tabData = tabDataMap.get(tabId);
 
-      // Show skeletons for non-active tabs
-      if (tabId !== feedTab) {
-        // Return skeleton cards for non-active tabs
-        return (
-          <div className="space-y-4 p-4">
-            {/* Create a grid of skeleton cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {[...Array(6)].map((_, i) => (
-                <VibeCardSkeleton
-                  key={`${tabId}-skeleton-${i}`}
-                  trackingId={`mobile-tab-${tabId}-skeleton-${i}`}
-                  compact
-                />
-              ))}
-            </div>
-          </div>
-        );
+      if (!tabData) {
+        // Fallback if no data available
+        return null;
       }
 
-      // For active tab, use the existing data
-      if (tabId === 'for-you' && shouldUseCustomEmptyState) {
+      const shouldUseTabCustomEmptyState =
+        tabId === 'for-you' && tabData.vibes.length === 0 && !tabData.isLoading;
+
+      // Always render actual content for each tab - no skeletons for inactive tabs
+      if (shouldUseTabCustomEmptyState) {
         return <ForYouEmptyState />;
       }
 
       return (
         <MasonryFeed
-          vibes={vibes}
-          isLoading={isLoading}
-          error={error}
-          hasMore={hasNextPage}
-          onLoadMore={loadMore}
+          vibes={tabData.vibes}
+          isLoading={tabData.isLoading}
+          error={tabData.error as Error | null}
+          hasMore={tabData.hasNextPage}
+          onLoadMore={() => {
+            if (!tabData.hasNextPage || tabData.isFetchingNextPage) return;
+            tabData.fetchNextPage();
+          }}
           ratingDisplayMode={tabId === 'hot' ? 'top-rated' : 'most-rated'}
           variant="feed"
           emptyStateTitle={tabConfig.emptyTitle}
@@ -399,16 +478,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
         />
       );
     },
-    [
-      feedTab,
-      user?.id,
-      vibes,
-      isLoading,
-      error,
-      hasNextPage,
-      loadMore,
-      shouldUseCustomEmptyState,
-    ]
+    [tabDataMap]
   );
 
   // Initialize after first intersection observer measurement
@@ -538,7 +608,11 @@ export function HomeFeed({ className }: HomeFeedProps) {
 
             <TabsDraggableContentContainer className="min-h-[400px]">
               {availableTabs.map((tab) => (
-                <TabsDraggableContent key={tab.id} value={tab.id}>
+                <TabsDraggableContent
+                  key={tab.id}
+                  value={tab.id}
+                  className="items-start"
+                >
                   {renderMobileFeedContent(tab.id)}
                 </TabsDraggableContent>
               ))}

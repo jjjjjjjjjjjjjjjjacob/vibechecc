@@ -86,6 +86,13 @@ const schema = defineSchema({
     gradientTo: v.optional(v.string()), // Ending color for gradient (hex or color name)
     gradientDirection: v.optional(v.string()), // Gradient direction (e.g., 'to-br', 'to-r', 'to-b')
 
+    // Text contrast mode for ensuring readability
+    textContrastMode: v.optional(v.union(
+      v.literal('light'), // Use light mode text colors
+      v.literal('dark'),  // Use dark mode text colors
+      v.literal('auto')   // Let the system decide (default behavior)
+    )),
+
     // Share tracking fields
     shareCount: v.optional(v.number()), // Total number of times this vibe has been shared
     lastSharedAt: v.optional(v.number()), // Timestamp of most recent share

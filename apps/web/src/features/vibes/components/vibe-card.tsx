@@ -3,7 +3,11 @@ import { useLocation, useRouter } from '@tanstack/react-router';
 import { useUser } from '@clerk/tanstack-react-start';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { trackEvents as _trackEvents } from '@/lib/track-events';
-import type { Vibe, EmojiRatingMetadata, CurrentUserRating } from '@vibechecc/types';
+import type {
+  Vibe,
+  EmojiRatingMetadata,
+  CurrentUserRating,
+} from '@vibechecc/types';
 import type { RatingDisplayMode } from '@/components/vibe-category-row';
 
 // Layout components
@@ -21,6 +25,7 @@ type VibeCardVariant =
   | 'feed-single'
   | 'list'
   | 'search-result'
+  | 'search-default'
   | 'mobile-story'
   | 'mobile-square'
   | 'mobile-optimized';
@@ -195,7 +200,7 @@ export function VibeCardV2({
   // Transform backend emojiRatings to frontend format
   const topEmojiRatings = React.useMemo(() => {
     if (!vibe?.emojiRatings) return [];
-    
+
     // Backend returns GroupedEmojiRating[], transform to expected format
     return vibe.emojiRatings.map((rating) => ({
       emoji: rating.emoji,
@@ -206,15 +211,15 @@ export function VibeCardV2({
       sentiment: undefined,
     }));
   }, [vibe?.emojiRatings]);
-  
+
   const mostInteractedEmojiData = React.useMemo(() => {
     if (!topEmojiRatings || topEmojiRatings.length === 0) return null;
-    
+
     // Find the emoji with the highest count (most interactions)
-    const mostInteracted = topEmojiRatings.reduce((max, current) => 
+    const mostInteracted = topEmojiRatings.reduce((max, current) =>
       current.count > max.count ? current : max
     );
-    
+
     return {
       emoji: mostInteracted.emoji,
       value: mostInteracted.averageValue,
@@ -246,7 +251,7 @@ export function VibeCardV2({
       topEmojiRatings &&
       topEmojiRatings.length > 0
     ) {
-      const topRated = topEmojiRatings.reduce((max, current) => 
+      const topRated = topEmojiRatings.reduce((max, current) =>
         current.averageValue > max.averageValue ? current : max
       );
       return {
@@ -299,38 +304,84 @@ export function VibeCardV2({
   }, [topEmojiRatings, finalVariant]);
 
   // Use emoji metadata passed from parent (no query needed)
-  const emojiMetadataRecord: Record<string, EmojiRatingMetadata> = emojiMetadata;
+  const emojiMetadataRecord: Record<string, EmojiRatingMetadata> =
+    emojiMetadata;
 
   // Removed saveExpansionState
 
   // Handle card click - no navigation
-  const handleCardClick = React.useCallback((e: React.MouseEvent) => {
-    if (!vibe?.id) return;
+  const handleCardClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      console.log('handleCardClick called:', {
+        vibeId: vibe?.id,
+        target: (e.target as HTMLElement).tagName,
+        currentTarget: (e.currentTarget as HTMLElement).tagName,
+      });
 
-    // Check if this click is from a drawer/dialog overlay closing event
-    const target = e.target as HTMLElement;
-    const isFromDrawerOverlay = target.closest('[data-slot="drawer-overlay"]');
-    const isFromDrawerContent = target.closest('[data-slot="drawer-content"], [data-vaul-drawer]');
-    
-    // Don't navigate if the click came from closing a drawer/dialog overlay
-    if (isFromDrawerOverlay && !isFromDrawerContent) {
-      return;
-    }
-    
-    // If this is from drawer content (like emoji picker), it shouldn't be navigating at all
-    if (isFromDrawerContent) {
-      return;
-    }
+      if (!vibe?.id) {
+        console.log('No vibe ID, returning');
+        return;
+      }
 
-    router.navigate({
-      to: '/vibes/$vibeId',
-      params: { vibeId: vibe.id },
-    });
-  }, [router, vibe?.id]);
+      // Check if this click is from a drawer/dialog overlay closing event
+      const target = e.target as HTMLElement;
+
+      // Check if we're inside a dragging tabs container or in drag cooldown
+      // Only check for tabs containers that are actually related to this vibe card
+      // Skip this check on mobile to ensure navigation works
+      const tabsDraggableContainer = target.closest(
+        '[data-tabs-draggable-container]'
+      );
+      if (tabsDraggableContainer && !isMobile) {
+        // Only prevent navigation if the tabs container is actually dragging AND
+        // it contains the vibe card (not just header tabs)
+        const isDragging =
+          tabsDraggableContainer.getAttribute('data-is-dragging') === 'true';
+        const isInCooldown =
+          tabsDraggableContainer.getAttribute('data-drag-cooldown') === 'true';
+        const vibeCardElement = target.closest('[data-vibe-card]');
+
+        // Only block if tabs are dragging/cooldown AND the vibe card is inside the tabs container
+        if (
+          (isDragging || isInCooldown) &&
+          vibeCardElement &&
+          tabsDraggableContainer.contains(vibeCardElement)
+        ) {
+          console.log('Navigation blocked by dragging tabs');
+          return;
+        }
+      }
+
+      const isFromDrawerOverlay = target.closest(
+        '[data-slot="drawer-overlay"]'
+      );
+      const isFromDrawerContent = target.closest(
+        '[data-slot="drawer-content"], [data-vaul-drawer]'
+      );
+
+      // Don't navigate if the click came from closing a drawer/dialog overlay
+      if (isFromDrawerOverlay && !isFromDrawerContent) {
+        console.log('Navigation blocked by drawer overlay');
+        return;
+      }
+
+      // If this is from drawer content (like emoji picker), it shouldn't be navigating at all
+      if (isFromDrawerContent) {
+        console.log('Navigation blocked by drawer content');
+        return;
+      }
+
+      console.log('Navigating to vibe:', vibe.id);
+      router.navigate({
+        to: '/vibes/$vibeId',
+        params: { vibeId: vibe.id },
+      });
+    },
+    [router, vibe?.id]
+  );
 
   // Handle emoji rating click
   const handleEmojiRatingClick = (emoji: string, value?: number) => {
-    console.log('handleEmojiRatingClick', emoji, value);
     if (!user?.id) {
       setShowAuthDialog(true);
       return;
@@ -359,7 +410,7 @@ export function VibeCardV2({
     tags?: string[];
   }) => {
     if (!vibe || !onEmojiRating) return;
-    
+
     await onEmojiRating(data);
   };
 
@@ -435,6 +486,8 @@ function getLayoutComponent(
   switch (variant) {
     case 'search-result':
       return <SearchResultLayout {...props} />;
+    case 'search-default':
+      return <DefaultLayout {...props} />;
     case 'list':
       return <ListLayout {...props} />;
     case 'mobile-story':

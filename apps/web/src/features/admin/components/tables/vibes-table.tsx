@@ -110,8 +110,14 @@ export function VibesTable({
 
   const _getAverageRating = (vibe: Vibe) => {
     if (!vibe.emojiRatings || vibe.emojiRatings.length === 0) return 0;
-    const totalValue = vibe.emojiRatings.reduce((acc, rating) => acc + (rating.averageValue * rating.count), 0);
-    const totalCount = vibe.emojiRatings.reduce((acc, rating) => acc + rating.count, 0);
+    const totalValue = vibe.emojiRatings.reduce(
+      (acc, rating) => acc + rating.averageValue * rating.count,
+      0
+    );
+    const totalCount = vibe.emojiRatings.reduce(
+      (acc, rating) => acc + rating.count,
+      0
+    );
     return totalCount > 0 ? Math.round((totalValue / totalCount) * 10) / 10 : 0;
   };
 

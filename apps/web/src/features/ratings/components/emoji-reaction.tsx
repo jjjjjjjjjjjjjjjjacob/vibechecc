@@ -12,7 +12,13 @@ import { RateAndReviewDialog } from './rate-and-review-dialog';
 import { AuthPromptDialog } from '@/features/auth';
 import { trackEvents } from '@/lib/track-events';
 import { EmojiRatingDisplay } from './emoji-rating-display';
-import type { EmojiRatingMetadata, CurrentUserRating } from '@vibechecc/types';
+import type {
+  EmojiRatingMetadata,
+  CurrentUserRating,
+  User,
+  Vibe,
+} from '@vibechecc/types';
+import { ShareButton } from '@/components/social';
 
 // Unified emoji rating data type
 export interface EmojiRatingData {
@@ -41,6 +47,7 @@ export function EmojiReactionButton({
   className,
   existingUserRatings,
   emojiMetadata,
+  textContrast,
 }: {
   reaction: EmojiRatingData;
   onEmojiClick: UnifiedEmojiRatingHandler;
@@ -49,6 +56,7 @@ export function EmojiReactionButton({
   className?: string;
   existingUserRatings?: CurrentUserRating[];
   emojiMetadata?: Record<string, EmojiRatingMetadata>;
+  textContrast?: 'light' | 'dark';
 }) {
   const { user } = useUser();
   const hasReacted = user?.id ? reaction.users?.includes(user.id) : false;
@@ -65,6 +73,7 @@ export function EmojiReactionButton({
       className={cn('flex-shrink-0', className)}
       existingUserRatings={existingUserRatings || []}
       emojiMetadata={emojiMetadata || {}}
+      textContrast={textContrast}
     />
   );
 }
@@ -76,18 +85,30 @@ function EmojiPickerWithRating({
   vibeId,
   existingUserRatings,
   emojiMetadata,
+  textContrast,
 }: {
   onEmojiClick: UnifiedEmojiRatingHandler;
   vibeTitle?: string;
   vibeId: string;
   existingUserRatings: CurrentUserRating[];
   emojiMetadata: Record<string, EmojiRatingMetadata>;
+  textContrast?: 'light' | 'dark';
 }) {
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
   const [isRatingDialogOpen, setIsRatingDialogOpen] = React.useState(false);
   const [selectedEmoji, setSelectedEmoji] = React.useState<string>('');
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
   const { user } = useUser();
+
+  // Helper function to get contrast-aware button classes (no background for add button)
+  const getButtonClasses = (textContrast?: 'light' | 'dark') => {
+    if (textContrast === 'light') {
+      return 'text-black/90 hover:text-black hover:bg-white/20';
+    } else if (textContrast === 'dark') {
+      return 'text-white/90 hover:text-white hover:bg-white/20';
+    }
+    return 'text-foreground hover:text-foreground';
+  };
 
   const handleAddEmojiClick = () => {
     if (!user) {
@@ -137,14 +158,14 @@ function EmojiPickerWithRating({
         <PopoverTrigger asChild>
           <button
             className={cn(
-              'inline-flex flex-shrink-0 items-center justify-center rounded-full p-1',
-              'bg-muted hover:bg-muted/80 text-sm',
-              'transition-all hover:scale-105 active:scale-95'
+              'inline-flex flex-shrink-0 items-center justify-center rounded-lg p-[10px]',
+              'text-sm transition-all hover:scale-105 active:scale-95',
+              getButtonClasses(textContrast)
             )}
             aria-label="Add reaction"
             title="Add your reaction"
             onClick={(e) => {
-              e.stopPropagation();
+              e.preventDefault();
               handleAddEmojiClick();
             }}
           >
@@ -160,7 +181,6 @@ function EmojiPickerWithRating({
           alignOffset={-16}
           onClick={(e) => {
             e.preventDefault();
-            e.stopPropagation();
           }}
         >
           <EmojiSearchCollapsible
@@ -214,6 +234,12 @@ export function EmojiReactionsRow({
   maxReactions = 6,
   existingUserRatings,
   emojiMetadata,
+  vibe,
+  author,
+  optimizeForTouch,
+  isMobile,
+  shareCount,
+  textContrast,
 }: {
   reactions: EmojiRatingData[];
   onEmojiClick: UnifiedEmojiRatingHandler;
@@ -224,12 +250,18 @@ export function EmojiReactionsRow({
   maxReactions?: number;
   existingUserRatings: CurrentUserRating[];
   emojiMetadata: Record<string, EmojiRatingMetadata>;
+  vibe?: Vibe;
+  author?: User;
+  optimizeForTouch?: boolean;
+  isMobile?: boolean;
+  shareCount?: number;
+  textContrast?: 'light' | 'dark';
 }) {
   const displayReactions = reactions.slice(0, maxReactions);
 
   return (
     <div className={cn('flex w-full min-w-0 items-center gap-1', className)}>
-      <div className="scrollbar-hide flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+      <div className="scrollbar-hide flex min-w-0 flex-1 items-center gap-1 overflow-x-auto py-1">
         {displayReactions.map((reaction) => (
           <EmojiReactionButton
             key={reaction.emoji}
@@ -240,6 +272,7 @@ export function EmojiReactionsRow({
             className="flex-shrink-0"
             existingUserRatings={existingUserRatings}
             emojiMetadata={emojiMetadata}
+            textContrast={textContrast}
           />
         ))}
       </div>
@@ -251,8 +284,25 @@ export function EmojiReactionsRow({
           vibeId={vibeId}
           existingUserRatings={existingUserRatings}
           emojiMetadata={emojiMetadata}
+          textContrast={textContrast}
         />
       )}
+      <ShareButton
+        contentType="vibe"
+        variant="ghost"
+        size={optimizeForTouch || isMobile ? 'default' : 'sm'}
+        showCount={shareCount ? true : false}
+        currentShareCount={shareCount}
+        vibe={vibe}
+        author={author}
+        ratings={reactions?.map((r) => ({
+          emoji: r.emoji,
+          value: r.value,
+          tags: r.tags || [],
+          count: r.count,
+        }))}
+        textContrast={textContrast}
+      />
     </div>
   );
 }

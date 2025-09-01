@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import {
   EmojiRatingDisplay,
-  EmojiRatingsList,
+  AllEmojiRatingsPopover,
 } from '@/features/ratings/components';
 import { api } from '@vibechecc/convex';
 import { convexQuery } from '@convex-dev/react-query';
@@ -148,8 +148,8 @@ function VibeResultCard({
           {/* Emoji Ratings Display - Show emoji ratings if available, fallback to generic rating */}
           {prioritizedRatings.length > 0 ? (
             <div className="w-full">
-              <EmojiRatingsList
-                emojiRatings={displayRatings}
+              <AllEmojiRatingsPopover
+                ratings={displayRatings}
                 vibeId={result.id}
                 className="space-y-1"
               />

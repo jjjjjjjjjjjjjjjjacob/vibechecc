@@ -2,18 +2,90 @@ import { cn } from './tailwind-utils';
 
 // Predefined gradient presets
 export const gradientPresets = [
-  { name: 'sunset', from: '#FF6B6B', to: '#FFA500', direction: 'to-br' },
-  { name: 'ocean', from: '#00C9FF', to: '#92FE9D', direction: 'to-br' },
-  { name: 'forest', from: '#11998E', to: '#38EF7D', direction: 'to-br' },
-  { name: 'lavender', from: '#667EEA', to: '#764BA2', direction: 'to-br' },
-  { name: 'peach', from: '#FFEAA7', to: '#FDB7AF', direction: 'to-br' },
-  { name: 'mint', from: '#00B09B', to: '#96C93D', direction: 'to-br' },
-  { name: 'cherry', from: '#EB3349', to: '#F45C43', direction: 'to-br' },
-  { name: 'purple', from: '#667EEA', to: '#F093FB', direction: 'to-br' },
-  { name: 'candy', from: '#FF6FD8', to: '#3813C2', direction: 'to-br' },
-  { name: 'sunshine', from: '#FFE000', to: '#FF6C00', direction: 'to-br' },
-  { name: 'sky', from: '#74B9FF', to: '#0984E3', direction: 'to-r' },
-  { name: 'coral', from: '#FF6B9D', to: '#FFC600', direction: 'to-r' },
+  {
+    name: 'sunset',
+    from: '#FF6B6B',
+    to: '#FFA500',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'ocean',
+    from: '#00C9FF',
+    to: '#92FE9D',
+    direction: 'to-br',
+    textContrast: 'light',
+  },
+  {
+    name: 'forest',
+    from: '#11998E',
+    to: '#38EF7D',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'lavender',
+    from: '#667EEA',
+    to: '#764BA2',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'peach',
+    from: '#FFEAA7',
+    to: '#FDB7AF',
+    direction: 'to-br',
+    textContrast: 'light',
+  },
+  {
+    name: 'mint',
+    from: '#00B09B',
+    to: '#96C93D',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'cherry',
+    from: '#EB3349',
+    to: '#F45C43',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'purple',
+    from: '#667EEA',
+    to: '#F093FB',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'candy',
+    from: '#FF6FD8',
+    to: '#3813C2',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'sunshine',
+    from: '#FFE000',
+    to: '#FF6C00',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'sky',
+    from: '#74B9FF',
+    to: '#0984E3',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
+  {
+    name: 'coral',
+    from: '#FF6B9D',
+    to: '#FFC600',
+    direction: 'to-br',
+    textContrast: 'dark',
+  },
 ];
 
 // Gradient direction options
@@ -124,7 +196,9 @@ export function generateGradientClasses(
 // Get a consistent gradient based on a string (like title)
 export function getConsistentGradient(seed?: string) {
   if (!seed) {
-    return generateRandomGradient();
+    // Return a random preset instead of generateRandomGradient()
+    const randomIndex = Math.floor(Math.random() * gradientPresets.length);
+    return gradientPresets[randomIndex];
   }
 
   let hash = 0;
@@ -152,5 +226,5 @@ export function isLightGradient(from: string, to: string) {
     (0.299 * toRgb.r + 0.587 * toRgb.g + 0.114 * toRgb.b) / 255;
 
   const avgLuminance = (fromLuminance + toLuminance) / 2;
-  return avgLuminance > 0.5;
+  return avgLuminance > 0.82;
 }

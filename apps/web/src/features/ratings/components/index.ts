@@ -4,7 +4,6 @@
 // Core Emoji Rating Components
 export { EmojiRatingDisplay } from './emoji-rating-display';
 export { EmojiRatingCycleDisplay } from './emoji-rating-cycle-display';
-export { EmojiRatingsList } from './emoji-ratings-list';
 export { HighestRatedEmojiDisplay } from './highest-rated-emoji-display';
 export { MostRatedDisplay } from './most-rated-display';
 export { RateAndReviewDialog } from './rate-and-review-dialog';
@@ -25,3 +24,6 @@ export { RatingDootButton } from './rating-doot-button';
 
 // Aggregate Views
 export { AllEmojiRatingsPopover } from './all-emoji-ratings-popover';
+
+// Review Components
+export { ReviewCard } from './review-card';

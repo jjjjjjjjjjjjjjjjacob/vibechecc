@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import { useUser } from '@clerk/tanstack-react-start';
-import type { EmojiRating } from '@vibechecc/types';
+import type {
+  EmojiRating,
+  EmojiRatingMetadata,
+  CurrentUserRating,
+} from '@vibechecc/types';
 import { RatingScale } from './rating-scale';
 import { RateAndReviewDialog } from './rate-and-review-dialog';
 import { AuthPromptDialog } from '@/features/auth';
@@ -9,7 +13,7 @@ import type {
   EmojiRatingData,
   UnifiedEmojiRatingHandler,
 } from './emoji-reaction';
-import type { Rating, EmojiRatingMetadata, CurrentUserRating } from '@vibechecc/types';
+import { Button } from '@/components/ui';
 
 interface EmojiRatingDisplayProps {
   rating: EmojiRatingData;
@@ -24,6 +28,7 @@ interface EmojiRatingDisplayProps {
   // Required data props to avoid queries
   existingUserRatings?: CurrentUserRating[];
   emojiMetadata?: Record<string, EmojiRatingMetadata>;
+  textContrast?: 'light' | 'dark';
 }
 
 export function EmojiRatingDisplay({
@@ -38,6 +43,7 @@ export function EmojiRatingDisplay({
   hasUserReacted = false,
   existingUserRatings = [],
   emojiMetadata = {},
+  textContrast,
 }: EmojiRatingDisplayProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [isRatingDialogOpen, setIsRatingDialogOpen] = React.useState(false);
@@ -45,6 +51,23 @@ export function EmojiRatingDisplay({
   const [hoverValue, setHoverValue] = React.useState<number | null>(null);
   const [selectedValue, setSelectedValue] = React.useState<number | null>(null);
   const { user } = useUser();
+
+  // Helper function to get contrast-aware button classes
+  const getButtonClasses = (
+    textContrast?: 'light' | 'dark',
+    hasReacted?: boolean
+  ) => {
+    if (textContrast === 'light') {
+      return hasReacted
+        ? 'bg-white/30 text-black/90'
+        : 'bg-white/20 hover:bg-white/30 text-black/90';
+    } else if (textContrast === 'dark') {
+      return hasReacted
+        ? 'bg-white/30 text-white/90'
+        : 'bg-white/20 hover:bg-white/30 text-white/90';
+    }
+    return hasReacted ? 'bg-primary/10' : 'bg-muted hover:bg-muted/80';
+  };
 
   const sizeClasses = {
     sm: 'text-lg gap-1',
@@ -72,6 +95,11 @@ export function EmojiRatingDisplay({
       setHoverValue(value);
     };
 
+    const handleScaleMouseLeave = () => {
+      // Reset hover value when mouse leaves the scale
+      setHoverValue(null);
+    };
+
     const handleScaleClick = async (value: number) => {
       if (!onEmojiClick) return;
 
@@ -87,7 +115,19 @@ export function EmojiRatingDisplay({
     };
 
     const scaleDisplay = (
-      <div className={cn('flex items-center gap-3', className)}>
+      <div className={cn('flex items-center gap-1', className)}>
+        <span
+          className={cn(
+            'font-[500]',
+            textContrast === 'light'
+              ? 'text-black/90'
+              : textContrast === 'dark'
+                ? 'text-white/90'
+                : ''
+          )}
+        >
+          {rating.value.toFixed(1)}
+        </span>
         <RatingScale
           emoji={rating.emoji}
           value={hoverValue ?? rating.value}
@@ -97,8 +137,19 @@ export function EmojiRatingDisplay({
           emojiColor={emojiColor}
           className="flex-1"
           showTooltip={!!onEmojiClick}
+          maintainValueOnLeave={false}
+          onMouseLeave={handleScaleMouseLeave}
         />
-        <div className="text-muted-foreground text-sm">
+        <div
+          className={cn(
+            'text-sm',
+            textContrast === 'light'
+              ? 'text-black/70'
+              : textContrast === 'dark'
+                ? 'text-white/70'
+                : 'text-muted-foreground'
+          )}
+        >
           {rating.count > 0 && `(${rating.count})`}
         </div>
       </div>
@@ -141,24 +192,19 @@ export function EmojiRatingDisplay({
   // Compact variants (minimal emoji display)
   if (variant === 'compact' || variant === 'compact-hover') {
     const compactDisplay = (
-      <div
+      <Button
         className={cn(
-          'relative inline-flex items-center justify-center rounded-full px-2 py-1 text-sm transition-all hover:scale-105 active:scale-95',
-          hasUserReacted ? 'bg-primary/10' : 'bg-muted hover:bg-muted/80',
+          'relative inline-flex h-8 items-center justify-center gap-1 rounded-full px-2 py-1 text-sm leading-none transition-all',
+          getButtonClasses(textContrast, hasUserReacted),
           onEmojiClick && 'cursor-pointer',
           className
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={
-          onEmojiClick
-            ? (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleEnhancedClick();
-              }
-            : undefined
-        }
+        onClick={(e) => {
+          e.preventDefault();
+          handleEnhancedClick();
+        }}
         onKeyDown={
           onEmojiClick
             ? (e) => {
@@ -190,16 +236,38 @@ export function EmojiRatingDisplay({
               size === 'sm' ? 'text-xs' : 'text-sm'
             )}
           >
-            <span>{rating.value.toFixed(1)}</span>
+            <span
+              className={cn(
+                'font-[500]',
+                textContrast === 'light'
+                  ? 'text-black/90'
+                  : textContrast === 'dark'
+                    ? 'text-white/90'
+                    : ''
+              )}
+            >
+              {rating.value.toFixed(1)}
+            </span>
             {rating.count > 0 && (
-              <span className="text-muted-foreground">({rating.count})</span>
+              <span
+                className={cn(
+                  'text-muted-foreground',
+                  textContrast === 'light'
+                    ? 'text-black/50'
+                    : textContrast === 'dark'
+                      ? 'text-white/50'
+                      : 'text-muted-foreground'
+                )}
+              >
+                ({rating.count})
+              </span>
             )}
           </span>
         )}
         {variant === 'compact' && rating.count > 0 && (
           <span className="ml-1 font-medium">{rating.count}</span>
         )}
-      </div>
+      </Button>
     );
 
     return (
@@ -232,22 +300,18 @@ export function EmojiRatingDisplay({
 
   // Default variant (pill with rating and count)
   const defaultDisplay = (
-    <div
+    <Button
       className={cn(
-        'bg-secondary/50 hover:bg-secondary inline-flex cursor-pointer items-center gap-2 rounded-full px-3 py-1 transition-all hover:scale-105 active:scale-95',
+        'inline-flex h-8 cursor-pointer items-center gap-1 rounded-full px-3 py-1 leading-none transition-all',
+        getButtonClasses(textContrast, false),
         sizeClasses[size],
         onEmojiClick && 'cursor-pointer',
         className
       )}
-      onClick={
-        onEmojiClick
-          ? (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleEnhancedClick();
-            }
-          : undefined
-      }
+      onClick={(e) => {
+        e.preventDefault();
+        handleEnhancedClick();
+      }}
       role={onEmojiClick ? 'button' : undefined}
       tabIndex={onEmojiClick ? 0 : undefined}
       aria-label={
@@ -267,11 +331,33 @@ export function EmojiRatingDisplay({
       }
     >
       <span style={{ color: emojiColor }}>{rating.emoji}</span>
-      <span className="text-base font-medium">{rating.value.toFixed(1)}</span>
+      <span
+        className={cn(
+          'text-base font-medium',
+          textContrast === 'light'
+            ? 'text-black/90'
+            : textContrast === 'dark'
+              ? 'text-white/90'
+              : ''
+        )}
+      >
+        {rating.value.toFixed(1)}
+      </span>
       {rating.count > 0 && (
-        <span className="text-muted-foreground text-sm">({rating.count})</span>
+        <span
+          className={cn(
+            'text-sm',
+            textContrast === 'light'
+              ? 'text-black/70'
+              : textContrast === 'dark'
+                ? 'text-white/70'
+                : 'text-muted-foreground'
+          )}
+        >
+          ({rating.count})
+        </span>
       )}
-    </div>
+    </Button>
   );
 
   return (

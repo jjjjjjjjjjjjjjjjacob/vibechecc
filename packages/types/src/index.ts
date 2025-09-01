@@ -99,12 +99,14 @@ export interface EmojiRatingMetadata {
 
 // Lighter type for current user ratings (matches backend response)
 export interface CurrentUserRating {
+  _id?: string; // Convex document ID for compatibility
   id?: string;
   emoji: string;
   value: number;
   review: string;
   createdAt: string;
   updatedAt?: string;
+  user?: User | null; // User who created the rating
 }
 
 export interface Vibe {
@@ -135,6 +137,9 @@ export interface Vibe {
   gradientFrom?: string; // Starting color for gradient (hex or color name)
   gradientTo?: string; // Ending color for gradient (hex or color name)  
   gradientDirection?: string; // Gradient direction (e.g., 'to-br', 'to-r', 'to-b')
+  
+  // Text contrast mode for ensuring readability
+  textContrastMode?: 'light' | 'dark' | 'auto'; // Text contrast mode based on background
   
   // Boost/dampen system fields
   boostScore?: number; // Current boost score (can be negative for dampens)

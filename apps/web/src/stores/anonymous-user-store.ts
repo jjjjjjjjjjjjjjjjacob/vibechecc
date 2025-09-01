@@ -74,6 +74,7 @@ interface AnonymousUserState {
     };
   };
   clearSession: () => void;
+  performCleanup: () => void;
 }
 
 // Generate a unique session ID
@@ -84,6 +85,39 @@ const generateSessionId = () => {
 // Generate a unique action ID
 const generateActionId = () => {
   return `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// Storage limits to prevent quota issues
+const MAX_ACTIONS = 50; // Keep last 50 actions
+const MAX_CTA_INTERACTIONS = 20; // Keep last 20 CTA interactions
+const MAX_AGE_DAYS = 7; // Remove data older than 7 days
+
+// Helper function to clean old data
+const cleanupOldData = (state: AnonymousUserState) => {
+  const now = Date.now();
+  const maxAge = MAX_AGE_DAYS * 24 * 60 * 60 * 1000; // 7 days in ms
+
+  // Remove old actions and keep only the most recent ones
+  const validActions = state.actions
+    .filter((action) => now - action.timestamp < maxAge)
+    .slice(-MAX_ACTIONS); // Keep only the last MAX_ACTIONS
+
+  // Remove old CTA interactions
+  const validCtaInteractions = state.ctaInteractions
+    .filter((interaction) => now - interaction.timestamp < maxAge)
+    .slice(-MAX_CTA_INTERACTIONS); // Keep only the last MAX_CTA_INTERACTIONS
+
+  // Remove old AB test assignments (older than 30 days)
+  const validAbTests = state.abTestAssignments.filter(
+    (assignment) => now - assignment.assignedAt < 30 * 24 * 60 * 60 * 1000
+  );
+
+  return {
+    ...state,
+    actions: validActions,
+    ctaInteractions: validCtaInteractions,
+    abTestAssignments: validAbTests,
+  };
 };
 
 export const useAnonymousUserStore = create<AnonymousUserState>()(
@@ -124,17 +158,28 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
           timestamp: Date.now(),
         };
 
-        set((state) => ({
-          actions: [...state.actions, action],
-          vibesViewed:
-            action.type === 'vibe_view'
-              ? state.vibesViewed + 1
-              : state.vibesViewed,
-          searchesPerformed:
-            action.type === 'search'
-              ? state.searchesPerformed + 1
-              : state.searchesPerformed,
-        }));
+        set((state) => {
+          // Clean up old data before adding new action
+          const cleanedState = cleanupOldData(state);
+
+          // Add new action with size limit
+          const updatedActions = [...cleanedState.actions, action].slice(
+            -MAX_ACTIONS
+          );
+
+          return {
+            ...cleanedState,
+            actions: updatedActions,
+            vibesViewed:
+              action.type === 'vibe_view'
+                ? cleanedState.vibesViewed + 1
+                : cleanedState.vibesViewed,
+            searchesPerformed:
+              action.type === 'search'
+                ? cleanedState.searchesPerformed + 1
+                : cleanedState.searchesPerformed,
+          };
+        });
       },
 
       recordCtaInteraction: (interactionData) => {
@@ -143,13 +188,25 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
           timestamp: Date.now(),
         };
 
-        set((state) => ({
-          ctaInteractions: [...state.ctaInteractions, interaction],
-          lastCtaShownAt:
-            interaction.action === 'impression'
-              ? Date.now()
-              : state.lastCtaShownAt,
-        }));
+        set((state) => {
+          // Clean up old data before adding new interaction
+          const cleanedState = cleanupOldData(state);
+
+          // Add new interaction with size limit
+          const updatedCtaInteractions = [
+            ...cleanedState.ctaInteractions,
+            interaction,
+          ].slice(-MAX_CTA_INTERACTIONS);
+
+          return {
+            ...cleanedState,
+            ctaInteractions: updatedCtaInteractions,
+            lastCtaShownAt:
+              interaction.action === 'impression'
+                ? Date.now()
+                : cleanedState.lastCtaShownAt,
+          };
+        });
       },
 
       dismissCta: (ctaId) => {
@@ -266,6 +323,11 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
           privateToken: null,
         });
       },
+
+      // Manual cleanup method for emergency use
+      performCleanup: () => {
+        set((state) => cleanupOldData(state));
+      },
     }),
     {
       name: 'anonymous-user-store',
@@ -288,6 +350,10 @@ export const useAnonymousUserStore = create<AnonymousUserState>()(
           state.dismissedCtas = new Set(
             state.dismissedCtas as unknown as string[]
           );
+
+          // Perform cleanup on storage rehydration to remove old data
+          const cleanedState = cleanupOldData(state);
+          Object.assign(state, cleanedState);
 
           // Initialize session if it doesn't exist
           if (!state.sessionId) {

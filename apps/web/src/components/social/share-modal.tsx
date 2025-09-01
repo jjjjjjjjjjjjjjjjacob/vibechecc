@@ -355,6 +355,9 @@ export function ShareModal({
                               <Type className="h-4 w-4" />
                             )
                           }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
                         >
                           {option.label}
                         </TabsDraggableTrigger>

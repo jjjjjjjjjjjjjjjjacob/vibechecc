@@ -15,10 +15,20 @@ import { EmojiRatingDisplay } from './emoji-rating-display';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, ArrowRight, ChevronDown } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion';
 import { Link } from '@tanstack/react-router';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/utils/tailwind-utils';
-import type { EmojiRating, EmojiRatingMetadata, CurrentUserRating } from '@vibechecc/types';
+import type {
+  EmojiRating,
+  EmojiRatingMetadata,
+  CurrentUserRating,
+} from '@vibechecc/types';
 import type {
   EmojiRatingData,
   UnifiedEmojiRatingHandler,
@@ -34,6 +44,7 @@ interface AllEmojiRatingsPopoverProps {
   className?: string;
   existingUserRatings?: CurrentUserRating[];
   emojiMetadata?: Record<string, EmojiRatingMetadata>;
+  textContrast?: 'light' | 'dark';
 }
 
 // Legacy interface for backward compatibility
@@ -56,6 +67,7 @@ export function AllRatingsPopover({
   className,
   existingUserRatings = [],
   emojiMetadata = {},
+  textContrast,
   visibleCount = 1,
 }: AllEmojiRatingsPopoverProps & {
   visibleCount?: number;
@@ -63,20 +75,45 @@ export function AllRatingsPopover({
   const [open, setOpen] = React.useState(false);
   const remainingCount = ratings.length - visibleCount;
 
+  // Sort ratings by count (descending), then by value (descending)
+  const sortedRatings = React.useMemo(() => {
+    return [...ratings].sort((a, b) => {
+      // First sort by count (most ratings)
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      // Then sort by average rating (highest rating)
+      return b.value - a.value;
+    });
+  }, [ratings]);
+
   // If no remaining ratings to show, don't render anything
   if (remainingCount <= 0) return null;
 
+  // Split ratings into groups
+  const topRatings = sortedRatings.slice(0, 3);
+  const accordionRatings = sortedRatings.slice(3, 8);
+  const hasMoreThan8Ratings = sortedRatings.length > 8;
+
   const trigger = children || (
-    <button
-      className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 text-xs transition-colors"
+    <Button
+      variant="ghost"
+      className={cn(
+        'flex items-center gap-0.5 px-2 py-1 text-xs transition-colors hover:bg-white/20',
+        textContrast === 'light'
+          ? 'text-black/70 hover:text-black/90'
+          : textContrast === 'dark'
+            ? 'text-white/70 hover:text-white/90'
+            : 'text-muted-foreground hover:text-foreground'
+      )}
       onClick={(e) => {
-        e.stopPropagation();
-        // Don't preventDefault - we want the popover to open
+        e.preventDefault();
+        setOpen(true);
       }}
     >
       <ChevronDown className="h-3 w-3" />
       <span>{remainingCount} more</span>
-    </button>
+    </Button>
   );
 
   return (
@@ -87,19 +124,45 @@ export function AllRatingsPopover({
         side="top"
         align="start"
         sideOffset={8}
+        onClick={(e) => {
+          e.preventDefault();
+        }}
       >
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between border-b pb-2">
-            <h4 className="text-sm font-semibold">all ratings</h4>
-            <span className="text-muted-foreground text-xs">
-              {ratings.length} rating{ratings.length !== 1 ? 's' : ''}
+            <h4
+              className={cn(
+                'text-sm font-semibold',
+                textContrast === 'light'
+                  ? 'text-black/90'
+                  : textContrast === 'dark'
+                    ? 'text-white/90'
+                    : ''
+              )}
+            >
+              all ratings
+            </h4>
+            <span
+              className={cn(
+                'text-xs',
+                textContrast === 'light'
+                  ? 'text-black/70'
+                  : textContrast === 'dark'
+                    ? 'text-white/70'
+                    : 'text-muted-foreground'
+              )}
+            >
+              {sortedRatings.length} rating
+              {sortedRatings.length !== 1 ? 's' : ''}
             </span>
           </div>
+
+          {/* Top 3 ratings - always visible */}
           <div className="space-y-2">
-            {ratings.map((rating, index) => (
+            {topRatings.map((rating, index) => (
               <div
-                key={`${rating.emoji}-${index}`}
-                className="hover:bg-muted/50 flex items-center justify-between rounded-md p-2 transition-colors"
+                key={`top-${rating.emoji}-${index}`}
+                className="hover:bg-muted/50 rounded-md p-2 transition-colors"
               >
                 <EmojiRatingDisplay
                   rating={rating}
@@ -108,16 +171,73 @@ export function AllRatingsPopover({
                   vibeTitle={vibeTitle}
                   existingUserRatings={existingUserRatings}
                   emojiMetadata={emojiMetadata}
+                  variant="scale"
                   className="flex-1"
+                  textContrast={textContrast}
                 />
-                {rating.count > 1 && (
-                  <div className="text-muted-foreground ml-2 text-xs">
-                    avg: {rating.value.toFixed(1)}
-                  </div>
-                )}
               </div>
             ))}
           </div>
+
+          {/* Accordion for ratings 4-8 */}
+          {accordionRatings.length > 0 && (
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="more-ratings" className="border-0">
+                <AccordionTrigger
+                  className={cn(
+                    'py-2 text-xs font-medium hover:no-underline',
+                    textContrast === 'light'
+                      ? 'text-black/70 hover:text-black/90'
+                      : textContrast === 'dark'
+                        ? 'text-white/70 hover:text-white/90'
+                        : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {accordionRatings.length} more rating
+                  {accordionRatings.length !== 1 ? 's' : ''}
+                </AccordionTrigger>
+                <AccordionContent className="pb-2">
+                  <div className="space-y-2">
+                    {accordionRatings.map((rating, index) => (
+                      <div
+                        key={`accordion-${rating.emoji}-${index}`}
+                        className="hover:bg-muted/50 rounded-md p-2 transition-colors"
+                      >
+                        <EmojiRatingDisplay
+                          rating={rating}
+                          vibeId={vibeId}
+                          onEmojiClick={onEmojiClick}
+                          vibeTitle={vibeTitle}
+                          existingUserRatings={existingUserRatings}
+                          emojiMetadata={emojiMetadata}
+                          variant="scale"
+                          className="flex-1"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
+
+          {/* Go to vibe CTA for 8+ ratings */}
+          {hasMoreThan8Ratings && (
+            <div className="border-t pt-3">
+              <Link to="/vibes/$vibeId" params={{ vibeId }}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between text-sm"
+                  onClick={() => setOpen(false)}
+                >
+                  <span>
+                    go to vibe to see all {sortedRatings.length} ratings
+                  </span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>
@@ -129,10 +249,12 @@ export function MoreRatingsTrigger({
   totalRatings,
   visibleRatings,
   className,
+  textContrast,
 }: {
   totalRatings: number;
   visibleRatings: number;
   className?: string;
+  textContrast?: 'light' | 'dark';
 }) {
   const remainingCount = totalRatings - visibleRatings;
 
@@ -141,12 +263,16 @@ export function MoreRatingsTrigger({
   return (
     <button
       className={cn(
-        'text-muted-foreground hover:text-foreground flex items-center gap-0.5 text-xs transition-colors',
+        'flex items-center gap-0.5 text-xs transition-colors',
+        textContrast === 'light'
+          ? 'text-black/70 hover:text-black/90'
+          : textContrast === 'dark'
+            ? 'text-white/70 hover:text-white/90'
+            : 'text-muted-foreground hover:text-foreground',
         className
       )}
       onClick={(e) => {
         e.preventDefault();
-        e.stopPropagation();
       }}
     >
       <ChevronDown className="h-3 w-3" />
@@ -248,6 +374,104 @@ export function AllEmojiRatingsPopover({
           <DialogTitle>All Ratings</DialogTitle>
         </DialogHeader>
         {content}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Full ratings dialog that shows ALL ratings without cutoff
+interface AllRatingsDialogProps {
+  ratings: EmojiRatingData[];
+  onEmojiClick: UnifiedEmojiRatingHandler;
+  vibeId: string;
+  vibeTitle?: string;
+  existingUserRatings?: CurrentUserRating[];
+  emojiMetadata?: Record<string, EmojiRatingMetadata>;
+  textContrast?: 'light' | 'dark';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function AllRatingsDialog({
+  ratings,
+  onEmojiClick,
+  vibeId,
+  vibeTitle,
+  existingUserRatings = [],
+  emojiMetadata = {},
+  textContrast,
+  open,
+  onOpenChange,
+}: AllRatingsDialogProps) {
+  // Sort ratings by count (descending), then by value (descending)
+  const sortedRatings = React.useMemo(() => {
+    return [...ratings].sort((a, b) => {
+      // First sort by count (most ratings)
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      // Then sort by average rating (highest rating)
+      return b.value - a.value;
+    });
+  }, [ratings]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[80vh] max-w-md">
+        <DialogHeader>
+          <DialogTitle>all ratings</DialogTitle>
+          {vibeTitle && (
+            <p className="text-muted-foreground text-sm">for "{vibeTitle}"</p>
+          )}
+        </DialogHeader>
+
+        <div className="flex items-center justify-between border-b pb-2">
+          <span className="text-muted-foreground text-sm">
+            {sortedRatings.length} rating{sortedRatings.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        <ScrollArea className="max-h-[50vh] pr-4">
+          <div className="space-y-3">
+            {sortedRatings.map((rating, index) => (
+              <div
+                key={`${rating.emoji}-${index}`}
+                className="hover:bg-muted/50 rounded-md border p-3 transition-colors"
+              >
+                <EmojiRatingDisplay
+                  rating={rating}
+                  vibeId={vibeId}
+                  onEmojiClick={onEmojiClick}
+                  vibeTitle={vibeTitle}
+                  existingUserRatings={existingUserRatings}
+                  emojiMetadata={emojiMetadata}
+                  variant="scale"
+                  className="flex-1"
+                  textContrast={textContrast}
+                />
+              </div>
+            ))}
+
+            {sortedRatings.length === 0 && (
+              <div className="text-muted-foreground py-8 text-center">
+                <p>no ratings yet</p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        <div className="border-t pt-3">
+          <Link to="/vibes/$vibeId" params={{ vibeId }}>
+            <Button
+              variant="ghost"
+              className="w-full justify-between"
+              onClick={() => onOpenChange?.(false)}
+            >
+              <span>go to vibe</span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -12,7 +12,7 @@ import { type LayoutOption } from '@/hooks/use-story-canvas';
 import {
   Download,
   Copy,
-  Share2,
+  Share,
   Image,
   Type,
   Maximize2,
@@ -96,7 +96,7 @@ export function GenericShare({
             className="flex-1 gap-2"
             variant="outline"
           >
-            <Share2 className="h-4 w-4" />
+            <Share className="h-4 w-4" />
             share link
           </Button>
           <Button

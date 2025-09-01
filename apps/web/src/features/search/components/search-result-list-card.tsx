@@ -1,13 +1,18 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
+import type { Id } from '@vibechecc/convex/dataModel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
+import { RatingDootButton } from '@/features/ratings/components/rating-doot-button';
+import { RatingShareButton } from '@/components/social/rating-share-button';
 import { api } from '@vibechecc/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
+import { useBulkRatingVoteScores, useBulkUserRatingVoteStatuses } from '@/queries';
+import { useUser } from '@clerk/tanstack-react-start';
 import type {
   SearchResult,
   VibeSearchResult,
@@ -18,6 +23,7 @@ import type {
 } from '@vibechecc/types';
 import { Hash, Users, MessageSquare } from '@/components/ui/icons';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface SearchResultListCardProps {
   result?: SearchResult;
@@ -82,12 +88,16 @@ function VibeResultListCard({
   queriedEmojis?: string[];
   loading?: boolean;
 }) {
+  // Use default layout for small/medium screens, search-result layout for large screens
+  const isMediumAndBelow = useMediaQuery('(max-width: 1024px)');
+  const variant = isMediumAndBelow ? 'search-default' : 'search-result';
+
   // If loading, delegate to VibeCard's loading state
   if (loading || !result) {
     return (
       <VibeCard
         loading={true}
-        variant={'search-result'}
+        variant={variant}
         ratingDisplayMode="most-rated"
       />
     );
@@ -115,11 +125,7 @@ function VibeResultListCard({
   };
 
   return (
-    <VibeCard
-      vibe={vibe}
-      variant={'search-result'}
-      ratingDisplayMode="most-rated"
-    />
+    <VibeCard vibe={vibe} variant={variant} ratingDisplayMode="most-rated" />
   );
 }
 
@@ -395,6 +401,17 @@ function ReviewResultListCard({
   result?: ReviewSearchResult;
   loading?: boolean;
 }) {
+  const { user } = useUser();
+  
+  // Get rating ID for vote data (only if not loading and result exists)
+  const ratingId = result?.id;
+  const ratingIds = React.useMemo(() => {
+    return ratingId ? [ratingId as Id<'ratings'>] : [];
+  }, [ratingId]);
+
+  // Fetch vote scores and statuses
+  const { data: voteScores } = useBulkRatingVoteScores(ratingIds);
+  const { data: voteStatuses } = useBulkUserRatingVoteStatuses(ratingIds);
   // Show skeleton if loading
   if (loading || !result) {
     return (
@@ -466,8 +483,8 @@ function ReviewResultListCard({
                 <p className="text-sm leading-relaxed">{result.reviewText}</p>
               </div>
 
-              {/* Rating */}
-              <div className="flex items-center">
+              {/* Rating and Actions */}
+              <div className="flex items-center justify-between">
                 <EmojiRatingDisplay
                   rating={{
                     emoji: result.emoji,
@@ -480,6 +497,46 @@ function ReviewResultListCard({
                   existingUserRatings={[]}
                   emojiMetadata={{}}
                 />
+                
+                {/* Action buttons */}
+                {ratingId && (
+                  <div className="flex items-center gap-1">
+                    <RatingDootButton
+                      ratingId={ratingId as Id<'ratings'>}
+                      netScore={voteScores?.[ratingId]?.netScore || 0}
+                      voteStatus={
+                        voteStatuses?.[ratingId] || {
+                          voteType: null,
+                          boosted: false,
+                          dampened: false,
+                        }
+                      }
+                      isOwnRating={result.reviewerId === user?.id}
+                      variant="ghost"
+                      size="sm"
+                    />
+                    <RatingShareButton
+                      rating={{
+                        _id: ratingId,
+                        emoji: result.emoji,
+                        value: result.rating,
+                        review: result.reviewText,
+                        createdAt: new Date().toISOString(), // SearchResult doesn't have createdAt
+                        user: {
+                          username: result.reviewerName,
+                          image_url: result.reviewerAvatar,
+                        },
+                      }}
+                      vibe={{
+                        id: result.vibeId,
+                        title: result.vibeTitle,
+                        createdBy: null, // Don't have vibe author info in search result
+                      }}
+                      variant="ghost"
+                      size="sm"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

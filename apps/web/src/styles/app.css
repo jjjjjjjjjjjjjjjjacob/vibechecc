@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './animations.css';
 @import './fonts.css';
+@import './clerk-overrides.css';
+@import './emoji-picker-overrides.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -145,7 +148,7 @@
     @apply border-border outline-ring/50 cursor-default;
   }
   body {
-    @apply text-foreground font-sans;
+    @apply text-foreground font-sans select-none;
   }
 }
 
@@ -235,424 +238,64 @@
       transition-duration: 100ms !important;
     }
   }
-}
 
-/* Accordion animations */
-@keyframes accordion-down {
-  from {
-    height: 0;
-  }
-  to {
-    height: var(
-      --radix-accordion-content-height,
-      var(--radix-collapsible-content-height)
-    );
-  }
-}
-
-@keyframes accordion-up {
-  from {
-    height: var(
-      --radix-accordion-content-height,
-      var(--radix-collapsible-content-height)
-    );
-  }
-  to {
-    height: 0;
-  }
-}
-
-/* Wiggle animation for emojis */
-@keyframes wiggle {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-10deg);
-  }
-  75% {
-    transform: rotate(10deg);
-  }
-}
-
-/* Shimmy animation for rating */
-@keyframes shimmy {
-  0%,
-  100% {
-    transform: translateX(0) scale(1);
-  }
-  10%,
-  30%,
-  50%,
-  70%,
-  90% {
-    transform: translateX(-1px) scale(1.02);
-  }
-  20%,
-  40%,
-  60%,
-  80% {
-    transform: translateX(1px) scale(1.02);
-  }
-}
-
-/* Pulse scale animation for rating selection */
-@keyframes pulse-scale {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Number pop animation */
-@keyframes number-pop {
-  0% {
-    transform: scale(1);
-  }
-  25% {
-    transform: scale(1.2);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Fade in down animation for CTA */
-@keyframes fade-in-down {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Fade in down animation for CTA */
-@keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Smooth emoji transitions for rating selector */
-@keyframes emoji-slide-in {
-  0% {
-    opacity: 0;
-    transform: translateX(30px) scale(0.8);
-  }
-  50% {
-    opacity: 0.5;
-    transform: translateX(15px) scale(0.9);
-    filter: blur(5px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes emoji-slide-out {
-  0% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: translateX(-15px) scale(0.9);
-    filter: blur(5px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-30px) scale(0.8);
-  }
-}
-
-/* Rating scale animation */
-@keyframes rating-reveal {
-  0% {
-    opacity: 0;
-    transform: translateY(10px) scale(0.95);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateY(5px) scale(0.98);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Hover arrow slide */
-@keyframes arrow-slide {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(5px);
-  }
-}
-
-/* Mobile-optimized bounce (lighter) */
-@keyframes bounce-light {
-  0%,
-  20%,
-  53%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-  40%,
-  43% {
-    transform: translateY(-5px);
-  }
-  70% {
-    transform: translateY(-2px);
-  }
-  90% {
-    transform: translateY(-1px);
-  }
-}
-
-/* Scale with spring effect */
-@keyframes scale-spring {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Stagger animation for lists */
-@keyframes stagger-fade-in {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Pulsing dots loader animation */
-@keyframes pulse-dot {
-  0%,
-  40%,
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  20% {
-    transform: scale(1.4);
-    opacity: 0.9;
-  }
-}
-
-/* Pulsing dots loader animation */
-@keyframes pulse-text {
-  0%,
-  40%,
-  100% {
-    transform-style: preserve-3d;
-    transform: perspective(500px) scale(1);
-    opacity: 0.9;
-  }
-  20% {
-    transform-style: preserve-3d;
-    transform: perspective(500px) translateZ(80px);
-    opacity: 1;
-  }
-}
-
-/* Flip clock animations */
-@keyframes flip-up-out {
-  0% {
-    opacity: 1;
-    transform: translateY(0) rotateX(0);
-    filter: blur(0px);
-  }
-  50% {
-    filter: blur(5px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-15px) rotateX(-45deg);
-    filter: blur(0px);
-  }
-}
-
-@keyframes flip-up-in {
-  0% {
-    opacity: 0;
-    transform: translateY(15px) rotateX(45deg);
-    filter: blur(0px);
-  }
-  50% {
-    filter: blur(5px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotateX(0);
-    filter: blur(0px);
-  }
-}
-
-@keyframes flip-down-out {
-  0% {
-    opacity: 1;
-    transform: translateY(0) rotateX(0);
-    filter: blur(0px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(15px) rotateX(45deg);
-    filter: blur(2px);
-  }
-}
-
-@keyframes flip-down-in {
-  0% {
-    opacity: 0;
-    transform: translateY(-15px) rotateX(-45deg);
-    filter: blur(2px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotateX(0);
-    filter: blur(0px);
-  }
-}
-
-.animate-accordion-down {
-  animation: accordion-down 0.2s ease-out;
-}
-
-.animate-accordion-up {
-  animation: accordion-up 0.2s ease-out;
-}
-
-.animate-wiggle {
-  animation: wiggle 0.5s ease-in-out;
-}
-
-.animate-flip-up-out {
-  animation: flip-up-out 0.1s ease-out forwards;
-}
-
-.animate-flip-up-in {
-  animation: flip-up-in 0.1s ease-out forwards;
-}
-
-.animate-flip-down-out {
-  animation: flip-down-out 0.1s ease-out forwards;
-}
-
-.animate-flip-down-in {
-  animation: flip-down-in 0.1s ease-out forwards;
-}
-
-.animate-pulse-scale {
-  animation: pulse-scale 0.5s ease-in-out;
-}
-
-.animate-number-pop {
-  animation: number-pop 0.5s ease-out;
-}
-
-.animate-fade-in-down {
-  animation: fade-in-down 0.3s ease-out;
-}
-
-.animate-fade-in-down {
-  animation: fade-in-up 0.3s ease-out;
-}
-
-.animate-emoji-slide-in {
-  animation: emoji-slide-in 0.3s ease-out;
-}
-
-.animate-emoji-slide-out {
-  animation: emoji-slide-out 0.3s ease-out;
-}
-
-.animate-rating-reveal {
-  animation: rating-reveal 0.4s ease-out;
-}
-
-.animate-arrow-slide {
-  animation: arrow-slide 0.2s ease-out;
-}
-
-.animate-bounce-light {
-  animation: bounce-light 1s ease-in-out;
-}
-
-.animate-scale-spring {
-  animation: scale-spring 0.2s ease-out;
-}
-
-.animate-stagger-fade-in {
-  animation: stagger-fade-in 0.4s ease-out;
-}
-
-.animate-pulse-dot {
-  animation: pulse-dot 2.4s ease-in-out infinite;
-}
-
-.animate-pulse-text {
-  animation: pulse-text 2.8s ease-in-out infinite;
-}
-
-/* Responsive animation controls */
-@media (prefers-reduced-motion: reduce) {
-  .animate-accordion-down,
-  .animate-accordion-up,
-  .animate-wiggle,
-  .animate-pulse-scale,
-  .animate-number-pop,
-  .animate-fade-in-down,
-  .animate-fade-in-up,
-  .animate-emoji-slide-in,
-  .animate-emoji-slide-out,
-  .animate-rating-reveal,
-  .animate-arrow-slide,
-  .animate-bounce-light,
-  .animate-scale-spring,
-  .animate-stagger-fade-in {
-    animation: none !important;
-    transition: none !important;
+  /* Text contrast mode overrides for vibe cards */
+  /* Force light mode colors (dark text on light background) */
+  [data-text-contrast="light"] {
+    /* Core text colors */
+    --foreground: oklch(0.145 0 0);
+    --background: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive-foreground: oklch(0.205 0 0);
+    --border: oklch(0.922 0 0);
+    /* Ensure all text-related variables use light mode values */
+    --color-foreground: oklch(0.145 0 0);
+    --color-card-foreground: oklch(0.145 0 0);
+    --color-popover-foreground: oklch(0.145 0 0);
+    --color-primary: oklch(0.205 0 0);
+    --color-primary-foreground: oklch(0.985 0 0);
+    --color-secondary-foreground: oklch(0.205 0 0);
+    --color-muted-foreground: oklch(0.556 0 0);
+    --color-accent-foreground: oklch(0.205 0 0);
+    --color-destructive-foreground: oklch(0.205 0 0);
   }
 
-  /* Keep opacity transitions for accessibility */
-  .animate-fade-in-down {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .animate-fade-in-up {
-    opacity: 1 !important;
-    transform: none !important;
+  /* Force dark mode colors (light text on dark background) */
+  [data-text-contrast="dark"] {
+    /* Core text colors */
+    --foreground: oklch(0.985 0 0);
+    --background: oklch(0.145 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive-foreground: oklch(0.985 0 0);
+    --border: oklch(0.205 0 0);
+    /* Ensure all text-related variables use dark mode values */
+    --color-foreground: oklch(0.985 0 0);
+    --color-card-foreground: oklch(0.985 0 0);
+    --color-popover-foreground: oklch(0.985 0 0);
+    --color-primary: oklch(0.922 0 0);
+    --color-primary-foreground: oklch(0.205 0 0);
+    --color-secondary-foreground: oklch(0.985 0 0);
+    --color-muted-foreground: oklch(0.708 0 0);
+    --color-accent-foreground: oklch(0.985 0 0);
+    --color-destructive-foreground: oklch(0.985 0 0);
   }
 }
 
@@ -732,244 +375,6 @@
 .container {
   @apply mx-auto w-full px-4;
   max-width: 1536px;
-}
-
-.cl-formButtonPrimary,
-.cl-socialButtonsBlockButton {
-  @apply bg-primary text-primary-foreground ring-offset-background hover:bg-primary/90 focus-visible:ring-ring inline-flex h-9 items-center justify-center rounded-md px-3 font-medium whitespace-nowrap !shadow-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
-}
-
-.cl-card,
-.cl-socialButtonsBlockButton,
-.cl-alert,
-.cl-phoneInputBox,
-.cl-userButtonPopoverCard {
-  @apply border-input bg-background rounded-lg border;
-}
-
-.cl-headerTitle,
-.cl-loading,
-.cl-formFieldLabel,
-.cl-formHeaderTitle,
-.cl-selectButton__countryCode,
-.cl-selectButton__countryCode p,
-.cl-selectOption p,
-.cl-selectOption div,
-.cl-modalCloseButton,
-.cl-navbarButton,
-.cl-breadcrumbsItem.cl-breadcrumbsItem__currentPage,
-.cl-profileSectionTitle p,
-.cl-userPreviewTextContainer,
-.cl-profileSectionContent p,
-.cl-form p,
-.cl-accordionTriggerButton {
-  @apply dark:text-foreground;
-}
-
-.cl-headerSubtitle,
-.cl-dividerText,
-.cl-footerActionText,
-.cl-alertText,
-.cl-formFieldInfoText,
-.cl-formFieldSuccessText,
-.cl-identityPreviewText,
-.cl-userButtonPopoverActionButton,
-.cl-userButtonPopoverActionButton svg,
-.cl-userButtonPopoverActionButtonText,
-.cl-userButtonPopoverFooter p,
-.cl-userButtonPopoverFooter a,
-.cl-formHeaderSubtitle,
-.cl-breadcrumbsItem,
-.cl-breadcrumbsItemDivider,
-.cl-fileDropAreaHint,
-.cl-fileDropAreaFooterHint,
-.cl-form
-  p[data-localization-key='userProfile.emailAddressPage.emailCode.formHint'],
-p[data-localization-key='userProfile.profilePage.successMessage'] {
-  @apply text-muted-foreground;
-}
-
-.cl-dividerLine {
-  @apply bg-border;
-}
-
-.cl-formFieldInput[type='text'],
-.cl-formFieldInput[type='email'],
-.cl-formFieldInput[type='password'] {
-  @apply border-input bg-background text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50;
-}
-
-.cl-footerActionLink {
-  @apply text-accent-foreground hover:text-accent-foreground/90 underline;
-}
-
-.cl-otpCodeFieldInput {
-  @apply !border-input text-foreground !border;
-}
-
-.cl-formResendCodeLink {
-  @apply text-primary disabled:opacity-90;
-}
-
-.cl-selectSearchInput__countryCode {
-  @apply border-input bg-background text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border border-b file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50;
-}
-
-.cl-selectOptionsContainer__countryCode {
-  @apply border-input bg-background border;
-}
-
-.cl-internal-icon,
-.cl-userPreviewSecondaryIdentifier__userButton {
-  @apply text-foreground;
-}
-
-/* Prevent icon blowout */
-.cl-internal-icon,
-.cl-internal-icon svg,
-.cl-userButtonPopoverActionButton svg,
-.cl-socialButtonsBlockButton svg,
-.cl-alternativeMethodsBlockButton svg {
-  width: 1rem !important;
-  height: 1rem !important;
-  max-width: 1rem !important;
-  max-height: 1rem !important;
-  flex-shrink: 0;
-}
-
-button[data-localization-key='userProfile.start.dangerSection.deleteAccountButton'] {
-  @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
-}
-
-.cl-fileDropAreaBox {
-  @apply dark:bg-gray-900;
-}
-
-.cl-fileDropAreaIconBox {
-  @apply dark:bg-gray-800;
-}
-
-.cl-fileDropAreaIcon {
-  @apply dark:text-gray-400;
-}
-
-.cl-fileDropAreaButtonPrimary {
-  @apply text-foreground hover:bg-secondary hover:text-accent-foreground h-10 px-4 py-2 transition-colors;
-}
-
-.cl-userButtonPopoverActionButton,
-.cl-profileSectionPrimaryButton,
-.cl-accordionTriggerButton,
-.cl-navbarButton {
-  @apply hover:bg-accent hover:text-accent-foreground;
-}
-
-.cl-card {
-  @apply rounded-lg shadow-md;
-}
-
-.cl-userButtonPopoverCard {
-  @apply rounded-md;
-}
-
-.cl-userButtonPopoverFooter a {
-  @apply hover:text-muted-foreground;
-}
-
-.cl-badge {
-  @apply border-input bg-background text-foreground rounded-full border px-2.5 py-0.5 text-xs !shadow-none;
-}
-
-.cl-badge[data-localization-key='badge__unverified'] {
-  @apply text-destructive border bg-transparent dark:text-red-500;
-}
-
-.cl-formButtonReset {
-  @apply text-foreground hover:bg-secondary;
-}
-
-.cl-footer {
-  @apply bg-background from-background to-background text-muted-foreground rounded-b-lg border-x border-b bg-gradient-to-t;
-}
-.cl-userButtonPopoverFooter {
-  @apply from-background to-background rounded-b-lg bg-gradient-to-t;
-}
-
-.cl-signIn-start,
-.cl-signUp-start,
-.cl-signIn-password,
-.cl-signIn-alternativeMethods,
-.cl-signIn-emailCode {
-  @apply rounded-b-none border-b-0;
-}
-
-.cl-cardBox {
-  @apply rounded-lg shadow-sm;
-}
-
-.cl-socialButtonsBlockButton {
-  @apply bg-foreground h-10 !border;
-}
-
-.cl-alternativeMethods .cl-alternativeMethodsBlockButton {
-  @apply border-input text-muted-foreground h-10 !border;
-}
-
-.cl-alternativeMethodsBlockButton {
-  @apply h-10 !shadow-none;
-}
-
-.cl-navbar {
-  @apply from-background to-background rounded-lg border-y border-l bg-gradient-to-t;
-}
-
-.cl-scrollBox {
-  @apply border-input from-background to-background rounded-lg rounded-l-none border bg-gradient-to-t;
-}
-
-h1[data-localization-key='userProfile.navbar.title'] {
-  @apply text-foreground;
-}
-
-.cl-profilePage > .cl-header {
-  @apply border-b;
-}
-
-.cl-profileSection__profile,
-.cl-profileSection__emailAddresses {
-  @apply border-b;
-}
-
-.cl-menuButton {
-  @apply text-foreground hover:text-foreground;
-}
-
-.cl-menuList {
-  @apply border-input bg-background border;
-}
-
-.cl-actionCard {
-  @apply border-input bg-background border;
-}
-
-.cl-menuItem[data-color='neutral'] {
-  @apply text-foreground hover:bg-muted;
-}
-
-.cl-avatarImageActionsUpload {
-  @apply border-input text-foreground !border;
-}
-
-.cl-userButtonPopoverMain {
-  @apply border-input bg-background rounded-lg;
-}
-
-.cl-navbarMobileMenuRow {
-  @apply from-background to-background rounded-lg border-x border-t bg-gradient-to-t;
-}
-
-.cl-navbarMobileMenuButton {
-  @apply text-foreground;
 }
 
 /* Theme color palette as CSS custom properties */
@@ -1294,29 +699,4 @@ h1[data-localization-key='userProfile.navbar.title'] {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-em-emoji-picker {
-  background: transparent;
-  background-color: transparent;
-  height: 100%;
-  min-height: 2rem;
-  max-height: 100%;
-  box-shadow: none;
-  touch-action: manipulation;
-}
-
-/* Ensure all clickable elements in picker work on mobile and desktop */
-em-emoji-picker button,
-em-emoji-picker [role="button"], 
-em-emoji-picker [role="option"],
-em-emoji-picker em-emoji,
-em-emoji-picker .emoji-mart-emoji,
-em-emoji-picker .emoji-mart-category-label,
-em-emoji-picker .emoji-mart-search input {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  pointer-events: auto !important;
-  user-select: none;
-  cursor: pointer;
 }
