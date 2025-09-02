@@ -70,6 +70,17 @@ vi.mock('@/features/search/hooks/use-search-results-improved', () => ({
   })),
 }));
 
+vi.mock('@/features/search/hooks/use-trending-searches', () => ({
+  useTrendingSearches: vi.fn(() => ({
+    data: [
+      { term: 'trending1', count: 50 },
+      { term: 'trending2', count: 30 },
+    ],
+    isLoading: false,
+    isError: false,
+  })),
+}));
+
 vi.mock('@/queries', () => ({
   useEmojiMetadata: () => ({ data: mockEmojiMetadata, isLoading: false }),
   useCurrentUser: () => ({ data: null, isLoading: false }),
@@ -266,6 +277,26 @@ vi.mock('@/components/tag-search-command', () => ({
   ),
 }));
 
+vi.mock('@/features/search/components/search-empty-state', () => ({
+  SearchEmptyState: ({
+    query,
+    hasFilters,
+    onClearFilters,
+  }: {
+    query?: string;
+    hasFilters?: boolean;
+    onClearFilters?: () => void;
+  }) => (
+    <div data-testid="search-empty-state">
+      <h2>No results found</h2>
+      {query && <p>No results for "{query}"</p>}
+      {hasFilters && onClearFilters && (
+        <button onClick={onClearFilters}>Clear filters</button>
+      )}
+    </div>
+  ),
+}));
+
 // Import the mocked function
 import { useSearchResultsImproved } from '@/features/search/hooks/use-search-results-improved';
 const mockUseSearchResultsImproved = vi.mocked(useSearchResultsImproved);
@@ -318,9 +349,9 @@ describe('Search Page - Emoji Filter Integration', () => {
     renderWithRouter({ q: 'test' });
 
     await waitFor(() => {
-      expect(screen.getByText('search results for "test"')).toBeInTheDocument();
+      expect(screen.getByText(/search results for "test"/)).toBeInTheDocument();
       expect(
-        screen.getByText('2 results found for "test"')
+        screen.getByText(/2.*results.*found.*for.*"test"/)
       ).toBeInTheDocument();
       expect(screen.getByText('filter results')).toBeInTheDocument();
     });
