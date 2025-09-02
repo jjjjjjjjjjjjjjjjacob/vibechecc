@@ -48,12 +48,14 @@ export {
   Eye,
   EyeOff,
   Flag,
+  TrendingUp,
+  TrendingDown,
   Sparkles,
   Zap,
   Save,
   PartyPopper,
   Rocket,
-  Share2,
+  Share,
 } from 'lucide-react';
 
 // Status and feedback icons
@@ -97,13 +99,13 @@ export {
 } from 'lucide-react';
 
 // Theme and visual icons
-export { Sun, Moon, Laptop, Palette } from 'lucide-react';
+export { Sun, Moon, Laptop, Palette, Shuffle } from 'lucide-react';
 
 // Device and info icons
 export { Maximize2, Info, Smartphone, Monitor } from 'lucide-react';
 
 // Analytics and trends icons
-export { TrendingUp, Flame, Download } from 'lucide-react';
+export { Flame, Download } from 'lucide-react';
 
 // Media icons
 export { Camera, Image } from 'lucide-react';

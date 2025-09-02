@@ -6,13 +6,16 @@
     "jsxImportSource": "react",
     "paths": {
       "@/*": ["./src/*"],
-      "@vibechecc/convex": ["../convex"],
-      "@vibechecc/convex/*": ["../convex/*"]
+      "@vibechecc/convex": ["../convex/convex/_generated/api.d.ts"],
+      "@vibechecc/convex/dataModel": [
+        "../convex/convex/_generated/dataModel.d.ts"
+      ]
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite-env.d.ts",
     "../convex/convex/_generated/api.d.ts",
     "../convex/convex/_generated/dataModel.d.ts"
   ],
@@ -22,6 +25,8 @@
     ".output",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "vite.config.ts"
+    "vite.config.ts",
+    "../convex/convex/**/*.ts",
+    "../convex/convex/**/*.tsx"
   ]
 }

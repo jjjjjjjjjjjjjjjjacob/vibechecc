@@ -7,7 +7,7 @@ import { Heart, Eye, UserPlus, Users, Sparkles } from '@/components/ui/icons';
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
 import { api } from '@vibechecc/convex';
-import { EmojiRatingSelector } from '@/features/ratings/components/emoji-rating-selector';
+import { RevolvingRateReviewButton } from '@/features/ratings/components/revolving-rate-review-button';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import type { EmojiRating } from '@vibechecc/types';
 import { computeUserDisplayName } from '@/utils/user-utils';
@@ -70,7 +70,7 @@ export function OnboardingDiscoverStep({
     setHasInteracted(true);
   };
 
-  const handleEmojiRating = async (_data: {
+  const _handleEmojiRating = async (_data: {
     emoji: string;
     value: number;
     review: string;
@@ -207,7 +207,7 @@ export function OnboardingDiscoverStep({
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {demoVibe.tags?.map((tag) => (
+                    {demoVibe.tags?.map((tag: string) => (
                       <Badge key={tag} variant="outline" className="text-xs">
                         #{tag}
                       </Badge>
@@ -217,10 +217,11 @@ export function OnboardingDiscoverStep({
 
                 {/* Emoji Rating Demo */}
                 <div className="border-t pt-4">
-                  <EmojiRatingSelector
+                  <RevolvingRateReviewButton
+                    vibeId={demoVibe.id}
                     topEmojis={demoVibe.emojiRatings || []}
-                    onSubmit={handleEmojiRating}
                     vibeTitle={demoVibe.title}
+                    existingUserRatings={[]}
                     className="mb-4"
                   />
 
@@ -231,12 +232,21 @@ export function OnboardingDiscoverStep({
                           top-rated emotions:
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          {demoVibe.emojiRatings.map((rating, index) => (
-                            <EmojiRatingDisplay
-                              key={`${rating.emoji}-${index}`}
-                              rating={rating}
-                            />
-                          ))}
+                          {demoVibe.emojiRatings.map(
+                            (rating, index: number) => (
+                              <EmojiRatingDisplay
+                                key={`${rating.emoji}-${index}`}
+                                rating={{
+                                  ...rating,
+                                  count: rating.count || 0,
+                                }}
+                                vibeId={demoVibe.id}
+                                variant="compact"
+                                existingUserRatings={[]}
+                                emojiMetadata={{}}
+                              />
+                            )
+                          )}
                         </div>
                       </div>
                     )}
@@ -341,7 +351,7 @@ export function OnboardingDiscoverStep({
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="bg-secondary/30 space-y-3 rounded-lg p-4">
                     <h4 className="flex items-center gap-2 font-semibold lowercase">
-                      <Heart className="h-4 w-4 text-red-500" />
+                      <Heart className="text-destructive h-4 w-4" />
                       for you feed
                     </h4>
                     <p className="text-muted-foreground text-sm">
@@ -352,7 +362,7 @@ export function OnboardingDiscoverStep({
 
                   <div className="bg-secondary/30 space-y-3 rounded-lg p-4">
                     <h4 className="flex items-center gap-2 font-semibold lowercase">
-                      <Eye className="h-4 w-4 text-blue-500" />
+                      <Eye className="text-theme-primary h-4 w-4" />
                       discover more
                     </h4>
                     <p className="text-muted-foreground text-sm">
@@ -400,7 +410,7 @@ export function OnboardingDiscoverStep({
 
       {/* Success Message */}
       {hasInteracted && (
-        <div className="animate-zoomIn rounded-lg border border-green-500/20 bg-green-500/10 p-4 text-center">
+        <div className="animate-zoomIn rounded-lg border border-green-600/20 bg-green-600/10 p-4 text-center dark:border-green-400/20 dark:bg-green-400/10">
           <p className="text-sm font-medium text-green-700 dark:text-green-300">
             awesome! you're ready to start your vibechecc journey 🚀
           </p>

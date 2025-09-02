@@ -1,4 +1,5 @@
 /// <reference lib="dom" />
+/// <reference types="@testing-library/jest-dom" />
 import React from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import { vi, beforeEach, afterEach, expect, describe, it } from 'vitest';

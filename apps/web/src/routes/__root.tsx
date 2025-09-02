@@ -36,6 +36,7 @@ import { Footer } from '@/components/footer';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { PostHogPageTracker } from '@/components/posthog-page-tracker';
 import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-posthog-integration';
+import { AppleIdErrorHandler } from '@/features/auth/components/apple-id-error-handler';
 import { OnboardingGuard } from '@/features/onboarding/components/onboarding-guard';
 import { EnvironmentAccessGuard } from '@/components/environment-access-guard';
 import { NewUserSurvey } from '@/components/new-user-survey';
@@ -265,34 +266,36 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-background text-foreground">
+      <body className="!bg-background text-foreground">
         <PostHogProvider>
-          <div className="relative flex min-h-screen flex-col">
-            <PostHogPageTracker />
-            <ClerkPostHogIntegration />
-            {isAdminRoute ? (
-              // Admin routes - no header/footer, no guards
-              <>{children}</>
-            ) : (
-              // Regular app routes - with header/footer and guards
-              <>
-                <EnvironmentAccessGuard>
-                  <OnboardingGuard>
-                    <Header />
-                    <LoadingIndicator />
+          <AppleIdErrorHandler>
+            <div className="relative flex min-h-screen flex-col">
+              <PostHogPageTracker />
+              <ClerkPostHogIntegration />
+              {isAdminRoute ? (
+                // Admin routes - no header/footer, no guards
+                <>{children}</>
+              ) : (
+                // Regular app routes - with header/footer and guards
+                <>
+                  <EnvironmentAccessGuard>
+                    <OnboardingGuard>
+                      <Header />
+                      <LoadingIndicator />
 
-                    <main className="flex-1" data-vaul-drawer-wrapper>
-                      {children}
-                    </main>
-                    <NewUserSurvey />
-                  </OnboardingGuard>
-                </EnvironmentAccessGuard>
+                      <main className="flex-1" data-vaul-drawer-wrapper>
+                        {children}
+                      </main>
+                      <NewUserSurvey />
+                    </OnboardingGuard>
+                  </EnvironmentAccessGuard>
 
-                <Footer />
-              </>
-            )}
-            <Toaster />
-          </div>
+                  <Footer />
+                </>
+              )}
+              <Toaster />
+            </div>
+          </AppleIdErrorHandler>
         </PostHogProvider>
         {import.meta.env.DEV && (
           <React.Suspense fallback={null}>

@@ -151,11 +151,11 @@ export function EmojisTable({
   const _getSentimentColor = (sentiment?: string) => {
     switch (sentiment) {
       case 'positive':
-        return 'text-green-600';
+        return 'text-green-600 dark:text-green-400';
       case 'negative':
-        return 'text-red-600';
+        return 'text-destructive';
       case 'neutral':
-        return 'text-gray-600';
+        return 'text-muted-foreground';
       default:
         return 'text-muted-foreground';
     }

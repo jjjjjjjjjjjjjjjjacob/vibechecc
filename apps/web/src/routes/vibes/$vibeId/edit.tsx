@@ -10,7 +10,8 @@ import { getAuth } from '@clerk/tanstack-react-start/server';
 import { getWebRequest } from '@tanstack/react-start/server';
 import { TagInput } from '@/components/tag-input';
 import { ImageUpload } from '@/components/image-upload';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { GradientPicker } from '@/components/gradient-picker';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { cn } from '@/utils/tailwind-utils';
 import {
   Circle,
@@ -23,6 +24,8 @@ import {
 } from '@/components/ui/icons';
 import type { Id } from '@vibechecc/convex/dataModel';
 import toast from '@/utils/toast';
+import { getConsistentGradient } from '@/utils/gradient-utils';
+import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 
 // Server function to check authentication
 const requireAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -58,6 +61,11 @@ function EditVibe() {
   const [imageStorageId, setImageStorageId] =
     React.useState<Id<'_storage'> | null>(null);
   const [currentImageUrl, setCurrentImageUrl] = React.useState<string>('');
+  const [gradient, setGradient] = React.useState<{
+    from: string;
+    to: string;
+    direction: string;
+  }>(() => getConsistentGradient());
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState('');
   const [validationErrors, setValidationErrors] = React.useState<
@@ -75,41 +83,71 @@ function EditVibe() {
       description: description || vibe.description,
       image: currentImageUrl || vibe.image,
       tags: tags.length > 0 ? tags : vibe.tags,
+      gradientFrom: gradient.from,
+      gradientTo: gradient.to,
+      gradientDirection: gradient.direction,
     };
-  }, [vibe, description, currentImageUrl, tags]);
+  }, [vibe, description, currentImageUrl, tags, gradient]);
 
   // Track original values to detect changes (excluding title which is read-only)
   const [originalValues, setOriginalValues] = React.useState({
     description: '',
     tags: [] as string[],
     imageUrl: '',
+    gradientFrom: '',
+    gradientTo: '',
+    gradientDirection: '',
   });
 
   // Initialize form with vibe data
   React.useEffect(() => {
     if (vibe && !vibe.isDeleted) {
+      // Auto-generate gradient if none exists and no image
+      const needsGradient =
+        !vibe.gradientFrom && !vibe.gradientTo && !vibe.image;
+      const autoGradient = needsGradient
+        ? getConsistentGradient(vibe.id)
+        : null;
+
       const initialValues = {
         description: vibe.description || '',
         tags: vibe.tags || [],
         imageUrl: vibe.image || '',
+        gradientFrom: vibe.gradientFrom || autoGradient?.from || gradient.from,
+        gradientTo: vibe.gradientTo || autoGradient?.to || gradient.to,
+        gradientDirection:
+          vibe.gradientDirection ||
+          autoGradient?.direction ||
+          gradient.direction,
       };
 
       setDescription(initialValues.description);
       setTags(initialValues.tags);
       setCurrentImageUrl(initialValues.imageUrl);
+
+      // Set gradient (either existing, auto-generated, or current state)
+      setGradient({
+        from: initialValues.gradientFrom,
+        to: initialValues.gradientTo,
+        direction: initialValues.gradientDirection,
+      });
+
       setOriginalValues(initialValues);
     }
-  }, [vibe]);
+  }, [vibe, gradient.direction, gradient.from, gradient.to]);
 
   // Check for unsaved changes
   React.useEffect(() => {
     const hasChanges =
       description !== originalValues.description ||
       JSON.stringify(tags) !== JSON.stringify(originalValues.tags) ||
-      currentImageUrl !== originalValues.imageUrl;
+      currentImageUrl !== originalValues.imageUrl ||
+      gradient.from !== originalValues.gradientFrom ||
+      gradient.to !== originalValues.gradientTo ||
+      gradient.direction !== originalValues.gradientDirection;
 
     setHasUnsavedChanges(hasChanges);
-  }, [description, tags, currentImageUrl, originalValues]);
+  }, [description, tags, currentImageUrl, gradient, originalValues]);
 
   // Real-time validation
   React.useEffect(() => {
@@ -220,6 +258,9 @@ function EditVibe() {
         description: description.trim(),
         image: imageStorageId || undefined,
         tags: tags.length > 0 ? tags : undefined,
+        gradientFrom: gradient.from,
+        gradientTo: gradient.to,
+        gradientDirection: gradient.direction,
       });
 
       toast.success('vibe updated successfully!');
@@ -311,21 +352,30 @@ function EditVibe() {
                   <div className="space-y-2 text-sm">
                     {description !== originalValues.description && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span>Description updated</span>
                       </div>
                     )}
                     {currentImageUrl !== originalValues.imageUrl && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span>Image updated</span>
                       </div>
                     )}
                     {JSON.stringify(tags) !==
                       JSON.stringify(originalValues.tags) && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span>Tags updated</span>
+                      </div>
+                    )}
+                    {(gradient.from !== originalValues.gradientFrom ||
+                      gradient.to !== originalValues.gradientTo ||
+                      gradient.direction !==
+                        originalValues.gradientDirection) && (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <span>Gradient updated</span>
                       </div>
                     )}
                     {!hasUnsavedChanges && (
@@ -354,7 +404,7 @@ function EditVibe() {
                 edit your vibe
               </h1>
               {hasUnsavedChanges && (
-                <div className="flex items-center gap-1 text-orange-500">
+                <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-xs">unsaved changes</span>
                 </div>
@@ -406,12 +456,12 @@ function EditVibe() {
                   rows={5}
                   className={cn(
                     'textarea-glow resize-none border-2 bg-transparent text-base transition-all',
-                    'focus:border-pink-500 focus:ring-pink-500/20',
+                    'focus:border-theme-primary focus:ring-theme-primary/20',
                     validationErrors.description
-                      ? 'border-red-500 focus:border-red-500'
+                      ? 'border-destructive focus:border-destructive'
                       : description && !validationErrors.description
-                        ? 'border-green-500/50'
-                        : 'border-pink-500/50'
+                        ? 'border-green-600/50 dark:border-green-400/50'
+                        : 'border-theme-primary/50'
                   )}
                   required
                 />
@@ -419,7 +469,7 @@ function EditVibe() {
                   <span
                     className={
                       validationErrors.description
-                        ? 'text-red-500'
+                        ? 'text-destructive'
                         : 'text-muted-foreground'
                     }
                   >
@@ -428,7 +478,7 @@ function EditVibe() {
                   <span
                     className={
                       description.length > 1800
-                        ? 'text-orange-500'
+                        ? 'text-orange-600 dark:text-orange-400'
                         : 'text-muted-foreground'
                     }
                   >
@@ -444,6 +494,35 @@ function EditVibe() {
                 disabled={isSubmitting}
                 initialImageUrl={currentImageUrl}
               />
+
+              {/* Gradient Picker Section - Only show if no image */}
+              {!currentImageUrl && !imageStorageId && (
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">
+                    vibe gradient
+                    <span className="text-muted-foreground ml-1 font-normal">
+                      (customize your vibe's appearance)
+                    </span>
+                  </Label>
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <GradientPicker value={gradient} onChange={setGradient} />
+                    </div>
+                    <div className="h-24 w-24 overflow-hidden rounded-lg border-2">
+                      <SimpleVibePlaceholder
+                        title={vibe?.title || 'preview'}
+                        gradientFrom={gradient.from}
+                        gradientTo={gradient.to}
+                        gradientDirection={gradient.direction}
+                        hideText
+                      />
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    this gradient will be shown when no image is uploaded
+                  </p>
+                </div>
+              )}
 
               {/* Tags Section */}
               <div className="space-y-3">
@@ -462,7 +541,7 @@ function EditVibe() {
                   <span
                     className={
                       validationErrors.tags
-                        ? 'text-red-500'
+                        ? 'text-destructive'
                         : 'text-muted-foreground'
                     }
                   >
@@ -472,7 +551,7 @@ function EditVibe() {
                   <span
                     className={
                       tags.length > 8
-                        ? 'text-orange-500'
+                        ? 'text-orange-600 dark:text-orange-400'
                         : 'text-muted-foreground'
                     }
                   >
@@ -530,7 +609,7 @@ function EditVibe() {
                 </div>
 
                 {hasUnsavedChanges && (
-                  <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center text-sm text-orange-700">
+                  <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center text-sm text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300">
                     <AlertCircle className="mr-1 inline h-4 w-4" />
                     you have unsaved changes
                   </div>

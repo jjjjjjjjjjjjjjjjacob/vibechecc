@@ -38,17 +38,14 @@ export function FeedLayout({
   floatingElements,
   className,
   containerClassName,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   headerSpacing = 'lg',
   contentSpacing = 'md',
 }: FeedLayoutProps) {
   return (
     <BaseLayout className={className} containerClassName={containerClassName}>
       {/* Header Section */}
-      {header && (
-        <div className={cn('relative z-0', spacingClasses[headerSpacing])}>
-          {header}
-        </div>
-      )}
+      {header && <div className={cn('relative z-0')}>{header}</div>}
 
       {/* Sticky Navigation Sections */}
       {stickyNavigation.map((section, index) => {

@@ -2,10 +2,10 @@ import * as React from 'react';
 import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { cn } from '@/utils/tailwind-utils';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 
 export type RatingDisplayMode = 'most-rated' | 'top-rated';
 

@@ -3,14 +3,17 @@ import {
   Link,
   useSearch,
   useNavigate,
+  Navigate,
 } from '@tanstack/react-router';
 import { lazy, Suspense, useMemo } from 'react';
 import * as React from 'react';
+import { useFeatureFlagEnabled, useFeatureFlagPayload } from 'posthog-js/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   useTopRatedEmojiVibes,
   useVibesPaginated,
+  useVibesInfinite,
   useTopRatedVibes,
   useAllTags,
   useVibesByTag,
@@ -24,10 +27,12 @@ import {
   type PrimaryColorTheme,
   type SecondaryColorTheme,
 } from '@/stores/theme-store';
-import type { Vibe } from '@/types';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import type { Vibe } from '@vibechecc/types';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';
+import { TrendingSignupCta } from '@/features/auth/components/signup-cta';
+import { useSignupCtaPlacement } from '@/features/auth/hooks/use-signup-cta-placement';
 import { useUser } from '@clerk/tanstack-react-start';
 
 // Skeleton for lazy-loaded components
@@ -136,10 +141,15 @@ const FEATURED_COLLECTIONS: EmojiCollection[] = [
   },
 ];
 
-function DiscoverPage() {
+function DiscoverPageDev() {
   const search = useSearch({ from: '/discover' });
   const navigate = useNavigate();
   const { user } = useUser();
+
+  // CTA placement hooks
+  const { isAuthenticated } = useSignupCtaPlacement({
+    enableSearchCta: true,
+  });
 
   // Get current user's theme
   const { data: currentUser } = useCurrentUser();
@@ -202,7 +212,8 @@ function DiscoverPage() {
             createdAt: new Date().toISOString(),
             createdById: user?.id || '',
             visibility: 'public' as const,
-            ratings: [],
+            emojiRatings: [],
+            currentUserRatings: [],
           }}
           author={{
             externalId: user?.id || '',
@@ -220,7 +231,7 @@ function DiscoverPage() {
       <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
-          <div className="mb-8 text-center">
+          <div className="mb-8 text-left">
             <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
               discover all the vibes
             </h1>
@@ -250,6 +261,19 @@ function DiscoverPage() {
           {/* Trending Section */}
           <TrendingSection />
 
+          {/* Boosted Section */}
+          <BoostedSection />
+
+          {/* Controversial Section */}
+          <ControversialSection />
+
+          {/* Trending CTA for unauthenticated users */}
+          {!isAuthenticated && (
+            <div className="mb-12">
+              <TrendingSignupCta className="animate-fade-in-up" />
+            </div>
+          )}
+
           {/* Recent Arrivals Section */}
           <RecentArrivalsSection />
 
@@ -275,6 +299,28 @@ function DiscoverPage() {
       </div>
     </>
   );
+}
+
+// Feature-flag the discover page to signed-in users with access
+function DiscoverPage() {
+  const { isSignedIn, isLoaded } = useUser();
+  const isFeatureFlagEnabled = useFeatureFlagEnabled('discover-page-access');
+  const featureFlagPayload = useFeatureFlagPayload('discover-page-access');
+
+  // Check both flag and payload (following EnvironmentAccessGuard pattern)
+  const hasAccess = isSignedIn && isFeatureFlagEnabled && !!featureFlagPayload;
+
+  // Wait for auth and feature flag to load
+  if (!isLoaded || isFeatureFlagEnabled === undefined) {
+    return null;
+  }
+
+  // Redirect if no access
+  if (!hasAccess) {
+    return <Navigate to="/" />;
+  }
+
+  return <DiscoverPageDev />;
 }
 
 // Component for emoji collection sections using VibeCategoryRow
@@ -368,15 +414,16 @@ function NewSection() {
   );
 }
 
-// Trending Section Component
+// Trending Section Component - Now uses hot algorithm
 function TrendingSection() {
-  const { data, isLoading, error } = useVibesPaginated(20);
+  const { data, isLoading, error } = useVibesInfinite(
+    { sort: 'hot', limit: 12 },
+    { enabled: true }
+  );
 
-  const trendingVibes = useMemo(() => {
-    if (!data?.vibes) return [];
-    // Filter for vibes with good engagement (rating count >= 3) and limit to 12
-    return data.vibes.filter((vibe) => vibe.ratings?.length >= 3).slice(0, 12);
-  }, [data]);
+  const trendingVibes = ((
+    data as { pages: Array<{ vibes: Vibe[] }> }
+  )?.pages?.flatMap((page) => page.vibes) || []) as Vibe[];
 
   return (
     <DiscoverSectionWrapper
@@ -389,6 +436,58 @@ function TrendingSection() {
       isLoading={isLoading}
       error={error}
       priority
+      ratingDisplayMode="most-rated"
+    />
+  );
+}
+
+// Boosted Section Component
+function BoostedSection() {
+  const { data, isLoading, error } = useVibesInfinite(
+    { sort: 'boosted', limit: 10 },
+    { enabled: true }
+  );
+
+  const boostedVibes = ((
+    data as { pages: Array<{ vibes: Vibe[] }> }
+  )?.pages?.flatMap((page) => page.vibes) || []) as Vibe[];
+
+  return (
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-sans">🚀</span> most boosted
+        </>
+      }
+      vibes={boostedVibes as Vibe[]}
+      isLoading={isLoading}
+      error={error}
+      ratingDisplayMode="most-rated"
+    />
+  );
+}
+
+// Controversial Section Component
+function ControversialSection() {
+  const { data, isLoading, error } = useVibesInfinite(
+    { sort: 'controversial', limit: 8 },
+    { enabled: true }
+  );
+
+  const controversialVibes = ((
+    data as { pages: Array<{ vibes: Vibe[] }> }
+  )?.pages?.flatMap((page) => page.vibes) || []) as Vibe[];
+
+  return (
+    <DiscoverSectionWrapper
+      title={
+        <>
+          <span className="font-sans">⚡</span> controversial
+        </>
+      }
+      vibes={controversialVibes as Vibe[]}
+      isLoading={isLoading}
+      error={error}
       ratingDisplayMode="most-rated"
     />
   );
@@ -435,7 +534,7 @@ function UnratedSection() {
     if (!data?.vibes) return [];
     // Filter for unrated vibes and limit to 10
     return data.vibes
-      .filter((v) => !v.ratings || v.ratings.length === 0)
+      .filter((v) => !v.emojiRatings || v.emojiRatings.length === 0)
       .slice(0, 10);
   }, [data]);
 
@@ -616,7 +715,7 @@ function FeaturedCollectionVibeList({
             Array.from({ length: 3 }).map((_, index) => (
               <VibeCard
                 key={`skeleton-${index}`}
-                variant="list"
+                variant="compact"
                 loading={true}
               />
             ))
@@ -629,7 +728,7 @@ function FeaturedCollectionVibeList({
               <VibeCard
                 key={vibe.id}
                 vibe={vibe}
-                variant="list"
+                variant="compact"
                 ratingDisplayMode={collection.ratingDisplayMode || 'most-rated'}
               />
             ))

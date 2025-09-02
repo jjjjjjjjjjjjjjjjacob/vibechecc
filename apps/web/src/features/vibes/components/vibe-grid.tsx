@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { VibeCard } from './vibe-card';
-import type { Vibe } from '@/types';
+import { VibeCardV2 as VibeCard } from './vibe-card';
+import type { Vibe } from '@vibechecc/types';
 
 interface VibeGridProps {
   vibes: Vibe[];

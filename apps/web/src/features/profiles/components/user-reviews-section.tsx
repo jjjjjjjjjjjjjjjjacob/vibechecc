@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
+import type { Id } from '@vibechecc/convex/dataModel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +12,14 @@ import {
 } from '@/components/ui/tooltip';
 import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-placeholder';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
-import { useUserRatings } from '@/queries';
+import { RatingShareButton } from '@/components/social/rating-share-button';
+import { RatingDootButton } from '@/features/ratings/components/rating-doot-button';
+import { BoostButton } from '@/features/ratings/components/boost-button';
+import {
+  useUserRatings,
+  useBulkRatingVoteScores,
+  useBulkUserRatingVoteStatuses,
+} from '@/queries';
 import type { User, Rating } from '@vibechecc/types';
 import { MessageSquare } from '@/components/ui/icons';
 
@@ -31,6 +39,18 @@ export function UserReviewsSection({
   const { data: userRatings, isLoading: reviewsLoading } = useUserRatings(
     user.externalId
   );
+
+  // Get rating IDs for fetching vote data
+  const ratingIds = React.useMemo(() => {
+    if (!userRatings) return [];
+    return userRatings
+      .filter((r) => r && r._id)
+      .map((r) => r!._id as Id<'ratings'>);
+  }, [userRatings]);
+
+  // Fetch vote scores and statuses for all ratings
+  const { data: voteScores } = useBulkRatingVoteScores(ratingIds);
+  const { data: voteStatuses } = useBulkUserRatingVoteStatuses(ratingIds);
 
   // Filter only ratings that have review text
   const ratingsWithReviews =
@@ -103,7 +123,7 @@ export function UserReviewsSection({
         your reviews
       </h2>
 
-      <div className="space-y-3">
+      <div className="space-y-3 sm:space-y-4">
         {displayedReviews.map((rating) => {
           if (!rating) return null;
 
@@ -118,6 +138,14 @@ export function UserReviewsSection({
               key={`${rating.vibeId}-${rating.createdAt}`}
               rating={completeRating}
               currentUser={user}
+              netScore={voteScores?.[rating._id || '']?.netScore || 0}
+              voteStatus={
+                voteStatuses?.[rating._id || ''] || {
+                  voteType: null,
+                  boosted: false,
+                  dampened: false,
+                }
+              }
             />
           );
         })}
@@ -143,9 +171,20 @@ export function UserReviewsSection({
 interface ReviewCardProps {
   rating: Rating;
   currentUser: User;
+  netScore: number;
+  voteStatus: {
+    voteType: 'boost' | 'dampen' | null;
+    boosted: boolean;
+    dampened: boolean;
+  };
 }
 
-function ReviewCard({ rating, currentUser }: ReviewCardProps) {
+function ReviewCard({
+  rating,
+  currentUser,
+  netScore,
+  voteStatus,
+}: ReviewCardProps) {
   const vibe = rating.vibe;
   const usePlaceholder = !vibe?.image;
 
@@ -155,9 +194,9 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
 
   return (
     <Link to="/vibes/$vibeId" params={{ vibeId: vibe.id }}>
-      <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+      <Card className="overflow-hidden transition-shadow duration-200 hover:shadow-md">
         <CardContent className="p-0">
-          <div className="flex gap-3 p-4">
+          <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
             {/* Reviewer Avatar (current user) */}
             <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage
@@ -182,7 +221,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
             {/* Content */}
             <div className="min-w-0 flex-1">
               {/* Header */}
-              <div className="mb-1 flex items-center gap-2">
+              <div className="mb-2 flex items-center gap-2 sm:mb-1">
                 <span className="truncate text-sm font-medium">
                   @
                   {currentUser.username ||
@@ -198,25 +237,71 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
               </div>
 
               {/* Review Text */}
-              <div className="mb-3">
+              <div className="mb-3 sm:mb-2">
                 <p className="text-sm leading-relaxed">{rating.review}</p>
               </div>
 
               {/* Rating and Vibe Image */}
-              <div className="flex items-center justify-between">
-                <EmojiRatingDisplay
-                  rating={{
-                    emoji: rating.emoji,
-                    value: rating.value,
-                    count: undefined,
-                  }}
-                  showScale={false}
-                  size="sm"
-                />
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <EmojiRatingDisplay
+                    rating={{
+                      emoji: rating.emoji,
+                      value: rating.value,
+                      count: 0,
+                    }}
+                    vibeId={vibe.id}
+                    size="sm"
+                  />
+                  {rating._id && (
+                    <>
+                      <RatingDootButton
+                        ratingId={rating._id as Id<'ratings'>}
+                        netScore={netScore}
+                        voteStatus={voteStatus}
+                        isOwnRating={true} // This is the user's own review section
+                        variant="ghost"
+                        size="sm"
+                      />
+                      <BoostButton
+                        contentId={rating._id as Id<'ratings'>}
+                        contentType="rating"
+                        currentBoostScore={0}
+                        boostCost={50}
+                        dampenCost={25}
+                        userPoints={0}
+                        userBoostAction={null}
+                        isOwnContent={true}
+                        variant="ghost"
+                        size="sm"
+                      />
+                    </>
+                  )}
+                  <RatingShareButton
+                    rating={rating}
+                    vibe={{
+                      ...vibe,
+                      emojiRatings: [],
+                      currentUserRatings: [],
+                      createdBy: vibe.createdBy
+                        ? {
+                            externalId: vibe.createdBy.id,
+                            id: vibe.createdBy.id,
+                            username: vibe.createdBy.name,
+                            full_name: vibe.createdBy.name,
+                            image_url: vibe.createdBy.avatar,
+                          }
+                        : null,
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8"
+                  />
+                </div>
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="relative h-8 w-8 cursor-pointer overflow-hidden rounded">
+                    <div className="relative h-8 w-8 flex-shrink-0 cursor-pointer overflow-hidden rounded">
                       {usePlaceholder ? (
                         <SimpleVibePlaceholder title={vibe.title} />
                       ) : (

@@ -4,19 +4,19 @@ import React from 'react';
 export function NotFound({ children }: { children?: React.ReactNode }) {
   return (
     <div className="space-y-2 p-2">
-      <div className="text-gray-600 dark:text-gray-400">
+      <div className="text-muted-foreground">
         {children || <p>The page you are looking for does not exist.</p>}
       </div>
       <p className="flex flex-wrap items-center gap-2">
         <button
           onClick={() => window.history.back()}
-          className="rounded bg-emerald-500 px-2 py-1 text-sm font-black text-white uppercase"
+          className="rounded bg-green-600 px-2 py-1 text-sm font-black text-white uppercase dark:bg-green-500"
         >
           Go back
         </button>
         <Link
           to="/"
-          className="rounded bg-cyan-600 px-2 py-1 text-sm font-black text-white uppercase"
+          className="bg-theme-primary text-primary-foreground rounded px-2 py-1 text-sm font-black uppercase"
         >
           Start Over
         </Link>

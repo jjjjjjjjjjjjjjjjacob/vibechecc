@@ -97,6 +97,18 @@ export interface EmojiRatingMetadata {
   sentiment?: 'positive' | 'negative' | 'neutral';
 }
 
+// Lighter type for current user ratings (matches backend response)
+export interface CurrentUserRating {
+  _id?: string; // Convex document ID for compatibility
+  id?: string;
+  emoji: string;
+  value: number;
+  review: string;
+  createdAt: string;
+  updatedAt?: string;
+  user?: User | null; // User who created the rating
+}
+
 export interface Vibe {
   _id?: string; // Convex document ID for compatibility
   id: string;
@@ -109,12 +121,49 @@ export interface Vibe {
   createdAt: string;
   updatedAt?: string;
   _creationTime?: number; // Convex creation time for compatibility
-  ratings: Rating[];
+  emojiRatings: Array<{
+    emoji: string;
+    averageValue: number;
+    count: number;
+    totalValue: number;
+  }>;
   tags?: string[];
   viewCount?: number;
   visibility?: 'public' | 'deleted'; // From Convex schema
   shareCount?: number; // Number of times this vibe has been shared
   lastSharedAt?: number; // Timestamp of most recent share
+
+  // Color gradient fields for custom vibe appearance
+  gradientFrom?: string; // Starting color for gradient (hex or color name)
+  gradientTo?: string; // Ending color for gradient (hex or color name)
+  gradientDirection?: string; // Gradient direction (e.g., 'to-br', 'to-r', 'to-b')
+
+  // Text contrast mode for ensuring readability
+  textContrastMode?: 'light' | 'dark' | 'auto'; // Text contrast mode based on background
+
+  // Boost/dampen system fields
+  boostScore?: number; // Current boost score (can be negative for dampens)
+  totalBoosts?: number; // Total number of boosts received
+  totalDampens?: number; // Total number of dampens received
+
+  // Current authenticated user's ratings for this vibe (only populated when authenticated)
+  currentUserRatings?: CurrentUserRating[];
+
+  // Pre-computed rating data to avoid N+1 queries
+  topEmojiRatings?: Array<{
+    emoji: string;
+    averageValue: number;
+    count: number;
+    tags: string[];
+    category?: string;
+    sentiment?: 'positive' | 'negative' | 'neutral';
+  }>;
+  mostInteractedEmoji?: {
+    emoji: string;
+    value: number;
+    count: number;
+  };
+  resolvedImageUrl?: string; // Pre-resolved image URL (from storage ID or legacy URL)
 }
 
 export interface Follow {

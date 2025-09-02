@@ -31,8 +31,11 @@ vi.mock('@/utils/date-utils', () => ({
 
 // Mock header nav store
 vi.mock('@/stores/header-nav-store', () => ({
-  useHeaderNavStore: () => ({
-    setNavState: vi.fn(),
+  useHeaderNavStore: vi.fn((selector) => {
+    const mockStore = {
+      setNavState: vi.fn(),
+    };
+    return selector ? selector(mockStore) : mockStore;
   }),
 }));
 

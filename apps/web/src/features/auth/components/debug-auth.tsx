@@ -37,14 +37,14 @@ export function DebugAuth() {
 
   if (!isLoaded) {
     return (
-      <div className="bg-yellow-100 p-4 text-yellow-800">
+      <div className="bg-yellow-100 p-4 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
         Clerk not loaded yet...
       </div>
     );
   }
 
   return (
-    <div className="fixed top-20 right-4 z-50 max-h-96 max-w-md overflow-y-auto rounded-lg border bg-white p-4 text-xs shadow-lg dark:bg-gray-800">
+    <div className="bg-background fixed top-20 right-4 z-50 max-h-96 max-w-md overflow-y-auto rounded-lg border p-4 text-xs shadow-lg">
       <h3 className="mb-2 font-bold">Debug Auth Status</h3>
 
       <div className="space-y-2">
@@ -61,13 +61,15 @@ export function DebugAuth() {
         <div>
           <strong>Clerk Token:</strong>
           {tokenError ? (
-            <div className="text-red-600">Error: {tokenError}</div>
+            <div className="text-destructive">Error: {tokenError}</div>
           ) : clerkToken ? (
-            <div className="text-green-600">
+            <div className="text-green-600 dark:text-green-400">
               Token exists ({clerkToken.slice(0, 20)}...)
             </div>
           ) : (
-            <div className="text-yellow-600">No token yet</div>
+            <div className="text-yellow-600 dark:text-yellow-400">
+              No token yet
+            </div>
           )}
         </div>
 
@@ -76,7 +78,7 @@ export function DebugAuth() {
           {debugLoading ? (
             <div>Loading...</div>
           ) : debugError ? (
-            <div className="text-red-600">Error: {String(debugError)}</div>
+            <div className="text-destructive">Error: {String(debugError)}</div>
           ) : (
             <ul className="ml-2">
               <li>hasAuth: {String(debugData?.hasAuth)}</li>
@@ -102,7 +104,9 @@ export function DebugAuth() {
           {onboardingLoading ? (
             <div>Loading...</div>
           ) : onboardingError ? (
-            <div className="text-red-600">Error: {String(onboardingError)}</div>
+            <div className="text-destructive">
+              Error: {String(onboardingError)}
+            </div>
           ) : (
             <ul className="ml-2">
               <li>completed: {String(onboardingData?.completed)}</li>

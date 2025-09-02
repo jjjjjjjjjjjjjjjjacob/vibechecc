@@ -262,6 +262,7 @@ describe('Vibes Mutations', () => {
       });
 
       // Create a simple vibe
+
       const _vibe = await t.withIdentity(user).mutation(api.vibes.create, {
         title: 'Test Vibe',
         description: 'A test vibe',

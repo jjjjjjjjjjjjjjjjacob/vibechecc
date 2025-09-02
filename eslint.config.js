@@ -79,6 +79,8 @@ export default tseslint.config(
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
         },
       ],
 
@@ -107,6 +109,19 @@ export default tseslint.config(
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      'no-console': 'off',
+    },
+  },
+  // Special rules for migration files and scripts
+  {
+    files: [
+      '**/migrations/**/*.{js,jsx,ts,tsx}',
+      '**/scripts/**/*.{js,jsx,ts,tsx}',
+      '**/seed*.{js,jsx,ts,tsx}',
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
       'no-console': 'off',
     },
   }

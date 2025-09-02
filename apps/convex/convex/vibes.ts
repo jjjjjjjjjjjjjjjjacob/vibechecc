@@ -39,6 +39,74 @@ type VibeWithEmojiData = Doc<'vibes'> & {
   hasEmojiFilter: boolean;
 };
 
+// Type definition for grouped emoji ratings
+type GroupedEmojiRating = {
+  emoji: string;
+  averageValue: number;
+  count: number;
+  totalValue: number;
+};
+
+// Helper function to group ratings by emoji with counts and averages
+function groupRatingsByEmoji(ratings: Doc<'ratings'>[]): GroupedEmojiRating[] {
+  const emojiGroups = new Map<string, { totalValue: number; count: number }>();
+
+  for (const rating of ratings) {
+    const existing = emojiGroups.get(rating.emoji);
+    if (existing) {
+      existing.totalValue += rating.value;
+      existing.count += 1;
+    } else {
+      emojiGroups.set(rating.emoji, {
+        totalValue: rating.value,
+        count: 1,
+      });
+    }
+  }
+
+  return Array.from(emojiGroups.entries()).map(
+    ([emoji, { totalValue, count }]) => ({
+      emoji,
+      averageValue: totalValue / count,
+      count,
+      totalValue,
+    })
+  );
+}
+
+// Helper function to convert hex to RGB
+function hexToRgb(hex: string) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+}
+
+// Helper function to check if a gradient is light or dark
+function isLightGradient(from: string, to: string) {
+  const fromRgb = hexToRgb(from);
+  const toRgb = hexToRgb(to);
+
+  if (!fromRgb || !toRgb) {
+    return true; // Default to light
+  }
+
+  // Calculate luminance
+  const fromLuminance =
+    (0.299 * fromRgb.r + 0.587 * fromRgb.g + 0.114 * fromRgb.b) / 255;
+  const toLuminance =
+    (0.299 * toRgb.r + 0.587 * toRgb.g + 0.114 * toRgb.b) / 255;
+
+  const avgLuminance = (fromLuminance + toLuminance) / 2;
+  // eslint-disable-next-line no-console
+  console.log('avgLuminance', avgLuminance);
+  return avgLuminance > 0.9;
+}
+
 // Simple get all vibes (for backwards compatibility)
 export const getAllSimple = query({
   handler: async (ctx) => {
@@ -70,7 +138,10 @@ export const getFilteredVibes = query({
             v.literal('top_rated'),
             v.literal('most_rated'),
             v.literal('name'),
-            v.literal('creation_date')
+            v.literal('creation_date'),
+            v.literal('hot'),
+            v.literal('boosted'),
+            v.literal('controversial')
           )
         ),
         minRatingCount: v.optional(v.number()),
@@ -83,10 +154,13 @@ export const getFilteredVibes = query({
     const limit = args.limit ?? 20;
     const filters = args.filters || {};
 
+    // Check authentication for current user ratings
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
+
     // If followingOnly is requested, get following user IDs
     let followingIds: string[] = [];
     if (filters.followingOnly) {
-      const identity = await ctx.auth.getUserIdentity();
       if (!identity) {
         return {
           vibes: [],
@@ -121,6 +195,19 @@ export const getFilteredVibes = query({
         break;
       case 'name':
         // Note: Convex doesn't support ordering by text fields directly
+        vibesQuery = ctx.db.query('vibes').order('desc');
+        break;
+      case 'boosted':
+        // Sort by boost score descending (highest boosted first)
+        vibesQuery = ctx.db
+          .query('vibes')
+          .withIndex('byBoostScore', (q) => q.gte('boostScore', 0))
+          .order('desc');
+        break;
+      case 'hot':
+      case 'controversial':
+        // For hot and controversial, we need to fetch vibes and sort by computed scores
+        // Use recent order first, then apply scoring algorithm
         vibesQuery = ctx.db.query('vibes').order('desc');
         break;
     }
@@ -315,7 +402,7 @@ export const getFilteredVibes = query({
       });
     }
 
-    // Sort if needed (for rating-based sorts)
+    // Sort if needed (for rating-based sorts and boost score sorts)
     if (filters.sort === 'rating_desc') {
       vibesWithEmojiRatings.sort(
         (a, b) =>
@@ -360,6 +447,71 @@ export const getFilteredVibes = query({
           );
         return scoreB - scoreA;
       });
+    } else if (filters.sort === 'boosted') {
+      // Sort by boost score descending (highest boost first)
+      vibesWithEmojiRatings.sort((a, b) => {
+        const boostA = a.boostScore || 0;
+        const boostB = b.boostScore || 0;
+        return boostB - boostA;
+      });
+    } else if (filters.sort === 'hot') {
+      // Hot algorithm: combine boost score with recency and engagement
+      // Reddit-style hot score algorithm
+      vibesWithEmojiRatings.sort((a, b) => {
+        const now = Date.now();
+        const ageInHours =
+          (now - new Date(a.createdAt).getTime()) / (1000 * 60 * 60);
+        const ageInHoursB =
+          (now - new Date(b.createdAt).getTime()) / (1000 * 60 * 60);
+
+        // Get engagement metrics
+        const ratingCountA =
+          'ratingCount' in a && typeof a.ratingCount === 'number'
+            ? a.ratingCount
+            : 0;
+        const ratingCountB =
+          'ratingCount' in b && typeof b.ratingCount === 'number'
+            ? b.ratingCount
+            : 0;
+        const boostA = a.boostScore || 0;
+        const boostB = b.boostScore || 0;
+
+        // Hot score = (boosts + rating engagement) / (age + 2)^1.5
+        // The +2 prevents division by zero and gives newer content a boost
+        const hotScoreA =
+          (boostA + ratingCountA) / Math.pow(ageInHours + 2, 1.5);
+        const hotScoreB =
+          (boostB + ratingCountB) / Math.pow(ageInHoursB + 2, 1.5);
+
+        return hotScoreB - hotScoreA;
+      });
+    } else if (filters.sort === 'controversial') {
+      // Controversial algorithm: high engagement with mixed boost/dampen scores
+      vibesWithEmojiRatings.sort((a, b) => {
+        const boostA = a.totalBoosts || 0;
+        const dampenA = a.totalDampens || 0;
+        const boostB = b.totalBoosts || 0;
+        const dampenB = b.totalDampens || 0;
+
+        // Controversial score: activity level * controversy ratio
+        // High controversy = similar amounts of boosts and dampens
+        const totalActivityA = boostA + dampenA;
+        const totalActivityB = boostB + dampenB;
+
+        if (totalActivityA === 0 && totalActivityB === 0) return 0;
+        if (totalActivityA === 0) return 1;
+        if (totalActivityB === 0) return -1;
+
+        // Controversy ratio: closer to 0.5 = more controversial
+        const controversyRatioA = Math.abs(boostA / totalActivityA - 0.5);
+        const controversyRatioB = Math.abs(boostB / totalActivityB - 0.5);
+
+        // Invert ratio so lower values (more controversial) rank higher
+        const controversyScoreA = (0.5 - controversyRatioA) * totalActivityA;
+        const controversyScoreB = (0.5 - controversyRatioB) * totalActivityB;
+
+        return controversyScoreB - controversyScoreA;
+      });
     }
 
     // Limit results
@@ -403,6 +555,7 @@ export const getFilteredVibes = query({
           .first()
       )
     );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const ratingUserMap = new Map(
       ratingUserIds.map((id, i) => [id, ratingUsers[i]])
     );
@@ -412,18 +565,28 @@ export const getFilteredVibes = query({
       const creator = creatorMap.get(vibe.createdById);
       const ratings = allRatings[index];
 
-      const ratingDetails = ratings.map((rating) => ({
-        user: ratingUserMap.get(rating.userId),
-        emoji: rating.emoji,
-        value: rating.value,
-        review: rating.review,
-        createdAt: rating.createdAt,
-      }));
+      // Group ratings by emoji instead of returning individual ratings
+      const emojiRatings = groupRatingsByEmoji(ratings);
+
+      // Include current user's ratings if authenticated
+      const currentUserRatings = userId
+        ? ratings
+            .filter((r) => r.userId === userId)
+            .map((rating) => ({
+              id: rating._id,
+              emoji: rating.emoji,
+              value: rating.value,
+              review: rating.review,
+              createdAt: rating.createdAt,
+              updatedAt: rating.updatedAt,
+            }))
+        : undefined;
 
       return {
         ...vibe,
         createdBy: creator,
-        ratings: ratingDetails,
+        emojiRatings,
+        currentUserRatings,
       };
     });
 
@@ -443,6 +606,10 @@ export const getAll = query({
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 20; // Default to 20 vibes to limit reads
+
+    // Check authentication for current user ratings
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
 
     // Get vibes with pagination
     const vibesQuery = ctx.db.query('vibes').order('desc');
@@ -489,6 +656,7 @@ export const getAll = query({
           .first()
       )
     );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const ratingUserMap = new Map(
       ratingUserIds.map((id, i) => [id, ratingUsers[i]])
     );
@@ -498,18 +666,28 @@ export const getAll = query({
       const creator = creatorMap.get(vibe.createdById);
       const ratings = allRatings[index];
 
-      const ratingDetails = ratings.map((rating) => ({
-        user: ratingUserMap.get(rating.userId),
-        emoji: rating.emoji,
-        value: rating.value,
-        review: rating.review,
-        createdAt: rating.createdAt,
-      }));
+      // Group ratings by emoji instead of returning individual ratings
+      const emojiRatings = groupRatingsByEmoji(ratings);
+
+      // Include current user's ratings if authenticated
+      const currentUserRatings = userId
+        ? ratings
+            .filter((r) => r.userId === userId)
+            .map((rating) => ({
+              id: rating._id,
+              emoji: rating.emoji,
+              value: rating.value,
+              review: rating.review,
+              createdAt: rating.createdAt,
+              updatedAt: rating.updatedAt,
+            }))
+        : undefined;
 
       return {
         ...vibe,
         createdBy: creator,
-        ratings: ratingDetails,
+        emojiRatings,
+        currentUserRatings,
       };
     });
 
@@ -545,7 +723,8 @@ export const getById = query({
         ...vibe,
         isDeleted: true,
         createdBy: null,
-        ratings: [],
+        emojiRatings: [],
+        currentUserRatings: undefined,
       };
     }
 
@@ -563,6 +742,7 @@ export const getById = query({
 
     // PERFORMANCE OPTIMIZED: Batch user queries to eliminate N+1 pattern
     const uniqueUserIds = [...new Set(ratings.map((r) => r.userId))];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const users = await ctx.db
       .query('users')
       .filter((q) =>
@@ -570,23 +750,29 @@ export const getById = query({
       )
       .collect();
 
-    // Create lookup map for O(1) user access
-    const userMap = new Map(users.map((user) => [user.externalId, user]));
+    // Group ratings by emoji instead of returning individual ratings
+    const emojiRatings = groupRatingsByEmoji(ratings);
 
-    const ratingDetails = ratings.map((rating) => ({
-      _id: rating._id,
-      user: userMap.get(rating.userId) || null,
-      emoji: rating.emoji,
-      value: rating.value,
-      review: rating.review,
-      createdAt: rating.createdAt,
-    }));
+    // Include current user's ratings if authenticated
+    const currentUserRatings = identity?.subject
+      ? ratings
+          .filter((r) => r.userId === identity.subject)
+          .map((rating) => ({
+            id: rating._id,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+            updatedAt: rating.updatedAt,
+          }))
+      : undefined;
 
     return {
       ...vibe,
       isDeleted: false,
       createdBy: creator,
-      ratings: ratingDetails,
+      emojiRatings,
+      currentUserRatings,
     };
   },
 });
@@ -597,6 +783,7 @@ export const getByUser = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     const isOwnProfile = identity?.subject === args.userId;
+    const currentUserId = identity?.subject;
 
     // SECURITY: For non-own profiles, only show public vibes
     // For own profile, show all non-deleted vibes
@@ -656,6 +843,7 @@ export const getByUser = query({
       )
       .collect();
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const ratingUserMap = new Map(
       ratingUsers.map((user) => [user.externalId, user])
     );
@@ -664,18 +852,28 @@ export const getByUser = query({
       const creator = creatorMap.get(vibe.createdById);
       const vibeRatings = ratingsByVibeId.get(vibe.id) || [];
 
-      const ratingDetails = vibeRatings.map((rating) => ({
-        user: ratingUserMap.get(rating.userId) || null,
-        emoji: rating.emoji,
-        value: rating.value,
-        review: rating.review,
-        createdAt: rating.createdAt,
-      }));
+      // Group ratings by emoji instead of returning individual ratings
+      const emojiRatings = groupRatingsByEmoji(vibeRatings);
+
+      // Include current user's ratings if authenticated
+      const currentUserRatings = currentUserId
+        ? vibeRatings
+            .filter((r) => r.userId === currentUserId)
+            .map((rating) => ({
+              id: rating._id,
+              emoji: rating.emoji,
+              value: rating.value,
+              review: rating.review,
+              createdAt: rating.createdAt,
+              updatedAt: rating.updatedAt,
+            }))
+        : undefined;
 
       return {
         ...vibe,
         createdBy: creator,
-        ratings: ratingDetails,
+        emojiRatings,
+        currentUserRatings,
       };
     });
   },
@@ -714,28 +912,13 @@ export const getUserRatedVibes = query({
           .filter((q) => q.eq(q.field('vibeId'), vibe.id))
           .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
         };
       })
     );
@@ -752,6 +935,12 @@ export const create = mutation({
     description: v.string(),
     image: v.optional(v.union(v.string(), v.id('_storage'))),
     tags: v.optional(v.array(v.string())),
+    gradientFrom: v.optional(v.string()),
+    gradientTo: v.optional(v.string()),
+    gradientDirection: v.optional(v.string()),
+    textContrastMode: v.optional(
+      v.union(v.literal('light'), v.literal('dark'), v.literal('auto'))
+    ),
   },
   handler: async (ctx, args) => {
     // SECURITY: Check authentication and validate input
@@ -830,6 +1019,15 @@ export const create = mutation({
       }
     }
 
+    // Calculate text contrast mode based on gradient or user override
+    const textContrastMode =
+      args.textContrastMode ||
+      (args.gradientFrom && args.gradientTo
+        ? isLightGradient(args.gradientFrom, args.gradientTo)
+          ? 'light'
+          : 'dark'
+        : 'auto');
+
     const _vibeId = await ctx.db.insert('vibes', {
       id,
       title,
@@ -840,6 +1038,10 @@ export const create = mutation({
       createdAt: now,
       tags: tags || [],
       visibility: 'public', // Default to public visibility
+      gradientFrom: args.gradientFrom,
+      gradientTo: args.gradientTo,
+      gradientDirection: args.gradientDirection,
+      textContrastMode,
     });
 
     // Update tag usage counts
@@ -886,6 +1088,24 @@ export const create = mutation({
       console.error('Failed to create new vibe notifications:', error);
     }
 
+    // Award points for posting a vibe
+    try {
+      if (identity) {
+        await ctx.scheduler.runAfter(
+          0,
+          internal.userPoints.awardPointsForVibe,
+          {
+            userId: identity.subject,
+            vibeId: id,
+          }
+        );
+      }
+    } catch (error) {
+      // Don't fail the vibe creation if points award fails
+      // eslint-disable-next-line no-console
+      console.error('Failed to award points for vibe creation:', error);
+    }
+
     return id;
   },
 });
@@ -924,6 +1144,7 @@ const addInterestsFromVibe = async (
 
     // Add new tags that aren't already in interests
     let hasNewInterests = false;
+
     const _newTags = vibe.tags.filter((tag: string) => {
       if (!currentInterests.has(tag)) {
         currentInterests.add(tag);
@@ -1090,6 +1311,7 @@ export const addRating = mutation({
     const tags: string[] = [];
 
     // Get emoji metadata for tags
+
     const _emojiData = await ctx.db
       .query('emojis')
       .withIndex('byEmoji', (q) => q.eq('emoji', emoji))
@@ -1334,34 +1556,19 @@ export const getByTag = query({
           )
           .first();
 
-        // Get limited ratings for performance
+        // Get all ratings for grouping by emoji
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(5);
+          .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
         };
       })
     );
@@ -1822,30 +2029,15 @@ export const getTopRated = query({
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(5);
+          .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
         };
       })
     );
@@ -1947,6 +2139,7 @@ export const addRatingForSeed = internalMutation({
     const tags: string[] = [];
 
     // Get emoji metadata for tags
+
     const _emojiData = await ctx.db
       .query('emojis')
       .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
@@ -2105,29 +2298,13 @@ export const getTopRatedByEmoji = query({
               vibeEmojiRatings.length
             : args.minValue;
 
-        // Get limited ratings for performance
-        const ratingDetails = await Promise.all(
-          ratings.slice(0, 5).map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const groupedEmojiRatings = groupRatingsByEmoji(ratings);
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings: groupedEmojiRatings,
           averageRating,
           emojiRating: {
             emoji: args.emoji,
@@ -2365,30 +2542,28 @@ export const getForYouFeed = query({
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(10);
+          .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
+
+        // Include current user's ratings if authenticated
+        const currentUserRatings = ratings
+          .filter((r) => r.userId === identity.subject)
+          .map((rating) => ({
+            id: rating._id,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+            updatedAt: rating.updatedAt,
+          }));
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
+          currentUserRatings,
         };
       })
     );
@@ -2419,7 +2594,10 @@ export const getFollowingVibes = query({
             v.literal('rating_desc'),
             v.literal('rating_asc'),
             v.literal('top_rated'),
-            v.literal('most_rated')
+            v.literal('most_rated'),
+            v.literal('hot'),
+            v.literal('boosted'),
+            v.literal('controversial')
           )
         ),
       })
@@ -2533,7 +2711,7 @@ export const getFollowingVibes = query({
         );
       }
 
-      // Apply rating-based sorting
+      // Apply rating-based sorting and boost score sorting
       if (filters.sort === 'rating_desc') {
         ratingFilteredVibes.sort((a, b) => b.averageRating - a.averageRating);
       } else if (filters.sort === 'rating_asc') {
@@ -2545,6 +2723,55 @@ export const getFollowingVibes = query({
           const scoreA = a.averageRating * Math.log1p(a.ratingCount);
           const scoreB = b.averageRating * Math.log1p(b.ratingCount);
           return scoreB - scoreA;
+        });
+      } else if (filters.sort === 'boosted') {
+        // Sort by boost score descending
+        ratingFilteredVibes.sort((a, b) => {
+          const boostA = a.vibe.boostScore || 0;
+          const boostB = b.vibe.boostScore || 0;
+          return boostB - boostA;
+        });
+      } else if (filters.sort === 'hot') {
+        // Hot algorithm: combine boost score with recency and engagement
+        ratingFilteredVibes.sort((a, b) => {
+          const now = Date.now();
+          const ageInHours =
+            (now - new Date(a.vibe.createdAt).getTime()) / (1000 * 60 * 60);
+          const ageInHoursB =
+            (now - new Date(b.vibe.createdAt).getTime()) / (1000 * 60 * 60);
+
+          const boostA = a.vibe.boostScore || 0;
+          const boostB = b.vibe.boostScore || 0;
+
+          const hotScoreA =
+            (boostA + a.ratingCount) / Math.pow(ageInHours + 2, 1.5);
+          const hotScoreB =
+            (boostB + b.ratingCount) / Math.pow(ageInHoursB + 2, 1.5);
+
+          return hotScoreB - hotScoreA;
+        });
+      } else if (filters.sort === 'controversial') {
+        // Controversial algorithm: high engagement with mixed boost/dampen scores
+        ratingFilteredVibes.sort((a, b) => {
+          const boostA = a.vibe.totalBoosts || 0;
+          const dampenA = a.vibe.totalDampens || 0;
+          const boostB = b.vibe.totalBoosts || 0;
+          const dampenB = b.vibe.totalDampens || 0;
+
+          const totalActivityA = boostA + dampenA;
+          const totalActivityB = boostB + dampenB;
+
+          if (totalActivityA === 0 && totalActivityB === 0) return 0;
+          if (totalActivityA === 0) return 1;
+          if (totalActivityB === 0) return -1;
+
+          const controversyRatioA = Math.abs(boostA / totalActivityA - 0.5);
+          const controversyRatioB = Math.abs(boostB / totalActivityB - 0.5);
+
+          const controversyScoreA = (0.5 - controversyRatioA) * totalActivityA;
+          const controversyScoreB = (0.5 - controversyRatioB) * totalActivityB;
+
+          return controversyScoreB - controversyScoreA;
         });
       }
 
@@ -2567,30 +2794,28 @@ export const getFollowingVibes = query({
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(10);
+          .collect();
 
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
+        // Group ratings by emoji instead of returning individual ratings
+        const emojiRatings = groupRatingsByEmoji(ratings);
+
+        // Include current user's ratings if authenticated
+        const currentUserRatings = ratings
+          .filter((r) => r.userId === identity.subject)
+          .map((rating) => ({
+            id: rating._id,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+            updatedAt: rating.updatedAt,
+          }));
 
         return {
           ...vibe,
           createdBy: creator,
-          ratings: ratingDetails,
+          emojiRatings,
+          currentUserRatings,
         };
       })
     );
@@ -2698,6 +2923,9 @@ export const updateVibe = mutation({
     description: v.optional(v.string()),
     image: v.optional(v.union(v.string(), v.id('_storage'))),
     tags: v.optional(v.array(v.string())),
+    gradientFrom: v.optional(v.string()),
+    gradientTo: v.optional(v.string()),
+    gradientDirection: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Check if user is authenticated
@@ -2735,6 +2963,11 @@ export const updateVibe = mutation({
     if (args.description !== undefined)
       updateData.description = args.description;
     if (args.tags !== undefined) updateData.tags = args.tags;
+    if (args.gradientFrom !== undefined)
+      updateData.gradientFrom = args.gradientFrom;
+    if (args.gradientTo !== undefined) updateData.gradientTo = args.gradientTo;
+    if (args.gradientDirection !== undefined)
+      updateData.gradientDirection = args.gradientDirection;
 
     // Handle image updates
     if (args.image !== undefined) {

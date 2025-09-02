@@ -9,9 +9,8 @@
  * Usage: node scripts/optimize-icon-imports.js
  */
 
-/* eslint-disable no-console */
-
 import { readFileSync, writeFileSync } from 'fs';
+
 import { join as _join, relative as _relative } from 'path';
 import { execSync } from 'child_process';
 

@@ -114,6 +114,7 @@ export const createMockSearchProviders = () => ({
   SearchAccordion: ({
     open,
     onOpenChange,
+
     triggerRef: _triggerRef,
   }: {
     open: boolean;
@@ -216,6 +217,7 @@ export const createMockUIComponents = () => ({
   ),
   DialogTrigger: ({
     children,
+
     asChild: _asChild,
   }: {
     children: React.ReactNode;

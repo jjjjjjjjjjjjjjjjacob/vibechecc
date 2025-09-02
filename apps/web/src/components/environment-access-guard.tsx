@@ -46,7 +46,13 @@ export function EnvironmentAccessGuard({
   children,
   fallback,
 }: EnvironmentAccessGuardProps) {
-  const [loadingState, setLoadingState] = useState<LoadingState>('theme-check');
+  // Check if animations should be disabled for development
+  const animationsDisabled =
+    import.meta.env.VITE_DISABLE_WELCOME_ANIMATIONS === 'true';
+
+  const [loadingState, setLoadingState] = useState<LoadingState>(
+    animationsDisabled ? 'content' : 'theme-check'
+  );
   // Initialize with 0 to avoid hydration mismatch, will be randomized on client
   const [taglineIndex, setTaglineIndex] = useState(0);
 
@@ -77,6 +83,8 @@ export function EnvironmentAccessGuard({
 
   // Initialize theme once user data is loaded
   React.useEffect(() => {
+    if (animationsDisabled) return; // Skip theme initialization if animations are disabled
+
     if (isUserLoaded && !isInitialized) {
       // Extract user theme preferences from user data
       const userTheme = user?.publicMetadata?.theme as
@@ -104,6 +112,7 @@ export function EnvironmentAccessGuard({
       setLoadingState('access-check');
     }
   }, [
+    animationsDisabled,
     isUserLoaded,
     isSignedIn,
     user,
@@ -115,6 +124,8 @@ export function EnvironmentAccessGuard({
   // Reset state when user changes (sign in/out)
   const previousUserStateKeyRef = React.useRef(userStateKey);
   React.useEffect(() => {
+    if (animationsDisabled) return; // Skip state reset if animations are disabled
+
     if (previousUserStateKeyRef.current !== userStateKey) {
       previousUserStateKeyRef.current = userStateKey;
       // Only reset if we're in a final state
@@ -123,10 +134,18 @@ export function EnvironmentAccessGuard({
         setLoadingState('access-check');
       }
     }
-  }, [userStateKey, loadingState]);
+  }, [animationsDisabled, userStateKey, loadingState]);
 
   // State progression logic
   React.useEffect(() => {
+    if (animationsDisabled) {
+      // For disabled animations, still check access but skip to final states
+      if (isFeatureFlagChecked && !hasAccess && isDevOrPrEnv) {
+        setLoadingState('access-denied');
+      }
+      return;
+    }
+
     // State 2 -> State 2.5/3-alt: Once access is determined
     if (loadingState === 'access-check' && isFeatureFlagChecked) {
       if (hasAccess) {
@@ -165,6 +184,7 @@ export function EnvironmentAccessGuard({
       setTimeout(() => setLoadingState('content'), 1300);
     }
   }, [
+    animationsDisabled,
     loadingState,
     isThemeReady,
     isFeatureFlagChecked,

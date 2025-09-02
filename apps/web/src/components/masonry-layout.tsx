@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
+import { useMediaQuery } from '@/hooks';
 
 interface MasonryLayoutProps {
   children: React.ReactNode[];
@@ -95,16 +96,22 @@ export function JSMasonryLayout({
     // For better distribution, we'll use a height-based algorithm
     // Since we can't measure actual heights in this context, we'll use
     // a more sophisticated round-robin that accounts for content variation
-    children.forEach((child, _index) => {
-      // Find the column with the least items to balance better
-      const columnSizes = cols.map((col) => col.length);
-      const minSize = Math.min(...columnSizes);
-      const targetColumnIndex = columnSizes.findIndex(
-        (size) => size === minSize
-      );
+    children.forEach(
+      (
+        child,
 
-      cols[targetColumnIndex].push(child);
-    });
+        _index
+      ) => {
+        // Find the column with the least items to balance better
+        const columnSizes = cols.map((col) => col.length);
+        const minSize = Math.min(...columnSizes);
+        const targetColumnIndex = columnSizes.findIndex(
+          (size) => size === minSize
+        );
+
+        cols[targetColumnIndex].push(child);
+      }
+    );
 
     return cols;
   }, [children, columnCount]);
@@ -140,17 +147,11 @@ export function JSMasonryLayout({
  */
 export function useMasonryLayout() {
   const [shouldUseMasonry, setShouldUseMasonry] = React.useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   React.useEffect(() => {
-    const checkSupport = () => {
-      // Use masonry on medium screens and larger (768px+) for better layout
-      setShouldUseMasonry(window.innerWidth >= 768);
-    };
-
-    checkSupport();
-    window.addEventListener('resize', checkSupport);
-    return () => window.removeEventListener('resize', checkSupport);
-  }, []);
+    setShouldUseMasonry(!isMobile);
+  }, [isMobile]);
 
   return shouldUseMasonry;
 }

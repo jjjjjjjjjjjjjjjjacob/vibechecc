@@ -5,7 +5,7 @@ import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
-import { RatingPopover } from './rating-popover';
+import { RateAndReviewDialog } from './rate-and-review-dialog';
 
 // Mock useUser from Clerk
 vi.mock('@clerk/tanstack-react-start', () => ({
@@ -149,6 +149,9 @@ vi.mock('@/components/ui/dialog', () => ({
   DialogDescription: ({ children }: { children: React.ReactNode }) => (
     <p data-testid="dialog-description">{children}</p>
   ),
+  DialogFooter: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dialog-footer">{children}</div>
+  ),
 }));
 
 // Mock the emoji search component
@@ -235,11 +238,33 @@ const createWrapper = () => {
   );
 };
 
-describe('RatingPopover', () => {
+describe('RateAndReviewDialog', () => {
   const mockOnSubmit = vi.fn();
   const mockOnOpenChange = vi.fn();
 
   const defaultProps = {
+    vibeId: 'test-vibe-1',
+    existingUserRatings: [],
+    emojiMetadata: {
+      '😍': {
+        _id: '1',
+        emoji: '😍',
+        category: 'positive',
+        description: 'Heart Eyes',
+      },
+      '🔥': {
+        _id: '2',
+        emoji: '🔥',
+        category: 'intense',
+        description: 'Fire',
+      },
+      '😱': {
+        _id: '3',
+        emoji: '😱',
+        category: 'negative',
+        description: 'Shocked',
+      },
+    },
     onSubmit: mockOnSubmit,
     onOpenChange: mockOnOpenChange,
     open: true,
@@ -261,9 +286,9 @@ describe('RatingPopover', () => {
   const renderComponent = (props = {}) => {
     return render(
       <Wrapper>
-        <RatingPopover {...defaultProps} {...props}>
+        <RateAndReviewDialog {...defaultProps} {...props}>
           <button>Rate with Emoji</button>
-        </RatingPopover>
+        </RateAndReviewDialog>
       </Wrapper>
     );
   };
@@ -273,9 +298,9 @@ describe('RatingPopover', () => {
     expect(screen.getByText('Rate with Emoji')).toBeInTheDocument();
   });
 
-  it('renders popover content with title', () => {
+  it('renders dialog content with title', () => {
     renderComponent();
-    expect(screen.getByText('rating')).toBeInTheDocument();
+    expect(screen.getByText('rate this vibe')).toBeInTheDocument();
     expect(screen.getByText('"Test Vibe"')).toBeInTheDocument();
   });
 

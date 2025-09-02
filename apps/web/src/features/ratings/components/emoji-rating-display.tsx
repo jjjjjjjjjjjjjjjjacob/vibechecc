@@ -1,218 +1,391 @@
 import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
-import type { EmojiRating } from '@vibechecc/types';
-import { AllEmojiRatingsPopover } from './all-emoji-ratings-popover';
-import { ChevronDown } from '@/components/ui/icons';
+import { useUser } from '@clerk/tanstack-react-start';
+import type {
+  EmojiRating,
+  EmojiRatingMetadata,
+  CurrentUserRating,
+} from '@vibechecc/types';
 import { RatingScale } from './rating-scale';
-import { api } from '@vibechecc/convex';
-import { convexQuery } from '@convex-dev/react-query';
-import { useQuery } from '@tanstack/react-query';
+import { RateAndReviewDialog } from './rate-and-review-dialog';
+import { AuthPromptDialog } from '@/features/auth';
+import type {
+  EmojiRatingData,
+  UnifiedEmojiRatingHandler,
+} from './emoji-reaction';
+import { Button } from '@/components/ui';
 
 interface EmojiRatingDisplayProps {
-  rating: EmojiRating;
-  showScale?: boolean;
+  rating: EmojiRatingData;
+  vibeId: string;
+  onEmojiClick?: UnifiedEmojiRatingHandler;
+  vibeTitle?: string;
   className?: string;
-  onEmojiClick?: (emoji: string, value: number) => void;
-  variant?: 'color' | 'gradient';
   emojiColor?: string;
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'compact' | 'compact-hover' | 'scale';
+  hasUserReacted?: boolean;
+  // Required data props to avoid queries
+  existingUserRatings?: CurrentUserRating[];
+  emojiMetadata?: Record<string, EmojiRatingMetadata>;
+  textContrast?: 'light' | 'dark';
 }
 
 export function EmojiRatingDisplay({
   rating,
-  showScale = false,
-  className,
+  vibeId,
   onEmojiClick,
-  variant: _variant = 'color',
+  vibeTitle,
+  className,
   emojiColor,
   size = 'md',
+  variant = 'default',
+  hasUserReacted = false,
+  existingUserRatings = [],
+  emojiMetadata = {},
+  textContrast,
 }: EmojiRatingDisplayProps) {
   const [isHovered, setIsHovered] = React.useState(false);
-  const [localValue, setLocalValue] = React.useState(rating.value);
+  const [isRatingDialogOpen, setIsRatingDialogOpen] = React.useState(false);
+  const [showAuthDialog, setShowAuthDialog] = React.useState(false);
+  const [hoverValue, setHoverValue] = React.useState<number | null>(null);
+  const [selectedValue, setSelectedValue] = React.useState<number | null>(null);
+  const { user } = useUser();
 
-  React.useEffect(() => {
-    setLocalValue(rating.value);
-  }, [rating.value]);
-
-  const handleScaleClick = (value: number) => {
-    onEmojiClick?.(rating.emoji, value);
+  // Helper function to get contrast-aware button classes
+  const getButtonClasses = (
+    textContrast?: 'light' | 'dark',
+    hasReacted?: boolean
+  ) => {
+    if (textContrast === 'light') {
+      return hasReacted
+        ? 'bg-white/30 text-black/90'
+        : 'bg-white/20 hover:bg-white/30 text-black/90';
+    } else if (textContrast === 'dark') {
+      return hasReacted
+        ? 'bg-white/30 text-white/90'
+        : 'bg-white/20 hover:bg-white/30 text-white/90';
+    }
+    return hasReacted ? 'bg-primary/10' : 'bg-muted hover:bg-muted/80';
   };
 
-  return (
-    <div
-      className={cn('inline-flex w-full items-center gap-2', className)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      role="group"
-      aria-label="Rating display"
-    >
-      {showScale ? (
-        // Show the scale when requested
-        <div className="flex w-full items-center gap-2">
-          <div className="flex min-w-6 items-center gap-1.5">
-            <span className="text-sm font-medium">{localValue.toFixed(1)}</span>
-          </div>
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              handleScaleClick(localValue);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                e.stopPropagation();
-                handleScaleClick(localValue);
+  const sizeClasses = {
+    sm: 'text-lg gap-1',
+    md: 'text-2xl gap-2',
+    lg: 'text-4xl gap-3',
+  };
+
+  // Enhanced click handler with auth and popover logic
+  const handleEnhancedClick = async () => {
+    if (!onEmojiClick) return;
+
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    // If we have a handler, always open the rating dialog for detailed rating input
+    setIsRatingDialogOpen(true);
+  };
+
+  // Scale variant (with rating scale bar)
+  if (variant === 'scale') {
+    const handleScaleChange = (value: number) => {
+      // Track mouse movement for real-time feedback
+      setHoverValue(value);
+    };
+
+    const handleScaleMouseLeave = () => {
+      // Reset hover value when mouse leaves the scale
+      setHoverValue(null);
+    };
+
+    const handleScaleClick = async (value: number) => {
+      if (!onEmojiClick) return;
+
+      if (!user) {
+        setShowAuthDialog(true);
+        return;
+      }
+
+      // Store the selected value and open rating dialog
+      setSelectedValue(value);
+      setHoverValue(null);
+      setIsRatingDialogOpen(true);
+    };
+
+    const scaleDisplay = (
+      <div className={cn('flex items-center gap-1', className)}>
+        <span
+          className={cn(
+            'font-[500]',
+            textContrast === 'light'
+              ? 'text-black/90'
+              : textContrast === 'dark'
+                ? 'text-white/90'
+                : ''
+          )}
+        >
+          {rating.value.toFixed(1)}
+        </span>
+        <RatingScale
+          emoji={rating.emoji}
+          value={hoverValue ?? rating.value}
+          onChange={onEmojiClick ? handleScaleChange : undefined}
+          onClick={onEmojiClick ? handleScaleClick : undefined}
+          size={size}
+          emojiColor={emojiColor}
+          className="flex-1"
+          showTooltip={!!onEmojiClick}
+          maintainValueOnLeave={false}
+          onMouseLeave={handleScaleMouseLeave}
+        />
+        <div
+          className={cn(
+            'text-sm',
+            textContrast === 'light'
+              ? 'text-black/70'
+              : textContrast === 'dark'
+                ? 'text-white/70'
+                : 'text-muted-foreground'
+          )}
+        >
+          {rating.count > 0 && `(${rating.count})`}
+        </div>
+      </div>
+    );
+
+    return (
+      <>
+        {onEmojiClick ? (
+          <RateAndReviewDialog
+            vibeId={vibeId}
+            open={isRatingDialogOpen}
+            onOpenChange={(open) => {
+              setIsRatingDialogOpen(open);
+              if (!open) {
+                setHoverValue(null);
+                setSelectedValue(null);
               }
             }}
-            onMouseLeave={() => setLocalValue(rating.value)}
-            role="button"
-            tabIndex={0}
-            aria-label={`Rate ${localValue} out of 5`}
+            vibeTitle={vibeTitle}
+            preSelectedEmoji={rating.emoji}
+            preSelectedValue={selectedValue ?? undefined}
+            existingUserRatings={existingUserRatings}
+            emojiMetadata={emojiMetadata}
           >
-            <RatingScale
-              emoji={rating.emoji}
-              value={localValue}
-              size={size}
-              showTooltip={true}
-              onChange={setLocalValue}
-              emojiColor={emojiColor}
-            />
-          </div>
-          {rating.count && (
-            <span className="text-muted-foreground text-xs whitespace-pre">
-              {rating.count} rating{rating.count !== 1 ? 's' : ''}
-            </span>
-          )}
-        </div>
-      ) : (
-        // Show the compact rating display
-        <div
-          className="bg-secondary/50 hover:bg-secondary inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 text-sm font-medium transition-all hover:scale-105 active:scale-95"
-          onClick={() => {
-            onEmojiClick?.(rating.emoji, rating.value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onEmojiClick?.(rating.emoji, rating.value);
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label={`${rating.emoji} rating ${rating.value} out of 5`}
-        >
-          <span
-            className="data-[hover=true]:animate-wiggle text-base transition-transform duration-500"
-            data-hover={isHovered ? 'true' : 'false'}
-            style={emojiColor ? { color: emojiColor } : undefined}
-          >
-            {rating.emoji}
-          </span>
-          <span>{rating.value.toFixed(1)}</span>
-          {rating.count && (
-            <span className="text-muted-foreground">({rating.count})</span>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+            {scaleDisplay}
+          </RateAndReviewDialog>
+        ) : (
+          scaleDisplay
+        )}
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to rate"
+          description="you must sign in to rate vibes with emojis"
+        />
+      </>
+    );
+  }
 
-interface TopEmojiRatingsProps {
-  emojiRatings: EmojiRating[];
-  expanded?: boolean;
-  className?: string;
-  onExpandToggle?: () => void;
-  onEmojiClick?: (emoji: string, value: number) => void;
-  vibeId?: string;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'color' | 'gradient';
+  // Compact variants (minimal emoji display)
+  if (variant === 'compact' || variant === 'compact-hover') {
+    const compactDisplay = (
+      <Button
+        className={cn(
+          'relative inline-flex h-8 items-center justify-center gap-1 rounded-full px-2 py-1 text-sm leading-none transition-all',
+          getButtonClasses(textContrast, hasUserReacted),
+          onEmojiClick && 'cursor-pointer',
+          className
+        )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={(e) => {
+          e.preventDefault();
+          handleEnhancedClick();
+        }}
+        onKeyDown={
+          onEmojiClick
+            ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleEnhancedClick();
+                }
+              }
+            : undefined
+        }
+        role={onEmojiClick ? 'button' : undefined}
+        tabIndex={onEmojiClick ? 0 : undefined}
+        aria-label={
+          onEmojiClick
+            ? `${rating.emoji} rating ${rating.value} out of 5`
+            : undefined
+        }
+      >
+        <span
+          className="font-sans text-base font-medium"
+          style={{ color: emojiColor }}
+        >
+          {rating.emoji}
+        </span>
+        {variant === 'compact-hover' && isHovered && (
+          <span
+            className={cn(
+              'animate-in fade-in slide-in-from-left-2 ml-1 flex items-center gap-1 font-medium duration-200',
+              size === 'sm' ? 'text-xs' : 'text-sm'
+            )}
+          >
+            <span
+              className={cn(
+                'font-[500]',
+                textContrast === 'light'
+                  ? 'text-black/90'
+                  : textContrast === 'dark'
+                    ? 'text-white/90'
+                    : ''
+              )}
+            >
+              {rating.value.toFixed(1)}
+            </span>
+            {rating.count > 0 && (
+              <span
+                className={cn(
+                  'text-muted-foreground',
+                  textContrast === 'light'
+                    ? 'text-black/50'
+                    : textContrast === 'dark'
+                      ? 'text-white/50'
+                      : 'text-muted-foreground'
+                )}
+              >
+                ({rating.count})
+              </span>
+            )}
+          </span>
+        )}
+        {variant === 'compact' && rating.count > 0 && (
+          <span className="ml-1 font-medium">{rating.count}</span>
+        )}
+      </Button>
+    );
+
+    return (
+      <>
+        {onEmojiClick ? (
+          <RateAndReviewDialog
+            vibeId={vibeId}
+            open={isRatingDialogOpen}
+            onOpenChange={setIsRatingDialogOpen}
+            vibeTitle={vibeTitle}
+            preSelectedEmoji={rating.emoji}
+            preSelectedValue={selectedValue ?? undefined}
+            existingUserRatings={existingUserRatings}
+            emojiMetadata={emojiMetadata}
+          >
+            {compactDisplay}
+          </RateAndReviewDialog>
+        ) : (
+          compactDisplay
+        )}
+        <AuthPromptDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          title="sign in to rate"
+          description="you must sign in to rate vibes with emojis"
+        />
+      </>
+    );
+  }
+
+  // Default variant (pill with rating and count)
+  const defaultDisplay = (
+    <Button
+      className={cn(
+        'inline-flex h-8 cursor-pointer items-center gap-1 rounded-full px-3 py-1 leading-none transition-all',
+        getButtonClasses(textContrast, false),
+        sizeClasses[size],
+        onEmojiClick && 'cursor-pointer',
+        className
+      )}
+      onClick={(e) => {
+        e.preventDefault();
+        handleEnhancedClick();
+      }}
+      role={onEmojiClick ? 'button' : undefined}
+      tabIndex={onEmojiClick ? 0 : undefined}
+      aria-label={
+        onEmojiClick
+          ? `${rating.emoji} rating ${rating.value} out of 5`
+          : undefined
+      }
+      onKeyDown={
+        onEmojiClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleEnhancedClick();
+              }
+            }
+          : undefined
+      }
+    >
+      <span style={{ color: emojiColor }}>{rating.emoji}</span>
+      <span
+        className={cn(
+          'text-base font-medium',
+          textContrast === 'light'
+            ? 'text-black/90'
+            : textContrast === 'dark'
+              ? 'text-white/90'
+              : ''
+        )}
+      >
+        {rating.value.toFixed(1)}
+      </span>
+      {rating.count > 0 && (
+        <span
+          className={cn(
+            'text-sm',
+            textContrast === 'light'
+              ? 'text-black/70'
+              : textContrast === 'dark'
+                ? 'text-white/70'
+                : 'text-muted-foreground'
+          )}
+        >
+          ({rating.count})
+        </span>
+      )}
+    </Button>
+  );
+
+  return (
+    <>
+      {onEmojiClick ? (
+        <RateAndReviewDialog
+          vibeId={vibeId}
+          open={isRatingDialogOpen}
+          onOpenChange={setIsRatingDialogOpen}
+          vibeTitle={vibeTitle}
+          preSelectedEmoji={rating.emoji}
+          preSelectedValue={selectedValue ?? undefined}
+          existingUserRatings={existingUserRatings}
+          emojiMetadata={emojiMetadata}
+        >
+          {defaultDisplay}
+        </RateAndReviewDialog>
+      ) : (
+        defaultDisplay
+      )}
+      <AuthPromptDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        title="sign in to rate"
+        description="you must sign in to rate vibes with emojis"
+      />
+    </>
+  );
 }
 
 export { type EmojiRating };
-
-export function TopEmojiRatings({
-  emojiRatings,
-  expanded = false,
-  className,
-  onExpandToggle,
-  onEmojiClick,
-  vibeId,
-  size = 'md',
-  variant = 'color',
-}: TopEmojiRatingsProps) {
-  const [showAllRatingsPopover, setShowAllRatingsPopover] =
-    React.useState(false);
-  const displayRatings = expanded ? emojiRatings : emojiRatings.slice(0, 3);
-
-  // Fetch emoji metadata for colors
-  const emojis = displayRatings.map((r) => r.emoji);
-  const emojiDataQuery = useQuery({
-    ...convexQuery(api.emojis.getByEmojis, { emojis }),
-    enabled: emojis.length > 0,
-  });
-  // Convert array to map for easy lookup
-  const emojiDataMap = React.useMemo(() => {
-    const emojiDataArray = emojiDataQuery.data || [];
-    const map: Record<string, { color?: string }> = {};
-    if (Array.isArray(emojiDataArray)) {
-      emojiDataArray.forEach((data) => {
-        map[data.emoji] = data;
-      });
-    }
-    return map;
-  }, [emojiDataQuery.data]);
-
-  return (
-    <div className={cn('space-y-2', className)}>
-      {displayRatings.map((rating, index) => (
-        <div
-          key={`${rating.emoji}-${index}`}
-          className="data-[mounted=true]:animate-in data-[mounted=true]:fade-in-0 data-[mounted=true]:slide-in-from-top-2 data-[mounted=true]:fill-mode-both data-[mounted=true]:duration-300"
-          data-mounted="true"
-          style={{ animationDelay: `${index * 50}ms` }}
-        >
-          <EmojiRatingDisplay
-            rating={rating}
-            showScale={expanded}
-            onEmojiClick={onEmojiClick}
-            emojiColor={emojiDataMap[rating.emoji]?.color}
-            size={size}
-            variant={variant}
-          />
-        </div>
-      ))}
-      {emojiRatings?.length > 1 && (
-        <AllEmojiRatingsPopover
-          emojiRatings={emojiRatings}
-          onEmojiClick={onEmojiClick}
-          open={showAllRatingsPopover}
-          onOpenChange={setShowAllRatingsPopover}
-          vibeId={vibeId}
-        >
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setShowAllRatingsPopover(true);
-            }}
-            className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 text-xs whitespace-pre transition-colors"
-          >
-            <ChevronDown className="h-3 w-3" />
-            <span>{emojiRatings.length - 1} more</span>
-          </button>
-        </AllEmojiRatingsPopover>
-      )}
-      {emojiRatings.length > 3 && onExpandToggle && (
-        <button
-          onClick={onExpandToggle}
-          className="text-muted-foreground hover:text-foreground text-xs whitespace-pre transition-colors"
-        >
-          {expanded
-            ? 'show less'
-            : `show ${emojiRatings.length - 3} more rating${emojiRatings.length - 3 !== 1 ? 's' : ''}`}
-        </button>
-      )}
-    </div>
-  );
-}

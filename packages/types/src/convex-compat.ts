@@ -113,7 +113,7 @@ export function transformConvexVibe(
     createdBy: createdBy || null,
     createdById: convexVibe.createdById,
     createdAt: convexVibe.createdAt,
-    ratings: [], // Will be populated separately
+    emojiRatings: [], // Will be populated separately
     tags: convexVibe.tags,
     viewCount: 0, // Default value
   };

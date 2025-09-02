@@ -11,8 +11,10 @@ interface RatingScaleProps {
   className?: string;
   onPointerDown?: () => void;
   onPointerUp?: () => void;
+  onMouseLeave?: () => void;
   emojiColor?: string;
   mobileSlider?: boolean;
+  maintainValueOnLeave?: boolean;
 }
 
 export function RatingScale({
@@ -25,8 +27,10 @@ export function RatingScale({
   className,
   onPointerDown,
   onPointerUp,
+  onMouseLeave,
   emojiColor,
   mobileSlider = false,
+  maintainValueOnLeave = false,
 }: RatingScaleProps) {
   const [hoverValue, setHoverValue] = React.useState<number | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -75,13 +79,19 @@ export function RatingScale({
   };
 
   const handleMouseLeave = () => {
-    setHoverValue(null);
+    if (!maintainValueOnLeave) {
+      setHoverValue(null);
+    }
     if (onPointerUp) {
       onPointerUp();
+    }
+    if (onMouseLeave) {
+      onMouseLeave();
     }
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
     if (!onClick) return;
     const value = calculateValueFromPosition(e.clientX);
     if (value !== null) {

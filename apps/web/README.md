@@ -329,7 +329,7 @@ export function Button({ variant, size, className, children }: ButtonProps) {
 // features/ratings/components/index.ts
 // Emoji Rating Components
 export { EmojiRatingDisplay } from './emoji-rating-display';
-export { EmojiRatingPopover } from './emoji-rating-popover';
+export { RateAndReviewDialog } from './rate-and-review-dialog';
 export { EmojiReaction } from './emoji-reaction';
 
 // Star Rating Components
@@ -337,7 +337,7 @@ export { StarRating } from './star-rating';
 export { StarRatingWithPopover } from './star-rating-with-popover';
 
 // Rating Utilities
-export { RatingPopover } from './rating-popover';
+export { RevolvingRateReviewButton } from './revolving-rate-review-button';
 export { RatingRangeSlider } from './rating-range-slider';
 ```
 

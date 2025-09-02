@@ -11,7 +11,6 @@ interface UseFollowUserOptions {
 
 export function useFollowUser(options: UseFollowUserOptions = {}) {
   const queryClient = useQueryClient();
-  // @ts-expect-error - Complex Convex types cause deep instantiation errors
   const followMutation = useConvexMutation(api.follows.follow);
   const unfollowMutation = useConvexMutation(api.follows.unfollow);
 

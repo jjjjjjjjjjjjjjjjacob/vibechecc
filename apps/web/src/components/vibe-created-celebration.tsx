@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/tabs-draggable';
 import {
   ArrowRight,
-  Share2,
+  Share,
   Trophy,
   Instagram,
   Twitter,
@@ -29,7 +29,7 @@ import {
   Check,
 } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
-import { VibeCard } from '@/features/vibes/components/vibe-card';
+import { VibeCardV2 as VibeCard } from '@/features/vibes/components/vibe-card';
 import { useStoryCanvas, type LayoutOption } from '@/hooks/use-story-canvas';
 import { useVibeImageUrl } from '@/hooks/use-vibe-image-url';
 import { StoryImagePreview } from '@/components/social/story-image-preview';
@@ -399,8 +399,10 @@ export function VibeCreatedCelebrationV2({
                 vibe={{
                   ...vibe,
                   createdBy: author,
-                  ratings: ratings.filter((r): r is Rating => 'review' in r),
                 }}
+                currentUserRatings={ratings.filter(
+                  (r): r is Rating => 'review' in r
+                )}
                 variant="compact"
                 className="shadow-xl"
               />
@@ -457,7 +459,7 @@ export function VibeCreatedCelebrationV2({
                   )}
                   style={{ transitionDelay: '500ms' }}
                 >
-                  <Share2 className="mr-2 h-4 w-4" />
+                  <Share className="mr-2 h-4 w-4" />
                   share vibe
                 </Button>
               </div>

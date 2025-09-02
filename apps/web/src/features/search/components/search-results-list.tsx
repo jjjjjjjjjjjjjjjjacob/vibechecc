@@ -2,8 +2,7 @@ import { SearchResultListCard } from './search-result-list-card';
 import { SearchEmptyState } from './search-empty-state';
 import { SearchError } from './search-error';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import type { SearchResult, VibeSearchResult } from '@vibechecc/types';
-import type { Vibe } from '@/types';
+import type { SearchResult, VibeSearchResult, Vibe } from '@vibechecc/types';
 
 interface SearchResultsListProps {
   results?: SearchResult[];
@@ -29,7 +28,8 @@ function _convertVibeSearchResultToVibe(result: VibeSearchResult): Vibe {
           image_url: result.createdBy.avatar,
         }
       : null,
-    ratings: [], // We don't have full ratings in search results
+    emojiRatings: [],
+    currentUserRatings: [], // We don't have user ratings in search results
     tags: result.tags,
   };
 }

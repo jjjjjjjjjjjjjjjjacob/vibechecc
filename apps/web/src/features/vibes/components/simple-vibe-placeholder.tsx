@@ -1,19 +1,32 @@
-import { useThemeStore } from '@/stores/theme-store';
 import { cn } from '@/utils/tailwind-utils';
+import {
+  generateGradientClasses,
+  generateGradientStyle,
+  isLightGradient,
+} from '@/utils/gradient-utils';
 import { useEffect, useState } from 'react';
 
 interface SimplePlaceholderProps {
   title?: string;
   className?: string;
   hideText?: boolean;
+  gradientFrom?: string;
+  gradientTo?: string;
+  gradientDirection?: string;
+  textColorOverride?: 'auto' | 'white' | 'black';
+  textContrastMode?: 'light' | 'dark' | 'auto';
 }
 
 export function SimpleVibePlaceholder({
   title,
   className,
   hideText = false,
+  gradientFrom,
+  gradientTo,
+  gradientDirection,
+  textColorOverride = 'auto',
+  textContrastMode,
 }: SimplePlaceholderProps) {
-  const { resolvedTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch by only rendering after mount
@@ -21,74 +34,77 @@ export function SimpleVibePlaceholder({
     setMounted(true);
   }, []);
 
-  // Generate a consistent color based on the title
-  const getColorIndex = (title?: string) => {
-    if (!title) return 0;
-    let hash = 0;
-    for (let i = 0; i < title.length; i++) {
-      hash = title.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return Math.abs(hash % 6); // 0-5 for our color palette
-  };
+  // Build Tailwind gradient classes from vibe or fallback to theme
+  const direction = gradientDirection || 'to-br';
+  const gradientDirectionClass = generateGradientClasses(
+    gradientFrom,
+    gradientTo,
+    direction
+  );
+  const colorClasses =
+    gradientFrom && gradientTo
+      ? cn(`from-[${gradientFrom}]`, `to-[${gradientTo}]`)
+      : 'from-theme-primary to-theme-secondary';
 
-  const colorIndex = getColorIndex(title);
+  const gradientClassName = cn(colorClasses, gradientDirectionClass);
+
+  // Determine text color based on textContrastMode, then textColorOverride, then auto-detection
+  const textColor = (() => {
+    // Priority 1: textContrastMode
+    if (textContrastMode === 'light') return 'text-black/70';
+    if (textContrastMode === 'dark') return 'text-white/90';
+    if (textContrastMode === 'auto') {
+      if (gradientFrom && gradientTo) {
+        return isLightGradient(gradientFrom, gradientTo)
+          ? 'text-black/70'
+          : 'text-white/90';
+      }
+      return 'text-white/90';
+    }
+
+    // Priority 2: textColorOverride (backward compatibility)
+    if (textColorOverride === 'white') return 'text-white/90';
+    if (textColorOverride === 'black') return 'text-black/70';
+
+    // Priority 3: Auto-detection based on gradient
+    if (gradientFrom && gradientTo) {
+      return isLightGradient(gradientFrom, gradientTo)
+        ? 'text-black/70'
+        : 'text-white/90';
+    }
+    return 'text-white/90';
+  })();
 
   // If not mounted yet, return a simple placeholder to avoid hydration mismatch
   if (!mounted) {
     return (
-      <div
-        className={cn('relative h-full w-full bg-zinc-800', className)}
-      ></div>
+      <div className={cn('bg-muted relative h-full w-full', className)}></div>
     );
   }
 
-  // Define background classes based on color index and theme
-  const getBgClass = () => {
-    const isDark = resolvedTheme === 'dark';
-
-    switch (colorIndex) {
-      case 0:
-        return isDark
-          ? 'bg-gradient-to-br from-pink-500 to-rose-400'
-          : 'bg-gradient-to-br from-pink-300 to-rose-200';
-      case 1:
-        return isDark
-          ? 'bg-gradient-to-br from-blue-500 to-sky-400'
-          : 'bg-gradient-to-br from-blue-300 to-sky-200';
-      case 2:
-        return isDark
-          ? 'bg-gradient-to-br from-green-500 to-emerald-400'
-          : 'bg-gradient-to-br from-green-300 to-emerald-200';
-      case 3:
-        return isDark
-          ? 'bg-gradient-to-br from-yellow-500 to-amber-400'
-          : 'bg-gradient-to-br from-yellow-300 to-amber-200';
-      case 4:
-        return isDark
-          ? 'bg-gradient-to-br from-purple-500 to-violet-400'
-          : 'bg-gradient-to-br from-purple-300 to-violet-200';
-      case 5:
-        return isDark
-          ? 'bg-gradient-to-br from-orange-500 to-red-400'
-          : 'bg-gradient-to-br from-orange-300 to-red-200';
-      default:
-        return isDark
-          ? 'bg-gradient-to-br from-pink-500 to-rose-400'
-          : 'bg-gradient-to-br from-pink-300 to-rose-200';
-    }
-  };
+  // Build inline gradient style when explicit colors are provided
+  const backgroundStyle =
+    gradientFrom && gradientTo
+      ? generateGradientStyle(gradientFrom, gradientTo, direction)
+      : undefined;
 
   return (
     <div
       className={cn(
         'relative flex h-full w-full items-center justify-center overflow-hidden',
-        getBgClass(),
+        gradientClassName,
         className
       )}
+      style={backgroundStyle ? { background: backgroundStyle } : undefined}
     >
       {title && !hideText && (
         <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
-          <span className="line-clamp-3 text-lg font-medium text-white drop-shadow-md">
+          <span
+            className={cn(
+              'line-clamp-3 text-lg font-medium drop-shadow-md',
+              textColor
+            )}
+          >
             {title}
           </span>
         </div>

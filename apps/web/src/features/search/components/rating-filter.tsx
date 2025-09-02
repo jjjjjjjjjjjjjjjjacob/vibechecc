@@ -40,8 +40,8 @@ export function RatingFilter({ value, onChange }: RatingFilterProps) {
                       key={i}
                       className={`h-3 w-3 ${
                         i < rating.value
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
+                          ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400'
+                          : 'text-muted-foreground'
                       }`}
                     />
                   ))}
