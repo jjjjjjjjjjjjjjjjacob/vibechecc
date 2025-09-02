@@ -21,7 +21,7 @@ function SSOCallbackPage() {
     <div className="bg-background flex min-h-screen flex-col items-center justify-center">
       <div className="text-center">
         <div className="mb-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <div className="border-primary mx-auto h-8 w-8 animate-spin rounded-full border-b-2"></div>
         </div>
         <p className="text-muted-foreground">welcome</p>
       </div>
