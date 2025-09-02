@@ -1,19 +1,18 @@
 import { action, internalMutation } from './_generated/server';
-import { internal } from './_generated/api';
+import { api, internal } from './_generated/api';
 import { v } from 'convex/values';
 import { nanoid } from 'nanoid';
 
 // Main seed action - comprehensive development data
 export const seed = action({
   handler: async (ctx): Promise<void> => {
-    // eslint-disable-next-line no-console
     console.log('Starting seed process...');
 
     try {
       // Step 1: Clear all existing data
-      // eslint-disable-next-line no-console
+
       console.log('Step 1: Clearing existing data...');
-      
+
       const tables = [
         'users',
         'vibes',
@@ -25,26 +24,28 @@ export const seed = action({
         'tags',
         'migrations',
       ] as const;
-      
+
       // Clear each table separately to avoid read limits
       for (const table of tables) {
         let hasMore = true;
         let totalDeleted = 0;
-        
+
         while (hasMore) {
           const result = await (
-            ctx as unknown as { runMutation: (fn: unknown, args: unknown) => Promise<unknown> }
+            ctx as unknown as {
+              runMutation: (fn: unknown, args: unknown) => Promise<unknown>;
+            }
           ).runMutation(internal.seed.clearTableBatch, { table });
-          totalDeleted += (result as { deleted: number; hasMore: boolean }).deleted;
+          totalDeleted += (result as { deleted: number; hasMore: boolean })
+            .deleted;
           hasMore = (result as { deleted: number; hasMore: boolean }).hasMore;
         }
-        
-        // eslint-disable-next-line no-console
+
         console.log(`Cleared ${totalDeleted} items from ${table}`);
       }
 
       // Step 2: Import emoji-mart data
-      // eslint-disable-next-line no-console
+
       console.log('Step 2: Importing emoji-mart data...');
       const emojiResult = (await (
         ctx as unknown as { runMutation: (fn: unknown) => Promise<unknown> }
@@ -55,13 +56,13 @@ export const seed = action({
         skipped: number;
         total: number;
       };
-      // eslint-disable-next-line no-console
+
       console.log(
         `Imported ${emojiResult.imported} new emojis, skipped ${emojiResult.skipped} existing (${emojiResult.total} total)`
       );
 
       // Step 3: Create users (20 for good development data)
-      // eslint-disable-next-line no-console
+
       console.log('Step 3: Creating users...');
       const userResult = (await (
         ctx as unknown as {
@@ -70,11 +71,11 @@ export const seed = action({
       ).runMutation(internal.seed.seedUsers, {
         count: 20,
       })) as unknown as { count: number };
-      // eslint-disable-next-line no-console
+
       console.log(`Created ${userResult.count} users`);
 
       // Step 4: Create vibes (25 for variety)
-      // eslint-disable-next-line no-console
+
       console.log('Step 4: Creating vibes...');
       const vibeResult = (await (
         ctx as unknown as {
@@ -83,82 +84,86 @@ export const seed = action({
       ).runMutation(internal.seed.seedVibes, {
         count: 100,
       })) as unknown as { count: number };
-      // eslint-disable-next-line no-console
+
       console.log(`Created ${vibeResult.count} vibes`);
 
       // Step 5: Create ratings
-      // eslint-disable-next-line no-console
+
       console.log('Step 5: Creating ratings...');
       const ratingResult = (await ctx.runMutation(
         internal.seed.seedRatings
       )) as { count: number };
-      // eslint-disable-next-line no-console
+
       console.log(`Created ${ratingResult.count} ratings`);
 
       // Step 6: Create tags from vibes
-      // eslint-disable-next-line no-console
+
       console.log('Step 6: Creating tags...');
       const tagResult = (await (
         ctx as unknown as { runMutation: (fn: unknown) => Promise<unknown> }
       ).runMutation(internal.seed.seedTags)) as unknown as {
         count: number;
       };
-      // eslint-disable-next-line no-console
+
       console.log(`Created ${tagResult.count} tags`);
 
       // Step 7: Create search data
-      // eslint-disable-next-line no-console
+
       console.log('Step 7: Creating search data...');
       const searchResult = (await ctx.runMutation(
         internal.seed.seedSearchData
       )) as { searchHistory: number; trending: number };
-      // eslint-disable-next-line no-console
+
       console.log(
         `Created ${searchResult.searchHistory} search history items and ${searchResult.trending} trending searches`
       );
 
       // Step 8: Create search metrics
-      // eslint-disable-next-line no-console
+
       console.log('Step 8: Creating search metrics...');
       const metricsResult = (await ctx.runMutation(
         internal.seed.seedSearchMetrics
       )) as { count: number };
-      // eslint-disable-next-line no-console
-      console.log(`Created ${metricsResult.count} search metrics`);
-      
-      // Step 9: Add images to vibes
-      // eslint-disable-next-line no-console
-      console.log('Step 9: Adding images to vibes...');
-      const imageResult = await ctx.runAction(internal.seedImages.seedVibesWithImages);
-      // eslint-disable-next-line no-console
-      console.log(`Added images to ${(imageResult as { updated: number }).updated} vibes`);
 
-      // eslint-disable-next-line no-console
+      console.log(`Created ${metricsResult.count} search metrics`);
+
+      // Step 9: Add images to vibes
+
+      console.log('Step 9: Adding images to vibes...');
+      const imageResult = await ctx.runAction(
+        api.seedImages.seedVibesWithImages as any
+      );
+
+      console.log(
+        `Added images to ${(imageResult as { updated: number }).updated} vibes`
+      );
+
       console.log('\n=== Seed Summary ===');
-      // eslint-disable-next-line no-console
+
       console.log(
         `✅ Emojis: ${emojiResult.imported} imported, ${emojiResult.total} total`
       );
-      // eslint-disable-next-line no-console
+
       console.log(`✅ Users: ${userResult.count}`);
-      // eslint-disable-next-line no-console
+
       console.log(`✅ Vibes: ${vibeResult.count}`);
-      // eslint-disable-next-line no-console
+
       console.log(`✅ Ratings: ${ratingResult.count}`);
-      // eslint-disable-next-line no-console
+
       console.log(`✅ Tags: ${tagResult.count}`);
-      // eslint-disable-next-line no-console
+
       console.log(`✅ Search History: ${searchResult.searchHistory}`);
-      // eslint-disable-next-line no-console
+
       console.log(`✅ Trending Searches: ${searchResult.trending}`);
-      // eslint-disable-next-line no-console
+
       console.log(`✅ Search Metrics: ${metricsResult.count}`);
-      // eslint-disable-next-line no-console
-      console.log(`✅ Images: ${(imageResult as { updated: number }).updated} vibes with images`);
-      // eslint-disable-next-line no-console
+
+      console.log(
+        `✅ Images: ${(imageResult as { updated: number }).updated} vibes with images`
+      );
+
       console.log('\nSeed completed successfully! 🎉');
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Seed failed:', error);
       throw error;
     }
@@ -186,16 +191,16 @@ export const clearAllData = internalMutation({
       let totalDeleted = 0;
       let iterations = 0;
       const maxIterations = 200; // Safety limit to prevent infinite loops
-      
+
       // Keep deleting until no more items
       while (iterations < maxIterations) {
         // Take a small batch
         const items = await ctx.db.query(table).take(batchSize);
-        
+
         if (items.length === 0) {
           break;
         }
-        
+
         // Delete this batch
         for (const item of items) {
           await ctx.db.delete(item._id);
@@ -203,8 +208,7 @@ export const clearAllData = internalMutation({
         totalDeleted += items.length;
         iterations++;
       }
-      
-      // eslint-disable-next-line no-console
+
       console.log(`Cleared ${totalDeleted} items from ${table}`);
     }
   },
@@ -384,7 +388,6 @@ export const seedUsers = internalMutation({
     return { count: createdUsers.length, users: createdUsers };
   },
 });
-
 
 // Vibe templates
 const vibeTemplates = [
@@ -2461,22 +2464,23 @@ export const clear = action({
       'tags',
       'migrations',
     ] as const;
-    
+
     // Clear each table separately to avoid read limits
     for (const table of tables) {
       let hasMore = true;
       let totalDeleted = 0;
-      
+
       while (hasMore) {
-        const result = await ctx.runMutation(internal.seed.clearTableBatch, { table });
+        const result = await ctx.runMutation(internal.seed.clearTableBatch, {
+          table,
+        });
         totalDeleted += result.deleted;
         hasMore = result.hasMore;
       }
-      
-      // eslint-disable-next-line no-console
+
       console.log(`Cleared ${totalDeleted} items from ${table}`);
     }
-    
+
     return { success: true, message: 'All data cleared successfully' };
   },
 });
@@ -2487,14 +2491,14 @@ export const clearTableBatch = internalMutation({
   handler: async (ctx, { table }) => {
     const batchSize = 20;
     const items = await ctx.db.query(table as any).take(batchSize);
-    
+
     for (const item of items) {
       await ctx.db.delete(item._id);
     }
-    
-    return { 
+
+    return {
       deleted: items.length,
-      hasMore: items.length === batchSize
+      hasMore: items.length === batchSize,
     };
   },
 });

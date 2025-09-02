@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MasonryFeed } from './masonry-feed';
 import type { Vibe } from '@vibechecc/types';
 
@@ -8,11 +9,14 @@ import type { Vibe } from '@vibechecc/types';
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: vi.fn(() => vi.fn()),
   useLocation: vi.fn(() => ({ pathname: '/test' })),
+  useRouter: vi.fn(() => ({ navigate: vi.fn() })),
   Link: ({ children, ...props }: any) => <a {...props}>{children}</a>,
 }));
 
 vi.mock('@clerk/tanstack-react-start', () => ({
   useUser: vi.fn(() => ({ user: null })),
+  SignInButton: ({ children }: any) => <button>{children}</button>,
+  SignUpButton: ({ children }: any) => <button>{children}</button>,
 }));
 
 vi.mock('@/hooks/use-mobile', () => ({
@@ -43,7 +47,7 @@ vi.mock('@/features/auth/hooks/use-signup-cta-placement', () => ({
   })),
 }));
 
-vi.mock('@/features/vibes/components/vibe-card-v2', () => ({
+vi.mock('@/features/vibes/components/vibe-card', () => ({
   VibeCardV2: ({ vibe, variant }: any) => (
     <div data-testid="vibe-card" data-variant={variant}>
       {vibe.title}
@@ -108,9 +112,19 @@ const mockVibes: Vibe[] = [
   },
 ];
 
+// Helper to render with QueryClient
+const renderWithQueryClient = (component: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
+  );
+};
+
 describe('MasonryFeed', () => {
   it('renders vibes using VibeCardV2 in masonry layout', () => {
-    render(<MasonryFeed vibes={mockVibes} />);
+    renderWithQueryClient(<MasonryFeed vibes={mockVibes} />);
 
     expect(screen.getByTestId('masonry-layout')).toBeInTheDocument();
     expect(screen.getByText('Test Vibe 1')).toBeInTheDocument();
@@ -121,7 +135,7 @@ describe('MasonryFeed', () => {
   });
 
   it('passes correct variant to VibeCardV2 based on feed variant', () => {
-    render(<MasonryFeed vibes={mockVibes} variant="search" />);
+    renderWithQueryClient(<MasonryFeed vibes={mockVibes} variant="search" />);
 
     const vibeCards = screen.getAllByTestId('vibe-card');
     vibeCards.forEach((card) => {
@@ -130,7 +144,7 @@ describe('MasonryFeed', () => {
   });
 
   it('shows empty state when no vibes', () => {
-    render(<MasonryFeed vibes={[]} />);
+    renderWithQueryClient(<MasonryFeed vibes={[]} />);
 
     expect(screen.getByText('no vibes found')).toBeInTheDocument();
     expect(
@@ -139,7 +153,7 @@ describe('MasonryFeed', () => {
   });
 
   it('shows loading skeleton when loading', () => {
-    render(<MasonryFeed vibes={[]} isLoading />);
+    renderWithQueryClient(<MasonryFeed vibes={[]} isLoading />);
 
     // Should render skeleton cards
     const skeletons = screen.getAllByTestId('masonry-layout')[0];
@@ -148,7 +162,7 @@ describe('MasonryFeed', () => {
 
   it('shows error state when error occurs', () => {
     const error = new Error('Test error');
-    render(<MasonryFeed vibes={[]} error={error} />);
+    renderWithQueryClient(<MasonryFeed vibes={[]} error={error} />);
 
     expect(screen.getByText('failed to load vibes')).toBeInTheDocument();
     expect(screen.getByText('try again')).toBeInTheDocument();
@@ -163,7 +177,7 @@ describe('MasonryFeed', () => {
       useMasonryLayout: vi.fn(() => false),
     }));
 
-    render(<MasonryFeed vibes={mockVibes} />);
+    renderWithQueryClient(<MasonryFeed vibes={mockVibes} />);
 
     // Should not render masonry layout when useMasonryLayout returns false
     // But our current mock still renders it, so let's just check the vibes render
@@ -172,7 +186,7 @@ describe('MasonryFeed', () => {
   });
 
   it('passes enableFadeIn and optimizeForTouch props to VibeCardV2', () => {
-    render(
+    renderWithQueryClient(
       <MasonryFeed vibes={mockVibes} enableFadeIn optimizeForTouch={false} />
     );
 

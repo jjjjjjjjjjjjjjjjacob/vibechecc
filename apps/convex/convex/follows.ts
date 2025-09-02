@@ -458,6 +458,7 @@ async function getPopularUserSuggestions(
       (sum: number, r: Doc<'ratings'>) => sum + r.value,
       0
     );
+
     const _vibeAverage = vibeRatingSum / vibeRatings.length;
 
     current.totalRatings += vibeRatings.length;

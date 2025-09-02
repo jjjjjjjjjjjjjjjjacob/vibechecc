@@ -40,7 +40,7 @@ export function ListLayout({
 
   // Callbacks
   handleEmojiRatingClick,
-  handleEmojiRating,
+  handleEmojiRating: _handleEmojiRating,
   setImageError,
   setShowRatingDialog,
   setShowAuthDialog,

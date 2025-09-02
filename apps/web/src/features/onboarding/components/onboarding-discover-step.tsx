@@ -70,7 +70,7 @@ export function OnboardingDiscoverStep({
     setHasInteracted(true);
   };
 
-  const handleEmojiRating = async (_data: {
+  const _handleEmojiRating = async (_data: {
     emoji: string;
     value: number;
     review: string;
@@ -207,7 +207,7 @@ export function OnboardingDiscoverStep({
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {demoVibe.tags?.map((tag) => (
+                    {demoVibe.tags?.map((tag: string) => (
                       <Badge key={tag} variant="outline" className="text-xs">
                         #{tag}
                       </Badge>
@@ -232,16 +232,21 @@ export function OnboardingDiscoverStep({
                           top-rated emotions:
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          {demoVibe.emojiRatings.map((rating, index) => (
-                            <EmojiRatingDisplay
-                              key={`${rating.emoji}-${index}`}
-                              rating={rating}
-                              vibeId={demoVibe.id}
-                              variant="compact"
-                              existingUserRatings={[]}
-                              emojiMetadata={{}}
-                            />
-                          ))}
+                          {demoVibe.emojiRatings.map(
+                            (rating, index: number) => (
+                              <EmojiRatingDisplay
+                                key={`${rating.emoji}-${index}`}
+                                rating={{
+                                  ...rating,
+                                  count: rating.count || 0,
+                                }}
+                                vibeId={demoVibe.id}
+                                variant="compact"
+                                existingUserRatings={[]}
+                                emojiMetadata={{}}
+                              />
+                            )
+                          )}
                         </div>
                       </div>
                     )}

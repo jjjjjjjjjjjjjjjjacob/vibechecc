@@ -38,20 +38,28 @@ export function VibePointsChart({
     });
   };
 
-  const formatTooltipValue = (value: number, name: string) => {
+  const _formatTooltipValue = (value: number, name: string) => {
     const sign = name === 'earned' ? '+' : name === 'spent' ? '-' : '';
     return [`${sign}${value}`, name];
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean;
+    payload?: Array<{ color: string; value: number; dataKey: string }>;
+    label?: string;
+  }) => {
     if (!active || !payload?.length) return null;
 
     return (
       <div className="bg-background border-border rounded-lg border p-3 shadow-lg">
         <p className="text-foreground mb-2 text-sm font-medium">
-          {formatDate(label)}
+          {label ? formatDate(label) : ''}
         </p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry, index: number) => (
           <div key={index} className="flex items-center gap-2 text-xs">
             <div
               className="h-2 w-2 rounded-full"

@@ -212,7 +212,8 @@ function DiscoverPageDev() {
             createdAt: new Date().toISOString(),
             createdById: user?.id || '',
             visibility: 'public' as const,
-            ratings: [],
+            emojiRatings: [],
+            currentUserRatings: [],
           }}
           author={{
             externalId: user?.id || '',
@@ -420,7 +421,9 @@ function TrendingSection() {
     { enabled: true }
   );
 
-  const trendingVibes = data?.pages?.flatMap((page) => page.vibes) || [];
+  const trendingVibes = ((
+    data as { pages: Array<{ vibes: Vibe[] }> }
+  )?.pages?.flatMap((page) => page.vibes) || []) as Vibe[];
 
   return (
     <DiscoverSectionWrapper
@@ -445,7 +448,9 @@ function BoostedSection() {
     { enabled: true }
   );
 
-  const boostedVibes = data?.pages?.flatMap((page) => page.vibes) || [];
+  const boostedVibes = ((
+    data as { pages: Array<{ vibes: Vibe[] }> }
+  )?.pages?.flatMap((page) => page.vibes) || []) as Vibe[];
 
   return (
     <DiscoverSectionWrapper
@@ -469,7 +474,9 @@ function ControversialSection() {
     { enabled: true }
   );
 
-  const controversialVibes = data?.pages?.flatMap((page) => page.vibes) || [];
+  const controversialVibes = ((
+    data as { pages: Array<{ vibes: Vibe[] }> }
+  )?.pages?.flatMap((page) => page.vibes) || []) as Vibe[];
 
   return (
     <DiscoverSectionWrapper

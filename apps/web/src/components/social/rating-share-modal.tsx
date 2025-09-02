@@ -26,14 +26,11 @@ import {
   Share,
   Download,
   Copy,
-  Image,
-  Type,
   Maximize2,
   Loader2,
   Info,
   Square,
   Smartphone,
-  Monitor,
 } from 'lucide-react';
 import { APP_URL } from '@/utils/bindings';
 
@@ -105,7 +102,7 @@ export function RatingShareModal({
 
   const shareUrl = `${APP_URL}/vibes/${vibe.id}?utm_source=rating_share&utm_medium=social&utm_campaign=rating_share`;
 
-  const currentLayoutOption =
+  const _currentLayoutOption =
     layoutOptions.find((opt) => opt.value === selectedLayout) ||
     layoutOptions[0];
   const currentPreviewUrl = previewUrls.get(selectedLayout) || '';

@@ -13,19 +13,19 @@ import {
 import { trackEvents } from '@/lib/track-events';
 
 // Mock track events
-jest.mock('@/lib/track-events', () => ({
+vi.mock('@/lib/track-events', () => ({
   trackEvents: {
-    placeholderPerformance: jest.fn(),
-    loadingStateChanged: jest.fn(),
-    componentPerformance: jest.fn(),
-    timeToInteractive: jest.fn(),
-    firstInteraction: jest.fn(),
+    placeholderPerformance: vi.fn(),
+    loadingStateChanged: vi.fn(),
+    componentPerformance: vi.fn(),
+    timeToInteractive: vi.fn(),
+    firstInteraction: vi.fn(),
   },
 }));
 
 // Mock performance.now()
 const mockPerformance = {
-  now: jest.fn(() => 1000),
+  now: vi.fn(() => 1000),
 };
 Object.defineProperty(window, 'performance', {
   value: mockPerformance,
@@ -33,17 +33,17 @@ Object.defineProperty(window, 'performance', {
 });
 
 // Mock IntersectionObserver
-const mockIntersectionObserver = jest.fn();
+const mockIntersectionObserver = vi.fn();
 mockIntersectionObserver.mockReturnValue({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 });
 window.IntersectionObserver = mockIntersectionObserver;
 
 describe('usePlaceholderTracking', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPerformance.now.mockReturnValue(1000);
   });
 
@@ -101,7 +101,7 @@ describe('usePlaceholderTracking', () => {
 
 describe('useLoadingStateTracking', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPerformance.now.mockReturnValue(1000);
   });
 
@@ -132,7 +132,7 @@ describe('useLoadingStateTracking', () => {
 
 describe('useComponentPerformance', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPerformance.now.mockReturnValue(1000);
   });
 
@@ -157,7 +157,7 @@ describe('useComponentPerformance', () => {
     );
   });
 
-  it('should track rerenders', () => {
+  it('should track rerenders', async () => {
     const { rerender } = renderHook(() =>
       useComponentPerformance('test-component', { trackRerender: true })
     );
@@ -167,6 +167,9 @@ describe('useComponentPerformance', () => {
 
     // Force rerender
     rerender();
+
+    // Wait for the debounced timeout (100ms) to complete
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
     expect(trackEvents.componentPerformance).toHaveBeenCalledWith(
       'test-component',
@@ -179,7 +182,7 @@ describe('useComponentPerformance', () => {
 
 describe('useTimeToInteractive', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPerformance.now.mockReturnValue(1000);
   });
 

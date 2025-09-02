@@ -1,7 +1,6 @@
 import {
   createFileRoute,
   useNavigate,
-  redirect,
   useRouteContext,
 } from '@tanstack/react-router';
 import * as React from 'react';
@@ -43,7 +42,7 @@ const getServerSideAuth = createServerFn({ method: 'GET' }).handler(
     try {
       const { userId } = await getAuth(request);
       return { authenticated: !!userId, userId };
-    } catch (error) {
+    } catch (_error) {
       return { authenticated: false };
     }
   }
@@ -51,13 +50,15 @@ const getServerSideAuth = createServerFn({ method: 'GET' }).handler(
 
 export const Route = createFileRoute('/vibes/create')({
   component: CreateVibe,
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async () => {
     const authData = await getServerSideAuth();
     if (!authData.authenticated) {
-      // Instead of using redirect(), we'll handle this in the component
-      return { ...authData, redirectTo: '/sign-in' };
+      // Instead of using redirect(), handle in component; cast to satisfy types
+      return { ...authData, redirectTo: '/sign-in' } as typeof authData & {
+        redirectTo: string;
+      };
     }
-    return authData;
+    return authData as typeof authData;
   },
 });
 
@@ -65,13 +66,16 @@ function CreateVibe() {
   const navigate = useNavigate();
   const { user } = useUser();
   const routeContext = useRouteContext({ from: '/vibes/create' });
+  const redirectTo = (
+    routeContext as typeof routeContext & { redirectTo?: string }
+  ).redirectTo;
 
   // Handle server-side redirect
   React.useEffect(() => {
-    if (routeContext.redirectTo) {
-      navigate({ to: routeContext.redirectTo });
+    if (redirectTo) {
+      navigate({ to: redirectTo });
     }
-  }, [routeContext.redirectTo, navigate]);
+  }, [redirectTo, navigate]);
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [tags, setTags] = React.useState<string[]>([]);
@@ -347,9 +351,47 @@ function CreateVibe() {
                                         {/* Direction Wheel - Inside accordion */}
                                         <div
                                           className="relative h-8 w-8 cursor-pointer"
+                                          role="button"
+                                          tabIndex={0}
+                                          aria-label="gradient direction control"
                                           onWheel={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
+                                          }}
+                                          onKeyDown={(e) => {
+                                            if (
+                                              e.key === 'Enter' ||
+                                              e.key === ' '
+                                            ) {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+
+                                              // Cycle through predefined directions
+                                              const directions = [
+                                                'to-r',
+                                                'to-br',
+                                                'to-b',
+                                                'to-bl',
+                                                'to-l',
+                                                'to-tl',
+                                                'to-t',
+                                                'to-tr',
+                                              ];
+                                              const currentIndex =
+                                                directions.indexOf(
+                                                  gradient.direction
+                                                );
+                                              const nextIndex =
+                                                (currentIndex + 1) %
+                                                directions.length;
+                                              const newDirection =
+                                                directions[nextIndex];
+
+                                              setGradient((prev) => ({
+                                                ...prev,
+                                                direction: newDirection,
+                                              }));
+                                            }
                                           }}
                                           onClick={(e) => {
                                             e.stopPropagation();

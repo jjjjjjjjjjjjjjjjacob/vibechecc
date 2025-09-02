@@ -12,7 +12,6 @@ const mockUseTopRatedVibes = vi.fn();
 const mockUsePersonalizedVibes = vi.fn();
 const mockUseVibesInfinite = vi.fn();
 const mockUseMasonryLayout = vi.fn();
-const _mockUseHeaderNavStore = vi.fn();
 
 // Import the actual useMasonryLayout from the mock
 import { useMasonryLayout } from './masonry-layout';
@@ -316,7 +315,7 @@ describe('HomeFeed', () => {
 
     await waitFor(() => {
       const descriptions = screen.getAllByText(
-        'most rated & recently active vibes'
+        'boost score + recency + engagement algorithm'
       );
       expect(descriptions.length).toBeGreaterThan(0);
     });
@@ -489,7 +488,7 @@ describe('HomeFeed', () => {
 
     // Check that useVibesInfinite is called with hot tab filters
     expect(mockUseVibesInfinite).toHaveBeenCalledWith(
-      expect.objectContaining({ sort: 'top_rated', limit: 20 }),
+      expect.objectContaining({ sort: 'hot', limit: 20 }),
       expect.objectContaining({
         enabled: true,
         queryKeyPrefix: ['home-feed'],
@@ -577,7 +576,7 @@ describe('HomeFeed', () => {
 
     // Verify useVibesInfinite is called with hot tab filters
     expect(mockUseVibesInfinite).toHaveBeenCalledWith(
-      expect.objectContaining({ sort: 'top_rated', limit: 20 }),
+      expect.objectContaining({ sort: 'hot', limit: 20 }),
       expect.objectContaining({
         enabled: true,
         queryKeyPrefix: ['home-feed'],

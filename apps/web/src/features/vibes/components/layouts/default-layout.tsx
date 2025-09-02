@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -115,6 +115,27 @@ export function DefaultLayout({
 }: DefaultLayoutProps) {
   const [isImageHovered, setIsImageHovered] = React.useState(false);
 
+  // Auto-generate gradient if missing (for vibes without images) OR get preset textContrast
+  const autoGradient = React.useMemo(() => {
+    if (!vibe?.id) return null;
+    if (!vibe.gradientFrom && !vibe.gradientTo && !imageUrl) {
+      return getConsistentGradient(vibe.id);
+    }
+
+    // Check if existing gradient matches a preset to use its fixed textContrast
+    if (vibe.gradientFrom && vibe.gradientTo) {
+      const matchingPreset = gradientPresets.find(
+        (preset) =>
+          preset.from === vibe.gradientFrom && preset.to === vibe.gradientTo
+      );
+      if (matchingPreset) {
+        return matchingPreset;
+      }
+    }
+
+    return null;
+  }, [vibe.gradientFrom, vibe.gradientTo, imageUrl, vibe.id]); // Include vibe.id for consistent generation
+
   // Early return if vibe or vibe.id is undefined
   if (!vibe?.id) {
     return null;
@@ -143,26 +164,6 @@ export function DefaultLayout({
       tags: rating.tags,
     };
   });
-
-  // Auto-generate gradient if missing (for vibes without images) OR get preset textContrast
-  const autoGradient = React.useMemo(() => {
-    if (!vibe.gradientFrom && !vibe.gradientTo && !imageUrl) {
-      return getConsistentGradient(vibe.id);
-    }
-
-    // Check if existing gradient matches a preset to use its fixed textContrast
-    if (vibe.gradientFrom && vibe.gradientTo) {
-      const matchingPreset = gradientPresets.find(
-        (preset) =>
-          preset.from === vibe.gradientFrom && preset.to === vibe.gradientTo
-      );
-      if (matchingPreset) {
-        return matchingPreset;
-      }
-    }
-
-    return null;
-  }, [vibe.gradientFrom, vibe.gradientTo, imageUrl, vibe.id]); // Include vibe.id for consistent generation
 
   // Unified rating handler
   const handleUnifiedEmojiRating: UnifiedEmojiRatingHandler = handleEmojiRating;

@@ -132,7 +132,15 @@ export function ProfileSnapshotCard() {
         {/* Points Chart - Desktop Only */}
         {pointsHistory && pointsHistory.length > 0 && (
           <div className="mt-6">
-            <VibePointsChart data={pointsHistory} showTitle={true} />
+            <VibePointsChart
+              data={pointsHistory.map((h) => ({
+                date: h.date,
+                earned: h.pointsEarned,
+                spent: h.pointsSpent,
+                balance: h.endingBalance,
+              }))}
+              showTitle={true}
+            />
           </div>
         )}
       </CardContent>

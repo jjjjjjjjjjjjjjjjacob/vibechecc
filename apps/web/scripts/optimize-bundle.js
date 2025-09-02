@@ -10,8 +10,6 @@
  * 4. Provide next steps for further optimization
  */
 
-/* eslint-disable no-console */
-
 import { execSync } from 'child_process';
 import {
   existsSync,

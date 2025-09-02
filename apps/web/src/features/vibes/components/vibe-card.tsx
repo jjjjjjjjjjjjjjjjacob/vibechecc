@@ -312,14 +312,14 @@ export function VibeCardV2({
   // Handle card click - no navigation
   const handleCardClick = React.useCallback(
     (e: React.MouseEvent) => {
-      console.log('handleCardClick called:', {
-        vibeId: vibe?.id,
-        target: (e.target as HTMLElement).tagName,
-        currentTarget: (e.currentTarget as HTMLElement).tagName,
-      });
+      // console.log('handleCardClick called:', {
+      //   vibeId: vibe?.id,
+      //   target: (e.target as HTMLElement).tagName,
+      //   currentTarget: (e.currentTarget as HTMLElement).tagName,
+      // });
 
       if (!vibe?.id) {
-        console.log('No vibe ID, returning');
+        // console.log('No vibe ID, returning');
         return;
       }
 
@@ -347,7 +347,7 @@ export function VibeCardV2({
           vibeCardElement &&
           tabsDraggableContainer.contains(vibeCardElement)
         ) {
-          console.log('Navigation blocked by dragging tabs');
+          // console.log('Navigation blocked by dragging tabs');
           return;
         }
       }
@@ -361,23 +361,23 @@ export function VibeCardV2({
 
       // Don't navigate if the click came from closing a drawer/dialog overlay
       if (isFromDrawerOverlay && !isFromDrawerContent) {
-        console.log('Navigation blocked by drawer overlay');
+        // console.log('Navigation blocked by drawer overlay');
         return;
       }
 
       // If this is from drawer content (like emoji picker), it shouldn't be navigating at all
       if (isFromDrawerContent) {
-        console.log('Navigation blocked by drawer content');
+        // console.log('Navigation blocked by drawer content');
         return;
       }
 
-      console.log('Navigating to vibe:', vibe.id);
+      // console.log('Navigating to vibe:', vibe.id);
       router.navigate({
         to: '/vibes/$vibeId',
         params: { vibeId: vibe.id },
       });
     },
-    [router, vibe?.id]
+    [router, vibe?.id, isMobile]
   );
 
   // Handle emoji rating click

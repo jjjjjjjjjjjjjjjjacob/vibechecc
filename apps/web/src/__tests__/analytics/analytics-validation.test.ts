@@ -11,6 +11,7 @@ vi.mock('posthog-js', () => ({
     init: vi.fn(),
     identify: vi.fn(),
     reset: vi.fn(),
+    __loaded: true, // Required for safeCapture to work
   },
 }));
 

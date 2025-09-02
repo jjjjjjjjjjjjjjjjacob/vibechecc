@@ -272,6 +272,7 @@ const mockUseSearchResultsImproved = vi.mocked(useSearchResultsImproved);
 
 describe('Search Page - Emoji Filter Integration', () => {
   let queryClient: QueryClient;
+
   let _user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {

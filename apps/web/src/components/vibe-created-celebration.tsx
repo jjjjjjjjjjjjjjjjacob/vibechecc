@@ -399,8 +399,10 @@ export function VibeCreatedCelebrationV2({
                 vibe={{
                   ...vibe,
                   createdBy: author,
-                  ratings: ratings.filter((r): r is Rating => 'review' in r),
                 }}
+                currentUserRatings={ratings.filter(
+                  (r): r is Rating => 'review' in r
+                )}
                 variant="compact"
                 className="shadow-xl"
               />

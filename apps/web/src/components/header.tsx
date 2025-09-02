@@ -4,7 +4,6 @@ import { Switch } from './ui/switch';
 import {
   Search,
   ChevronUp,
-  Menu,
   User,
   Heart,
   Sun,
@@ -95,8 +94,9 @@ export function Header() {
   // Check discover page access feature flag
   const discoverFlagEnabled = useFeatureFlagEnabled('discover-page-access');
   const discoverFlagPayload = useFeatureFlagPayload('discover-page-access');
-  const showDiscoverLink = !!clerkUser && discoverFlagEnabled && !!discoverFlagPayload;
-  
+  const showDiscoverLink =
+    !!clerkUser && discoverFlagEnabled && !!discoverFlagPayload;
+
   // Only show home link when there are other navigation items visible or user is signed in
   const showHomeLink = !!clerkUser || showDiscoverLink;
 
@@ -308,7 +308,7 @@ export function Header() {
   const vibeId = vibeMatch?.params?.vibeId as string | undefined;
 
   // Fetch vibe data when on vibe page
-  const { data: currentVibe } = useVibe(vibeId || '', { enabled: !!vibeId });
+  const { data: currentVibe } = useVibe(vibeId || '');
 
   // Handle graceful transition into vibe page state
   useEffect(() => {

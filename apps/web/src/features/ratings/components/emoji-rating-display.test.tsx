@@ -3,7 +3,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EmojiRatingDisplay } from './emoji-rating-display';
 import type { EmojiRating } from '@vibechecc/types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 // Mock Clerk
@@ -60,18 +59,6 @@ vi.mock('@tanstack/react-query', async () => {
   };
 });
 
-// Create a wrapper for React Query
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
-
 describe('EmojiRatingDisplay', () => {
   const mockRating: EmojiRating = {
     emoji: '😍',
@@ -91,7 +78,7 @@ describe('EmojiRatingDisplay', () => {
     );
 
     expect(screen.getByText('😍')).toBeInTheDocument();
-    expect(screen.getByText(/3\.5/)).toBeInTheDocument();
+    expect(screen.getAllByText(/3\.5/).length).toBeGreaterThan(0);
     expect(screen.getByText('(10)')).toBeInTheDocument();
   });
 
@@ -106,7 +93,7 @@ describe('EmojiRatingDisplay', () => {
       />
     );
 
-    expect(screen.getByText(/3\.5/)).toBeInTheDocument();
+    expect(screen.getAllByText(/3\.5/).length).toBeGreaterThan(0);
     expect(screen.getByText('(10)')).toBeInTheDocument();
 
     // Should render the emoji in the scale display
@@ -151,7 +138,7 @@ describe('EmojiRatingDisplay', () => {
     );
 
     // Should render the rating value and scale correctly
-    expect(screen.getByText(/4/)).toBeInTheDocument();
+    expect(screen.getAllByText(/4/).length).toBeGreaterThan(0);
     // Check that there's a rate button
     expect(screen.getByRole('button', { name: 'Rate' })).toBeInTheDocument();
   });

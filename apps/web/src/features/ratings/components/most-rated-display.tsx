@@ -22,6 +22,7 @@ export function MostRatedDisplay({
   onEmojiClick,
   vibeTitle,
   className,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   showPopover = true,
   emojiColor,
   size = 'md',

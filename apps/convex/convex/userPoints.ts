@@ -1,4 +1,9 @@
-import { query, mutation, internalMutation } from './_generated/server';
+import {
+  query,
+  mutation,
+  internalMutation,
+  type MutationCtx,
+} from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
@@ -44,7 +49,11 @@ function calculateBoostCost(currentBoostScore: number = 0): number {
 }
 
 // Calculate boost transfer amount based on voter and target levels
-function calculateBoostTransfer(voterLevel: number, targetLevel: number): number {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function calculateBoostTransfer(
+  voterLevel: number,
+  targetLevel: number
+): number {
   // Base transfer amount, slightly higher for lower-level targets
   const levelDifference = Math.max(1, targetLevel - voterLevel);
   const multiplier = levelDifference > 0 ? 1 : 1.2; // Boost for helping newer users
@@ -55,27 +64,35 @@ function calculateBoostTransfer(voterLevel: number, targetLevel: number): number
 function calculateDampenPenalty(
   targetBalance: number,
   protectedPoints: number = 0,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   dampenCount: number = 0,
   karmaScore: number = 0
 ): number {
   // Calculate effective balance (excluding protected points)
   const effectiveBalance = Math.max(0, targetBalance - protectedPoints);
-  
+
   // Reduce penalty if user has low effective balance
-  const balanceMultiplier = effectiveBalance > 50 ? 1 : Math.max(0.2, effectiveBalance / 50);
-  
+  const balanceMultiplier =
+    effectiveBalance > 50 ? 1 : Math.max(0.2, effectiveBalance / 50);
+
   // Reduce penalty for users with good karma
-  const karmaMultiplier = karmaScore > 0 ? Math.max(0.5, 1 - (karmaScore / 100)) : 1;
-  
+  const karmaMultiplier =
+    karmaScore > 0 ? Math.max(0.5, 1 - karmaScore / 100) : 1;
+
   // Increase penalty for users with bad karma
-  const badKarmaMultiplier = karmaScore < 0 ? Math.min(2, 1 + Math.abs(karmaScore / 50)) : 1;
-  
-  let penalty = RATING_DAMPEN_PENALTY * balanceMultiplier * karmaMultiplier * badKarmaMultiplier;
-  
+  const badKarmaMultiplier =
+    karmaScore < 0 ? Math.min(2, 1 + Math.abs(karmaScore / 50)) : 1;
+
+  let penalty =
+    RATING_DAMPEN_PENALTY *
+    balanceMultiplier *
+    karmaMultiplier *
+    badKarmaMultiplier;
+
   // Cap the penalty
   penalty = Math.min(penalty, MAX_DAMPEN_PENALTY);
   penalty = Math.min(penalty, effectiveBalance); // Can't take more than available
-  
+
   return Math.ceil(penalty);
 }
 
@@ -83,50 +100,63 @@ function calculateDampenPenalty(
 function isUserProtected(userPoints: Doc<'userPoints'>): boolean {
   const accountAge = Date.now() - (userPoints._creationTime || 0);
   const daysOld = accountAge / (1000 * 60 * 60 * 24);
-  
+
   // Protect new users for specified days
   if (daysOld < NEW_USER_PROTECTED_DAYS) {
     return true;
   }
-  
+
   // Protect users with very low balance
-  const effectiveBalance = Math.max(0, userPoints.currentBalance - (userPoints.protectedPoints || 0));
+  const effectiveBalance = Math.max(
+    0,
+    userPoints.currentBalance - (userPoints.protectedPoints || 0)
+  );
   return effectiveBalance <= MIN_PROTECTED_POINTS;
 }
 
 // Process point transfer between users
 async function processPointTransfer(
-  ctx: any, // MutationCtx
+  ctx: MutationCtx,
   fromUserId: string,
   toUserId: string,
   amount: number,
   transferType: 'boost' | 'dampen',
   targetId: string,
-  metadata: any = {}
-): Promise<{ success: boolean; fromBalance: number; toBalance: number; error?: string }> {
+  metadata: Record<string, unknown> = {}
+): Promise<{
+  success: boolean;
+  fromBalance: number;
+  toBalance: number;
+  error?: string;
+}> {
   // Get both users' points
   const fromUserPoints = await ctx.db
     .query('userPoints')
     .withIndex('byUserId', (q) => q.eq('userId', fromUserId))
     .first();
-    
+
   const toUserPoints = await ctx.db
     .query('userPoints')
     .withIndex('byUserId', (q) => q.eq('userId', toUserId))
     .first();
 
   if (!fromUserPoints || !toUserPoints) {
-    return { success: false, fromBalance: 0, toBalance: 0, error: 'User points not found' };
+    return {
+      success: false,
+      fromBalance: 0,
+      toBalance: 0,
+      error: 'User points not found',
+    };
   }
 
   if (transferType === 'boost') {
     // For boost: transfer points from voter to content creator
     if (fromUserPoints.currentBalance < amount) {
-      return { 
-        success: false, 
-        fromBalance: fromUserPoints.currentBalance, 
+      return {
+        success: false,
+        fromBalance: fromUserPoints.currentBalance,
         toBalance: toUserPoints.currentBalance,
-        error: 'Insufficient points for transfer' 
+        error: 'Insufficient points for transfer',
       };
     }
 
@@ -166,19 +196,25 @@ async function processPointTransfer(
       metadata: { transferType: 'boost', ...metadata },
     });
 
-    return { success: true, fromBalance: newFromBalance, toBalance: newToBalance };
-
+    return {
+      success: true,
+      fromBalance: newFromBalance,
+      toBalance: newToBalance,
+    };
   } else {
     // For dampen: deduct points from content creator
     const protectedPoints = toUserPoints.protectedPoints || 0;
-    const effectiveBalance = Math.max(0, toUserPoints.currentBalance - protectedPoints);
-    
+    const effectiveBalance = Math.max(
+      0,
+      toUserPoints.currentBalance - protectedPoints
+    );
+
     if (effectiveBalance <= 0) {
-      return { 
-        success: false, 
-        fromBalance: fromUserPoints.currentBalance, 
+      return {
+        success: false,
+        fromBalance: fromUserPoints.currentBalance,
         toBalance: toUserPoints.currentBalance,
-        error: 'Target user has no points available for dampening' 
+        error: 'Target user has no points available for dampening',
       };
     }
 
@@ -200,7 +236,11 @@ async function processPointTransfer(
       multiplier: fromUserPoints.multiplier,
       balanceAfter: fromUserPoints.currentBalance,
       timestamp: Date.now(),
-      metadata: { transferType: 'dampen', penaltyAmount: actualPenalty, ...metadata },
+      metadata: {
+        transferType: 'dampen',
+        penaltyAmount: actualPenalty,
+        ...metadata,
+      },
     });
 
     await ctx.db.insert('pointTransactions', {
@@ -214,10 +254,18 @@ async function processPointTransfer(
       multiplier: toUserPoints.multiplier,
       balanceAfter: newToBalance,
       timestamp: Date.now(),
-      metadata: { transferType: 'dampen', penaltyAmount: actualPenalty, ...metadata },
+      metadata: {
+        transferType: 'dampen',
+        penaltyAmount: actualPenalty,
+        ...metadata,
+      },
     });
 
-    return { success: true, fromBalance: fromUserPoints.currentBalance, toBalance: newToBalance };
+    return {
+      success: true,
+      fromBalance: fromUserPoints.currentBalance,
+      toBalance: newToBalance,
+    };
   }
 }
 
@@ -229,7 +277,7 @@ export const getUserPointsStats = query({
     if (!identity && !args.userId) {
       return null;
     }
-    
+
     const userId = args.userId || identity?.subject;
     if (!userId) {
       return null;
@@ -279,11 +327,11 @@ export const initializeUserPoints = mutation({
     }
 
     const today = getCurrentDateString();
-    
+
     // New users get starter points and protection
     const starterPoints = 50; // Give new users 50 points to start
     const protectedPoints = MIN_PROTECTED_POINTS + 30; // Extra protection for new users
-    
+
     // Create new user points record
     const userPointsId = await ctx.db.insert('userPoints', {
       userId: args.userId,
@@ -323,7 +371,7 @@ export const initializeUserPoints = mutation({
 
 // Award points for posting a vibe
 export const awardPointsForVibe = internalMutation({
-  args: { 
+  args: {
     userId: v.string(),
     vibeId: v.string(),
   },
@@ -354,14 +402,14 @@ export const awardPointsForVibe = internalMutation({
         karmaScore: 0,
       });
       userPoints = await ctx.db.get(userPointsId);
-      
+
       if (!userPoints) {
         throw new Error('Failed to initialize user points');
       }
     }
 
     const today = getCurrentDateString();
-    
+
     // Check if daily reset is needed (inline for simplicity)
     if (userPoints.lastResetDate !== today) {
       const yesterday = new Date();
@@ -434,7 +482,7 @@ export const awardPointsForVibe = internalMutation({
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayString = yesterday.toISOString().split('T')[0];
-      
+
       if (userPoints.lastActivityDate === yesterdayString) {
         newStreakDays += 1;
       } else {
@@ -475,11 +523,12 @@ export const awardPointsForVibe = internalMutation({
       const levelsGained = newLevel - userPoints.level;
       const bonusPoints = LEVEL_UP_BONUS * levelsGained;
       const protectedBonus = Math.ceil(bonusPoints * 0.5); // Half of level-up bonus becomes protected
-      
+
       // Update balance with bonus and protected points
       const balanceAfterBonus = newBalance + bonusPoints;
-      const newProtectedPoints = (userPoints.protectedPoints || 0) + protectedBonus;
-      
+      const newProtectedPoints =
+        (userPoints.protectedPoints || 0) + protectedBonus;
+
       await ctx.db.patch(userPoints._id, {
         currentBalance: balanceAfterBonus,
         totalPointsEarned: newTotalEarned + bonusPoints,
@@ -520,7 +569,7 @@ export const awardPointsForVibe = internalMutation({
 
 // Award points for writing a review
 export const awardPointsForReview = internalMutation({
-  args: { 
+  args: {
     userId: v.string(),
     ratingId: v.string(),
     vibeId: v.string(),
@@ -552,14 +601,14 @@ export const awardPointsForReview = internalMutation({
         karmaScore: 0,
       });
       userPoints = await ctx.db.get(userPointsId);
-      
+
       if (!userPoints) {
         throw new Error('Failed to initialize user points');
       }
     }
 
     const today = getCurrentDateString();
-    
+
     // Check if daily reset is needed (inline for simplicity)
     if (userPoints.lastResetDate !== today) {
       const yesterday = new Date();
@@ -632,7 +681,7 @@ export const awardPointsForReview = internalMutation({
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayString = yesterday.toISOString().split('T')[0];
-      
+
       if (userPoints.lastActivityDate === yesterdayString) {
         newStreakDays += 1;
       } else {
@@ -674,11 +723,12 @@ export const awardPointsForReview = internalMutation({
       const levelsGained = newLevel - userPoints.level;
       const bonusPoints = LEVEL_UP_BONUS * levelsGained;
       const protectedBonus = Math.ceil(bonusPoints * 0.5); // Half of level-up bonus becomes protected
-      
+
       // Update balance with bonus and protected points
       const balanceAfterBonus = newBalance + bonusPoints;
-      const newProtectedPoints = (userPoints.protectedPoints || 0) + protectedBonus;
-      
+      const newProtectedPoints =
+        (userPoints.protectedPoints || 0) + protectedBonus;
+
       await ctx.db.patch(userPoints._id, {
         currentBalance: balanceAfterBonus,
         totalPointsEarned: newTotalEarned + bonusPoints,
@@ -710,14 +760,18 @@ export const awardPointsForReview = internalMutation({
       .query('vibes')
       .withIndex('id', (q) => q.eq('id', args.vibeId))
       .first();
-    
+
     if (vibe && vibe.createdById !== args.userId) {
-      await ctx.scheduler.runAfter(0, internal.userPoints.awardPointsForReceivingReview, {
-        userId: vibe.createdById,
-        vibeId: args.vibeId,
-        ratingId: args.ratingId,
-        reviewerUserId: args.userId,
-      });
+      await ctx.scheduler.runAfter(
+        0,
+        internal.userPoints.awardPointsForReceivingReview,
+        {
+          userId: vibe.createdById,
+          vibeId: args.vibeId,
+          ratingId: args.ratingId,
+          reviewerUserId: args.userId,
+        }
+      );
     }
 
     return {
@@ -767,14 +821,14 @@ export const awardPointsForReceivingReview = internalMutation({
         karmaScore: 0,
       });
       userPoints = await ctx.db.get(userPointsId);
-      
+
       if (!userPoints) {
         throw new Error('Failed to initialize user points');
       }
     }
 
     const today = getCurrentDateString();
-    
+
     // Check if daily reset is needed (inline for simplicity)
     if (userPoints.lastResetDate !== today) {
       const yesterday = new Date();
@@ -848,11 +902,12 @@ export const awardPointsForReceivingReview = internalMutation({
       const levelsGained = newLevel - userPoints.level;
       const bonusPoints = LEVEL_UP_BONUS * levelsGained;
       const protectedBonus = Math.ceil(bonusPoints * 0.5); // Half of level-up bonus becomes protected
-      
+
       // Update balance with bonus and protected points
       const balanceAfterBonus = newBalance + bonusPoints;
-      const newProtectedPoints = (userPoints.protectedPoints || 0) + protectedBonus;
-      
+      const newProtectedPoints =
+        (userPoints.protectedPoints || 0) + protectedBonus;
+
       await ctx.db.patch(userPoints._id, {
         currentBalance: balanceAfterBonus,
         totalPointsEarned: newTotalEarned + bonusPoints,
@@ -883,7 +938,7 @@ export const awardPointsForReceivingReview = internalMutation({
 
 // Get boost cost for content
 export const getBoostCost = query({
-  args: { 
+  args: {
     contentType: v.union(v.literal('vibe'), v.literal('rating')),
     contentId: v.string(),
   },
@@ -898,7 +953,7 @@ export const getBoostCost = query({
       currentBoostScore = vibe?.boostScore || 0;
     } else {
       const rating = await ctx.db.get(args.contentId as Id<'ratings'>);
-      currentBoostScore = rating?.boostScore || 0;
+      currentBoostScore = rating?.netScore || 0;
     }
 
     return {
@@ -915,7 +970,18 @@ export const boostContent = mutation({
     contentType: v.union(v.literal('vibe'), v.literal('rating')),
     contentId: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx,
+    args
+  ): Promise<{
+    success: boolean;
+    pointsSpent: number;
+    pointsTransferred: number;
+    newBalance: number;
+    newBoostScore: number;
+    nextBoostCost: number;
+    message: string;
+  }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('You must be logged in to boost content');
@@ -937,16 +1003,18 @@ export const boostContent = mutation({
     let contentCreatorId = '';
 
     if (args.contentType === 'vibe') {
-      content = await ctx.db
+      const vibe = await ctx.db
         .query('vibes')
         .withIndex('id', (q) => q.eq('id', args.contentId))
         .first();
-      currentBoostScore = content?.boostScore || 0;
-      contentCreatorId = content?.createdById || '';
+      content = vibe as Doc<'vibes'> | null;
+      currentBoostScore = vibe?.boostScore || 0;
+      contentCreatorId = vibe?.createdById || '';
     } else {
-      content = await ctx.db.get(args.contentId as Id<'ratings'>);
-      currentBoostScore = content?.boostScore || 0;
-      contentCreatorId = content?.userId || '';
+      const rating = await ctx.db.get(args.contentId as Id<'ratings'>);
+      content = rating as Doc<'ratings'> | null;
+      currentBoostScore = (rating as Doc<'ratings'> | null)?.netScore || 0;
+      contentCreatorId = (rating as Doc<'ratings'> | null)?.userId || '';
     }
 
     if (!content) {
@@ -966,13 +1034,21 @@ export const boostContent = mutation({
 
     // Check if user has enough points
     if (userPoints.currentBalance < actualCost) {
-      throw new Error(`Insufficient points. You need ${actualCost} points but only have ${userPoints.currentBalance}.`);
+      throw new Error(
+        `Insufficient points. You need ${actualCost} points but only have ${userPoints.currentBalance}.`
+      );
     }
 
     // Deduct points from user
     const newBalance = userPoints.currentBalance - actualCost;
     const newBoostScore = currentBoostScore + 1;
-    const newTotalBoosts = (content.totalBoosts || 0) + 1;
+    let newTotalBoosts: number;
+    if (args.contentType === 'vibe') {
+      newTotalBoosts = ((content as Doc<'vibes'> | null)?.totalBoosts || 0) + 1;
+    } else {
+      newTotalBoosts =
+        ((content as Doc<'ratings'> | null)?.boostCount || 0) + 1;
+    }
 
     // Update user points
     await ctx.db.patch(userPoints._id, {
@@ -987,8 +1063,8 @@ export const boostContent = mutation({
       });
     } else {
       await ctx.db.patch(content._id, {
-        boostScore: newBoostScore,
-        totalBoosts: newTotalBoosts,
+        netScore: newBoostScore,
+        boostCount: newTotalBoosts,
       });
     }
 
@@ -1014,18 +1090,21 @@ export const boostContent = mutation({
     });
 
     // Transfer points to content creator
-    const pointTransferResult = await ctx.runMutation(internal.userPoints.internalProcessPointTransfer, {
-      fromUserId: identity.subject, // from (voter)
-      toUserId: contentCreatorId, // to (creator)
-      amount: transferAmount,
-      transferType: 'boost',
-      targetId: args.contentId,
-      metadata: { 
-        action: 'boost_content', 
-        contentType: args.contentType,
-        contentId: args.contentId 
+    const pointTransferResult = await ctx.runMutation(
+      internal.userPoints.internalProcessPointTransfer,
+      {
+        fromUserId: identity.subject, // from (voter)
+        toUserId: contentCreatorId, // to (creator)
+        amount: transferAmount,
+        transferType: 'boost',
+        targetId: args.contentId,
+        metadata: {
+          action: 'boost_content',
+          contentType: args.contentType,
+          contentId: args.contentId,
+        },
       }
-    });
+    );
 
     // Update karma for both users
     if (pointTransferResult.success) {
@@ -1034,7 +1113,7 @@ export const boostContent = mutation({
         userId: identity.subject,
         action: 'helpful_boost',
       });
-      
+
       // Content creator gets positive karma for having content boosted
       await ctx.runMutation(internal.userPoints.updateUserKarma, {
         userId: contentCreatorId,
@@ -1065,7 +1144,18 @@ export const dampenContent = mutation({
     contentType: v.union(v.literal('vibe'), v.literal('rating')),
     contentId: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx,
+    args
+  ): Promise<{
+    success: boolean;
+    pointsSpent: number;
+    pointsPenalized: number;
+    newBalance: number;
+    newBoostScore: number;
+    nextDampenCost: number;
+    message: string;
+  }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('You must be logged in to dampen content');
@@ -1084,7 +1174,9 @@ export const dampenContent = mutation({
     // Check daily dampen limit
     const currentDampenCount = userPoints.dailyDampenCount || 0;
     if (currentDampenCount >= MAX_DAMPEN_PER_DAY) {
-      throw new Error(`You have reached your daily dampen limit (${MAX_DAMPEN_PER_DAY} per day).`);
+      throw new Error(
+        `You have reached your daily dampen limit (${MAX_DAMPEN_PER_DAY} per day).`
+      );
     }
 
     // Get current boost score and calculate cost
@@ -1093,16 +1185,18 @@ export const dampenContent = mutation({
     let contentCreatorId = '';
 
     if (args.contentType === 'vibe') {
-      content = await ctx.db
+      const vibe = await ctx.db
         .query('vibes')
         .withIndex('id', (q) => q.eq('id', args.contentId))
         .first();
-      currentBoostScore = content?.boostScore || 0;
-      contentCreatorId = content?.createdById || '';
+      content = vibe as Doc<'vibes'> | null;
+      currentBoostScore = vibe?.boostScore || 0;
+      contentCreatorId = vibe?.createdById || '';
     } else {
-      content = await ctx.db.get(args.contentId as Id<'ratings'>);
-      currentBoostScore = content?.boostScore || 0;
-      contentCreatorId = content?.userId || '';
+      const rating = await ctx.db.get(args.contentId as Id<'ratings'>);
+      content = rating as Doc<'ratings'> | null;
+      currentBoostScore = (rating as Doc<'ratings'> | null)?.netScore || 0;
+      contentCreatorId = (rating as Doc<'ratings'> | null)?.userId || '';
     }
 
     if (!content) {
@@ -1126,14 +1220,18 @@ export const dampenContent = mutation({
 
     // Check if creator is protected
     if (isUserProtected(creatorPoints)) {
-      throw new Error('This user is protected from dampening (new user or low balance).');
+      throw new Error(
+        'This user is protected from dampening (new user or low balance).'
+      );
     }
 
     const cost = calculateBoostCost(currentBoostScore);
 
     // Check if user has enough points
     if (userPoints.currentBalance < cost) {
-      throw new Error(`Insufficient points. You need ${cost} points but only have ${userPoints.currentBalance}.`);
+      throw new Error(
+        `Insufficient points. You need ${cost} points but only have ${userPoints.currentBalance}.`
+      );
     }
 
     // Calculate penalty for content creator
@@ -1147,7 +1245,14 @@ export const dampenContent = mutation({
     // Deduct points from user
     const newBalance = userPoints.currentBalance - cost;
     const newBoostScore = currentBoostScore - 1;
-    const newTotalDampens = (content.totalDampens || 0) + 1;
+    let newTotalDampens: number;
+    if (args.contentType === 'vibe') {
+      newTotalDampens =
+        ((content as Doc<'vibes'> | null)?.totalDampens || 0) + 1;
+    } else {
+      newTotalDampens =
+        ((content as Doc<'ratings'> | null)?.dampenCount || 0) + 1;
+    }
 
     // Update user points and daily dampen count
     await ctx.db.patch(userPoints._id, {
@@ -1163,8 +1268,8 @@ export const dampenContent = mutation({
       });
     } else {
       await ctx.db.patch(content._id, {
-        boostScore: newBoostScore,
-        totalDampens: newTotalDampens,
+        netScore: newBoostScore,
+        dampenCount: newTotalDampens,
       });
     }
 
@@ -1192,29 +1297,32 @@ export const dampenContent = mutation({
     // Apply penalty to content creator
     let pointTransferResult = null;
     if (penalty > 0) {
-      pointTransferResult = await ctx.runMutation(internal.userPoints.internalProcessPointTransfer, {
-        fromUserId: identity.subject, // doesn't spend dampener's points
-        toUserId: contentCreatorId, // to (creator) - will lose points
-        amount: penalty,
-        transferType: 'dampen',
-        targetId: args.contentId,
-        metadata: { 
-          action: 'dampen_content', 
-          contentType: args.contentType,
-          contentId: args.contentId 
+      pointTransferResult = await ctx.runMutation(
+        internal.userPoints.internalProcessPointTransfer,
+        {
+          fromUserId: identity.subject, // doesn't spend dampener's points
+          toUserId: contentCreatorId, // to (creator) - will lose points
+          amount: penalty,
+          transferType: 'dampen',
+          targetId: args.contentId,
+          metadata: {
+            action: 'dampen_content',
+            contentType: args.contentType,
+            contentId: args.contentId,
+          },
         }
-      });
+      );
 
       // Update karma - dampening hurts both users
       if (pointTransferResult.success) {
         // Check if this is excessive dampening (more than 5 per day)
         const isExcessive = currentDampenCount >= 5;
-        
+
         await ctx.runMutation(internal.userPoints.updateUserKarma, {
           userId: identity.subject,
           action: isExcessive ? 'excessive_dampen' : 'helpful_boost', // Negative if excessive
         });
-        
+
         await ctx.runMutation(internal.userPoints.updateUserKarma, {
           userId: contentCreatorId,
           action: 'content_dampened',
@@ -1241,7 +1349,7 @@ export const dampenContent = mutation({
 
 // Get points history for a user
 export const getPointsHistory = query({
-  args: { 
+  args: {
     userId: v.optional(v.string()),
     days: v.optional(v.number()),
   },
@@ -1250,7 +1358,7 @@ export const getPointsHistory = query({
     if (!identity && !args.userId) {
       return [];
     }
-    
+
     const userId = args.userId || identity?.subject;
     if (!userId) {
       return [];
@@ -1265,7 +1373,7 @@ export const getPointsHistory = query({
 
     return await ctx.db
       .query('pointsHistory')
-      .withIndex('byUserAndDate', (q) => 
+      .withIndex('byUserAndDate', (q) =>
         q.eq('userId', userId).gte('date', startDateString)
       )
       .order('asc')
@@ -1275,8 +1383,10 @@ export const getPointsHistory = query({
 
 // Get leaderboard
 export const getLeaderboard = query({
-  args: { 
-    type: v.optional(v.union(v.literal('points'), v.literal('level'), v.literal('streak'))),
+  args: {
+    type: v.optional(
+      v.union(v.literal('points'), v.literal('level'), v.literal('streak'))
+    ),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -1312,15 +1422,17 @@ export const getLeaderboard = query({
           .query('users')
           .withIndex('byExternalId', (q) => q.eq('externalId', points.userId))
           .first();
-        
+
         return {
           ...points,
-          user: user ? {
-            username: user.username,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            image_url: user.image_url,
-          } : null,
+          user: user
+            ? {
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                image_url: user.image_url,
+              }
+            : null,
         };
       })
     );
@@ -1403,37 +1515,40 @@ export const internalResetDailyLimits = internalMutation({
     // Create points history entry for previous day
     if (userPoints.lastResetDate !== today) {
       const previousDate = userPoints.lastResetDate;
-      
+
       // Get all transactions for the previous day
       const startOfDay = new Date(`${previousDate}T00:00:00.000Z`).getTime();
       const endOfDay = new Date(`${previousDate}T23:59:59.999Z`).getTime();
-      
+
       const dayTransactions = await ctx.db
         .query('pointTransactions')
-        .withIndex('byUser', (q) => 
-          q.eq('userId', args.userId)
-           .gte('timestamp', startOfDay)
-           .lte('timestamp', endOfDay)
+        .withIndex('byUser', (q) =>
+          q
+            .eq('userId', args.userId)
+            .gte('timestamp', startOfDay)
+            .lte('timestamp', endOfDay)
         )
         .collect();
 
       const pointsEarned = dayTransactions
-        .filter(t => t.type === 'earned')
+        .filter((t) => t.type === 'earned')
         .reduce((sum, t) => sum + t.amount, 0);
-        
-      const pointsSpent = Math.abs(dayTransactions
-        .filter(t => t.type === 'spent')
-        .reduce((sum, t) => sum + t.amount, 0));
+
+      const pointsSpent = Math.abs(
+        dayTransactions
+          .filter((t) => t.type === 'spent')
+          .reduce((sum, t) => sum + t.amount, 0)
+      );
 
       const netChange = pointsEarned - pointsSpent;
-      const activityCount = dayTransactions
-        .filter(t => t.action === 'post_vibe' || t.action === 'write_review')
-        .length;
+      const activityCount = dayTransactions.filter(
+        (t) => t.action === 'post_vibe' || t.action === 'write_review'
+      ).length;
 
       // Check if history entry already exists
       const existingHistory = await ctx.db
         .query('pointsHistory')
-        .withIndex('byUserAndDate', (q) => 
+        .withIndex('byUserAndDate', (q) =>
           q.eq('userId', args.userId).eq('date', previousDate)
         )
         .first();
@@ -1526,7 +1641,7 @@ export const updateUserKarma = internalMutation({
     }
 
     let karmaChange = 0;
-    
+
     switch (args.action) {
       case 'positive_rating':
         karmaChange = 1; // Good reviews increase karma
@@ -1553,7 +1668,7 @@ export const updateUserKarma = internalMutation({
     }
 
     const newKarmaScore = (userPoints.karmaScore || 0) + karmaChange;
-    
+
     // Cap karma between -100 and +100
     const cappedKarma = Math.max(-100, Math.min(100, newKarmaScore));
 
@@ -1592,18 +1707,72 @@ export const internalProcessPointTransfer = internalMutation({
 export const internalDailyPointsReset = internalMutation({
   handler: async (ctx) => {
     const today = getCurrentDateString();
-    
+
     // Get all users who need daily reset
     const usersToReset = await ctx.db
       .query('userPoints')
       .filter((q) => q.neq(q.field('lastResetDate'), today))
       .collect();
 
-    // Reset each user's daily limits
+    // Reset each user's daily limits directly without circular call
     for (const userPoints of usersToReset) {
-      await ctx.runMutation(internal.userPoints.internalResetDailyLimits, {
-        userId: userPoints.userId,
-      });
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = yesterday.toISOString().split('T')[0];
+
+      // Check if we need to update streak
+      let newStreakDays = userPoints.streakDays;
+      if (userPoints.lastActivityDate === yesterdayString) {
+        // Streak continues if user was active yesterday
+      } else if (userPoints.lastActivityDate !== today) {
+        // Reset streak if gap in activity (more than 1 day)
+        newStreakDays = 0;
+      }
+
+      // Award daily streak bonus if applicable
+      if (
+        newStreakDays >= 7 &&
+        userPoints.lastActivityDate === yesterdayString
+      ) {
+        const streakBonus = DAILY_STREAK_BONUS * Math.floor(newStreakDays / 7);
+        const newBalance = userPoints.currentBalance + streakBonus;
+        const newTotalEarned = userPoints.totalPointsEarned + streakBonus;
+
+        await ctx.db.patch(userPoints._id, {
+          currentBalance: newBalance,
+          totalPointsEarned: newTotalEarned,
+          dailyEarnedPoints: 0,
+          dailyPostCount: 0,
+          dailyReviewCount: 0,
+          dailyDampenCount: 0,
+          lastResetDate: today,
+          streakDays: newStreakDays,
+        });
+
+        // Record streak bonus transaction
+        await ctx.db.insert('pointTransactions', {
+          userId: userPoints.userId,
+          type: 'earned',
+          action: 'daily_bonus',
+          amount: streakBonus,
+          multiplier: userPoints.multiplier,
+          balanceAfter: newBalance,
+          timestamp: Date.now(),
+          metadata: {
+            description: `Daily streak bonus (${newStreakDays} days)`,
+          },
+        });
+      } else {
+        // Reset daily counters without bonus
+        await ctx.db.patch(userPoints._id, {
+          dailyEarnedPoints: 0,
+          dailyPostCount: 0,
+          dailyReviewCount: 0,
+          dailyDampenCount: 0,
+          lastResetDate: today,
+          streakDays: newStreakDays,
+        });
+      }
     }
 
     return {

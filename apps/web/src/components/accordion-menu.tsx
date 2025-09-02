@@ -32,13 +32,17 @@ interface PanelProps {
 export function AccordionMenu({
   value,
   defaultValue = null,
+
   onValueChange: _onValueChange,
+
   collapsible: _collapsible = true,
   className,
   durationMs = 250,
   children,
   overlayOpen = false,
+
   onOverlayClose: _onOverlayClose,
+
   overlayClassName: _overlayClassName,
   scaleBackgroundOnOverlay = true,
   darkenBackgroundOnOverlay = false,
@@ -48,6 +52,7 @@ export function AccordionMenu({
   const registry = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(
     new Map()
   );
+
   const [internalValue, _setInternalValue] = useState<string | null>(
     defaultValue ?? null
   );

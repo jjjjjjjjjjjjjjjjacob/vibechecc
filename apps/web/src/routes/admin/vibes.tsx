@@ -76,7 +76,7 @@ function AdminVibesPage() {
                   }
                 : null,
               createdAt: vibe.createdAt,
-              ratings: (vibe.emojiRatings || []).map((rating) => ({
+              currentUserRatings: (vibe.emojiRatings || []).map((rating) => ({
                 ...rating,
                 user: rating.user
                   ? {
@@ -90,6 +90,7 @@ function AdminVibesPage() {
                 createdAt: rating.createdAt,
                 tags: rating.tags,
               })),
+              emojiRatings: [],
               tags: vibe.tags,
               viewCount: 0, // viewCount not tracked in backend
               visibility: vibe.visibility,

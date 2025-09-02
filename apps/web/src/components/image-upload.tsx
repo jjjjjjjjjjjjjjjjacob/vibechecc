@@ -25,6 +25,7 @@ export function ImageUpload({
   const [previewUrl, setPreviewUrl] = React.useState<string>(
     initialImageUrl || ''
   );
+
   const [_uploadedStorageId, setUploadedStorageId] =
     React.useState<Id<'_storage'> | null>(null);
   const uploadMutation = useFileUpload();

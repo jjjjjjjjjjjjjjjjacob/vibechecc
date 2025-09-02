@@ -96,16 +96,22 @@ export function JSMasonryLayout({
     // For better distribution, we'll use a height-based algorithm
     // Since we can't measure actual heights in this context, we'll use
     // a more sophisticated round-robin that accounts for content variation
-    children.forEach((child, _index) => {
-      // Find the column with the least items to balance better
-      const columnSizes = cols.map((col) => col.length);
-      const minSize = Math.min(...columnSizes);
-      const targetColumnIndex = columnSizes.findIndex(
-        (size) => size === minSize
-      );
+    children.forEach(
+      (
+        child,
 
-      cols[targetColumnIndex].push(child);
-    });
+        _index
+      ) => {
+        // Find the column with the least items to balance better
+        const columnSizes = cols.map((col) => col.length);
+        const minSize = Math.min(...columnSizes);
+        const targetColumnIndex = columnSizes.findIndex(
+          (size) => size === minSize
+        );
+
+        cols[targetColumnIndex].push(child);
+      }
+    );
 
     return cols;
   }, [children, columnCount]);

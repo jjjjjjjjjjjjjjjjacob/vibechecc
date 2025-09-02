@@ -65,8 +65,10 @@ async function syncUserOAuthConnections(
               lastName: account.last_name,
               imageUrl: account.image_url,
               verificationStatus: account.verification?.status,
-              createdAt: (account as any).created_at || Date.now(),
-              updatedAt: (account as any).updated_at || Date.now(),
+              createdAt:
+                (account as { created_at?: number }).created_at || Date.now(),
+              updatedAt:
+                (account as { updated_at?: number }).updated_at || Date.now(),
             },
           });
 
@@ -87,9 +89,7 @@ async function syncUserOAuthConnections(
       // Skip other unsupported platforms
       if (!platform) {
         // eslint-disable-next-line no-console
-        console.log(
-          `Skipping unsupported OAuth provider: ${account.provider}`
-        );
+        console.log(`Skipping unsupported OAuth provider: ${account.provider}`);
         continue;
       }
 
@@ -232,7 +232,7 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
 
       // SECURITY: Determine signup method from external accounts
       let signupMethod = 'clerk';
-      const hasAppleAuth = (userData.external_accounts || []).some(account => 
+      const hasAppleAuth = (userData.external_accounts || []).some((account) =>
         account.provider.toLowerCase().includes('apple')
       );
       if (hasAppleAuth) {
@@ -473,7 +473,6 @@ export async function validateRequest(
         // eslint-disable-next-line no-console
         console.log('Webhook validated with main-alt secret');
         return event;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_altError) {
         // eslint-disable-next-line no-console
         console.error('Webhook verification failed with both secrets');

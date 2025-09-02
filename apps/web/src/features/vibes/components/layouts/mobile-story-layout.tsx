@@ -17,11 +17,11 @@ import { RateAndReviewDialog } from '@/features/ratings/components/rate-and-revi
 import { AuthPromptDialog } from '@/features/auth';
 import { ShareButton } from '@/components/social/share-button';
 
-interface MobileStoryLayoutProps extends VibeCardSharedProps {}
+type MobileStoryLayoutProps = VibeCardSharedProps;
 
 export function MobileStoryLayout({
   vibe,
-  variant,
+  variant: _variant,
   className,
   loading,
   enableFadeIn,
@@ -45,7 +45,7 @@ export function MobileStoryLayout({
 
   // Callbacks
   handleEmojiRatingClick,
-  handleEmojiRating,
+  handleEmojiRating: _handleEmojiRating,
   setImageError,
   setShowRatingDialog,
   setShowAuthDialog,

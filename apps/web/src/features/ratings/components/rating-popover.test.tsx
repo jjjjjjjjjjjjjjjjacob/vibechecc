@@ -149,6 +149,9 @@ vi.mock('@/components/ui/dialog', () => ({
   DialogDescription: ({ children }: { children: React.ReactNode }) => (
     <p data-testid="dialog-description">{children}</p>
   ),
+  DialogFooter: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dialog-footer">{children}</div>
+  ),
 }));
 
 // Mock the emoji search component
@@ -241,6 +244,27 @@ describe('RateAndReviewDialog', () => {
 
   const defaultProps = {
     vibeId: 'test-vibe-1',
+    existingUserRatings: [],
+    emojiMetadata: {
+      '😍': {
+        _id: '1',
+        emoji: '😍',
+        category: 'positive',
+        description: 'Heart Eyes',
+      },
+      '🔥': {
+        _id: '2',
+        emoji: '🔥',
+        category: 'intense',
+        description: 'Fire',
+      },
+      '😱': {
+        _id: '3',
+        emoji: '😱',
+        category: 'negative',
+        description: 'Shocked',
+      },
+    },
     onSubmit: mockOnSubmit,
     onOpenChange: mockOnOpenChange,
     open: true,
@@ -276,7 +300,7 @@ describe('RateAndReviewDialog', () => {
 
   it('renders dialog content with title', () => {
     renderComponent();
-    expect(screen.getByText('rate & review')).toBeInTheDocument();
+    expect(screen.getByText('rate this vibe')).toBeInTheDocument();
     expect(screen.getByText('"Test Vibe"')).toBeInTheDocument();
   });
 

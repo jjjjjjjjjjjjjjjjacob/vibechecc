@@ -149,10 +149,11 @@ function VibeResultCard({
           {prioritizedRatings.length > 0 ? (
             <div className="w-full">
               <AllEmojiRatingsPopover
-                ratings={displayRatings}
+                emojiRatings={displayRatings}
                 vibeId={result.id}
-                className="space-y-1"
-              />
+              >
+                <></>
+              </AllEmojiRatingsPopover>
             </div>
           ) : result.rating ? (
             <div className="w-full">
@@ -260,7 +261,7 @@ function ReviewResultCard({ result }: { result: ReviewSearchResult }) {
                       rating={{
                         emoji: result.emoji,
                         value: result.rating,
-                        count: undefined,
+                        count: 0,
                       }}
                       vibeId={result.vibeId}
                       variant="compact"

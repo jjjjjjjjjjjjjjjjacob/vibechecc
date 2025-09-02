@@ -3,7 +3,6 @@ import { Link } from '@tanstack/react-router';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from '../simple-vibe-placeholder';
 import { trackEvents } from '@/lib/track-events';
 import type { VibeCardSharedProps } from '../vibe-card';
@@ -15,12 +14,12 @@ import {
   HighBoostIndicator,
 } from '@/components/boost-indicator';
 
-interface SearchResultLayoutProps extends VibeCardSharedProps {}
+type SearchResultLayoutProps = VibeCardSharedProps;
 
 export function SearchResultLayout({
   vibe,
-  variant,
-  className,
+  variant: _variant,
+  className: _className,
   loading,
 
   // Computed data
@@ -40,8 +39,8 @@ export function SearchResultLayout({
   preselectedRatingValue,
 
   // Callbacks
-  handleEmojiRatingClick,
-  handleEmojiRating,
+  handleEmojiRatingClick: _handleEmojiRatingClick,
+  handleEmojiRating: _handleEmojiRating,
   setImageError,
   setShowRatingDialog,
   setShowAuthDialog,

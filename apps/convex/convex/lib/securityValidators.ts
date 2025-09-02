@@ -317,11 +317,11 @@ export class SecurityValidators {
       'oauth_apple',
       'apple_oauth',
       'oauth_apple_id',
-      'apple_id'
+      'apple_id',
     ];
 
     const normalizedProvider = validated!.toLowerCase().replace(/[-_]/g, '');
-    const isValidApple = validAppleProviders.some(valid => 
+    const isValidApple = validAppleProviders.some((valid) =>
       normalizedProvider.includes(valid.replace(/[-_]/g, ''))
     );
 
@@ -347,7 +347,7 @@ export class SecurityValidators {
     if (validated) {
       // SECURITY: Detect Apple's private relay emails
       const isAppleRelay = validated.includes('@privaterelay.appleid.com');
-      
+
       // Log Apple relay detection for monitoring (but don't block)
       if (isAppleRelay) {
         // eslint-disable-next-line no-console
@@ -375,7 +375,10 @@ export class SecurityValidators {
     });
 
     // SECURITY: Validate Clerk user ID format (typically user_xxx or similar)
-    if (!validated!.startsWith('user_') && !validated!.match(/^[a-zA-Z0-9_-]{5,}$/)) {
+    if (
+      !validated!.startsWith('user_') &&
+      !validated!.match(/^[a-zA-Z0-9_-]{5,}$/)
+    ) {
       throw new Error('Invalid user ID format');
     }
 

@@ -13,7 +13,7 @@ export interface AdminVibe extends Omit<Vibe, '_id'> {
     image_url?: string;
   } | null;
   ratingsCount?: number;
-  emojiRatings?: Array<{
+  detailedRatings?: Array<{
     _id?: Id<'ratings'>;
     userId: string;
     vibeId: string;

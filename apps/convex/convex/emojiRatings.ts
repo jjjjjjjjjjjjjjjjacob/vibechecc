@@ -1,6 +1,11 @@
-import { query, mutation, type QueryCtx, type MutationCtx } from './_generated/server';
+import {
+  query,
+  mutation,
+  type QueryCtx,
+  type MutationCtx,
+} from './_generated/server';
 import { v } from 'convex/values';
-import { internal } from './_generated/api';
+import { api, internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
 
 // Helper function to compute user display name (backend version)
@@ -73,7 +78,7 @@ export const getUserVibeRatings = query({
       )
       .collect();
 
-    return ratings.map(rating => ({
+    return ratings.map((rating) => ({
       id: rating._id,
       emoji: rating.emoji,
       value: rating.value,
@@ -94,7 +99,7 @@ export const getAllRatingsForVibe = query({
       .collect();
 
     // Get all users who rated this vibe in a single query
-    const userIds = [...new Set(ratings.map(r => r.userId))];
+    const userIds = [...new Set(ratings.map((r) => r.userId))];
     const users = await Promise.all(
       userIds.map(async (userId) => {
         const user = await ctx.db
@@ -106,10 +111,12 @@ export const getAllRatingsForVibe = query({
     );
 
     // Create a user map for efficient lookup
-    const userMap = new Map(users.filter(u => u).map(u => [u!.externalId, u]));
+    const userMap = new Map(
+      users.filter((u) => u).map((u) => [u!.externalId, u])
+    );
 
     // Return ratings with user details
-    return ratings.map(rating => ({
+    return ratings.map((rating) => ({
       _id: rating._id,
       vibeId: rating.vibeId,
       userId: rating.userId,
@@ -161,7 +168,7 @@ export const createOrUpdateEmojiRating = mutation({
     const tags: string[] = [];
 
     // Get emoji metadata for tags
-    const _emojiData = await ctx.db
+    await ctx.db
       .query('emojis')
       .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
       .first();
@@ -173,7 +180,10 @@ export const createOrUpdateEmojiRating = mutation({
     const existingRating = await ctx.db
       .query('ratings')
       .withIndex('vibeUserEmoji', (q) =>
-        q.eq('vibeId', args.vibeId).eq('userId', identity.subject).eq('emoji', args.emoji)
+        q
+          .eq('vibeId', args.vibeId)
+          .eq('userId', identity.subject)
+          .eq('emoji', args.emoji)
       )
       .first();
 
@@ -232,11 +242,12 @@ export const createOrUpdateEmojiRating = mutation({
         };
 
         // Schedule notification with type workaround
-        await ctx.scheduler.runAfter(
+        // @ts-expect-error Convex FunctionReference generics are too deep for TS here
+        await (ctx.scheduler as unknown).runAfter(
           0,
-          // @ts-expect-error - TypeScript depth issue with internal functions
-          internal.notifications.createNotification,
-          notificationArgs
+          // @ts-expect-error Convex generated internal reference type depth
+          (internal as unknown).notifications.createNotification,
+          notificationArgs as unknown
         );
       }
     } catch (error) {
@@ -287,10 +298,12 @@ export const createOrUpdateEmojiRating = mutation({
           };
 
           // PERFORMANCE OPTIMIZED: Use batch notification system
-          await ctx.scheduler.runAfter(
+          // @ts-expect-error Convex FunctionReference generics are too deep for TS here
+          await (ctx.scheduler as unknown).runAfter(
             0,
-            internal.notifications.createFollowerNotifications,
-            followerNotificationArgs
+            // @ts-expect-error Convex generated internal reference type depth
+            (internal as unknown).notifications.createFollowerNotifications,
+            followerNotificationArgs as unknown
           );
         }
       } catch (error) {
@@ -306,11 +319,17 @@ export const createOrUpdateEmojiRating = mutation({
     // Award points for writing a review (only for new ratings)
     if (!existingRating) {
       try {
-        await ctx.scheduler.runAfter(0, internal.userPoints.awardPointsForReview, {
-          userId: identity.subject,
-          ratingId: result ? result.toString() : '',
-          vibeId: args.vibeId,
-        });
+        // @ts-expect-error Convex FunctionReference generics are too deep for TS here
+        await (ctx.scheduler as unknown).runAfter(
+          0,
+          // @ts-expect-error Convex generated internal reference type depth
+          (internal as unknown).userPoints.awardPointsForReview,
+          {
+            userId: identity.subject,
+            ratingId: result ? result.toString() : '',
+            vibeId: args.vibeId,
+          } as unknown
+        );
       } catch (error) {
         // Don't fail the rating operation if points award fails
         // eslint-disable-next-line no-console
@@ -610,7 +629,15 @@ export const toggleRatingBoost = mutation({
   args: {
     ratingId: v.id('ratings'),
   },
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx,
+    args
+  ): Promise<{
+    boosted: boolean;
+    action: string;
+    pointsTransferred: number;
+    message: string;
+  }> => {
     // Check if user is authenticated
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -655,7 +682,7 @@ export const toggleRatingBoost = mutation({
         karmaScore: 0,
       });
       voterPoints = await ctx.db.get(userPointsId);
-      
+
       if (!voterPoints) {
         throw new Error('Failed to initialize user points');
       }
@@ -688,14 +715,16 @@ export const toggleRatingBoost = mutation({
         karmaScore: 0,
       });
       authorPoints = await ctx.db.get(userPointsId);
-      
+
       if (!authorPoints) {
         throw new Error('Failed to initialize rating author points');
       }
     }
 
     // Calculate transfer amount based on levels
-    const transferAmount = Math.ceil(2 * (1 + Math.max(0, authorPoints.level - voterPoints.level) * 0.1));
+    const transferAmount = Math.ceil(
+      2 * (1 + Math.max(0, authorPoints.level - voterPoints.level) * 0.1)
+    );
 
     // Check if user already voted on this rating
     const existingVote = await ctx.db
@@ -713,36 +742,41 @@ export const toggleRatingBoost = mutation({
         // Unboost - remove the existing boost vote and reverse point transfer
         await ctx.db.delete(existingVote._id);
         await updateRatingScore(ctx, args.ratingId);
-        
+
         // Reverse the point transfer (from author back to voter)
         if (authorPoints.currentBalance >= transferAmount) {
-          pointTransferResult = await ctx.runMutation(internal.userPoints.internalProcessPointTransfer, {
-            fromUserId: rating.userId, // from (author)
-            toUserId: identity.subject, // to (voter)
-            amount: transferAmount,
-            transferType: 'boost',
-            targetId: args.ratingId,
-            metadata: { action: 'unboost', ratingId: args.ratingId }
-          });
-          
+          pointTransferResult = await ctx.runMutation(
+            internal.userPoints.internalProcessPointTransfer,
+            {
+              fromUserId: rating.userId, // from (author)
+              toUserId: identity.subject, // to (voter)
+              amount: transferAmount,
+              transferType: 'boost',
+              targetId: args.ratingId,
+              metadata: { action: 'unboost', ratingId: args.ratingId },
+            }
+          );
+
           if (pointTransferResult.success) {
             message = `Unboosted! Reclaimed ${transferAmount} VP`;
           }
         }
-        
-        return { 
-          boosted: false, 
+
+        return {
+          boosted: false,
           action: 'unboosted',
           pointsTransferred: pointTransferResult?.success ? transferAmount : 0,
-          message: message || 'Unboosted!'
+          message: message || 'Unboosted!',
         };
       } else {
         // Switch from dampen to boost - handle both point transfers
         // First reverse the dampen penalty (give points back to author if possible)
         // Then do the boost transfer (from voter to author)
-        
+
         if (voterPoints.currentBalance < transferAmount) {
-          throw new Error(`Insufficient points. You need ${transferAmount} VP to boost this rating.`);
+          throw new Error(
+            `Insufficient points. You need ${transferAmount} VP to boost this rating.`
+          );
         }
 
         await ctx.db.patch(existingVote._id, {
@@ -750,32 +784,37 @@ export const toggleRatingBoost = mutation({
           createdAt: Date.now(),
         });
         await updateRatingScore(ctx, args.ratingId);
-        
+
         // Process boost transfer (voter to author)
-        pointTransferResult = await ctx.runMutation(internal.userPoints.internalProcessPointTransfer, {
-          fromUserId: identity.subject, // from (voter)
-          toUserId: rating.userId, // to (author)
-          amount: transferAmount,
-          transferType: 'boost',
-          targetId: args.ratingId,
-          metadata: { action: 'switch_to_boost', ratingId: args.ratingId }
-        });
-        
+        pointTransferResult = await ctx.runMutation(
+          internal.userPoints.internalProcessPointTransfer,
+          {
+            fromUserId: identity.subject, // from (voter)
+            toUserId: rating.userId, // to (author)
+            amount: transferAmount,
+            transferType: 'boost',
+            targetId: args.ratingId,
+            metadata: { action: 'switch_to_boost', ratingId: args.ratingId },
+          }
+        );
+
         if (pointTransferResult.success) {
           message = `Switched to boost! Sent ${transferAmount} VP to rating author`;
         }
-        
-        return { 
-          boosted: true, 
+
+        return {
+          boosted: true,
           action: 'boosted',
           pointsTransferred: pointTransferResult?.success ? transferAmount : 0,
-          message: message || 'Switched to boost!'
+          message: message || 'Switched to boost!',
         };
       }
     } else {
       // New boost - create new boost vote and transfer points
       if (voterPoints.currentBalance < transferAmount) {
-        throw new Error(`Insufficient points. You need ${transferAmount} VP to boost this rating.`);
+        throw new Error(
+          `Insufficient points. You need ${transferAmount} VP to boost this rating.`
+        );
       }
 
       await ctx.db.insert('ratingVotes', {
@@ -785,26 +824,29 @@ export const toggleRatingBoost = mutation({
         createdAt: Date.now(),
       });
       await updateRatingScore(ctx, args.ratingId);
-      
+
       // Process boost transfer (voter to author)
-      pointTransferResult = await ctx.runMutation(internal.userPoints.internalProcessPointTransfer, {
-        fromUserId: identity.subject, // from (voter)
-        toUserId: rating.userId, // to (author)
-        amount: transferAmount,
-        transferType: 'boost',
-        targetId: args.ratingId,
-        metadata: { action: 'boost', ratingId: args.ratingId }
-      });
-      
+      pointTransferResult = await ctx.runMutation(
+        internal.userPoints.internalProcessPointTransfer,
+        {
+          fromUserId: identity.subject, // from (voter)
+          toUserId: rating.userId, // to (author)
+          amount: transferAmount,
+          transferType: 'boost',
+          targetId: args.ratingId,
+          metadata: { action: 'boost', ratingId: args.ratingId },
+        }
+      );
+
       if (pointTransferResult.success) {
         message = `Boosted! Sent ${transferAmount} VP to rating author`;
       }
-      
-      return { 
-        boosted: true, 
+
+      return {
+        boosted: true,
         action: 'boosted',
         pointsTransferred: pointTransferResult?.success ? transferAmount : 0,
-        message: message || 'Boosted!'
+        message: message || 'Boosted!',
       };
     }
   },
@@ -815,7 +857,15 @@ export const toggleRatingDampen = mutation({
   args: {
     ratingId: v.id('ratings'),
   },
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx,
+    args
+  ): Promise<{
+    dampened: boolean;
+    action: string;
+    pointsPenalized: number;
+    message: string;
+  }> => {
     // Check if user is authenticated
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -855,37 +905,51 @@ export const toggleRatingDampen = mutation({
 
     // Check daily dampen limit
     const currentDampenCount = dampenerPoints.dailyDampenCount || 0;
-    if (currentDampenCount >= 10) { // MAX_DAMPEN_PER_DAY
+    if (currentDampenCount >= 10) {
+      // MAX_DAMPEN_PER_DAY
       throw new Error('You have reached your daily dampen limit (10 per day).');
     }
 
     // Check if author is protected
     const accountAge = Date.now() - (authorPoints._creationTime || 0);
     const daysOld = accountAge / (1000 * 60 * 60 * 24);
-    const isProtected = daysOld < 7 || // NEW_USER_PROTECTED_DAYS
-      Math.max(0, authorPoints.currentBalance - (authorPoints.protectedPoints || 0)) <= 20; // MIN_PROTECTED_POINTS
+    const isProtected =
+      daysOld < 7 || // NEW_USER_PROTECTED_DAYS
+      Math.max(
+        0,
+        authorPoints.currentBalance - (authorPoints.protectedPoints || 0)
+      ) <= 20; // MIN_PROTECTED_POINTS
 
     if (isProtected) {
-      throw new Error('This user is protected from dampening (new user or low balance).');
+      throw new Error(
+        'This user is protected from dampening (new user or low balance).'
+      );
     }
 
     // Calculate penalty amount
     const protectedPoints = authorPoints.protectedPoints || 0;
     const karmaScore = authorPoints.karmaScore || 0;
-    const effectiveBalance = Math.max(0, authorPoints.currentBalance - protectedPoints);
-    
+    const effectiveBalance = Math.max(
+      0,
+      authorPoints.currentBalance - protectedPoints
+    );
+
     let penalty = 1; // RATING_DAMPEN_PENALTY
-    
+
     // Reduce penalty if user has low effective balance
-    const balanceMultiplier = effectiveBalance > 50 ? 1 : Math.max(0.2, effectiveBalance / 50);
-    
+    const balanceMultiplier =
+      effectiveBalance > 50 ? 1 : Math.max(0.2, effectiveBalance / 50);
+
     // Reduce penalty for users with good karma
-    const karmaMultiplier = karmaScore > 0 ? Math.max(0.5, 1 - (karmaScore / 100)) : 1;
-    
+    const karmaMultiplier =
+      karmaScore > 0 ? Math.max(0.5, 1 - karmaScore / 100) : 1;
+
     // Increase penalty for users with bad karma
-    const badKarmaMultiplier = karmaScore < 0 ? Math.min(2, 1 + Math.abs(karmaScore / 50)) : 1;
-    
-    penalty = penalty * balanceMultiplier * karmaMultiplier * badKarmaMultiplier;
+    const badKarmaMultiplier =
+      karmaScore < 0 ? Math.min(2, 1 + Math.abs(karmaScore / 50)) : 1;
+
+    penalty =
+      penalty * balanceMultiplier * karmaMultiplier * badKarmaMultiplier;
     penalty = Math.min(penalty, 5); // MAX_DAMPEN_PENALTY
     penalty = Math.min(penalty, effectiveBalance); // Can't take more than available
     penalty = Math.ceil(penalty);
@@ -906,26 +970,33 @@ export const toggleRatingDampen = mutation({
         // Undampen - remove the existing dampen vote and restore points if possible
         await ctx.db.delete(existingVote._id);
         await updateRatingScore(ctx, args.ratingId);
-        
+
         // Try to restore points to the author (reverse dampen penalty)
-        pointTransferResult = await ctx.runMutation(internal.userPoints.internalProcessPointTransfer, {
-          fromUserId: identity.subject, // doesn't matter for restore
-          toUserId: rating.userId, // to (author)
-          amount: penalty,
-          transferType: 'boost', // use boost to add points back
-          targetId: args.ratingId,
-          metadata: { action: 'undampen', ratingId: args.ratingId, restored: true }
-        });
-        
+        pointTransferResult = await ctx.runMutation(
+          internal.userPoints.internalProcessPointTransfer,
+          {
+            fromUserId: identity.subject, // doesn't matter for restore
+            toUserId: rating.userId, // to (author)
+            amount: penalty,
+            transferType: 'boost', // use boost to add points back
+            targetId: args.ratingId,
+            metadata: {
+              action: 'undampen',
+              ratingId: args.ratingId,
+              restored: true,
+            },
+          }
+        );
+
         if (pointTransferResult.success) {
           message = `Undampened! Restored ${penalty} VP to rating author`;
         }
-        
-        return { 
-          dampened: false, 
+
+        return {
+          dampened: false,
           action: 'undampened',
           pointsPenalized: 0,
-          message: message || 'Undampened!'
+          message: message || 'Undampened!',
         };
       } else {
         // Switch from boost to dampen - reverse boost transfer and apply dampen penalty
@@ -934,33 +1005,36 @@ export const toggleRatingDampen = mutation({
           createdAt: Date.now(),
         });
         await updateRatingScore(ctx, args.ratingId);
-        
+
         // Apply dampen penalty
         if (penalty > 0 && effectiveBalance > 0) {
-          pointTransferResult = await ctx.runMutation(internal.userPoints.internalProcessPointTransfer, {
-            fromUserId: identity.subject, // doesn't spend dampener's points
-            toUserId: rating.userId, // to (author) - will lose points
-            amount: penalty,
-            transferType: 'dampen',
-            targetId: args.ratingId,
-            metadata: { action: 'switch_to_dampen', ratingId: args.ratingId }
-          });
-          
+          pointTransferResult = await ctx.runMutation(
+            internal.userPoints.internalProcessPointTransfer,
+            {
+              fromUserId: identity.subject, // doesn't spend dampener's points
+              toUserId: rating.userId, // to (author) - will lose points
+              amount: penalty,
+              transferType: 'dampen',
+              targetId: args.ratingId,
+              metadata: { action: 'switch_to_dampen', ratingId: args.ratingId },
+            }
+          );
+
           if (pointTransferResult.success) {
             message = `Switched to dampen! Removed ${penalty} VP from rating author`;
           }
         }
-        
+
         // Update dampener's daily count
         await ctx.db.patch(dampenerPoints._id, {
-          dailyDampenCount: currentDampenCount + 1
+          dailyDampenCount: currentDampenCount + 1,
         });
-        
-        return { 
-          dampened: true, 
+
+        return {
+          dampened: true,
           action: 'dampened',
           pointsPenalized: pointTransferResult?.success ? penalty : 0,
-          message: message || 'Switched to dampen!'
+          message: message || 'Switched to dampen!',
         };
       }
     } else {
@@ -972,51 +1046,51 @@ export const toggleRatingDampen = mutation({
         createdAt: Date.now(),
       });
       await updateRatingScore(ctx, args.ratingId);
-      
+
       // Apply dampen penalty
       if (penalty > 0 && effectiveBalance > 0) {
-        pointTransferResult = await ctx.runMutation(internal.userPoints.internalProcessPointTransfer, {
-          fromUserId: identity.subject, // doesn't spend dampener's points
-          toUserId: rating.userId, // to (author) - will lose points
-          amount: penalty,
-          transferType: 'dampen',
-          targetId: args.ratingId,
-          metadata: { action: 'dampen', ratingId: args.ratingId }
-        });
-        
+        pointTransferResult = await ctx.runMutation(
+          internal.userPoints.internalProcessPointTransfer,
+          {
+            fromUserId: identity.subject, // doesn't spend dampener's points
+            toUserId: rating.userId, // to (author) - will lose points
+            amount: penalty,
+            transferType: 'dampen',
+            targetId: args.ratingId,
+            metadata: { action: 'dampen', ratingId: args.ratingId },
+          }
+        );
+
         if (pointTransferResult.success) {
           message = `Dampened! Removed ${penalty} VP from rating author`;
         }
       }
-      
+
       // Update dampener's daily count
       await ctx.db.patch(dampenerPoints._id, {
-        dailyDampenCount: currentDampenCount + 1
+        dailyDampenCount: currentDampenCount + 1,
       });
-      
-      return { 
-        dampened: true, 
+
+      return {
+        dampened: true,
         action: 'dampened',
         pointsPenalized: pointTransferResult?.success ? penalty : 0,
-        message: message || 'Dampened!'
+        message: message || 'Dampened!',
       };
     }
   },
 });
 
 // Helper function to update rating score based on votes
-async function updateRatingScore(
-  ctx: MutationCtx,
-  ratingId: Id<'ratings'>
-) {
+async function updateRatingScore(ctx: MutationCtx, ratingId: Id<'ratings'>) {
   // Count all votes for this rating
   const votes = await ctx.db
     .query('ratingVotes')
     .withIndex('byRating', (q) => q.eq('ratingId', ratingId))
     .collect();
 
-  const boostCount = votes.filter(v => v.voteType === 'boost').length;
-  const dampenCount = votes.filter(v => v.voteType === 'dampen').length;
+  const boostCount = votes.filter((v) => v.voteType === 'boost').length;
+  const dampenCount = votes.filter((v) => v.voteType === 'dampen').length;
   const netScore = boostCount - dampenCount;
 
   // Update the rating with new scores
@@ -1032,9 +1106,66 @@ export const toggleRatingLike = mutation({
   args: {
     ratingId: v.id('ratings'),
   },
-  handler: async (ctx, args) => {
-    // Redirect to boost for backward compatibility
-    return await toggleRatingBoost.handler(ctx, args);
+  handler: async (
+    ctx,
+    args
+  ): Promise<{
+    boosted: boolean;
+    action: string;
+    pointsTransferred: number;
+    message: string;
+  }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('You must be logged in to like a rating');
+    }
+
+    const rating = await ctx.db.get(args.ratingId);
+    if (!rating) {
+      throw new Error('Rating not found');
+    }
+    if (rating.userId === identity.subject) {
+      throw new Error('You cannot like your own rating');
+    }
+
+    const existing = await ctx.db
+      .query('ratingVotes')
+      .withIndex('byRatingAndUser', (q) =>
+        q.eq('ratingId', args.ratingId).eq('userId', identity.subject)
+      )
+      .first();
+
+    if (existing && existing.voteType === 'boost') {
+      await ctx.db.delete(existing._id);
+      await updateRatingScore(ctx, args.ratingId);
+      return {
+        boosted: false,
+        action: 'unboosted',
+        pointsTransferred: 0,
+        message: 'Unboosted!',
+      };
+    }
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        voteType: 'boost' as const,
+        createdAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert('ratingVotes', {
+        ratingId: args.ratingId,
+        userId: identity.subject,
+        voteType: 'boost',
+        createdAt: Date.now(),
+      });
+    }
+    await updateRatingScore(ctx, args.ratingId);
+    return {
+      boosted: true,
+      action: 'boosted',
+      pointsTransferred: 0,
+      message: 'Boosted!',
+    };
   },
 });
 
@@ -1092,8 +1223,12 @@ export const getRatingLikeCount = query({
   args: {
     ratingId: v.id('ratings'),
   },
-  handler: async (ctx, args) => {
-    const result = await getRatingVoteScore.handler(ctx, args);
+  handler: async (ctx, args): Promise<number> => {
+    const result: { netScore: number } = await ctx.runQuery(
+      // @ts-expect-error Type instantiation is excessively deep - Convex generated types
+      api.emojiRatings.getRatingVoteScore,
+      args
+    );
     return result.netScore; // Return net score instead of like count
   },
 });
@@ -1102,8 +1237,11 @@ export const getUserRatingLikeStatus = query({
   args: {
     ratingId: v.id('ratings'),
   },
-  handler: async (ctx, args) => {
-    const result = await getUserRatingVoteStatus.handler(ctx, args);
+  handler: async (ctx, args): Promise<boolean> => {
+    const result: { boosted: boolean } = await ctx.runQuery(
+      api.emojiRatings.getUserRatingVoteStatus,
+      args
+    );
     return result.boosted; // Return boosted status instead of liked
   },
 });
@@ -1114,7 +1252,10 @@ export const getBulkRatingVoteScores = query({
     ratingIds: v.array(v.id('ratings')),
   },
   handler: async (ctx, args) => {
-    const scoreMap = new Map<string, { netScore: number; boostCount: number; dampenCount: number }>();
+    const scoreMap = new Map<
+      string,
+      { netScore: number; boostCount: number; dampenCount: number }
+    >();
 
     // Get all ratings and their scores
     const ratings = await Promise.all(
@@ -1159,11 +1300,22 @@ export const getBulkUserRatingVoteStatuses = query({
       );
     }
 
-    const voteStatuses = new Map<string, { voteType: 'boost' | 'dampen' | null; boosted: boolean; dampened: boolean }>();
+    const voteStatuses = new Map<
+      string,
+      {
+        voteType: 'boost' | 'dampen' | null;
+        boosted: boolean;
+        dampened: boolean;
+      }
+    >();
 
     // Initialize all ratings as not voted
     for (const ratingId of args.ratingIds) {
-      voteStatuses.set(ratingId, { voteType: null, boosted: false, dampened: false });
+      voteStatuses.set(ratingId, {
+        voteType: null,
+        boosted: false,
+        dampened: false,
+      });
     }
 
     // Get all votes by this user for the provided rating IDs
@@ -1203,13 +1355,20 @@ export const getBulkRatingLikeCounts = query({
     ratingIds: v.array(v.id('ratings')),
   },
   handler: async (ctx, args) => {
-    const scores = await getBulkRatingVoteScores.handler(ctx, args);
+    const scores = await ctx.runQuery(
+      api.emojiRatings.getBulkRatingVoteScores,
+      args
+    );
     const likeCounts: Record<string, number> = {};
-    
-    for (const [ratingId, score] of Object.entries(scores)) {
+    for (const [ratingId, score] of Object.entries(
+      scores as Record<
+        string,
+        { netScore: number; boostCount: number; dampenCount: number }
+      >
+    )) {
       likeCounts[ratingId] = score.netScore; // Return net score instead of like count
     }
-    
+
     return likeCounts;
   },
 });
@@ -1219,20 +1378,31 @@ export const getBulkUserRatingLikeStatuses = query({
     ratingIds: v.array(v.id('ratings')),
   },
   handler: async (ctx, args) => {
-    const voteStatuses = await getBulkUserRatingVoteStatuses.handler(ctx, args);
+    const voteStatuses = await ctx.runQuery(
+      api.emojiRatings.getBulkUserRatingVoteStatuses,
+      args
+    );
     const likeStatuses: Record<string, boolean> = {};
-    
-    for (const [ratingId, status] of Object.entries(voteStatuses)) {
+    for (const [ratingId, status] of Object.entries(
+      voteStatuses as Record<
+        string,
+        {
+          voteType: 'boost' | 'dampen' | null;
+          boosted: boolean;
+          dampened: boolean;
+        }
+      >
+    )) {
       likeStatuses[ratingId] = status.boosted; // Return boosted status instead of liked
     }
-    
+
     return likeStatuses;
   },
 });
 
 // Helper function to delete a rating and all its votes/likes (for data consistency)
 async function deleteRatingWithVotes(
-  ctx: QueryCtx | MutationCtx,
+  ctx: MutationCtx,
   ratingId: Id<'ratings'>
 ) {
   // Delete all votes on this rating
@@ -1240,7 +1410,7 @@ async function deleteRatingWithVotes(
     .query('ratingVotes')
     .withIndex('byRating', (q) => q.eq('ratingId', ratingId))
     .collect();
-  
+
   for (const vote of ratingVotes) {
     await ctx.db.delete(vote._id);
   }
@@ -1250,22 +1420,24 @@ async function deleteRatingWithVotes(
     .query('ratingLikes')
     .withIndex('byRating', (q) => q.eq('ratingId', ratingId))
     .collect();
-  
+
   for (const like of ratingsLikes) {
     await ctx.db.delete(like._id);
   }
-  
+
   // Then delete the rating itself
   await ctx.db.delete(ratingId);
 }
 
 // Keep old function name for backward compatibility
-const deleteRatingWithLikes = deleteRatingWithVotes;
+
+const _deleteRatingWithLikes = deleteRatingWithVotes;
 
 // Admin function to clean up orphaned rating likes (for data consistency)
 export const cleanupOrphanedRatingLikes = mutation({
   args: {},
-  handler: async (ctx, args) => {
+
+  handler: async (ctx, _args) => {
     // Check authentication (admin only)
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -1301,7 +1473,7 @@ export const cleanupOrphanedRatingLikes = mutation({
 });
 
 // Default export for test-setup
-export default {
+const emojiRatingsModule: Record<string, unknown> = {
   getEmojiMetadata,
   getAllEmojiMetadata,
   getEmojiByCategory,
@@ -1325,3 +1497,4 @@ export default {
   getBulkUserRatingLikeStatuses,
   cleanupOrphanedRatingLikes,
 };
+export default emojiRatingsModule;

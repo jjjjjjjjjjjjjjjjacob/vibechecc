@@ -87,11 +87,13 @@ const schema = defineSchema({
     gradientDirection: v.optional(v.string()), // Gradient direction (e.g., 'to-br', 'to-r', 'to-b')
 
     // Text contrast mode for ensuring readability
-    textContrastMode: v.optional(v.union(
-      v.literal('light'), // Use light mode text colors
-      v.literal('dark'),  // Use dark mode text colors
-      v.literal('auto')   // Let the system decide (default behavior)
-    )),
+    textContrastMode: v.optional(
+      v.union(
+        v.literal('light'), // Use light mode text colors
+        v.literal('dark'), // Use dark mode text colors
+        v.literal('auto') // Let the system decide (default behavior)
+      )
+    ),
 
     // Share tracking fields
     shareCount: v.optional(v.number()), // Total number of times this vibe has been shared
@@ -422,7 +424,11 @@ const schema = defineSchema({
   // Point transaction history for transparency and auditing
   pointTransactions: defineTable({
     userId: v.string(), // External ID of user
-    type: v.union(v.literal('earned'), v.literal('spent'), v.literal('transfer')), // Transaction type
+    type: v.union(
+      v.literal('earned'),
+      v.literal('spent'),
+      v.literal('transfer')
+    ), // Transaction type
     action: v.union(
       v.literal('post_vibe'),
       v.literal('write_review'),
@@ -463,24 +469,48 @@ const schema = defineSchema({
     .index('byUserAndDate', ['userId', 'date'])
     .index('byDate', ['date'])
     .index('byUserAndNetChange', ['userId', 'netChange']),
+
+  // Anonymous actions storage for private mode token carryover
+  anonymousActions: defineTable({
+    sessionId: v.string(), // Anonymous session identifier
+    actions: v.array(v.any()), // Array of actions performed before authentication
+    createdAt: v.number(), // Timestamp when actions were stored
+    expiresAt: v.number(), // Expiration timestamp (24 hours from creation)
+    processedAt: v.optional(v.number()), // Timestamp when actions were processed
+  })
+    .index('bySessionId', ['sessionId'])
+    .index('byExpiresAt', ['expiresAt']),
 });
 export default schema;
 
 const _user = schema.tables.users.validator;
 const vibe = schema.tables.vibes.validator;
 const rating = schema.tables.ratings.validator;
+
 const _emoji = schema.tables.emojis.validator;
+
 const _searchHistory = schema.tables.searchHistory.validator;
+
 const _trendingSearches = schema.tables.trendingSearches.validator;
+
 const _searchMetrics = schema.tables.searchMetrics.validator;
+
 const _follows = schema.tables.follows.validator;
+
 const _notification = schema.tables.notifications.validator;
+
 const _socialConnection = schema.tables.socialConnections.validator;
+
 const _shareEvent = schema.tables.shareEvents.validator;
+
 const _ratingVote = schema.tables.ratingVotes.validator;
+
 const _ratingLike = schema.tables.ratingLikes.validator;
+
 const _userPoints = schema.tables.userPoints.validator;
+
 const _pointTransaction = schema.tables.pointTransactions.validator;
+
 const _pointsHistory = schema.tables.pointsHistory.validator;
 
 export type User = Infer<typeof _user>;

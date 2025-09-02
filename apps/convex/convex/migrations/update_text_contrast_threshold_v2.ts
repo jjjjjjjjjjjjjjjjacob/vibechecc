@@ -1,4 +1,5 @@
 import { internalMutation, mutation } from '../_generated/server';
+import { internal } from '../_generated/api';
 
 // Helper function to convert hex to RGB
 function hexToRgb(hex: string) {
@@ -37,52 +38,63 @@ export const updateTextContrastThresholdV2 = internalMutation({
   args: {},
   handler: async (ctx) => {
     console.log('Starting textContrastMode threshold update migration v2...');
-    
+
     // Get all vibes that have gradient colors (either from old migration or manual)
     const vibes = await ctx.db
       .query('vibes')
-      .filter((q) => 
+      .filter((q) =>
         q.and(
           q.neq(q.field('gradientFrom'), undefined),
           q.neq(q.field('gradientTo'), undefined)
         )
       )
       .collect();
-    
+
     let updatedCount = 0;
     let skippedCount = 0;
-    
+
     for (const vibe of vibes) {
       // Skip if no gradient colors
       if (!vibe.gradientFrom || !vibe.gradientTo) {
         skippedCount++;
         continue;
       }
-      
+
       // Recalculate with new threshold (0.82)
-      const newTextContrastMode = isLightGradient(vibe.gradientFrom, vibe.gradientTo) ? 'light' : 'dark';
+      const newTextContrastMode = isLightGradient(
+        vibe.gradientFrom,
+        vibe.gradientTo
+      )
+        ? 'light'
+        : 'dark';
       const reason = `gradient luminance recalculated with threshold 0.82`;
-      
+
       // Only update if different from current value
       if (vibe.textContrastMode !== newTextContrastMode) {
         await ctx.db.patch(vibe._id, { textContrastMode: newTextContrastMode });
         updatedCount++;
-        console.log(`Updated vibe ${vibe.id}: changed from '${vibe.textContrastMode}' to '${newTextContrastMode}' (${reason})`);
+        console.log(
+          `Updated vibe ${vibe.id}: changed from '${vibe.textContrastMode}' to '${newTextContrastMode}' (${reason})`
+        );
       } else {
         skippedCount++;
-        console.log(`Skipped vibe ${vibe.id}: already has correct value '${newTextContrastMode}'`);
+        console.log(
+          `Skipped vibe ${vibe.id}: already has correct value '${newTextContrastMode}'`
+        );
       }
     }
-    
-    console.log(`Migration complete: Updated ${updatedCount} vibes, skipped ${skippedCount} vibes`);
-    
+
+    console.log(
+      `Migration complete: Updated ${updatedCount} vibes, skipped ${skippedCount} vibes`
+    );
+
     // Record migration completion
     await ctx.db.insert('migrations', {
       name: 'update_text_contrast_threshold_v2',
       completedAt: new Date().toISOString(),
       status: 'completed',
     });
-    
+
     return {
       updatedCount,
       skippedCount,
@@ -94,18 +106,33 @@ export const updateTextContrastThresholdV2 = internalMutation({
 // Regular mutation version that can be called from dashboard
 export const runTextContrastThresholdUpdateV2 = mutation({
   args: {},
-  handler: async (ctx) => {
+  handler: async (
+    ctx
+  ): Promise<{
+    updatedCount: number;
+    skippedCount: number;
+    totalProcessed: number;
+  }> => {
     // Check if migration already ran
     const existingMigration = await ctx.db
       .query('migrations')
-      .withIndex('byName', (q) => q.eq('name', 'update_text_contrast_threshold_v2'))
+      .withIndex('byName', (q) =>
+        q.eq('name', 'update_text_contrast_threshold_v2')
+      )
       .first();
-    
+
     if (existingMigration) {
-      throw new Error('Migration "update_text_contrast_threshold_v2" has already been run');
+      throw new Error(
+        'Migration "update_text_contrast_threshold_v2" has already been run'
+      );
     }
-    
-    // Run the internal migration
-    return await updateTextContrastThresholdV2(ctx, {});
+
+    // Run the internal migration via generated internal reference
+    const result = await ctx.runMutation(
+      (internal.migrations as any).update_text_contrast_threshold_v2
+        .updateTextContrastThresholdV2 as any,
+      {}
+    );
+    return result as any;
   },
 });

@@ -11,7 +11,10 @@ import { RatingShareButton } from '@/components/social/rating-share-button';
 import { api } from '@vibechecc/convex';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { useBulkRatingVoteScores, useBulkUserRatingVoteStatuses } from '@/queries';
+import {
+  useBulkRatingVoteScores,
+  useBulkUserRatingVoteStatuses,
+} from '@/queries';
 import { useUser } from '@clerk/tanstack-react-start';
 import type {
   SearchResult,
@@ -120,7 +123,8 @@ function VibeResultListCard({
           image_url: result.createdBy.avatar,
         }
       : null,
-    ratings: [], // Not needed for search results
+    emojiRatings: [],
+    currentUserRatings: [], // Not needed for search results
     viewCount: 0, // Not needed for search results
   };
 
@@ -402,7 +406,7 @@ function ReviewResultListCard({
   loading?: boolean;
 }) {
   const { user } = useUser();
-  
+
   // Get rating ID for vote data (only if not loading and result exists)
   const ratingId = result?.id;
   const ratingIds = React.useMemo(() => {
@@ -489,7 +493,7 @@ function ReviewResultListCard({
                   rating={{
                     emoji: result.emoji,
                     value: result.rating,
-                    count: undefined,
+                    count: 0,
                   }}
                   vibeId={result.vibeId}
                   variant="compact"
@@ -497,7 +501,7 @@ function ReviewResultListCard({
                   existingUserRatings={[]}
                   emojiMetadata={{}}
                 />
-                
+
                 {/* Action buttons */}
                 {ratingId && (
                   <div className="flex items-center gap-1">
@@ -523,6 +527,7 @@ function ReviewResultListCard({
                         review: result.reviewText,
                         createdAt: new Date().toISOString(), // SearchResult doesn't have createdAt
                         user: {
+                          externalId: '',
                           username: result.reviewerName,
                           image_url: result.reviewerAvatar,
                         },
@@ -530,6 +535,9 @@ function ReviewResultListCard({
                       vibe={{
                         id: result.vibeId,
                         title: result.vibeTitle,
+                        description: '',
+                        createdAt: new Date().toISOString(),
+                        emojiRatings: [],
                         createdBy: null, // Don't have vibe author info in search result
                       }}
                       variant="ghost"

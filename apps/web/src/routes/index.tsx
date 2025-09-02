@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as React from 'react';
 import { HomeFeed } from '@/components/home-feed';
-import { SignedIn, SignedOut, useUser } from '@clerk/tanstack-react-start';
+import { SignedOut, useUser } from '@clerk/tanstack-react-start';
 import { useFeatureFlagEnabled, useFeatureFlagPayload } from 'posthog-js/react';
 import { useCurrentUser } from '@/queries';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@/stores/theme-store';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Sparkles } from '@/components/ui/icons';
+import { Sparkles } from '@/components/ui/icons';
 import { APP_NAME } from '@/utils/bindings';
 
 export const Route = createFileRoute('/')({
@@ -32,11 +32,12 @@ function Home() {
   const { data: currentUser, isLoading: _isUserLoading } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
   const { isLoaded: isClerkLoaded, user: _user, isSignedIn } = useUser();
-  
+
   // Check discover page access feature flag
   const discoverFlagEnabled = useFeatureFlagEnabled('discover-page-access');
   const discoverFlagPayload = useFeatureFlagPayload('discover-page-access');
-  const showDiscoverButton = isSignedIn && discoverFlagEnabled && !!discoverFlagPayload;
+  const _showDiscoverButton =
+    isSignedIn && discoverFlagEnabled && !!discoverFlagPayload;
   const [hasMounted, setHasMounted] = React.useState(false);
   const [clerkTimedOut, setClerkTimedOut] = React.useState(false);
 

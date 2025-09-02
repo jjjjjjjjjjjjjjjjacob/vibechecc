@@ -47,6 +47,7 @@ export function MasonryFeed({
   onLoadMore,
   ratingDisplayMode = 'most-rated',
   variant = 'feed',
+
   queriedEmojis: _queriedEmojis,
   className,
   emptyStateTitle = 'no vibes found',
@@ -82,26 +83,35 @@ export function MasonryFeed({
   }, [emojiMetadataArray]);
 
   // Handle emoji rating at feed level
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleEmojiRating = React.useCallback(
-    async (data: {
-      emoji: string;
-      value: number;
-      review: string;
-      tags?: string[];
-    }) => {
+    async (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      data: {
+        emoji: string;
+        value: number;
+        review: string;
+        tags?: string[];
+      }
+    ) => {
       // This would need the vibeId, so we'll pass this function to the cards
       // The actual implementation will be in the card components
       throw new Error('This should be handled by individual cards');
     },
-    [createEmojiRatingMutation, onRefetch]
+
+    []
   );
 
   // CTA placement hooks
-  const { shouldShowFeedCta, isAuthenticated, vibesViewed } =
-    useSignupCtaPlacement({
-      feedThreshold: 3,
-      enableFeedCta: variant === 'feed', // Only show on main feed
-    });
+  const {
+    shouldShowFeedCta,
+    isAuthenticated,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    vibesViewed,
+  } = useSignupCtaPlacement({
+    feedThreshold: 3,
+    enableFeedCta: variant === 'feed', // Only show on main feed
+  });
   const { trackVibeView } = useAnonymousInteractionTracking();
 
   // Intersection observer for infinite scroll

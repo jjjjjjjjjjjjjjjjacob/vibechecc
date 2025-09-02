@@ -255,6 +255,14 @@ export function SignupCta({
     recordCtaInteraction,
     shouldShowCta,
     hasTrackedImpression,
+    colorVariant,
+    effectiveVariant,
+    hasAttemptedInteraction,
+    isMobile,
+    messagingVariant,
+    mobileLayoutVariant,
+    sessionTimeMinutes,
+    vibesViewed,
   ]);
 
   const handleCtaClick = (action: 'signup' | 'signin') => {

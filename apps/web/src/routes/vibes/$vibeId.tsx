@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router';
-import type { Id } from '@vibechecc/convex/dataModel';
+import type {} from '@vibechecc/convex/dataModel';
 import * as React from 'react';
 import {
   useVibe,
@@ -120,7 +120,7 @@ function VibePage() {
   }, [emojiMetadataArray]);
 
   // Check if current user owns this vibe
-  const isOwner = _user?.id && vibe && vibe.createdById === _user.id;
+  const isOwner = !!(_user?.id && vibe && vibe.createdById === _user.id);
 
   // Get similar vibes based on tags, creator, or fallback to recent vibes
   const similarVibes = React.useMemo(() => {
@@ -282,7 +282,27 @@ function VibePage() {
         onDelete={handleDeleteVibe}
         onShare={() => setShowShareModal(true)}
         isPendingDelete={deleteVibeMutation.isPending}
-        allRatings={allRatingsData || []}
+        allRatings={(allRatingsData || []).map((rating) => ({
+          _id: rating._id,
+          vibeId: rating.vibeId,
+          userId: rating.userId,
+          emoji: rating.emoji,
+          value: rating.value,
+          review: rating.review,
+          createdAt: rating.createdAt,
+          updatedAt: rating.updatedAt,
+          user: rating.user
+            ? {
+                id: rating.user._id,
+                externalId: rating.user.externalId,
+                username: rating.user.username,
+                firstName: rating.user.first_name,
+                lastName: rating.user.last_name,
+                imageUrl:
+                  rating.user.image_url || rating.user.profile_image_url,
+              }
+            : undefined,
+        }))}
         variant={isMobile ? 'mobile' : 'desktop'}
         similarVibes={similarVibes}
       />
@@ -295,7 +315,7 @@ function VibePage() {
         preSelectedEmoji={selectedEmojiForRating || undefined}
         preSelectedValue={preselectedRatingValue || undefined}
         isOwner={!!isOwner}
-        existingUserRatings={vibe.currentUserRatings}
+        existingUserRatings={vibe.currentUserRatings || []}
         emojiMetadata={emojiMetadataRecord}
         onOpenChange={(open) => {
           setShowRatingDialog(open);

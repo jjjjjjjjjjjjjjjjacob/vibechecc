@@ -5,8 +5,6 @@
  * Shows the complete impact of all optimizations implemented
  */
 
-/* eslint-disable no-console */
-
 console.log('🚀 Mobile Performance Optimization Summary\n');
 
 const optimizations = [

@@ -5,8 +5,6 @@
  * Tracks bundle size improvements and identifies optimization opportunities
  */
 
-/* eslint-disable no-console */
-
 import { existsSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 

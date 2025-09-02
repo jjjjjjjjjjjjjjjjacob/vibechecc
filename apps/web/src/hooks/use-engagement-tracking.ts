@@ -4,7 +4,6 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { usePostHog } from 'posthog-js/react';
 import { trackEvents } from '@/lib/track-events';
 
 /**

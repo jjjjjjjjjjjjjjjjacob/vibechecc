@@ -134,7 +134,7 @@ function EditVibe() {
 
       setOriginalValues(initialValues);
     }
-  }, [vibe]);
+  }, [vibe, gradient.direction, gradient.from, gradient.to]);
 
   // Check for unsaved changes
   React.useEffect(() => {

@@ -241,7 +241,7 @@
 
   /* Text contrast mode overrides for vibe cards */
   /* Force light mode colors (dark text on light background) */
-  [data-text-contrast="light"] {
+  [data-text-contrast='light'] {
     /* Core text colors */
     --foreground: oklch(0.145 0 0);
     --background: oklch(1 0 0);
@@ -270,7 +270,7 @@
   }
 
   /* Force dark mode colors (light text on dark background) */
-  [data-text-contrast="dark"] {
+  [data-text-contrast='dark'] {
     /* Core text colors */
     --foreground: oklch(0.985 0 0);
     --background: oklch(0.145 0 0);

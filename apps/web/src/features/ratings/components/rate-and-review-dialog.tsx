@@ -123,7 +123,10 @@ export function RateAndReviewDialog({
   const emojiMetadataRecord = emojiMetadata;
 
   // Use user ratings passed from parent (no queries needed)
-  const userRatings = existingUserRatings;
+  const userRatings = React.useMemo(
+    () => existingUserRatings || [],
+    [existingUserRatings]
+  );
 
   const setOpen = React.useCallback(
     (newOpen: boolean) => {
@@ -376,11 +379,8 @@ export function RateAndReviewDialog({
           review: data.review.trim(),
         });
 
-        // Check if the submission was actually successful
-        if (
-          result === false ||
-          (typeof result === 'object' && result?.success === false)
-        ) {
+        // Check if the submission returned a valid ID
+        if (!result) {
           toast.info(
             'rating not changed - this is the same as your existing rating',
             {
@@ -445,7 +445,7 @@ export function RateAndReviewDialog({
       setFormError('root', {
         message: 'Failed to submit rating. Please try again.',
       });
-      console.error('Emoji rating submission error:', error);
+      // console.error('Emoji rating submission error:', error);
     }
   };
 

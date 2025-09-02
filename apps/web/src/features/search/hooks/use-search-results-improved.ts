@@ -24,7 +24,9 @@ const VALID_CONVEX_SORT_OPTIONS = [
 ] as const;
 
 // Helper to filter SearchFilters to only include Convex-compatible options
-function filterForConvex(filters?: SearchFilters): typeof filters {
+function filterForConvex(
+  filters?: SearchFilters
+): SearchRequest['filters'] | undefined {
   if (!filters) return filters;
 
   const convexFilters = { ...filters };
@@ -37,7 +39,7 @@ function filterForConvex(filters?: SearchFilters): typeof filters {
     convexFilters.sort = 'relevance';
   }
 
-  return convexFilters as typeof filters;
+  return convexFilters as SearchRequest['filters'];
 }
 
 interface UseSearchResultsParams {
@@ -67,7 +69,24 @@ export function useSearchResultsImproved({
   const searchQuery = useQuery({
     ...convexQuery(api.searchOptimized.searchAllOptimized, {
       query: debouncedQuery,
-      filters: filterForConvex(filters),
+      filters: filterForConvex(filters) as {
+        sort?:
+          | 'name'
+          | 'relevance'
+          | 'rating_desc'
+          | 'rating_asc'
+          | 'top_rated'
+          | 'most_rated'
+          | 'recent'
+          | 'oldest'
+          | 'creation_date'
+          | 'interaction_time';
+        tags?: string[];
+        ratingRange?: { min: number; max: number };
+        dateRange?: { start: string; end: string };
+        users?: string[];
+        creators?: string[];
+      },
       page,
       pageSize: limit,
       includeTypes,

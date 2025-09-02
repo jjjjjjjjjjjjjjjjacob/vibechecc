@@ -851,18 +851,22 @@ function applySorting(
       // Hot algorithm: combine boost score with recency and engagement
       results.vibes.sort((a, b) => {
         const now = Date.now();
-        const ageInHours = (now - new Date(a.createdAt || 0).getTime()) / (1000 * 60 * 60);
-        const ageInHoursB = (now - new Date(b.createdAt || 0).getTime()) / (1000 * 60 * 60);
-        
+        const ageInHours =
+          (now - new Date(a.createdAt || 0).getTime()) / (1000 * 60 * 60);
+        const ageInHoursB =
+          (now - new Date(b.createdAt || 0).getTime()) / (1000 * 60 * 60);
+
         const boostA = a.boostScore || 0;
         const boostB = b.boostScore || 0;
         const ratingCountA = a.ratingCount || 0;
         const ratingCountB = b.ratingCount || 0;
-        
+
         // Hot score = (boosts + rating engagement) / (age + 2)^1.5
-        const hotScoreA = (boostA + ratingCountA) / Math.pow(ageInHours + 2, 1.5);
-        const hotScoreB = (boostB + ratingCountB) / Math.pow(ageInHoursB + 2, 1.5);
-        
+        const hotScoreA =
+          (boostA + ratingCountA) / Math.pow(ageInHours + 2, 1.5);
+        const hotScoreB =
+          (boostB + ratingCountB) / Math.pow(ageInHoursB + 2, 1.5);
+
         return hotScoreB - hotScoreA;
       });
       break;
@@ -873,22 +877,22 @@ function applySorting(
         const dampenA = a.totalDampens || 0;
         const boostB = b.totalBoosts || 0;
         const dampenB = b.totalDampens || 0;
-        
+
         const totalActivityA = boostA + dampenA;
         const totalActivityB = boostB + dampenB;
-        
+
         if (totalActivityA === 0 && totalActivityB === 0) return 0;
         if (totalActivityA === 0) return 1;
         if (totalActivityB === 0) return -1;
-        
+
         // Controversy ratio: closer to 0.5 = more controversial
-        const controversyRatioA = Math.abs((boostA / totalActivityA) - 0.5);
-        const controversyRatioB = Math.abs((boostB / totalActivityB) - 0.5);
-        
+        const controversyRatioA = Math.abs(boostA / totalActivityA - 0.5);
+        const controversyRatioB = Math.abs(boostB / totalActivityB - 0.5);
+
         // Invert ratio so lower values (more controversial) rank higher
         const controversyScoreA = (0.5 - controversyRatioA) * totalActivityA;
         const controversyScoreB = (0.5 - controversyRatioB) * totalActivityB;
-        
+
         return controversyScoreB - controversyScoreA;
       });
       break;

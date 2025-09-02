@@ -132,23 +132,23 @@ export interface Vibe {
   visibility?: 'public' | 'deleted'; // From Convex schema
   shareCount?: number; // Number of times this vibe has been shared
   lastSharedAt?: number; // Timestamp of most recent share
-  
+
   // Color gradient fields for custom vibe appearance
   gradientFrom?: string; // Starting color for gradient (hex or color name)
-  gradientTo?: string; // Ending color for gradient (hex or color name)  
+  gradientTo?: string; // Ending color for gradient (hex or color name)
   gradientDirection?: string; // Gradient direction (e.g., 'to-br', 'to-r', 'to-b')
-  
+
   // Text contrast mode for ensuring readability
   textContrastMode?: 'light' | 'dark' | 'auto'; // Text contrast mode based on background
-  
+
   // Boost/dampen system fields
   boostScore?: number; // Current boost score (can be negative for dampens)
   totalBoosts?: number; // Total number of boosts received
   totalDampens?: number; // Total number of dampens received
-  
+
   // Current authenticated user's ratings for this vibe (only populated when authenticated)
   currentUserRatings?: CurrentUserRating[];
-  
+
   // Pre-computed rating data to avoid N+1 queries
   topEmojiRatings?: Array<{
     emoji: string;

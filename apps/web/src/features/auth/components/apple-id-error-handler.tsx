@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/tanstack-react-start';
 import toast from '@/utils/toast';
-import { AlertCircle, Shield, Info } from '@/components/ui/icons';
+import {
+  Shield,
+  AlertCircle as _AlertCircle,
+  Info as _Info,
+} from '@/components/ui/icons';
 
 interface AppleIdErrorHandlerProps {
   children: React.ReactNode;
@@ -19,13 +23,14 @@ export function AppleIdErrorHandler({ children }: AppleIdErrorHandlerProps) {
     if (!isLoaded || !isSignedIn || !user) return;
 
     // SECURITY: Check if user has Apple ID authentication
-    const hasAppleAuth = user.externalAccounts?.some((account: any) =>
-      account.provider?.toLowerCase().includes('apple')
+    const hasAppleAuth = user.externalAccounts?.some(
+      (account: { provider?: string }) =>
+        account.provider?.toLowerCase().includes('apple')
     );
 
     if (hasAppleAuth) {
       // PRIVACY: Inform user about Apple's privacy features
-      const hasPrivateEmail = user.externalAccounts?.some((account: any) =>
+      const hasPrivateEmail = user.externalAccounts?.some((account) =>
         account.emailAddress?.includes('@privaterelay.appleid.com')
       );
 
@@ -74,7 +79,7 @@ export function AppleIdStatus() {
 
   if (!user) return null;
 
-  const appleAccount = user.externalAccounts?.find((account: any) =>
+  const appleAccount = user.externalAccounts?.find((account) =>
     account.provider?.toLowerCase().includes('apple')
   );
 

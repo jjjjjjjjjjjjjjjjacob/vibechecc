@@ -1,13 +1,14 @@
 /// <reference lib="dom" />
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { VibeCard } from './vibe-card';
+import { VibeCard } from './index';
 import type { Vibe } from '@vibechecc/types';
 
 // Mock dependencies
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: vi.fn(() => vi.fn()),
   useLocation: vi.fn(() => ({ pathname: '/test' })),
+  useRouter: vi.fn(() => ({ navigate: vi.fn() })),
   Link: ({ children, ...props }: any) => <a {...props}>{children}</a>,
 }));
 

@@ -85,7 +85,8 @@ export function OnboardingInterestsStep({
   ];
 
   const availableInterests =
-    allTags?.slice(0, 50).map((tag) => tag.tag) || defaultInterests;
+    allTags?.slice(0, 50).map((tag: { tag: string }) => tag.tag) ||
+    defaultInterests;
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests((prev) =>
@@ -121,7 +122,7 @@ export function OnboardingInterestsStep({
 
           <CardContent className="space-y-6">
             <div className="flex flex-wrap justify-center gap-3">
-              {availableInterests.map((interest, index) => (
+              {availableInterests.map((interest: string, index: number) => (
                 <div
                   key={interest}
                   className="animate-zoomIn"

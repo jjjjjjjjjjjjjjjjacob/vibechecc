@@ -38,6 +38,7 @@ export function FeedLayout({
   floatingElements,
   className,
   containerClassName,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   headerSpacing = 'lg',
   contentSpacing = 'md',
 }: FeedLayoutProps) {

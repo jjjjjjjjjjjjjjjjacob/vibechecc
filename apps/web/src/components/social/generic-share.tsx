@@ -41,7 +41,9 @@ interface GenericShareProps {
 
 export function GenericShare({
   vibe,
+
   author: _author,
+
   ratings: _ratings = [],
   generatedBlob,
   isGenerating,

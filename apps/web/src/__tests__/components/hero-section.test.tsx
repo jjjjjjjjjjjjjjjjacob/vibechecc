@@ -3,31 +3,44 @@
  */
 /// <reference lib="dom" />
 
+import * as React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from '@tanstack/react-router';
 import { HeroSection } from '@/components/hero-section';
 import { useHeroTaglineExperiment } from '@/hooks/use-hero-tagline-experiment';
 
+// Mock TanStack Router
+vi.mock('@tanstack/react-router', () => ({
+  MemoryRouter: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  Link: ({ children, ...props }: any) =>
+    React.createElement('a', props, children),
+}));
+
 // Mock the hero tagline experiment hook
-jest.mock('@/hooks/use-hero-tagline-experiment');
-jest.mock('@/hooks/use-performance-tracking');
+vi.mock('@/hooks/use-hero-tagline-experiment');
+vi.mock('@/hooks/use-performance-tracking');
 
 // Mock APP_NAME
-jest.mock('@/utils/bindings', () => ({
+vi.mock('@/utils/bindings', () => ({
   APP_NAME: 'TestApp',
 }));
 
-const mockUseHeroTaglineExperiment =
-  useHeroTaglineExperiment as jest.MockedFunction<
-    typeof useHeroTaglineExperiment
-  >;
+const mockUseHeroTaglineExperiment = useHeroTaglineExperiment as any;
 
 const mockPerformanceHooks = {
-  trackFirstInteraction: jest.fn(),
+  trackFirstInteraction: vi.fn(),
 };
 
-jest.mock('@/hooks/use-performance-tracking', () => ({
-  useTimeToInteractive: jest.fn(() => mockPerformanceHooks),
+vi.mock('@/hooks/use-performance-tracking', () => ({
+  useTimeToInteractive: vi.fn(() => mockPerformanceHooks),
+  usePlaceholderTracking: vi.fn(() => ({
+    visibilityRef: vi.fn(),
+    trackInteraction: vi.fn(),
+    isVisible: false,
+    hasInteracted: false,
+  })),
 }));
 
 const defaultMockExperiment = {
@@ -42,11 +55,11 @@ const defaultMockExperiment = {
     },
   },
   variantId: 'control',
-  trackTaglineView: jest.fn(),
-  trackCtaClick: jest.fn(),
-  trackSignupConversion: jest.fn(),
-  trackVibeCreationConversion: jest.fn(),
-  trackDiscoveryConversion: jest.fn(),
+  trackTaglineView: vi.fn(),
+  trackCtaClick: vi.fn(),
+  trackSignupConversion: vi.fn(),
+  trackVibeCreationConversion: vi.fn(),
+  trackDiscoveryConversion: vi.fn(),
   experimentKey: 'hero_tagline_experiment',
 };
 
@@ -56,7 +69,7 @@ function renderWithRouter(component: React.ReactElement) {
 
 describe('HeroSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseHeroTaglineExperiment.mockReturnValue(defaultMockExperiment);
   });
 

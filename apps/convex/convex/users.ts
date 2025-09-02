@@ -755,23 +755,31 @@ export const handleAppleIdConnection = internalMutation({
     const validatedUserId = SecurityValidators.validateClerkUserId(userId);
 
     // SECURITY: Validate Apple email if provided (handles relay emails)
-    const validatedEmail = SecurityValidators.validateAppleEmail(appleAccount.email);
+    const validatedEmail = SecurityValidators.validateAppleEmail(
+      appleAccount.email
+    );
 
     // Get existing user or create if needed
     let user = await userByExternalId(ctx, validatedUserId);
-    
+
     // SECURITY: Apple ID specific user creation with privacy considerations
     if (!user) {
       // Create user with Apple ID defaults and validated data
-      const validatedFirstName = appleAccount.firstName ? 
-        SecurityValidators.validateString(appleAccount.firstName, { maxLength: 50, fieldName: 'First name' }) : 
-        undefined;
-      const validatedLastName = appleAccount.lastName ? 
-        SecurityValidators.validateString(appleAccount.lastName, { maxLength: 50, fieldName: 'Last name' }) : 
-        undefined;
-      const validatedImageUrl = appleAccount.imageUrl ? 
-        SecurityValidators.validateUrl(appleAccount.imageUrl) : 
-        undefined;
+      const validatedFirstName = appleAccount.firstName
+        ? SecurityValidators.validateString(appleAccount.firstName, {
+            maxLength: 50,
+            fieldName: 'First name',
+          })
+        : undefined;
+      const validatedLastName = appleAccount.lastName
+        ? SecurityValidators.validateString(appleAccount.lastName, {
+            maxLength: 50,
+            fieldName: 'Last name',
+          })
+        : undefined;
+      const validatedImageUrl = appleAccount.imageUrl
+        ? SecurityValidators.validateUrl(appleAccount.imageUrl)
+        : undefined;
 
       const userAttributes = {
         externalId: validatedUserId,
@@ -788,7 +796,9 @@ export const handleAppleIdConnection = internalMutation({
       user = await ctx.db.get(newUserId);
 
       // eslint-disable-next-line no-console
-      console.log(`Created new user from Apple ID: ${validatedUserId} (email: ${validatedEmail ? 'provided' : 'not provided'})`);
+      console.log(
+        `Created new user from Apple ID: ${validatedUserId} (email: ${validatedEmail ? 'provided' : 'not provided'})`
+      );
     } else {
       // SECURITY: Update existing user with Apple ID data (if provided)
       const updates: Partial<{
@@ -803,25 +813,36 @@ export const handleAppleIdConnection = internalMutation({
 
       // PRIVACY: Only update if Apple provides the data (respects user privacy settings)
       if (appleAccount.firstName && !user.first_name) {
-        const validatedFirstName = SecurityValidators.validateString(appleAccount.firstName, { maxLength: 50, fieldName: 'First name' });
+        const validatedFirstName = SecurityValidators.validateString(
+          appleAccount.firstName,
+          { maxLength: 50, fieldName: 'First name' }
+        );
         if (validatedFirstName) updates.first_name = validatedFirstName;
       }
       if (appleAccount.lastName && !user.last_name) {
-        const validatedLastName = SecurityValidators.validateString(appleAccount.lastName, { maxLength: 50, fieldName: 'Last name' });
+        const validatedLastName = SecurityValidators.validateString(
+          appleAccount.lastName,
+          { maxLength: 50, fieldName: 'Last name' }
+        );
         if (validatedLastName) updates.last_name = validatedLastName;
       }
       if (appleAccount.imageUrl && !user.image_url) {
-        const validatedImageUrl = SecurityValidators.validateUrl(appleAccount.imageUrl);
+        const validatedImageUrl = SecurityValidators.validateUrl(
+          appleAccount.imageUrl
+        );
         if (validatedImageUrl) {
           updates.image_url = validatedImageUrl;
           updates.profile_image_url = validatedImageUrl;
         }
       }
 
-      if (Object.keys(updates).length > 1) { // More than just updated_at
+      if (Object.keys(updates).length > 1) {
+        // More than just updated_at
         await ctx.db.patch(user._id, updates);
         // eslint-disable-next-line no-console
-        console.log(`Updated existing user from Apple ID: ${validatedUserId} (email: ${validatedEmail ? 'provided' : 'not provided'})`);
+        console.log(
+          `Updated existing user from Apple ID: ${validatedUserId} (email: ${validatedEmail ? 'provided' : 'not provided'})`
+        );
       }
     }
 
@@ -831,7 +852,9 @@ export const handleAppleIdConnection = internalMutation({
       userExists: !!user,
       appleProvider: appleAccount.provider,
       hasAppleEmail: !!validatedEmail,
-      isAppleRelay: validatedEmail ? validatedEmail.includes('@privaterelay.appleid.com') : false,
+      isAppleRelay: validatedEmail
+        ? validatedEmail.includes('@privaterelay.appleid.com')
+        : false,
     };
   },
 });

@@ -28,7 +28,8 @@ function _convertVibeSearchResultToVibe(result: VibeSearchResult): Vibe {
           image_url: result.createdBy.avatar,
         }
       : null,
-    ratings: [], // We don't have full ratings in search results
+    emojiRatings: [],
+    currentUserRatings: [], // We don't have user ratings in search results
     tags: result.tags,
   };
 }

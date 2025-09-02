@@ -74,7 +74,15 @@ export default tseslint.config(
       'jsx-a11y/no-static-element-interactions': 'warn',
 
       // TypeScript rules
-      '@typescript-eslint/no-unused-vars': ['error'],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
+      ],
 
       // General JavaScript rules
       'no-console': 'warn',
@@ -101,6 +109,19 @@ export default tseslint.config(
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      'no-console': 'off',
+    },
+  },
+  // Special rules for migration files and scripts
+  {
+    files: [
+      '**/migrations/**/*.{js,jsx,ts,tsx}',
+      '**/scripts/**/*.{js,jsx,ts,tsx}',
+      '**/seed*.{js,jsx,ts,tsx}',
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
       'no-console': 'off',
     },
   }

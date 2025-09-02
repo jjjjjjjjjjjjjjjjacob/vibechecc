@@ -11,9 +11,7 @@ import {
   getUserAvatarUrl,
   getUserInitials,
 } from '@/utils/user-utils';
-import type {
-  UnifiedEmojiRatingHandler,
-} from './emoji-reaction';
+import type { UnifiedEmojiRatingHandler } from './emoji-reaction';
 
 interface ReviewCardProps {
   rating: {
@@ -25,8 +23,22 @@ interface ReviewCardProps {
     review?: string;
     createdAt?: string;
     updatedAt?: string;
-    user?: any;
-    rater?: any;
+    user?: {
+      id: string;
+      externalId: string;
+      username?: string;
+      firstName?: string;
+      lastName?: string;
+      imageUrl?: string;
+    };
+    rater?: {
+      id: string;
+      externalId: string;
+      username?: string;
+      firstName?: string;
+      lastName?: string;
+      imageUrl?: string;
+    };
     vibe?: {
       id: string;
       title: string;
@@ -39,7 +51,12 @@ interface ReviewCardProps {
   vibe: {
     id: string;
     title: string;
-    currentUserRatings?: any[];
+    currentUserRatings?: {
+      emoji: string;
+      value: number;
+      review: string;
+      createdAt: string;
+    }[];
   };
   currentUserId?: string;
   voteScore?: { netScore: number };
@@ -49,7 +66,15 @@ interface ReviewCardProps {
     dampened: boolean;
   };
   onEmojiClick?: UnifiedEmojiRatingHandler;
-  emojiMetadata?: Record<string, any>;
+  emojiMetadata?: Record<
+    string,
+    {
+      emoji: string;
+      color?: string;
+      category: string;
+      sentiment?: 'positive' | 'negative' | 'neutral';
+    }
+  >;
   isOwnRating?: boolean;
   variant?: 'default' | 'compact';
   showActions?: boolean;
@@ -58,12 +83,14 @@ interface ReviewCardProps {
 export function ReviewCard({
   rating,
   vibe,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   currentUserId,
   voteScore,
   voteStatus,
   onEmojiClick,
   emojiMetadata = {},
   isOwnRating,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   variant = 'default',
   showActions = true,
 }: ReviewCardProps) {
@@ -93,10 +120,7 @@ export function ReviewCard({
             className="flex-shrink-0"
           >
             <Avatar className="h-8 w-8">
-              <AvatarImage
-                src={getUserAvatarUrl(user)}
-                alt={displayName}
-              />
+              <AvatarImage src={getUserAvatarUrl(user)} alt={displayName} />
               <AvatarFallback className="text-xs">
                 {getUserInitials(user)}
               </AvatarFallback>
@@ -104,10 +128,7 @@ export function ReviewCard({
           </Link>
         ) : (
           <Avatar className="h-8 w-8 flex-shrink-0">
-            <AvatarImage
-              src={getUserAvatarUrl(user)}
-              alt={displayName}
-            />
+            <AvatarImage src={getUserAvatarUrl(user)} alt={displayName} />
             <AvatarFallback className="text-xs">
               {getUserInitials(user)}
             </AvatarFallback>
@@ -185,11 +206,13 @@ export function ReviewCard({
                   <RatingDootButton
                     ratingId={rating._id as Id<'ratings'>}
                     netScore={voteScore?.netScore || 0}
-                    voteStatus={voteStatus || {
-                      voteType: null,
-                      boosted: false,
-                      dampened: false,
-                    }}
+                    voteStatus={
+                      voteStatus || {
+                        voteType: null,
+                        boosted: false,
+                        dampened: false,
+                      }
+                    }
                     isOwnRating={isOwnRating || false}
                     variant="ghost"
                     size="sm"
@@ -197,21 +220,35 @@ export function ReviewCard({
                 )}
                 <RatingShareButton
                   rating={{
-                    ...rating,
+                    _id: rating._id,
+                    user: rating.user ?? null,
                     emoji: rating.emoji || '😊',
                     value: rating.value || 3,
                     review: rating.review || '',
                     createdAt: rating.createdAt || new Date().toISOString(),
+                    updatedAt: rating.updatedAt,
+                    vibeId: rating.vibeId,
+                    userId: rating.userId,
+                    tags: undefined,
                   }}
                   vibe={{
-                    ...vibe,
-                    createdBy: rating.vibe?.createdBy ? {
-                      externalId: rating.vibe.createdBy.id,
-                      id: rating.vibe.createdBy.id,
-                      username: rating.vibe.createdBy.name,
-                      full_name: rating.vibe.createdBy.name,
-                      image_url: rating.vibe.createdBy.avatar,
-                    } : null,
+                    // Build a full Vibe object primarily from rating.vibe
+                    id: rating.vibe?.id || vibe.id,
+                    title: rating.vibe?.title || vibe.title,
+                    description: rating.vibe?.description || '',
+                    image: rating.vibe?.image,
+                    createdAt:
+                      rating.vibe?.createdAt || new Date().toISOString(),
+                    createdBy: rating.vibe?.createdBy
+                      ? {
+                          externalId: rating.vibe.createdBy.id,
+                          id: rating.vibe.createdBy.id,
+                          username: rating.vibe.createdBy.name,
+                          full_name: rating.vibe.createdBy.name,
+                          image_url: rating.vibe.createdBy.avatar,
+                        }
+                      : null,
+                    emojiRatings: [],
                   }}
                   variant="ghost"
                   size="sm"

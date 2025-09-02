@@ -18,12 +18,9 @@ import { SimpleVibePlaceholder } from '@/features/vibes/components/simple-vibe-p
 import { VibeCardV2 } from '@/features/vibes/components/vibe-card';
 import { Edit, Trash2, Expand } from 'lucide-react';
 import { ShareButton } from '@/components/social/share-button';
-import { RatingShareButton } from '@/components/social/rating-share-button';
 import { VibeVotingButton } from '@/features/vibes/components/vibe-voting-button';
 import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { RevolvingRateReviewButton } from '@/features/ratings/components/revolving-rate-review-button';
-import { RatingDootButton } from '@/features/ratings/components/rating-doot-button';
-import { EmojiRatingCycleDisplay } from '@/features/ratings/components/emoji-rating-cycle-display';
 import { ReviewCard } from '@/features/ratings/components/review-card';
 import {
   EmojiReactionsRow,
@@ -86,10 +83,17 @@ interface VibeDetailUnifiedProps {
     review?: string;
     createdAt?: string;
     updatedAt?: string;
-    user: any;
+    user?: {
+      id: string;
+      externalId: string;
+      username?: string;
+      firstName?: string;
+      lastName?: string;
+      imageUrl?: string;
+    };
   }>;
   variant: 'mobile' | 'desktop';
-  similarVibes?: any[];
+  similarVibes?: Array<Vibe>;
 }
 
 export function VibeDetailUnified({
@@ -102,7 +106,7 @@ export function VibeDetailUnified({
   emojiMetadataRecord,
   onEmojiRatingClick,
   onDelete,
-  onShare,
+  onShare: _onShare,
   isPendingDelete,
   allRatings,
   variant,
@@ -182,7 +186,7 @@ export function VibeDetailUnified({
       const interval = startCycling();
       return () => clearInterval(interval);
     }
-  }, [randomInitialDelay]);
+  }, [randomInitialDelay, DEFAULT_EMOJIS.length]);
 
   const ratingIds = React.useMemo(() => {
     if (!allRatings) return [];
@@ -324,8 +328,12 @@ export function VibeDetailUnified({
                 src={imageUrl}
                 alt={vibe.title}
                 className="max-h-full max-w-full object-contain"
-                onLoad={() => console.log('Image loaded')}
-                onError={() => console.log('Image error')}
+                onLoad={() => {
+                  /* Image loaded */
+                }}
+                onError={() => {
+                  /* Image error */
+                }}
               />
             </div>
           </DialogContent>

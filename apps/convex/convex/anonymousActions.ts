@@ -26,7 +26,7 @@ export const storeAnonymousActions = mutation({
   handler: async (ctx, { sessionId, actions }) => {
     // Store actions with expiration (24 hours)
     const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
-    
+
     return await ctx.db.insert('anonymousActions', {
       sessionId,
       actions,
@@ -44,16 +44,19 @@ export const processAnonymousActions = mutation({
   handler: async (ctx, { sessionId }) => {
     const identity = await ctx.auth.getUserIdentity();
     const userId = AuthUtils.requireAuth(identity?.subject);
-    
+
     // Find the anonymous actions for this session
     const anonymousRecord = await ctx.db
       .query('anonymousActions')
       .withIndex('bySessionId', (q) => q.eq('sessionId', sessionId))
       .filter((q) => q.gt(q.field('expiresAt'), Date.now()))
       .unique();
-    
+
     if (!anonymousRecord) {
-      return { success: false, message: 'No anonymous actions found or expired' };
+      return {
+        success: false,
+        message: 'No anonymous actions found or expired',
+      };
     }
 
     const { actions } = anonymousRecord;
@@ -118,6 +121,7 @@ export const processAnonymousActions = mutation({
         }
         processedCount++;
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(`Failed to process action ${action.type}:`, error);
         results.push({
           type: action.type,
@@ -131,7 +135,6 @@ export const processAnonymousActions = mutation({
     // Mark the anonymous record as processed
     await ctx.db.patch(anonymousRecord._id, {
       processedAt: Date.now(),
-      processedBy: userId,
     });
 
     return {
@@ -160,7 +163,7 @@ export const getCarryoverSummary = query({
     }
 
     const { actions } = anonymousRecord;
-    
+
     // Summarize actions by type
     const summary = actions.reduce(
       (acc, action) => {

@@ -10,8 +10,8 @@ em-emoji-picker {
 
 /* Ensure all clickable elements in picker work on mobile and desktop */
 em-emoji-picker button,
-em-emoji-picker [role="button"], 
-em-emoji-picker [role="option"],
+em-emoji-picker [role='button'],
+em-emoji-picker [role='option'],
 em-emoji-picker em-emoji,
 em-emoji-picker .emoji-mart-emoji,
 em-emoji-picker .emoji-mart-category-label,

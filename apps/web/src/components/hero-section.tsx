@@ -35,10 +35,26 @@ function HeroButtonsSkeleton() {
       <div
         className="h-10 w-32 animate-pulse rounded-md bg-white/10"
         onClick={() => trackInteraction('skeleton_click')}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            trackInteraction('skeleton_click');
+          }
+        }}
+        role="button"
+        tabIndex={0}
       />
       <div
         className="h-10 w-36 animate-pulse rounded-md bg-white/10"
         onClick={() => trackInteraction('skeleton_click')}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            trackInteraction('skeleton_click');
+          }
+        }}
+        role="button"
+        tabIndex={0}
       />
     </div>
   );

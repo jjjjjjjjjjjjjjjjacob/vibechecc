@@ -1,10 +1,9 @@
 import { Toaster as Sonner, type ToasterProps } from 'sonner';
 import { useHeaderNavStore } from '@/stores';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useEffect } from 'react';
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const navState = useHeaderNavStore((state) => state.navState);
+  const _navState = useHeaderNavStore((state) => state.navState);
   const isMobile = useMediaQuery('(max-width: 640px)');
 
   return (

@@ -29,7 +29,7 @@ export interface ExperimentConfig {
  * Core A/B testing hook for feature flag experiments
  */
 export function useAbTest(config: ExperimentConfig) {
-  const posthog = usePostHog();
+  const _posthog = usePostHog();
   const isEnabled = useFeatureFlagEnabled(config.flagKey);
   const payload = useFeatureFlagPayload(config.flagKey);
 

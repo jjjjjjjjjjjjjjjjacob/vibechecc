@@ -2,7 +2,7 @@
 // This barrel export file provides a clean API for importing vibe-related components
 
 // Core Vibe Display
-export { VibeCard } from './vibe-card';
+export { VibeCardV2 as VibeCard } from './vibe-card';
 export { VibeGrid } from './vibe-grid';
 
 // Vibe Creation

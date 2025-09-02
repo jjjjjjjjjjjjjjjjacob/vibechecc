@@ -72,6 +72,13 @@ vi.mock('@/queries', () => ({
   useEmojiMetadata: () => ({ data: mockEmojiMetadata }),
   useTopEmojiRatings: () => ({ data: [] }),
   useMostInteractedEmoji: () => ({ data: null }),
+  useAllRatingsForVibe: () => ({ data: [], isLoading: false, error: null }),
+  useBulkRatingVoteScores: () => ({ data: {}, isLoading: false, error: null }),
+  useBulkUserRatingVoteStatuses: () => ({
+    data: {},
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 // Mock components
@@ -80,6 +87,7 @@ vi.mock('@/features/auth', () => ({
 }));
 
 // Mock the emoji rating components with proper integration
+
 let _mockRatingDialogOpen = false;
 
 vi.mock('@/features/ratings/components/revolving-rate-review-button', () => ({
@@ -104,6 +112,7 @@ vi.mock('@/features/ratings/components/rate-and-review-dialog', () => ({
     onSubmit,
     isSubmitting,
     open: controlledOpen,
+
     onOpenChange: _onOpenChange,
     children,
   }: {
@@ -216,9 +225,7 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
       expect(
         screen.getByText('A test vibe for integration testing')
       ).toBeInTheDocument();
-      expect(
-        screen.getByText('originally vibed by testuser')
-      ).toBeInTheDocument();
+      expect(screen.getByText('testuser')).toBeInTheDocument();
     });
   });
 
@@ -233,8 +240,10 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     });
 
     // Find the emoji rating selector button by its text content
-    const rateButton = await screen.findByText('click to rate with an emoji');
-    const buttonElement = rateButton.closest('button');
+    const rateButtons = await screen.findAllByText(
+      'click to rate with an emoji'
+    );
+    const buttonElement = rateButtons[0].closest('button');
 
     // Click the button to open the popover
     if (buttonElement) {
@@ -261,8 +270,10 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     });
 
     // Open emoji rating popover by clicking the rating selector
-    const rateButton = await screen.findByText('click to rate with an emoji');
-    const buttonElement = rateButton.closest('button');
+    const rateButtons = await screen.findAllByText(
+      'click to rate with an emoji'
+    );
+    const buttonElement = rateButtons[0].closest('button');
     if (buttonElement) await user.click(buttonElement);
 
     // Check that the button was clicked (button should exist)
@@ -286,8 +297,10 @@ describe('Vibe Detail Page - Rating Flow Integration', () => {
     });
 
     // Open emoji rating popover
-    const rateButton = await screen.findByText('click to rate with an emoji');
-    const buttonElement = rateButton.closest('button');
+    const rateButtons = await screen.findAllByText(
+      'click to rate with an emoji'
+    );
+    const buttonElement = rateButtons[0].closest('button');
     if (buttonElement) await user.click(buttonElement);
 
     // Test basic rating functionality

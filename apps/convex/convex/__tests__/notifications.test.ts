@@ -854,12 +854,10 @@ describe('Notifications', () => {
         .mutation(api.notifications.markAllAsRead, {});
 
       // User1 creates a vibe
-      const _newVibeId = await t
-        .withIdentity({ subject: 'user1' })
-        .mutation(api.vibes.create, {
-          title: 'New Test Vibe',
-          description: 'A new vibe for testing notifications',
-        });
+      await t.withIdentity({ subject: 'user1' }).mutation(api.vibes.create, {
+        title: 'New Test Vibe',
+        description: 'A new vibe for testing notifications',
+      });
 
       // Wait for new vibe notification to complete
       vi.runAllTimers();
@@ -976,17 +974,19 @@ describe('Notifications', () => {
           description: 'A vibe to rate myself',
         });
 
-      // User1 rates their own vibe
-      await t
-        .withIdentity({ subject: 'user1' })
-        .mutation(api.emojiRatings.createOrUpdateEmojiRating, {
-          vibeId,
-          emoji: '😊',
-          value: 3,
-          review: 'Self rating',
-        });
+      // User1 tries to rate their own vibe - should fail
+      await expect(
+        t
+          .withIdentity({ subject: 'user1' })
+          .mutation(api.emojiRatings.createOrUpdateEmojiRating, {
+            vibeId,
+            emoji: '😊',
+            value: 3,
+            review: 'Self rating',
+          })
+      ).rejects.toThrow('You cannot rate your own vibe');
 
-      // Check notifications - should not contain rating notification for self
+      // Check notifications - should be empty since no rating was created
       const notifications = await t
         .withIdentity({ subject: 'user1' })
         .query(api.notifications.getNotifications, {});

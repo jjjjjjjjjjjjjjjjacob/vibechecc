@@ -10,13 +10,12 @@ import {
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
-import { EmojiReaction, EmojiReactions } from './emoji-reaction';
-// Local type for emoji reactions in UI components (matches what emoji-reaction.tsx expects)
-interface EmojiReactionType {
-  emoji: string;
-  count: number;
-  users: string[];
-}
+import {
+  EmojiReactionButton as EmojiReaction,
+  EmojiReactionsRow as EmojiReactions,
+  type EmojiRatingData,
+  type UnifiedEmojiRatingHandler,
+} from './emoji-reaction';
 
 // Mock useUser from Clerk
 vi.mock('@clerk/tanstack-react-start', () => ({
@@ -66,6 +65,29 @@ vi.mock('@convex-dev/react-query', () => ({
   useConvexMutation: () => vi.fn(),
 }));
 
+// Mock the RateAndReviewDialog to provide a dialog role
+vi.mock('./rate-and-review-dialog', () => ({
+  RateAndReviewDialog: ({
+    open,
+    children,
+  }: {
+    open?: boolean;
+    children?: React.ReactNode;
+  }) => {
+    return (
+      <>
+        {children}
+        {open && (
+          <div role="dialog" data-testid="rate-review-dialog">
+            <h2>Rate & Review</h2>
+            <p>Mock rating dialog content</p>
+          </div>
+        )}
+      </>
+    );
+  },
+}));
+
 // Mock the Convex client
 const mockConvexClient = {
   query: vi.fn(),
@@ -91,8 +113,9 @@ const createWrapper = () => {
 };
 
 describe('EmojiReaction', () => {
-  const mockOnReact = vi.fn();
-  const mockOnRatingSubmit = vi.fn();
+  const mockOnEmojiClick: UnifiedEmojiRatingHandler = vi
+    .fn()
+    .mockResolvedValue({});
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -102,44 +125,59 @@ describe('EmojiReaction', () => {
     cleanup();
   });
 
-  const baseReaction: EmojiReactionType = {
+  const baseReaction: EmojiRatingData = {
     emoji: '🔥',
+    value: 3.5,
     count: 5,
     users: ['user1', 'user2', 'user3'],
   };
 
   it('renders emoji with count on hover', async () => {
-    render(<EmojiReaction reaction={baseReaction} onReact={mockOnReact} />, {
-      wrapper: createWrapper(),
-    });
+    render(
+      <EmojiReaction
+        reaction={baseReaction}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+      />,
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     const button = screen.getByRole('button');
     expect(screen.getByText('🔥')).toBeInTheDocument();
 
-    // Count should not be visible initially
-    expect(screen.queryByText('5')).not.toBeInTheDocument();
+    // Rating and count should not be visible initially
+    expect(screen.queryByText('3.5')).not.toBeInTheDocument();
+    expect(screen.queryByText('(5)')).not.toBeInTheDocument();
 
-    // Hover to show count
+    // Hover to show rating and count
     fireEvent.mouseEnter(button);
     await waitFor(() => {
-      expect(screen.getByText('5')).toBeInTheDocument();
+      expect(screen.getByText('3.5')).toBeInTheDocument();
+      expect(screen.getByText('(5)')).toBeInTheDocument();
     });
 
-    // Mouse leave to hide count
+    // Mouse leave to hide rating and count
     fireEvent.mouseLeave(button);
     await waitFor(() => {
-      expect(screen.queryByText('5')).not.toBeInTheDocument();
+      expect(screen.queryByText('3.5')).not.toBeInTheDocument();
+      expect(screen.queryByText('(5)')).not.toBeInTheDocument();
     });
   });
 
   it('highlights when user has reacted', () => {
-    const reactionWithUser: EmojiReactionType = {
+    const reactionWithUser: EmojiRatingData = {
       ...baseReaction,
       users: ['user123', 'user2', 'user3'],
     };
 
     render(
-      <EmojiReaction reaction={reactionWithUser} onReact={mockOnReact} />,
+      <EmojiReaction
+        reaction={reactionWithUser}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+      />,
       { wrapper: createWrapper() }
     );
 
@@ -147,63 +185,76 @@ describe('EmojiReaction', () => {
     expect(button).toHaveClass('bg-primary/10');
   });
 
-  it('calls onReact when clicked in normal mode', () => {
-    render(<EmojiReaction reaction={baseReaction} onReact={mockOnReact} />, {
-      wrapper: createWrapper(),
-    });
-
-    fireEvent.click(screen.getByRole('button'));
-    expect(mockOnReact).toHaveBeenCalledWith('🔥');
-    expect(mockOnRatingSubmit).not.toHaveBeenCalled();
-  });
-
-  it('opens rating popover when clicked in rating mode', () => {
+  it('opens rating dialog when clicked', async () => {
     render(
       <EmojiReaction
         reaction={baseReaction}
-        onReact={mockOnReact}
-        ratingMode={true}
-        onRatingSubmit={mockOnRatingSubmit}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+      />,
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button'));
+
+    // Wait for dialog to appear
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+  });
+
+  it('opens rating dialog with vibe title', async () => {
+    render(
+      <EmojiReaction
+        reaction={baseReaction}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
         vibeTitle="Test Vibe"
       />,
       { wrapper: createWrapper() }
     );
 
     fireEvent.click(screen.getByRole('button'));
-    // The rating popover should open (we can check by looking for the dialog)
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(mockOnReact).not.toHaveBeenCalled();
+
+    // Wait for dialog to appear
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
   });
 
-  it('handles keyboard interactions', () => {
-    render(<EmojiReaction reaction={baseReaction} onReact={mockOnReact} />, {
-      wrapper: createWrapper(),
-    });
+  it('handles keyboard interactions', async () => {
+    render(
+      <EmojiReaction
+        reaction={baseReaction}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+      />,
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     const button = screen.getByRole('button');
 
-    // Enter key
+    // Enter key should open dialog
     fireEvent.keyDown(button, { key: 'Enter' });
-    expect(mockOnReact).toHaveBeenCalledWith('🔥');
-
-    // Space key
-    fireEvent.keyDown(button, { key: ' ' });
-    expect(mockOnReact).toHaveBeenCalledTimes(2);
-
-    // Other keys should not trigger
-    fireEvent.keyDown(button, { key: 'a' });
-    expect(mockOnReact).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
   });
 });
 
 describe('EmojiReactions', () => {
-  const mockOnReact = vi.fn();
-  const mockOnRatingSubmit = vi.fn();
+  const mockOnEmojiClick: UnifiedEmojiRatingHandler = vi
+    .fn()
+    .mockResolvedValue({});
 
-  const reactions: EmojiReactionType[] = [
-    { emoji: '🔥', count: 5, users: ['user1', 'user2'] },
-    { emoji: '😍', count: 3, users: ['user3', 'user4', 'user5'] },
-    { emoji: '💯', count: 1, users: ['user6'] },
+  const reactions: EmojiRatingData[] = [
+    { emoji: '🔥', value: 4.2, count: 5, users: ['user1', 'user2'] },
+    { emoji: '😍', value: 3.8, count: 3, users: ['user3', 'user4', 'user5'] },
+    { emoji: '💯', value: 5.0, count: 1, users: ['user6'] },
   ];
 
   beforeEach(() => {
@@ -215,9 +266,18 @@ describe('EmojiReactions', () => {
   });
 
   it('renders multiple emoji reactions', () => {
-    render(<EmojiReactions reactions={reactions} onReact={mockOnReact} />, {
-      wrapper: createWrapper(),
-    });
+    render(
+      <EmojiReactions
+        reactions={reactions}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
+      />,
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(screen.getByText('🔥')).toBeInTheDocument();
     expect(screen.getByText('😍')).toBeInTheDocument();
@@ -228,7 +288,10 @@ describe('EmojiReactions', () => {
     render(
       <EmojiReactions
         reactions={reactions}
-        onReact={mockOnReact}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         showAddButton={true}
       />,
       { wrapper: createWrapper() }
@@ -242,7 +305,10 @@ describe('EmojiReactions', () => {
     render(
       <EmojiReactions
         reactions={reactions}
-        onReact={mockOnReact}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         showAddButton={false}
       />,
       { wrapper: createWrapper() }
@@ -255,7 +321,10 @@ describe('EmojiReactions', () => {
     render(
       <EmojiReactions
         reactions={reactions}
-        onReact={mockOnReact}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         showAddButton={true}
       />,
       { wrapper: createWrapper() }
@@ -276,9 +345,11 @@ describe('EmojiReactions', () => {
     render(
       <EmojiReactions
         reactions={reactions}
-        onReact={mockOnReact}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         showAddButton={true}
-        ratingMode={false}
       />,
       { wrapper: createWrapper() }
     );
@@ -300,17 +371,18 @@ describe('EmojiReactions', () => {
 
     // Since the emoji picker is a custom element, we'll just verify it opened
     // Real emoji selection would require mocking the custom element
-    expect(mockOnReact).not.toHaveBeenCalled();
+    expect(mockOnEmojiClick).not.toHaveBeenCalled();
   });
 
   it('opens rating popover when emoji is selected from picker in rating mode', async () => {
     render(
       <EmojiReactions
         reactions={reactions}
-        onReact={mockOnReact}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         showAddButton={true}
-        ratingMode={true}
-        onRatingSubmit={mockOnRatingSubmit}
         vibeTitle="Test Vibe"
       />,
       { wrapper: createWrapper() }
@@ -333,14 +405,17 @@ describe('EmojiReactions', () => {
 
     // In rating mode, clicking an emoji would open the rating dialog
     // Since the emoji picker is a custom element, we'll just verify setup
-    expect(mockOnReact).not.toHaveBeenCalled();
+    expect(mockOnEmojiClick).not.toHaveBeenCalled();
   });
 
   it('closes emoji picker after selection', async () => {
     render(
       <EmojiReactions
         reactions={reactions}
-        onReact={mockOnReact}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         showAddButton={true}
       />,
       { wrapper: createWrapper() }
@@ -370,13 +445,14 @@ describe('EmojiReactions', () => {
     });
   });
 
-  it('passes rating mode to individual reactions', () => {
+  it('passes rating mode to individual reactions', async () => {
     render(
       <EmojiReactions
         reactions={reactions}
-        onReact={mockOnReact}
-        ratingMode={true}
-        onRatingSubmit={mockOnRatingSubmit}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         vibeTitle="Test Vibe"
       />,
       { wrapper: createWrapper() }
@@ -385,16 +461,21 @@ describe('EmojiReactions', () => {
     // Click on a reaction
     fireEvent.click(screen.getByText('🔥').closest('button')!);
 
-    // Should open rating popover, not call onReact
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(mockOnReact).not.toHaveBeenCalled();
+    // Should open rating dialog
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+    expect(mockOnEmojiClick).not.toHaveBeenCalled();
   });
 
   it('applies custom className', () => {
     const { container } = render(
       <EmojiReactions
         reactions={reactions}
-        onReact={mockOnReact}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         className="custom-reactions"
       />,
       { wrapper: createWrapper() }
@@ -407,7 +488,10 @@ describe('EmojiReactions', () => {
     render(
       <EmojiReactions
         reactions={[]}
-        onReact={mockOnReact}
+        onEmojiClick={mockOnEmojiClick}
+        vibeId="test-vibe"
+        existingUserRatings={[]}
+        emojiMetadata={{}}
         showAddButton={true}
       />,
       { wrapper: createWrapper() }

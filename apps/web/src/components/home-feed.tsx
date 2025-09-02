@@ -250,15 +250,15 @@ export function HomeFeed({ className }: HomeFeedProps) {
 
   // Flatten all pages to get vibes array - optimized with better memoization
   const vibes = React.useMemo(() => {
-    if (!data?.pages) {
+    const pages = (
+      data as { pages?: Array<{ vibes?: import('@vibechecc/types').Vibe[] }> }
+    )?.pages;
+    if (!pages) {
       return [];
     }
-    // Set as initialized since query is now available
-    const vibes = (
-      data as { pages: Array<{ vibes?: import('@vibechecc/types').Vibe[] }> }
-    ).pages.flatMap((page) => page?.vibes || []);
+    const vibes = pages.flatMap((page) => page?.vibes || []);
     return vibes;
-  }, [data?.pages]); // Only depend on pages, not the full data object
+  }, [data]);
 
   // For "for you" tab, use custom empty state component
   const shouldUseCustomEmptyState =
@@ -339,7 +339,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
     const processQuery = (tabId: typeof feedTab, query: any) => {
       const tabVibes = query.data?.pages
         ? query.data.pages.flatMap(
-            (page: any) => page?.vibes?.filter(Boolean) || []
+            (page: { vibes?: unknown[] }) => page?.vibes?.filter(Boolean) || []
           )
         : [];
 

@@ -22,7 +22,6 @@ import {
   Twitter,
   Instagram,
 } from '@/components/ui/icons';
-import { EmojiRatingDisplay } from '@/features/ratings/components/emoji-rating-display';
 import { ReviewCard } from '@/features/ratings/components/review-card';
 import {
   TabsDraggable,
@@ -155,33 +154,33 @@ export function UserProfileView({
 
   // Debug logging for UserProfileView data
   React.useEffect(() => {
-    console.log('[UserProfileView] Component data:', {
-      user: {
-        id: user?._id || user?.id,
-        externalId: user?.externalId,
-        username: user?.username,
-        hasUser: !!user,
-      },
-      userVibes: {
-        count: userVibes?.length || 0,
-        isLoading: vibesLoading,
-        hasData: !!userVibes,
-        firstFew:
-          userVibes?.slice(0, 3).map((v) => ({ id: v.id, title: v.title })) ||
-          [],
-      },
-      userRatings: {
-        count: userRatings?.length || 0,
-        isLoading: ratingsLoading,
-        hasData: !!userRatings,
-        isDefined: userRatings !== undefined,
-      },
-      receivedRatings: {
-        count: receivedRatings?.length || 0,
-        isLoading: receivedRatingsLoading,
-        hasData: !!receivedRatings,
-      },
-    });
+    // console.log('[UserProfileView] Component data:', {
+    //   user: {
+    //     id: user?._id || user?.id,
+    //     externalId: user?.externalId,
+    //     username: user?.username,
+    //     hasUser: !!user,
+    //   },
+    //   userVibes: {
+    //     count: userVibes?.length || 0,
+    //     isLoading: vibesLoading,
+    //     hasData: !!userVibes,
+    //     firstFew:
+    //       userVibes?.slice(0, 3).map((v) => ({ id: v.id, title: v.title })) ||
+    //       [],
+    //   },
+    //   userRatings: {
+    //     count: userRatings?.length || 0,
+    //     isLoading: ratingsLoading,
+    //     hasData: !!userRatings,
+    //     isDefined: userRatings !== undefined,
+    //   },
+    //   receivedRatings: {
+    //     count: receivedRatings?.length || 0,
+    //     isLoading: receivedRatingsLoading,
+    //     hasData: !!receivedRatings,
+    //   },
+    // });
   }, [
     user,
     userVibes,
@@ -232,7 +231,7 @@ export function UserProfileView({
   const { data: voteStatuses } = useBulkUserRatingVoteStatuses(ratingIds);
 
   // Handle unified emoji rating
-  const handleUnifiedEmojiRating: UnifiedEmojiRatingHandler = async (data) => {
+  const handleUnifiedEmojiRating: UnifiedEmojiRatingHandler = async () => {
     // In profile view, we don't allow rating - this is just for display
     return Promise.resolve();
   };
@@ -478,7 +477,7 @@ export function UserProfileView({
           {/* Modern Navigation */}
           <TabsDraggable defaultValue="vibes" className="w-full">
             <div className="mt-12 mb-8 flex justify-center">
-              <TabsDraggableList 
+              <TabsDraggableList
                 className="gap-1 rounded-lg border-0 bg-transparent p-1.5 shadow-2xl backdrop-blur-md"
                 indicatorClassName="from-theme-primary to-theme-secondary bg-gradient-to-r shadow-lg"
               >
@@ -605,7 +604,20 @@ export function UserProfileView({
                                     }
                                     rating={{
                                       ...rating,
-                                      user: user,
+                                      user: user
+                                        ? {
+                                            id: user.id || user._id || '',
+                                            externalId:
+                                              user.externalId ||
+                                              user.id ||
+                                              user._id ||
+                                              '',
+                                            username: user.username,
+                                            firstName: user.first_name,
+                                            lastName: user.last_name,
+                                            imageUrl: user.image_url,
+                                          }
+                                        : undefined,
                                     }}
                                     vibe={{
                                       id: rating.vibeId,
@@ -708,12 +720,29 @@ export function UserProfileView({
                                         rating._id ||
                                         `received-rating-${rating.vibeId}-${rating.userId}-${index}`
                                       }
-                                      rating={rating}
+                                      rating={{
+                                        ...rating,
+                                        rater: rating.rater
+                                          ? {
+                                              id: rating.rater._id || '',
+                                              externalId:
+                                                rating.rater._id || '',
+                                              username: rating.rater.username,
+                                              firstName:
+                                                rating.rater.first_name,
+                                              lastName: rating.rater.last_name,
+                                              imageUrl: rating.rater.image_url,
+                                            }
+                                          : undefined,
+                                      }}
                                       vibe={{
                                         id: rating.vibeId,
                                         title:
-                                          (rating as any).vibe?.title ||
-                                          'Unknown',
+                                          (
+                                            rating as {
+                                              vibe?: { title?: string };
+                                            }
+                                          ).vibe?.title || 'Unknown',
                                         currentUserRatings: [],
                                       }}
                                       currentUserId={currentUserId}

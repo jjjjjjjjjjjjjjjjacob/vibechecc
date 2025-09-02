@@ -192,7 +192,7 @@ export function useSeasonalTaglineExperiment() {
   const isSummer = currentMonth >= 5 && currentMonth <= 7; // Jun-Aug
   const isEvening = currentHour >= 18 || currentHour <= 6;
 
-  const seasonalVariants = Object.keys(HERO_TAGLINE_VARIANTS);
+  const _seasonalVariants = Object.keys(HERO_TAGLINE_VARIANTS);
 
   // Add seasonal context to tracking
   const baseExperiment = useHeroTaglineExperiment();

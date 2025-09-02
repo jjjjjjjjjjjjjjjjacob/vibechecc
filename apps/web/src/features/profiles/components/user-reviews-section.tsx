@@ -248,9 +248,9 @@ function ReviewCard({
                     rating={{
                       emoji: rating.emoji,
                       value: rating.value,
-                      count: undefined,
+                      count: 0,
                     }}
-                    showScale={false}
+                    vibeId={vibe.id}
                     size="sm"
                   />
                   {rating._id && (
@@ -281,7 +281,8 @@ function ReviewCard({
                     rating={rating}
                     vibe={{
                       ...vibe,
-                      ratings: [],
+                      emojiRatings: [],
+                      currentUserRatings: [],
                       createdBy: vibe.createdBy
                         ? {
                             externalId: vibe.createdBy.id,

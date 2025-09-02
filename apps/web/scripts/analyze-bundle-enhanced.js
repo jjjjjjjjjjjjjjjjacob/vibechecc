@@ -5,9 +5,8 @@
  * Provides detailed bundle size analysis, dependency breakdown, and optimization recommendations
  */
 
-/* eslint-disable no-console */
-
 import { existsSync, readdirSync, statSync, readFileSync } from 'fs';
+
 import { join, relative as _relative } from 'path';
 
 const DIST_DIR = './.output';

@@ -34,10 +34,10 @@ export function useRatingShareCanvas(
       shareUrl: string,
       layoutOption?: RatingShareLayoutOption
     ): Promise<Blob | null> => {
-      console.log(
-        '[useRatingShareCanvas] Starting generation with layout:',
-        layoutOption?.value
-      );
+      // console.log(
+      //   '[useRatingShareCanvas] Starting generation with layout:',
+      //   layoutOption?.value
+      // );
       setIsGenerating(true);
 
       try {
@@ -172,8 +172,8 @@ export function useRatingShareCanvas(
 
         // Rating author section
         const raterUser = rating.rater || rating.user;
-        const raterDisplayName = computeUserDisplayName(raterUser as any);
-        const raterAvatarUrl = getUserAvatarUrl(raterUser as any);
+        const raterDisplayName = computeUserDisplayName(raterUser as User);
+        const raterAvatarUrl = getUserAvatarUrl(raterUser as User);
         let avatarDrawn = false;
 
         // Try to load and draw rater avatar
@@ -253,8 +253,7 @@ export function useRatingShareCanvas(
         ctx.fillStyle = storyColors.cardForeground || storyColors.foreground;
         ctx.fillText(raterDisplayName, contentX + 80, contentY + 10);
 
-        const raterUsername =
-          (rating.rater as any)?.username || (rating.user as any)?.username;
+        const raterUsername = rating.rater?.username || rating.user?.username;
         if (raterUsername) {
           ctx.font = '18px system-ui, -apple-system, sans-serif';
           ctx.fillStyle = storyColors.mutedForeground;
@@ -493,11 +492,12 @@ export function useRatingShareCanvas(
             0.95
           );
         });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error(
-          '[useRatingShareCanvas] Failed to generate image:',
-          error
-        );
+        // console.error(
+        //   '[useRatingShareCanvas] Failed to generate image:',
+        //   error
+        // );
         toast.error('failed to generate rating share image');
         return null;
       } finally {

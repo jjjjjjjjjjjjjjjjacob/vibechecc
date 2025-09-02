@@ -14,14 +14,15 @@ import posthog from 'posthog-js';
 /**
  * Helper function to safely capture events only when PostHog is initialized
  */
-function safeCapture(eventName: string, properties?: Record<string, any>) {
+function safeCapture(eventName: string, properties?: Record<string, unknown>) {
   // Only capture if PostHog is initialized and not opted out
   if (typeof window !== 'undefined' && posthog.__loaded) {
     try {
       posthog.capture(eventName, properties);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Silently fail if PostHog capture fails
-      console.warn('PostHog capture failed:', error);
+      // console.warn('PostHog capture failed:', error);
     }
   }
 }

@@ -37,8 +37,8 @@ const DEFAULT_EMOJIS = [
 
 export function EmojiRatingCycleDisplay({
   vibeId,
-  onEmojiClick: _onEmojiClick, // eslint-disable-line @typescript-eslint/no-unused-vars
-  isSubmitting: _isSubmitting = false, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onEmojiClick: _onEmojiClick,
+  isSubmitting: _isSubmitting = false,
   vibeTitle,
   emojiMetadata = {},
   existingUserRatings,

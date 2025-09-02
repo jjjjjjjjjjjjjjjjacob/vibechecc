@@ -14,9 +14,11 @@ export const LazyRechartsComponents = lazy(() =>
 );
 
 export const LazyEmojiPicker = lazy(() =>
-  import('@/features/ratings/components/emoji-search-command-v2').then(
+  import('@/features/ratings/components/emoji-search-collapsible').then(
     (module) => ({
-      default: module.EmojiSearchCommandV2,
+      default: module.EmojiSearchCollapsible as React.ComponentType<
+        { onSelect: (emoji: string) => void } & Record<string, unknown>
+      >,
     })
   )
 );

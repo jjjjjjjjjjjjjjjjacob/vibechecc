@@ -7,9 +7,8 @@
  * lazily loaded to reduce the initial bundle size.
  */
 
-/* eslint-disable no-console */
-
 import { existsSync, readdirSync, statSync, readFileSync } from 'fs';
+
 import { join, relative as _relative } from 'path';
 
 const ROUTES_DIR = './src/routes';
@@ -164,6 +163,7 @@ function showAnalysis(candidates) {
     adminRoutes,
     heavyFeatures,
     largeComponents,
+
     allComponents: _allComponents,
   } = candidates;
 

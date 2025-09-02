@@ -22,7 +22,7 @@ interface VibeVotingButtonProps {
 }
 
 export function VibeVotingButton({
-  vibeId,
+  vibeId: _vibeId,
   currentBoostScore = 0,
   userVoteStatus = null,
   onVoteChange,
@@ -80,7 +80,7 @@ export function VibeVotingButton({
         duration: 2000,
         icon: newVoteStatus ? '🚀' : '📉',
       });
-    } catch (error) {
+    } catch (_error) {
       // Revert optimistic update on error
       setOptimisticVoteStatus(userVoteStatus);
       setOptimisticScore(currentBoostScore);
@@ -130,7 +130,7 @@ export function VibeVotingButton({
         duration: 2000,
         icon: newVoteStatus ? '📉' : '🚀',
       });
-    } catch (error) {
+    } catch (_error) {
       // Revert optimistic update on error
       setOptimisticVoteStatus(userVoteStatus);
       setOptimisticScore(currentBoostScore);

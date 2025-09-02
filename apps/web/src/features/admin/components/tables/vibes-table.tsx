@@ -218,7 +218,15 @@ export function VibesTable({
         const vibe = row.original;
         return (
           <ExpandableRatingsCell
-            ratings={vibe.currentUserRatings || []}
+            ratings={(vibe.currentUserRatings || []).map((r) => ({
+              _id: r._id,
+              user: r.user ?? null,
+              value: r.value,
+              emoji: r.emoji,
+              review: r.review,
+              createdAt: r.createdAt,
+              updatedAt: r.updatedAt,
+            }))}
             previewCount={2}
           />
         );

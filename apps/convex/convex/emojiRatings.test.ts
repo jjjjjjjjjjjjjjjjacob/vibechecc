@@ -9,19 +9,45 @@ describe('emoji ratings', () => {
     test('should create a new rating with emoji', async () => {
       const t = convexTest(schema, modules);
 
-      // Mock authenticated user
-      const userId = 'test-user-123';
-      const mockIdentity = {
-        subject: userId,
-        tokenIdentifier: `test|${userId}`,
+      // Create vibe creator
+      const creatorId = 'vibe-creator-123';
+      const creatorIdentity = {
+        subject: creatorId,
+        tokenIdentifier: `test|${creatorId}`,
         issuer: 'test',
       };
 
+      await t.mutation(api.users.create, {
+        externalId: creatorId,
+        username: 'vibecreator',
+      });
+
+      // Create vibe
+      const vibeId = await t
+        .withIdentity(creatorIdentity)
+        .mutation(api.vibes.create, {
+          title: 'Test Vibe',
+          description: 'Test vibe content',
+          tags: ['test'],
+        });
+
+      // Create rater (different user)
+      const raterId = 'rater-456';
+      const raterIdentity = {
+        subject: raterId,
+        tokenIdentifier: `test|${raterId}`,
+        issuer: 'test',
+      };
+
+      await t.mutation(api.users.create, {
+        externalId: raterId,
+        username: 'rater',
+      });
+
       const result = await t
-        .withIdentity(mockIdentity)
-        // @ts-expect-error - TypeScript depth issue with mutation
+        .withIdentity(raterIdentity)
         .mutation(api.emojiRatings.createOrUpdateEmojiRating, {
-          vibeId: 'test-vibe-123',
+          vibeId,
           value: 4,
           review: 'This vibe is mind-blowing!',
           emoji: '🤯',
@@ -68,17 +94,44 @@ describe('emoji ratings', () => {
     test('should update existing rating', async () => {
       const t = convexTest(schema, modules);
 
-      const userId = 'test-user-123';
-      const vibeId = 'test-vibe-123';
-      const mockIdentity = {
-        subject: userId,
-        tokenIdentifier: `test|${userId}`,
+      // Create vibe creator
+      const creatorId = 'vibe-creator-update-123';
+      const creatorIdentity = {
+        subject: creatorId,
+        tokenIdentifier: `test|${creatorId}`,
         issuer: 'test',
       };
 
+      await t.mutation(api.users.create, {
+        externalId: creatorId,
+        username: 'vibecreatorupdate',
+      });
+
+      // Create vibe
+      const vibeId = await t
+        .withIdentity(creatorIdentity)
+        .mutation(api.vibes.create, {
+          title: 'Test Update Vibe',
+          description: 'Test vibe content for update',
+          tags: ['test'],
+        });
+
+      // Create rater (different user)
+      const raterId = 'rater-update-456';
+      const raterIdentity = {
+        subject: raterId,
+        tokenIdentifier: `test|${raterId}`,
+        issuer: 'test',
+      };
+
+      await t.mutation(api.users.create, {
+        externalId: raterId,
+        username: 'raterupdate',
+      });
+
       // Create initial rating
       await t
-        .withIdentity(mockIdentity)
+        .withIdentity(raterIdentity)
         .mutation(api.emojiRatings.createOrUpdateEmojiRating, {
           vibeId,
           value: 3,
@@ -86,14 +139,14 @@ describe('emoji ratings', () => {
           emoji: '😊',
         });
 
-      // Update with emoji rating
+      // Update with same emoji rating
       await t
-        .withIdentity(mockIdentity)
+        .withIdentity(raterIdentity)
         .mutation(api.emojiRatings.createOrUpdateEmojiRating, {
           vibeId,
           value: 5,
           review: 'Updated review - amazing!',
-          emoji: '😍',
+          emoji: '😊',
         });
 
       // Check that only one rating exists
@@ -101,14 +154,14 @@ describe('emoji ratings', () => {
         const ratings = await ctx.db
           .query('ratings')
           .withIndex('vibeAndUser', (q) =>
-            q.eq('vibeId', vibeId).eq('userId', userId)
+            q.eq('vibeId', vibeId).eq('userId', raterId)
           )
           .collect();
 
         expect(ratings).toHaveLength(1);
         expect(ratings[0].value).toBe(5);
         expect(ratings[0].review).toBe('Updated review - amazing!');
-        expect(ratings[0].emoji).toBe('😍');
+        expect(ratings[0].emoji).toBe('😊');
       });
     });
 

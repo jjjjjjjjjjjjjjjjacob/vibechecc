@@ -38,6 +38,7 @@ vi.mock('lucide-react', () => {
     'Download',
     'Edit',
     'Edit2',
+    'Expand',
     'Eye',
     'Filter',
     'Flag',

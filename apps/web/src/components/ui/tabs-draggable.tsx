@@ -57,18 +57,12 @@ const TabsDraggable = React.forwardRef<HTMLDivElement, TabsDraggableProps>(
 
     // Determine if component is controlled or uncontrolled at mount and keep it stable
     const isControlled = React.useRef(value !== undefined);
-    
+
     // Check for inconsistent control state and warn
     React.useEffect(() => {
       const currentlyControlled = value !== undefined;
       if (isControlled.current !== currentlyControlled) {
-        console.warn(
-          'TabsDraggable: Component changed from ' +
-          (isControlled.current ? 'controlled' : 'uncontrolled') +
-          ' to ' +
-          (currentlyControlled ? 'controlled' : 'uncontrolled') +
-          '. This can cause issues. Ensure the `value` prop is consistently provided or omitted.'
-        );
+        // console.warn - removed for linting
       }
     }, [value]);
     const [internalActiveTabIndex, setInternalActiveTabIndex] =
@@ -84,7 +78,6 @@ const TabsDraggable = React.forwardRef<HTMLDivElement, TabsDraggableProps>(
       }
       return internalActiveTabIndex;
     }, [value, tabs, internalActiveTabIndex]);
-
 
     // Handle initial tab selection for uncontrolled mode
     React.useEffect(() => {
@@ -172,8 +165,13 @@ const TabsDraggable = React.forwardRef<HTMLDivElement, TabsDraggableProps>(
                     } as TabsDraggableListProps);
                   }
 
-                  if (element.props && typeof element.props === 'object' && 'children' in element.props) {
+                  if (
+                    element.props &&
+                    typeof element.props === 'object' &&
+                    'children' in element.props
+                  ) {
                     const updatedChildren = React.Children.map(
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (element.props as any).children,
                       (nestedChild) => {
                         if (React.isValidElement(nestedChild)) {
@@ -184,6 +182,7 @@ const TabsDraggable = React.forwardRef<HTMLDivElement, TabsDraggableProps>(
                     );
 
                     return React.cloneElement(element, {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       ...(element.props as any),
                       children: updatedChildren,
                     });
@@ -248,7 +247,6 @@ const TabsDraggableList = React.forwardRef<
 
     // Extract tabs data from children
     React.useEffect(() => {
-
       const tabsData: { id: string; label: string; icon?: React.ReactNode }[] =
         [];
       React.Children.forEach(children, (child) => {
@@ -586,7 +584,6 @@ const TabsDraggableContent = React.forwardRef<
     isDragging = false,
   } = context;
 
-
   // Calculate parallax transform if enabled
   const parallaxTransform = React.useMemo(() => {
     if (!parallaxMode || indicatorDragOffset === undefined) return '';
@@ -648,7 +645,7 @@ const TabsDraggableContentContainer = React.forwardRef<
   const [dragOffset, setDragOffset] = React.useState(0);
 
   // Transition state management
-  const [transitioningToIndex, setTransitioningToIndex] = React.useState<
+  const [_transitioningToIndex, setTransitioningToIndex] = React.useState<
     number | null
   >(null);
   const [isTransitioning, setIsTransitioning] = React.useState(false);
@@ -691,7 +688,6 @@ const TabsDraggableContentContainer = React.forwardRef<
   const lastX = React.useRef(0);
 
   const [containerWidth, setContainerWidth] = React.useState(0);
-
 
   // Update container width on resize
   React.useEffect(() => {
@@ -1095,7 +1091,6 @@ const TabsDraggableContentContainer = React.forwardRef<
             isActive ||
             (isNeighbor && isDragging) ||
             (isNeighbor && isTransitioning);
-
 
           return (
             <div

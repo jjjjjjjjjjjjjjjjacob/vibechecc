@@ -103,7 +103,6 @@ export function BoostButton({
       const result = await boostContentMutation.mutateAsync({
         contentId,
         contentType,
-        action: newAction ? 'boost' : 'remove',
       });
 
       onBoostChange?.(newAction, optimisticScore + scoreDelta);
@@ -121,7 +120,7 @@ export function BoostButton({
       } else {
         showPointsToast('earned', Math.floor(boostCost * 0.5), 'boost removed');
       }
-    } catch (error) {
+    } catch (_error) {
       // Revert optimistic update on error
       setOptimisticAction(initialBoostAction);
       setOptimisticScore(currentBoostScore);
@@ -176,7 +175,6 @@ export function BoostButton({
       const result = await dampenContentMutation.mutateAsync({
         contentId,
         contentType,
-        action: newAction ? 'dampen' : 'remove',
       });
 
       onBoostChange?.(newAction, optimisticScore + scoreDelta);
@@ -198,7 +196,7 @@ export function BoostButton({
           'dampen removed'
         );
       }
-    } catch (error) {
+    } catch (_error) {
       // Revert optimistic update on error
       setOptimisticAction(initialBoostAction);
       setOptimisticScore(currentBoostScore);
