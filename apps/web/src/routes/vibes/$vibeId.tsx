@@ -43,7 +43,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 
 // Constants to avoid rollup issues with empty array literals
 const EMPTY_ARRAY: never[] = [];

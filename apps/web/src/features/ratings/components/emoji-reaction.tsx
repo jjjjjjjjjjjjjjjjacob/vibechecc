@@ -2,7 +2,12 @@ import * as React from 'react';
 import { cn } from '@/utils/tailwind-utils';
 import { PlusCircle } from '@/components/ui/icons';
 import { useUser } from '@clerk/tanstack-react-start';
-import type { EmojiReaction as EmojiReactionType } from '@/types';
+// Local type for emoji reactions in UI components
+interface EmojiReactionType {
+  emoji: string;
+  count: number;
+  users: string[];
+}
 import {
   Popover,
   PopoverContent,

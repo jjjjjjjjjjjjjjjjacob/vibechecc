@@ -341,7 +341,7 @@ export function OnboardingDiscoverStep({
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="bg-secondary/30 space-y-3 rounded-lg p-4">
                     <h4 className="flex items-center gap-2 font-semibold lowercase">
-                      <Heart className="h-4 w-4 text-red-500" />
+                      <Heart className="text-destructive h-4 w-4" />
                       for you feed
                     </h4>
                     <p className="text-muted-foreground text-sm">
@@ -352,7 +352,7 @@ export function OnboardingDiscoverStep({
 
                   <div className="bg-secondary/30 space-y-3 rounded-lg p-4">
                     <h4 className="flex items-center gap-2 font-semibold lowercase">
-                      <Eye className="h-4 w-4 text-blue-500" />
+                      <Eye className="text-theme-primary h-4 w-4" />
                       discover more
                     </h4>
                     <p className="text-muted-foreground text-sm">
@@ -400,7 +400,7 @@ export function OnboardingDiscoverStep({
 
       {/* Success Message */}
       {hasInteracted && (
-        <div className="animate-zoomIn rounded-lg border border-green-500/20 bg-green-500/10 p-4 text-center">
+        <div className="animate-zoomIn rounded-lg border border-green-600/20 bg-green-600/10 p-4 text-center dark:border-green-400/20 dark:bg-green-400/10">
           <p className="text-sm font-medium text-green-700 dark:text-green-300">
             awesome! you're ready to start your vibechecc journey 🚀
           </p>

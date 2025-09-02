@@ -11,7 +11,12 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { EmojiReaction, EmojiReactions } from './emoji-reaction';
-import type { EmojiReaction as EmojiReactionType } from '../types';
+// Local type for emoji reactions in UI components (matches what emoji-reaction.tsx expects)
+interface EmojiReactionType {
+  emoji: string;
+  count: number;
+  users: string[];
+}
 
 // Mock useUser from Clerk
 vi.mock('@clerk/tanstack-react-start', () => ({

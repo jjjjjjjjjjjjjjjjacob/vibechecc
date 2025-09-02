@@ -8,7 +8,7 @@ import { ChevronRight } from '@/components/ui/icons';
 import { cn } from '@/utils/tailwind-utils';
 import { EmojiRatingDisplay } from './emoji-rating-display';
 import { TopEmojiRatingsAccordion } from './top-emoji-ratings-accordion';
-import type { EmojiRating } from '@/types';
+import type { EmojiRating } from '@vibechecc/types';
 
 interface EmojiRatingDisplayPopoverProps {
   rating: EmojiRating;

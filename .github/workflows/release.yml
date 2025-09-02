@@ -132,43 +132,105 @@ jobs:
           VERSION="${{ steps.release.outputs.version }}"
           TAG_NAME="v${VERSION}"
 
+          echo "🏷️ Creating GitHub release for ${TAG_NAME}..."
+
+          # Verify tag exists locally and remotely
+          if ! git tag -l | grep -q "^${TAG_NAME}$"; then
+            echo "❌ Error: Tag ${TAG_NAME} not found locally"
+            exit 1
+          fi
+
+          # Check if release already exists
+          if gh release view "$TAG_NAME" > /dev/null 2>&1; then
+            echo "⚠️ Release ${TAG_NAME} already exists, skipping creation"
+            exit 0
+          fi
+
           # Get the previous tag for comparison
           PREV_TAG=$(git describe --tags --abbrev=0 ${TAG_NAME}^ 2>/dev/null || echo "")
+          echo "📝 Previous tag: ${PREV_TAG:-'none (first release)'}"
 
-          # Generate release notes using GitHub CLI
+          # Generate release title
           RELEASE_TITLE="Release ${VERSION}"
           if [ "${{ inputs.alt_release }}" = "true" ]; then
             RELEASE_TITLE="Release ${VERSION} (Alt)"
           fi
 
+          # Create release with proper error handling
+          set -e
           if [ -z "$PREV_TAG" ]; then
-            # First release - no previous tag
+            echo "🆕 Creating first release..."
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               gh release create "$TAG_NAME" \
                 --generate-notes \
                 --title "$RELEASE_TITLE" \
                 --prerelease \
-                --verify-tag || true
+                --verify-tag
             else
               gh release create "$TAG_NAME" \
                 --generate-notes \
                 --title "$RELEASE_TITLE" \
-                --verify-tag || true
+                --verify-tag
             fi
           else
-            # Normal release with previous tag for comparison
+            echo "🔄 Creating release with comparison to ${PREV_TAG}..."
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               gh release create "$TAG_NAME" \
                 --generate-notes \
                 --notes-start-tag "$PREV_TAG" \
                 --title "$RELEASE_TITLE" \
                 --prerelease \
-                --verify-tag || true
+                --verify-tag
             else
               gh release create "$TAG_NAME" \
                 --generate-notes \
                 --notes-start-tag "$PREV_TAG" \
                 --title "$RELEASE_TITLE" \
-                --verify-tag || true
+                --verify-tag
             fi
           fi
+
+          echo "✅ Successfully created GitHub release ${TAG_NAME}"
+
+      - name: Deployment Status Check
+        if: steps.release.outputs.version != '' && !inputs.prerelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.release.outputs.version }}"
+          TAG_NAME="v${VERSION}"
+
+          echo "🚀 Monitoring deployment status for ${TAG_NAME}..."
+
+          # Wait a moment for deployment to potentially trigger
+          sleep 30
+
+          # Check if there are any deployment statuses
+          DEPLOYMENT_COUNT=$(gh api repos/${{ github.repository }}/deployments --per-page 5 --jq 'length')
+
+          if [ "$DEPLOYMENT_COUNT" -gt 0 ]; then
+            echo "📊 Found $DEPLOYMENT_COUNT deployment(s), checking latest status..."
+            LATEST_STATUS=$(gh api repos/${{ github.repository }}/deployments --per-page 1 --jq '.[0].environment // "unknown"')
+            echo "🔍 Latest deployment environment: $LATEST_STATUS"
+          else
+            echo "ℹ️ No deployments found - this may be expected for library releases"
+          fi
+
+          echo "📝 Release monitoring completed for ${TAG_NAME}"
+
+      - name: Release Notification
+        if: failure() && steps.release.outputs.version != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.release.outputs.version }}"
+          TAG_NAME="v${VERSION}"
+
+          echo "❌ Release workflow failed for ${TAG_NAME}"
+          echo "🔍 Creating issue for failed release..."
+
+          # Create an issue for the failed release (optional - only if this is desired)
+          # gh issue create \
+          #   --title "Release ${TAG_NAME} workflow failed" \
+          #   --body "The release workflow failed for version ${TAG_NAME}. Please check the workflow logs and resolve any issues." \
+          #   --label "bug,release" || echo "⚠️ Could not create issue, but release failure logged"

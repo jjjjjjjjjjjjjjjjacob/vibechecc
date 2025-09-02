@@ -32,4 +32,7 @@ terraform/.envrc
 .nx/cache
 .nx/workspace-data
 
+coverage/
+*.lcov
+
 tmp*

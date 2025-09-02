@@ -196,7 +196,7 @@ export function SuggestedFollows({
                       <div className="mt-1">
                         <Badge
                           variant="secondary"
-                          className="border-orange-400/20 bg-orange-400/10 text-xs text-orange-600"
+                          className="border-orange-400/20 bg-orange-400/10 text-xs text-orange-600 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-400"
                         >
                           <span className="mr-1">⭐</span>
                           {suggestion.engagementStats.averageRating.toFixed(

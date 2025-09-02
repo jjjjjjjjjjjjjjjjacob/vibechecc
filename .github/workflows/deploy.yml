@@ -156,14 +156,37 @@ jobs:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: |
           echo "Setting environment variables for Convex deployment"
-          bunx convex env set CLERK_FRONTEND_API_URL ${{ secrets.CLERK_FRONTEND_API_URL }}
-          bunx convex env set CLERK_WEBHOOK_SECRET ${{ secrets.CLERK_WEBHOOK_SECRET }}
+          
+          # Required environment variables
+          if [ -z "${{ secrets.CLERK_FRONTEND_API_URL }}" ]; then
+            echo "ERROR: CLERK_FRONTEND_API_URL is required but not set"
+            exit 1
+          fi
+          bunx convex env set CLERK_FRONTEND_API_URL "${{ secrets.CLERK_FRONTEND_API_URL }}"
+          
+          if [ -z "${{ secrets.CLERK_WEBHOOK_SECRET }}" ]; then
+            echo "ERROR: CLERK_WEBHOOK_SECRET is required but not set"
+            exit 1
+          fi
+          bunx convex env set CLERK_WEBHOOK_SECRET "${{ secrets.CLERK_WEBHOOK_SECRET }}"
+          
           # Set alternative webhook secret if available (for main-alt environment)
           if [ -n "${{ secrets.CLERK_WEBHOOK_SECRET_ALT }}" ]; then
-            bunx convex env set CLERK_WEBHOOK_SECRET_ALT ${{ secrets.CLERK_WEBHOOK_SECRET_ALT }}
+            bunx convex env set CLERK_WEBHOOK_SECRET_ALT "${{ secrets.CLERK_WEBHOOK_SECRET_ALT }}"
           fi
-          bunx convex env set POSTHOG_API_KEY ${{ secrets.VITE_POSTHOG_API_KEY }}
-          bunx convex env set POSTHOG_HOST ${{ secrets.POSTHOG_HOST }}
+          
+          if [ -z "${{ secrets.VITE_POSTHOG_API_KEY }}" ]; then
+            echo "ERROR: VITE_POSTHOG_API_KEY is required but not set"
+            exit 1
+          fi
+          bunx convex env set POSTHOG_API_KEY "${{ secrets.VITE_POSTHOG_API_KEY }}"
+          
+          # Optional PostHog host
+          if [ -n "${{ secrets.VITE_POSTHOG_API_HOST }}" ]; then
+            bunx convex env set POSTHOG_HOST "${{ secrets.VITE_POSTHOG_API_HOST }}"
+          else
+            echo "VITE_POSTHOG_API_HOST not set, using default PostHog host"
+          fi
 
       # Build and deploy Convex backend
       - name: Build Convex Backend

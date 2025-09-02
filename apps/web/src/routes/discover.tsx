@@ -24,7 +24,7 @@ import {
   type PrimaryColorTheme,
   type SecondaryColorTheme,
 } from '@/stores/theme-store';
-import type { Vibe } from '@/types';
+import type { Vibe } from '@vibechecc/types';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
 import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';

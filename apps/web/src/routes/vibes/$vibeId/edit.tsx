@@ -311,20 +311,20 @@ function EditVibe() {
                   <div className="space-y-2 text-sm">
                     {description !== originalValues.description && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span>Description updated</span>
                       </div>
                     )}
                     {currentImageUrl !== originalValues.imageUrl && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span>Image updated</span>
                       </div>
                     )}
                     {JSON.stringify(tags) !==
                       JSON.stringify(originalValues.tags) && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span>Tags updated</span>
                       </div>
                     )}
@@ -354,7 +354,7 @@ function EditVibe() {
                 edit your vibe
               </h1>
               {hasUnsavedChanges && (
-                <div className="flex items-center gap-1 text-orange-500">
+                <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-xs">unsaved changes</span>
                 </div>
@@ -406,12 +406,12 @@ function EditVibe() {
                   rows={5}
                   className={cn(
                     'textarea-glow resize-none border-2 bg-transparent text-base transition-all',
-                    'focus:border-pink-500 focus:ring-pink-500/20',
+                    'focus:border-theme-primary focus:ring-theme-primary/20',
                     validationErrors.description
-                      ? 'border-red-500 focus:border-red-500'
+                      ? 'border-destructive focus:border-destructive'
                       : description && !validationErrors.description
-                        ? 'border-green-500/50'
-                        : 'border-pink-500/50'
+                        ? 'border-green-600/50 dark:border-green-400/50'
+                        : 'border-theme-primary/50'
                   )}
                   required
                 />
@@ -419,7 +419,7 @@ function EditVibe() {
                   <span
                     className={
                       validationErrors.description
-                        ? 'text-red-500'
+                        ? 'text-destructive'
                         : 'text-muted-foreground'
                     }
                   >
@@ -428,7 +428,7 @@ function EditVibe() {
                   <span
                     className={
                       description.length > 1800
-                        ? 'text-orange-500'
+                        ? 'text-orange-600 dark:text-orange-400'
                         : 'text-muted-foreground'
                     }
                   >
@@ -462,7 +462,7 @@ function EditVibe() {
                   <span
                     className={
                       validationErrors.tags
-                        ? 'text-red-500'
+                        ? 'text-destructive'
                         : 'text-muted-foreground'
                     }
                   >
@@ -472,7 +472,7 @@ function EditVibe() {
                   <span
                     className={
                       tags.length > 8
-                        ? 'text-orange-500'
+                        ? 'text-orange-600 dark:text-orange-400'
                         : 'text-muted-foreground'
                     }
                   >
@@ -530,7 +530,7 @@ function EditVibe() {
                 </div>
 
                 {hasUnsavedChanges && (
-                  <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center text-sm text-orange-700">
+                  <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center text-sm text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300">
                     <AlertCircle className="mr-1 inline h-4 w-4" />
                     you have unsaved changes
                   </div>

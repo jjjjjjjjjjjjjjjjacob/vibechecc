@@ -115,21 +115,17 @@ export function FollowButton({
         // Base styles
         'border-none transition-all duration-200',
 
-        // Following state styles (gradient)
+        // Following state styles (gradient background)
         isFollowing && [
           'from-theme-primary to-theme-secondary text-primary-foreground bg-gradient-to-r',
-          'shadow-lg backdrop-blur-md',
-          'hover:scale-105 hover:shadow-xl',
-          // Hover state for unfollow
-          isHovered &&
-            'from-theme-primary to-theme-secondary border-none bg-gradient-to-r',
+          'shadow-lg hover:scale-105 hover:shadow-xl',
         ],
 
-        // Not following state styles
+        // Not following state styles (outline)
         !isFollowing && [
-          'bg-background/80 border-theme-primary/80 text-theme-primary border border-solid',
+          'border-theme-primary text-theme-primary border bg-transparent',
           'hover:from-theme-primary hover:to-theme-secondary hover:bg-gradient-to-r',
-          'hover:text-foreground hover:border-none',
+          'hover:text-primary-foreground hover:border-theme-primary',
           'hover:scale-105 hover:shadow-lg',
         ],
 

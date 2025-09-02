@@ -155,8 +155,8 @@ function CreateVibe() {
                     placeholder="give your vibe a catchy title"
                     className={cn(
                       'input-glow h-11 border-2 bg-transparent text-base transition-all sm:h-12',
-                      'focus:border-purple-500 focus:ring-purple-500/20',
-                      title && 'border-purple-500/50'
+                      'focus:border-theme-primary focus:ring-theme-primary/20',
+                      title && 'border-theme-primary/50'
                     )}
                     required
                   />
@@ -184,8 +184,8 @@ function CreateVibe() {
                     rows={5}
                     className={cn(
                       'textarea-glow resize-none border-2 bg-transparent text-base transition-all',
-                      'focus:border-pink-500 focus:ring-pink-500/20',
-                      description && 'border-pink-500/50'
+                      'focus:border-theme-secondary focus:ring-theme-secondary/20',
+                      description && 'border-theme-secondary/50'
                     )}
                     required
                   />

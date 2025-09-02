@@ -24,7 +24,7 @@ export function AuthTest() {
   };
 
   return (
-    <div className="space-y-4 rounded-lg bg-gray-100 p-4">
+    <div className="bg-muted space-y-4 rounded-lg p-4">
       <h2 className="text-xl font-bold">Auth Test Panel</h2>
 
       <div className="space-y-2">
@@ -58,7 +58,7 @@ export function AuthTest() {
         <button
           onClick={handleEnsureUser}
           disabled={ensureUserExists.isPending}
-          className="rounded bg-blue-500 px-3 py-1 text-white disabled:bg-gray-400"
+          className="bg-primary text-primary-foreground disabled:bg-muted disabled:text-muted-foreground rounded px-3 py-1"
         >
           {ensureUserExists.isPending ? 'Creating...' : 'Ensure User Exists'}
         </button>
