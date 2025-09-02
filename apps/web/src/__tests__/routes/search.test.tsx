@@ -4,7 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Import the component directly instead of trying to extract from Route
+// Import the component directly
 import SearchResultsPage from '@/routes/search';
 
 // Mock search results
@@ -286,8 +286,26 @@ describe('Search Page - Emoji Filter Integration', () => {
   });
 
   const renderWithRouter = (searchParams = {}) => {
-    // Set the mock search params before rendering
-    (globalThis as any).setMockSearchParams(searchParams);
+    // Set the mock search params before rendering using the global function
+    const defaultParams = {
+      q: undefined,
+      tags: undefined,
+      rating: undefined,
+      ratingMin: 1,
+      ratingMax: 5,
+      sort: 'relevance',
+      page: 1,
+      emojiFilter: undefined,
+      emojiMinValue: undefined,
+      tab: 'all',
+    };
+
+    const finalParams = {
+      ...defaultParams,
+      ...searchParams,
+    };
+
+    (globalThis as any).setMockSearchParams(finalParams);
 
     return render(
       <QueryClientProvider client={queryClient}>
