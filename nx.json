@@ -46,7 +46,8 @@
   "tui": { "enabled": true },
   "release": {
     "version": {
-      "conventionalCommits": true,
+      "specifierSource": "conventional-commits",
+      "currentVersionResolver": "disk",
       "fallbackCurrentVersionResolver": "disk"
     },
     "changelog": {

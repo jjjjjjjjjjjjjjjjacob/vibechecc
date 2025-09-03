@@ -910,7 +910,14 @@ export function VibeCard({
                 {finalVariant === 'compact' && (
                   <div
                     className="flex-shrink-0"
+                    role="button"
+                    tabIndex={0}
                     onClick={(e) => e.preventDefault()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <ShareButton
                       contentType="vibe"

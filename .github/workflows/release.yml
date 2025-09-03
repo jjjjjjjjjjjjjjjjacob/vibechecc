@@ -11,11 +11,6 @@ on:
         required: true
         type: string
         description: 'Branch being released'
-      alt_release:
-        required: false
-        type: boolean
-        default: false
-        description: 'Whether this is an alt release (for main-alt branch)'
     outputs:
       version:
         description: 'The new version number'
@@ -25,7 +20,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     environment:
-      name: ${{ inputs.branch == 'main' && 'main' || inputs.branch == 'dev' && 'dev' || inputs.branch == 'main-alt' && 'main-alt' || '' }}
+      name: ${{ inputs.branch == 'main' && 'main' || inputs.branch == 'dev' && 'dev' || '' }}
     outputs:
       version: ${{ steps.release.outputs.version }}
     permissions:
@@ -44,6 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Configure Git
@@ -70,16 +66,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e
           # Ensure tags are available locally for detection
-          git fetch --tags --force
-
-          # Pre-stage the lock file to prevent Nx from trying to stage bun.lockb
-          git add bun.lock
+          git fetch --tags --force --prune
 
           # Get current version and check if it's a prerelease
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           IS_PRERELEASE=$(echo "$CURRENT_VERSION" | grep -c "\-" || true)
-          
+
           echo "Current version: $CURRENT_VERSION"
           echo "Is prerelease: $IS_PRERELEASE"
           echo "Target prerelease: ${{ inputs.prerelease }}"
@@ -88,48 +82,23 @@ jobs:
           if ! git tag -l "v*" | grep -q .; then
             echo "No version tags found, using --first-release"
             if [ "${{ inputs.prerelease }}" = "true" ]; then
-              # Let conventional commits determine the bump, with preid for beta
-              bunx nx release --preid=beta --first-release --yes || true
-            elif [ "${{ inputs.alt_release }}" = "true" ]; then
-              # Alt release with preid for A/B testing
-              bunx nx release --preid=alt --first-release --yes || true
+              # Dev: create first prerelease from manifest version
+              bunx nx release --specifier prerelease --preid=beta --first-release --skip-publish
             else
-              bunx nx release --first-release --yes || true
+              # Main: create first stable release from manifest version
+              bunx nx release --specifier release --first-release --skip-publish
             fi
           else
-            # Handle version graduation: beta → stable when deploying to main
-            if [ "${{ inputs.prerelease }}" = "false" ] && [ "$IS_PRERELEASE" -gt 0 ]; then
-              echo "🎓 Graduating prerelease to stable version"
-              # Extract base version (0.1.0-beta.8 → 0.1.0)
-              BASE_VERSION=${CURRENT_VERSION%-*}
-              echo "Base version for graduation: $BASE_VERSION"
-              
-              # Use version command to set specific version
-              bunx nx release version $BASE_VERSION --yes || true
-            elif [ "${{ inputs.prerelease }}" = "true" ]; then
-              # Development branch: create prerelease versions
-              echo "🔄 Creating prerelease version"
-              
-              # Check if current version tag already exists
-              CURRENT_TAG="v${CURRENT_VERSION}"
-              if git tag -l | grep -q "^${CURRENT_TAG}$"; then
-                echo "⚠️ Tag ${CURRENT_TAG} already exists, forcing patch increment"
-                bunx nx release version patch --preid=beta --yes || true
-              else
-                bunx nx release --preid=beta --yes || true
-              fi
-            elif [ "${{ inputs.alt_release }}" = "true" ]; then
-              # Alt release with preid for A/B testing
-              echo "🅰️ Creating alt release version"
-              bunx nx release --preid=alt --yes || true
+            if [ "${{ inputs.prerelease }}" = "true" ]; then
+              # Dev: always bump prerelease (e.g., 0.1.0-beta.8 -> 0.1.0-beta.9)
+              bunx nx release --specifier prerelease --preid=beta --skip-publish
             else
-              # Production branch: stable version (when current is already stable)
-              echo "🚀 Creating stable version"
-              bunx nx release --yes || true
+              # Main: finalize prerelease to stable (e.g., 0.1.0-beta.8 -> 0.1.0)
+              bunx nx release --specifier release --skip-publish
             fi
           fi
 
-          # Stage any changes again in case Nx modified the lock file
+          # Stage any changes again in case Nx modified the lock file (backup path)
           git add bun.lock || true
 
           # Stage all modified package.json files (they should exist)
@@ -140,16 +109,19 @@ jobs:
             git add CHANGELOG.md
           fi
 
-          # Get the final version from package.json after release
-          FINAL_VERSION=$(node -p "require('./package.json').version")
-          echo "Final version: $FINAL_VERSION"
-          echo "version=$FINAL_VERSION" >> $GITHUB_OUTPUT
+          # Get the version from package.json after release
+          VERSION=$(node --input-type=module -e "import {readFileSync} from 'node:fs'; console.log(JSON.parse(readFileSync('package.json','utf8')).version)")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          # Create commit and tag if there are changes (backup in case Nx didn't)
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Creating release commit and tag..."
-            git commit -m "chore(release): v${FINAL_VERSION} [skip ci]" || true
-            git tag -a "v${FINAL_VERSION}" -m "v${FINAL_VERSION}" || true
+          # Create commit and tag only if Nx didn't (avoid duplicates)
+          if git tag -l | grep -q "^v${VERSION}$"; then
+            echo "Tag v${VERSION} already exists; skipping backup commit/tag."
+          else
+            if [ -n "$(git status --porcelain)" ]; then
+              echo "Creating release commit and tag..."
+              git commit -m "chore(release): v${VERSION} [skip ci]"
+              git tag -a "v${VERSION}" -m "v${VERSION}"
+            fi
           fi
 
       - name: Push changes
@@ -161,10 +133,13 @@ jobs:
           git push origin ${{ inputs.branch }} --follow-tags
 
       - name: Generate Release Notes
-        if: steps.release.outputs.version != ''
+        if: ${{ steps.release.outputs.version != '' }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
+          # Ensure we have the latest tags available locally
+          git fetch --tags --force --prune
+
           VERSION="${{ steps.release.outputs.version }}"
           TAG_NAME="v${VERSION}"
 
@@ -188,9 +163,6 @@ jobs:
 
           # Generate release title
           RELEASE_TITLE="Release ${VERSION}"
-          if [ "${{ inputs.alt_release }}" = "true" ]; then
-            RELEASE_TITLE="Release ${VERSION} (Alt)"
-          fi
 
           # Create release with proper error handling
           set -e
@@ -229,7 +201,7 @@ jobs:
           echo "✅ Successfully created GitHub release ${TAG_NAME}"
 
       - name: Deployment Status Check
-        if: steps.release.outputs.version != '' && !inputs.prerelease
+        if: ${{ steps.release.outputs.version != '' && !inputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
@@ -255,7 +227,7 @@ jobs:
           echo "📝 Release monitoring completed for ${TAG_NAME}"
 
       - name: Release Notification
-        if: failure() && steps.release.outputs.version != ''
+        if: ${{ failure() && steps.release.outputs.version != '' }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |

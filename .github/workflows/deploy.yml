@@ -24,7 +24,7 @@ jobs:
   deploy-terraform:
     runs-on: ubuntu-latest
     environment:
-      name: ${{ inputs.branch == 'main' && 'main' || inputs.branch == 'main-alt' && 'main-alt' || 'dev' }}
+      name: ${{ inputs.branch == 'main' && 'main' || 'dev' }}
     permissions:
       contents: read
     steps:
@@ -50,9 +50,6 @@ jobs:
           elif [ "${{ inputs.environment }}" = "production" ]; then
             echo "workspace=production" >> $GITHUB_OUTPUT
             echo "app_name=vibechecc" >> $GITHUB_OUTPUT
-          elif [ "${{ inputs.environment }}" = "production-alt" ]; then
-            echo "workspace=production-alt" >> $GITHUB_OUTPUT
-            echo "app_name=${{ vars.VITE_APP_NAME }}" >> $GITHUB_OUTPUT
           elif [ "${{ inputs.environment }}" = "development" ]; then
             echo "workspace=development" >> $GITHUB_OUTPUT
             echo "app_name=vibechecc" >> $GITHUB_OUTPUT
@@ -121,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-terraform
     environment:
-      name: ${{ inputs.branch == 'main' && 'main' || inputs.branch == 'main-alt' && 'main-alt' || 'dev' }}
+      name: ${{ inputs.branch == 'main' && 'main' || 'dev' }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Bun
@@ -170,11 +167,6 @@ jobs:
           fi
           bunx convex env set CLERK_WEBHOOK_SECRET "${{ secrets.CLERK_WEBHOOK_SECRET }}"
 
-          # Set alternative webhook secret if available (for main-alt environment)
-          if [ -n "${{ secrets.CLERK_WEBHOOK_SECRET_ALT }}" ]; then
-            bunx convex env set CLERK_WEBHOOK_SECRET_ALT "${{ secrets.CLERK_WEBHOOK_SECRET_ALT }}"
-          fi
-
           if [ -z "${{ secrets.VITE_POSTHOG_API_KEY }}" ]; then
             echo "ERROR: VITE_POSTHOG_API_KEY is required but not set"
             exit 1
@@ -197,7 +189,7 @@ jobs:
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: |
-          if [ "${{ inputs.environment }}" = "production" ] || [ "${{ inputs.environment }}" = "production-alt" ]; then
+          if [ "${{ inputs.environment }}" = "production" ]; then
             echo "Deploying to Convex using deploy key"
             echo "Environment: ${{ inputs.environment }}"
             echo "Branch: ${{ inputs.branch }}"
@@ -220,7 +212,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [deploy-terraform, deploy-convex]
     environment:
-      name: ${{ inputs.branch == 'main' && 'main' || inputs.branch == 'main-alt' && 'main-alt' || 'dev' }}
+      name: ${{ inputs.branch == 'main' && 'main' || 'dev' }}
     permissions:
       contents: read
     steps:
@@ -294,8 +286,8 @@ jobs:
           name = "${{ vars.VITE_APP_NAME }}-pr-${{ inputs.pr_number }}-web"
           EOF
 
-      - name: Add Production Environment to Wrangler Config
-        if: inputs.environment == 'production' || inputs.environment == 'production-alt' || inputs.environment == 'development'
+      - name: Add Production/Development Environment to Wrangler Config
+        if: inputs.environment == 'production' || inputs.environment == 'development'
         working-directory: apps/web
         run: |
           cat >> wrangler.toml << EOF

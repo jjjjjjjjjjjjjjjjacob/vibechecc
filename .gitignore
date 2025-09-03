@@ -36,3 +36,5 @@ coverage/
 *.lcov
 
 tmp*
+.bun-tmp
+.bun-temp
