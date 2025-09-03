@@ -31,17 +31,25 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: read
     steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.RELEASE_APP_ID }}
+          private_key: ${{ secrets.RELEASE_PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Configure Git
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "vibechecc-release-bot[bot]"
+          git config user.email "178154844+vibechecc-release-bot[bot]@users.noreply.github.com"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -116,18 +124,16 @@ jobs:
 
       - name: Push changes
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
-          # Use the bot token if available to bypass branch protection
-          if [ -n "${{ secrets.RELEASE_BOT_TOKEN }}" ]; then
-            git remote set-url origin https://x-access-token:${{ secrets.RELEASE_BOT_TOKEN }}@github.com/${{ github.repository }}.git
-          fi
+          # Use the GitHub App token to bypass repository rules
+          git remote set-url origin https://x-access-token:${{ steps.generate_token.outputs.token }}@github.com/${{ github.repository }}.git
           git push origin ${{ inputs.branch }} --follow-tags
 
       - name: Generate Release Notes
         if: steps.release.outputs.version != ''
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
           VERSION="${{ steps.release.outputs.version }}"
           TAG_NAME="v${VERSION}"
@@ -195,7 +201,7 @@ jobs:
       - name: Deployment Status Check
         if: steps.release.outputs.version != '' && !inputs.prerelease
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
           VERSION="${{ steps.release.outputs.version }}"
           TAG_NAME="v${VERSION}"
@@ -221,7 +227,7 @@ jobs:
       - name: Release Notification
         if: failure() && steps.release.outputs.version != ''
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
           VERSION="${{ steps.release.outputs.version }}"
           TAG_NAME="v${VERSION}"
