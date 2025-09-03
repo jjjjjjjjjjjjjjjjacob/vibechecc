@@ -76,6 +76,14 @@ jobs:
           # Pre-stage the lock file to prevent Nx from trying to stage bun.lockb
           git add bun.lock
 
+          # Get current version and check if it's a prerelease
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          IS_PRERELEASE=$(echo "$CURRENT_VERSION" | grep -c "\-" || true)
+          
+          echo "Current version: $CURRENT_VERSION"
+          echo "Is prerelease: $IS_PRERELEASE"
+          echo "Target prerelease: ${{ inputs.prerelease }}"
+
           # Check if any version tags exist
           if ! git tag -l "v*" | grep -q .; then
             echo "No version tags found, using --first-release"
@@ -89,13 +97,26 @@ jobs:
               bunx nx release --first-release --yes || true
             fi
           else
-            if [ "${{ inputs.prerelease }}" = "true" ]; then
-              # Let conventional commits determine the bump, with preid for beta
+            # Handle version graduation: beta → stable when deploying to main
+            if [ "${{ inputs.prerelease }}" = "false" ] && [ "$IS_PRERELEASE" -gt 0 ]; then
+              echo "🎓 Graduating prerelease to stable version"
+              # Extract base version (0.1.0-beta.8 → 0.1.0)
+              BASE_VERSION=${CURRENT_VERSION%-*}
+              echo "Base version for graduation: $BASE_VERSION"
+              
+              # Use version command to set specific version
+              bunx nx release version $BASE_VERSION --yes || true
+            elif [ "${{ inputs.prerelease }}" = "true" ]; then
+              # Development branch: create prerelease versions
+              echo "🔄 Creating prerelease version"
               bunx nx release --preid=beta --yes || true
             elif [ "${{ inputs.alt_release }}" = "true" ]; then
               # Alt release with preid for A/B testing
+              echo "🅰️ Creating alt release version"
               bunx nx release --preid=alt --yes || true
             else
+              # Production branch: stable version (when current is already stable)
+              echo "🚀 Creating stable version"
               bunx nx release --yes || true
             fi
           fi
@@ -111,15 +132,16 @@ jobs:
             git add CHANGELOG.md
           fi
 
-          # Get the version from package.json after release
-          VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # Get the final version from package.json after release
+          FINAL_VERSION=$(node -p "require('./package.json').version")
+          echo "Final version: $FINAL_VERSION"
+          echo "version=$FINAL_VERSION" >> $GITHUB_OUTPUT
 
           # Create commit and tag if there are changes (backup in case Nx didn't)
           if [ -n "$(git status --porcelain)" ]; then
             echo "Creating release commit and tag..."
-            git commit -m "chore(release): v${VERSION} [skip ci]" || true
-            git tag -a "v${VERSION}" -m "v${VERSION}" || true
+            git commit -m "chore(release): v${FINAL_VERSION} [skip ci]" || true
+            git tag -a "v${FINAL_VERSION}" -m "v${FINAL_VERSION}" || true
           fi
 
       - name: Push changes
