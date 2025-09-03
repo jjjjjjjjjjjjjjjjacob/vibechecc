@@ -44,6 +44,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Configure Git
@@ -71,7 +72,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Ensure tags are available locally for detection
-          git fetch --tags --force
+          git fetch --tags --force --prune
 
           # Pre-stage the lock file to prevent Nx from trying to stage bun.lockb
           git add bun.lock
@@ -115,11 +116,15 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          # Create commit and tag if there are changes (backup in case Nx didn't)
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Creating release commit and tag..."
-            git commit -m "chore(release): v${VERSION} [skip ci]" || true
-            git tag -a "v${VERSION}" -m "v${VERSION}" || true
+          # Create commit and tag only if Nx didn't (avoid duplicates)
+          if git tag -l | grep -q "^v${VERSION}$"; then
+            echo "Tag v${VERSION} already exists; skipping backup commit/tag."
+          else
+            if [ -n "$(git status --porcelain)" ]; then
+              echo "Creating release commit and tag..."
+              git commit -m "chore(release): v${VERSION} [skip ci]" || true
+              git tag -a "v${VERSION}" -m "v${VERSION}" || true
+            fi
           fi
 
       - name: Push changes
@@ -135,6 +140,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
+          # Ensure we have the latest tags available locally
+          git fetch --tags --force --prune
+
           VERSION="${{ steps.release.outputs.version }}"
           TAG_NAME="v${VERSION}"
 

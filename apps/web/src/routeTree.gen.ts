@@ -29,6 +29,7 @@ import { Route as VibesVibeIdRouteImport } from './routes/vibes/$vibeId'
 import { Route as UsersUsernameRouteImport } from './routes/users.$username'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as SignUpSsoCallbackRouteImport } from './routes/sign-up/sso-callback'
+import { Route as SignInSsoCallbackRouteImport } from './routes/sign-in/sso-callback'
 import { Route as RatingsRatingIdRouteImport } from './routes/ratings/$ratingId'
 import { Route as ProfilePreviewRouteImport } from './routes/profile/preview'
 import { Route as ProfileEditRouteImport } from './routes/profile/edit'
@@ -139,6 +140,11 @@ const SignUpSsoCallbackRoute = SignUpSsoCallbackRouteImport.update({
   path: '/sso-callback',
   getParentRoute: () => SignUpRoute,
 } as any)
+const SignInSsoCallbackRoute = SignInSsoCallbackRouteImport.update({
+  id: '/sso-callback',
+  path: '/sso-callback',
+  getParentRoute: () => SignInRoute,
+} as any)
 const RatingsRatingIdRoute = RatingsRatingIdRouteImport.update({
   id: '/ratings/$ratingId',
   path: '/ratings/$ratingId',
@@ -194,7 +200,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/search': typeof SearchRoute
-  '/sign-in': typeof SignInRoute
+  '/sign-in': typeof SignInRouteWithChildren
   '/sign-up': typeof SignUpRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin/emojis': typeof AdminEmojisRoute
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
+  '/sign-in/sso-callback': typeof SignInSsoCallbackRoute
   '/sign-up/sso-callback': typeof SignUpSsoCallbackRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
@@ -223,7 +230,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
-  '/sign-in': typeof SignInRoute
+  '/sign-in': typeof SignInRouteWithChildren
   '/sign-up': typeof SignUpRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin/emojis': typeof AdminEmojisRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
+  '/sign-in/sso-callback': typeof SignInSsoCallbackRoute
   '/sign-up/sso-callback': typeof SignUpSsoCallbackRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
@@ -255,7 +263,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/search': typeof SearchRoute
-  '/sign-in': typeof SignInRoute
+  '/sign-in': typeof SignInRouteWithChildren
   '/sign-up': typeof SignUpRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin/emojis': typeof AdminEmojisRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/profile/edit': typeof ProfileEditRoute
   '/profile/preview': typeof ProfilePreviewRoute
   '/ratings/$ratingId': typeof RatingsRatingIdRoute
+  '/sign-in/sso-callback': typeof SignInSsoCallbackRoute
   '/sign-up/sso-callback': typeof SignUpSsoCallbackRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/users/$username': typeof UsersUsernameRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/preview'
     | '/ratings/$ratingId'
+    | '/sign-in/sso-callback'
     | '/sign-up/sso-callback'
     | '/sitemap/xml'
     | '/users/$username'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/preview'
     | '/ratings/$ratingId'
+    | '/sign-in/sso-callback'
     | '/sign-up/sso-callback'
     | '/sitemap/xml'
     | '/users/$username'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/profile/preview'
     | '/ratings/$ratingId'
+    | '/sign-in/sso-callback'
     | '/sign-up/sso-callback'
     | '/sitemap/xml'
     | '/users/$username'
@@ -380,7 +392,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRouteWithChildren
   SearchRoute: typeof SearchRoute
-  SignInRoute: typeof SignInRoute
+  SignInRoute: typeof SignInRouteWithChildren
   SignUpRoute: typeof SignUpRouteWithChildren
   TermsRoute: typeof TermsRoute
   RatingsRatingIdRoute: typeof RatingsRatingIdRoute
@@ -534,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpSsoCallbackRouteImport
       parentRoute: typeof SignUpRoute
     }
+    '/sign-in/sso-callback': {
+      id: '/sign-in/sso-callback'
+      path: '/sso-callback'
+      fullPath: '/sign-in/sso-callback'
+      preLoaderRoute: typeof SignInSsoCallbackRouteImport
+      parentRoute: typeof SignInRoute
+    }
     '/ratings/$ratingId': {
       id: '/ratings/$ratingId'
       path: '/ratings/$ratingId'
@@ -635,6 +654,17 @@ const ProfileRouteChildren: ProfileRouteChildren = {
 const ProfileRouteWithChildren =
   ProfileRoute._addFileChildren(ProfileRouteChildren)
 
+interface SignInRouteChildren {
+  SignInSsoCallbackRoute: typeof SignInSsoCallbackRoute
+}
+
+const SignInRouteChildren: SignInRouteChildren = {
+  SignInSsoCallbackRoute: SignInSsoCallbackRoute,
+}
+
+const SignInRouteWithChildren =
+  SignInRoute._addFileChildren(SignInRouteChildren)
+
 interface SignUpRouteChildren {
   SignUpSsoCallbackRoute: typeof SignUpSsoCallbackRoute
 }
@@ -667,7 +697,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRouteWithChildren,
   SearchRoute: SearchRoute,
-  SignInRoute: SignInRoute,
+  SignInRoute: SignInRouteWithChildren,
   SignUpRoute: SignUpRouteWithChildren,
   TermsRoute: TermsRoute,
   RatingsRatingIdRoute: RatingsRatingIdRoute,

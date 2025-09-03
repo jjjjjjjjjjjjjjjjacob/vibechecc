@@ -3,8 +3,31 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+// Mock lazy-loaded components to prevent Suspense issues
+vi.mock('@/features/search/components/search-results-grid', () => ({
+  SearchResultsGrid: ({ results }: any) => (
+    <div data-testid="search-results-grid">
+      {results?.map((result: any) => (
+        <div key={result.id}>{result.title}</div>
+      ))}
+    </div>
+  ),
+}));
 
-// Import the component directly
+vi.mock('@/features/search/components/search-results-list', () => ({
+  SearchResultsList: ({ results }: any) => (
+    <div data-testid="search-results-list">
+      {results?.map((result: any) => (
+        <div key={result.id}>{result.title}</div>
+      ))}
+    </div>
+  ),
+}));
+
+vi.mock('@/features/search/components/search-pagination', () => ({
+  SearchPagination: () => <div data-testid="search-pagination">Pagination</div>,
+}));
+
 import SearchResultsPage from '@/routes/search';
 
 // Mock search results
@@ -110,54 +133,7 @@ vi.mock('@/queries', () => ({
   }),
 }));
 
-// Mock components
-vi.mock('@/features/search/components', () => ({
-  SearchResultsGrid: ({
-    results,
-    loading,
-    error,
-  }: {
-    results?: Array<{ id: string; title: string }>;
-    loading?: boolean;
-    error?: Error;
-  }) => {
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error loading search results</div>;
-    if (!results || results.length === 0) return <div>no results found</div>;
-
-    return (
-      <div data-testid="search-results">
-        {results.map((result) => (
-          <div key={result.id}>{result.title}</div>
-        ))}
-      </div>
-    );
-  },
-  SearchPagination: () => <div data-testid="pagination">Pagination</div>,
-  SearchResultsList: ({
-    results,
-    loading,
-    error,
-  }: {
-    results?: Array<{ id: string; title: string }>;
-    loading?: boolean;
-    error?: Error;
-  }) => {
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error loading search results</div>;
-    if (!results || results.length === 0) return <div>no results found</div>;
-
-    return (
-      <div data-testid="search-results-list">
-        {results.map((result) => (
-          <div key={result.id} data-testid="search-result-list-item">
-            {result.title}
-          </div>
-        ))}
-      </div>
-    );
-  },
-}));
+// Remove duplicate mock - using individual component mocks above instead
 
 vi.mock('@/components/emoji-search-command', () => ({
   EmojiSearchCommand: ({ onSelect }: { onSelect: (emoji: string) => void }) => (
