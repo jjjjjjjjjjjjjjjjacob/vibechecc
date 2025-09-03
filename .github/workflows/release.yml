@@ -70,6 +70,12 @@ jobs:
           # Ensure tags are available locally for detection
           git fetch --tags --force --prune
 
+          # Get current version and detect prerelease
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          IS_PRERELEASE=$(echo "$CURRENT_VERSION" | grep -c "-" || true)
+          echo "Current version: $CURRENT_VERSION"
+          echo "Is prerelease: $IS_PRERELEASE"
+
           # Get current version and check if it's a prerelease
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           IS_PRERELEASE=$(echo "$CURRENT_VERSION" | grep -c "\-" || true)
@@ -85,16 +91,24 @@ jobs:
               # Dev: create first prerelease from manifest version
               bunx nx release --specifier prerelease --preid=beta --first-release --skip-publish
             else
-              # Main: create first stable release from manifest version
-              bunx nx release --specifier release --first-release --skip-publish
+              # Main: create first stable release using manifest version explicitly
+              MANIFEST_VERSION=$(node -p "require('./package.json').version")
+              bunx nx release --specifier "$MANIFEST_VERSION" --first-release --skip-publish
             fi
           else
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Dev: always bump prerelease (e.g., 0.1.0-beta.8 -> 0.1.0-beta.9)
               bunx nx release --specifier prerelease --preid=beta --skip-publish
             else
-              # Main: finalize prerelease to stable (e.g., 0.1.0-beta.8 -> 0.1.0)
-              bunx nx release --specifier release --skip-publish
+              # Main: if current version is prerelease, finalize to stable by stripping preid; otherwise let conventional commits decide
+              if [ "$IS_PRERELEASE" != "0" ]; then
+                STABLE_VERSION=$(echo "$CURRENT_VERSION" | cut -d '-' -f1)
+                echo "Finalizing prerelease to stable: $STABLE_VERSION"
+                bunx nx release --specifier "$STABLE_VERSION" --skip-publish
+              else
+                echo "Stable train: deriving bump from conventional commits"
+                bunx nx release --skip-publish
+              fi
             fi
           fi
 
