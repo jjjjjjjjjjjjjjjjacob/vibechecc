@@ -66,6 +66,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e
           # Ensure tags are available locally for detection
           git fetch --tags --force --prune
 
@@ -77,18 +78,18 @@ jobs:
             echo "No version tags found, using --first-release"
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Dev: create first prerelease from manifest version
-              bunx nx release --specifier prerelease --preid=beta --first-release --yes || true
+              bunx nx release --specifier prerelease --preid=beta --first-release --yes
             else
               # Main: create first stable release from manifest version
-              bunx nx release --specifier release --first-release --yes || true
+              bunx nx release --specifier release --first-release --yes
             fi
           else
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Dev: always bump prerelease (e.g., 0.1.0-beta.8 -> 0.1.0-beta.9)
-              bunx nx release --specifier prerelease --preid=beta --yes || true
+              bunx nx release --specifier prerelease --preid=beta --yes
             else
               # Main: finalize prerelease to stable (e.g., 0.1.0-beta.8 -> 0.1.0)
-              bunx nx release --specifier release --yes || true
+              bunx nx release --specifier release --yes
             fi
           fi
 
@@ -113,8 +114,8 @@ jobs:
           else
             if [ -n "$(git status --porcelain)" ]; then
               echo "Creating release commit and tag..."
-              git commit -m "chore(release): v${VERSION} [skip ci]" || true
-              git tag -a "v${VERSION}" -m "v${VERSION}" || true
+              git commit -m "chore(release): v${VERSION} [skip ci]"
+              git tag -a "v${VERSION}" -m "v${VERSION}"
             fi
           fi
 
