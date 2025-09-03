@@ -70,9 +70,6 @@ jobs:
           # Ensure tags are available locally for detection
           git fetch --tags --force --prune
 
-          # Pre-stage the lock file to prevent Nx from trying to stage bun.lockb
-          git add bun.lock
-
           # Check if any version tags exist
           if ! git tag -l "v*" | grep -q .; then
             echo "No version tags found, using --first-release"
@@ -93,7 +90,7 @@ jobs:
             fi
           fi
 
-          # Stage any changes again in case Nx modified the lock file
+          # Stage any changes again in case Nx modified the lock file (backup path)
           git add bun.lock || true
 
           # Stage all modified package.json files (they should exist)

@@ -35,10 +35,7 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
       imageUrl?: string | null,
       layoutOption?: LayoutOption
     ): Promise<Blob | null> => {
-      console.log(
-        '[useStoryCanvas] Starting generation with layout:',
-        layoutOption?.value
-      );
+      // start generation
       setIsGenerating(true);
 
       try {
@@ -171,26 +168,26 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
         // Try to load and draw user avatar if available
         if (userAvatarUrl) {
           try {
-            console.log('[useStoryCanvas] Loading user avatar:', userAvatarUrl);
+            // loading user avatar
             const avatarImg = new Image();
             avatarImg.crossOrigin = 'anonymous';
 
             // Add timeout to prevent hanging
             const loadPromise = new Promise((resolve, reject) => {
               const timeout = setTimeout(() => {
-                console.error('[useStoryCanvas] User avatar load timeout');
+                // avatar load timeout
                 reject(new Error('Image load timeout'));
               }, 3000); // 3 second timeout
 
               avatarImg.onload = () => {
                 clearTimeout(timeout);
-                console.log('[useStoryCanvas] User avatar loaded successfully');
+                // avatar loaded
                 resolve(avatarImg);
               };
 
               avatarImg.onerror = () => {
                 clearTimeout(timeout);
-                console.error('[useStoryCanvas] User avatar load failed');
+                // avatar load failed
                 reject(new Error('Image load failed'));
               };
 
@@ -986,8 +983,7 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
             0.95
           );
         });
-      } catch (error) {
-        console.error('[useStoryCanvas] Failed to generate image:', error);
+      } catch {
         toast.error('failed to generate image');
         return null;
       } finally {
@@ -1034,8 +1030,8 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
           files: [file],
         });
         return true;
-      } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') {
           toast.error('failed to share image');
         }
         return false;

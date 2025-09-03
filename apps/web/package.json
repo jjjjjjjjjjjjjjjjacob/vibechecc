@@ -14,7 +14,6 @@
     "wrangler:deploy": "wrangler deploy",
     "clean": "rm -rf .turbo node_modules dist",
     "fonts:optimize": "node scripts/optimize-fonts-hybrid.js",
-    "fonts:optimize:full": "node scripts/optimize-fonts.js",
     "fonts:check": "ls -lh public/fonts/optimized/",
     "bundle:analyze": "node scripts/analyze-bundle-enhanced.js",
     "bundle:analyze:simple": "node scripts/analyze-bundle.js",

@@ -43,7 +43,7 @@
     },
     "apps/convex": {
       "name": "@vibechecc/convex",
-      "version": "0.1.0-beta.0",
+      "version": "0.1.0-beta.8",
       "dependencies": {
         "convex": "^1.24.8",
         "express": "^5.1.0",
@@ -59,7 +59,7 @@
     },
     "apps/web": {
       "name": "@vibechecc/web",
-      "version": "0.1.0-beta.0",
+      "version": "0.1.0-beta.8",
       "dependencies": {
         "@clerk/backend": "^2.0.0",
         "@clerk/tanstack-react-start": "^0.18.0",
@@ -133,7 +133,7 @@
     },
     "packages/types": {
       "name": "@vibechecc/types",
-      "version": "0.1.0-beta.0",
+      "version": "0.1.0-beta.8",
       "devDependencies": {
         "tsup": "^8.0.1",
         "typescript": "^5.7.2",
@@ -141,12 +141,15 @@
     },
     "packages/utils": {
       "name": "@vibechecc/utils",
-      "version": "0.1.0-beta.0",
+      "version": "0.1.0-beta.8",
       "devDependencies": {
         "tsup": "^8.0.1",
         "typescript": "^5.7.2",
       },
     },
+  },
+  "patchedDependencies": {
+    "nx@21.3.11": "patches/nx@21.3.11.patch",
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.4.3", "", {}, "sha512-VQKMkwriZbaOgVCby1UDY/LDk5fIjhQicCvVPFqfe+69fWaPWydbWJ3wRt59/YzIwda1I81loas3oCoHxnqvdA=="],

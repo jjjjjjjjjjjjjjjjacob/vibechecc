@@ -72,5 +72,8 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "patchedDependencies": {
+    "nx@21.3.11": "patches/nx@21.3.11.patch"
+  }
 }

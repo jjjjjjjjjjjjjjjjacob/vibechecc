@@ -7,6 +7,7 @@
  */
 
 import { execSync } from 'child_process';
+import prettier from 'prettier';
 import {
   existsSync,
   mkdirSync,
@@ -164,7 +165,12 @@ async function main() {
 
   // Generate CSS
   // console.log('📝 Generating CSS...');
-  const css = generateCSS(processedFonts);
+  let css = generateCSS(processedFonts);
+  try {
+    css = await prettier.format(css, { parser: 'css', singleQuote: true });
+  } catch {
+    void 0;
+  }
   writeFileSync(CSS_OUTPUT, css);
 
   // const duration = ((Date.now() - startTime) / 1000).toFixed(2);
