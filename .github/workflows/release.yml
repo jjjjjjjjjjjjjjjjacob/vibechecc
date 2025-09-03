@@ -75,18 +75,18 @@ jobs:
             echo "No version tags found, using --first-release"
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Dev: create first prerelease from manifest version
-              bunx nx release --specifier prerelease --preid=beta --first-release --yes
+              bunx nx release --specifier prerelease --preid=beta --first-release --skip-publish --yes
             else
               # Main: create first stable release from manifest version
-              bunx nx release --specifier release --first-release --yes
+              bunx nx release --specifier release --first-release --skip-publish --yes
             fi
           else
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Dev: always bump prerelease (e.g., 0.1.0-beta.8 -> 0.1.0-beta.9)
-              bunx nx release --specifier prerelease --preid=beta --yes
+              bunx nx release --specifier prerelease --preid=beta --skip-publish --yes
             else
               # Main: finalize prerelease to stable (e.g., 0.1.0-beta.8 -> 0.1.0)
-              bunx nx release --specifier release --yes
+              bunx nx release --specifier release --skip-publish --yes
             fi
           fi
 
@@ -102,7 +102,7 @@ jobs:
           fi
 
           # Get the version from package.json after release
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION=$(node --input-type=module -e "import {readFileSync} from 'node:fs'; console.log(JSON.parse(readFileSync('package.json','utf8')).version)")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
           # Create commit and tag only if Nx didn't (avoid duplicates)
@@ -125,7 +125,7 @@ jobs:
           git push origin ${{ inputs.branch }} --follow-tags
 
       - name: Generate Release Notes
-        if: steps.release.outputs.version != ''
+        if: ${{ steps.release.outputs.version != '' }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
@@ -193,7 +193,7 @@ jobs:
           echo "✅ Successfully created GitHub release ${TAG_NAME}"
 
       - name: Deployment Status Check
-        if: steps.release.outputs.version != '' && !inputs.prerelease
+        if: ${{ steps.release.outputs.version != '' && !inputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
@@ -219,7 +219,7 @@ jobs:
           echo "📝 Release monitoring completed for ${TAG_NAME}"
 
       - name: Release Notification
-        if: failure() && steps.release.outputs.version != ''
+        if: ${{ failure() && steps.release.outputs.version != '' }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
