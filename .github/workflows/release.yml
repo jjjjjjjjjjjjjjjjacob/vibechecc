@@ -75,18 +75,18 @@ jobs:
             echo "No version tags found, using --first-release"
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Dev: create first prerelease from manifest version
-              bunx nx release --specifier prerelease --preid=beta --first-release --skip-publish --yes
+              bunx nx release --specifier prerelease --preid=beta --first-release --skip-publish
             else
               # Main: create first stable release from manifest version
-              bunx nx release --specifier release --first-release --skip-publish --yes
+              bunx nx release --specifier release --first-release --skip-publish
             fi
           else
             if [ "${{ inputs.prerelease }}" = "true" ]; then
               # Dev: always bump prerelease (e.g., 0.1.0-beta.8 -> 0.1.0-beta.9)
-              bunx nx release --specifier prerelease --preid=beta --skip-publish --yes
+              bunx nx release --specifier prerelease --preid=beta --skip-publish
             else
               # Main: finalize prerelease to stable (e.g., 0.1.0-beta.8 -> 0.1.0)
-              bunx nx release --specifier release --skip-publish --yes
+              bunx nx release --specifier release --skip-publish
             fi
           fi
 
