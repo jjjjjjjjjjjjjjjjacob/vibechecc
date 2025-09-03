@@ -212,11 +212,11 @@ jobs:
           sleep 30
 
           # Check if there are any deployment statuses
-          DEPLOYMENT_COUNT=$(gh api repos/${{ github.repository }}/deployments --per-page 5 --jq 'length')
+          DEPLOYMENT_COUNT=$(gh api repos/${{ github.repository }}/deployments?per_page=5 --jq 'length')
 
           if [ "$DEPLOYMENT_COUNT" -gt 0 ]; then
             echo "📊 Found $DEPLOYMENT_COUNT deployment(s), checking latest status..."
-            LATEST_STATUS=$(gh api repos/${{ github.repository }}/deployments --per-page 1 --jq '.[0].environment // "unknown"')
+            LATEST_STATUS=$(gh api repos/${{ github.repository }}/deployments?per_page=1 --jq '.[0].environment // "unknown"')
             echo "🔍 Latest deployment environment: $LATEST_STATUS"
           else
             echo "ℹ️ No deployments found - this may be expected for library releases"
