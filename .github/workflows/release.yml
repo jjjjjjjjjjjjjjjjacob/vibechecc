@@ -109,7 +109,15 @@ jobs:
             elif [ "${{ inputs.prerelease }}" = "true" ]; then
               # Development branch: create prerelease versions
               echo "🔄 Creating prerelease version"
-              bunx nx release --preid=beta --yes || true
+              
+              # Check if current version tag already exists
+              CURRENT_TAG="v${CURRENT_VERSION}"
+              if git tag -l | grep -q "^${CURRENT_TAG}$"; then
+                echo "⚠️ Tag ${CURRENT_TAG} already exists, forcing patch increment"
+                bunx nx release version patch --preid=beta --yes || true
+              else
+                bunx nx release --preid=beta --yes || true
+              fi
             elif [ "${{ inputs.alt_release }}" = "true" ]; then
               # Alt release with preid for A/B testing
               echo "🅰️ Creating alt release version"
