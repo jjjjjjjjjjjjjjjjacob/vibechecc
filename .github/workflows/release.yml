@@ -11,11 +11,6 @@ on:
         required: true
         type: string
         description: 'Branch being released'
-      alt_release:
-        required: false
-        type: boolean
-        default: false
-        description: 'Whether this is an alt release (for main-alt branch)'
     outputs:
       version:
         description: 'The new version number'
@@ -25,7 +20,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     environment:
-      name: ${{ inputs.branch == 'main' && 'main' || inputs.branch == 'dev' && 'dev' || inputs.branch == 'main-alt' && 'main-alt' || '' }}
+      name: ${{ inputs.branch == 'main' && 'main' || inputs.branch == 'dev' && 'dev' || '' }}
     outputs:
       version: ${{ steps.release.outputs.version }}
     permissions:
@@ -81,23 +76,19 @@ jobs:
           if ! git tag -l "v*" | grep -q .; then
             echo "No version tags found, using --first-release"
             if [ "${{ inputs.prerelease }}" = "true" ]; then
-              # Let conventional commits determine the bump, with preid for beta
-              bunx nx release --preid=beta --first-release --yes || true
-            elif [ "${{ inputs.alt_release }}" = "true" ]; then
-              # Alt release with preid for A/B testing
-              bunx nx release --preid=alt --first-release --yes || true
+              # Dev: create first prerelease from manifest version
+              bunx nx release --specifier prerelease --preid=beta --first-release --yes || true
             else
-              bunx nx release --first-release --yes || true
+              # Main: create first stable release from manifest version
+              bunx nx release --specifier release --first-release --yes || true
             fi
           else
             if [ "${{ inputs.prerelease }}" = "true" ]; then
-              # Let conventional commits determine the bump, with preid for beta
-              bunx nx release --preid=beta --yes || true
-            elif [ "${{ inputs.alt_release }}" = "true" ]; then
-              # Alt release with preid for A/B testing
-              bunx nx release --preid=alt --yes || true
+              # Dev: always bump prerelease (e.g., 0.1.0-beta.8 -> 0.1.0-beta.9)
+              bunx nx release --specifier prerelease --preid=beta --yes || true
             else
-              bunx nx release --yes || true
+              # Main: finalize prerelease to stable (e.g., 0.1.0-beta.8 -> 0.1.0)
+              bunx nx release --specifier release --yes || true
             fi
           fi
 
@@ -166,9 +157,6 @@ jobs:
 
           # Generate release title
           RELEASE_TITLE="Release ${VERSION}"
-          if [ "${{ inputs.alt_release }}" = "true" ]; then
-            RELEASE_TITLE="Release ${VERSION} (Alt)"
-          fi
 
           # Create release with proper error handling
           set -e
