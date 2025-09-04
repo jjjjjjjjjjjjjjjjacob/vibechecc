@@ -16,7 +16,6 @@ interface EmojiRatingDisplayPopoverProps {
   onEmojiClick?: (emoji: string, value: number) => void;
   className?: string;
   vibeId?: string;
-  variant?: 'color' | 'gradient';
   size?: 'sm' | 'md' | 'lg';
   showScale?: boolean;
   onMouseEnter?: () => void;
@@ -29,7 +28,6 @@ export function EmojiRatingDisplayPopover({
   onEmojiClick,
   className,
   vibeId,
-  variant = 'color',
   size = 'md',
   showScale = true,
   onMouseEnter,
@@ -57,7 +55,6 @@ export function EmojiRatingDisplayPopover({
             rating={rating}
             showScale={showScale}
             onEmojiClick={onEmojiClick}
-            variant={variant}
             size={size}
           />
           {allRatings && allRatings?.length > 1 && (
@@ -87,7 +84,6 @@ export function EmojiRatingDisplayPopover({
               setOpen(false);
             }}
             vibeId={vibeId}
-            variant={variant}
           />
         </PopoverContent>
       )}

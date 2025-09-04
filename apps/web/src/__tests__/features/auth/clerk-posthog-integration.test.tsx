@@ -114,8 +114,7 @@ describe('ClerkPostHogIntegration Signup Tracking', () => {
       'clerk'
     );
     expect(mockTrackSurveyEvents.triggerNewUserSurvey).toHaveBeenCalledWith(
-      'user_456',
-      'newuser@example.com'
+      'user_456'
     );
   });
 

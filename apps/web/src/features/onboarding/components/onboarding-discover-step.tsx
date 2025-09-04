@@ -70,12 +70,7 @@ export function OnboardingDiscoverStep({
     setHasInteracted(true);
   };
 
-  const handleEmojiRating = async (_data: {
-    emoji: string;
-    value: number;
-    review: string;
-    tags?: string[];
-  }) => {
+  const handleEmojiRating = async () => {
     // Mock submission for demo - track interaction
     setHasInteracted(true);
   };

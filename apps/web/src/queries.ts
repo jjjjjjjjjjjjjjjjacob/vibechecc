@@ -10,29 +10,8 @@ import {
   useConvexAction,
 } from '@convex-dev/react-query';
 import { useConvex } from 'convex/react';
-import type { FunctionReference, FunctionArgs } from 'convex/server';
 import { api } from '@vibechecc/convex';
 // import { useAuth } from '@clerk/tanstack-react-start';
-
-// CONVEX INFINITE QUERY HELPER
-
-const _convexInfiniteQuery = <
-  ConvexQueryReference extends FunctionReference<'query'>,
-  Args extends FunctionArgs<ConvexQueryReference>,
->(
-  funcRef: ConvexQueryReference,
-  queryArgs: Args
-) => {
-  return {
-    queryKey: ['convexQuery', JSON.stringify(funcRef), queryArgs],
-    staleTime: Infinity,
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage: { continueCursor?: string }) =>
-      lastPage?.continueCursor || undefined,
-  };
-};
-
-// vibechecc QUERIES
 
 // Query to get all vibes (simple version for performance)
 export function useVibes() {
@@ -134,7 +113,7 @@ export function useCreateVibeMutation() {
 
   return useMutation({
     mutationFn: convexMutation,
-    onSuccess: (_newVibe) => {
+    onSuccess: () => {
       // Targeted invalidation - only invalidate affected queries
       queryClient.invalidateQueries({
         queryKey: ['convexQuery', api.vibes.getAllSimple],
@@ -651,7 +630,7 @@ export function useTrendingEmojiRatings(days: number = 7) {
 // Legacy stub for unused NewColumn component
 export function useCreateColumnMutation() {
   return useMutation({
-    mutationFn: async (_args: { boardId: string; name: string }) => {
+    mutationFn: async () => {
       throw new Error(
         'useCreateColumnMutation is deprecated and not implemented'
       );
@@ -839,16 +818,8 @@ export function useVibesPaginatedGeneric(
     queryKeyName?: string; // Override for the query key identifier
   }
 ) {
-  const {
-    enabled = true,
-    queryKeyPrefix: _queryKeyPrefix = ['vibes'],
-    queryKeyName,
-  } = options || {};
+  const { enabled = true } = options || {};
   const { limit, cursor, ...filterOptions } = filters || {};
-
-  // Generate a query key based on filters or use provided queryKeyName
-  const _filterKey =
-    queryKeyName || JSON.stringify({ ...filterOptions, cursor });
 
   return useQuery({
     ...convexQuery(api.vibes.getFilteredVibes, {

@@ -13,7 +13,6 @@ interface EmojiRatingDisplayProps {
   showScale?: boolean;
   className?: string;
   onEmojiClick?: (emoji: string, value: number) => void;
-  variant?: 'color' | 'gradient';
   emojiColor?: string;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -23,7 +22,6 @@ export function EmojiRatingDisplay({
   showScale = false,
   className,
   onEmojiClick,
-  variant: _variant = 'color',
   emojiColor,
   size = 'md',
 }: EmojiRatingDisplayProps) {
@@ -126,7 +124,6 @@ interface TopEmojiRatingsProps {
   onEmojiClick?: (emoji: string, value: number) => void;
   vibeId?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'color' | 'gradient';
 }
 
 export { type EmojiRating };
@@ -139,7 +136,6 @@ export function TopEmojiRatings({
   onEmojiClick,
   vibeId,
   size = 'md',
-  variant = 'color',
 }: TopEmojiRatingsProps) {
   const [showAllRatingsPopover, setShowAllRatingsPopover] =
     React.useState(false);
@@ -148,6 +144,8 @@ export function TopEmojiRatings({
   // Fetch emoji metadata for colors
   const emojis = displayRatings.map((r) => r.emoji);
   const emojiDataQuery = useQuery({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Type instantiation is excessively deep - Convex generated types
     ...convexQuery(api.emojis.getByEmojis, { emojis }),
     enabled: emojis.length > 0,
   });
@@ -178,7 +176,6 @@ export function TopEmojiRatings({
             onEmojiClick={onEmojiClick}
             emojiColor={emojiDataMap[rating.emoji]?.color}
             size={size}
-            variant={variant}
           />
         </div>
       ))}

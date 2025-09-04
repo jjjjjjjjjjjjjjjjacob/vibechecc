@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal, Hash, Trash2, Edit2 } from '@/components/ui/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -32,41 +31,14 @@ interface Tag {
 
 interface TagsTableProps {
   data: Tag[];
-  totalCount: number;
-  pageCount: number;
-  currentPage: number;
-  pageSize: number;
   isLoading: boolean;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number) => void;
-  onSearchChange: (search: string) => void;
-  onSortChange: (
-    field: 'name' | 'usage' | 'lastUsed',
-    direction: 'asc' | 'desc'
-  ) => void;
-  stats?: {
-    totalTags: number;
-    activeTags: number;
-    unusedTags: number;
-    averageUsage: number;
-  };
 }
 
-export function TagsTable({
-  data,
-  totalCount: _totalCount,
-  pageCount: _pageCount,
-  currentPage: _currentPage,
-  pageSize: _pageSize,
-  isLoading,
-  onPageChange: _onPageChange,
-  onPageSizeChange: _onPageSizeChange,
-  onSearchChange: _onSearchChange,
-  onSortChange: _onSortChange,
-  stats: _stats,
-}: TagsTableProps) {
+export function TagsTable({ data, isLoading }: TagsTableProps) {
   const queryClient = useQueryClient();
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - Complex Convex types cause deep instantiation errors
   const updateTagMutation = useConvexMutation(api.admin.tags.updateTag);
   const deleteTagMutation = useConvexMutation(api.admin.tags.deleteTag);
   const mergeTagsMutation = useConvexMutation(api.admin.tags.mergeTags);
@@ -80,7 +52,8 @@ export function TagsTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'tag-stats'] });
       toast.success('tag updated');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to update tag');
     },
   });
@@ -94,7 +67,8 @@ export function TagsTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'tag-stats'] });
       toast.success('tag deleted');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to delete tag');
     },
   });
@@ -117,7 +91,8 @@ export function TagsTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'tag-stats'] });
       toast.success('tags merged');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to merge tags');
     },
   });

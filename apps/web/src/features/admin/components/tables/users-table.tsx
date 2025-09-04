@@ -32,45 +32,15 @@ import { toast } from '@/utils/toast';
 
 interface UsersTableProps {
   data: User[];
-  totalCount: number;
-  pageCount: number;
-  currentPage: number;
-  pageSize: number;
   isLoading: boolean;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number) => void;
-  onSearchChange: (search: string) => void;
-  onStatusChange: (status: 'all' | 'active' | 'suspended') => void;
-  onDateRangeChange: (from: number | undefined, to: number | undefined) => void;
-  stats?: {
-    totalUsers: number;
-    activeUsers: number;
-    suspendedUsers: number;
-    newUsersToday: number;
-    newUsersThisWeek: number;
-    newUsersThisMonth: number;
-    onboardingCompletionRate: number;
-    profileCompletionRate: number;
-  };
 }
 
-export function UsersTable({
-  data,
-  totalCount: _totalCount,
-  pageCount: _pageCount,
-  currentPage: _currentPage,
-  pageSize: _pageSize,
-  isLoading,
-  onPageChange: _onPageChange,
-  onPageSizeChange: _onPageSizeChange,
-  onSearchChange: _onSearchChange,
-  onStatusChange: _onStatusChange,
-  onDateRangeChange: _onDateRangeChange,
-  stats: _stats,
-}: UsersTableProps) {
+export function UsersTable({ data, isLoading }: UsersTableProps) {
   const queryClient = useQueryClient();
 
   const updateUserMutation = useConvexMutation(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Complex Convex types cause deep instantiation errors
     api.admin.users.updateUserStatus
   );
   const deleteUserMutation = useConvexMutation(api.admin.users.deleteUser);
@@ -96,7 +66,8 @@ export function UsersTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'user-stats'] });
       toast.success('user status updated');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to update user status');
     },
   });
@@ -116,7 +87,8 @@ export function UsersTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'user-stats'] });
       toast.success('user deleted');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to delete user');
     },
   });
@@ -192,7 +164,7 @@ export function UsersTable({
         return (
           <EditableTextCell
             value={user.bio || ''}
-            onSave={async (_newValue) => {
+            onSave={async () => {
               // This would need a separate mutation for updating user bio
             }}
             multiline

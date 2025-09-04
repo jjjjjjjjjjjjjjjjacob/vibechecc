@@ -7,7 +7,6 @@ import {
 import * as React from 'react';
 import {
   useVibe,
-  useAddRatingMutation,
   useVibesPaginated,
   useCreateEmojiRatingMutation,
   useEmojiMetadata,
@@ -43,7 +42,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import type { Vibe } from '@vibechecc/types';
+import { Vibe } from '@/types';
 
 // Constants to avoid rollup issues with empty array literals
 const EMPTY_ARRAY: never[] = [];
@@ -58,15 +57,10 @@ function VibePage() {
   const location = useLocation();
   const { data: allVibesData } = useVibesPaginated(50);
   const { data: emojiMetadataArray } = useEmojiMetadata();
-  const [review, setReview] = React.useState('');
-  const { user: _user } = useUser();
-  const addRatingMutation = useAddRatingMutation();
+  const { user } = useUser();
   const createEmojiRatingMutation = useCreateEmojiRatingMutation();
   const deleteVibeMutation = useDeleteVibeMutation();
   const [showAuthDialog, setShowAuthDialog] = React.useState(false);
-  const [_authDialogType, setAuthDialogType] = React.useState<'react' | 'rate'>(
-    'react'
-  );
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
   >(null);
@@ -127,69 +121,6 @@ function VibePage() {
       {} as Record<string, (typeof emojiMetadataArray)[0]>
     );
   }, [emojiMetadataArray]);
-
-  // Extract context keywords from vibe for emoji suggestions
-  const _contextKeywords = React.useMemo(() => {
-    if (!vibe) return [];
-
-    const keywords: string[] = [];
-
-    // Extract words from title and description
-    const titleWords = vibe.title
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((word) => word.length > 2);
-    const descriptionWords =
-      vibe.description
-        ?.toLowerCase()
-        .split(/\W+/)
-        .filter((word) => word.length > 2) ?? [];
-
-    keywords.push(...titleWords, ...descriptionWords);
-
-    // Add keywords from tags
-    if (vibe.tags) {
-      keywords.push(...vibe.tags.map((tag) => tag.toLowerCase()));
-    }
-
-    // Add some context-based keywords based on common patterns
-    const title = vibe.title.toLowerCase();
-    const description = vibe.description?.toLowerCase() || '';
-
-    // Add contextual keywords based on content analysis
-    if (
-      title.includes('money') ||
-      title.includes('rich') ||
-      title.includes('expensive') ||
-      description.includes('money')
-    ) {
-      keywords.push('money', 'rich', 'expensive');
-    }
-    if (
-      title.includes('time') ||
-      title.includes('clock') ||
-      title.includes('fast') ||
-      description.includes('time')
-    ) {
-      keywords.push('time', 'fast', 'speed');
-    }
-    if (
-      title.includes('love') ||
-      title.includes('heart') ||
-      description.includes('love')
-    ) {
-      keywords.push('love', 'heart');
-    }
-    if (
-      title.includes('fire') ||
-      title.includes('hot') ||
-      description.includes('fire')
-    ) {
-      keywords.push('fire', 'hot', 'amazing');
-    }
-
-    return [...new Set(keywords)]; // Remove duplicates
-  }, [vibe]);
 
   // Get similar vibes based on tags, creator, or fallback to recent vibes
   const similarVibes = React.useMemo(() => {
@@ -287,82 +218,6 @@ function VibePage() {
     );
   }
 
-  const _averageRating = vibe.ratings.length
-    ? vibe.ratings.reduce((sum: number, r) => sum + (r.value || 0), 0) /
-      vibe.ratings.length
-    : 0;
-
-  const _handleSubmitRating = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const rating = 3; // Default rating
-    const emoji = '⭐'; // Default emoji
-
-    try {
-      await addRatingMutation.mutateAsync({
-        vibeId: vibe.id,
-        value: rating,
-        emoji: emoji,
-        review: review.trim() || 'No review provided',
-      });
-      setReview('');
-      // We don't reset rating to allow the user to see what they rated
-
-      // Show success toast
-      toast.success(
-        `vibe rated ${rating} stars! ${review.trim() ? 'review submitted.' : ''}`,
-        {
-          duration: 3000,
-          icon: '✨',
-        }
-      );
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to submit rating:', error);
-      toast.error('failed to submit rating. please try again.', {
-        duration: 3000,
-        icon: '❌',
-      });
-    }
-  };
-
-  // Handle rating with popover (includes emoji option)
-  const _handleRatingWithPopover = async (data: {
-    rating: number;
-    review: string;
-    useEmojiRating?: boolean;
-  }) => {
-    try {
-      await addRatingMutation.mutateAsync({
-        vibeId: vibe.id,
-        value: data.rating,
-        emoji: '⭐', // Default star emoji
-        review: data.review || 'No review provided',
-      });
-
-      // Show success toast
-      toast.success(
-        `vibe rated ${data.rating} star${data.rating === 1 ? '' : 's'}! review submitted.`,
-        {
-          duration: 3000,
-          icon: '✨',
-        }
-      );
-
-      // If user wants to add emoji rating, open emoji popover
-      if (data.useEmojiRating) {
-        // This will be handled by showing the emoji rating popover
-        toast('Select an emoji to add emoji rating', {
-          duration: 2000,
-          icon: '👆',
-        });
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to submit rating:', error);
-      throw error; // Re-throw to let popover handle error state
-    }
-  };
-
   // Handle emoji rating submission
   const handleEmojiRating = async (data: {
     emoji: string;
@@ -393,8 +248,7 @@ function VibePage() {
   };
 
   const handleEmojiRatingClick = (emoji: string, value?: number) => {
-    if (!_user?.id) {
-      setAuthDialogType('rate');
+    if (!user?.id) {
       setShowAuthDialog(true);
       return;
     }
@@ -410,7 +264,7 @@ function VibePage() {
   };
 
   const handleDeleteVibe = async () => {
-    if (!_user?.id || !vibe) return;
+    if (!user?.id || !vibe) return;
 
     if (
       confirm(
@@ -429,7 +283,7 @@ function VibePage() {
   };
 
   // Check if current user owns this vibe
-  const isOwner = _user?.id && vibe && vibe.createdById === _user.id;
+  const isOwner = user?.id && vibe && vibe.createdById === user.id;
 
   return (
     <div className="container mx-auto mb-8">
@@ -588,8 +442,7 @@ function VibePage() {
                 variant="secondary"
                 size="sm"
                 onClick={() => {
-                  if (!_user?.id) {
-                    setAuthDialogType('rate');
+                  if (!user?.id) {
                     setShowAuthDialog(true);
                   } else {
                     // Scroll to rating selector or open emoji picker
@@ -673,7 +526,6 @@ function VibePage() {
                   size="lg"
                   className="w-full"
                   onClick={() => {
-                    setAuthDialogType('rate');
                     setShowAuthDialog(true);
                   }}
                 >

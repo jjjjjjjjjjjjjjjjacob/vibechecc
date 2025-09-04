@@ -12,7 +12,6 @@
 /* eslint-disable no-console */
 
 import { readFileSync, writeFileSync } from 'fs';
-import { join as _join, relative as _relative } from 'path';
 import { execSync } from 'child_process';
 
 const SRC_DIR = './src';
@@ -66,30 +65,6 @@ function extractIconsFromImport(importStatement) {
     .split(',')
     .map((icon) => icon.trim())
     .filter((icon) => icon.length > 0);
-}
-
-function _calculateRelativeIconImport(_filePath) {
-  // Calculate relative path from file to icons
-  const relativePath = _relative(_filePath, 'src/components/ui/icons');
-
-  // Clean up the path (remove .tsx extension and handle current directory)
-  let cleanPath = relativePath.replace(/\.tsx$/, '');
-
-  // If we're in the same directory or a subdirectory, adjust the path
-  if (!cleanPath.startsWith('../')) {
-    cleanPath = './' + cleanPath;
-  }
-
-  // Ensure it ends properly for the icons file
-  if (cleanPath.endsWith('/icons')) {
-    // cleanPath is already correct
-  } else if (cleanPath === './') {
-    cleanPath = './icons';
-  } else {
-    cleanPath = cleanPath + '/icons';
-  }
-
-  return cleanPath;
 }
 
 function optimizeFile(filePath) {

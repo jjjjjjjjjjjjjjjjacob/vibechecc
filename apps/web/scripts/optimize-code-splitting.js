@@ -10,7 +10,7 @@
 /* eslint-disable no-console */
 
 import { existsSync, readdirSync, statSync, readFileSync } from 'fs';
-import { join, relative as _relative } from 'path';
+import { join } from 'path';
 
 const ROUTES_DIR = './src/routes';
 const FEATURES_DIR = './src/features';
@@ -159,13 +159,8 @@ function identifyLazyLoadCandidates() {
 }
 
 function showAnalysis(candidates) {
-  const {
-    criticalRoutes,
-    adminRoutes,
-    heavyFeatures,
-    largeComponents,
-    allComponents: _allComponents,
-  } = candidates;
+  const { criticalRoutes, adminRoutes, heavyFeatures, largeComponents } =
+    candidates;
 
   console.log(`${colors.bright}📊 Component Analysis Results${colors.reset}\n`);
 

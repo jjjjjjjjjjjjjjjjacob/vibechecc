@@ -21,13 +21,13 @@ describe('Follows', () => {
 
   describe('follow', () => {
     it('should allow a user to follow another user', async () => {
-      // Create test users
-      const _user1Id = await t.mutation(api.users.create, {
+      // Create test users first
+      await t.mutation(api.users.create, {
         externalId: 'user1',
         username: 'testuser1',
       });
 
-      const _user2Id = await t.mutation(api.users.create, {
+      await t.mutation(api.users.create, {
         externalId: 'user2',
         username: 'testuser2',
       });

@@ -23,10 +23,7 @@ class SurveyManager {
   /**
    * Triggers the new user survey for recently signed up users
    */
-  async triggerNewUserSurvey(
-    userId: string,
-    _userEmail?: string
-  ): Promise<void> {
+  async triggerNewUserSurvey(userId: string): Promise<void> {
     if (typeof window === 'undefined') {
       // eslint-disable-next-line no-console
       console.warn('PostHog not initialized, cannot trigger survey');
@@ -199,8 +196,8 @@ export const surveyManager = new SurveyManager();
 
 // Export survey response tracking functions for use in components
 export const trackSurveyEvents = {
-  triggerNewUserSurvey: (userId: string, userEmail?: string) =>
-    surveyManager.triggerNewUserSurvey(userId, userEmail),
+  triggerNewUserSurvey: (userId: string) =>
+    surveyManager.triggerNewUserSurvey(userId),
 
   recordResponse: (responses: NewUserSurveyData, userId: string) =>
     surveyManager.recordSurveyResponse(responses, userId),

@@ -107,22 +107,19 @@ export function getThemeGradientClasses() {
   };
 }
 
-export function applyUserTheme(_userTheme: UserTheme) {
+export function applyUserTheme() {
   // Legacy function - now handled by theme provider
   // console.warn('applyUserTheme is deprecated. Use theme provider instead.');
 }
 
-export function applyScopedUserTheme(
-  _userTheme: UserTheme,
-  _element: HTMLElement
-) {
+export function applyScopedUserTheme() {
   // Legacy function - now handled by theme provider
   // console.warn(
   //   'applyScopedUserTheme is deprecated. Use theme provider instead.'
   // );
 }
 
-export function injectUserThemeCSS(_userTheme: UserTheme) {
+export function injectUserThemeCSS() {
   // Legacy function - now handled by theme provider
   // console.warn('injectUserThemeCSS is deprecated. Use theme provider instead.');
 }

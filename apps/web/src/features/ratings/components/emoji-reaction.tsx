@@ -22,7 +22,6 @@ interface EmojiReactionProps {
   reaction: EmojiReactionType;
   onReact?: (emoji: string) => void;
   className?: string;
-  showAddButton?: boolean;
   ratingMode?: boolean;
   onRatingSubmit?: (data: {
     emoji: string;
@@ -38,10 +37,8 @@ export function EmojiReaction({
   reaction,
   onReact,
   className,
-  showAddButton: _showAddButton = false,
   onRatingSubmit,
   vibeTitle,
-  vibeId: _vibeId,
 }: EmojiReactionProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [isRatingPopoverOpen, setIsRatingPopoverOpen] = React.useState(false);
@@ -184,10 +181,8 @@ interface SimplifiedEmojiPickerProps {
 function SimplifiedEmojiPicker({
   onEmojiSelect,
   onClose,
-  open: _open,
   onRatingSubmit,
   vibeTitle,
-  vibeId: _vibeId,
 }: SimplifiedEmojiPickerProps) {
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
@@ -289,7 +284,6 @@ export function EmojiReactions({
   onReact,
   className,
   showAddButton = true,
-  contextKeywords: _contextKeywords = [],
   onRatingSubmit,
   vibeTitle,
   vibeId,

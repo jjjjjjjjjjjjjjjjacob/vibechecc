@@ -125,7 +125,7 @@ vi.mock('@clerk/tanstack-react-start', () => ({
     getToken: vi.fn().mockResolvedValue('test-token'),
   }),
   SignedIn: ({ children }: any) => children,
-  SignedOut: ({ children: _children }: any) => null, // Return null for signed out state in tests
+  SignedOut: () => null, // Return null for signed out state in tests
   SignInButton: ({ children }: any) =>
     React.createElement('div', null, children),
   SignUpButton: ({ children }: any) =>
@@ -179,6 +179,9 @@ vi.mock('@vibechecc/convex', () => ({
 }));
 
 vi.mock('@convex-dev/react-query', () => ({
+  ConvexQueryClient: class {
+    constructor() {}
+  },
   convexQuery: (query: any, args: any) => ({
     queryKey: ['convexQuery', String(query), args],
     queryFn: async () => {
@@ -296,7 +299,7 @@ vi.mock('@convex-dev/react-query', () => ({
       return undefined;
     },
   }),
-  useConvexQuery: (query: any, _args: any) => {
+  useConvexQuery: (query: any) => {
     const queryString = String(query);
 
     if (queryString.includes('emojis')) {
@@ -384,7 +387,14 @@ vi.mock('@tanstack/react-router', () => ({
     React.createElement('a', props, children),
   Outlet: () => null,
   RouterProvider: ({ children }: any) => children,
-  createFileRoute: (_path: string) => {
+  createMemoryHistory: vi.fn().mockReturnValue({
+    push: vi.fn(),
+    replace: vi.fn(),
+    go: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+  }),
+  createFileRoute: () => {
     // Return a function that accepts route options and returns the Route object
     return (options: any = {}) => ({
       useSearch: () => mockSearchParams,
@@ -402,6 +412,13 @@ vi.mock('@tanstack/react-router', () => ({
     },
     addChildren: vi.fn().mockReturnValue({}),
   }),
+  createRootRouteWithContext: () =>
+    vi.fn().mockReturnValue({
+      options: {
+        component: vi.fn(),
+      },
+      addChildren: vi.fn().mockReturnValue({}),
+    }),
   createRoute: vi.fn().mockReturnValue({
     options: {
       component: vi.fn(),

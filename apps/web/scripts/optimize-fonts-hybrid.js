@@ -182,7 +182,8 @@ async function main() {
   // console.log('   • font-display: swap for instant text');
 }
 
-main().catch((_e) => {
-  // console.error(e);
+main().catch((e) => {
+  // eslint-disable-next-line no-console
+  console.error(e);
   process.exit(1);
 });

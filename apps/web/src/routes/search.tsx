@@ -9,11 +9,6 @@ import { useIsTablet } from '@/hooks/use-tablet';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 // Lazy load search components for code splitting
-const _SearchResultsGrid = lazy(() =>
-  import('@/features/search/components/search-results-grid').then((m) => ({
-    default: m.SearchResultsGrid,
-  }))
-);
 const SearchResultsList = lazy(() =>
   import('@/features/search/components/search-results-list').then((m) => ({
     default: m.SearchResultsList,

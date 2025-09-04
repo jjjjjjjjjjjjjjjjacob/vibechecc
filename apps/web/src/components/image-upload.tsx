@@ -25,8 +25,6 @@ export function ImageUpload({
   const [previewUrl, setPreviewUrl] = React.useState<string>(
     initialImageUrl || ''
   );
-  const [_uploadedStorageId, setUploadedStorageId] =
-    React.useState<Id<'_storage'> | null>(null);
   const uploadMutation = useFileUpload();
 
   const handleFileSelect = async (
@@ -54,7 +52,6 @@ export function ImageUpload({
     try {
       // Upload to Convex
       const result = await uploadMutation.mutateAsync(file);
-      setUploadedStorageId(result.storageId);
 
       // Update preview with actual URL
       if (result.url) {
@@ -71,7 +68,6 @@ export function ImageUpload({
       console.error('Upload failed:', error);
       alert('Failed to upload image. Please try again.');
       setPreviewUrl('');
-      setUploadedStorageId(null);
     }
   };
 
@@ -80,7 +76,6 @@ export function ImageUpload({
       URL.revokeObjectURL(previewUrl);
     }
     setPreviewUrl('');
-    setUploadedStorageId(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }

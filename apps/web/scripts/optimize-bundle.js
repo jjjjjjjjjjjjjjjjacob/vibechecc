@@ -13,12 +13,7 @@
 /* eslint-disable no-console */
 
 import { execSync } from 'child_process';
-import {
-  existsSync,
-  readFileSync as _readFileSync,
-  readdirSync,
-  statSync,
-} from 'fs';
+import { existsSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
 // ANSI color codes
@@ -296,12 +291,6 @@ function generateNextStepsRecommendations(bundleData) {
 
   // Display recommendations
   recommendations.forEach((rec, index) => {
-    const _priorityColor =
-      rec.priority === 'High'
-        ? colors.red
-        : rec.priority === 'Medium'
-          ? colors.yellow
-          : colors.blue;
     const priorityIcon =
       rec.priority === 'High' ? '🔴' : rec.priority === 'Medium' ? '🟡' : '🔵';
 

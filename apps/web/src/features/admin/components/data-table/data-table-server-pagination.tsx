@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/select';
 
 interface DataTableServerPaginationProps {
-  totalCount: number;
   currentPage: number;
   pageCount: number;
   pageSize: number;
@@ -26,7 +25,6 @@ interface DataTableServerPaginationProps {
 }
 
 export function DataTableServerPagination({
-  totalCount: _totalCount,
   currentPage,
   pageCount,
   pageSize,

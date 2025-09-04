@@ -108,7 +108,7 @@ function CreateVibe() {
     }
   };
 
-  const handleImageUpload = (storageId: Id<'_storage'>, _url: string) => {
+  const handleImageUpload = (storageId: Id<'_storage'>) => {
     setImageStorageId(storageId);
   };
 

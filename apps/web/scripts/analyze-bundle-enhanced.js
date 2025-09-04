@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import { existsSync, readdirSync, statSync, readFileSync } from 'fs';
-import { join, relative as _relative } from 'path';
+import { join } from 'path';
 
 const DIST_DIR = './.output';
 const PUBLIC_DIR = './public';
@@ -180,7 +180,7 @@ function analyzeJSBundles() {
   if (clientFiles.length === 0) {
     console.log(`${colors.yellow}  No client bundles found${colors.reset}`);
   } else {
-    clientFiles.slice(0, 10).forEach((file, _index) => {
+    clientFiles.slice(0, 10).forEach((file) => {
       const icon = file.size > 500000 ? '🔴' : file.size > 200000 ? '🟡' : '🟢';
       const gzipFormatted = formatSize(file.gzipSize);
       const brotliFormatted = formatSize(file.brotliSize);
@@ -353,12 +353,6 @@ function analyzeOptimizationOpportunities(bundleInfo, depInfo) {
 
   // Display opportunities
   opportunities.forEach((opp, index) => {
-    const _typeColor =
-      opp.type === 'critical'
-        ? colors.red
-        : opp.type === 'high'
-          ? colors.yellow
-          : colors.blue;
     const typeIcon =
       opp.type === 'critical' ? '🔴' : opp.type === 'high' ? '🟡' : '🔵';
 

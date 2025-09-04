@@ -48,12 +48,6 @@ export function EmojiSearchCommand({
   const loadingRef = React.useRef(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  // Get categories for navigation
-  const _categoriesQuery = useQuery({
-    ...convexQuery(api.emojis.getCategories, {}),
-    enabled: showCategories && !searchValue,
-  });
-
   // Search emojis from database
   const searchResults = useQuery({
     ...convexQuery(api.emojis.search, {

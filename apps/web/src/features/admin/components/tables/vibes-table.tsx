@@ -5,7 +5,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '@vibechecc/convex';
 import type { Vibe } from '@vibechecc/types';
-import type { VibeStats } from '@/features/admin/types';
 
 // Define Id type locally to avoid import issues
 type Id<T extends string> = string & { __tableName: T };
@@ -30,35 +29,14 @@ import { toast } from '@/utils/toast';
 
 interface VibesTableProps {
   data: Vibe[];
-  totalCount: number;
-  pageCount: number;
-  currentPage: number;
-  pageSize: number;
   isLoading: boolean;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number) => void;
-  onSearchChange: (search: string) => void;
-  onStatusChange: (status: 'all' | 'public' | 'private' | 'deleted') => void;
-  onDateRangeChange: (from: number | undefined, to: number | undefined) => void;
-  stats?: VibeStats;
 }
 
-export function VibesTable({
-  data,
-  totalCount: _totalCount,
-  pageCount: _pageCount,
-  currentPage: _currentPage,
-  pageSize: _pageSize,
-  isLoading,
-  onPageChange: _onPageChange,
-  onPageSizeChange: _onPageSizeChange,
-  onSearchChange: _onSearchChange,
-  onStatusChange: _onStatusChange,
-  onDateRangeChange: _onDateRangeChange,
-  stats: _stats,
-}: VibesTableProps) {
+export function VibesTable({ data, isLoading }: VibesTableProps) {
   const queryClient = useQueryClient();
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - Complex Convex types cause deep instantiation errors
   const moderateVibeMutation = useConvexMutation(api.admin.vibes.moderateVibe);
   const deleteVibeMutation = useConvexMutation(api.admin.vibes.deleteVibe);
 
@@ -83,7 +61,8 @@ export function VibesTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'vibe-stats'] });
       toast.success('vibe updated');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to update vibe');
     },
   });
@@ -103,16 +82,11 @@ export function VibesTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'vibe-stats'] });
       toast.success('vibe deleted');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to delete vibe');
     },
   });
-
-  const _getAverageRating = (vibe: Vibe) => {
-    if (!vibe.ratings || vibe.ratings.length === 0) return 0;
-    const sum = vibe.ratings.reduce((acc, rating) => acc + rating.value, 0);
-    return Math.round((sum / vibe.ratings.length) * 10) / 10;
-  };
 
   const columns: ColumnDef<Vibe>[] = [
     {
@@ -143,7 +117,7 @@ export function VibesTable({
           <div className="max-w-[300px] space-y-1">
             <EditableTextCell
               value={vibe.title}
-              onSave={async (_newValue) => {
+              onSave={async () => {
                 // This would need a mutation for updating vibe title
               }}
               placeholder="no title..."
@@ -194,7 +168,7 @@ export function VibesTable({
         return (
           <TagArrayCell
             value={vibe.tags || []}
-            onSave={async (_newTags) => {
+            onSave={async () => {
               // This would need a mutation for updating vibe tags
             }}
             maxTags={10}

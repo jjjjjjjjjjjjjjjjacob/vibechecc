@@ -18,7 +18,6 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
   const followUser = useMutation({
     mutationFn: async ({
       targetUserId,
-      username: _username,
     }: {
       targetUserId: string;
       username?: string;
@@ -113,7 +112,6 @@ export function useFollowUser(options: UseFollowUserOptions = {}) {
   const unfollowUser = useMutation({
     mutationFn: async ({
       targetUserId,
-      username: _username,
     }: {
       targetUserId: string;
       username?: string;

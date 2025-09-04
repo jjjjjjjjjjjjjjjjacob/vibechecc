@@ -14,7 +14,6 @@ interface AuthPromptDialogProps {
   onOpenChange: (open: boolean) => void;
   title?: string;
   description?: string;
-  actionText?: string;
 }
 
 export function AuthPromptDialog({
@@ -22,7 +21,6 @@ export function AuthPromptDialog({
   onOpenChange,
   title = 'sign in required',
   description = 'you must sign in to use vibechecc',
-  actionText: _actionText = 'this feature',
 }: AuthPromptDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

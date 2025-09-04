@@ -18,14 +18,12 @@ interface ProfileDropdownProps {
   onItemClick?: (
     e?: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => void;
-  className?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
 export function ProfileDropdown({
   onItemClick,
-  className: _className,
   open: openProp,
   onOpenChange,
 }: ProfileDropdownProps) {

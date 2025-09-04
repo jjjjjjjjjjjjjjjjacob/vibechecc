@@ -40,7 +40,6 @@ import type { Vibe, User, EmojiRating, Rating } from '@vibechecc/types';
 import { api } from '@vibechecc/convex';
 import { useConvexQuery } from '@convex-dev/react-query';
 import { APP_URL } from '@/utils/bindings';
-import toast from '@/utils/toast';
 
 interface VibeCreatedCelebrationV2Props {
   isOpen: boolean;
@@ -101,6 +100,8 @@ export function VibeCreatedCelebrationV2({
 
   // Get social connections for current user
   const socialConnections = useConvexQuery(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Complex Convex types cause deep instantiation errors
     api.social.connections.getSocialConnections,
     {}
   );
@@ -203,26 +204,6 @@ export function VibeCreatedCelebrationV2({
   const handlePlatformSelect = (platform: Platform) => {
     setSelectedPlatform(platform);
     setCurrentStep('customize');
-  };
-
-  const _handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: vibe.title,
-          text: `Check out my vibe: "${vibe.title}" on vibechecc!`,
-          url: shareUrl,
-        });
-      } catch {
-        // User cancelled or share failed
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success('link copied to clipboard!');
-      }
-    } else {
-      // Fallback to copying to clipboard
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success('link copied to clipboard!');
-    }
   };
 
   const platformConfig = {
@@ -549,8 +530,6 @@ export function VibeCreatedCelebrationV2({
             {selectedPlatform === 'twitter' ? (
               <TwitterManualShare
                 vibe={vibe}
-                author={author}
-                ratings={ratings}
                 generatedBlob={generatedBlob}
                 isGenerating={isGenerating}
                 downloadImage={downloadImage}
@@ -560,8 +539,6 @@ export function VibeCreatedCelebrationV2({
             ) : selectedPlatform === 'instagram' ? (
               <InstagramManualShare
                 vibe={vibe}
-                author={author}
-                ratings={ratings}
                 generatedBlob={generatedBlob}
                 isGenerating={isGenerating}
                 downloadImage={downloadImage}
@@ -571,8 +548,6 @@ export function VibeCreatedCelebrationV2({
             ) : selectedPlatform === 'tiktok' ? (
               <TikTokManualShare
                 vibe={vibe}
-                author={author}
-                ratings={ratings}
                 generatedBlob={generatedBlob}
                 isGenerating={isGenerating}
                 downloadImage={downloadImage}

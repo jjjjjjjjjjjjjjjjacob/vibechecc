@@ -17,7 +17,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 let mockDebouncedValue: string = '';
 
 vi.mock('@/hooks/use-debounced-value', () => ({
-  useDebouncedValue: vi.fn((value: string, _delay: number) => {
+  useDebouncedValue: vi.fn((value: string) => {
     mockDebouncedValue = value;
     return mockDebouncedValue;
   }),

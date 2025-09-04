@@ -11,15 +11,13 @@ import {
   Twitter,
 } from 'lucide-react';
 import toast from '@/utils/toast';
-import type { Vibe, User, EmojiRating, Rating } from '@vibechecc/types';
+import type { Vibe } from '@vibechecc/types';
 import { APP_NAME, APP_URL } from '@/utils/bindings';
 import { api } from '@vibechecc/convex';
 import { useConvexMutation } from '@convex-dev/react-query';
 
 interface TwitterManualShareProps {
   vibe: Vibe;
-  author: User;
-  ratings?: (EmojiRating | Rating)[];
   generatedBlob: Blob | null;
   isGenerating: boolean;
   downloadImage: (blob: Blob) => void;
@@ -28,8 +26,6 @@ interface TwitterManualShareProps {
 
 export function TwitterManualShare({
   vibe,
-  author: _author,
-  ratings: _ratings = [],
   generatedBlob,
   isGenerating,
   downloadImage,
@@ -40,6 +36,8 @@ export function TwitterManualShare({
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [hasDownloaded, setHasDownloaded] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - Type instantiation is excessively deep - Convex generated types
   const trackShareMutation = useConvexMutation(api.social.sharing.trackShare);
 
   const shareUrl = `${APP_URL}/vibes/${vibe.id}?utm_source=twitter&utm_medium=social&utm_campaign=manual_share`;

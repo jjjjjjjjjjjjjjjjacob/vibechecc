@@ -13,23 +13,17 @@ export const Route = createFileRoute('/admin/vibes')({
 
 function AdminVibesPage() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(25);
-  const [search, setSearch] = React.useState('');
-  const [status, setStatus] = React.useState<'all' | 'public' | 'deleted'>(
-    'all'
-  );
-  const [dateFrom, setDateFrom] = React.useState<number | undefined>();
-  const [dateTo, setDateTo] = React.useState<number | undefined>();
 
   const { data, isLoading, error } = useQuery({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Type instantiation is excessively deep - Convex generated types
     ...convexQuery(api.admin.vibes.getAllVibes, {
-      page,
-      pageSize,
-      search: search || undefined,
-      status,
-      dateFrom,
-      dateTo,
+      page: 1,
+      pageSize: 100,
+      search: undefined,
+      status: 'all',
+      dateFrom: undefined,
+      dateTo: undefined,
     }),
     enabled: isAdmin && !authLoading,
   });
@@ -95,29 +89,7 @@ function AdminVibesPage() {
               visibility: vibe.visibility,
             })) || []
           }
-          totalCount={data?.totalCount || 0}
-          pageCount={data?.pageCount || 0}
-          currentPage={page}
-          pageSize={pageSize}
           isLoading={isLoading}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          onSearchChange={setSearch}
-          onStatusChange={(
-            newStatus: 'all' | 'public' | 'private' | 'deleted'
-          ) => {
-            if (newStatus === 'private') {
-              // Convert 'private' to 'all' since our state doesn't support 'private'
-              setStatus('all');
-            } else {
-              setStatus(newStatus as 'all' | 'public' | 'deleted');
-            }
-          }}
-          onDateRangeChange={(from, to) => {
-            setDateFrom(from);
-            setDateTo(to);
-          }}
-          stats={stats}
         />
       </div>
     </AdminLayout>

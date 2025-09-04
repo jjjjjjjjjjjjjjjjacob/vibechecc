@@ -853,13 +853,11 @@ describe('Notifications', () => {
         .withIdentity({ subject: 'user1' })
         .mutation(api.notifications.markAllAsRead, {});
 
-      // User1 creates a vibe
-      const _newVibeId = await t
-        .withIdentity({ subject: 'user1' })
-        .mutation(api.vibes.create, {
-          title: 'New Test Vibe',
-          description: 'A new vibe for testing notifications',
-        });
+      // User1 creates a vibe (this should notify user1's followers)
+      await t.withIdentity({ subject: 'user1' }).mutation(api.vibes.create, {
+        title: 'New Test Vibe',
+        description: 'A test vibe for notification',
+      });
 
       // Wait for new vibe notification to complete
       vi.runAllTimers();

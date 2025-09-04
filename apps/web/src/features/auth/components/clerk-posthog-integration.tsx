@@ -57,10 +57,7 @@ export function ClerkPostHogIntegration() {
           // Also trigger survey for very recent signups (within 24 hours)
           if (daysSinceSignup <= 1 && !hasTriggeredSurvey.current) {
             hasTriggeredSurvey.current = true;
-            trackSurveyEvents.triggerNewUserSurvey(
-              user.id,
-              user.primaryEmailAddress?.emailAddress
-            );
+            trackSurveyEvents.triggerNewUserSurvey(user.id);
           }
         }
       }

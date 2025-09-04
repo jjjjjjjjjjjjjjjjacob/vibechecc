@@ -11,13 +11,11 @@ import {
   Hash,
 } from 'lucide-react';
 import toast from '@/utils/toast';
-import type { Vibe, User, EmojiRating, Rating } from '@vibechecc/types';
+import type { Vibe } from '@vibechecc/types';
 import { APP_NAME, APP_URL } from '@/utils/bindings';
 
 interface InstagramManualShareProps {
   vibe: Vibe;
-  author: User;
-  ratings?: (EmojiRating | Rating)[];
   generatedBlob: Blob | null;
   isGenerating: boolean;
   downloadImage: (blob: Blob) => void;
@@ -26,8 +24,6 @@ interface InstagramManualShareProps {
 
 export function InstagramManualShare({
   vibe,
-  author: _author,
-  ratings: _ratings = [],
   generatedBlob,
   isGenerating,
   downloadImage,

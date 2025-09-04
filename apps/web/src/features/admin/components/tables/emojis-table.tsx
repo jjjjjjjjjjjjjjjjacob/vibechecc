@@ -79,9 +79,7 @@ export function EmojisTable({
   onCategoryChange,
   onSentimentChange,
   onEnabledChange,
-  onSortChange: _onSortChange,
   categories,
-  stats: _stats,
   searchValue,
   categoryValue,
   sentimentValue,
@@ -90,6 +88,8 @@ export function EmojisTable({
   const queryClient = useQueryClient();
 
   const updateEmojiFieldMutation = useConvexMutation(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Complex Convex types cause deep instantiation errors
     api.admin.emojis.updateEmojiField
   );
   const toggleEmojiStatusMutation = useConvexMutation(
@@ -113,7 +113,8 @@ export function EmojisTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'emoji-stats'] });
       toast.success('emoji updated');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to update emoji');
     },
   });
@@ -130,36 +131,11 @@ export function EmojisTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'emoji-stats'] });
       toast.success('emoji status updated');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to update emoji status');
     },
   });
-
-  const _getSentimentBadgeVariant = (sentiment?: string) => {
-    switch (sentiment) {
-      case 'positive':
-        return 'default';
-      case 'negative':
-        return 'destructive';
-      case 'neutral':
-        return 'secondary';
-      default:
-        return 'outline';
-    }
-  };
-
-  const _getSentimentColor = (sentiment?: string) => {
-    switch (sentiment) {
-      case 'positive':
-        return 'text-green-600 dark:text-green-400';
-      case 'negative':
-        return 'text-destructive';
-      case 'neutral':
-        return 'text-muted-foreground';
-      default:
-        return 'text-muted-foreground';
-    }
-  };
 
   const columns: ColumnDef<Emoji>[] = [
     {

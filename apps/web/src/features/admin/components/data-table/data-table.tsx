@@ -134,7 +134,7 @@ export function DataTable<TData, TValue>({
     manualSorting: isServerPagination,
     pageCount: pageCount || -1,
     filterFns: {
-      fuzzy: (row, columnId, value, _addMeta) => {
+      fuzzy: (row, columnId, value) => {
         const itemValue = row.getValue(columnId) as string;
         return itemValue?.toLowerCase().includes(value.toLowerCase()) ?? false;
       },
@@ -239,7 +239,6 @@ export function DataTable<TData, TValue>({
       totalCount !== undefined &&
       currentPage !== undefined ? (
         <DataTableServerPagination
-          totalCount={totalCount}
           currentPage={currentPage}
           pageCount={pageCount || 1}
           pageSize={pageSize || 10}

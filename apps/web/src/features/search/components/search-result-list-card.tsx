@@ -75,7 +75,6 @@ export function SearchResultListCard({
 
 function VibeResultListCard({
   result,
-  queriedEmojis: _queriedEmojis,
   loading = false,
 }: {
   result?: VibeSearchResult;
@@ -423,8 +422,6 @@ function ReviewResultListCard({
       </Card>
     );
   }
-
-  const _usePlaceholder = !result.vibeImage;
 
   return (
     <Link to="/vibes/$vibeId" params={{ vibeId: result.vibeId }}>

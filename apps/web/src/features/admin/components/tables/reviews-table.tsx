@@ -31,41 +31,15 @@ import { toast } from '@/utils/toast';
 
 interface ReviewsTableProps {
   data: Rating[];
-  totalCount: number;
-  pageCount: number;
-  currentPage: number;
-  pageSize: number;
   isLoading: boolean;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number) => void;
-  onSearchChange: (search: string) => void;
-  onStatusChange: (status: 'all' | 'flagged' | 'approved') => void;
-  onDateRangeChange: (from: number | undefined, to: number | undefined) => void;
-  stats?: {
-    totalReviews: number;
-    flaggedReviews: number;
-    averageRating: number;
-    totalRatings: number;
-  };
 }
 
-export function ReviewsTable({
-  data,
-  totalCount: _totalCount,
-  pageCount: _pageCount,
-  currentPage: _currentPage,
-  pageSize: _pageSize,
-  isLoading,
-  onPageChange: _onPageChange,
-  onPageSizeChange: _onPageSizeChange,
-  onSearchChange: _onSearchChange,
-  onStatusChange: _onStatusChange,
-  onDateRangeChange: _onDateRangeChange,
-  stats: _stats,
-}: ReviewsTableProps) {
+export function ReviewsTable({ data, isLoading }: ReviewsTableProps) {
   const queryClient = useQueryClient();
 
   const moderateReviewMutation = useConvexMutation(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Complex Convex types cause deep instantiation errors
     api.admin.reviews.moderateReview
   );
   const deleteReviewMutation = useConvexMutation(
@@ -93,7 +67,8 @@ export function ReviewsTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'review-stats'] });
       toast.success('review updated');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to update review');
     },
   });
@@ -116,7 +91,8 @@ export function ReviewsTable({
       queryClient.invalidateQueries({ queryKey: ['admin', 'review-stats'] });
       toast.success('review deleted');
     },
-    onError: (_error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onError: (error) => {
       toast.error('failed to delete review');
     },
   });
@@ -229,7 +205,7 @@ export function ReviewsTable({
           <div className="max-w-[300px]">
             <EditableTextCell
               value={rating.review}
-              onSave={async (_newValue) => {
+              onSave={async () => {
                 // This would need a mutation for updating review text
               }}
               multiline

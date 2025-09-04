@@ -126,7 +126,7 @@ export function VibeCategoryRow({
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           onScroll={checkScrollButtons}
         >
-          {vibes?.map((vibe, _index) => (
+          {vibes?.map((vibe) => (
             <div
               key={vibe.id}
               className={cn(

@@ -15,7 +15,6 @@ import {
   useAllTags,
   useVibesByTag,
   useCurrentUser,
-  useUserVibes,
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from '@/components/ui/icons';
@@ -147,9 +146,6 @@ function DiscoverPage() {
 
   // Celebration dialog state
   const [showCelebration, setShowCelebration] = React.useState(false);
-
-  // Get user vibes to check if this was first vibe
-  const { data: _userVibes } = useUserVibes(user?.id || '');
 
   // Handle celebration from search params
   React.useEffect(() => {

@@ -1,22 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { OnboardingFlow } from '@/features/onboarding/components/onboarding-flow';
 import { useOnboardingStatus } from '@/queries';
-import { SignedIn, SignedOut, useAuth } from '@clerk/tanstack-react-start';
-import { useEffect } from 'react';
+import { SignedIn, SignedOut } from '@clerk/tanstack-react-start';
 
 export const Route = createFileRoute('/onboarding')({
   component: OnboardingPage,
 });
 
 function OnboardingPage() {
-  const { data: _onboardingStatus, isLoading } = useOnboardingStatus();
-  const { getToken, isLoaded } = useAuth();
-
-  useEffect(() => {
-    if (isLoaded) {
-      // getToken().then(console.log);
-    }
-  }, [getToken, isLoaded]);
+  const { isLoading } = useOnboardingStatus();
 
   // Show loading state while checking onboarding status
   if (isLoading) {

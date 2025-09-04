@@ -21,14 +21,12 @@ import {
   Smartphone,
   Monitor,
 } from '@/components/ui/icons';
-import type { Vibe, User, EmojiRating, Rating } from '@vibechecc/types';
+import type { Vibe } from '@vibechecc/types';
 import { APP_URL } from '@/utils/bindings';
 import toast from '@/utils/toast';
 
 interface GenericShareProps {
   vibe: Vibe;
-  author: User;
-  ratings?: (EmojiRating | Rating)[];
   generatedBlob?: Blob | null;
   isGenerating: boolean;
   downloadImage: (blob: Blob) => void;
@@ -41,8 +39,6 @@ interface GenericShareProps {
 
 export function GenericShare({
   vibe,
-  author: _author,
-  ratings: _ratings = [],
   generatedBlob,
   isGenerating,
   downloadImage,

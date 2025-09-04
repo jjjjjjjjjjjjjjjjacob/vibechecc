@@ -1,7 +1,6 @@
 /// <reference lib="dom" />
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // Mock lazy-loaded components to prevent Suspense issues
 vi.mock('@/features/search/components/search-results-grid', () => ({
@@ -279,7 +278,6 @@ const mockUseSearchResultsImproved = vi.mocked(useSearchResultsImproved);
 
 describe('Search Page - Emoji Filter Integration', () => {
   let queryClient: QueryClient;
-  let _user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -288,7 +286,6 @@ describe('Search Page - Emoji Filter Integration', () => {
         mutations: { retry: false },
       },
     });
-    _user = userEvent.setup();
     vi.clearAllMocks();
   });
 

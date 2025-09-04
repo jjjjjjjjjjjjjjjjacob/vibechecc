@@ -82,9 +82,6 @@ export function useSearchResultsImproved({
   // Stable callback for tracking searches with deduplication
   const trackSearch = useCallback(
     (query: string, resultCount: number) => {
-      // Create a unique key for this search
-      const _trackingKey = `${query}-${resultCount}-${Date.now()}`;
-
       // Prevent duplicate tracking within 1 second
       if (hasTrackedRef.current.has(query)) {
         return;

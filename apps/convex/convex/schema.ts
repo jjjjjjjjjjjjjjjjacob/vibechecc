@@ -350,19 +350,28 @@ const schema = defineSchema({
 });
 export default schema;
 
-const _user = schema.tables.users.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const user = schema.tables.users.validator;
 const vibe = schema.tables.vibes.validator;
 const rating = schema.tables.ratings.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _emoji = schema.tables.emojis.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _searchHistory = schema.tables.searchHistory.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _trendingSearches = schema.tables.trendingSearches.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _searchMetrics = schema.tables.searchMetrics.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _follows = schema.tables.follows.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _notification = schema.tables.notifications.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _socialConnection = schema.tables.socialConnections.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _shareEvent = schema.tables.shareEvents.validator;
 
-export type User = Infer<typeof _user>;
+export type User = Infer<typeof user>;
 export type Vibe = Infer<typeof vibe>;
 export type Rating = Infer<typeof rating>;
 export type Emoji = Infer<typeof _emoji>;
@@ -390,6 +399,3 @@ export const createRatingSchema = v.object({
   review: rating.fields.review,
   tags: v.optional(rating.fields.tags),
 });
-
-// Deprecated - reactions are now part of ratings
-// export const reactToVibeSchema = v.object({...})

@@ -14,7 +14,6 @@ interface MasonryFeedProps {
   onLoadMore?: () => void;
   ratingDisplayMode?: 'most-rated' | 'top-rated';
   variant?: 'feed' | 'search' | 'category';
-  queriedEmojis?: string[];
   className?: string;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
@@ -30,7 +29,6 @@ export function MasonryFeed({
   onLoadMore,
   ratingDisplayMode = 'most-rated',
   variant = 'feed',
-  queriedEmojis: _queriedEmojis,
   className,
   emptyStateTitle = 'no vibes found',
   emptyStateDescription = 'try adjusting your filters or check back later',

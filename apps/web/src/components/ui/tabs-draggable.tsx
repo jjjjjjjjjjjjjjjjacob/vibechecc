@@ -436,7 +436,7 @@ interface TabsDraggableTriggerProps {
 const TabsDraggableTrigger = React.forwardRef<
   HTMLButtonElement,
   TabsDraggableTriggerProps
->(({ value: _value, className, icon, children, onClick, ...props }, ref) => {
+>(({ className, icon, children, onClick, ...props }, ref) => {
   const dataState = props['data-state'];
 
   return (
@@ -525,10 +525,11 @@ interface TabsDraggableContentContainerProps {
   children: React.ReactNode;
 }
 
-const TabsDraggableContentContainer = React.forwardRef<
-  HTMLDivElement,
-  TabsDraggableContentContainerProps
->(({ className, style, children }, _ref) => {
+const TabsDraggableContentContainer = ({
+  className,
+  style,
+  children,
+}: TabsDraggableContentContainerProps) => {
   const context = React.useContext(TabsDraggableContext);
   const {
     activeTabIndex,
@@ -758,7 +759,7 @@ const TabsDraggableContentContainer = React.forwardRef<
       </div>
     </div>
   );
-});
+};
 TabsDraggableContentContainer.displayName = 'TabsDraggableContentContainer';
 
 TabsDraggableContent.displayName = 'TabsDraggableContent';

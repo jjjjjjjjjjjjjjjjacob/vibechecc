@@ -36,9 +36,17 @@ describe('Vibes Mutations', () => {
         familyName: 'User',
       };
 
+      // Create the user first
+      await t.mutation(api.users.create, {
+        externalId: mockIdentity.subject,
+        username: 'testuser123',
+      });
+
       // Create the vibe using the real mutation with authentication
       const vibeId = await t
         .withIdentity(mockIdentity)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore  - Complex Convex types cause deep instantiation errors
         .mutation(api.vibes.create, mockVibeData);
 
       expect(vibeId).toBeTypeOf('string'); // The mutation returns the new document's _id
@@ -84,6 +92,12 @@ describe('Vibes Mutations', () => {
         familyName: 'User',
       };
 
+      // Create the user first
+      await t.mutation(api.users.create, {
+        externalId: mockIdentity.subject,
+        username: 'minimaluser456',
+      });
+
       const vibeId = await t
         .withIdentity(mockIdentity)
         .mutation(api.vibes.create, mockVibeDataMinimal);
@@ -128,6 +142,12 @@ describe('Vibes Mutations', () => {
         givenName: 'Storage',
         familyName: 'User',
       };
+
+      // Create the user first
+      await t.mutation(api.users.create, {
+        externalId: mockIdentity.subject,
+        username: 'storageuser789',
+      });
 
       const vibeId = await t
         .withIdentity(mockIdentity)
@@ -180,6 +200,12 @@ describe('Vibes Mutations', () => {
         givenName: 'Rating',
         familyName: 'User',
       };
+
+      // Create the user first
+      await t.mutation(api.users.create, {
+        externalId: mockIdentity.subject,
+        username: 'ratinguser789',
+      });
 
       // First create a vibe to rate
       const vibeData = {
@@ -259,13 +285,6 @@ describe('Vibes Mutations', () => {
       await t.withIdentity(user).mutation(api.users.create, {
         externalId: user.subject,
         username: 'testUser',
-      });
-
-      // Create a simple vibe
-      const _vibe = await t.withIdentity(user).mutation(api.vibes.create, {
-        title: 'Test Vibe',
-        description: 'A test vibe',
-        tags: ['test'],
       });
 
       // Get personalized feed - should work without errors

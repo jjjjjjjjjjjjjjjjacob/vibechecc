@@ -846,7 +846,7 @@ export const getSearchSuggestions = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { query: searchQuery, limit: _limit = 10 } = args;
+    const { query: searchQuery } = args;
     const results = {
       vibes: [] as VibeSearchResult[],
       users: [] as UserSearchResult[],

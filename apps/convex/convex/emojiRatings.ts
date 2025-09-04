@@ -1,7 +1,30 @@
-import { query, mutation, type QueryCtx } from './_generated/server';
+import {
+  query,
+  mutation,
+  type QueryCtx,
+  type MutationCtx,
+} from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
+import { SchedulableFunctionReference } from 'convex/server';
+
+// Helper function to safely call scheduler (works in both test and production)
+async function safeSchedulerCall(
+  ctx: MutationCtx,
+  delay: number,
+  fn: SchedulableFunctionReference,
+  args: unknown
+): Promise<void> {
+  try {
+    await ctx.scheduler.runAfter(delay, fn, args);
+  } catch (error) {
+    // If scheduler fails (e.g., in some test configurations), log but don't break the flow
+    // eslint-disable-next-line no-console
+    console.error('Scheduler call failed:', error);
+    throw error; // Re-throw to let the test framework handle it properly
+  }
+}
 
 // Helper function to compute user display name (backend version)
 function computeUserDisplayName(user: Doc<'users'> | null): string {
@@ -80,12 +103,6 @@ export const createOrUpdateEmojiRating = mutation({
     const now = new Date().toISOString();
     const tags: string[] = [];
 
-    // Get emoji metadata for tags
-    const _emojiData = await ctx.db
-      .query('emojis')
-      .withIndex('byEmoji', (q) => q.eq('emoji', args.emoji))
-      .first();
-
     // Tags come from the rating data, not from the emoji itself
     // The emoji metadata contains keywords, not tags
 
@@ -157,7 +174,8 @@ export const createOrUpdateEmojiRating = mutation({
         };
 
         // Schedule notification with type workaround
-        await ctx.scheduler.runAfter(
+        await safeSchedulerCall(
+          ctx,
           0,
           // @ts-expect-error - TypeScript depth issue with internal functions
           internal.notifications.createNotification,
@@ -218,7 +236,8 @@ export const createOrUpdateEmojiRating = mutation({
           };
 
           // PERFORMANCE OPTIMIZED: Use batch notification system
-          await ctx.scheduler.runAfter(
+          await safeSchedulerCall(
+            ctx,
             0,
             internal.notifications.createFollowerNotifications,
             followerNotificationArgs

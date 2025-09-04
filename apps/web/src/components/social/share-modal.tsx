@@ -37,7 +37,6 @@ import {
 import { api } from '@vibechecc/convex';
 import { useConvexQuery } from '@convex-dev/react-query';
 import { APP_URL } from '@/utils/bindings';
-import { useFeatureFlagEnabled } from 'posthog-js/react';
 
 interface ShareModalProps {
   open: boolean;
@@ -100,19 +99,10 @@ export function ShareModal({
   const [showPreview, setShowPreview] = useState(false);
   const [allLayoutsReady, setAllLayoutsReady] = useState(false);
 
-  // Get feature flags
-  const _twitterDirectEnabled = useFeatureFlagEnabled(
-    'social-twitter-direct-enabled'
-  );
-  const _instagramDirectEnabled = useFeatureFlagEnabled(
-    'social-instagram-direct-enabled'
-  );
-  const _tiktokShareKitEnabled = useFeatureFlagEnabled(
-    'social-tiktok-sharekit-enabled'
-  );
-
   // Get social connections for current user
   const socialConnections = useConvexQuery(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Type instantiation is excessively deep - Convex generated types
     api.social.connections.getSocialConnections,
     {}
   );
@@ -127,9 +117,6 @@ export function ShareModal({
 
   const shareUrl = `${APP_URL}/vibes/${vibe.id}?utm_source=${selectedPlatform || 'share'}&utm_medium=social&utm_campaign=social_share`;
 
-  const _currentLayoutOption =
-    layoutOptions.find((opt) => opt.value === selectedLayout) ||
-    layoutOptions[0];
   const currentPreviewUrl = previewUrls.get(selectedLayout) || '';
 
   // Check if platforms are connected
@@ -313,8 +300,6 @@ export function ShareModal({
             {selectedPlatform === 'twitter' ? (
               <TwitterManualShare
                 vibe={vibe}
-                author={author}
-                ratings={ratings}
                 generatedBlob={generatedBlob}
                 isGenerating={isGenerating}
                 downloadImage={downloadImage}
@@ -395,8 +380,6 @@ export function ShareModal({
             ) : selectedPlatform === 'instagram' ? (
               <InstagramManualShare
                 vibe={vibe}
-                author={author}
-                ratings={ratings}
                 generatedBlob={generatedBlob}
                 isGenerating={isGenerating}
                 downloadImage={downloadImage}
@@ -477,8 +460,6 @@ export function ShareModal({
             ) : selectedPlatform === 'tiktok' ? (
               <TikTokManualShare
                 vibe={vibe}
-                author={author}
-                ratings={ratings}
                 generatedBlob={generatedBlob}
                 isGenerating={isGenerating}
                 downloadImage={downloadImage}

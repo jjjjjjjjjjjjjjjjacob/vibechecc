@@ -11,27 +11,22 @@ export const Route = createFileRoute('/admin/users')({
 });
 
 function AdminUsersPage() {
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(25);
-  const [search, setSearch] = React.useState('');
-  const [status, setStatus] = React.useState<'all' | 'active' | 'suspended'>(
-    'all'
-  );
-  const [dateFrom, setDateFrom] = React.useState<number | undefined>();
-  const [dateTo, setDateTo] = React.useState<number | undefined>();
-
   const { data, isLoading, error } = useQuery({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Type instantiation is excessively deep - Convex generated types
     ...convexQuery(api.admin.users.getAllUsers, {
-      page,
-      pageSize,
-      search: search || undefined,
-      status,
-      dateFrom,
-      dateTo,
+      page: 1,
+      pageSize: 100,
+      search: undefined,
+      status: 'all',
+      dateFrom: undefined,
+      dateTo: undefined,
     }),
   });
 
   const { data: stats } = useQuery({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Type instantiation is excessively deep - Convex generated types
     ...convexQuery(api.admin.users.getUserStats, {}),
   });
 
@@ -59,23 +54,7 @@ function AdminUsersPage() {
       description={`manage ${stats?.totalUsers || 0} user accounts and permissions`}
     >
       <div className="flex h-full flex-col">
-        <UsersTable
-          data={data?.data || []}
-          totalCount={data?.totalCount || 0}
-          pageCount={data?.pageCount || 0}
-          currentPage={page}
-          pageSize={pageSize}
-          isLoading={isLoading}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          onSearchChange={setSearch}
-          onStatusChange={setStatus}
-          onDateRangeChange={(from, to) => {
-            setDateFrom(from);
-            setDateTo(to);
-          }}
-          stats={stats}
-        />
+        <UsersTable data={data?.data || []} isLoading={isLoading} />
       </div>
     </AdminLayout>
   );

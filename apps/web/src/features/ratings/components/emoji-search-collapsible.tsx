@@ -24,14 +24,10 @@ interface EmojiSearchCollapsibleProps {
   onOpenChange?: (open: boolean) => void;
   maxHeight?: string;
   expandButtonVariant?: 'text' | 'circle';
-  'data-testid'?: string;
 }
 
 export function EmojiSearchCollapsible({
   onSelect,
-  searchValue: _searchValue,
-  onSearchChange: _onSearchChange,
-  className: _className,
   open: openProp,
   onOpenChange: onOpenChangeProp,
   showCategories = false,
@@ -39,7 +35,6 @@ export function EmojiSearchCollapsible({
   dynamicWidth = false,
   perLine,
   maxHeight,
-  'data-testid': _dataTestId,
 }: EmojiSearchCollapsibleProps) {
   const { user } = useUser();
   const { resolvedTheme } = useThemeStore();

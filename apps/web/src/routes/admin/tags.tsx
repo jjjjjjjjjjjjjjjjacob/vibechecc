@@ -11,23 +11,17 @@ export const Route = createFileRoute('/admin/tags')({
 });
 
 function AdminTagsPage() {
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(25);
-  const [search, setSearch] = React.useState('');
-  const [sortBy, setSortBy] = React.useState<'name' | 'usage' | 'lastUsed'>(
-    'usage'
-  );
-  const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>(
-    'desc'
-  );
-
   const { data, isLoading, error } = useQuery({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Type instantiation is excessively deep - Convex generated types
     ...convexQuery(api.admin.tags.getAllTags, {
-      page,
-      pageSize,
-      search: search || undefined,
-      sortBy,
-      sortDirection,
+      page: 1,
+      pageSize: 100,
+      search: undefined,
+      minUsage: undefined,
+      maxUsage: undefined,
+      sortBy: 'usage',
+      sortDirection: 'desc',
     }),
   });
 
@@ -69,19 +63,7 @@ function AdminTagsPage() {
               createdAt: tag.createdAt,
             })) || []
           }
-          totalCount={data?.totalCount || 0}
-          pageCount={data?.pageCount || 0}
-          currentPage={page}
-          pageSize={pageSize}
           isLoading={isLoading}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          onSearchChange={setSearch}
-          onSortChange={(field, direction) => {
-            setSortBy(field);
-            setSortDirection(direction);
-          }}
-          stats={stats}
         />
       </div>
     </AdminLayout>

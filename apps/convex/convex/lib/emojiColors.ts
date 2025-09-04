@@ -14,29 +14,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   flags: '#10B981', // Emerald
 };
 
-// Emotion/sentiment-based colors
-const _SENTIMENT_COLORS = {
-  positive: {
-    default: '#10B981', // Green
-    love: '#EC4899', // Pink
-    excited: '#F59E0B', // Amber
-    happy: '#FFD700', // Gold
-    cool: '#3B82F6', // Blue
-  },
-  negative: {
-    default: '#EF4444', // Red
-    sad: '#6B7280', // Gray
-    angry: '#DC2626', // Dark Red
-    scared: '#7C3AED', // Purple
-    sick: '#84CC16', // Lime (sickly)
-  },
-  neutral: {
-    default: '#6B7280', // Gray
-    thinking: '#3B82F6', // Blue
-    surprised: '#F59E0B', // Amber
-  },
-};
-
 // Specific emoji color overrides for common emojis
 const EMOJI_SPECIFIC_COLORS: Record<string, string> = {
   // Fire/Hot emojis

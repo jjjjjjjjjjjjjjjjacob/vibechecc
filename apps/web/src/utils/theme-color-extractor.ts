@@ -58,7 +58,6 @@ function parseColorValue(colorValue: string): string | null {
 }
 
 export function extractThemeColors(): ExtractedColors {
-  const warn = (..._args: unknown[]) => {};
   const root = document.documentElement;
 
   // Create a test element to compute colors
@@ -75,7 +74,8 @@ export function extractThemeColors(): ExtractedColors {
     const rawValue = getComputedStyle(root).getPropertyValue(cssVar).trim();
 
     if (!rawValue) {
-      warn(`CSS variable ${cssVar} not found`);
+      // eslint-disable-next-line no-console
+      console.warn(`CSS variable ${cssVar} not found`);
       return '#000000';
     }
 
@@ -89,7 +89,8 @@ export function extractThemeColors(): ExtractedColors {
     const hexColor = parseColorValue(computedColor);
 
     if (!hexColor) {
-      warn(
+      // eslint-disable-next-line no-console
+      console.warn(
         `Failed to parse color for ${cssVar}: ${rawValue} -> ${computedColor}`
       );
       return '#000000';
@@ -124,10 +125,10 @@ export function extractThemeColors(): ExtractedColors {
 }
 
 export function hexToRgba(hex: string, alpha: number = 1): string {
-  const warn = (..._args: unknown[]) => {};
   // Validate hex color
   if (!hex || !hex.startsWith('#')) {
-    warn(`Invalid hex color: ${hex}`);
+    // eslint-disable-next-line no-console
+    console.warn(`Invalid hex color: ${hex}`);
     return `rgba(0, 0, 0, ${alpha})`;
   }
 
@@ -139,7 +140,8 @@ export function hexToRgba(hex: string, alpha: number = 1): string {
 
   // Ensure we have a valid 6-digit hex
   if (fullHex.length !== 7) {
-    warn(`Invalid hex length: ${hex}`);
+    // eslint-disable-next-line no-console
+    console.warn(`Invalid hex length: ${hex}`);
     return `rgba(0, 0, 0, ${alpha})`;
   }
 
@@ -148,7 +150,8 @@ export function hexToRgba(hex: string, alpha: number = 1): string {
   const b = parseInt(fullHex.slice(5, 7), 16);
 
   if (isNaN(r) || isNaN(g) || isNaN(b)) {
-    warn(`Failed to parse hex: ${hex}`);
+    // eslint-disable-next-line no-console
+    console.warn(`Failed to parse hex: ${hex}`);
     return `rgba(0, 0, 0, ${alpha})`;
   }
 

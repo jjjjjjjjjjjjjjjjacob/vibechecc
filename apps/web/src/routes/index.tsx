@@ -28,9 +28,9 @@ function HeroButtonsSkeleton() {
 
 function Home() {
   // Get current user's theme
-  const { data: currentUser, isLoading: _isUserLoading } = useCurrentUser();
+  const { data: currentUser } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
-  const { isLoaded: isClerkLoaded, user: _user } = useUser();
+  const { isLoaded: isClerkLoaded } = useUser();
   const [hasMounted, setHasMounted] = React.useState(false);
   const [clerkTimedOut, setClerkTimedOut] = React.useState(false);
 

@@ -11,27 +11,22 @@ export const Route = createFileRoute('/admin/reviews')({
 });
 
 function AdminReviewsPage() {
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(25);
-  const [search, setSearch] = React.useState('');
-  const [status, setStatus] = React.useState<'all' | 'flagged' | 'approved'>(
-    'all'
-  );
-  const [dateFrom, setDateFrom] = React.useState<number | undefined>();
-  const [dateTo, setDateTo] = React.useState<number | undefined>();
-
   const { data, isLoading, error } = useQuery({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Type instantiation is excessively deep - Convex generated types
     ...convexQuery(api.admin.reviews.getAllReviews, {
-      page,
-      pageSize,
-      search: search || undefined,
-      status,
-      dateFrom,
-      dateTo,
+      page: 1,
+      pageSize: 100,
+      search: undefined,
+      status: 'all',
+      dateFrom: undefined,
+      dateTo: undefined,
     }),
   });
 
   const { data: stats } = useQuery({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Type instantiation is excessively deep - Convex generated types
     ...convexQuery(api.admin.reviews.getReviewStats, {}),
   });
 
@@ -83,29 +78,7 @@ function AdminReviewsPage() {
                 : undefined,
             })) || []
           }
-          totalCount={data?.totalCount || 0}
-          pageCount={data?.pageCount || 0}
-          currentPage={page}
-          pageSize={pageSize}
           isLoading={isLoading}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          onSearchChange={setSearch}
-          onStatusChange={setStatus}
-          onDateRangeChange={(from, to) => {
-            setDateFrom(from);
-            setDateTo(to);
-          }}
-          stats={
-            stats
-              ? {
-                  totalReviews: stats.totalReviews,
-                  flaggedReviews: stats.flaggedReviews,
-                  averageRating: stats.averageRating,
-                  totalRatings: stats.totalReviews, // Use totalReviews as totalRatings
-                }
-              : undefined
-          }
         />
       </div>
     </AdminLayout>

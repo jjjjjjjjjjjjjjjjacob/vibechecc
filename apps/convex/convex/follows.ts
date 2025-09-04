@@ -1,8 +1,40 @@
-import { mutation, query, type QueryCtx } from './_generated/server';
+import {
+  mutation,
+  query,
+  type QueryCtx,
+  type MutationCtx,
+} from './_generated/server';
 import { v } from 'convex/values';
 import { getCurrentUser, getCurrentUserOrThrow } from './users';
 import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
+
+// Helper function to safely call scheduler (won't throw in test environment)
+async function safeSchedulerCall(
+  ctx: MutationCtx,
+  delay: number,
+  fn: unknown,
+  args: unknown
+): Promise<void> {
+  try {
+    await (
+      ctx.scheduler as unknown as {
+        runAfter: (
+          delay: number,
+          fn: unknown,
+          args: unknown
+        ) => Promise<unknown>;
+      }
+    ).runAfter(delay, fn, args);
+  } catch (error) {
+    // In test environment, scheduler might fail - don't throw
+    // eslint-disable-next-line no-console
+    console.error(
+      'Scheduler call failed (expected in test environment):',
+      error
+    );
+  }
+}
 
 // Helper function to compute user display name (backend version)
 function computeUserDisplayName(user: Doc<'users'> | null): string {
@@ -83,23 +115,15 @@ export const follow = mutation({
     });
 
     // Create follow notification for the user being followed
-    try {
-      const followerDisplayName = computeUserDisplayName(currentUser);
-      await (
-        ctx.scheduler as unknown as { runAfter: typeof ctx.scheduler.runAfter }
-      ).runAfter(0, internal.notifications.createNotification, {
-        userId: args.followingId,
-        type: 'follow',
-        triggerUserId: currentUser.externalId,
-        targetId: currentUser.externalId, // Link to follower's profile
-        title: `${followerDisplayName} followed you`,
-        description: 'check out their profile',
-      });
-    } catch (error) {
-      // Don't fail the follow operation if notification creation fails
-      // eslint-disable-next-line no-console
-      console.error('Failed to create follow notification:', error);
-    }
+    const followerDisplayName = computeUserDisplayName(currentUser);
+    await safeSchedulerCall(ctx, 0, internal.notifications.createNotification, {
+      userId: args.followingId,
+      type: 'follow',
+      triggerUserId: currentUser.externalId,
+      targetId: currentUser.externalId, // Link to follower's profile
+      title: `${followerDisplayName} followed you`,
+      description: 'check out their profile',
+    });
 
     return { success: true, followId };
   },
@@ -458,7 +482,6 @@ async function getPopularUserSuggestions(
       (sum: number, r: Doc<'ratings'>) => sum + r.value,
       0
     );
-    const _vibeAverage = vibeRatingSum / vibeRatings.length;
 
     current.totalRatings += vibeRatings.length;
     current.totalValue += vibeRatingSum;

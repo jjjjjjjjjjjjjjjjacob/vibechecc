@@ -12,7 +12,6 @@ const mockUseTopRatedVibes = vi.fn();
 const mockUsePersonalizedVibes = vi.fn();
 const mockUseVibesInfinite = vi.fn();
 const mockUseMasonryLayout = vi.fn();
-const _mockUseHeaderNavStore = vi.fn();
 
 // Import the actual useMasonryLayout from the mock
 import { useMasonryLayout } from './masonry-layout';

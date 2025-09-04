@@ -2,7 +2,7 @@ import { SearchResultListCard } from './search-result-list-card';
 import { SearchEmptyState } from './search-empty-state';
 import { SearchError } from './search-error';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import type { SearchResult, VibeSearchResult, Vibe } from '@vibechecc/types';
+import type { SearchResult } from '@vibechecc/types';
 
 interface SearchResultsListProps {
   results?: SearchResult[];
@@ -10,27 +10,6 @@ interface SearchResultsListProps {
   error?: Error | unknown;
   onRetry?: () => void;
   queriedEmojis?: string[];
-}
-
-// Helper function to convert VibeSearchResult to Vibe for VibeCard component
-function _convertVibeSearchResultToVibe(result: VibeSearchResult): Vibe {
-  return {
-    id: result.id,
-    title: result.title,
-    description: result.description,
-    image: result.image,
-    createdAt: new Date().toISOString(), // We don't have createdAt in search results
-    createdBy: result.createdBy
-      ? {
-          externalId: result.createdBy.id,
-          username: result.createdBy.name,
-          first_name: result.createdBy.name,
-          image_url: result.createdBy.avatar,
-        }
-      : null,
-    ratings: [], // We don't have full ratings in search results
-    tags: result.tags,
-  };
 }
 
 export function SearchResultsList({

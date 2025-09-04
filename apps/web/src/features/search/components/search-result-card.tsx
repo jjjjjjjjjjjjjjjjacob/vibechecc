@@ -97,7 +97,6 @@ function VibeResultCard({
       : 3;
 
   const displayRatings = prioritizedRatings.slice(0, maxRatingsToShow);
-  const _hasMoreRatings = emojiRatings.length > maxRatingsToShow;
 
   return (
     <Card className="relative h-full overflow-hidden transition-all duration-200 hover:shadow-md">

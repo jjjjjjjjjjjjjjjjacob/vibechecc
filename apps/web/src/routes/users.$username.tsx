@@ -34,9 +34,7 @@ function UserProfile() {
   );
   const { data: receivedRatings, isLoading: receivedRatingsLoading } =
     useUserReceivedRatings(user?.externalId || '');
-  const { data: emojiStats, isLoading: _emojiStatsLoading } = useUserEmojiStats(
-    user?.externalId || ''
-  );
+  const { data: emojiStats } = useUserEmojiStats(user?.externalId || '');
 
   // Track profile view when user data is loaded
   React.useEffect(() => {

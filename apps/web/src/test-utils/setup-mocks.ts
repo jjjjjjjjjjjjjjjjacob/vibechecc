@@ -333,7 +333,7 @@ vi.mock('@convex-dev/react-query', () => ({
       return undefined;
     },
   }),
-  useConvexQuery: (query: unknown, _args: unknown) => {
+  useConvexQuery: (query: unknown) => {
     const queryString = query?.toString() || '';
 
     if (queryString.includes('emojis')) {

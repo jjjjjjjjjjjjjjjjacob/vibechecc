@@ -56,10 +56,6 @@ describe('Search Functions', () => {
       };
 
       // Create test user
-      const _userId = await t.mutation(api.users.create, {
-        username: 'testuser',
-        externalId: 'test_external_id_1',
-      });
 
       // Create test vibes with authentication
       await t.withIdentity(mockIdentity).mutation(api.vibes.create, {

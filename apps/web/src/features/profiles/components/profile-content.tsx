@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router';
 import * as React from 'react';
 import {
   useUserVibes,
-  useUserReactedVibes,
   useUpdateProfileMutation,
   useCurrentUser,
   useEnsureUserExistsMutation,
@@ -35,22 +34,12 @@ export function ProfileContent() {
   const { data: vibes, isLoading: vibesLoading } = useUserVibes(
     convexUser?._id || ''
   );
-  const { data: _reactedVibes, isLoading: _reactedVibesLoading } =
-    useUserReactedVibes(convexUser?.externalId || '');
   const updateProfileMutation = useUpdateProfileMutation();
 
   const [username, setUsername] = React.useState('');
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [imageUrl, setImageUrl] = React.useState('');
-  const [_bio, _setBio] = React.useState('');
-  const [_socials, _setSocials] = React.useState({
-    twitter: '',
-    instagram: '',
-    tiktok: '',
-    youtube: '',
-    website: '',
-  });
   const [isEditing, setIsEditing] = React.useState(false);
   const [isPreviewMode, setIsPreviewMode] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -67,14 +56,6 @@ export function ProfileContent() {
       setLastName(convexUser.last_name || '');
       setImageUrl(convexUser.image_url || '');
       setThemeColor(convexUser.themeColor || 'pink');
-      _setBio(convexUser.bio || '');
-      _setSocials({
-        twitter: convexUser.socials?.twitter || '',
-        instagram: convexUser.socials?.instagram || '',
-        tiktok: convexUser.socials?.tiktok || '',
-        youtube: convexUser.socials?.youtube || '',
-        website: convexUser.socials?.website || '',
-      });
     }
   }, [convexUser]);
 
