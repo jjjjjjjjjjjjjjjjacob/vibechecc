@@ -4,12 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## IMPORTANT: AI Assistant Rules
 
-**ALWAYS check `.agent/` directory FIRST before starting any work:**
+**ALWAYS check hierarchical rule structure FIRST:**
 
-- `.agent/rules.md` - Project-specific rules that OVERRIDE default behavior
-- `.agent/docs/*-learnings.md` - Workspace-specific insights and patterns
+1. **`.agent/rules-core.md`** - Essential rules that must always be followed (Level 1)
+2. **`.agent/rules-detailed.md`** - Detailed guides referenced when needed (Level 2)
+3. **`.agent/rules-implementation.md`** - Code templates and examples (Level 3)
+4. **`.agent/docs/*-learnings.md`** - Workspace-specific insights and patterns
 
-These files contain critical information about how to work with this codebase effectively.
+These files contain critical information organized for efficient AI assistant consumption.
 
 ## Project Overview
 
@@ -74,60 +76,31 @@ bun nx reset                            # Clear Nx cache
 - **Backend**: convex-test for Convex function testing
 - **Run single test**: `bun nx test <project> -- <test-file>`
 
-## Code Conventions & Style Guide
+## Essential Development Rules
 
-### File Naming
+**See `.agent/rules-core.md` for complete Level 1 rules. Key essentials:**
 
-- **ALWAYS use `kebab-case`** for file names (e.g., `user-profile.tsx`, `search-utils.ts`)
-- Test files: `[name].test.ts` or `[name].test.tsx`
-- NO underscores, NO camelCase in file names
+### Critical File Naming
 
-### Naming Conventions
+- **Frontend (apps/web/)**: kebab-case (`user-profile.tsx`)
+- **Backend (apps/convex/)**: camelCase (`userProfile.ts`) - CRITICAL: Hyphens break Convex
+- **Other workspaces**: kebab-case
 
-#### TypeScript/JavaScript
+### Import Restrictions
 
-- **camelCase** for:
-  - Variable names: `const userName = 'John'`
-  - Function names (non-components): `function getUserData() {}`
-  - Object properties: `{ firstName: 'John', lastName: 'Doe' }`
-- **PascalCase** for:
-  - React components: `function UserProfile() {}`
-  - Classes: `class UserService {}`
-  - Types/Interfaces: `type UserData = {}`, `interface UserProfile {}`
-  - Enums: `enum UserRole {}`
+- **shadcn/ui**: ONLY in `apps/web/` directory
+- **Workspace imports**: Always use `@vibechecc/types`, `@vibechecc/utils`, etc.
 
-- **UPPER_SNAKE_CASE** for:
-  - Constants: `const MAX_RETRIES = 3`
-  - Environment variables: `process.env.DATABASE_URL`
+### Theme Colors
 
-### UI Design Style
+- **MANDATORY**: Always use semantic colors (`bg-primary`, `text-foreground`)
+- **NEVER**: Hardcoded colors (`bg-pink-500`, `text-blue-600`)
 
-- **Lowercase text** throughout the UI (buttons, labels, headers)
-  - Button: "save changes" NOT "Save Changes"
-  - Headers: "user profile" NOT "User Profile"
-  - Labels: "email address" NOT "Email Address"
-- Exception: Proper nouns and user-generated content maintain their casing
+### Package Management
 
-### Import Rules
+- **Always use `bun`** - NEVER npm, yarn, or pnpm
 
-- **shadcn/ui components** can ONLY be imported in `apps/web/` directory
-  - Reason: Only `apps/web/components.json` exists
-  - Example: `import { Button } from '@/components/ui/button'`
-  - NEVER attempt to use shadcn imports in other workspaces
-
-### Code Style
-
-- **Indentation**: 2 spaces for TypeScript/JavaScript/JSON, 4 spaces for Python/Rust
-- **No comments** unless explicitly requested
-- Prefer existing utility functions over creating new ones
-
-### Theme Color Usage
-
-- **ALWAYS use themed & moded colors** for maximum compatibility across custom themes/modes
-- **Priority**: semantic colors (`primary`, `background`, `muted`) > theme colors (`theme-primary`, `theme-secondary`) > mode-aware colors
-- **NEVER use hardcoded colors**: No `bg-pink-500`, `text-blue-600`, hex values, or RGB/HSL
-- **Exceptions**: Only for system status, brand logos, or documented third-party requirements
-- See `.agent/rules/theme-colors.mdc` for complete guidelines
+**For detailed patterns, code templates, and implementation guides, reference the hierarchical rule structure above.**
 
 ### Import Patterns
 
@@ -144,60 +117,27 @@ import { v } from 'convex/values';
 import type { User } from '@vibechecc/types';
 ```
 
-## Convex Backend Development
+**For complete component and function templates, see `.agent/rules-implementation.md`**
 
-### Database Queries
+## Backend Development
 
-Prefer Convex indexes over filters for performance:
+**Key principles**:
 
-```typescript
-// Good - using index
-const messages = await ctx.db
-  .query('messages')
-  .withIndex('by_channel', (q) => q.eq('channel', channel))
-  .collect();
+- Prefer Convex indexes over filters for performance
+- Include proper authentication checks
+- Use camelCase file names (hyphens break codegen)
 
-// Avoid - using filter
-const messages = await ctx.db
-  .query('messages')
-  .filter((q) => q.eq(q.field('channel'), channel))
-  .collect();
-```
-
-### Function Types
-
-- **Queries**: Read-only data fetching
-- **Mutations**: Data modifications
-- **Actions**: External API calls, can call mutations
-- **HTTP Actions**: REST endpoints
-
-### File Organization
-
-- Functions in `convex/` directory
-- API path: `convex/foo/bar.ts` → `api.foo.bar.functionName`
-- Schema in `convex/schema.ts`
+**For complete function templates, database patterns, and optimization guides, see `.agent/rules-implementation.md`**
 
 ## Testing Guidelines
 
-### Frontend Components
+**Essential rules**:
 
-- Use `@testing-library/react` for component testing
-- Include `/// <reference lib="dom" />` in test files
-- Use `screen` queries and Jest-DOM matchers
-- Clean up with `afterEach(cleanup)`
+- No skipped tests (they're considered failing)
+- Use `@testing-library/react` for frontend, `convex-test` for backend
+- Co-locate test files with source code
 
-### Backend Functions
-
-- Use `convex-test` for testing Convex functions
-- Initialize with `convexTest(schema, modules)`
-- Test mutations and queries with proper assertions
-- Verify data integrity after operations
-
-### General Rules
-
-- No skipped tests - they're considered failing
-- Use `describe` blocks for grouping related tests
-- Test edge cases and error conditions
+**For complete test templates and patterns, see `.agent/rules-implementation.md`**
 
 ## Development Environment
 
@@ -271,18 +211,20 @@ Run `bun run quality` before submitting PRs to ensure all checks pass.
 - **Search History**: Recent and trending searches
 - **Mobile Optimized**: Responsive filter drawer for mobile devices
 
-## AI Assistant Guidelines
+## AI Assistant Workflow
 
-### REQUIRED Reading Before Starting Work
+### REQUIRED Reading Order
 
-1. **`.agent/rules.md`** - Contains MANDATORY rules that override all default AI behavior
-2. **`.agent/docs/web-learnings.md`** - Frontend development patterns and gotchas
-3. **`.agent/docs/convex-learnings.md`** - Backend development patterns and best practices
-4. **`.agent/docs/*-learnings.md`** - Task-specific learnings for various features
+1. **`.agent/rules-core.md`** - Essential rules (Level 1)
+2. **`.agent/rules-detailed.md`** - Detailed guides when needed (Level 2)
+3. **`.agent/rules-implementation.md`** - Code templates and examples (Level 3)
+4. **`.agent/docs/*-learnings.md`** - Workspace-specific insights
 
-### Workflow Requirements
+### Mandatory Workflow
 
-- **Use TodoWrite**: Track ALL multi-step tasks with the todo system
-- **Update Learnings**: Document insights in `.agent/docs/` after completing tasks
-- **Follow Patterns**: NEVER introduce new patterns without explicit permission
-- **Check First**: Always check existing code patterns before implementing
+- **TodoWrite**: Use for ALL multi-step tasks
+- **One task at a time**: Only one todo `in_progress`
+- **Update learnings**: Document insights after completing tasks
+- **Quality checks**: Run `bun run quality` before task completion
+
+**The hierarchical rule structure optimizes context consumption while maintaining comprehensive coverage.**

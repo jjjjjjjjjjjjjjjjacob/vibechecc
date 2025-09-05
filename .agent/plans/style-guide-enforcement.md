@@ -4,6 +4,17 @@
 
 This plan addresses structural maladies identified in the audit of `@apps/web/` and `@apps/convex/`. The implementation is divided into 4 phases with specific tasks, dependencies, and validation steps.
 
+## Important File Naming Conventions
+
+**CRITICAL:** Different workspaces have different naming requirements due to technical constraints:
+
+- **Frontend (`apps/web/`)**: Uses kebab-case (e.g., `user-profile.tsx`, `search-utils.ts`)
+- **Backend (`apps/convex/`)**: Uses camelCase (e.g., `emojiRatings.ts`, `searchOptimized.ts`)
+  - **Reason**: Convex codegen requires camelCase file names to generate proper API endpoints
+  - Renaming backend files to kebab-case would break the Convex build system
+
+This plan respects these workspace-specific requirements and only enforces naming standards within their appropriate contexts.
+
 ## Phase 1: File Naming Standardization
 
 **Duration:** 1-2 days | **Priority:** 🔴 Critical | **Risk:** Low
@@ -44,60 +55,53 @@ apps/web/src/hooks/useOfflineIndicator.tsx → apps/web/src/hooks/use-offline-in
    bun run lint
    ```
 
-### 1.2 Convex Backend File Renames
+### 1.2 Convex Backend File Organization
 
-#### Task: Rename camelCase Files
+#### Task: Validate Current Convex File Naming
 
-**Files to rename:**
+**IMPORTANT:** Convex requires camelCase naming for proper codegen functionality. Backend files should remain in camelCase format.
+
+**Current backend files (correct naming):**
 
 ```bash
-# From → To
-apps/convex/convex/emojiMetadata.ts → apps/convex/convex/emoji-metadata.ts
-apps/convex/convex/emojiRatings.ts → apps/convex/convex/emoji-ratings.ts
-apps/convex/convex/emojiRatings.test.ts → apps/convex/convex/emoji-ratings.test.ts
-apps/convex/convex/searchOptimized.ts → apps/convex/convex/search-optimized.ts
-apps/convex/convex/cleanupSearchHistory.ts → apps/convex/convex/cleanup-search-history.ts
-apps/convex/convex/debugSearchHistory.ts → apps/convex/convex/debug-search-history.ts
-apps/convex/convex/users_auth_debug.test.ts → apps/convex/convex/users-auth-debug.test.ts
+# These files are correctly named for Convex codegen
+apps/convex/convex/emojiMetadata.ts ✓ (camelCase required)
+apps/convex/convex/emojiRatings.ts ✓ (camelCase required)
+apps/convex/convex/searchOptimized.ts ✓ (camelCase required)
+apps/convex/convex/cleanupSearchHistory.ts ✓ (camelCase required)
+apps/convex/convex/debugSearchHistory.ts ✓ (camelCase required)
+```
+
+**Files that need standardization:**
+
+```bash
+# Only this file violates camelCase convention
+apps/convex/convex/users_auth_debug.test.ts → apps/convex/convex/usersAuthDebug.test.ts
 ```
 
 **Implementation Steps:**
 
-1. **Check imports/references:**
+1. **Rename only the underscore file:**
 
    ```bash
-   grep -r "emojiMetadata\|emojiRatings\|searchOptimized\|cleanupSearchHistory\|debugSearchHistory" apps/convex/convex --exclude-dir=node_modules
+   git mv apps/convex/convex/users_auth_debug.test.ts apps/convex/convex/usersAuthDebug.test.ts
    ```
 
-2. **Execute renames:**
+2. **Update any references to the renamed test file**
 
-   ```bash
-   git mv apps/convex/convex/emojiMetadata.ts apps/convex/convex/emoji-metadata.ts
-   git mv apps/convex/convex/emojiRatings.ts apps/convex/convex/emoji-ratings.ts
-   git mv apps/convex/convex/emojiRatings.test.ts apps/convex/convex/emoji-ratings.test.ts
-   git mv apps/convex/convex/searchOptimized.ts apps/convex/convex/search-optimized.ts
-   git mv apps/convex/convex/cleanupSearchHistory.ts apps/convex/convex/cleanup-search-history.ts
-   git mv apps/convex/convex/debugSearchHistory.ts apps/convex/convex/debug-search-history.ts
-   git mv apps/convex/convex/users_auth_debug.test.ts apps/convex/convex/users-auth-debug.test.ts
-   ```
-
-3. **Update imports in files that reference renamed modules**
-
-4. **Update Convex schema generation:**
-
-   ```bash
-   cd apps/convex && bun convex codegen
-   ```
-
-5. **Validation:**
+3. **Validation:**
    ```bash
    bun nx test @vibechecc/convex
    bun nx typecheck @vibechecc/convex
+   bun convex codegen
    ```
+
+**Note:** All other backend files correctly use camelCase as required by Convex. No additional renames needed.
 
 ### 1.3 Phase 1 Completion Criteria
 
-- [ ] All files follow kebab-case naming convention
+- [ ] All frontend files follow kebab-case naming convention
+- [ ] All backend files follow camelCase naming convention (Convex requirement)
 - [ ] No broken imports remain
 - [ ] All tests pass
 - [ ] TypeScript compilation succeeds
@@ -119,8 +123,8 @@ apps/convex/convex/users_auth_debug.test.ts → apps/convex/convex/users-auth-de
 # Confirmed unused (verified no imports)
 apps/web/src/components/icon-link.tsx
 apps/web/src/hooks/use-offline-indicator.tsx
-apps/convex/convex/cleanup-search-history.ts
-apps/convex/convex/debug-search-history.ts
+apps/convex/convex/cleanupSearchHistory.ts
+apps/convex/convex/debugSearchHistory.ts
 ```
 
 **Implementation Steps:**
@@ -129,15 +133,15 @@ apps/convex/convex/debug-search-history.ts
 
    ```bash
    # Verify no imports exist
-   grep -r "icon-link\|use-offline-indicator\|cleanup-search-history\|debug-search-history" . --exclude-dir=node_modules
+   grep -r "icon-link\|use-offline-indicator\|cleanupSearchHistory\|debugSearchHistory" . --exclude-dir=node_modules
    ```
 
 2. **Remove files:**
    ```bash
    git rm apps/web/src/components/icon-link.tsx
    git rm apps/web/src/hooks/use-offline-indicator.tsx
-   git rm apps/convex/convex/cleanup-search-history.ts
-   git rm apps/convex/convex/debug-search-history.ts
+   git rm apps/convex/convex/cleanupSearchHistory.ts
+   git rm apps/convex/convex/debugSearchHistory.ts
    ```
 
 ### 2.2 Consolidate Duplicate Search Components
@@ -296,7 +300,7 @@ apps/convex/convex/utilities/
 
 #### Task: Choose Single Search Approach
 
-**Decision:** Keep `search-optimized.ts`, remove `search.ts`
+**Decision:** Keep `searchOptimized.ts`, remove `search.ts`
 
 **Implementation Steps:**
 
@@ -313,7 +317,7 @@ apps/convex/convex/utilities/
    ```
 
 3. **Rename optimized function to standard name:**
-   - Edit `apps/convex/convex/search-optimized.ts`
+   - Edit `apps/convex/convex/searchOptimized.ts`
    - Change `searchAllOptimized` → `searchAll`
    - Update exports
 
@@ -325,7 +329,7 @@ apps/convex/convex/utilities/
 
 5. **Rename optimized file:**
    ```bash
-   git mv apps/convex/convex/search-optimized.ts apps/convex/convex/search.ts
+   git mv apps/convex/convex/searchOptimized.ts apps/convex/convex/search.ts
    ```
 
 ### 3.2 Break Down Monolithic Files
@@ -632,7 +636,7 @@ apps/web/src/routes/discover.tsx
 - [ ] All hardcoded Tailwind color classes replaced with theme variables
 - [ ] CSS variables added for special cases (star ratings, etc.)
 - [ ] Visual consistency maintained across light/dark modes
-- [ ] Exceptions documented in `.agent/rules/theme-colors.mdc`
+- [ ] Exceptions documented in `.agent/rules-detailed.md`
 - [ ] No regression in UI appearance
 
 ### 4.1 Create Barrel Exports
@@ -747,7 +751,7 @@ apps/web/src/features/onboarding/components/index.ts
 
 ## Success Metrics
 
-- [ ] 100% kebab-case file naming compliance
+- [ ] 100% file naming compliance (kebab-case for frontend, camelCase for backend)
 - [ ] Zero orphaned/unused files
 - [ ] Zero duplicate functionality
 - [ ] Consistent test organization (100% co-located)

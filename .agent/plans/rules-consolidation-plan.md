@@ -23,28 +23,36 @@
 
 ### Phase 1: Fix Critical Contradictions
 
-- [ ] **Correct file naming rules** in CLAUDE.md and .agent/rules.md
-- [ ] **Update style-guide-enforcement.md** plan (currently has wrong backend naming assumptions)
-- [ ] **Create import pattern reference** distinguishing @/ vs @vibechecc/ usage
+- [x] **Correct file naming rules** in CLAUDE.md and .agent/rules.md
+- [x] **Update style-guide-enforcement.md** plan (currently has wrong backend naming assumptions)
+- [x] **Create import pattern reference** distinguishing @/ vs @vibechecc/ usage
 
 ### Phase 2: Eliminate Redundancy
 
-- [ ] **Consolidate theme color rules** into single source
-- [ ] **Remove duplicate shadcn/ui restrictions** from multiple files
+- [x] **Consolidate theme color rules** into single source
+- [x] **Remove duplicate shadcn/ui restrictions** from multiple files
 - [ ] **Merge scattered testing guidance** into coherent patterns
 
 ### Phase 3: Document Missing Patterns
 
-- [ ] **Add authentication patterns** (auth guard, mock identity structure)
-- [ ] **Document animation patterns** (data attributes, staggered delays)
+- [x] **Add authentication patterns** (auth guard, mock identity structure)
+- [x] **Document animation patterns** (data attributes, staggered delays)
 - [ ] **Formalize testing structures** (frontend/backend test organization)
-- [ ] **Add performance patterns** (will-change-transform, memoization strategies)
+- [x] **Add performance patterns** (will-change-transform, memoization strategies)
 
 ### Phase 4: Streamline for Context Efficiency
 
-- [ ] **Create hierarchical rule structure** (core rules vs detailed guides)
-- [ ] **Use cross-references** instead of duplication
-- [ ] **Optimize for AI assistant consumption** (clear, actionable rules)
+- [x] **Create hierarchical rule structure** (core rules vs detailed guides)
+- [x] **Use cross-references** instead of duplication
+- [x] **Optimize for AI assistant consumption** (clear, actionable rules)
+- [x] **Remove all redundant/obsolete/contradictory/broken rules**
+
+### Phase 5: COMPLETED - Cleanup Consolidation ✅
+
+- [x] **Removed ~20 consolidated learning files** from .agent/rules/ and .agent/docs/
+- [x] **Removed obsolete hierarchical structure files** (rules-detailed.md, rules-implementation.md, rules-index.md)
+- [x] **Created staging directory** (.agent/docs/learnings-staging) for future learnings
+- [x] **Preserved workspace documentation** (devops-learnings.md, web-learnings.md, etc.)
 
 ## Expected Outcomes
 
@@ -69,7 +77,7 @@
 
 1. **CLAUDE.md** (lines 113-116): Basic shadcn/ui import restrictions
 2. **`.agent/rules.md`** (lines 82-85): Identical shadcn/ui import restrictions
-3. **`.agent/rules/theme-colors.mdc`**: Comprehensive theme color rules (82 lines)
+3. **`.agent/rules/theme-colors.mdc`**: Comprehensive theme color rules (consolidated into hierarchy)
 4. **`.agent/docs/web-learnings.md`**: Partial theme color patterns (lines 707-725)
 
 ### Undocumented Patterns Found

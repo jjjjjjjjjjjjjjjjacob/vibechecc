@@ -1,179 +1,146 @@
-# AI Assistant Rules for vibechecc
+# AI Assistant Rules Navigation
 
-These rules override default AI behavior when working on this codebase.
+This file serves as the navigation index to the organized rule structure optimized for efficient AI assistant context consumption.
 
-## Core Principles
+## Always Start Here
 
-1. **Additive Changes Preferred**
-   - Always extend existing patterns rather than modifying them
-   - Never change existing function signatures without explicit permission
-   - Create v(n+1) versions when replacing code
-   - Document breaking changes and request permission
+**Essential Rules**: `.agent/rules-core.md`  
+Must always be in context - contains critical file naming, imports, colors, package management, and workflow requirements.
 
-2. **Pattern Preservation**
-   - Follow existing codebase patterns exactly
-   - Do not introduce new patterns without explicit request
-   - When unsure about a pattern, ask for clarification
+## Rule Organization
 
-3. **Monorepo Awareness**
-   - Always use workspace imports (`@vibechecc/types`, `@vibechecc/utils`, etc.)
-   - Run commands from the repository root
-   - Use `bun` exclusively (never npm, yarn, or pnpm)
+### Features (`/.agent/rules/features/`)
 
-## Development Workflow
+**When working on authentication:**
 
-### Before Making Changes
+- `auth-rules.md` - Clerk integration, user flows, session management
 
-1. Read relevant README files in affected directories
-2. Check `.agent/docs/*-learnings.md` for workspace-specific insights
-3. Understand existing patterns by examining neighboring code
-4. Use the TodoWrite tool for any multi-step tasks
+**When working on search functionality:**
 
-### During Development
+- `search-rules.md` - Filter patterns, search UI, performance optimization
 
-1. Mark todos as in_progress before starting work
-2. Only have one todo in_progress at a time
-3. Complete current tasks before starting new ones
-4. Update task status in real-time
+**When working on vibes (posts):**
 
-### After Completing Tasks
+- `vibe-rules.md` - Creation, display, moderation, content patterns
 
-1. Mark todos as completed immediately
-2. Update relevant learnings in `.agent/docs/`
-3. Run quality checks (`bun run quality`)
-4. Document any new patterns discovered
+**When working on ratings/reactions:**
 
-## Code Style Rules
+- `rating-rules.md` - Emoji ratings, star ratings, aggregation patterns
 
-### Naming Conventions
+**When working on user features:**
 
-#### File Names
+- `user-rules.md` - Profiles, preferences, privacy, data management
 
-- **kebab-case** for all file names: `user-profile.tsx`, `search-utils.ts`, `vibe-card.tsx`
-- Test files: `[name].test.ts` or `[name].test.tsx`
-- NO underscores, NO camelCase in file names
+**When working on notifications:**
 
-#### TypeScript/JavaScript
+- `notification-rules.md` - Real-time updates, notification patterns
 
-- **camelCase** for:
-  - Variable names: `const userName = 'John'`
-  - Function names (non-components): `function getUserData() {}`
-  - Object properties: `{ firstName: 'John', lastName: 'Doe' }`
-- **PascalCase** for:
-  - React components: `function UserProfile() {}`
-  - Classes: `class UserService {}`
-  - Types/Interfaces: `type UserData = {}`, `interface UserProfile {}`
-  - Enums: `enum UserRole {}`
+### Stack (`/.agent/rules/stack/`)
 
-- **UPPER_SNAKE_CASE** for:
-  - Constants: `const MAX_RETRIES = 3`
-  - Environment variables: `process.env.DATABASE_URL`
+**When working on frontend (apps/web/):**
 
-### UI Design Style
+- `web-app-rules.md` - TanStack Start, shadcn/ui, routing, state management
 
-- **Lowercase text** throughout the UI (buttons, labels, headers)
-  - Button: "save changes" NOT "Save Changes"
-  - Headers: "user profile" NOT "User Profile"
-  - Labels: "email address" NOT "Email Address"
-- Exception: Proper nouns and user-generated content maintain their casing
+**When working on backend (apps/convex/):**
 
-### Import Rules
+- `convex-backend-rules.md` - Database patterns, function types, performance
 
-- **shadcn/ui components** can ONLY be imported in `apps/web/` directory
-  - Reason: Only `apps/web/components.json` exists
-  - Example: `import { Button } from '@/components/ui/button'`
-  - NEVER attempt to use shadcn imports in other workspaces
+**When working across the monorepo:**
 
-### General
+- `monorepo-rules.md` - Workspace patterns, shared packages, imports
 
-- NO COMMENTS unless explicitly requested
-- Prefer existing utility functions over creating new ones
-- Match indentation of surrounding code (2 spaces for TS/JS/JSON)
+**When setting up local development:**
 
-### Frontend (apps/web)
+- `local-dev-rules.md` - Environment setup, debugging, testing
 
-- Use shadcn/ui components when available
-- Follow TanStack Start routing conventions
-- Place feature-specific code in `src/features/`
-- Use Convex hooks from `src/queries.ts`
-- Component structure:
+**When working on deployments/CI:**
 
-  ```typescript
-  // Imports first
-  import { useState } from 'react'
-  import { Button } from '@/components/ui/button'
+- `cicd-rules.md` - GitHub Actions, deployment patterns, environment management
 
-  // Types/interfaces
-  interface UserCardProps {
-    user: User
-  }
+### Patterns (`/.agent/rules/patterns/`)
 
-  // Component definition
-  export function UserCard({ user }: UserCardProps) {
-    return <div>...</div>
-  }
-  ```
+**When organizing imports or dependencies:**
 
-### Backend (apps/convex)
+- `import-patterns.md` - Workspace imports, shadcn restrictions, module organization
 
-- Prefer indexes over filters for queries
-- Include proper authentication checks
-- Follow Convex function naming patterns
-- Keep functions focused and single-purpose
-- Function organization:
+**When implementing auth flows:**
 
-  ```typescript
-  // Queries
-  export const getUser = query({...})
+- `authentication-patterns.md` - Clerk patterns, protected routes, session handling
 
-  // Mutations
-  export const updateUser = mutation({...})
+**When optimizing performance or animations:**
 
-  // Actions
-  export const syncUser = action({...})
+- `animation-performance-patterns.md` - CSS animations, performance optimization, transitions
 
-  // Internal mutations
-  export const internalUpdateUser = internalMutation({...})
-  ```
+## Accumulated Knowledge (`/.agent/docs/`)
 
-## Testing Rules
+**Always check relevant learnings before starting work:**
 
-1. Never skip tests - they're considered failing
-2. Co-locate test files with source code
-3. Use existing test patterns and utilities
-4. Run tests before marking tasks complete
+- `web-learnings.md` - Frontend development patterns and gotchas
+- `convex-learnings.md` - Backend development insights and best practices
+- `[feature]-learnings.md` - Feature-specific accumulated knowledge
 
-## Documentation Rules
+## Task-Based Navigation
 
-1. Only create documentation when explicitly requested
-2. Update existing docs rather than creating new ones
-3. Keep README files focused on their specific scope
-4. Don't duplicate information across README files
+### Common Task Types
 
-## Security Rules
+**Building new features:**
 
-1. Never commit secrets or API keys
-2. Always validate user input
-3. Use proper authentication checks
-4. Follow existing security patterns
+1. Read `rules-core.md` (always in context)
+2. Check relevant `features/` rule file
+3. Check relevant `stack/` rule files
+4. Review `docs/*-learnings.md` for insights
 
-## Implementation Plans
+**Fixing bugs or performance issues:**
 
-Before starting work on any major feature or fix, check the relevant implementation plan in `.agent/plans/`:
+1. Read `rules-core.md` (always in context)
+2. Check `patterns/` for relevant optimization rules
+3. Review workspace-specific learnings
 
-- `ui-ux-improvements.md` - UI/UX enhancements and mobile improvements
-- `social-community-features.md` - Social media integration, leaderboards, trophies
-- `rating-review-improvements.md` - Rating system fixes and enhancements
-- `auth-onboarding-improvements.md` - Authentication flow and onboarding analytics
-- `discovery-recommendations.md` - Discovery page and recommendation algorithms
-- `technical-fixes.md` - Release notes and technical infrastructure fixes
+**Setting up development environment:**
 
-These plans contain detailed implementation steps, dependencies, and success criteria.
-Update plans with learnings as work progresses.
+1. Read `rules-core.md` (always in context)
+2. Check `stack/local-dev-rules.md`
+3. Review `stack/monorepo-rules.md`
 
-## Quality Standards
+**Working on UI/UX improvements:**
 
-1. Full TypeScript coverage required
-2. No linter errors (unless fixing is explicitly requested)
-3. Run `bun run quality` before completing tasks
-4. Ensure backward compatibility
+1. Read `rules-core.md` (always in context)
+2. Check `stack/web-app-rules.md`
+3. Check `patterns/animation-performance-patterns.md`
+4. Review `docs/web-learnings.md`
+
+## Directory Structure
+
+```
+.agent/rules/
+├── features/
+│   ├── auth-rules.md
+│   ├── search-rules.md
+│   ├── vibe-rules.md
+│   ├── rating-rules.md
+│   ├── user-rules.md
+│   └── notification-rules.md
+├── stack/
+│   ├── web-app-rules.md
+│   ├── convex-backend-rules.md
+│   ├── monorepo-rules.md
+│   ├── local-dev-rules.md
+│   └── cicd-rules.md
+├── patterns/
+│   ├── import-patterns.md
+│   ├── authentication-patterns.md
+│   └── animation-performance-patterns.md
+├── rules-core.md (essential - always in context)
+└── rules.md (this navigation file)
+```
+
+## Usage Workflow
+
+1. **Before starting any task**: Read `rules-core.md` (should already be in context)
+2. **Identify task type**: Use task-based navigation above
+3. **Read relevant rule files**: Check 1-2 specific rule files for your task
+4. **Check accumulated learnings**: Review relevant `docs/*-learnings.md`
+5. **Use TodoWrite**: For multi-step tasks, create todo list
+6. **Update learnings**: Document insights after completion
+
+This organized structure provides comprehensive rule coverage while optimizing AI assistant context usage. Always start with the core rules and navigate to specific areas based on your current task.

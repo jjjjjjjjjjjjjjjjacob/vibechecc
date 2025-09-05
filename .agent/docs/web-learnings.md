@@ -704,24 +704,7 @@ find apps/web/src -name "*.tsx" -o -name "*.ts" | xargs sed -i '' 's/@\/types/@v
 3. Replace with appropriate semantic/theme tokens
 4. Verify visual consistency after changes
 
-**Color Mapping Established**:
-
-```typescript
-// Status colors
-'text-green-500' → 'text-green-600 dark:text-green-400'
-'text-red-500' → 'text-destructive'
-'text-orange-500' → 'text-orange-600 dark:text-orange-400'
-
-// Brand colors
-'border-pink-500' → 'border-theme-primary'
-'bg-purple-500' → 'bg-theme-primary'
-'border-purple-500' → 'border-theme-secondary'
-
-// UI colors
-'bg-gray-100' → 'bg-muted'
-'text-gray-500' → 'text-muted-foreground'
-'hover:bg-gray-50' → 'hover:bg-muted/50'
-```
+**Color Mapping Established**: See `.agent/rules-detailed.md` for comprehensive color migration patterns, including status colors, brand colors, and UI colors.
 
 #### 2. File Naming Audit Process
 
