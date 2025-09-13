@@ -290,7 +290,7 @@ export const getUserPointsStats = query({
 
     if (!userPoints) {
       // Return default values for new users
-      return {
+      const defaultStats = {
         userId,
         totalPointsEarned: 0,
         currentBalance: 0,
@@ -306,9 +306,16 @@ export const getUserPointsStats = query({
         lastActivityDate: getCurrentDateString(),
         karmaScore: 0,
       };
+      return {
+        ...defaultStats,
+        availablePoints: defaultStats.currentBalance, // Alias for compatibility
+      };
     }
 
-    return userPoints;
+    return {
+      ...userPoints,
+      availablePoints: userPoints.currentBalance, // Alias for compatibility
+    };
   },
 });
 

@@ -1,5 +1,10 @@
-import { action, internalMutation, internalQuery } from './_generated/server';
-import { api, internal } from './_generated/api';
+import {
+  action,
+  internalAction,
+  internalMutation,
+  internalQuery,
+} from './_generated/server';
+import { internal } from './_generated/api';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { nanoid } from 'nanoid';
 import { v } from 'convex/values';
@@ -124,7 +129,6 @@ export const downloadAndStoreImage = action({
       // Download the image
       const response = await fetch(url);
       if (!response.ok) {
-        console.error(`Failed to download image from ${url}`);
         return null;
       }
 
@@ -135,8 +139,31 @@ export const downloadAndStoreImage = action({
       const storageId = await ctx.storage.store(blob);
 
       return storageId;
-    } catch (error) {
-      console.error(`Error downloading/storing image from ${url}:`, error);
+    } catch {
+      return null;
+    }
+  },
+});
+
+// Internal action to download an image from URL and store it in Convex
+export const downloadAndStoreImageInternal = internalAction({
+  args: { url: v.string() },
+  handler: async (ctx, { url }): Promise<Id<'_storage'> | null> => {
+    try {
+      // Download the image
+      const response = await fetch(url);
+      if (!response.ok) {
+        return null;
+      }
+
+      // Get the image as a blob
+      const blob = await response.blob();
+
+      // Store the image in Convex storage
+      const storageId = await ctx.storage.store(blob);
+
+      return storageId;
+    } catch {
       return null;
     }
   },
@@ -186,8 +213,8 @@ export const seedVibesWithImages = action({
       const imageUrl = getImageForVibe(vibe.title, vibe.description || '');
 
       // Download and store the image
-      const storageId: Id<'_storage'> | null = await ctx.runAction(
-        'seedImages:downloadAndStoreImage' as any,
+      const storageId = await ctx.runAction(
+        internal.seedImages.downloadAndStoreImageInternal,
         { url: imageUrl }
       );
 
@@ -199,7 +226,6 @@ export const seedVibesWithImages = action({
         });
 
         updated++;
-        console.log(`Added image to vibe: ${vibe.title}`);
       }
     }
 

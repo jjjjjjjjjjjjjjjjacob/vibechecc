@@ -10,10 +10,20 @@ export default defineConfig(() => {
 
   return {
     envDir: path.resolve(__dirname, '../..'), // Load .env files from root directory
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
     server: {
       port: 3000,
-      hmr: {
-        overlay: false,
+      hmr: true,
+      fs: {
+        allow: [path.resolve(__dirname, '../..')],
+      },
+      watch: {
+        usePolling: true,
+        ignored: ['**/node_modules/**', '**/.git/**'],
       },
     },
     plugins: [
@@ -25,7 +35,9 @@ export default defineConfig(() => {
         target: 'cloudflare-module',
         customViteReactPlugin: true,
       }),
-      react(),
+      react({
+        include: '**/*.tsx',
+      }),
     ],
     build: {
       rollupOptions: {

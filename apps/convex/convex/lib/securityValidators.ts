@@ -298,6 +298,145 @@ export class SecurityValidators {
 }
 
 /**
+ * Type definitions for Clerk user data structures
+ */
+interface ClerkExternalAccount {
+  provider: string;
+  verification?: {
+    status: string;
+  };
+}
+
+interface ClerkEmailAddress {
+  id: string;
+  email_address?: string;
+}
+
+interface ClerkUserData {
+  external_accounts?: ClerkExternalAccount[];
+  email_addresses?: ClerkEmailAddress[];
+  primary_email_address_id?: string;
+}
+
+/**
+ * Authentication provider security utilities
+ */
+export class AuthProviderUtils {
+  /**
+   * List of allowed authentication providers for new signups
+   * SECURITY: Only Apple ID allowed for new user registrations to prevent spam
+   */
+  private static ALLOWED_SIGNUP_PROVIDERS = ['oauth_apple'];
+
+  /**
+   * Legacy providers that existing users can continue to use for sign-in
+   */
+  private static LEGACY_SIGNIN_PROVIDERS = [
+    'oauth_apple',
+    'oauth_google',
+    'oauth_github',
+    'email_link',
+    'password',
+  ];
+
+  /**
+   * Validates authentication provider for new user signups
+   * SECURITY: Restricts new signups to Apple ID only
+   */
+  static validateSignupProvider(
+    externalAccountProvider?: string,
+    isNewUser: boolean = true
+  ): void {
+    if (!isNewUser) {
+      // Existing users can use any legacy provider
+      return;
+    }
+
+    if (!externalAccountProvider) {
+      throw new Error('Authentication provider is required for new signups');
+    }
+
+    if (!this.ALLOWED_SIGNUP_PROVIDERS.includes(externalAccountProvider)) {
+      throw new Error(
+        'New accounts require Apple ID authentication. Please sign up with your Apple ID to maintain platform security and prevent spam.'
+      );
+    }
+  }
+
+  /**
+   * Validates authentication provider for sign-in
+   * SECURITY: Allows legacy providers for existing users
+   */
+  static validateSigninProvider(externalAccountProvider?: string): void {
+    if (!externalAccountProvider) {
+      throw new Error('Authentication provider is required');
+    }
+
+    if (!this.LEGACY_SIGNIN_PROVIDERS.includes(externalAccountProvider)) {
+      throw new Error('Invalid authentication provider');
+    }
+  }
+
+  /**
+   * Extracts provider information from Clerk user data
+   */
+  static extractProviderFromClerkUser(userData: unknown): string | undefined {
+    // Type guard to check if userData matches ClerkUserData structure
+    const isClerkUserData = (data: unknown): data is ClerkUserData => {
+      return (
+        typeof data === 'object' &&
+        data !== null &&
+        (('external_accounts' in data &&
+          Array.isArray((data as ClerkUserData).external_accounts)) ||
+          ('email_addresses' in data &&
+            Array.isArray((data as ClerkUserData).email_addresses)))
+      );
+    };
+
+    if (!isClerkUserData(userData)) {
+      return undefined;
+    }
+
+    // Extract provider from external_accounts array
+    if (
+      userData.external_accounts &&
+      Array.isArray(userData.external_accounts)
+    ) {
+      const primaryAccount = userData.external_accounts.find(
+        (account: ClerkExternalAccount) =>
+          account.verification?.status === 'verified'
+      );
+
+      if (primaryAccount) {
+        return primaryAccount.provider;
+      }
+    }
+
+    // Fallback: check email addresses for provider hints
+    if (userData.email_addresses && Array.isArray(userData.email_addresses)) {
+      const primaryEmail = userData.email_addresses.find(
+        (email: ClerkEmailAddress) =>
+          email.id === userData.primary_email_address_id
+      );
+
+      if (primaryEmail?.email_address?.includes('@icloud.com')) {
+        return 'oauth_apple';
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Checks if a user was created with Apple ID
+   */
+  static isAppleIdUser(userData: unknown): boolean {
+    const provider = this.extractProviderFromClerkUser(userData);
+    return provider === 'oauth_apple';
+  }
+}
+
+/**
  * Authentication helper utilities
  */
 export class AuthUtils {

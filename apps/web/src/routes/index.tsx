@@ -19,7 +19,7 @@ export const Route = createFileRoute('/')({
 
 function HeroButtonsSkeleton() {
   return (
-    <div className="flex gap-3">
+    <div className="gap-button flex">
       <Skeleton className="h-10 w-32 rounded-md bg-white/10" />
       <Skeleton className="h-10 w-36 rounded-md bg-white/10" />
     </div>
@@ -74,13 +74,13 @@ function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-8">
+      <section className="container px-4 py-8">
         <div
           data-has-mounted={hasMounted}
           className="from-theme-primary to-theme-secondary animate-gradient-shift rounded-2xl bg-gradient-to-r p-8 text-white transition delay-100 duration-500 data-[has-mounted=false]:opacity-0 data-[has-mounted=true]:opacity-100 md:p-12"
           style={{ backgroundSize: '200% 200%' }}
         >
-          <div className="max-w-2xl">
+          <div className="max-w-4xl">
             <h1 className="mb-4 text-4xl font-bold lowercase md:text-5xl">
               we're vibing here
             </h1>
@@ -114,7 +114,7 @@ function Home() {
                 ) : (
                   <>
                     <SignedIn>
-                      <div className="flex gap-3">
+                      <div className="gap-button flex">
                         <Button
                           asChild
                           variant="outline"
@@ -151,7 +151,9 @@ function Home() {
       </section>
 
       {/* Home Feed */}
-      <HomeFeed />
+      <div className="container">
+        <HomeFeed />
+      </div>
     </>
   );
 }

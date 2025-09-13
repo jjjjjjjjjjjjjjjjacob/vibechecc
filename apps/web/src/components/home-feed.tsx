@@ -62,8 +62,8 @@ export function HomeFeed({ className }: HomeFeedProps) {
       icon: <Sparkles className="h-4 w-4" />,
       description:
         followStats?.following > 0
-          ? `personalized vibes from ${followStats.following} ${followStats.following === 1 ? 'person' : 'people'} you follow`
-          : 'discover and follow people to see personalized content',
+          ? `ai-powered recommendations based on your interests and ${followStats.following} ${followStats.following === 1 ? 'person' : 'people'} you follow`
+          : 'intelligent recommendations that learn from your ratings and interactions',
       requiresAuth: true,
     },
     {
@@ -106,11 +106,11 @@ export function HomeFeed({ className }: HomeFeedProps) {
     switch (feedTab) {
       case 'for-you':
         return {
-          usePersonalizedFeed: true, // Use dedicated personalized feed
+          usePersonalizedFeed: true, // Use enhanced personalized feed with AI recommendations
           enabled: !!user?.id,
-          emptyTitle: 'your personalized feed is empty',
+          emptyTitle: 'building your recommendations',
           emptyDescription:
-            'start following users to see their vibes in your personalized feed!',
+            'our ai learns from your ratings and follows to show you the best content!',
           emptyAction: null, // Handled by custom component
         };
       case 'hot':
@@ -189,8 +189,12 @@ export function HomeFeed({ className }: HomeFeedProps) {
   }, [data]); // Include full data object for proper dependency tracking
 
   // For "for you" tab, use custom empty state component
+  // Also show if there's an error but we want to provide helpful guidance
   const shouldUseCustomEmptyState =
-    feedTab === 'for-you' && vibes.length === 0 && !isLoading;
+    feedTab === 'for-you' &&
+    vibes.length === 0 &&
+    !isLoading &&
+    (!error || (error && followStats && followStats.following === 0));
 
   // Load more function for intersection observer
   const loadMore = React.useCallback(() => {
@@ -213,12 +217,12 @@ export function HomeFeed({ className }: HomeFeedProps) {
     // This prevents tabs from appearing when navigating away
     if (typeof window !== 'undefined' && window.location.pathname === '/') {
       // Show tabs in header when:
-      // 1. They're not in view AND observer has initialized
+      // 1. They're not in view AND observer has initialized AND we have an entry (to prevent initial flicker)
       // We ignore loading state to prevent tabs from disappearing during queries
-      if (!tabsInView && hasInitialized) {
+      if (!tabsInView && hasInitialized && entry) {
         setPageNavState('tabs');
-      } else if (tabsInView) {
-        // Hide tabs when they're visible in the main content
+      } else if (tabsInView || !hasInitialized || !entry) {
+        // Hide tabs when they're visible in the main content OR when not initialized yet
         setPageNavState(null);
       }
     } else {
@@ -229,7 +233,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
     return () => {
       setPageNavState(null);
     };
-  }, [tabsInView, hasInitialized, setPageNavState]);
+  }, [tabsInView, hasInitialized, entry, setPageNavState]);
 
   // Prepare header content
   const headerContent = (

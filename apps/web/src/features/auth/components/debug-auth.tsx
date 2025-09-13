@@ -37,7 +37,7 @@ export function DebugAuth() {
 
   if (!isLoaded) {
     return (
-      <div className="bg-yellow-100 p-4 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
+      <div className="bg-warning/10 text-warning p-4">
         Clerk not loaded yet...
       </div>
     );
@@ -63,13 +63,11 @@ export function DebugAuth() {
           {tokenError ? (
             <div className="text-destructive">Error: {tokenError}</div>
           ) : clerkToken ? (
-            <div className="text-green-600 dark:text-green-400">
+            <div className="text-success">
               Token exists ({clerkToken.slice(0, 20)}...)
             </div>
           ) : (
-            <div className="text-yellow-600 dark:text-yellow-400">
-              No token yet
-            </div>
+            <div className="text-warning">No token yet</div>
           )}
         </div>
 

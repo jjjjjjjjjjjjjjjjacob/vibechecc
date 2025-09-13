@@ -15,6 +15,8 @@ import {
   useAllTags,
   useVibesByTag,
   useCurrentUser,
+  useTrendingWithEngagement,
+  usePersonalizedRecommendations,
 } from '@/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, TrendingUp, Sparkles, Flame } from '@/components/ui/icons';
@@ -26,8 +28,9 @@ import {
 import type { Vibe } from '@vibechecc/types';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
-import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';
+import { VibeCreatedCelebrationV2 } from '@/components/vibe-created-celebration';
 import { useUser } from '@clerk/tanstack-react-start';
+import { useFeatureFlagEnabled } from 'posthog-js/react';
 
 // Skeleton for lazy-loaded components
 function VibeCategoryRowSkeleton() {
@@ -144,6 +147,14 @@ function DiscoverPage() {
   const { data: currentUser } = useCurrentUser();
   const { setColorTheme, setSecondaryColorTheme } = useThemeStore();
 
+  // Feature flag checks using PostHog
+  const showFeaturedCollections = useFeatureFlagEnabled('FEATURED_COLLECTIONS');
+  const useEnhancedTrending =
+    useFeatureFlagEnabled('ENHANCED_TRENDING') ?? true; // Default to enhanced trending
+  const usePersonalizedDiscovery = useFeatureFlagEnabled(
+    'PERSONALIZED_DISCOVERY'
+  );
+
   // Celebration dialog state
   const [showCelebration, setShowCelebration] = React.useState(false);
 
@@ -183,6 +194,8 @@ function DiscoverPage() {
     }
   }, [currentUser, setColorTheme, setSecondaryColorTheme]);
 
+  // PostHog automatically handles exposure tracking for feature flags
+
   return (
     <>
       {/* Celebration Dialog */}
@@ -214,7 +227,7 @@ function DiscoverPage() {
       )}
 
       <div className="from-background via-background min-h-screen bg-gradient-to-br to-[hsl(var(--theme-primary))]/10">
-        <div className="container mx-auto px-4 py-8">
+        <div className="gap-page container mx-auto px-4 py-8">
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
@@ -225,26 +238,31 @@ function DiscoverPage() {
             </p>
           </div>
 
-          {/* Featured Collections Grid */}
-          <section className="mb-12">
-            <h2 className="text-primary mb-6 text-2xl font-semibold lowercase">
-              featured collections
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {FEATURED_COLLECTIONS.map((collection) => (
-                <FeaturedCollectionVibeList
-                  key={collection.emoji}
-                  collection={collection}
-                />
-              ))}
-            </div>
-          </section>
+          {/* Featured Collections Grid - Feature Flag Controlled */}
+          {showFeaturedCollections && (
+            <section className="mb-12">
+              <h2 className="text-primary mb-6 text-2xl font-semibold lowercase">
+                featured collections
+              </h2>
+              <div className="gap-section grid md:grid-cols-2 xl:grid-cols-3">
+                {FEATURED_COLLECTIONS.map((collection) => (
+                  <FeaturedCollectionVibeList
+                    key={collection.emoji}
+                    collection={collection}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Personalized "For You" Section - Feature Flag Controlled */}
+          {usePersonalizedDiscovery && user && <PersonalizedForYouSection />}
 
           {/* New Section */}
           <NewSection />
 
-          {/* Trending Section */}
-          <TrendingSection />
+          {/* Trending Section - Enhanced or Legacy */}
+          <TrendingSection useEnhancedAlgorithm={useEnhancedTrending} />
 
           {/* Recent Arrivals Section */}
           <RecentArrivalsSection />
@@ -270,6 +288,71 @@ function DiscoverPage() {
         </div>
       </div>
     </>
+  );
+}
+
+// Personalized "For You" Section Component
+function PersonalizedForYouSection() {
+  const {
+    data: recommendations,
+    isLoading,
+    error,
+  } = usePersonalizedRecommendations({
+    limit: 15,
+  });
+
+  const personalizedVibes = recommendations?.vibes || [];
+
+  // PostHog automatically tracks conversions for feature flag usage
+  // No manual tracking needed
+
+  if (personalizedVibes.length === 0 && !isLoading) {
+    // Don't show section if no personalized content available
+    return null;
+  }
+
+  return (
+    <section className="mb-12">
+      <div className="mb-6 flex items-center gap-2">
+        <h2 className="text-primary text-2xl font-semibold lowercase">
+          <span className="font-sans">✨</span> for you
+        </h2>
+        <Badge
+          variant="secondary"
+          className="border-[hsl(var(--theme-primary))]/20 bg-[hsl(var(--theme-primary))]/10 text-[hsl(var(--theme-primary))]"
+        >
+          personalized
+        </Badge>
+      </div>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Handpicked recommendations based on your interests and activity
+      </p>
+      <div className="gap-standard grid sm:grid-cols-2 lg:grid-cols-3">
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, index) => (
+              <VibeCard
+                key={`skeleton-${index}`}
+                variant="compact"
+                loading={true}
+              />
+            ))
+          : personalizedVibes
+              .slice(0, 12)
+              .map((vibe: Vibe) => (
+                <VibeCard
+                  key={vibe.id}
+                  vibe={vibe}
+                  variant="compact"
+                  ratingDisplayMode="most-rated"
+                />
+              ))}
+      </div>
+      {error && (
+        <div className="text-muted-foreground mt-4 text-center text-sm">
+          Unable to load personalized recommendations
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -365,14 +448,46 @@ function NewSection() {
 }
 
 // Trending Section Component
-function TrendingSection() {
-  const { data, isLoading, error } = useVibesPaginated(20);
+function TrendingSection({
+  useEnhancedAlgorithm = false,
+}: {
+  useEnhancedAlgorithm?: boolean;
+}) {
+  // Use enhanced trending algorithm if feature flag is enabled
+  const enhancedTrending = useTrendingWithEngagement({
+    limit: 12,
+    timeWindowHours: 24,
+    enabled: useEnhancedAlgorithm,
+  });
 
-  const trendingVibes = useMemo(() => {
-    if (!data?.vibes) return [];
+  // Fallback to legacy algorithm if enhanced is disabled
+  const legacyData = useVibesPaginated(20);
+
+  const legacyTrendingVibes = useMemo(() => {
+    if (!legacyData.data?.vibes) return [];
     // Filter for vibes with good engagement (rating count >= 3) and limit to 12
-    return data.vibes.filter((vibe) => vibe.ratings?.length >= 3).slice(0, 12);
-  }, [data]);
+    return legacyData.data.vibes
+      .filter((vibe) => vibe.ratings?.length >= 3)
+      .slice(0, 12);
+  }, [legacyData.data]);
+
+  // Choose data source based on feature flag
+  const { data, isLoading, error } = useEnhancedAlgorithm
+    ? {
+        data: enhancedTrending.data,
+        isLoading: enhancedTrending.isLoading,
+        error: enhancedTrending.error,
+      }
+    : {
+        data: { vibes: legacyTrendingVibes },
+        isLoading: legacyData.isLoading,
+        error: legacyData.error,
+      };
+
+  const trendingVibes = data?.vibes || [];
+
+  // PostHog automatically tracks conversions for feature flag usage
+  // No manual tracking needed
 
   return (
     <DiscoverSectionWrapper

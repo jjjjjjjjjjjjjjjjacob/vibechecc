@@ -311,20 +311,20 @@ function EditVibe() {
                   <div className="space-y-2 text-sm">
                     {description !== originalValues.description && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Description updated</span>
                       </div>
                     )}
                     {currentImageUrl !== originalValues.imageUrl && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Image updated</span>
                       </div>
                     )}
                     {JSON.stringify(tags) !==
                       JSON.stringify(originalValues.tags) && (
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Tags updated</span>
                       </div>
                     )}
@@ -350,11 +350,11 @@ function EditVibe() {
           {/* Header with gradient text */}
           <div className="my-6 text-center">
             <div className="flex items-center justify-center gap-4">
-              <h1 className="animate-gradient-text drop-shadow-theme-primary/50 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
+              <h1 className="animate-gradient-text drop-shadow-theme-primary/50 themed-gradient-text text-3xl font-bold lowercase drop-shadow-md sm:text-4xl">
                 edit your vibe
               </h1>
               {hasUnsavedChanges && (
-                <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                <div className="text-warning flex items-center gap-1">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-xs">unsaved changes</span>
                 </div>
@@ -410,7 +410,7 @@ function EditVibe() {
                     validationErrors.description
                       ? 'border-destructive focus:border-destructive'
                       : description && !validationErrors.description
-                        ? 'border-green-600/50 dark:border-green-400/50'
+                        ? 'border-success/50'
                         : 'border-theme-primary/50'
                   )}
                   required
@@ -428,7 +428,7 @@ function EditVibe() {
                   <span
                     className={
                       description.length > 1800
-                        ? 'text-orange-600 dark:text-orange-400'
+                        ? 'text-warning'
                         : 'text-muted-foreground'
                     }
                   >
@@ -471,9 +471,7 @@ function EditVibe() {
                   </span>
                   <span
                     className={
-                      tags.length > 8
-                        ? 'text-orange-600 dark:text-orange-400'
-                        : 'text-muted-foreground'
+                      tags.length > 8 ? 'text-warning' : 'text-muted-foreground'
                     }
                   >
                     {tags.length}/10 tags
@@ -530,7 +528,7 @@ function EditVibe() {
                 </div>
 
                 {hasUnsavedChanges && (
-                  <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center text-sm text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300">
+                  <div className="border-warning/20 bg-warning/10 text-warning rounded-lg border p-3 text-center text-sm">
                     <AlertCircle className="mr-1 inline h-4 w-4" />
                     you have unsaved changes
                   </div>

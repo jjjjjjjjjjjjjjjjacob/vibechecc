@@ -51,7 +51,7 @@ interface VibeCreatedCelebrationV2Props {
 }
 
 type CelebrationStep = 'celebrate' | 'share' | 'customize';
-type StoryLayout = 'expanded' | 'minimal';
+type StoryLayout = 'expanded' | 'minimal' | 'square';
 type Platform = 'twitter' | 'instagram' | 'tiktok';
 
 const layoutOptions: LayoutOption[] = [
@@ -69,6 +69,15 @@ const layoutOptions: LayoutOption[] = [
     label: 'minimal',
     description: 'text focus',
     includeImage: false,
+    includeRatings: true,
+    includeReview: true,
+    includeTags: true,
+  },
+  {
+    value: 'square',
+    label: 'square',
+    description: 'for instagram',
+    includeImage: true,
     includeRatings: true,
     includeReview: true,
     includeTags: true,
@@ -223,8 +232,7 @@ export function VibeCreatedCelebrationV2({
       icon: Music2,
       label: 'tiktok',
       description: 'download for video/story',
-      color:
-        'hover:bg-[#000000]/10 hover:text-[#000000] dark:hover:bg-[#FFFFFF]/10 dark:hover:text-[#FFFFFF]',
+      color: 'hover:bg-foreground/10 hover:text-foreground',
     },
   };
 

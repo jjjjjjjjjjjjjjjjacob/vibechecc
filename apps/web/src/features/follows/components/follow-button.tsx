@@ -31,6 +31,7 @@ export function FollowButton({
   unfollowText = 'unfollow',
 }: FollowButtonProps) {
   const [isHovered, setIsHovered] = React.useState(false);
+  const [isFocused, setIsFocused] = React.useState(false);
 
   const { data: isFollowing, isLoading: isCheckingStatus } =
     useIsCurrentUserFollowing(targetUserId);
@@ -59,10 +60,20 @@ export function FollowButton({
     username,
   ]);
 
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleClick();
+      }
+    },
+    [handleClick]
+  );
+
   const getButtonText = () => {
     if (isLoading) return '';
     if (isFollowing) {
-      return isHovered ? unfollowText : followingText;
+      return isHovered || isFocused ? unfollowText : followingText;
     }
     return followText;
   };
@@ -71,18 +82,30 @@ export function FollowButton({
     if (!showIcon) return null;
 
     if (isLoading) {
-      return <Loader2 className="h-4 w-4 animate-spin" />;
+      return <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />;
     }
 
     if (isFollowing) {
-      return isHovered ? (
-        <UserMinus className="h-4 w-4" />
+      return isHovered || isFocused ? (
+        <UserMinus className="h-4 w-4" aria-hidden="true" />
       ) : (
-        <UserPlus className="h-4 w-4 fill-current" />
+        <UserPlus className="h-4 w-4 fill-current" aria-hidden="true" />
       );
     }
 
-    return <UserPlus className="h-4 w-4" />;
+    return <UserPlus className="h-4 w-4" aria-hidden="true" />;
+  };
+
+  const getAriaLabel = () => {
+    if (isLoading) {
+      return `${isFollowing ? 'Unfollowing' : 'Following'} ${username || 'user'}...`;
+    }
+    if (isFollowing) {
+      return isHovered || isFocused
+        ? `Unfollow ${username || 'user'}`
+        : `Following ${username || 'user'}. Click to unfollow`;
+    }
+    return `Follow ${username || 'user'}`;
   };
 
   if (isCheckingStatus) {
@@ -91,13 +114,17 @@ export function FollowButton({
         size={size}
         variant="outline"
         disabled
+        aria-label="Checking follow status..."
         className={cn(
-          'border-border bg-background/50',
+          'border-border bg-background/50 cursor-wait',
+          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2',
           variant === 'compact' && 'px-3 py-1 text-xs',
           className
         )}
       >
-        {showIcon && <Loader2 className="h-4 w-4 animate-spin" />}
+        {showIcon && (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        )}
         {variant !== 'compact' && <span className="ml-2">loading...</span>}
       </Button>
     );
@@ -106,34 +133,64 @@ export function FollowButton({
   return (
     <Button
       size={size}
-      variant={isFollowing ? 'outline' : 'default'}
+      variant={isFollowing ? 'default' : 'outline'}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       disabled={isLoading}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      aria-label={getAriaLabel()}
+      aria-pressed={isFollowing}
+      role="button"
       className={cn(
-        // Base styles
-        'border-none transition-all duration-200',
+        // Base styles with improved transitions
+        'relative transition-all duration-300 ease-out',
+        'transform-gpu', // Use GPU acceleration for smoother animations
 
-        // Following state styles (gradient background)
+        // Enhanced focus styles for accessibility
+        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2',
+        'focus-visible:outline-none',
+
+        // Following state styles (more prominent gradient)
         isFollowing && [
-          'from-theme-primary to-theme-secondary text-primary-foreground bg-gradient-to-r',
-          'shadow-lg hover:scale-105 hover:shadow-xl',
+          'from-primary to-primary/90 text-primary-foreground bg-gradient-to-r',
+          'border-transparent shadow-sm',
+          // Enhanced hover state for unfollow intent
+          'hover:from-destructive hover:to-destructive/90',
+          'hover:scale-[1.02] hover:shadow-md',
+          // Focus state
+          'focus-visible:from-destructive focus-visible:to-destructive/90',
+          'focus-visible:scale-[1.02] focus-visible:shadow-md',
         ],
 
-        // Not following state styles (outline)
+        // Not following state styles (improved contrast)
         !isFollowing && [
-          'border-theme-primary text-theme-primary border bg-transparent',
-          'hover:from-theme-primary hover:to-theme-secondary hover:bg-gradient-to-r',
-          'hover:text-primary-foreground hover:border-theme-primary',
-          'hover:scale-105 hover:shadow-lg',
+          'border-primary text-primary bg-transparent',
+          'shadow-sm hover:shadow-md',
+          // More prominent hover state
+          'hover:from-primary hover:to-primary/90 hover:bg-gradient-to-r',
+          'hover:text-primary-foreground hover:border-transparent',
+          'hover:scale-[1.02]',
+          // Focus state
+          'focus-visible:from-primary focus-visible:to-primary/90 focus-visible:bg-gradient-to-r',
+          'focus-visible:text-primary-foreground focus-visible:border-transparent',
+          'focus-visible:scale-[1.02]',
         ],
+
+        // Active state (pressed feedback)
+        'active:scale-[0.98] active:shadow-sm',
 
         // Compact variant
         variant === 'compact' && 'px-3 py-1 text-xs font-medium',
 
-        // Loading state
-        isLoading && 'cursor-not-allowed opacity-75',
+        // Loading state improvements
+        isLoading && [
+          'cursor-wait opacity-75',
+          'hover:scale-100 focus-visible:scale-100 active:scale-100',
+          'pointer-events-none', // Prevent multiple clicks during loading
+        ],
 
         className
       )}

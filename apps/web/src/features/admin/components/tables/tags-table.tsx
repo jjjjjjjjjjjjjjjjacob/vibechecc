@@ -211,7 +211,7 @@ export function TagsTable({ data, isLoading }: TagsTableProps) {
                   daysSince > 30
                     ? 'text-destructive'
                     : daysSince > 7
-                      ? 'text-yellow-600 dark:text-yellow-400'
+                      ? 'text-warning'
                       : 'text-muted-foreground'
                 )}
               >

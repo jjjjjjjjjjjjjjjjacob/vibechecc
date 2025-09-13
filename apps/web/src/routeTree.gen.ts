@@ -16,8 +16,10 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DataRouteImport } from './routes/data'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibesIndexRouteImport } from './routes/vibes/index'
@@ -75,6 +77,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
@@ -83,6 +90,11 @@ const DiscoverRoute = DiscoverRouteImport.update({
 const DataRoute = DataRouteImport.update({
   id: '/data',
   path: '/data',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -194,8 +206,10 @@ const VibesVibeIdEditRoute = VibesVibeIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/community': typeof CommunityRoute
   '/data': typeof DataRoute
   '/discover': typeof DiscoverRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
@@ -225,8 +239,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/data': typeof DataRoute
   '/discover': typeof DiscoverRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
@@ -257,8 +273,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/community': typeof CommunityRoute
   '/data': typeof DataRoute
   '/discover': typeof DiscoverRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
@@ -291,8 +309,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/community'
     | '/data'
     | '/discover'
+    | '/leaderboard'
     | '/onboarding'
     | '/privacy'
     | '/profile'
@@ -322,8 +342,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/community'
     | '/data'
     | '/discover'
+    | '/leaderboard'
     | '/onboarding'
     | '/privacy'
     | '/search'
@@ -353,8 +375,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/community'
     | '/data'
     | '/discover'
+    | '/leaderboard'
     | '/onboarding'
     | '/privacy'
     | '/profile'
@@ -386,8 +410,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  CommunityRoute: typeof CommunityRoute
   DataRoute: typeof DataRoute
   DiscoverRoute: typeof DiscoverRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRouteWithChildren
@@ -455,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/discover': {
       id: '/discover'
       path: '/discover'
@@ -467,6 +500,13 @@ declare module '@tanstack/react-router' {
       path: '/data'
       fullPath: '/data'
       preLoaderRoute: typeof DataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -691,8 +731,10 @@ const VibesVibeIdRouteWithChildren = VibesVibeIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  CommunityRoute: CommunityRoute,
   DataRoute: DataRoute,
   DiscoverRoute: DiscoverRoute,
+  LeaderboardRoute: LeaderboardRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRouteWithChildren,

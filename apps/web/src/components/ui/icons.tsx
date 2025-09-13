@@ -54,10 +54,14 @@ export {
   PartyPopper,
   Rocket,
   Share2,
+  Bookmark,
+  ExternalLink,
+  Lock,
 } from 'lucide-react';
 
 // Status and feedback icons
 export {
+  Award,
   Check,
   CheckCircle,
   AlertCircle,
@@ -112,7 +116,7 @@ export { Camera, Image } from 'lucide-react';
 export { PanelLeft } from 'lucide-react';
 
 // Social media icons
-export { Twitter, Instagram } from 'lucide-react';
+export { Twitter, Instagram, Apple } from 'lucide-react';
 
 // Emoji and reactions
 export { Smile } from 'lucide-react';

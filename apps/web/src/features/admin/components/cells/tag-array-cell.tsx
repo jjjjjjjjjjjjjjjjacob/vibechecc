@@ -149,7 +149,7 @@ export function TagArrayCell({
                 {isLoading ? (
                   <div className="h-2 w-2 animate-spin rounded-full border border-current border-t-transparent" />
                 ) : (
-                  <Check className="h-2 w-2 text-green-600 dark:text-green-400" />
+                  <Check className="text-success h-2 w-2" />
                 )}
               </Button>
               <Button

@@ -5,16 +5,17 @@
 
 /**
  * Format a date to a human-readable distance from now
- * @param date - The date to format
+ * @param date - The date to format (Date object or timestamp number)
  * @param options - Options object with addSuffix boolean
  * @returns Formatted string like "2 hours ago" or "in 3 days"
  */
 export function formatDistanceToNow(
-  date: Date,
+  date: Date | number,
   options: { addSuffix?: boolean } = {}
 ): string {
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
+  const targetDate = date instanceof Date ? date : new Date(date);
+  const diffMs = now.getTime() - targetDate.getTime();
   const diffSeconds = Math.floor(Math.abs(diffMs) / 1000);
   const diffMinutes = Math.floor(diffSeconds / 60);
   const diffHours = Math.floor(diffMinutes / 60);

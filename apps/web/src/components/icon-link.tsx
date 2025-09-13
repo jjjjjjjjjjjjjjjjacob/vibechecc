@@ -10,7 +10,7 @@ export function IconLink({
   return (
     <a
       href={href}
-      className="text-center text-xs font-bold text-slate-500 uppercase"
+      className="text-muted-foreground text-center text-xs font-bold uppercase"
     >
       <img
         src={icon}

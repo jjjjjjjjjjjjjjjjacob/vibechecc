@@ -71,22 +71,7 @@ export async function getCurrentUserOrCreate(ctx: MutationCtx) {
   return user;
 }
 
-// Helper function to create user if not exists (internal)
-export async function createUserIfNotExistsInternal(
-  ctx: MutationCtx,
-  externalId: string
-) {
-  let user = await userByExternalId(ctx, externalId);
-  if (!user) {
-    const userId = await ctx.db.insert('users', {
-      externalId,
-      created_at: Date.now(),
-      updated_at: Date.now(),
-    });
-    user = await ctx.db.get(userId);
-  }
-  return user;
-}
+// Note: createUserIfNotExistsInternal has been moved to internal/userMutations.ts
 
 // Get all users - RESTRICTED: Only for authenticated admin users
 export const getAll = query({
@@ -321,104 +306,16 @@ export const updateProfile = action({
       throw new Error('User not authenticated');
     }
 
-    // Update Convex only - Clerk will be updated from frontend
-    return await (
-      ctx as unknown as { runMutation: typeof ctx.runMutation }
-    ).runMutation(internal.internal.updateProfileInternal, {
+    // Call the internal mutation to avoid circular dependency
+    // @ts-expect-error - Type instantiation is excessively deep - Convex circular reference workaround
+    return await ctx.runMutation(internal.internal.updateProfileInternal, {
       externalId: identity.subject,
       ...args,
     });
   },
 });
 
-// Internal mutation for updating profile (called by action)
-export const updateProfileInternal = internalMutation({
-  args: {
-    externalId: v.string(),
-    username: v.optional(v.string()),
-    first_name: v.optional(v.string()),
-    last_name: v.optional(v.string()),
-    image_url: v.optional(v.string()),
-    bio: v.optional(v.string()),
-    themeColor: v.optional(v.string()), // Legacy field
-    primaryColor: v.optional(v.string()), // Primary gradient color
-    secondaryColor: v.optional(v.string()), // Secondary gradient color
-    interests: v.optional(v.array(v.string())), // User interests
-    socials: v.optional(
-      v.object({
-        twitter: v.optional(v.string()),
-        instagram: v.optional(v.string()),
-        tiktok: v.optional(v.string()),
-        youtube: v.optional(v.string()),
-        website: v.optional(v.string()),
-      })
-    ),
-  },
-  handler: async (ctx, args) => {
-    const user = await userByExternalId(ctx, args.externalId);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const updates: Partial<{
-      username: string;
-      first_name: string;
-      last_name: string;
-      image_url: string;
-      profile_image_url: string;
-      bio: string;
-      themeColor: string;
-      primaryColor: string;
-      secondaryColor: string;
-      interests: string[];
-      socials: {
-        twitter?: string;
-        instagram?: string;
-        tiktok?: string;
-        youtube?: string;
-        website?: string;
-      };
-    }> = {};
-
-    if (args.username !== undefined) {
-      updates.username = args.username;
-    }
-    if (args.first_name !== undefined) {
-      updates.first_name = args.first_name;
-    }
-    if (args.last_name !== undefined) {
-      updates.last_name = args.last_name;
-    }
-    if (args.image_url !== undefined) {
-      updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
-    }
-    if (args.bio !== undefined) {
-      updates.bio = args.bio;
-    }
-    if (args.themeColor !== undefined) {
-      updates.themeColor = args.themeColor;
-    }
-    if (args.primaryColor !== undefined) {
-      updates.primaryColor = args.primaryColor;
-    }
-    if (args.secondaryColor !== undefined) {
-      updates.secondaryColor = args.secondaryColor;
-    }
-    if (args.interests !== undefined) {
-      updates.interests = args.interests;
-    }
-    if (args.socials !== undefined) {
-      updates.socials = args.socials;
-    }
-
-    if (Object.keys(updates).length > 0) {
-      await ctx.db.patch(user._id, updates);
-    }
-
-    return await ctx.db.get(user._id);
-  },
-});
+// Note: internalUpdateProfile has been moved to internal/userMutations.ts
 
 // ONBOARDING ACTIONS (updated to sync with Clerk)
 
@@ -435,62 +332,15 @@ export const completeOnboarding = action({
       throw new Error('User not authenticated');
     }
 
-    // Update Convex only - Clerk will be updated from frontend
-    return await (
-      ctx as unknown as { runMutation: typeof ctx.runMutation }
-    ).runMutation(internal.internal.completeOnboardingInternal, {
+    // Call the internal mutation to avoid circular dependency
+    return await ctx.runMutation(internal.internal.completeOnboardingInternal, {
       externalId: identity.subject,
       ...args,
     });
   },
 });
 
-// Internal mutation for completing onboarding
-export const completeOnboardingInternal = internalMutation({
-  args: {
-    externalId: v.string(),
-    username: v.optional(v.string()),
-    interests: v.optional(v.array(v.string())),
-    image_url: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    let user = await userByExternalId(ctx, args.externalId);
-
-    // If user doesn't exist, create them first
-    if (!user) {
-      // console.log('User not found in completeOnboarding, creating...');
-      user = await createUserIfNotExistsInternal(ctx, args.externalId);
-    }
-
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-
-    const updates: {
-      onboardingCompleted: boolean;
-      username?: string;
-      interests?: string[];
-      image_url?: string;
-      profile_image_url?: string;
-    } = {
-      onboardingCompleted: true,
-    };
-
-    if (args.username !== undefined) {
-      updates.username = args.username;
-    }
-    if (args.interests !== undefined) {
-      updates.interests = args.interests;
-    }
-    if (args.image_url !== undefined) {
-      updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
-    }
-
-    await ctx.db.patch(user._id, updates);
-    return await ctx.db.get(user._id);
-  },
-});
+// Note: completeOnboardingInternal has been moved to internal/userMutations.ts
 
 // Update onboarding step data ACTION (simplified - only updates Convex)
 export const updateOnboardingData = action({
@@ -507,99 +357,18 @@ export const updateOnboardingData = action({
       throw new Error('User not authenticated');
     }
 
-    // Update Convex only - Clerk will be updated from frontend
-    return await (
-      ctx as unknown as { runMutation: typeof ctx.runMutation }
-    ).runMutation(internal.internal.updateOnboardingDataInternal, {
-      externalId: identity.subject,
-      ...args,
-    });
+    // Call the internal mutation to avoid circular dependency
+    return await ctx.runMutation(
+      internal.internal.updateOnboardingDataInternal,
+      {
+        externalId: identity.subject,
+        ...args,
+      }
+    );
   },
 });
 
-// Internal mutation for updating onboarding data
-export const updateOnboardingDataInternal = internalMutation({
-  args: {
-    externalId: v.string(),
-    username: v.optional(v.string()),
-    first_name: v.optional(v.string()),
-    last_name: v.optional(v.string()),
-    interests: v.optional(v.array(v.string())),
-    image_url: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    let user = await userByExternalId(ctx, args.externalId);
-    // console.log(
-    //   'User after getCurrentUser:',
-    //   user ? { _id: user._id, externalId: user.externalId } : 'null'
-    // );
-
-    // If user doesn't exist, create them first
-    if (!user) {
-      // console.log('User not found, creating...');
-      user = await createUserIfNotExistsInternal(ctx, args.externalId);
-    }
-
-    if (!user) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to get or create user');
-      throw new Error('User not authenticated');
-    }
-
-    const updates: Partial<{
-      username: string;
-      first_name: string;
-      last_name: string;
-      interests: string[];
-      image_url: string;
-      profile_image_url: string;
-    }> = {};
-
-    if (args.username !== undefined) {
-      updates.username = args.username;
-    }
-    if (args.first_name !== undefined) {
-      updates.first_name = args.first_name;
-    }
-    if (args.last_name !== undefined) {
-      updates.last_name = args.last_name;
-    }
-    if (args.interests !== undefined) {
-      updates.interests = args.interests;
-    }
-    if (args.image_url !== undefined) {
-      updates.image_url = args.image_url;
-      updates.profile_image_url = args.image_url; // Keep both fields synced
-    }
-
-    // console.log('Updates to apply:', updates);
-
-    if (Object.keys(updates).length > 0) {
-      await ctx.db.patch(user._id, updates);
-      // console.log('Updates applied successfully');
-    }
-
-    const updatedUser = await ctx.db.get(user._id);
-    // console.log(
-    //   'Final user state:',
-    //   updatedUser
-    //     ? {
-    //         _id: updatedUser._id,
-    //         externalId: updatedUser.externalId,
-    //         username: updatedUser.username,
-    //         onboardingCompleted: updatedUser.onboardingCompleted,
-    //         interests: updatedUser.interests,
-    //         image_url: updatedUser.image_url,
-    //         profile_image_url: updatedUser.profile_image_url,
-    //         bio: updatedUser.bio,
-    //         socials: updatedUser.socials,
-    //       }
-    //     : 'null'
-    // );
-
-    return updatedUser;
-  },
-});
+// Note: updateOnboardingDataInternal has been moved to internal/userMutations.ts
 
 // SECURITY: Debug authentication - RESTRICTED TO DEVELOPMENT ONLY
 export const debugAuth = query({
@@ -735,6 +504,15 @@ export const listAll = internalQuery({
 export const upsertFromClerk = internalMutation({
   args: { data: v.any() as Validator<UserJSON> }, // no runtime validation, trust Clerk
   async handler(ctx, { data }) {
+    const existingUser = await userByExternalId(ctx, data.id);
+    const isNewUser = existingUser === null;
+
+    // Log new user signup
+    if (isNewUser) {
+      // eslint-disable-next-line no-console
+      console.log(`[INFO] New signup processed: ${data.id}`);
+    }
+
     // SECURITY: Validate username from Clerk to ensure consistency
     let validatedUsername = data.username || undefined;
     if (validatedUsername) {
@@ -767,11 +545,10 @@ export const upsertFromClerk = internalMutation({
       updated_at: data.updated_at || undefined,
     };
 
-    const user = await userByExternalId(ctx, data.id);
-    if (user === null) {
+    if (isNewUser) {
       await ctx.db.insert('users', userAttributes);
     } else {
-      await ctx.db.patch(user._id, userAttributes);
+      await ctx.db.patch(existingUser._id, userAttributes);
     }
   },
 });

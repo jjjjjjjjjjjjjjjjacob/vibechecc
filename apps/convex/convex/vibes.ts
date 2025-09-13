@@ -3,6 +3,7 @@ import {
   query,
   internalMutation,
   type MutationCtx,
+  type QueryCtx,
 } from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
@@ -2199,7 +2200,7 @@ export const getVibesByEmojiFilters = query({
   },
 });
 
-// Get personalized feed for authenticated user (vibes from followed users and matching interests)
+// Enhanced personalized feed with sophisticated recommendations and trending fallbacks
 export const getForYouFeed = query({
   args: {
     limit: v.optional(v.number()),
@@ -2211,168 +2212,394 @@ export const getForYouFeed = query({
     // Check if user is authenticated
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      return {
-        vibes: [],
-        continueCursor: null,
-        isDone: true,
-      };
+      // For anonymous users, return trending content
+      return await getTrendingFallbackForFeed(ctx, limit);
     }
 
-    // Get current user's data including interests
+    // Get current user's data including interests and interaction history
     const currentUser = await ctx.db
       .query('users')
-      .withIndex('byExternalId', (q) => q.eq('externalId', identity!.subject))
+      .withIndex('byExternalId', (q) => q.eq('externalId', identity.subject))
       .first();
 
-    const userInterests = new Set(currentUser?.interests || []);
-
-    // Get users that current user follows
-    const followingList = await ctx.db
-      .query('follows')
-      .withIndex('byFollower', (q) => q.eq('followerId', identity.subject))
-      .collect();
-
-    const followingIds = new Set(
-      followingList.map((follow) => follow.followingId)
-    );
-
-    // Get recent vibes for engagement scoring (more vibes for better selection)
-    const recentVibes = await ctx.db
-      .query('vibes')
-      .withIndex('byCreatedAt')
-      .order('desc')
-      .take(200); // Get more vibes to ensure we have a good pool
-
-    // Batch fetch all ratings for all vibes to avoid N+1 query problem
-    const allVibeIds = recentVibes.map((vibe) => vibe.id);
-    const allRatings = await ctx.db
-      .query('ratings')
-      .filter((q) =>
-        q.or(...allVibeIds.map((vibeId) => q.eq(q.field('vibeId'), vibeId)))
-      )
-      .collect();
-
-    // Group ratings by vibeId for efficient lookup
-    const ratingsByVibeId = new Map<string, typeof allRatings>();
-    for (const rating of allRatings) {
-      const existing = ratingsByVibeId.get(rating.vibeId) || [];
-      existing.push(rating);
-      ratingsByVibeId.set(rating.vibeId, existing);
+    if (!currentUser) {
+      return await getTrendingFallbackForFeed(ctx, limit);
     }
 
-    // Calculate engagement scores for all vibes
-    const vibesWithEngagement = await Promise.all(
-      recentVibes.map(async (vibe) => {
-        // Get pre-fetched ratings for this vibe
-        const ratings = ratingsByVibeId.get(vibe.id) || [];
+    // Get user's interaction patterns to determine recommendation strategy
+    const [userRatings, userEmojiRatings, followingList] = await Promise.all([
+      ctx.db
+        .query('ratings')
+        .withIndex('user', (q) => q.eq('userId', identity.subject))
+        .collect(),
+      ctx.db
+        .query('emojiRatings')
+        .withIndex('byUser', (q) => q.eq('userId', identity.subject))
+        .collect(),
+      ctx.db
+        .query('follows')
+        .withIndex('byFollower', (q) => q.eq('followerId', identity.subject))
+        .collect(),
+    ]);
 
-        // Check if vibe has tags matching user interests
-        const hasMatchingInterests =
-          vibe.tags?.some((tag) => userInterests.has(tag)) || false;
+    const totalInteractions = userRatings.length + userEmojiRatings.length;
+    const hasLimitedHistory = totalInteractions < 5 && followingList.length < 2;
 
-        if (
-          ratings.length === 0 &&
-          !followingIds.has(vibe.createdById) &&
-          !hasMatchingInterests
-        ) {
-          // Skip vibes with no ratings unless they're from followed users or match interests
-          return null;
-        }
+    if (hasLimitedHistory) {
+      // New user - blend personalized with trending (60/40 split)
+      return await getNewUserFeedRecommendations(ctx, currentUser, limit, {
+        ratings: userRatings,
+        emojiRatings: userEmojiRatings,
+        following: followingList,
+      });
+    }
 
-        // Calculate base engagement score
-        const totalRatings = ratings.length;
-        const averageRating =
-          totalRatings > 0
-            ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length
-            : 0;
-        const baseScore =
-          totalRatings * (averageRating / 5) + totalRatings * 0.3;
-
-        // Apply recency boost (newer vibes get higher scores)
-        const createdAtMs = new Date(vibe.createdAt).getTime();
-        const hoursOld = (Date.now() - createdAtMs) / (1000 * 60 * 60);
-        const recencyMultiplier = Math.max(0.1, 1 - hoursOld / 168); // Decay over 1 week
-
-        // Inflate score for followed users (3x multiplier)
-        const followMultiplier = followingIds.has(vibe.createdById) ? 3.0 : 1.0;
-
-        // Inflate score for vibes matching user interests (2x multiplier)
-        const interestMultiplier = hasMatchingInterests ? 2.0 : 1.0;
-
-        const finalScore =
-          baseScore * recencyMultiplier * followMultiplier * interestMultiplier;
-
-        return {
-          vibe,
-          engagementScore: finalScore,
-          isFromFollowed: followingIds.has(vibe.createdById),
-          hasMatchingInterests,
-        };
-      })
-    );
-
-    // Filter out null values and sort by engagement score (highest first)
-    const sortedVibes = vibesWithEngagement
-      .filter(
-        (item) =>
-          item !== null &&
-          (item.engagementScore > 0 ||
-            item.isFromFollowed ||
-            item.hasMatchingInterests)
-      )
-      .sort((a, b) => (b?.engagementScore ?? 0) - (a?.engagementScore ?? 0))
-      .slice(0, limit);
-
-    // Get complete vibe details
-    const vibesWithDetails = await Promise.all(
-      sortedVibes.map(async (item) => {
-        if (!item) return null;
-        const vibe = item.vibe;
-        const creator = await ctx.db
-          .query('users')
-          .withIndex('byExternalId', (q) =>
-            q.eq('externalId', vibe.createdById)
-          )
-          .first();
-
-        const ratings = await ctx.db
-          .query('ratings')
-          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
-          .take(10);
-
-        const ratingDetails = await Promise.all(
-          ratings.map(async (rating) => {
-            const user = await ctx.db
-              .query('users')
-              .withIndex('byExternalId', (q) =>
-                q.eq('externalId', rating.userId)
-              )
-              .first();
-            return {
-              user,
-              emoji: rating.emoji,
-              value: rating.value,
-              review: rating.review,
-              createdAt: rating.createdAt,
-            };
-          })
-        );
-
-        return {
-          ...vibe,
-          createdBy: creator,
-          ratings: ratingDetails,
-        };
-      })
-    );
-
-    return {
-      vibes: vibesWithDetails,
-      continueCursor: null, // Simplified pagination for engagement-based feed
-      isDone: true,
-    };
+    // Experienced user - full personalized recommendations
+    return await getPersonalizedFeedRecommendations(ctx, currentUser, limit, {
+      ratings: userRatings,
+      emojiRatings: userEmojiRatings,
+      following: followingList,
+    });
   },
 });
+
+// Helper: Trending fallback for anonymous users
+async function getTrendingFallbackForFeed(ctx: QueryCtx, limit: number) {
+  // Get trending vibes with engagement scoring
+  const timeWindowHours = 48; // Extended window for better coverage
+  const timeWindowMs = timeWindowHours * 60 * 60 * 1000;
+  const now = Date.now();
+  const cutoffTime = now - timeWindowMs;
+
+  const vibes = await ctx.db
+    .query('vibes')
+    .withIndex('byVisibility', (q) => q.eq('visibility', 'public'))
+    .order('desc')
+    .take(100);
+
+  // Calculate trending scores
+  const vibesWithScores = await Promise.all(
+    vibes.map(async (vibe: Doc<'vibes'>) => {
+      const [ratings, emojiRatings] = await Promise.all([
+        ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .collect(),
+        ctx.db
+          .query('emojiRatings')
+          .withIndex('byVibe', (q) => q.eq('vibeId', vibe.id))
+          .collect(),
+      ]);
+
+      const recentRatings = ratings.filter(
+        (r: Doc<'ratings'>) => new Date(r.createdAt).getTime() >= cutoffTime
+      );
+      const recentEmojiRatings = emojiRatings.filter(
+        (r: Doc<'emojiRatings'>) =>
+          new Date(r.createdAt).getTime() >= cutoffTime
+      );
+
+      const totalRatings = ratings.length + emojiRatings.length;
+      const recentEngagement = recentRatings.length + recentEmojiRatings.length;
+      const avgRating =
+        totalRatings > 0
+          ? [...ratings, ...emojiRatings].reduce(
+              (sum: number, r: Doc<'ratings'> | Doc<'emojiRatings'>) =>
+                sum + r.value,
+              0
+            ) / totalRatings
+          : 3;
+
+      const ageInHours =
+        (now - new Date(vibe.createdAt).getTime()) / (60 * 60 * 1000);
+      const recencyFactor = Math.exp(-ageInHours / (timeWindowHours * 2));
+
+      const trendingScore =
+        recentEngagement * 0.4 + avgRating * 0.3 + recencyFactor * 0.3;
+
+      return { vibe, trendingScore };
+    })
+  );
+
+  vibesWithScores.sort((a, b) => b.trendingScore - a.trendingScore);
+  const topVibes = vibesWithScores.slice(0, limit);
+
+  // Add creator details
+  const vibesWithDetails = await Promise.all(
+    topVibes.map(async ({ vibe }) => {
+      const creator = await ctx.db
+        .query('users')
+        .withIndex('byExternalId', (q) => q.eq('externalId', vibe.createdById))
+        .first();
+
+      const ratings = await ctx.db
+        .query('ratings')
+        .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+        .take(5);
+
+      const ratingDetails = await Promise.all(
+        ratings.map(async (rating: Doc<'ratings'>) => {
+          const user = await ctx.db
+            .query('users')
+            .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
+            .first();
+          return {
+            user,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+          };
+        })
+      );
+
+      return { ...vibe, createdBy: creator, ratings: ratingDetails };
+    })
+  );
+
+  return {
+    vibes: vibesWithDetails,
+    continueCursor: null,
+    isDone: true,
+  };
+}
+
+// Helper: New user recommendations (blend personalized + trending)
+async function getNewUserFeedRecommendations(
+  ctx: QueryCtx,
+  currentUser: Doc<'users'>,
+  limit: number,
+  userHistory: {
+    ratings: Doc<'ratings'>[];
+    emojiRatings: Doc<'emojiRatings'>[];
+    following: Doc<'follows'>[];
+  }
+) {
+  const personalizedLimit = Math.floor(limit * 0.6); // 60% personalized
+  const trendingLimit = limit - personalizedLimit; // 40% trending
+
+  const [personalizedResult, trendingResult] = await Promise.all([
+    getPersonalizedFeedRecommendations(
+      ctx,
+      currentUser,
+      personalizedLimit * 2,
+      userHistory
+    ),
+    getTrendingFallbackForFeed(ctx, trendingLimit * 2),
+  ]);
+
+  // Merge and deduplicate
+  const personalizedIds = new Set(
+    personalizedResult.vibes.map((v: unknown) => (v as any).id) // eslint-disable-line @typescript-eslint/no-explicit-any
+  );
+  const uniqueTrending = trendingResult.vibes.filter(
+    (v: unknown) => !personalizedIds.has((v as any).id) // eslint-disable-line @typescript-eslint/no-explicit-any
+  );
+
+  const combinedVibes = [
+    ...personalizedResult.vibes.slice(0, personalizedLimit),
+    ...uniqueTrending.slice(0, trendingLimit),
+  ];
+
+  return {
+    vibes: combinedVibes.slice(0, limit),
+    continueCursor: null,
+    isDone: true,
+  };
+}
+
+// Helper: Full personalized recommendations for experienced users
+async function getPersonalizedFeedRecommendations(
+  ctx: QueryCtx,
+  currentUser: Doc<'users'>,
+  limit: number,
+  userHistory: {
+    ratings: Doc<'ratings'>[];
+    emojiRatings: Doc<'emojiRatings'>[];
+    following: Doc<'follows'>[];
+  }
+) {
+  const {
+    ratings: userRatings,
+    emojiRatings: userEmojiRatings,
+    following: followingList,
+  } = userHistory;
+
+  // Build user interest profile
+  const userInterests = new Set(currentUser.interests || []);
+  const preferredTags = new Map<string, number>();
+  const preferredEmojis = new Map<
+    string,
+    { count: number; avgRating: number }
+  >();
+  const followingIds = new Set(
+    followingList.map((f: Doc<'follows'>) => f.followingId)
+  );
+  const ratedVibeIds = new Set([
+    ...userRatings.map((r: Doc<'ratings'>) => r.vibeId),
+    ...userEmojiRatings.map((r: Doc<'emojiRatings'>) => r.vibeId),
+  ]);
+
+  // Analyze emoji preferences
+  userEmojiRatings.forEach((rating: Doc<'emojiRatings'>) => {
+    const existing = preferredEmojis.get(rating.emoji) || {
+      count: 0,
+      avgRating: 0,
+    };
+    const newCount = existing.count + 1;
+    const newAvg =
+      (existing.avgRating * existing.count + rating.value) / newCount;
+    preferredEmojis.set(rating.emoji, { count: newCount, avgRating: newAvg });
+  });
+
+  // Analyze tag preferences from highly rated vibes
+  const highlyRatedVibeIds = [
+    ...userRatings
+      .filter((r: Doc<'ratings'>) => r.value >= 4)
+      .map((r: Doc<'ratings'>) => r.vibeId),
+    ...userEmojiRatings
+      .filter((r: Doc<'emojiRatings'>) => r.value >= 4)
+      .map((r: Doc<'emojiRatings'>) => r.vibeId),
+  ];
+
+  const highlyRatedVibes = await Promise.all(
+    highlyRatedVibeIds.slice(0, 50).map((vibeId: string) =>
+      ctx.db
+        .query('vibes')
+        .filter((q) => q.eq(q.field('id'), vibeId))
+        .first()
+    )
+  );
+
+  highlyRatedVibes.forEach((vibe: Doc<'vibes'> | null) => {
+    if (vibe?.tags) {
+      vibe.tags.forEach((tag: string) => {
+        preferredTags.set(tag, (preferredTags.get(tag) || 0) + 1);
+      });
+    }
+  });
+
+  // Get candidate vibes
+  const candidateVibes = await ctx.db
+    .query('vibes')
+    .withIndex('byVisibility', (q) => q.eq('visibility', 'public'))
+    .filter((q) => q.neq(q.field('createdById'), currentUser.externalId))
+    .take(250);
+
+  // Score candidates
+  const vibesWithScores = await Promise.all(
+    candidateVibes
+      .filter((vibe: Doc<'vibes'>) => !ratedVibeIds.has(vibe.id))
+      .map(async (vibe: Doc<'vibes'>) => {
+        let score = 0;
+
+        // Social signal (strongest factor)
+        if (followingIds.has(vibe.createdById)) {
+          score += 4.0;
+        }
+
+        // Tag similarity
+        if (vibe.tags && vibe.tags.length > 0) {
+          const tagScore = vibe.tags.reduce((acc: number, tag: string) => {
+            if (userInterests.has(tag)) {
+              return acc + 2.0;
+            }
+            const preferenceCount = preferredTags.get(tag) || 0;
+            return acc + Math.min(preferenceCount * 0.5, 1.5);
+          }, 0);
+          score += tagScore * 0.4;
+        }
+
+        // Emoji compatibility
+        const vibeEmojiRatings = await ctx.db
+          .query('emojiRatings')
+          .withIndex('byVibe', (q) => q.eq('vibeId', vibe.id))
+          .collect();
+
+        const emojiScore = vibeEmojiRatings.reduce(
+          (acc: number, rating: Doc<'emojiRatings'>) => {
+            const userPref = preferredEmojis.get(rating.emoji);
+            if (userPref && userPref.avgRating >= 4) {
+              return acc + 1.0;
+            } else if (userPref && userPref.avgRating >= 3) {
+              return acc + 0.5;
+            }
+            return acc;
+          },
+          0
+        );
+        score += emojiScore * 0.3;
+
+        // Quality and recency factors
+        const vibeRatings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .collect();
+
+        const avgRating =
+          vibeRatings.length > 0
+            ? vibeRatings.reduce(
+                (sum: number, r: Doc<'ratings'>) => sum + r.value,
+                0
+              ) / vibeRatings.length
+            : 3.0;
+
+        score += (avgRating - 3) * 0.5; // Quality bonus/penalty
+
+        // Recency factor
+        const ageInDays =
+          (Date.now() - new Date(vibe.createdAt).getTime()) /
+          (24 * 60 * 60 * 1000);
+        const recencyBonus = Math.max(0, 1 - ageInDays / 14);
+        score += recencyBonus * 0.2;
+
+        return { vibe, score };
+      })
+  );
+
+  // Sort and take top recommendations
+  vibesWithScores.sort((a, b) => b.score - a.score);
+  const topVibes = vibesWithScores.slice(0, limit);
+
+  // Add vibe details
+  const vibesWithDetails = await Promise.all(
+    topVibes.map(async ({ vibe }) => {
+      const creator = await ctx.db
+        .query('users')
+        .withIndex('byExternalId', (q) => q.eq('externalId', vibe.createdById))
+        .first();
+
+      const ratings = await ctx.db
+        .query('ratings')
+        .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+        .take(5);
+
+      const ratingDetails = await Promise.all(
+        ratings.map(async (rating: Doc<'ratings'>) => {
+          const user = await ctx.db
+            .query('users')
+            .withIndex('byExternalId', (q) => q.eq('externalId', rating.userId))
+            .first();
+          return {
+            user,
+            emoji: rating.emoji,
+            value: rating.value,
+            review: rating.review,
+            createdAt: rating.createdAt,
+          };
+        })
+      );
+
+      return { ...vibe, createdBy: creator, ratings: ratingDetails };
+    })
+  );
+
+  return {
+    vibes: vibesWithDetails,
+    continueCursor: null,
+    isDone: true,
+  };
+}
 
 // Get vibes from followed users with filtering options
 export const getFollowingVibes = query({
@@ -2810,5 +3037,440 @@ export const deleteVibe = mutation({
     }
 
     return vibe._id;
+  },
+});
+
+// Enhanced trending algorithm with engagement scoring
+export const getTrendingWithEngagement = query({
+  args: {
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+    timeWindowHours: v.optional(v.number()), // Time window for trending calculation
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+    const timeWindowHours = args.timeWindowHours ?? 24; // Default to 24 hours
+    const timeWindowMs = timeWindowHours * 60 * 60 * 1000;
+    const now = Date.now();
+    const cutoffTime = now - timeWindowMs;
+
+    // Get recent vibes (within time window for better trending detection)
+    const vibesQuery = ctx.db
+      .query('vibes')
+      .withIndex('byVisibility', (q) => q.eq('visibility', 'public'))
+      .order('desc');
+
+    const vibes = await vibesQuery.paginate({
+      cursor: args.cursor || null,
+      numItems: Math.min(limit * 4, 200), // Get more to calculate trending from
+    });
+
+    // Calculate trending scores for each vibe
+    const vibesWithTrendingScores = await Promise.all(
+      vibes.page.map(async (vibe) => {
+        const vibeCreatedAt = new Date(vibe.createdAt).getTime();
+
+        // Get all ratings for this vibe
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .collect();
+
+        // Get emoji ratings for additional engagement data
+        const emojiRatings = await ctx.db
+          .query('emojiRatings')
+          .withIndex('byVibe', (q) => q.eq('vibeId', vibe.id))
+          .collect();
+
+        // Calculate engagement metrics
+        const totalRatings = ratings.length;
+        const totalEmojiRatings = emojiRatings.length;
+        const totalEngagement = totalRatings + totalEmojiRatings;
+        const avgRating =
+          totalRatings > 0
+            ? ratings.reduce((sum, r) => sum + r.value, 0) / totalRatings
+            : 0;
+
+        // Calculate recent engagement (ratings within time window)
+        const recentRatings = ratings.filter((rating) => {
+          const ratingTime = new Date(rating.createdAt).getTime();
+          return ratingTime >= cutoffTime;
+        });
+
+        const recentEmojiRatings = emojiRatings.filter((rating) => {
+          const ratingTime = new Date(rating.createdAt).getTime();
+          return ratingTime >= cutoffTime;
+        });
+
+        // Calculate rating diversity (different users engaging)
+        const uniqueRaters = new Set([
+          ...ratings.map((r) => r.userId),
+          ...emojiRatings.map((r) => r.userId),
+        ]);
+        const ratingDiversity = uniqueRaters.size;
+        const diversityScore = Math.min(ratingDiversity / 5, 1.0); // Normalize to max 1.0
+
+        // Calculate emoji diversity (variety of different emojis used)
+        const uniqueEmojis = new Set([
+          ...ratings.map((r) => r.emoji).filter(Boolean),
+          ...emojiRatings.map((r) => r.emoji).filter(Boolean),
+        ]);
+        const emojiDiversity = uniqueEmojis.size;
+        const emojiDiversityScore = Math.min(emojiDiversity / 8, 1.0); // Normalize to max 1.0
+
+        // Calculate engagement quality (review length, engagement depth)
+        const ratingsWithReviews = ratings.filter(
+          (r) => r.review && r.review.length > 10
+        );
+        const avgReviewLength =
+          ratingsWithReviews.length > 0
+            ? ratingsWithReviews.reduce(
+                (sum, r) => sum + (r.review?.length || 0),
+                0
+              ) / ratingsWithReviews.length
+            : 0;
+        const qualityEngagementScore = Math.min(avgReviewLength / 100, 1.0); // Normalize long reviews
+
+        // Time decay factor (newer content gets higher score, but with improved curve)
+        const ageInHours = (now - vibeCreatedAt) / (60 * 60 * 1000);
+        const timeDecayFactor = Math.exp(-ageInHours / (timeWindowHours * 1.5)); // Slightly faster decay
+
+        // Engagement velocity (rate of recent engagement with smoothing)
+        const hoursActive = Math.max(
+          0.5,
+          (now - vibeCreatedAt) / (60 * 60 * 1000)
+        );
+        const engagementVelocity =
+          (recentRatings.length + recentEmojiRatings.length) / hoursActive;
+        const velocityScore = Math.sqrt(engagementVelocity) * 2.0; // Square root to reduce extreme values
+
+        // Quality score (weighted average rating with better scaling)
+        const qualityWeight = Math.min(totalEngagement, 15) / 15; // Increased cap and include emoji ratings
+        const qualityScore = avgRating * qualityWeight;
+
+        // Recency bonus for very new content (within 6 hours)
+        const recencyBonus =
+          ageInHours < 6
+            ? Math.exp(-(ageInHours / 3)) * 0.5 // Exponential bonus for very fresh content
+            : 0;
+
+        // Calculate enhanced trending score with improved formula
+        const engagementScore =
+          recentRatings.length * 1.2 + recentEmojiRatings.length * 1.0;
+        const qualityBoost = qualityScore * 0.8;
+        const diversityBoost = diversityScore * 0.6 + emojiDiversityScore * 0.4;
+        const engagementQualityBoost = qualityEngagementScore * 0.5;
+
+        const trendingScore =
+          engagementScore * 0.3 +
+          velocityScore * 0.25 +
+          qualityBoost * 0.2 +
+          diversityBoost * 0.15 +
+          timeDecayFactor * 0.05 +
+          engagementQualityBoost * 0.03 +
+          recencyBonus * 0.02;
+
+        return {
+          vibe,
+          trendingScore,
+          engagementScore,
+          velocityScore: engagementVelocity,
+          qualityScore,
+          timeDecayFactor,
+          totalRatings,
+          totalEngagement,
+          recentEngagement: recentRatings.length + recentEmojiRatings.length,
+          avgRating,
+          ratingDiversity,
+          diversityScore,
+          emojiDiversity,
+          emojiDiversityScore,
+          qualityEngagementScore,
+          recencyBonus,
+          ageInHours,
+        };
+      })
+    );
+
+    // Sort by trending score (descending)
+    vibesWithTrendingScores.sort((a, b) => b.trendingScore - a.trendingScore);
+
+    // Take top vibes and add creator details
+    const topTrendingVibes = await Promise.all(
+      vibesWithTrendingScores.slice(0, limit).map(async ({ vibe }) => {
+        const creator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', vibe.createdById)
+          )
+          .first();
+
+        // Get recent ratings for display
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(5);
+
+        const ratingDetails = await Promise.all(
+          ratings.map(async (rating) => {
+            const user = await ctx.db
+              .query('users')
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
+              .first();
+            return {
+              user,
+              emoji: rating.emoji,
+              value: rating.value,
+              review: rating.review,
+              createdAt: rating.createdAt,
+            };
+          })
+        );
+
+        return {
+          ...vibe,
+          createdBy: creator,
+          ratings: ratingDetails,
+        };
+      })
+    );
+
+    return {
+      vibes: topTrendingVibes,
+      continueCursor: vibes.continueCursor,
+      isDone: vibes.isDone,
+    };
+  },
+});
+
+// Get personalized "For You" recommendations based on user behavior
+export const getPersonalizedRecommendations = query({
+  args: {
+    userId: v.optional(v.string()),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+
+    // Get current user identity if not provided
+    let userId = args.userId;
+    if (!userId) {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) {
+        // For anonymous users, fall back to top-rated content
+        return {
+          vibes: [],
+          continueCursor: null,
+          isDone: true,
+        };
+      }
+      userId = identity.subject;
+    }
+
+    // Get user's interaction history
+    const user = await ctx.db
+      .query('users')
+      .withIndex('byExternalId', (q) => q.eq('externalId', userId))
+      .first();
+
+    if (!user) {
+      // Fallback to top-rated if user not found
+      return {
+        vibes: [],
+        continueCursor: null,
+        isDone: true,
+      };
+    }
+
+    // Get user's rating history
+    const userRatings = await ctx.db
+      .query('ratings')
+      .withIndex('user', (q) => q.eq('userId', userId))
+      .collect();
+
+    // Get user's emoji rating history
+    const userEmojiRatings = await ctx.db
+      .query('emojiRatings')
+      .withIndex('byUser', (q) => q.eq('userId', userId))
+      .collect();
+
+    // Extract user preferences
+    const ratedVibeIds = new Set(userRatings.map((r) => r.vibeId));
+    const preferredEmojis = new Map<
+      string,
+      { count: number; totalValue: number }
+    >();
+    const preferredTags = new Map<string, number>();
+
+    // Analyze emoji preferences
+    userEmojiRatings.forEach((rating) => {
+      const emoji = rating.emoji;
+      if (!preferredEmojis.has(emoji)) {
+        preferredEmojis.set(emoji, { count: 0, totalValue: 0 });
+      }
+      const emojiData = preferredEmojis.get(emoji)!;
+      emojiData.count++;
+      emojiData.totalValue += rating.value;
+    });
+
+    // Analyze tag preferences from rated vibes
+    const ratedVibes = await Promise.all(
+      Array.from(ratedVibeIds)
+        .slice(0, 50)
+        .map((vibeId) =>
+          ctx.db
+            .query('vibes')
+            .filter((q) => q.eq(q.field('id'), vibeId))
+            .first()
+        )
+    );
+
+    ratedVibes.forEach((vibe) => {
+      if (vibe?.tags) {
+        vibe.tags.forEach((tag) => {
+          preferredTags.set(tag, (preferredTags.get(tag) || 0) + 1);
+        });
+      }
+    });
+
+    // Get following list for social signals
+    const following = await ctx.db
+      .query('follows')
+      .withIndex('byFollower', (q) => q.eq('followerId', userId))
+      .collect();
+
+    const followingIds = new Set(following.map((f) => f.followingId));
+
+    // Get candidate vibes (exclude already rated ones)
+    const candidateVibes = await ctx.db
+      .query('vibes')
+      .withIndex('byVisibility', (q) => q.eq('visibility', 'public'))
+      .filter((q) => q.neq(q.field('createdById'), userId)) // Don't recommend user's own vibes
+      .take(200); // Get a large pool to score
+
+    // Score vibes based on personalization factors
+    const vibesWithScores = await Promise.all(
+      candidateVibes
+        .filter((vibe) => !ratedVibeIds.has(vibe.id)) // Exclude already rated
+        .map(async (vibe) => {
+          let personalizedScore = 0;
+
+          // Social signal bonus (content from followed users)
+          if (followingIds.has(vibe.createdById)) {
+            personalizedScore += 3.0;
+          }
+
+          // Tag preference bonus
+          if (vibe.tags) {
+            const tagBonus = vibe.tags.reduce((bonus, tag) => {
+              const tagCount = preferredTags.get(tag) || 0;
+              return bonus + (tagCount > 0 ? Math.log(tagCount + 1) : 0);
+            }, 0);
+            personalizedScore += tagBonus * 0.5;
+          }
+
+          // Get vibe's emoji ratings for emoji preference matching
+          const vibeEmojiRatings = await ctx.db
+            .query('emojiRatings')
+            .withIndex('byVibe', (q) => q.eq('vibeId', vibe.id))
+            .collect();
+
+          // Emoji preference bonus
+          const emojiBonus = vibeEmojiRatings.reduce((bonus, rating) => {
+            const userPref = preferredEmojis.get(rating.emoji);
+            if (userPref) {
+              const avgUserRating = userPref.totalValue / userPref.count;
+              // Bonus for emojis the user likes and rates highly
+              return bonus + (avgUserRating >= 4 ? 1.0 : 0.5);
+            }
+            return bonus;
+          }, 0);
+          personalizedScore += emojiBonus * 0.3;
+
+          // Recency bonus (slight preference for newer content)
+          const ageInDays =
+            (Date.now() - new Date(vibe.createdAt).getTime()) /
+            (24 * 60 * 60 * 1000);
+          const recencyBonus = Math.max(0, 2 - ageInDays / 7); // Decreases over 2 weeks
+          personalizedScore += recencyBonus * 0.2;
+
+          // Quality signal from overall ratings
+          const vibeRatings = await ctx.db
+            .query('ratings')
+            .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+            .collect();
+
+          const avgRating =
+            vibeRatings.length > 0
+              ? vibeRatings.reduce((sum, r) => sum + r.value, 0) /
+                vibeRatings.length
+              : 3; // Default neutral rating
+
+          const qualityBonus = (avgRating - 3) * 0.5; // Bonus/penalty based on deviation from neutral
+          personalizedScore += qualityBonus;
+
+          return {
+            vibe,
+            personalizedScore,
+            socialSignal: followingIds.has(vibe.createdById),
+            tagMatchCount: vibe.tags
+              ? vibe.tags.filter((tag) => preferredTags.has(tag)).length
+              : 0,
+          };
+        })
+    );
+
+    // Sort by personalized score (descending)
+    vibesWithScores.sort((a, b) => b.personalizedScore - a.personalizedScore);
+
+    // Take top recommendations and add creator details
+    const recommendations = await Promise.all(
+      vibesWithScores.slice(0, limit).map(async ({ vibe }) => {
+        const creator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', vibe.createdById)
+          )
+          .first();
+
+        const ratings = await ctx.db
+          .query('ratings')
+          .withIndex('vibe', (q) => q.eq('vibeId', vibe.id))
+          .take(5);
+
+        const ratingDetails = await Promise.all(
+          ratings.map(async (rating) => {
+            const user = await ctx.db
+              .query('users')
+              .withIndex('byExternalId', (q) =>
+                q.eq('externalId', rating.userId)
+              )
+              .first();
+            return {
+              user,
+              emoji: rating.emoji,
+              value: rating.value,
+              review: rating.review,
+              createdAt: rating.createdAt,
+            };
+          })
+        );
+
+        return {
+          ...vibe,
+          createdBy: creator,
+          ratings: ratingDetails,
+        };
+      })
+    );
+
+    return {
+      vibes: recommendations,
+      continueCursor: null, // For simplicity, not implementing cursor-based pagination for personalized results
+      isDone: true,
+    };
   },
 });

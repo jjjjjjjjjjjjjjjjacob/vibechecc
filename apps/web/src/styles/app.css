@@ -22,6 +22,21 @@
   --radius-xl: calc(var(--radius) + 4px);
   --text-3xs: 0.5rem;
   --text-2xs: 0.625rem;
+
+  /* Component-specific spacing tokens */
+  --card-padding: var(--spacing-base); /* 16px */
+  --card-padding-sm: 0.75rem; /* 12px */
+  --card-gap: var(--spacing-sm); /* 8px */
+  --button-gap: var(--spacing-sm); /* 8px */
+  --section-gap: var(--spacing-lg); /* 24px */
+  --page-gap: var(--spacing-xl); /* 32px */
+
+  /* Mobile-optimized spacing overrides */
+  --mobile-card-padding: 0.75rem; /* 12px */
+  --mobile-card-gap: 0.375rem; /* 6px */
+  --mobile-button-gap: 0.375rem; /* 6px */
+  --mobile-section-gap: var(--spacing-base); /* 16px */
+  --mobile-page-gap: var(--spacing-lg); /* 24px */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -38,6 +53,12 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-rating: var(--rating);
+  --color-rating-foreground: var(--rating-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -78,6 +99,12 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.205 0 0);
+  --success: oklch(0.557 0.193 142.5); /* green-600 equivalent */
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.661 0.178 36.77); /* orange-600 equivalent */
+  --warning-foreground: oklch(0.205 0 0);
+  --rating: oklch(0.734 0.173 85.87); /* yellow-500 equivalent */
+  --rating-foreground: oklch(0.205 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -120,6 +147,12 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.657 0.193 143.38); /* green-400 equivalent for dark mode */
+  --success-foreground: oklch(0.205 0 0);
+  --warning: oklch(0.755 0.178 44.34); /* orange-400 equivalent for dark mode */
+  --warning-foreground: oklch(0.205 0 0);
+  --rating: oklch(0.824 0.173 87.66); /* yellow-400 equivalent for dark mode */
+  --rating-foreground: oklch(0.205 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -168,6 +201,64 @@
 
   .font-doto {
     font-family: var(--font-doto), var(--font-family-sans);
+  }
+
+  /* Standardized Spacing Utilities */
+  .space-xs {
+    gap: var(--spacing-xs);
+  }
+  .space-sm {
+    gap: var(--spacing-sm);
+  }
+  .space-base {
+    gap: var(--spacing-base);
+  }
+  .space-lg {
+    gap: var(--spacing-lg);
+  }
+  .space-xl {
+    gap: var(--spacing-xl);
+  }
+  .space-2xl {
+    gap: var(--spacing-2xl);
+  }
+
+  .p-standard {
+    padding: var(--card-padding);
+  }
+  .p-standard-sm {
+    padding: var(--card-padding-sm);
+  }
+  .gap-standard {
+    gap: var(--card-gap);
+  }
+  .gap-button {
+    gap: var(--button-gap);
+  }
+  .gap-section {
+    gap: var(--section-gap);
+  }
+  .gap-page {
+    gap: var(--page-gap);
+  }
+
+  /* Responsive spacing utilities */
+  @media (max-width: 768px) {
+    .p-standard {
+      padding: var(--mobile-card-padding);
+    }
+    .gap-standard {
+      gap: var(--mobile-card-gap);
+    }
+    .gap-button {
+      gap: var(--mobile-button-gap);
+    }
+    .gap-section {
+      gap: var(--mobile-section-gap);
+    }
+    .gap-page {
+      gap: var(--mobile-page-gap);
+    }
   }
 
   *::-webkit-scrollbar {
@@ -233,6 +324,43 @@
 
     .mobile-fast-transition {
       transition-duration: 100ms !important;
+    }
+
+    /* Optimized mobile card spacing */
+    .mobile-card-spacing {
+      padding: 0.75rem !important; /* 12px instead of 16px */
+    }
+
+    .mobile-card-gap {
+      gap: 0.5rem !important; /* 8px instead of 12px+ */
+    }
+
+    /* Mobile-optimized text sizes */
+    .mobile-text-optimize {
+      font-size: 0.875rem !important; /* 14px instead of 16px */
+      line-height: 1.4 !important;
+    }
+
+    /* Touch-friendly sizing */
+    .mobile-touch-target {
+      min-height: 44px !important; /* Apple's recommended touch target */
+      min-width: 44px !important;
+    }
+  }
+
+  /* Extra small screens - more aggressive optimizations */
+  @media (max-width: 480px) {
+    .xs-minimal-padding {
+      padding: 0.5rem !important; /* 8px */
+    }
+
+    .xs-minimal-gap {
+      gap: 0.25rem !important; /* 4px */
+    }
+
+    .xs-compact-text {
+      font-size: 0.75rem !important; /* 12px */
+      line-height: 1.3 !important;
     }
   }
 }
@@ -729,9 +857,13 @@
   animation: menu-slide-up 0.5s ease-out;
 }
 
-.container {
-  @apply mx-auto w-full px-4;
-  max-width: 1536px;
+@layer components {
+  .container {
+    @apply mx-auto w-full px-4;
+    /* Default container width; Tailwind max-w-* utilities will override from utilities layer */
+    max-width: 1536px;
+    transition: max-width 0.8s ease-in-out;
+  }
 }
 
 .cl-formButtonPrimary,
@@ -842,15 +974,15 @@ button[data-localization-key='userProfile.start.dangerSection.deleteAccountButto
 }
 
 .cl-fileDropAreaBox {
-  @apply dark:bg-gray-900;
+  @apply dark:bg-card;
 }
 
 .cl-fileDropAreaIconBox {
-  @apply dark:bg-gray-800;
+  @apply dark:bg-muted;
 }
 
 .cl-fileDropAreaIcon {
-  @apply dark:text-gray-400;
+  @apply dark:text-muted-foreground;
 }
 
 .cl-fileDropAreaButtonPrimary {
@@ -1303,4 +1435,188 @@ em-emoji-picker {
   min-height: 2rem;
   max-height: 100%;
   box-shadow: none;
+}
+
+/* Mobile performance optimization utilities */
+@layer utilities {
+  /* GPU acceleration for smooth mobile animations */
+  .mobile-gpu-accelerate {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
+  }
+
+  /* Enhanced mobile animation performance */
+  .mobile-animate-optimized {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
+    /* Use hardware-accelerated properties only */
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(
+      0.25,
+      0.46,
+      0.45,
+      0.94
+    ); /* easeOutQuad - mobile optimized */
+  }
+
+  /* Remove will-change after animations complete */
+  .mobile-animate-complete {
+    will-change: auto;
+  }
+
+  /* Optimized mobile interactions */
+  .mobile-interaction-optimize {
+    touch-action: manipulation; /* Prevents 300ms delay */
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+    user-select: none; /* Prevent text selection on touch */
+    -webkit-user-select: none; /* Safari specific */
+    -webkit-touch-callout: none; /* Disable callout on iOS */
+  }
+
+  /* Enhanced mobile touch targets */
+  .mobile-touch-optimize {
+    min-height: 44px; /* Apple's recommended minimum */
+    min-width: 44px;
+    position: relative;
+    /* Add pseudo-element for larger touch area if needed */
+  }
+
+  .mobile-touch-optimize::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    /* Invisible larger touch area */
+  }
+
+  /* Mobile-friendly focus states */
+  .mobile-focus-optimize:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Optimized scrolling for mobile */
+  .mobile-scroll-optimize {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+    /* Improve scroll momentum on iOS */
+    -webkit-scroll-behavior: smooth;
+  }
+
+  /* Feed-specific mobile optimizations */
+  .mobile-feed-optimize {
+    /* Contain layout shifts */
+    contain: layout style;
+    /* Optimize for frequent updates */
+    content-visibility: auto;
+    contain-intrinsic-size: 0 400px; /* Estimated card height */
+  }
+
+  /* Battery-conscious animations */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 769px) {
+    .desktop-only-animation {
+      /* Complex animations only on desktop */
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mobile-fade-in {
+      /* More elaborate fade-in on desktop */
+      transition:
+        opacity 0.4s ease-out,
+        transform 0.4s ease-out;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .desktop-only-animation {
+      transition: opacity 0.15s ease-out; /* Simple opacity transition on mobile */
+    }
+
+    .mobile-fade-in {
+      /* Simplified mobile fade-in */
+      transition: opacity 0.25s ease-out;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-animate-optimized,
+    .mobile-fade-in,
+    .desktop-only-animation {
+      transition: none !important;
+      transform: none !important;
+      animation: none !important;
+    }
+
+    /* Ensure content is still visible */
+    .mobile-fade-in {
+      opacity: 1 !important;
+    }
+  }
+
+  /* Performance-first mobile card animations */
+  .mobile-card-enter {
+    opacity: 0;
+    transform: translateY(20px) translateZ(0);
+    transition:
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out;
+    will-change: transform, opacity;
+  }
+
+  .mobile-card-enter-active {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+
+  .mobile-card-enter-done {
+    will-change: auto; /* Clean up will-change */
+  }
+
+  /* Ultra-smooth mobile scroll snap */
+  .mobile-scroll-snap {
+    scroll-snap-type: y mandatory;
+    scroll-snap-stop: normal;
+  }
+
+  .mobile-scroll-snap > * {
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+  }
+
+  /* Connection-aware optimizations */
+  @media (prefers-reduced-data: reduce) {
+    .mobile-animate-optimized {
+      transition-duration: 0.1s; /* Faster animations on slow connections */
+    }
+
+    .mobile-card-enter {
+      transition-duration: 0.15s;
+    }
+  }
+
+  /* Device-specific optimizations */
+  @supports (backdrop-filter: blur(10px)) {
+    .mobile-backdrop-blur {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+  }
+
+  /* iOS specific optimizations */
+  @supports (-webkit-touch-callout: none) {
+    .ios-optimize {
+      -webkit-transform: translateZ(0); /* Force hardware acceleration on iOS */
+      -webkit-perspective: 1000px;
+      -webkit-backface-visibility: hidden;
+    }
+  }
 }

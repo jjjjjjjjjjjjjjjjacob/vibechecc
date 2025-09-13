@@ -76,7 +76,7 @@ export function EmojiTrends({ className }: { className?: string }) {
                 </div>
               </div>
               {trend.change > 0 && (
-                <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                <div className="text-success flex items-center gap-1">
                   <TrendingUp className="h-3 w-3" />
                   <span className="text-xs">+{trend.change}%</span>
                 </div>

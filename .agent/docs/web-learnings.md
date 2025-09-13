@@ -2,6 +2,198 @@
 
 This document captures learnings, patterns, and best practices discovered during web development tasks in the vibechecc project.
 
+## User Points System Integration Patterns
+
+### Context
+
+Successfully migrated and integrated a comprehensive user points system from the broken `refactor/platform-improvements` branch, including karma calculations, daily limits, streaks, and point transactions.
+
+### Key Implementation Patterns
+
+#### 1. Backend Points API Architecture
+
+**Pattern**: Centralized points management with internal mutations for atomic operations
+
+```typescript
+// Core API structure
+export const getUserPointsStats = query({ ... });
+export const initializeUserPoints = mutation({ ... });
+export const boostContent = mutation({ ... });
+export const dampenContent = mutation({ ... });
+export const getPointsHistory = query({ ... });
+
+// Internal mutations for atomic point transfers
+export const transferPointsInternal = internalMutation({
+  // Handles point deductions, karma updates, transaction logging
+});
+```
+
+**Why**: Ensures data consistency and provides clean API for frontend consumption while maintaining atomic operations for complex point transfers.
+
+#### 2. Karma-Based Content Moderation
+
+**Pattern**: Community-driven content quality through point-based voting
+
+```typescript
+const boostCost = getBoostCost(userStats.level, userStats.consecutiveDays);
+const dampenCost = getDampenCost(userStats.level);
+
+// Point transfer affects both users and content karma
+await transferPointsInternal({
+  fromUserId: currentUser.id,
+  toUserId: vibe.userId,
+  amount: boostCost,
+  karmaChange: 1, // Increases content karma
+  reason: 'boost_content',
+});
+```
+
+**Why**: Incentivizes quality content creation and enables community self-moderation through economic incentives.
+
+#### 3. Progressive Cost Scaling
+
+**Pattern**: Dynamic pricing based on user level and engagement streaks
+
+```typescript
+export function getBoostCost(level: number, consecutiveDays: number): number {
+  const baseCost = Math.max(1, Math.floor(level / 2));
+  const streakBonus = consecutiveDays >= 7 ? 0.8 : 1; // 20% discount for 7+ day streaks
+  return Math.ceil(baseCost * streakBonus);
+}
+```
+
+**Why**: Rewards consistent users with lower costs while scaling with user progression to maintain economic balance.
+
+## Boost/Dampen Feature Integration Patterns
+
+### Context
+
+Implemented point-integrated rating system with boost (positive) and dampen (negative) actions that transfer points and affect content karma.
+
+### Key Frontend Patterns
+
+#### 1. Confirmation Dialog for Destructive Actions
+
+**Pattern**: Always confirm dampen actions with clear cost implications
+
+```typescript
+const handleDampen = () => {
+  setShowDampenConfirm(true);
+};
+
+// Confirmation dialog shows cost and impact
+<AlertDialog open={showDampenConfirm} onOpenChange={setShowDampenConfirm}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Dampen this content?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This will cost {dampenCost} points and reduce the content's karma by 1.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+**Why**: Prevents accidental point spending and provides transparency about the action's consequences.
+
+#### 2. Toast Feedback with Point Changes
+
+**Pattern**: Immediate visual feedback showing point transfers and balance updates
+
+```typescript
+toast({
+  title: isBoost ? '🚀 Content boosted!' : '👎 Content dampened',
+  description: `${isBoost ? 'Spent' : 'Spent'} ${cost} points. Balance: ${newBalance}`,
+  duration: 3000,
+});
+```
+
+**Why**: Provides immediate confirmation of successful actions and keeps users aware of their point balance changes.
+
+#### 3. Balance Validation with Loading States
+
+**Pattern**: Pre-validate user balance and show appropriate loading states
+
+```typescript
+const canAfford = userStats && userStats.pointsBalance >= cost;
+const isDisabled = !canAfford || isLoading || !isAuthenticated;
+
+<Button
+  disabled={isDisabled}
+  variant={isBoost ? "default" : "destructive"}
+  size="sm"
+>
+  {isLoading ? (
+    <Loader2 className="h-4 w-4 animate-spin" />
+  ) : (
+    `${isBoost ? '🚀 Boost' : '👎 Dampen'} (${cost})`
+  )}
+</Button>
+```
+
+**Why**: Prevents failed transactions and provides clear feedback about affordability and action state.
+
+## Enhanced Rating System Component Patterns
+
+### Context
+
+Extended existing rating components to integrate with the points system while maintaining backward compatibility.
+
+### Key Integration Patterns
+
+#### 1. Component API Extension
+
+**Pattern**: Extend existing component APIs with optional boost/dampen props
+
+```typescript
+interface EmojiRatingDisplayProps {
+  // Existing props
+  vibe: Vibe;
+  currentUserRating?: EmojiRating;
+
+  // New optional props for points integration
+  enableBoostDampen?: boolean;
+  onBoostDampen?: (action: 'boost' | 'dampen') => void;
+}
+```
+
+**Why**: Maintains backward compatibility while enabling new functionality where needed.
+
+#### 2. Responsive Control Layout
+
+**Pattern**: Mobile-optimized boost/dampen controls with proper spacing
+
+```typescript
+<div className="flex items-center gap-2 mt-2">
+  <div className="flex items-center gap-1">
+    <BoostButton vibe={vibe} />
+    <DampenButton vibe={vibe} />
+  </div>
+  <div className="text-sm text-muted-foreground">
+    Karma: {vibe.karma || 0}
+  </div>
+</div>
+```
+
+**Why**: Provides clear visual hierarchy and maintains usability on mobile devices.
+
+#### 3. Progressive Enhancement
+
+**Pattern**: Rating system works without points integration, enhanced when available
+
+```typescript
+const userStats = useUserPointsStats();
+const canUsePoints = userStats && userStats.pointsBalance > 0;
+
+{canUsePoints && (
+  <div className="border-t pt-2 mt-2">
+    <BoostDampenControls vibe={vibe} />
+  </div>
+)}
+```
+
+**Why**: Ensures core functionality remains available even if points system fails or is unavailable.
+
 ## Personalized Feed Enhancement Patterns
 
 ### Context
@@ -848,3 +1040,446 @@ Could add import restrictions in ESLint config:
 - **Theme system migrations**: When moving from hardcoded to semantic colors
 - **File naming standardization**: When enforcing consistent naming conventions
 - **Quality assurance workflows**: When establishing systematic code quality checks
+
+## Mobile Feed Animation Performance Optimization Patterns
+
+### Context
+
+Successfully implemented comprehensive mobile performance optimizations for vibe card feed animations, focusing on smooth 60fps interactions, battery efficiency, and adaptive quality based on device capabilities.
+
+### Key Implementation Patterns
+
+#### 1. Enhanced Intersection Observer with Mobile Optimization
+
+**Pattern**: Adaptive intersection observer with mobile-specific settings and reduced motion support
+
+```typescript
+const {
+  ref: intersectionRef,
+  hasIntersected,
+  isMobile,
+  prefersReducedMotion,
+} = useIntersectionObserver<HTMLDivElement>({
+  threshold: 0.1,
+  rootMargin: '50px',
+  // Mobile-specific optimizations
+  mobileThreshold: 0.05, // Lower threshold for earlier triggering on mobile
+  mobileRootMargin: '100px', // Larger preload area on mobile
+  triggerOnce: true,
+  // Use performance metrics to decide on reduced motion
+  reducedMotion: isLowPerformance || metrics.adaptiveQuality === 'low',
+});
+```
+
+**Benefits**:
+
+- Earlier animation triggering on mobile for smoother perceived performance
+- Larger preload areas reduce layout shifts on slower devices
+- Automatic reduced motion support based on user preferences and device performance
+- Will-change hints automatically added and removed for optimal GPU utilization
+
+#### 2. Performance Monitoring Hook for Adaptive Quality
+
+**Pattern**: Real-time performance monitoring with adaptive UI adjustments
+
+```typescript
+const { metrics, getAdaptiveClasses, getAnimationSettings, isLowPerformance } =
+  usePerformanceMonitor({
+    enableBatteryMonitoring: true,
+    lowFpsThreshold: 45,
+  });
+
+// Adaptive CSS classes based on performance
+const adaptiveClasses = getAdaptiveClasses(
+  isMobile
+    ? 'mobile-animate-optimized mobile-interaction-optimize'
+    : 'desktop-only-animation'
+);
+```
+
+**Key Features**:
+
+- FPS monitoring with configurable thresholds
+- Battery level detection for power-conscious animations
+- Connection speed awareness (2G/3G force low quality)
+- Automatic will-change management for GPU optimization
+- Progressive quality degradation (high → medium → low)
+
+#### 3. Mobile-Optimized CSS Utility Classes
+
+**Pattern**: Performance-first CSS utilities for mobile devices
+
+```css
+/* Enhanced mobile animation performance */
+.mobile-animate-optimized {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(
+    0.25,
+    0.46,
+    0.45,
+    0.94
+  ); /* easeOutQuad - mobile optimized */
+}
+
+/* Feed-specific mobile optimizations */
+.mobile-feed-optimize {
+  contain: layout style;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 400px; /* Estimated card height */
+}
+
+/* iOS specific optimizations */
+.ios-optimize {
+  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000px;
+  -webkit-backface-visibility: hidden;
+}
+```
+
+**Benefits**:
+
+- Guaranteed GPU acceleration with hardware-optimized transforms
+- Layout containment prevents expensive reflows
+- Content visibility API for better scroll performance
+- iOS-specific webkit prefixes for maximum compatibility
+
+#### 4. Battery-Conscious Animation Strategy
+
+**Pattern**: Adaptive animations based on battery level and charging state
+
+```typescript
+// Performance-conscious animation states
+prefersReducedMotion || isLowPerformance
+  ? 'opacity-100' // Skip animation for reduced motion or low performance
+  : hasIntersected
+    ? 'mobile-card-enter-active mobile-card-enter-done'
+    : 'mobile-card-enter',
+
+// Adaptive image loading
+loading={
+  hasIntersected && metrics.adaptiveQuality !== 'low'
+    ? 'eager'
+    : 'lazy'
+}
+```
+
+**Quality Levels**:
+
+- **High**: Full animations, eager image loading, complex hover effects
+- **Medium**: Simplified animations, standard loading, reduced effects
+- **Low**: Minimal animations, lazy loading, essential interactions only
+
+#### 5. Touch-Optimized Interaction Design
+
+**Pattern**: Mobile-first touch targets with enhanced accessibility
+
+```css
+/* Enhanced mobile touch targets */
+.mobile-touch-optimize {
+  min-height: 44px; /* Apple's recommended minimum */
+  min-width: 44px;
+  position: relative;
+}
+
+.mobile-touch-optimize::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  /* Invisible larger touch area */
+}
+```
+
+```typescript
+// Touch-optimized interactions
+isMobile
+  ? 'mobile-touch-optimize mobile-focus-optimize'
+  : 'transition-transform duration-100 hover:scale-[1.03]';
+```
+
+**Benefits**:
+
+- Meets accessibility guidelines for touch targets (44px minimum)
+- Extended touch areas for improved usability
+- Disabled complex hover effects on mobile for better performance
+- Enhanced focus states for keyboard navigation
+
+### Performance Metrics and Monitoring
+
+#### 1. Real-Time FPS Monitoring
+
+**Pattern**: RequestAnimationFrame-based performance tracking
+
+```typescript
+const measureFrameRate = useCallback(() => {
+  frameCountRef.current++;
+
+  const updateFPS = () => {
+    const now = performance.now();
+    const elapsed = now - lastTimeRef.current;
+
+    if (elapsed >= sampleDuration) {
+      const fps = Math.round((frameCountRef.current * 1000) / elapsed);
+      const isLowPerformance = fps < lowFpsThreshold;
+
+      // Determine adaptive quality based on performance
+      let adaptiveQuality: 'high' | 'medium' | 'low' = 'high';
+      if (fps < 30) adaptiveQuality = 'low';
+      else if (fps < lowFpsThreshold) adaptiveQuality = 'medium';
+
+      setMetrics((prev) => ({
+        ...prev,
+        fps,
+        isLowPerformance,
+        adaptiveQuality,
+      }));
+    }
+
+    rafIdRef.current = requestAnimationFrame(updateFPS);
+  };
+
+  rafIdRef.current = requestAnimationFrame(updateFPS);
+}, [sampleDuration, lowFpsThreshold]);
+```
+
+#### 2. Battery API Integration
+
+**Pattern**: Progressive quality degradation based on power state
+
+```typescript
+const updateBatteryInfo = useCallback(async () => {
+  if (!enableBatteryMonitoring || !('getBattery' in navigator)) return;
+
+  try {
+    const battery = await navigator.getBattery();
+
+    setMetrics((prev) => ({
+      ...prev,
+      batteryLevel: Math.round(battery.level * 100),
+      isCharging: battery.charging,
+      adaptiveQuality:
+        !battery.charging && battery.level < 0.2
+          ? 'low' // Force low quality on low battery
+          : prev.adaptiveQuality,
+    }));
+  } catch (error) {
+    console.warn('Battery monitoring not available:', error);
+  }
+}, [enableBatteryMonitoring]);
+```
+
+#### 3. Connection-Aware Optimizations
+
+**Pattern**: Network speed adaptation for animation quality
+
+```typescript
+const updateConnectionInfo = useCallback(() => {
+  const connection = navigator.connection;
+
+  if (connection) {
+    const connectionType = connection.effectiveType;
+
+    setMetrics((prev) => ({
+      ...prev,
+      connectionType,
+      adaptiveQuality:
+        connectionType === '2g' || connectionType === 'slow-2g'
+          ? 'low' // Force low quality on slow connections
+          : prev.adaptiveQuality,
+    }));
+  }
+}, []);
+```
+
+### Advanced Animation Patterns
+
+#### 1. Will-Change Management
+
+**Pattern**: Automatic will-change optimization for GPU acceleration
+
+```typescript
+// Add will-change hint when intersecting
+if (element instanceof HTMLElement) {
+  element.style.willChange = 'transform, opacity';
+
+  // Remove will-change after animation completes (assume 500ms animation)
+  setTimeout(() => {
+    element.style.willChange = 'auto';
+  }, 500);
+}
+```
+
+**Benefits**:
+
+- Enables GPU acceleration only when needed
+- Prevents memory leaks from persistent will-change properties
+- Optimizes for both animation smoothness and resource usage
+
+#### 2. Reduced Motion Integration
+
+**Pattern**: Comprehensive accessibility support with performance benefits
+
+```typescript
+// Detect reduced motion preferences
+const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+setPrefersReducedMotion(mediaQuery.matches);
+
+// Skip intersection observer if reduced motion is enabled
+if (reducedMotion || prefersReducedMotion) {
+  setHasIntersected(true);
+  setIsIntersecting(true);
+  return;
+}
+```
+
+**CSS Implementation**:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .mobile-animate-optimized,
+  .mobile-fade-in,
+  .desktop-only-animation {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+```
+
+#### 3. Progressive Image Loading
+
+**Pattern**: Performance-aware image loading strategy
+
+```typescript
+// Performance optimizations for images
+loading={
+  hasIntersected && metrics.adaptiveQuality !== 'low'
+    ? 'eager'
+    : 'lazy'
+}
+decoding="async"
+```
+
+**Benefits**:
+
+- Eager loading only for visible, high-performance scenarios
+- Async decoding prevents main thread blocking
+- Reduces memory pressure on low-performance devices
+
+### Mobile-Specific Optimizations
+
+#### 1. Viewport-Aware Animation Thresholds
+
+**Pattern**: Mobile-optimized intersection thresholds
+
+```typescript
+// Calculate optimized threshold and root margin for mobile
+const optimizedThreshold =
+  isMobile && mobileThreshold !== undefined ? mobileThreshold : threshold;
+
+const optimizedRootMargin =
+  isMobile && mobileRootMargin !== undefined
+    ? mobileRootMargin
+    : isMobile
+      ? '100px' // Larger preload area on mobile
+      : rootMargin;
+```
+
+#### 2. iOS Safari Optimizations
+
+**Pattern**: WebKit-specific performance enhancements
+
+```css
+/* iOS specific optimizations */
+@supports (-webkit-touch-callout: none) {
+  .ios-optimize {
+    -webkit-transform: translateZ(0);
+    -webkit-perspective: 1000px;
+    -webkit-backface-visibility: hidden;
+  }
+}
+```
+
+#### 3. Mobile Interaction Optimizations
+
+**Pattern**: Touch-first interaction design
+
+```css
+.mobile-interaction-optimize {
+  touch-action: manipulation; /* Prevents 300ms delay */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none; /* Disable callout on iOS */
+}
+```
+
+### Performance Validation Strategies
+
+#### 1. Development Server Integration
+
+**Pattern**: Real-time performance monitoring during development
+
+- Dev server runs successfully with optimizations
+- TypeScript compilation confirms type safety
+- Hot reloading maintains performance characteristics
+
+#### 2. Responsive Design Testing
+
+**Pattern**: Multi-device performance validation
+
+- Desktop: Full animation suite with complex hover effects
+- Tablet: Medium quality with simplified interactions
+- Mobile: Optimized animations with touch-first design
+- Low-end devices: Essential animations only
+
+#### 3. Network Condition Simulation
+
+**Pattern**: Connection-aware performance testing
+
+- Fast connections: High-quality animations and eager loading
+- Slow connections: Reduced animations and lazy loading
+- Offline scenarios: Minimal animations with cached content
+
+### Best Practices Established
+
+#### 1. Performance-First Design
+
+- **Always measure before optimizing**: Use performance monitoring to guide decisions
+- **Progressive enhancement**: Start with minimal animations, enhance based on capability
+- **Resource cleanup**: Properly manage will-change properties and event listeners
+
+#### 2. Mobile-First Animation Strategy
+
+- **Touch targets over hover effects**: Prioritize mobile interactions
+- **Battery awareness**: Reduce animations on low battery devices
+- **Connection sensitivity**: Adapt quality based on network speed
+
+#### 3. Accessibility Integration
+
+- **Reduced motion respect**: Honor user preferences automatically
+- **Focus management**: Enhanced focus states for keyboard navigation
+- **Screen reader compatibility**: Ensure animations don't interfere with assistive technology
+
+### Future Enhancement Opportunities
+
+1. **Service Worker Integration**: Cache animation states for offline performance
+2. **Web Workers**: Offload performance monitoring to prevent main thread blocking
+3. **WebGL Acceleration**: Advanced GPU utilization for complex animations
+4. **Predictive Loading**: Machine learning-based preloading strategies
+5. **Haptic Feedback**: iOS/Android vibration API integration for touch responses
+
+### Applicable Situations
+
+- **Mobile-first applications**: When optimizing for mobile user bases
+- **Performance-critical interfaces**: Applications requiring smooth 60fps animations
+- **Battery-conscious apps**: PWAs and mobile web applications
+- **Accessibility-focused projects**: Applications requiring reduced motion support
+- **Feed-based interfaces**: Infinite scroll implementations with complex cards
+- **Cross-platform development**: Ensuring consistent performance across devices

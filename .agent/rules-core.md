@@ -65,6 +65,24 @@ bun run dev     # ✅
 npm install     # ❌
 ```
 
+## Convex Development Commands
+
+**Run Convex functions from `apps/convex/` directory:**
+
+```bash
+cd apps/convex
+bunx convex dev         # Start Convex development server
+bunx convex codegen     # Generate API types
+bunx convex run seed:seed    # Seed database
+bunx convex run seed:clear   # Clear database
+```
+
+**Alternative via Nx from project root:**
+
+```bash
+bun run dev:backend     # nx dev @vibechecc/convex
+```
+
 ## Required Workflow
 
 1. **TodoWrite**: Use for ALL multi-step tasks

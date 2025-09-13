@@ -634,25 +634,25 @@ function ActivityItem({ activity }: ActivityItemProps) {
         return {
           icon: Users,
           text: `${activity.data.displayName} joined the platform`,
-          color: 'text-green-600 dark:text-green-400',
+          color: 'text-success',
         };
       case 'vibe_created':
         return {
           icon: MessageCircle,
           text: `${activity.data.creatorName} created "${activity.data.title}"`,
-          color: 'text-blue-600 dark:text-blue-400',
+          color: 'text-primary',
         };
       case 'rating_added':
         return {
           icon: Star,
           text: `${activity.data.raterName} rated "${activity.data.vibeTitle}" ${activity.data.emoji} ${activity.data.value}★`,
-          color: 'text-yellow-600 dark:text-yellow-400',
+          color: 'text-warning',
         };
       case 'user_followed':
         return {
           icon: Activity,
           text: `${activity.data.followerName} followed ${activity.data.followingName}`,
-          color: 'text-purple-600 dark:text-purple-400',
+          color: 'text-accent-foreground',
         };
       default:
         return {

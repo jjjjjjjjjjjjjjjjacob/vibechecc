@@ -21,7 +21,7 @@ const maxWidthClasses = {
 };
 
 const paddingClasses = {
-  none: '',
+  none: 'px-0 py-0',
   sm: 'px-2 py-4',
   md: 'px-4 py-6',
   lg: 'px-6 py-8',
@@ -31,8 +31,8 @@ export function BaseLayout({
   children,
   className,
   containerClassName,
-  maxWidth = '5xl',
-  padding = 'md',
+  maxWidth = 'full',
+  padding = 'none',
 }: BaseLayoutProps) {
   return (
     <div className={cn('min-h-screen', className)}>

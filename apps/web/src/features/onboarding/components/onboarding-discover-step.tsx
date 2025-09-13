@@ -395,8 +395,8 @@ export function OnboardingDiscoverStep({
 
       {/* Success Message */}
       {hasInteracted && (
-        <div className="animate-zoomIn rounded-lg border border-green-600/20 bg-green-600/10 p-4 text-center dark:border-green-400/20 dark:bg-green-400/10">
-          <p className="text-sm font-medium text-green-700 dark:text-green-300">
+        <div className="animate-zoomIn border-success/20 bg-success/10 rounded-lg border p-4 text-center">
+          <p className="text-success text-sm font-medium">
             awesome! you're ready to start your vibechecc journey 🚀
           </p>
         </div>

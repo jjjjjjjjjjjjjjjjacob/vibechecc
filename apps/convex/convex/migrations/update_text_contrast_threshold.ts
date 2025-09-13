@@ -31,7 +31,6 @@ function isLightGradient(from: string, to: string) {
     (0.299 * toRgb.r + 0.587 * toRgb.g + 0.114 * toRgb.b) / 255;
 
   const avgLuminance = (fromLuminance + toLuminance) / 2;
-  console.log('avgLuminance', avgLuminance);
   return avgLuminance > 0.82;
 }
 
@@ -39,8 +38,6 @@ function isLightGradient(from: string, to: string) {
 export const updateTextContrastThreshold = internalMutation({
   args: {},
   handler: async (ctx) => {
-    console.log('Starting textContrastMode threshold update migration...');
-
     // Get all vibes that have gradient colors (either from old migration or manual)
     const vibes = await ctx.db
       .query('vibes')
@@ -69,26 +66,15 @@ export const updateTextContrastThreshold = internalMutation({
       )
         ? 'light'
         : 'dark';
-      const reason = `gradient luminance recalculated with new threshold (0.9)`;
 
       // Only update if different from current value
       if (vibe.textContrastMode !== newTextContrastMode) {
         await ctx.db.patch(vibe._id, { textContrastMode: newTextContrastMode });
         updatedCount++;
-        console.log(
-          `Updated vibe ${vibe.id}: changed from '${vibe.textContrastMode}' to '${newTextContrastMode}' (${reason})`
-        );
       } else {
         skippedCount++;
-        console.log(
-          `Skipped vibe ${vibe.id}: already has correct value '${newTextContrastMode}'`
-        );
       }
     }
-
-    console.log(
-      `Migration complete: Updated ${updatedCount} vibes, skipped ${skippedCount} vibes`
-    );
 
     // Record migration completion
     await ctx.db.insert('migrations', {
@@ -131,10 +117,10 @@ export const runTextContrastThresholdUpdate = mutation({
 
     // Run the internal migration via generated internal reference
     const result = await ctx.runMutation(
-      (internal.migrations as any).update_text_contrast_threshold
-        .updateTextContrastThreshold as any,
+      internal.migrations.update_text_contrast_threshold
+        .updateTextContrastThreshold,
       {}
     );
-    return result as any;
+    return result;
   },
 });

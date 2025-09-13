@@ -974,25 +974,17 @@ describe('Notifications', () => {
           description: 'A vibe to rate myself',
         });
 
-      // User1 rates their own vibe
-      await t
-        .withIdentity({ subject: 'user1' })
-        .mutation(api.emojiRatings.createOrUpdateEmojiRating, {
-          vibeId,
-          emoji: '😊',
-          value: 3,
-          review: 'Self rating',
-        });
-
-      // Check notifications - should not contain rating notification for self
-      const notifications = await t
-        .withIdentity({ subject: 'user1' })
-        .query(api.notifications.getNotifications, {});
-
-      const ratingNotifications = notifications.notifications.filter(
-        (n: Notification) => n.type === 'rating'
-      );
-      expect(ratingNotifications).toHaveLength(0);
+      // User1 tries to rate their own vibe - should fail
+      await expect(
+        t
+          .withIdentity({ subject: 'user1' })
+          .mutation(api.emojiRatings.createOrUpdateEmojiRating, {
+            vibeId,
+            emoji: '😊',
+            value: 3,
+            review: 'Self rating',
+          })
+      ).rejects.toThrow('You cannot rate your own vibe');
     });
   });
 

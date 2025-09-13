@@ -121,7 +121,7 @@ export function EditableTextCell({
             {isLoading ? (
               <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
             ) : (
-              <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+              <Check className="text-success h-3 w-3" />
             )}
           </Button>
           <Button

@@ -1,10 +1,12 @@
 import { internalMutation } from './_generated/server';
+import type { Doc } from './_generated/dataModel';
 import { v } from 'convex/values';
-import { userByExternalId, createUserIfNotExistsInternal } from './users';
+import {
+  userByExternalId,
+  createUserIfNotExistsInternal,
+} from './internal/userMutations';
 
-// Internal mutations to avoid circular dependencies when actions call internal functions
-
-// Internal mutation for updating profile (called by action)
+// User mutation wrappers to avoid circular dependencies when actions call internal functions
 export const updateProfileInternal = internalMutation({
   args: {
     externalId: v.string(),
@@ -33,8 +35,7 @@ export const updateProfileInternal = internalMutation({
       throw new Error('User not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updates: Record<string, any> = {};
+    const updates: Partial<Doc<'users'>> = {};
 
     if (args.username !== undefined) {
       updates.username = args.username;
@@ -76,7 +77,6 @@ export const updateProfileInternal = internalMutation({
   },
 });
 
-// Internal mutation for completing onboarding
 export const completeOnboardingInternal = internalMutation({
   args: {
     externalId: v.string(),
@@ -96,8 +96,7 @@ export const completeOnboardingInternal = internalMutation({
       throw new Error('User not authenticated');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updates: Record<string, any> = {
+    const updates: Partial<Doc<'users'>> = {
       onboardingCompleted: true,
     };
 
@@ -117,7 +116,6 @@ export const completeOnboardingInternal = internalMutation({
   },
 });
 
-// Internal mutation for updating onboarding data
 export const updateOnboardingDataInternal = internalMutation({
   args: {
     externalId: v.string(),
@@ -139,8 +137,7 @@ export const updateOnboardingDataInternal = internalMutation({
       throw new Error('User not authenticated');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updates: Record<string, any> = {};
+    const updates: Partial<Doc<'users'>> = {};
 
     if (args.username !== undefined) {
       updates.username = args.username;

@@ -378,6 +378,18 @@ export function Header() {
                   >
                     discover
                   </Link>
+                  <Link
+                    to="/community"
+                    className={cn(
+                      'hover:text-foreground/80 lowercase transition-colors',
+                      location.pathname === '/community'
+                        ? 'text-foreground font-medium'
+                        : 'text-foreground/60'
+                    )}
+                    onClick={() => setNavState(null)}
+                  >
+                    community
+                  </Link>
                   <SignedIn>
                     <Link
                       to="/vibes/my-vibes"
@@ -619,7 +631,7 @@ export function Header() {
             <TabAccordionContent value="search" className="pb-0">
               <div
                 data-has-mounted={navHasMounted}
-                className="h-auto max-h-[calc(70vh+84px)] opacity-100 transition delay-200 duration-200 data-[has-mounted=false]:translate-y-10 data-[has-mounted=false]:opacity-0"
+                className="h-auto max-h-[calc(70vh_+_84px)] opacity-100 transition delay-200 duration-200 data-[has-mounted=false]:translate-y-10 data-[has-mounted=false]:opacity-0"
               >
                 <GlobalSearchCommand
                   open={true}
@@ -670,6 +682,17 @@ export function Header() {
                       }}
                     >
                       discover
+                    </Link>
+                    <Link
+                      to="/community"
+                      className={cn(
+                        'hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground block w-full rounded-lg px-2 py-1.5 lowercase transition-all duration-150'
+                      )}
+                      onClick={() => {
+                        setNavState(null);
+                      }}
+                    >
+                      community
                     </Link>
                     <button
                       className="hover:bg-muted/50 hover:text-foreground text-foreground/80 data-[selected=true]:text-foreground flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left lowercase transition-all duration-150"

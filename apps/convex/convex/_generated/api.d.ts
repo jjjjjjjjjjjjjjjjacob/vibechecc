@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as achievements from "../achievements.js";
 import type * as admin_dashboard from "../admin/dashboard.js";
 import type * as admin_emojis from "../admin/emojis.js";
 import type * as admin_reviews from "../admin/reviews.js";
@@ -23,6 +24,7 @@ import type * as admin_vibes from "../admin/vibes.js";
 import type * as analytics_searchMetrics from "../analytics/searchMetrics.js";
 import type * as anonymousActions from "../anonymousActions.js";
 import type * as cleanupSearchHistory from "../cleanupSearchHistory.js";
+import type * as community from "../community.js";
 import type * as crons from "../crons.js";
 import type * as debugSearchHistory from "../debugSearchHistory.js";
 import type * as emojiMetadata from "../emojiMetadata.js";
@@ -31,6 +33,7 @@ import type * as emojis from "../emojis.js";
 import type * as files from "../files.js";
 import type * as follows from "../follows.js";
 import type * as http from "../http.js";
+import type * as internal_userMutations from "../internal/userMutations.js";
 import type * as internal_ from "../internal.js";
 import type * as lib_emojiColors from "../lib/emojiColors.js";
 import type * as lib_securityValidators from "../lib/securityValidators.js";
@@ -40,6 +43,7 @@ import type * as migrations_set_text_contrast_mode from "../migrations/set_text_
 import type * as migrations_update_text_contrast_threshold from "../migrations/update_text_contrast_threshold.js";
 import type * as migrations_update_text_contrast_threshold_v2 from "../migrations/update_text_contrast_threshold_v2.js";
 import type * as notifications from "../notifications.js";
+import type * as ratingLikes from "../ratingLikes.js";
 import type * as ratings from "../ratings.js";
 import type * as search_fuzzy_search from "../search/fuzzy_search.js";
 import type * as search_search_scorer from "../search/search_scorer.js";
@@ -67,6 +71,7 @@ import type * as vibes from "../vibes.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  achievements: typeof achievements;
   "admin/dashboard": typeof admin_dashboard;
   "admin/emojis": typeof admin_emojis;
   "admin/reviews": typeof admin_reviews;
@@ -77,6 +82,7 @@ declare const fullApi: ApiFromModules<{
   "analytics/searchMetrics": typeof analytics_searchMetrics;
   anonymousActions: typeof anonymousActions;
   cleanupSearchHistory: typeof cleanupSearchHistory;
+  community: typeof community;
   crons: typeof crons;
   debugSearchHistory: typeof debugSearchHistory;
   emojiMetadata: typeof emojiMetadata;
@@ -85,6 +91,7 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   follows: typeof follows;
   http: typeof http;
+  "internal/userMutations": typeof internal_userMutations;
   internal: typeof internal_;
   "lib/emojiColors": typeof lib_emojiColors;
   "lib/securityValidators": typeof lib_securityValidators;
@@ -94,6 +101,7 @@ declare const fullApi: ApiFromModules<{
   "migrations/update_text_contrast_threshold": typeof migrations_update_text_contrast_threshold;
   "migrations/update_text_contrast_threshold_v2": typeof migrations_update_text_contrast_threshold_v2;
   notifications: typeof notifications;
+  ratingLikes: typeof ratingLikes;
   ratings: typeof ratings;
   "search/fuzzy_search": typeof search_fuzzy_search;
   "search/search_scorer": typeof search_search_scorer;

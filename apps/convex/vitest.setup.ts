@@ -16,6 +16,7 @@ export const modules = {
   'tags.ts': () => import('./convex/tags'),
   'http.ts': () => import('./convex/http'),
   'internal.ts': () => import('./convex/internal'), // Add internal module for scheduler calls
+  'internal/userMutations.ts': () => import('./convex/internal/userMutations'),
   'schema.ts': () => import('./convex/schema'),
   'lib/securityValidators.ts': () => import('./convex/lib/securityValidators'),
   'lib/emojiColors.ts': () => import('./convex/lib/emojiColors'),

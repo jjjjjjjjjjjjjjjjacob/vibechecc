@@ -31,7 +31,6 @@ function isLightGradient(from: string, to: string) {
     (0.299 * toRgb.r + 0.587 * toRgb.g + 0.114 * toRgb.b) / 255;
 
   const avgLuminance = (fromLuminance + toLuminance) / 2;
-  console.log('avgLuminance', avgLuminance);
   return avgLuminance > 0.9;
 }
 
@@ -39,8 +38,6 @@ function isLightGradient(from: string, to: string) {
 export const setTextContrastMode = internalMutation({
   args: {},
   handler: async (ctx) => {
-    console.log('Starting textContrastMode migration...');
-
     // Get all vibes that don't have textContrastMode set
     const vibes = await ctx.db
       .query('vibes')
@@ -54,12 +51,10 @@ export const setTextContrastMode = internalMutation({
 
     for (const vibe of vibes) {
       let textContrastMode: 'light' | 'dark' | 'auto' = 'auto';
-      let reason = 'no background';
 
       // If vibe has an image (either legacy URL or storage ID), assume dark background
       if (vibe.image || vibe.imageStorageId) {
         textContrastMode = 'dark'; // Use light text on dark background
-        reason = 'has image';
         imageVibes++;
       }
       // If vibe has gradient colors, calculate based on brightness
@@ -67,32 +62,18 @@ export const setTextContrastMode = internalMutation({
         textContrastMode = isLightGradient(vibe.gradientFrom, vibe.gradientTo)
           ? 'light'
           : 'dark';
-        reason = `gradient is ${textContrastMode === 'light' ? 'light' : 'dark'}`;
         gradientVibes++;
       }
       // If neither image nor gradient, leave as 'auto'
       else {
         skippedCount++;
-        console.log(`Skipped vibe ${vibe.id}: ${reason}`);
         continue;
       }
 
       // Update the vibe
       await ctx.db.patch(vibe._id, { textContrastMode });
       updatedCount++;
-
-      console.log(
-        `Updated vibe ${vibe.id}: set to '${textContrastMode}' (${reason})`
-      );
     }
-
-    console.log(
-      `Migration complete: Updated ${updatedCount} vibes, skipped ${skippedCount} vibes`
-    );
-    console.log(`  - ${imageVibes} vibes with images (set to 'dark')`);
-    console.log(
-      `  - ${gradientVibes} vibes with gradients (calculated based on brightness)`
-    );
 
     // Record migration completion
     await ctx.db.insert('migrations', {
@@ -137,10 +118,9 @@ export const runTextContrastMigration = mutation({
 
     // Run the internal migration via generated internal reference
     const result = await ctx.runMutation(
-      (internal.migrations as any).set_text_contrast_mode
-        .setTextContrastMode as any,
+      internal.migrations.set_text_contrast_mode.setTextContrastMode,
       {}
     );
-    return result as any;
+    return result;
   },
 });

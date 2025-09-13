@@ -15,6 +15,7 @@ import {
   Twitter,
   Instagram,
   Music2,
+  MessageSquare,
   ExternalLink,
   Unlink,
   AlertCircle,
@@ -25,7 +26,7 @@ import { formatDistanceToNow } from '@/utils/date-utils';
 
 interface SocialConnection {
   _id: string;
-  platform: 'twitter' | 'instagram' | 'tiktok';
+  platform: 'twitter' | 'instagram' | 'tiktok' | 'discord';
   platformUserId: string;
   platformUsername?: string;
   connectionStatus: 'connected' | 'disconnected' | 'expired' | 'error';
@@ -40,12 +41,14 @@ const platformIcons = {
   twitter: Twitter,
   instagram: Instagram,
   tiktok: Music2,
+  discord: MessageSquare,
 };
 
 const platformLabels = {
   twitter: 'x / twitter',
   instagram: 'instagram',
   tiktok: 'tiktok',
+  discord: 'discord',
 };
 
 const statusColors = {
@@ -69,11 +72,13 @@ export function SocialConnectionsList({
   );
 
   const handleDisconnect = async (
-    platform: 'twitter' | 'instagram' | 'tiktok'
+    platform: 'twitter' | 'instagram' | 'tiktok' | 'discord'
   ) => {
     setDisconnectingPlatform(platform);
     try {
-      await disconnectMutation({ platform });
+      await disconnectMutation({
+        platform: platform as 'twitter' | 'instagram' | 'tiktok',
+      });
       toast('disconnected', { duration: 3000 });
     } catch {
       toast.error('disconnect failed');

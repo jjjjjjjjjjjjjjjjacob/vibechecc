@@ -100,52 +100,70 @@ export const createOrUpdateEmojiRating = mutation({
       throw new Error('Rating value must be between 1 and 5');
     }
 
+    // Get the vibe to check if user is trying to rate their own vibe
+    const vibe = await ctx.db
+      .query('vibes')
+      .withIndex('id', (q) => q.eq('id', args.vibeId))
+      .first();
+
+    if (!vibe) {
+      throw new Error('Vibe not found');
+    }
+
+    // Prevent self-rating
+    if (vibe.createdById === identity.subject) {
+      throw new Error('You cannot rate your own vibe');
+    }
+
     const now = new Date().toISOString();
     const tags: string[] = [];
 
     // Tags come from the rating data, not from the emoji itself
     // The emoji metadata contains keywords, not tags
 
-    // Check if user already rated this vibe
-    const existingRating = await ctx.db
+    // Check if user already has a rating with this emoji for this vibe
+    const existingEmojiRating = await ctx.db
       .query('ratings')
-      .withIndex('vibeAndUser', (q) =>
-        q.eq('vibeId', args.vibeId).eq('userId', identity.subject)
+      .withIndex('vibeUserEmoji', (q) =>
+        q
+          .eq('vibeId', args.vibeId)
+          .eq('userId', identity.subject)
+          .eq('emoji', args.emoji)
       )
       .first();
 
-    const ratingData = {
-      emoji: args.emoji,
-      value: args.value,
-      review: args.review,
-      tags: tags.length > 0 ? tags : undefined,
-      updatedAt: now,
-    };
+    let result: string;
+    let isUpdate = false;
 
-    let result;
-    if (existingRating) {
+    if (existingEmojiRating) {
       // Update existing rating
-      await ctx.db.patch(existingRating._id, ratingData);
-      result = existingRating._id;
+      await ctx.db.patch(existingEmojiRating._id, {
+        value: args.value,
+        review: args.review,
+        updatedAt: now,
+      });
+      result = existingEmojiRating._id;
+      isUpdate = true;
     } else {
       // Create new rating
-      result = await ctx.db.insert('ratings', {
+      const insertResult = await ctx.db.insert('ratings', {
         vibeId: args.vibeId,
         userId: identity.subject,
+        emoji: args.emoji,
+        value: args.value,
+        review: args.review,
+        tags: tags.length > 0 ? tags : undefined,
         createdAt: now,
-        ...ratingData,
+        updatedAt: now,
       });
+      result = insertResult;
+      isUpdate = false;
     }
 
-    // Create rating notification for the vibe creator (only for new ratings or significant updates)
+    // Create rating notification for the vibe creator (only for new ratings, not updates)
     try {
-      // PERFORMANCE OPTIMIZED: Use indexed query instead of filter
-      const vibe = await ctx.db
-        .query('vibes')
-        .withIndex('id', (q) => q.eq('id', args.vibeId))
-        .first();
-
-      if (vibe && vibe.createdById !== identity.subject) {
+      // We already have vibe data from earlier validation
+      if (!isUpdate && vibe.createdById !== identity.subject) {
         // Don't notify yourself
         // Get the rater's user info
         const raterUser = await ctx.db
@@ -156,14 +174,13 @@ export const createOrUpdateEmojiRating = mutation({
           .first();
 
         const raterDisplayName = computeUserDisplayName(raterUser);
-        const ratingId = existingRating ? existingRating._id : result;
 
         // Extract notification args to avoid type depth issues
         const notificationArgs = {
           userId: vibe.createdById,
           type: 'rating' as const,
           triggerUserId: identity.subject,
-          targetId: ratingId ? ratingId.toString() : '',
+          targetId: result ? result.toString() : '',
           title: `${raterDisplayName} rated your vibe with ${args.emoji}`,
           description: 'see what they thought',
           metadata: {
@@ -177,7 +194,6 @@ export const createOrUpdateEmojiRating = mutation({
         await safeSchedulerCall(
           ctx,
           0,
-          // @ts-expect-error - TypeScript depth issue with internal functions
           internal.notifications.createNotification,
           notificationArgs
         );
@@ -188,69 +204,59 @@ export const createOrUpdateEmojiRating = mutation({
       console.error('Failed to create rating notification:', error);
     }
 
-    // Create new rating notifications for users who follow the rater (only for new ratings)
-    if (!existingRating) {
-      try {
-        // Get the rater's and vibe info in parallel for efficiency
-        const [raterUser, vibe] = await Promise.all([
-          ctx.db
-            .query('users')
-            .withIndex('byExternalId', (q) =>
-              q.eq('externalId', identity.subject)
-            )
-            .first(),
-          ctx.db
-            .query('vibes')
-            .withIndex('id', (q) => q.eq('id', args.vibeId))
-            .first(),
-        ]);
+    // Create new rating notifications for users who follow the rater
+    try {
+      // Get the rater's user info
+      const raterUser = await ctx.db
+        .query('users')
+        .withIndex('byExternalId', (q) => q.eq('externalId', identity.subject))
+        .first();
 
-        if (raterUser && vibe) {
-          const raterDisplayName = computeUserDisplayName(raterUser);
+      if (raterUser) {
+        const raterDisplayName = computeUserDisplayName(raterUser);
 
-          // Get vibe creator info
-          const vibeCreator = await ctx.db
-            .query('users')
-            .withIndex('byExternalId', (q) =>
-              q.eq('externalId', vibe.createdById)
-            )
-            .first();
+        // Get vibe creator info
+        const vibeCreator = await ctx.db
+          .query('users')
+          .withIndex('byExternalId', (q) =>
+            q.eq('externalId', vibe.createdById)
+          )
+          .first();
 
-          const vibeCreatorName = computeUserDisplayName(vibeCreator);
+        const vibeCreatorName = computeUserDisplayName(vibeCreator);
 
-          // Extract notification args to avoid type depth issues
-          const followerNotificationArgs = {
-            triggerUserId: identity.subject,
-            triggerUserDisplayName: raterDisplayName,
-            type: 'new_rating' as const,
-            targetId: result ? result.toString() : '',
-            title: `${raterDisplayName} reviewed a vibe`,
-            description: 'see their review',
-            metadata: {
-              vibeTitle: vibe.title,
-              vibeCreator: vibeCreatorName,
-              emoji: args.emoji,
-              ratingValue: args.value,
-            },
-            maxFollowers: 50,
-          };
+        // Extract notification args to avoid type depth issues
+        const followerNotificationArgs = {
+          triggerUserId: identity.subject,
+          triggerUserDisplayName: raterDisplayName,
+          type: 'new_rating' as const,
+          targetId: result ? result.toString() : '',
+          title: `${raterDisplayName} reviewed a vibe`,
+          description: 'see their review',
+          metadata: {
+            vibeTitle: vibe.title,
+            vibeCreator: vibeCreatorName,
+            emoji: args.emoji,
+            ratingValue: args.value,
+          },
+          maxFollowers: 50,
+        };
 
-          // PERFORMANCE OPTIMIZED: Use batch notification system
-          await safeSchedulerCall(
-            ctx,
-            0,
-            internal.notifications.createFollowerNotifications,
-            followerNotificationArgs
-          );
-        }
-      } catch (error) {
-        // Don't fail the rating operation if notification creation fails
-        // eslint-disable-next-line no-console
-        console.error(
-          'Failed to create new rating notifications for followers:',
-          error
+        // PERFORMANCE OPTIMIZED: Use batch notification system
+        await safeSchedulerCall(
+          ctx,
+          0,
+          internal.notifications.createFollowerNotifications,
+          followerNotificationArgs
         );
       }
+    } catch (error) {
+      // Don't fail the rating operation if notification creation fails
+      // eslint-disable-next-line no-console
+      console.error(
+        'Failed to create new rating notifications for followers:',
+        error
+      );
     }
 
     return result;

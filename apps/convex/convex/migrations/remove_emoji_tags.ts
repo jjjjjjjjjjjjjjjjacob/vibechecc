@@ -24,16 +24,10 @@ export const removeEmojiTags = internalMutation({
         // Update the document
         await ctx.db.patch(emoji._id, emojiWithoutTags);
         updatedCount++;
-
-        console.log(`Removed tags from emoji: ${emoji.emoji} (${emoji.name})`);
       } else {
         skippedCount++;
       }
     }
-
-    console.log(
-      `Migration complete: Updated ${updatedCount} emojis, skipped ${skippedCount} emojis`
-    );
 
     // Record migration completion
     await ctx.db.insert('migrations', {

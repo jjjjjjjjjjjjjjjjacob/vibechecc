@@ -39,7 +39,9 @@ import { ClerkPostHogIntegration } from '@/features/auth/components/clerk-postho
 import { OnboardingGuard } from '@/features/onboarding/components/onboarding-guard';
 import { EnvironmentAccessGuard } from '@/components/environment-access-guard';
 import { NewUserSurvey } from '@/components/new-user-survey';
-import appCss from '@/styles/app.css?url';
+// Load Tailwind CSS with HMR in dev; use link tag in prod for SSR
+import '@/styles/app.css';
+import appCssUrl from '@/styles/app.css?url';
 import { seo } from '@/utils/seo';
 import { APP_CONFIG } from '@/utils/bindings';
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start';
@@ -86,7 +88,8 @@ export const Route = createRootRouteWithContext<{
       }),
     ],
     links: [
-      { rel: 'stylesheet', href: appCss },
+      // In production, include stylesheet via link; in dev HMR injects it
+      ...(!import.meta.env.DEV ? [{ rel: 'stylesheet', href: appCssUrl }] : []),
       // Font preloading for critical fonts - optimized for performance
       {
         rel: 'preload',
@@ -259,6 +262,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       setPageNavState(null);
     }
   }, [location.pathname, setPageNavState]);
+
+  // Safety: ensure any residual transforms from dialogs are cleared on navigation
+  React.useEffect(() => {
+    const wrapper = document.querySelector(
+      '[data-vaul-drawer-wrapper]'
+    ) as HTMLElement | null;
+    if (!wrapper) return;
+    wrapper.style.transformOrigin = '';
+    wrapper.style.transitionProperty = '';
+    wrapper.style.transitionDuration = '';
+    wrapper.style.transitionTimingFunction = '';
+    wrapper.style.borderRadius = '';
+    wrapper.style.overflow = '';
+    wrapper.style.transform = '';
+    document.body.style.background = '';
+  }, [location.pathname]);
 
   return (
     <html lang="en" className={cn('font-sans')}>

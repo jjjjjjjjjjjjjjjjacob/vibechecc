@@ -12,7 +12,7 @@ interface UseStoryCanvasOptions {
 }
 
 export interface LayoutOption {
-  value: 'expanded' | 'minimal';
+  value: 'expanded' | 'minimal' | 'square';
   label: string;
   description: string;
   includeImage: boolean;
@@ -33,7 +33,8 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
       ratings: (EmojiRating | Rating)[] = [],
       _shareUrl: string,
       imageUrl?: string | null,
-      layoutOption?: LayoutOption
+      layoutOption?: LayoutOption,
+      showResponses?: boolean
     ): Promise<Blob | null> => {
       // start generation
       setIsGenerating(true);
@@ -71,10 +72,15 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
 
         // Theme detection complete
 
-        // Create canvas
+        // Create canvas with dimensions based on layout
         const canvas = document.createElement('canvas');
-        canvas.width = 1080;
-        canvas.height = 1920;
+        if (layoutOption?.value === 'square') {
+          canvas.width = 1080;
+          canvas.height = 1080;
+        } else {
+          canvas.width = 1080;
+          canvas.height = 1920;
+        }
         const ctx = canvas.getContext('2d');
 
         if (!ctx) {
@@ -110,26 +116,35 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
 
         // Solid background color - no gradient
         ctx.fillStyle = storyColors.background;
-        ctx.fillRect(0, 0, 1080, 1920);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw header
+        // Draw header with proper top padding to prevent cutoff
         ctx.textBaseline = 'top';
         ctx.font = 'bold 72px system-ui, -apple-system, sans-serif';
 
+        // Increased top margin to prevent cutoff
+        const headerY = 100;
+
         // Create gradient for app name text
-        const headerGradient = ctx.createLinearGradient(80, 80, 400, 80);
+        const headerGradient = ctx.createLinearGradient(
+          80,
+          headerY,
+          400,
+          headerY
+        );
         headerGradient.addColorStop(0, storyColors.primary);
         headerGradient.addColorStop(1, storyColors.secondary);
         ctx.fillStyle = headerGradient;
-        ctx.fillText(APP_NAME, 80, 80);
+        ctx.fillText(APP_NAME, 80, headerY);
 
         ctx.font = '36px system-ui, -apple-system, sans-serif';
         ctx.fillStyle = storyColors.mutedForeground;
-        ctx.fillText('share your vibe', 580, 100);
+        ctx.fillText('share your vibe', 580, headerY + 20);
 
         // Draw main card with nice shadow and rounded corners
-        const cardY = 200;
-        const cardHeight = 1400;
+        // Adjusted card positioning to account for new header spacing
+        const cardY = 220;
+        const cardHeight = 1380;
         const cardX = 60;
         const cardWidth = 960;
         const borderRadius = 32;
@@ -269,6 +284,352 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
           includeReview: false,
           includeTags: true,
         };
+
+        // Handle square layout differently
+        if (layout.value === 'square') {
+          // For square layout, use the dedicated square canvas component approach
+          // with more compact dimensions and proper padding to prevent cutoff
+
+          // Header with proper top padding to prevent cutoff
+          const headerY = 100; // Increased padding from top to prevent cutoff
+          ctx.font = 'bold 60px system-ui, -apple-system, sans-serif';
+
+          // Create gradient for app name text
+          const headerGradient = ctx.createLinearGradient(
+            80,
+            headerY,
+            400,
+            headerY
+          );
+          headerGradient.addColorStop(0, storyColors.primary);
+          headerGradient.addColorStop(1, storyColors.secondary);
+          ctx.fillStyle = headerGradient;
+          ctx.fillText(APP_NAME, 80, headerY);
+
+          ctx.font = '30px system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = storyColors.mutedForeground;
+          ctx.fillText('share your vibe', 580, headerY + 20);
+
+          // Main content card for square format
+          // Adjusted for new header positioning
+          const cardY = 190;
+          const cardHeight = 720; // More compact for square
+          const cardX = 60;
+          const cardWidth = 960;
+          const borderRadius = 32;
+
+          // Card background
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+          ctx.shadowBlur = 40;
+          ctx.shadowOffsetY = 15;
+
+          ctx.fillStyle = storyColors.card;
+          ctx.beginPath();
+          ctx.roundRect(cardX, cardY, cardWidth, cardHeight, borderRadius);
+          ctx.fill();
+
+          // Border
+          ctx.shadowColor = 'transparent';
+          ctx.strokeStyle = hexToRgba(storyColors.primary, 0.2);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Content area
+          const contentX = cardX + 50;
+          const contentWidth = cardWidth - 100;
+          let currentY = cardY + 50;
+
+          // Author section (more compact)
+          const displayName = computeUserDisplayName(author);
+          const userAvatarUrl = getUserAvatarUrl(author);
+          let avatarDrawn = false;
+
+          // Try to load and draw user avatar
+          if (userAvatarUrl) {
+            try {
+              const avatarImg = new Image();
+              avatarImg.crossOrigin = 'anonymous';
+
+              const loadPromise = new Promise((resolve, reject) => {
+                const timeout = setTimeout(
+                  () => reject(new Error('Timeout')),
+                  3000
+                );
+                avatarImg.onload = () => {
+                  clearTimeout(timeout);
+                  resolve(avatarImg);
+                };
+                avatarImg.onerror = () => {
+                  clearTimeout(timeout);
+                  reject(new Error('Failed'));
+                };
+                avatarImg.src = userAvatarUrl;
+              });
+
+              await loadPromise;
+
+              // Draw avatar circle
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(contentX + 35, currentY + 35, 32, 0, Math.PI * 2);
+              ctx.clip();
+
+              const imgSize = Math.min(avatarImg.width, avatarImg.height);
+              const sx = (avatarImg.width - imgSize) / 2;
+              const sy = (avatarImg.height - imgSize) / 2;
+
+              ctx.drawImage(
+                avatarImg,
+                sx,
+                sy,
+                imgSize,
+                imgSize,
+                contentX + 35 - 32,
+                currentY + 35 - 32,
+                64,
+                64
+              );
+              ctx.restore();
+              avatarDrawn = true;
+            } catch {
+              avatarDrawn = false;
+            }
+          }
+
+          // Fallback to initials
+          if (!avatarDrawn) {
+            ctx.fillStyle = storyColors.muted;
+            ctx.beginPath();
+            ctx.arc(contentX + 35, currentY + 35, 32, 0, Math.PI * 2);
+            ctx.fill();
+
+            const initials = displayName.slice(0, 2).toUpperCase();
+            ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = storyColors.foreground;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(initials, contentX + 35, currentY + 35);
+          }
+
+          // Author name
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.font = '500 28px system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = storyColors.cardForeground;
+          ctx.fillText(displayName, contentX + 90, currentY + 10);
+
+          if (author.username) {
+            ctx.font = '22px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = storyColors.mutedForeground;
+            ctx.fillText(`@${author.username}`, contentX + 90, currentY + 45);
+          }
+
+          currentY += 100;
+
+          // Title (more compact)
+          ctx.font = 'bold 40px system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = storyColors.cardForeground;
+
+          const titleWords = vibe.title.split(' ');
+          let titleLine = '';
+          let titleY = currentY;
+          const maxTitleLines = 2;
+          let titleLineCount = 0;
+
+          for (const word of titleWords) {
+            if (titleLineCount >= maxTitleLines) break;
+            const testLine = titleLine + word + ' ';
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > contentWidth && titleLine !== '') {
+              ctx.fillText(titleLine, contentX, titleY);
+              titleLine = word + ' ';
+              titleY += 50;
+              titleLineCount++;
+            } else {
+              titleLine = testLine;
+            }
+          }
+          if (titleLineCount < maxTitleLines && titleLine) {
+            ctx.fillText(titleLine, contentX, titleY);
+            titleY += 50;
+          }
+
+          currentY = titleY + 20;
+
+          // Conditionally show description OR responses based on showResponses parameter
+          const shouldShowResponses = showResponses && ratings.length > 0;
+
+          if (!shouldShowResponses) {
+            // Show description
+            ctx.font = '24px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = hexToRgba(storyColors.cardForeground, 0.8);
+
+            const descWords = vibe.description.split(' ');
+            let descLine = '';
+            let descY = currentY;
+            const maxDescLines = 3;
+            let descLineCount = 0;
+
+            for (const word of descWords) {
+              if (descLineCount >= maxDescLines) break;
+              const testLine = descLine + word + ' ';
+              const metrics = ctx.measureText(testLine);
+              if (metrics.width > contentWidth && descLine !== '') {
+                ctx.fillText(descLine, contentX, descY);
+                descLine = word + ' ';
+                descY += 32;
+                descLineCount++;
+              } else {
+                descLine = testLine;
+              }
+            }
+            if (descLineCount < maxDescLines && descLine) {
+              ctx.fillText(descLine, contentX, descY);
+              descY += 32;
+            }
+            currentY = descY + 20;
+          } else {
+            // Show responses (emoji ratings summary)
+            if (ratings.length > 0) {
+              // Top emoji ratings
+              const emojiAverages = ratings
+                .reduce(
+                  (acc, rating) => {
+                    const existing = acc.find((e) => e.emoji === rating.emoji);
+                    if (existing) {
+                      existing.totalValue += rating.value;
+                      existing.count++;
+                    } else {
+                      acc.push({
+                        emoji: rating.emoji,
+                        count: 1,
+                        totalValue: rating.value,
+                        avgRating: rating.value,
+                      });
+                    }
+                    return acc;
+                  },
+                  [] as {
+                    emoji: string;
+                    count: number;
+                    totalValue: number;
+                    avgRating: number;
+                  }[]
+                )
+                .map((item) => ({
+                  ...item,
+                  avgRating: item.totalValue / item.count,
+                }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 3);
+
+              ctx.font = '500 20px system-ui, -apple-system, sans-serif';
+              ctx.fillStyle = storyColors.mutedForeground;
+              ctx.fillText('top reactions', contentX, currentY);
+              currentY += 35;
+
+              // Draw emoji reactions horizontally
+              let emojiX = contentX;
+              for (const emoji of emojiAverages) {
+                // Emoji
+                ctx.font = '28px system-ui, -apple-system, sans-serif';
+                ctx.fillText(emoji.emoji, emojiX, currentY);
+
+                // Rating
+                ctx.font = '500 18px system-ui, -apple-system, sans-serif';
+                ctx.fillStyle = storyColors.foreground;
+                ctx.fillText(emoji.avgRating.toFixed(1), emojiX, currentY + 40);
+
+                // Count
+                ctx.font = '14px system-ui, -apple-system, sans-serif';
+                ctx.fillStyle = storyColors.mutedForeground;
+                ctx.fillText(`${emoji.count}`, emojiX, currentY + 60);
+
+                emojiX += 80;
+              }
+              currentY += 85;
+            }
+          }
+
+          // Tags (compact)
+          if (layout.includeTags && vibe.tags && vibe.tags.length > 0) {
+            ctx.font = '500 20px system-ui, -apple-system, sans-serif';
+            let tagX = contentX;
+
+            for (const tag of vibe.tags.slice(0, 4)) {
+              const tagText = `#${tag}`;
+              const metrics = ctx.measureText(tagText);
+              const tagWidth = metrics.width + 30;
+
+              if (tagX + tagWidth > contentX + contentWidth) break;
+
+              // Tag background
+              ctx.fillStyle = hexToRgba(storyColors.primary, 0.1);
+              ctx.beginPath();
+              ctx.roundRect(tagX, currentY, tagWidth, 32, 16);
+              ctx.fill();
+
+              // Tag text
+              ctx.fillStyle = storyColors.primary;
+              ctx.fillText(tagText, tagX + 15, currentY + 8);
+
+              tagX += tagWidth + 8;
+            }
+            currentY += 50;
+          }
+
+          // Stats at bottom with inline positioning
+          currentY = Math.max(currentY, cardY + cardHeight - 90);
+
+          // Inline metadata for better space utilization
+          let statsX = contentX;
+
+          if (ratings.length > 0) {
+            ctx.font = '20px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = storyColors.foreground;
+            const reviewsText = `💬 ${ratings.length} review${ratings.length !== 1 ? 's' : ''}`;
+            ctx.fillText(reviewsText, statsX, currentY);
+
+            // Position date inline with reviews
+            const reviewsMetrics = ctx.measureText(reviewsText);
+            statsX = contentX + reviewsMetrics.width + 30;
+          }
+
+          ctx.font = '18px system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = storyColors.mutedForeground;
+          ctx.fillText(
+            `📅 ${format(new Date(vibe.createdAt), 'MMM d, yyyy')}`,
+            statsX,
+            currentY + 2
+          );
+
+          // Footer with proper bottom margin to prevent cutoff
+          const footerY = 970; // Adjusted for better spacing from bottom
+          ctx.font = '500 28px system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = storyColors.foreground;
+          ctx.fillText('view full vibe at', 80, footerY);
+
+          ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = storyColors.primary;
+          ctx.fillText(APP_DOMAIN, 80, footerY + 35);
+
+          // Convert to blob
+          return new Promise((resolve) => {
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  setGeneratedBlob(blob);
+                  resolve(blob);
+                } else {
+                  toast.error('failed to generate image');
+                  resolve(null);
+                }
+              },
+              'image/png',
+              0.95
+            );
+          });
+        }
 
         // Vibe image or placeholder
         let contentY = authorY + 140;
@@ -932,30 +1293,32 @@ export function useStoryCanvas(options: UseStoryCanvasOptions = {}) {
           }
         }
 
-        // Stats section at bottom - ensure minimum spacing
-        const statsY = Math.max(y + 30, cardY + cardHeight - 180);
+        // Stats section at bottom - ensure minimum spacing and better positioning
+        const statsY = Math.max(y + 40, cardY + cardHeight - 200);
         y = statsY;
 
-        // Draw stat icons and text
-        ctx.font = '600 32px system-ui, -apple-system, sans-serif';
+        // Create inline metadata section with proper spacing
+        ctx.font = '24px system-ui, -apple-system, sans-serif';
         ctx.fillStyle = storyColors.foreground;
 
-        // Reviews count
-        ctx.font = '28px system-ui, -apple-system, sans-serif';
-        ctx.fillStyle = storyColors.foreground;
+        // Combine stats on single line for better space usage
+        let statsText = '';
+        let statsX = contentX;
+
         if (ratings.length > 0) {
-          ctx.fillText(`💬 ${ratings.length} reviews`, contentX, y);
-          y += 45;
+          statsText = `💬 ${ratings.length} review${ratings.length !== 1 ? 's' : ''}`;
+          ctx.fillText(statsText, statsX, y);
+
+          // Measure text width to position date next to it
+          const statsMetrics = ctx.measureText(statsText);
+          statsX = contentX + statsMetrics.width + 40; // Add spacing
         }
 
-        // Date
-        ctx.font = '26px system-ui, -apple-system, sans-serif';
+        // Date positioned inline with better spacing
+        ctx.font = '22px system-ui, -apple-system, sans-serif';
         ctx.fillStyle = storyColors.mutedForeground;
-        ctx.fillText(
-          `📅 ${format(new Date(vibe.createdAt), 'MMM d, yyyy')}`,
-          contentX,
-          y
-        );
+        const dateText = `📅 ${format(new Date(vibe.createdAt), 'MMM d, yyyy')}`;
+        ctx.fillText(dateText, statsX, y + 2); // Slight vertical adjustment for better alignment
 
         // Footer section
         y = 1680;

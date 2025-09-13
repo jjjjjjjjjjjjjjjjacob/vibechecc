@@ -10,7 +10,7 @@ export function NotFound({ children }: { children?: React.ReactNode }) {
       <p className="flex flex-wrap items-center gap-2">
         <button
           onClick={() => window.history.back()}
-          className="rounded bg-green-600 px-2 py-1 text-sm font-black text-white uppercase dark:bg-green-500"
+          className="bg-success text-success-foreground rounded px-2 py-1 text-sm font-black uppercase"
         >
           Go back
         </button>

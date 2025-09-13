@@ -53,7 +53,7 @@ export function RatingSlider({
             key={i}
             className={`h-3 w-3 ${
               i < rating
-                ? 'fill-yellow-500 text-yellow-500'
+                ? 'fill-rating text-rating'
                 : 'fill-muted text-muted-foreground'
             }`}
           />

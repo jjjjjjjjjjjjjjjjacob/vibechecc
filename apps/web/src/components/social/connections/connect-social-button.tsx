@@ -32,8 +32,7 @@ const platformConfig = {
     icon: Music2,
     label: 'tiktok',
     provider: 'oauth_tiktok',
-    color:
-      'hover:bg-[#000000]/10 hover:text-[#000000] dark:hover:bg-[#FFFFFF]/10 dark:hover:text-[#FFFFFF]',
+    color: 'hover:bg-foreground/10 hover:text-foreground',
   },
 };
 

@@ -830,3 +830,33 @@ export function useVibesPaginatedGeneric(
     enabled,
   });
 }
+
+// Enhanced trending algorithm with engagement scoring
+export function useTrendingWithEngagement(options?: {
+  limit?: number;
+  cursor?: string;
+  timeWindowHours?: number;
+  enabled?: boolean;
+}) {
+  const { enabled = true, ...queryOptions } = options || {};
+
+  return useQuery({
+    ...convexQuery(api.vibes.getTrendingWithEngagement, queryOptions),
+    enabled,
+  });
+}
+
+// Query to get personalized recommendations based on user behavior
+export function usePersonalizedRecommendations(options?: {
+  userId?: string;
+  limit?: number;
+  cursor?: string;
+  enabled?: boolean;
+}) {
+  const { enabled = true, ...queryOptions } = options || {};
+
+  return useQuery({
+    ...convexQuery(api.vibes.getPersonalizedRecommendations, queryOptions),
+    enabled,
+  });
+}

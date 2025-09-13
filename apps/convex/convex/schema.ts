@@ -59,6 +59,9 @@ const schema = defineSchema({
 
     // Admin flag
     isAdmin: v.optional(v.boolean()), // Whether user has admin privileges
+
+    // Authentication provider tracking (for security monitoring)
+    authProvider: v.optional(v.string()), // OAuth provider used for signup (oauth_apple, oauth_google, etc.)
   })
     .index('byExternalId', ['externalId']) // Primary index for Clerk user lookups
     .index('byUsername', ['username']) // Index for username lookups
@@ -81,9 +84,22 @@ const schema = defineSchema({
     visibility: v.optional(v.union(v.literal('public'), v.literal('deleted'))), // Default 'public', 'deleted' for soft delete
     updatedAt: v.optional(v.string()), // Track when vibe was last updated
 
+    // Gradient styling fields
+    gradientFrom: v.optional(v.string()), // Start color of gradient
+    gradientTo: v.optional(v.string()), // End color of gradient
+    gradientDirection: v.optional(v.string()), // Direction of gradient (e.g., "to right")
+    textContrastMode: v.optional(
+      v.union(v.literal('light'), v.literal('dark'))
+    ), // Text contrast mode for readability
+
     // Share tracking fields
     shareCount: v.optional(v.number()), // Total number of times this vibe has been shared
     lastSharedAt: v.optional(v.number()), // Timestamp of most recent share
+
+    // Boost/dampen system fields
+    boostScore: v.optional(v.number()), // Current boost score (can be negative for dampens)
+    totalBoosts: v.optional(v.number()), // Total number of boosts received
+    totalDampens: v.optional(v.number()), // Total number of dampens received
 
     // Admin moderation fields
     moderationReason: v.optional(v.string()), // Reason for moderation action
@@ -99,6 +115,8 @@ const schema = defineSchema({
     .index('byUpdatedAt', ['updatedAt']) // NEW: Index for recent content queries
     .index('byShareCount', ['shareCount']) // NEW: Index for sorting by share popularity
     .index('byLastSharedAt', ['lastSharedAt']) // NEW: Index for recently shared content
+    .index('byBoostScore', ['boostScore']) // NEW: Index for sorting by boost score
+    .index('byTotalBoosts', ['totalBoosts']) // NEW: Index for sorting by total boosts
     .searchIndex('searchTitle', {
       searchField: 'title',
       filterFields: ['createdById', 'tags', 'visibility'],
@@ -118,6 +136,11 @@ const schema = defineSchema({
     createdAt: v.string(),
     updatedAt: v.optional(v.string()),
 
+    // Boost/dampen system fields
+    netScore: v.optional(v.number()), // Net score: boosts - dampens (can be negative)
+    boostCount: v.optional(v.number()), // Total number of boosts received
+    dampenCount: v.optional(v.number()), // Total number of dampens received
+
     // Admin moderation fields
     flagged: v.optional(v.boolean()), // Whether review is flagged
     moderationReason: v.optional(v.string()), // Reason for moderation
@@ -127,11 +150,14 @@ const schema = defineSchema({
     .index('user', ['userId'])
     .index('vibeAndUser', ['vibeId', 'userId'])
     .index('vibeAndEmoji', ['vibeId', 'emoji'])
+    .index('vibeUserEmoji', ['vibeId', 'userId', 'emoji']) // NEW: Compound index for duplicate emoji prevention
     .index('byCreatedAt', ['createdAt'])
     .index('byUserAndEmoji', ['userId', 'emoji'])
     .index('byValue', ['value'])
     .index('byVibeAndValue', ['vibeId', 'value']) // NEW: Compound index for rating-based sorting
     .index('byValueAndVibe', ['value', 'vibeId']) // NEW: Index for filtering by rating value
+    .index('byNetScore', ['netScore']) // NEW: Index for sorting by net score
+    .index('byBoostCount', ['boostCount']) // NEW: Index for sorting by boost count
     .searchIndex('searchReview', {
       searchField: 'review',
       filterFields: ['vibeId', 'userId', 'emoji', 'value'],
@@ -273,7 +299,8 @@ const schema = defineSchema({
     platform: v.union(
       v.literal('twitter'),
       v.literal('instagram'),
-      v.literal('tiktok')
+      v.literal('tiktok'),
+      v.literal('discord')
     ), // Social platform type
     platformUserId: v.string(), // User ID on the social platform
     platformUsername: v.optional(v.string()), // Username on the social platform
@@ -309,6 +336,7 @@ const schema = defineSchema({
       v.literal('twitter'),
       v.literal('instagram'),
       v.literal('tiktok'),
+      v.literal('discord'),
       v.literal('clipboard'),
       v.literal('native')
     ), // Platform shared to
@@ -347,6 +375,138 @@ const schema = defineSchema({
     .index('byCreatedAt', ['createdAt'])
     .index('byUserAndPlatform', ['userId', 'platform', 'createdAt'])
     .index('byContentAndPlatform', ['contentType', 'contentId', 'platform']),
+
+  // Anonymous actions table for pre-auth state management
+  anonymousActions: defineTable({
+    sessionId: v.string(), // Anonymous session identifier
+    actions: v.array(v.any()), // Array of actions performed before authentication
+    createdAt: v.number(), // Timestamp when actions were stored
+    expiresAt: v.number(), // Expiration timestamp (24 hours from creation)
+    processedAt: v.optional(v.number()), // Timestamp when actions were processed
+  })
+    .index('bySessionId', ['sessionId'])
+    .index('byExpiresAt', ['expiresAt']),
+
+  // User points system for gamification
+  userPoints: defineTable({
+    userId: v.string(), // External ID of user
+    totalPointsEarned: v.number(), // Lifetime points earned
+    currentBalance: v.number(), // Current spendable points
+    protectedPoints: v.optional(v.number()), // Points that can't be dampened (starter bonus, level-ups)
+    dailyEarnedPoints: v.number(), // Points earned today
+    dailyPostCount: v.number(), // Posts made today
+    dailyReviewCount: v.number(), // Reviews written today
+    dailyDampenCount: v.optional(v.number()), // Times user dampened content today
+    lastResetDate: v.string(), // Date of last daily reset (YYYY-MM-DD)
+    level: v.number(), // User level based on total points
+    multiplier: v.number(), // Current multiplier for point earnings
+    streakDays: v.number(), // Consecutive days of activity
+    lastActivityDate: v.string(), // Date of last activity (YYYY-MM-DD)
+    karmaScore: v.optional(v.number()), // Karma/reputation score for moderating dampen power
+  })
+    .index('byUserId', ['userId'])
+    .index('byLevel', ['level'])
+    .index('byTotalPoints', ['totalPointsEarned'])
+    .index('byStreak', ['streakDays']),
+
+  // Point transaction history for transparency and auditing
+  pointTransactions: defineTable({
+    userId: v.string(), // External ID of user
+    type: v.union(
+      v.literal('earned'),
+      v.literal('spent'),
+      v.literal('transfer')
+    ), // Transaction type
+    action: v.union(
+      v.literal('post_vibe'),
+      v.literal('write_review'),
+      v.literal('receive_review'),
+      v.literal('boost'),
+      v.literal('dampen'),
+      v.literal('daily_bonus'),
+      v.literal('level_up'),
+      v.literal('receive_boost'),
+      v.literal('receive_dampen'),
+      v.literal('transfer_boost'),
+      v.literal('transfer_dampen')
+    ), // Action that triggered the transaction
+    targetId: v.optional(v.string()), // ID of target (vibeId, ratingId, etc.)
+    fromUserId: v.optional(v.string()), // External ID of user who sent points (for transfers)
+    toUserId: v.optional(v.string()), // External ID of user who received points (for transfers)
+    amount: v.number(), // Points amount (positive for earned, negative for spent)
+    multiplier: v.number(), // Multiplier applied at time of transaction
+    balanceAfter: v.number(), // User's balance after this transaction
+    timestamp: v.number(), // Transaction timestamp
+    metadata: v.optional(v.any()), // Additional transaction data
+  })
+    .index('byUser', ['userId', 'timestamp'])
+    .index('byTimestamp', ['timestamp']),
+
+  // Daily points history for analytics and charts
+  pointsHistory: defineTable({
+    userId: v.string(), // External ID of user
+    date: v.string(), // Date (YYYY-MM-DD)
+    pointsEarned: v.number(), // Total points earned on this date
+    pointsSpent: v.number(), // Total points spent on this date
+    netChange: v.number(), // Net point change for the day
+    endingBalance: v.number(), // Balance at end of day
+    activityCount: v.number(), // Number of activities (posts + reviews)
+  })
+    .index('byUserAndDate', ['userId', 'date'])
+    .index('byDate', ['date'])
+    .index('byUserAndNetChange', ['userId', 'netChange']),
+
+  // Emoji ratings table for enhanced rating system
+  emojiRatings: defineTable({
+    vibeId: v.string(), // ID of the vibe being rated
+    userId: v.string(), // External ID of user giving the rating
+    emoji: v.string(), // Emoji used for the rating
+    value: v.number(), // Rating value (1-5)
+    review: v.optional(v.string()), // Optional text review
+    createdAt: v.string(), // When the rating was created
+    updatedAt: v.optional(v.string()), // When the rating was last updated
+
+    // Engagement metrics
+    helpfulCount: v.optional(v.number()), // Number of users who found this helpful
+    boostCount: v.optional(v.number()), // Number of boosts received
+    dampenCount: v.optional(v.number()), // Number of dampens received
+  })
+    .index('byVibe', ['vibeId'])
+    .index('byUser', ['userId'])
+    .index('byEmoji', ['emoji'])
+    .index('byVibeAndUser', ['vibeId', 'userId'])
+    .index('byVibeAndEmoji', ['vibeId', 'emoji'])
+    .index('byValue', ['value'])
+    .index('byCreatedAt', ['createdAt']),
+
+  // User behavior tracking for recommendation analytics
+  userBehavior: defineTable({
+    userId: v.string(), // External ID of user
+    eventType: v.union(
+      v.literal('recommendation_shown'),
+      v.literal('recommendation_clicked'),
+      v.literal('trending_shown'),
+      v.literal('trending_clicked'),
+      v.literal('featured_collection_viewed'),
+      v.literal('personalized_content_engaged')
+    ), // Type of behavior event
+    metadata: v.any(), // Additional event data (JSON)
+    timestamp: v.number(), // When the event occurred
+  })
+    .index('byUser', ['userId', 'timestamp'])
+    .index('byEventType', ['eventType', 'timestamp'])
+    .index('byTimestamp', ['timestamp']),
+
+  // Rating likes table for social interaction with individual ratings
+  ratingLikes: defineTable({
+    ratingId: v.string(), // ID of the rating being liked
+    userId: v.string(), // External ID of user who liked
+    createdAt: v.number(), // Timestamp
+  })
+    .index('byRating', ['ratingId'])
+    .index('byUser', ['userId'])
+    .index('byRatingAndUser', ['ratingId', 'userId'])
+    .index('byCreatedAt', ['createdAt']),
 });
 export default schema;
 
@@ -370,6 +530,20 @@ const _notification = schema.tables.notifications.validator;
 const _socialConnection = schema.tables.socialConnections.validator;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _shareEvent = schema.tables.shareEvents.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _anonymousAction = schema.tables.anonymousActions.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _userPoints = schema.tables.userPoints.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _pointTransaction = schema.tables.pointTransactions.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _pointsHistory = schema.tables.pointsHistory.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _emojiRating = schema.tables.emojiRatings.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _userBehavior = schema.tables.userBehavior.validator;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _ratingLike = schema.tables.ratingLikes.validator;
 
 export type User = Infer<typeof user>;
 export type Vibe = Infer<typeof vibe>;
@@ -382,6 +556,13 @@ export type Follow = Infer<typeof _follows>;
 export type Notification = Infer<typeof _notification>;
 export type SocialConnection = Infer<typeof _socialConnection>;
 export type ShareEvent = Infer<typeof _shareEvent>;
+export type AnonymousAction = Infer<typeof _anonymousAction>;
+export type UserPoints = Infer<typeof _userPoints>;
+export type PointTransaction = Infer<typeof _pointTransaction>;
+export type PointsHistory = Infer<typeof _pointsHistory>;
+export type EmojiRating = Infer<typeof _emojiRating>;
+export type UserBehavior = Infer<typeof _userBehavior>;
+export type RatingLike = Infer<typeof _ratingLike>;
 
 export const createVibeSchema = v.object({
   title: vibe.fields.title,

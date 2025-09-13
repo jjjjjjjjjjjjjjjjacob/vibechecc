@@ -47,6 +47,10 @@ export function EmojiRatingCycleDisplay({
     Math.floor(Math.random() * DEFAULT_EMOJIS.length)
   );
   const [isHovered, setIsHovered] = React.useState(false);
+  const [userInteracted, setUserInteracted] = React.useState(false);
+  const [selectedEmoji, setSelectedEmoji] = React.useState<string | undefined>(
+    undefined
+  );
   const [emojiTransition, setEmojiTransition] = React.useState<
     'in' | 'out' | 'idle'
   >('idle');
@@ -99,6 +103,22 @@ export function EmojiRatingCycleDisplay({
     }
   }, [emojiOptions.length, isHovered, delay, randomInitialDelay]);
 
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    setUserInteracted(true);
+    setSelectedEmoji(currentEmoji);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    // Don't reset userInteracted here - keep it true once user has interacted
+  };
+
+  const handleClick = () => {
+    setUserInteracted(true);
+    setSelectedEmoji(currentEmoji);
+  };
+
   return (
     <RatingPopover
       onSubmit={onSubmit}
@@ -106,7 +126,7 @@ export function EmojiRatingCycleDisplay({
       vibeTitle={vibeTitle}
       emojiMetadata={emojiMetadata}
       preSelectedEmoji={
-        isHovered && currentEmoji !== '❓' ? currentEmoji : undefined
+        userInteracted && selectedEmoji ? selectedEmoji : undefined
       }
     >
       <div
@@ -117,11 +137,13 @@ export function EmojiRatingCycleDisplay({
           'hover:animate-scale-spring active:scale-95',
           className
         )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
+            handleClick();
           }
         }}
       >

@@ -43,7 +43,7 @@ export function UserReviewsSection({
   if (reviewsLoading) {
     return (
       <div className={className}>
-        <h2 className="from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase sm:mb-4 sm:text-2xl">
+        <h2 className="from-primary to-secondary mb-3 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase sm:mb-4 sm:text-2xl">
           your reviews
         </h2>
         <div className="space-y-3">
@@ -69,7 +69,7 @@ export function UserReviewsSection({
   if (displayedReviews.length === 0) {
     return (
       <div className={className}>
-        <h2 className="from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase sm:mb-4 sm:text-2xl">
+        <h2 className="from-primary to-secondary mb-3 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase sm:mb-4 sm:text-2xl">
           your reviews
         </h2>
         <Card className="border-dashed">
@@ -84,7 +84,7 @@ export function UserReviewsSection({
             <Button
               variant="outline"
               asChild
-              className="border-theme-primary/30 text-theme-primary hover:bg-theme-primary/10"
+              className="border-primary/30 text-primary hover:bg-primary/10"
             >
               <a href="/discover">
                 <MessageSquare className="mr-2 h-4 w-4" />
@@ -103,7 +103,7 @@ export function UserReviewsSection({
         your reviews
       </h2>
 
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-3">
         {displayedReviews.map((rating) => {
           if (!rating) return null;
 
@@ -128,7 +128,7 @@ export function UserReviewsSection({
           <Button
             variant="outline"
             asChild
-            className="bg-background/90 border-theme-primary/30 text-theme-primary w-full transition-transform hover:scale-[1.02] hover:bg-current/10 sm:w-auto"
+            className="bg-background/90 border-primary/30 text-primary hover:bg-primary/10 w-full transition-all duration-200 hover:scale-[1.02] sm:w-auto"
           >
             <a href="/vibes/my-reviews">
               view all reviews ({ratingsWithReviews.length} total)
@@ -157,7 +157,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
     <Link to="/vibes/$vibeId" params={{ vibeId: vibe.id }}>
       <Card className="overflow-hidden transition-shadow duration-200 hover:shadow-md">
         <CardContent className="p-0">
-          <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
+          <div className="flex gap-3 p-4">
             {/* Reviewer Avatar (current user) */}
             <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage
@@ -182,7 +182,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
             {/* Content */}
             <div className="min-w-0 flex-1">
               {/* Header */}
-              <div className="mb-2 flex items-center gap-2 sm:mb-1">
+              <div className="mb-2 flex items-center gap-2">
                 <span className="truncate text-sm font-medium">
                   @
                   {currentUser.username ||
@@ -198,7 +198,7 @@ function ReviewCard({ rating, currentUser }: ReviewCardProps) {
               </div>
 
               {/* Review Text */}
-              <div className="mb-3 sm:mb-2">
+              <div className="mb-2">
                 <p className="text-sm leading-relaxed">{rating.review}</p>
               </div>
 

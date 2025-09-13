@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/tailwind-utils';
 import { SimpleVibePlaceholder } from './simple-vibe-placeholder';
+import { useIntersectionObserver } from '@/hooks/use-intersection-observer';
 import { useUser } from '@clerk/tanstack-react-start';
 import { trackEvents } from '@/lib/track-events';
 import { Badge } from '@/components/ui/badge';
@@ -75,6 +76,28 @@ export function VibeCard({
 
     return 'default';
   }, [variant, compact, layout]);
+
+  // Performance monitoring temporarily disabled to fix infinite re-render
+  // TODO: Move to app-level context to avoid multiple instances
+  const getAdaptiveClasses = (baseClasses: string) => baseClasses;
+  const isLowPerformance = false;
+
+  // Intersection observer for viewport-based animations (mobile-optimized)
+  const {
+    ref: intersectionRef,
+    hasIntersected,
+    isMobile,
+    prefersReducedMotion,
+  } = useIntersectionObserver<HTMLDivElement>({
+    threshold: 0.1,
+    rootMargin: '50px',
+    // Mobile-specific optimizations
+    mobileThreshold: 0.05, // Lower threshold for earlier triggering on mobile
+    mobileRootMargin: '100px', // Larger preload area on mobile
+    triggerOnce: true,
+    // Use performance metrics to decide on reduced motion
+    reducedMotion: isLowPerformance,
+  });
   const [imageError, setImageError] = React.useState(false);
   const [selectedEmojiForRating, setSelectedEmojiForRating] = React.useState<
     string | null
@@ -193,6 +216,9 @@ export function VibeCard({
     );
   }, [emojiMetadataArray]);
 
+  // Check if current user is the vibe creator
+  const isOwnVibe = user?.id && vibe?.createdById === user.id;
+
   // Handle emoji rating submission
   const handleEmojiRating = async (data: {
     emoji: string;
@@ -201,6 +227,10 @@ export function VibeCard({
     tags?: string[];
   }) => {
     if (!vibe) return;
+    if (isOwnVibe) {
+      toast.error('You cannot rate your own vibe', { duration: 3000 });
+      return;
+    }
 
     await createEmojiRatingMutation.mutateAsync({
       vibeId: vibe.id,
@@ -218,6 +248,10 @@ export function VibeCard({
   const handleEmojiRatingClick = (emoji: string, value?: number) => {
     if (!user?.id) {
       setShowAuthDialog(true);
+      return;
+    }
+    if (isOwnVibe) {
+      toast.error('You cannot rate your own vibe', { duration: 3000 });
       return;
     }
 
@@ -318,8 +352,19 @@ export function VibeCard({
                     <img
                       src={imageUrl}
                       alt={vibe.title}
-                      className="h-full w-full object-cover transition-transform duration-200 will-change-transform hover:scale-[1.02]"
+                      className={cn(
+                        'h-full w-full object-cover',
+                        // Mobile-optimized image interactions
+                        isMobile
+                          ? 'mobile-interaction-optimize'
+                          : 'transition-transform duration-150 hover:scale-[1.01]'
+                      )}
                       onError={() => setImageError(true)}
+                      // Performance optimizations for images
+                      loading={
+                        hasIntersected && !isLowPerformance ? 'eager' : 'lazy'
+                      }
+                      decoding="async"
                     />
                   )}
                 </div>
@@ -490,7 +535,7 @@ export function VibeCard({
       <>
         <div
           className={cn(
-            'group relative overflow-hidden rounded-lg transition-shadow duration-200 will-change-transform hover:shadow-md',
+            'group relative overflow-hidden rounded-lg transition-shadow duration-200 hover:shadow-md',
             'h-24 sm:h-28',
             className
           )}
@@ -515,7 +560,7 @@ export function VibeCard({
                 <img
                   src={imageUrl}
                   alt={vibe.title}
-                  className="h-full w-full object-cover transition-transform duration-200 will-change-transform group-hover:scale-[1.02]"
+                  className="h-full w-full object-cover transition-transform duration-150 group-hover:scale-[1.01]"
                   onError={() => setImageError(true)}
                 />
               )}
@@ -692,7 +737,10 @@ export function VibeCard({
 
           {/* Content skeleton */}
           <CardContent
-            className={cn('p-4', finalVariant === 'compact' && 'p-3')}
+            className={cn(
+              'p-standard',
+              finalVariant === 'compact' && 'p-standard-sm'
+            )}
           >
             <Skeleton
               className={cn(
@@ -724,8 +772,8 @@ export function VibeCard({
           {/* Footer skeleton */}
           <CardFooter
             className={cn(
-              'flex flex-col items-start gap-3 p-4 pt-0',
-              finalVariant === 'compact' && 'p-3 pt-0'
+              'gap-standard gap-section p-standard-sm sm:p-standard flex flex-col items-start pt-0', // Standardized gaps and padding
+              finalVariant === 'compact' && 'gap-standard p-standard-sm pt-0'
             )}
           >
             <div className="w-full space-y-3">
@@ -764,10 +812,29 @@ export function VibeCard({
   return (
     <>
       <Card
+        ref={intersectionRef}
         className={cn(
-          'bg-popover/20 border-border/50 relative overflow-hidden transition-shadow duration-200 will-change-transform hover:shadow-md',
+          'bg-popover/20 border-border/50 relative overflow-hidden',
           'h-full',
           finalVariant === 'feed-masonry' && 'break-inside-avoid',
+          // Adaptive animation classes based on performance
+          getAdaptiveClasses(
+            isMobile
+              ? 'mobile-animate-optimized mobile-interaction-optimize'
+              : 'desktop-only-animation'
+          ),
+          // Enhanced mobile feed optimizations
+          isMobile && 'mobile-feed-optimize ios-optimize',
+          // Performance-conscious animation states
+          prefersReducedMotion || isLowPerformance
+            ? 'opacity-100' // Skip animation for reduced motion or low performance
+            : hasIntersected
+              ? 'mobile-card-enter-active mobile-card-enter-done'
+              : 'mobile-card-enter',
+          // Desktop hover effects (disabled on mobile or low performance)
+          !isMobile &&
+            !isLowPerformance &&
+            'transition-shadow duration-200 hover:shadow-md',
           className
         )}
       >
@@ -788,7 +855,15 @@ export function VibeCard({
                   e.stopPropagation();
                 }}
               >
-                <Avatar className="h-6 w-6 shadow-md transition-transform duration-150 will-change-transform hover:scale-[1.05]">
+                <Avatar
+                  className={cn(
+                    'h-6 w-6 shadow-md',
+                    // Mobile touch optimization
+                    isMobile
+                      ? 'mobile-touch-optimize mobile-focus-optimize'
+                      : 'transition-transform duration-100 hover:scale-[1.03]'
+                  )}
+                >
                   <AvatarImage
                     src={getUserAvatarUrl(vibe.createdBy)}
                     alt={computeUserDisplayName(vibe.createdBy)}
@@ -836,27 +911,28 @@ export function VibeCard({
               <div
                 className={cn(
                   'relative overflow-hidden',
-                  // Dynamic aspect ratio based on variant and image presence
+                  // Dynamic aspect ratio with mobile optimizations
                   usePlaceholder
                     ? (() => {
                         switch (finalVariant) {
                           case 'feed-masonry':
-                            return 'aspect-[4/3]';
+                            return 'aspect-[4/3] sm:aspect-[9/16]'; // More vertical on mobile
                           case 'compact':
                             return 'aspect-[4/3]';
                           default:
-                            return 'aspect-video';
+                            return 'aspect-video sm:aspect-[16/10]'; // Wider on desktop
                         }
                       })()
                     : (() => {
                         switch (finalVariant) {
                           case 'feed-single':
-                            return 'sm:aspect-video';
+                            return 'aspect-[9/16] sm:aspect-video'; // Portrait on mobile, landscape on desktop
                           case 'feed-masonry':
+                            return 'aspect-[3/4] sm:aspect-[9/16]'; // Taller for mobile vertical scrolling
                           case 'feed-grid':
-                            return 'aspect-[3/4]';
+                            return 'aspect-[3/4] sm:aspect-square'; // More square on desktop
                           case 'compact':
-                            return 'aspect-[4/3]';
+                            return 'aspect-[4/3] sm:aspect-[16/10]'; // Wider on desktop
                           default:
                             return 'aspect-video';
                         }
@@ -869,19 +945,35 @@ export function VibeCard({
                   <img
                     src={imageUrl}
                     alt={vibe.title}
-                    className="h-full w-full object-cover transition-transform duration-200 will-change-transform hover:scale-[1.02]"
+                    className={cn(
+                      'h-full w-full object-cover',
+                      // Mobile-optimized image interactions
+                      isMobile
+                        ? 'mobile-interaction-optimize'
+                        : 'transition-transform duration-150 hover:scale-[1.01]'
+                    )}
                     onError={() => setImageError(true)}
+                    // Performance optimizations
+                    loading={
+                      hasIntersected && !isLowPerformance ? 'eager' : 'lazy'
+                    }
+                    decoding="async"
                   />
                 )}
               </div>
             </div>
 
             <CardContent
-              className={cn('p-4', finalVariant === 'compact' && 'p-3')}
+              className={cn(
+                'p-standard-sm sm:p-standard', // Standardized responsive padding
+                finalVariant === 'compact' && 'p-standard-sm',
+                // Mobile content optimization
+                isMobile && 'mobile-interaction-optimize'
+              )}
             >
               <div
                 className={cn(
-                  'flex items-start justify-between gap-2',
+                  'gap-standard flex items-start justify-between',
                   finalVariant === 'compact' && 'items-center'
                 )}
               >
@@ -964,8 +1056,8 @@ export function VibeCard({
 
           <CardFooter
             className={cn(
-              'flex flex-col items-start gap-3 p-4 pt-0',
-              finalVariant === 'compact' && 'p-3 pt-0'
+              'gap-standard gap-section p-standard-sm sm:p-standard flex flex-col items-start pt-0', // Standardized gaps and padding
+              finalVariant === 'compact' && 'gap-standard p-standard-sm pt-0'
             )}
           >
             {/* Show skeleton while ratings are loading */}
@@ -984,6 +1076,11 @@ export function VibeCard({
                       showScale={finalVariant !== 'compact'}
                       size={finalVariant === 'compact' ? 'sm' : 'md'}
                     />
+                  ) : isOwnVibe ? (
+                    <div className="bg-secondary/50 text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium">
+                      <span className="text-base">📝</span>
+                      <span className="text-xs">your vibe</span>
+                    </div>
                   ) : (
                     <EmojiRatingCycleDisplay
                       onSubmit={handleEmojiRating}

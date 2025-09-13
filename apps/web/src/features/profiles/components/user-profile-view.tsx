@@ -302,7 +302,7 @@ export function UserProfileView({
                     {averageReceivedRating > 0 && (
                       <div className="border-border bg-card/50 rounded-full border px-3 py-1.5 backdrop-blur">
                         <div className="text-foreground flex items-center gap-2">
-                          <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400" />
+                          <Star className="fill-rating text-rating h-3.5 w-3.5" />
                           <span className="text-xs font-bold">
                             {averageReceivedRating.toFixed(1)}
                           </span>
@@ -553,7 +553,7 @@ export function UserProfileView({
                                           {[...Array(5)].map((_, i) => (
                                             <Star
                                               key={i}
-                                              className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400' : 'text-muted-foreground'}`}
+                                              className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-rating text-rating' : 'text-muted-foreground'}`}
                                             />
                                           ))}
                                         </div>
@@ -618,9 +618,9 @@ export function UserProfileView({
                                     : 'reviews'}
                                 </span>
                                 {averageReceivedRating > 0 && (
-                                  <span className="inline-flex items-center gap-1 rounded-full border border-yellow-400/30 bg-yellow-400/20 px-2 py-1 text-xs font-medium">
-                                    <Star className="h-3 w-3 fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400" />
-                                    <span className="text-yellow-600 dark:text-yellow-400">
+                                  <span className="border-rating/30 bg-rating/20 inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium">
+                                    <Star className="fill-rating text-rating h-3 w-3" />
+                                    <span className="text-rating">
                                       {averageReceivedRating.toFixed(1)} avg
                                     </span>
                                   </span>
@@ -683,7 +683,7 @@ export function UserProfileView({
                                             {[...Array(5)].map((_, i) => (
                                               <Star
                                                 key={i}
-                                                className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400' : 'text-muted-foreground'}`}
+                                                className={`h-3 w-3 ${rating?.value && i < rating.value ? 'fill-rating text-rating' : 'text-muted-foreground'}`}
                                               />
                                             ))}
                                           </div>
@@ -861,7 +861,7 @@ export function UserProfileView({
                               className={`from-theme-primary/10 to-theme-secondary/10 border-theme-primary/30 border-border rounded-xl border bg-gradient-to-r p-3`}
                             >
                               <div className="flex items-center justify-center gap-1 text-2xl font-bold">
-                                <Star className="h-5 w-5 fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400" />
+                                <Star className="fill-rating text-rating h-5 w-5" />
                                 <span
                                   className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-transparent`}
                                 >

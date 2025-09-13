@@ -287,7 +287,7 @@ describe('HomeFeed', () => {
 
     await waitFor(() => {
       const descriptions = screen.getAllByText(
-        'personalized vibes from 10 people you follow'
+        'ai-powered recommendations based on your interests and 10 people you follow'
       );
       expect(descriptions.length).toBeGreaterThan(0);
     });
@@ -423,10 +423,10 @@ describe('HomeFeed', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('your personalized feed is getting ready')
+        screen.getByText('building your personalized feed')
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/haven't shared any vibes yet/)
+        screen.getByText(/you're following 10 people/)
       ).toBeInTheDocument();
     });
   });

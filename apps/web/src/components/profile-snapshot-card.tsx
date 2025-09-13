@@ -52,7 +52,7 @@ export function ProfileSnapshotCard() {
           </div>
 
           <div className="min-w-0 flex-1">
-            <h2 className="from-theme-primary to-theme-secondary mb-1 bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase sm:text-xl">
+            <h2 className="from-primary to-secondary mb-1 bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase sm:text-xl">
               {displayName}
             </h2>
             {username && (

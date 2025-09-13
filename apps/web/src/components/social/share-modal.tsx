@@ -8,6 +8,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import {
   TabsDraggable,
   TabsDraggableList,
@@ -33,6 +35,7 @@ import {
   Info,
   Maximize2,
   Loader2,
+  Square,
 } from 'lucide-react';
 import { api } from '@vibechecc/convex';
 import { useConvexQuery } from '@convex-dev/react-query';
@@ -48,7 +51,7 @@ interface ShareModalProps {
 
 interface SocialConnection {
   _id: string;
-  platform: 'twitter' | 'instagram' | 'tiktok';
+  platform: 'twitter' | 'instagram' | 'tiktok' | 'discord';
   platformUserId: string;
   platformUsername?: string;
   connectionStatus: 'connected' | 'disconnected' | 'expired' | 'error';
@@ -56,8 +59,8 @@ interface SocialConnection {
 }
 
 type ShareStep = 'platform' | 'customize';
-type StoryLayout = 'expanded' | 'minimal';
-type Platform = 'twitter' | 'instagram' | 'tiktok';
+type StoryLayout = 'expanded' | 'minimal' | 'square';
+type Platform = 'twitter' | 'instagram' | 'tiktok' | 'discord';
 
 const layoutOptions: LayoutOption[] = [
   {
@@ -76,6 +79,15 @@ const layoutOptions: LayoutOption[] = [
     includeImage: false,
     includeRatings: true,
     includeReview: true,
+    includeTags: true,
+  },
+  {
+    value: 'square',
+    label: 'square',
+    description: '1:1 social media',
+    includeImage: false,
+    includeRatings: true,
+    includeReview: false,
     includeTags: true,
   },
 ];
@@ -98,6 +110,7 @@ export function ShareModal({
   const [selectedLayout, setSelectedLayout] = useState<StoryLayout>('expanded');
   const [showPreview, setShowPreview] = useState(false);
   const [allLayoutsReady, setAllLayoutsReady] = useState(false);
+  const [showResponses, setShowResponses] = useState(true);
 
   // Get social connections for current user
   const socialConnections = useConvexQuery(
@@ -140,7 +153,8 @@ export function ShareModal({
           ratings,
           shareUrl,
           vibeImageUrl,
-          layout
+          layout,
+          layout.value === 'square' ? showResponses : undefined
         );
         if (blob) {
           const url = URL.createObjectURL(blob);
@@ -182,6 +196,59 @@ export function ShareModal({
     isGenerating,
     allLayoutsReady,
     previewUrls.size,
+    showResponses,
+  ]);
+
+  // Regenerate square layout when showResponses changes
+  useEffect(() => {
+    if (
+      selectedLayout === 'square' &&
+      previewUrls.has('square') &&
+      !isGenerating
+    ) {
+      const regenerateSquare = async () => {
+        const squareLayout = layoutOptions.find((l) => l.value === 'square');
+        if (!squareLayout) return;
+
+        const blob = await generateCanvasImage(
+          vibe,
+          author,
+          ratings,
+          shareUrl,
+          vibeImageUrl,
+          squareLayout,
+          showResponses
+        );
+
+        if (blob) {
+          // Revoke old URL
+          const oldUrl = previewUrls.get('square');
+          if (oldUrl) {
+            URL.revokeObjectURL(oldUrl);
+          }
+
+          // Set new URL
+          const newUrl = URL.createObjectURL(blob);
+          const newUrls = new Map(previewUrls);
+          newUrls.set('square', newUrl);
+          setPreviewUrls(newUrls);
+          previewUrlsRef.current = newUrls;
+        }
+      };
+
+      regenerateSquare();
+    }
+  }, [
+    showResponses,
+    selectedLayout,
+    vibe,
+    author,
+    ratings,
+    shareUrl,
+    vibeImageUrl,
+    generateCanvasImage,
+    isGenerating,
+    previewUrls,
   ]);
 
   const handlePlatformSelect = (platform: Platform) => {
@@ -206,8 +273,7 @@ export function ShareModal({
       icon: Music2,
       label: 'tiktok',
       description: 'download for video/story',
-      color:
-        'hover:bg-[#000000]/10 hover:text-[#000000] dark:hover:bg-[#FFFFFF]/10 dark:hover:text-[#FFFFFF]',
+      color: 'hover:bg-foreground/10 hover:text-foreground',
     },
   };
 
@@ -296,6 +362,20 @@ export function ShareModal({
               ← back to platforms
             </Button>
 
+            {/* Content Toggle for Square Layout */}
+            {selectedLayout === 'square' && (
+              <div className="mb-4 flex items-center space-x-2">
+                <Checkbox
+                  id="show-responses"
+                  checked={showResponses}
+                  onCheckedChange={(checked) => setShowResponses(!!checked)}
+                />
+                <Label htmlFor="show-responses" className="text-sm font-medium">
+                  show responses instead of description
+                </Label>
+              </div>
+            )}
+
             {/* Render platform-specific wrapper */}
             {selectedPlatform === 'twitter' ? (
               <TwitterManualShare
@@ -321,6 +401,8 @@ export function ShareModal({
                           icon={
                             option.value === 'expanded' ? (
                               <Image className="h-4 w-4" />
+                            ) : option.value === 'square' ? (
+                              <Square className="h-4 w-4" />
                             ) : (
                               <Type className="h-4 w-4" />
                             )
@@ -401,6 +483,8 @@ export function ShareModal({
                           icon={
                             option.value === 'expanded' ? (
                               <Image className="h-4 w-4" />
+                            ) : option.value === 'square' ? (
+                              <Square className="h-4 w-4" />
                             ) : (
                               <Type className="h-4 w-4" />
                             )
@@ -481,6 +565,8 @@ export function ShareModal({
                           icon={
                             option.value === 'expanded' ? (
                               <Image className="h-4 w-4" />
+                            ) : option.value === 'square' ? (
+                              <Square className="h-4 w-4" />
                             ) : (
                               <Type className="h-4 w-4" />
                             )

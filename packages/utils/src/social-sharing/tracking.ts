@@ -48,6 +48,7 @@ export function trackShareEvent(event: ShareEvent): void {
     typeof window !== 'undefined' &&
     window.location.hostname === 'localhost'
   ) {
+    // eslint-disable-next-line no-console -- Development-only logging
     console.log('Share event tracked:', event);
   }
 }
