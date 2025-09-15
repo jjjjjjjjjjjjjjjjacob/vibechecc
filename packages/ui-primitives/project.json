@@ -1,0 +1,31 @@
+{
+  "name": "@vibechecc/ui-primitives",
+  "sourceRoot": "packages/ui-primitives/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:ui", "platform:shared"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "packages/ui-primitives"
+      },
+      "inputs": ["default", "^production"]
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "packages/ui-primitives"
+      },
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js"]
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rm -rf .turbo node_modules",
+        "cwd": "packages/ui-primitives"
+      }
+    }
+  }
+}

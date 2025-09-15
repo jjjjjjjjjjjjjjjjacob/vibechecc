@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "vibechecc",
+    "slug": "vibechecc-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vibechecc.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.vibechecc.mobile"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-splash-screen",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share vibes with images.",
+          "cameraPermission": "The app accesses your camera to let you take photos for vibes."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow vibechecc to access your camera to capture photos for vibes."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "scheme": "vibechecc"
+  }
+}

@@ -1,40 +1,6 @@
 {
   "name": "vibechecc",
   "version": "0.1.0-beta.9",
-  "private": true,
-  "packageManager": "bun@1.2.16",
-  "sideEffects": false,
-  "type": "module",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "dev": "nx run-many --target=dev --parallel=true --projects=@vibechecc/web,@vibechecc/convex",
-    "dev:frontend": "nx dev @vibechecc/web",
-    "dev:backend": "nx dev @vibechecc/convex",
-    "dev:webhooks": "bunx svix listen https://127.0.0.1:3210/webhooks/clerk",
-    "seed": "bunx convex run seed:seed",
-    "seed:clear": "bunx convex run seed:clear",
-    "build": "nx run-many --target=build --parallel=true --projects=@vibechecc/web,@vibechecc/convex,@vibechecc/types",
-    "test": "nx run-many --parallel=true --target=test --projects=@vibechecc/web,@vibechecc/convex",
-    "test:watch": "nx run browser:test:watch",
-    "lint": "nx run-many --target=lint",
-    "format": "prettier --write .",
-    "lint:fix": "nx run-many --target=lint --fix",
-    "format:check": "prettier --check .",
-    "format:staged": "prettier --write --cache --ignore-unknown",
-    "typecheck": "nx run-many --target=typecheck",
-    "quality": "bun run typecheck && bun run test && bun run format:check && bun run lint",
-    "quality:fix": "bun run typecheck && bun run lint:fix && bun run format",
-    "deploy": "bun run build && bun run wrangler:deploy",
-    "cf-typegen": "wrangler types --env-interface Env",
-    "clean": "nx run-many --target=bun clean --parallel=true --projects=@vibechecc/web,@vibechecc/convex,@vibechecc/types",
-    "sync:tags": "bun run scripts/sync-tags.ts",
-    "sync:tags:export": "./scripts/export-dev-tags.sh",
-    "sync:tags:seed": "./scripts/seed-prod-tags.sh",
-    "sync:tags:all": "./scripts/sync-tags-to-prod.sh"
-  },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
     "@happy-dom/global-registrator": "^17.5.6",
@@ -72,8 +38,50 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
-  "dependencies": {},
+  "packageManager": "bun@1.2.16",
   "patchedDependencies": {
     "nx@21.3.11": "patches/nx@21.3.11.patch"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "nx run-many --target=dev --parallel=true --projects=@vibechecc/web,@vibechecc/convex",
+    "dev:frontend": "nx dev @vibechecc/web",
+    "dev:backend": "nx dev @vibechecc/convex",
+    "dev:mobile": "nx dev @vibechecc/mobile",
+    "dev:mobile:ios": "nx dev:ios @vibechecc/mobile",
+    "dev:mobile:android": "nx dev:android @vibechecc/mobile",
+    "dev:webhooks": "bunx svix listen https://127.0.0.1:3210/webhooks/clerk",
+    "seed": "bunx convex run seed:seed",
+    "seed:clear": "bunx convex run seed:clear",
+    "build": "nx run-many --target=build --parallel=true --projects=@vibechecc/web,@vibechecc/convex,@vibechecc/types",
+    "build:mobile:ios": "nx build:ios @vibechecc/mobile",
+    "build:mobile:android": "nx build:android @vibechecc/mobile",
+    "build:mobile:preview": "nx build:preview @vibechecc/mobile",
+    "test": "nx run-many --parallel=true --target=test --projects=@vibechecc/web,@vibechecc/convex",
+    "test:watch": "nx run browser:test:watch",
+    "lint": "nx run-many --target=lint",
+    "format": "prettier --write .",
+    "lint:fix": "nx run-many --target=lint --fix",
+    "format:check": "prettier --check .",
+    "format:staged": "prettier --write --cache --ignore-unknown",
+    "typecheck": "nx run-many --target=typecheck",
+    "quality": "bun run typecheck && bun run test && bun run format:check && bun run lint",
+    "quality:fix": "bun run typecheck && bun run lint:fix && bun run format",
+    "deploy": "bun run build && bun run wrangler:deploy",
+    "cf-typegen": "wrangler types --env-interface Env",
+    "clean": "nx run-many --target=bun clean --parallel=true --projects=@vibechecc/web,@vibechecc/convex,@vibechecc/types",
+    "sync:tags": "bun run scripts/sync-tags.ts",
+    "sync:tags:export": "./scripts/export-dev-tags.sh",
+    "sync:tags:seed": "./scripts/seed-prod-tags.sh",
+    "sync:tags:all": "./scripts/sync-tags-to-prod.sh"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "react-native-css": "^2.1.2"
   }
 }

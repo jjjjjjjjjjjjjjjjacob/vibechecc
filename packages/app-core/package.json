@@ -1,0 +1,72 @@
+{
+  "name": "@vibechecc/app-core",
+  "version": "0.1.0-beta.1",
+  "description": "Shared business logic, hooks, and state management for vibechecc",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./hooks/*": {
+      "types": "./src/hooks/*.ts",
+      "default": "./src/hooks/*.ts"
+    },
+    "./stores/*": {
+      "types": "./src/stores/*.ts",
+      "default": "./src/stores/*.ts"
+    },
+    "./services/*": {
+      "types": "./src/services/*.ts",
+      "default": "./src/services/*.ts"
+    },
+    "./utils/*": {
+      "types": "./src/utils/*.ts",
+      "default": "./src/utils/*.ts"
+    },
+    "./types": {
+      "types": "./src/types/index.ts",
+      "default": "./src/types/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "clean": "rm -rf .turbo node_modules dist"
+  },
+  "dependencies": {
+    "@vibechecc/types": "workspace:^",
+    "@vibechecc/utils": "workspace:^",
+    "@vibechecc/convex": "workspace:^",
+    "@tanstack/react-query": "^5.66.0",
+    "convex": "^1.25.4",
+    "zustand": "^5.0.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@vitest/ui": "^2.1.8",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.8"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "@tanstack/react-query": "^5.66.0",
+    "convex": "^1.25.4"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "hooks",
+    "state-management",
+    "convex",
+    "mobile",
+    "web",
+    "vibechecc"
+  ],
+  "private": true
+}

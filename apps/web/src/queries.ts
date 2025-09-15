@@ -503,7 +503,9 @@ export function useFollowingVibesInfinite(
 export function useDebugAuth() {
   return useQuery({
     ...convexQuery(api.users.debugAuth, {}),
-    enabled: import.meta.env.DEV, // Only run in development
+    enabled: typeof window !== 'undefined' ?
+      (import.meta?.env?.DEV || false) :
+      (__DEV__ || false), // Cross-platform development detection
   });
 }
 

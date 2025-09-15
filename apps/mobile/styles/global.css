@@ -1,0 +1,729 @@
+/* NativeWind global styles for vibechecc mobile app */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Variables matching web app theme */
+:root {
+  /* Spacing tokens */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-base: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Component spacing */
+  --card-padding: var(--spacing-base);
+  --card-padding-sm: 0.75rem;
+  --card-gap: var(--spacing-sm);
+  --button-gap: var(--spacing-sm);
+  --section-gap: var(--spacing-lg);
+  --page-gap: var(--spacing-xl);
+
+  /* Mobile-optimized spacing */
+  --mobile-card-padding: 0.75rem;
+  --mobile-card-gap: 0.375rem;
+  --mobile-button-gap: 0.375rem;
+  --mobile-section-gap: var(--spacing-base);
+  --mobile-page-gap: var(--spacing-lg);
+
+  /* Border radius */
+  --radius: 0.625rem;
+
+  /* Light theme colors - OKLCH color space matching web */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.205 0 0);
+  --success: oklch(0.557 0.193 142.5); /* green-600 equivalent */
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.661 0.178 36.77); /* orange-600 equivalent */
+  --warning-foreground: oklch(0.205 0 0);
+  --rating: oklch(0.734 0.173 85.87); /* yellow-500 equivalent */
+  --rating-foreground: oklch(0.205 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
+  /* Default theme colors (pink-orange gradient) */
+  --theme-primary: 330 81% 50%;
+  --theme-secondary: 25 95% 48%;
+  --theme-accent: 330 81% 50%;
+}
+
+.dark {
+  /* Dark theme colors - OKLCH color space matching web */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.657 0.193 143.38); /* green-400 equivalent for dark mode */
+  --success-foreground: oklch(0.205 0 0);
+  --warning: oklch(0.755 0.178 44.34); /* orange-400 equivalent for dark mode */
+  --warning-foreground: oklch(0.205 0 0);
+  --rating: oklch(0.824 0.173 87.66); /* yellow-400 equivalent for dark mode */
+  --rating-foreground: oklch(0.205 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+/* Color theme classes (following .dark pattern) - matching web app exactly */
+.purple-primary {
+  --theme-primary: hsl(262 83% 48%); /* purple-600 */
+}
+
+.pink-primary {
+  --theme-primary: hsl(330 81% 50%); /* pink-600 - same as default */
+}
+
+.blue-primary {
+  --theme-primary: hsl(217 91% 50%); /* blue-600 */
+}
+
+.emerald-primary {
+  --theme-primary: hsl(160 84% 35%); /* emerald-700 */
+}
+
+.orange-primary {
+  --theme-primary: hsl(25 95% 48%); /* orange-600 */
+}
+
+.red-primary {
+  --theme-primary: hsl(0 84% 50%); /* red-600 */
+}
+
+.indigo-primary {
+  --theme-primary: hsl(239 84% 57%); /* indigo-600 */
+}
+
+.teal-primary {
+  --theme-primary: hsl(173 80% 35%); /* teal-700 */
+}
+
+.slate-primary {
+  --theme-primary: hsl(215 28% 25%); /* slate-700 */
+}
+
+.amber-primary {
+  --theme-primary: hsl(45 93% 42%); /* amber-600 */
+}
+
+.lime-primary {
+  --theme-primary: hsl(84 81% 39%); /* lime-600 */
+}
+
+.cyan-primary {
+  --theme-primary: hsl(188 95% 32%); /* cyan-700 */
+}
+
+.violet-primary {
+  --theme-primary: hsl(262 90% 65%); /* violet-500 */
+}
+
+.fuchsia-primary {
+  --theme-primary: hsl(292 84% 51%); /* fuchsia-600 */
+}
+
+.green-primary {
+  --theme-primary: hsl(142 76% 31%); /* green-700 */
+}
+
+.yellow-primary {
+  --theme-primary: hsl(54 92% 50%); /* yellow-500 */
+}
+
+/* Secondary color theme classes */
+.purple-secondary {
+  --theme-secondary: hsl(262 83% 48%); /* purple-600 */
+}
+
+.pink-secondary {
+  --theme-secondary: hsl(330 81% 50%); /* pink-600 */
+}
+
+.blue-secondary {
+  --theme-secondary: hsl(217 91% 50%); /* blue-600 */
+}
+
+.emerald-secondary {
+  --theme-secondary: hsl(160 84% 35%); /* emerald-700 */
+}
+
+.orange-secondary {
+  --theme-secondary: hsl(25 95% 48%); /* orange-600 */
+}
+
+.red-secondary {
+  --theme-secondary: hsl(0 84% 50%); /* red-600 */
+}
+
+.indigo-secondary {
+  --theme-secondary: hsl(239 84% 57%); /* indigo-600 */
+}
+
+.teal-secondary {
+  --theme-secondary: hsl(173 80% 35%); /* teal-700 */
+}
+
+.slate-secondary {
+  --theme-secondary: hsl(215 28% 25%); /* slate-700 */
+}
+
+.amber-secondary {
+  --theme-secondary: hsl(45 93% 42%); /* amber-600 */
+}
+
+.lime-secondary {
+  --theme-secondary: hsl(84 81% 39%); /* lime-600 */
+}
+
+.cyan-secondary {
+  --theme-secondary: hsl(188 95% 32%); /* cyan-700 */
+}
+
+.violet-secondary {
+  --theme-secondary: hsl(262 90% 65%); /* violet-500 */
+}
+
+.fuchsia-secondary {
+  --theme-secondary: hsl(292 84% 51%); /* fuchsia-600 */
+}
+
+.green-secondary {
+  --theme-secondary: hsl(142 76% 31%); /* green-700 */
+}
+
+.yellow-secondary {
+  --theme-secondary: hsl(54 92% 50%); /* yellow-500 */
+}
+
+/* Apply theme colors when data attributes are set */
+[data-theme-primary='purple'] {
+  --theme-primary: hsl(262 83% 48%);
+}
+
+[data-theme-primary='pink'] {
+  --theme-primary: hsl(330 81% 50%);
+}
+
+[data-theme-primary='blue'] {
+  --theme-primary: hsl(217 91% 50%);
+}
+
+[data-theme-primary='emerald'] {
+  --theme-primary: hsl(160 84% 35%);
+}
+
+[data-theme-primary='orange'] {
+  --theme-primary: hsl(25 95% 48%);
+}
+
+[data-theme-primary='red'] {
+  --theme-primary: hsl(0 84% 50%);
+}
+
+[data-theme-primary='indigo'] {
+  --theme-primary: hsl(239 84% 57%);
+}
+
+[data-theme-primary='teal'] {
+  --theme-primary: hsl(173 80% 35%);
+}
+
+[data-theme-primary='slate'] {
+  --theme-primary: hsl(215 28% 25%);
+}
+
+[data-theme-primary='amber'] {
+  --theme-primary: hsl(45 93% 42%);
+}
+
+[data-theme-primary='lime'] {
+  --theme-primary: hsl(84 81% 39%);
+}
+
+[data-theme-primary='cyan'] {
+  --theme-primary: hsl(188 95% 32%);
+}
+
+[data-theme-primary='violet'] {
+  --theme-primary: hsl(262 90% 65%);
+}
+
+[data-theme-primary='fuchsia'] {
+  --theme-primary: hsl(292 84% 51%);
+}
+
+[data-theme-primary='green'] {
+  --theme-primary: hsl(142 76% 31%);
+}
+
+[data-theme-primary='yellow'] {
+  --theme-primary: hsl(54 92% 50%);
+}
+
+/* Apply secondary theme colors */
+[data-theme-secondary='purple'] {
+  --theme-secondary: hsl(262 83% 48%);
+}
+
+[data-theme-secondary='pink'] {
+  --theme-secondary: hsl(330 81% 50%);
+}
+
+[data-theme-secondary='blue'] {
+  --theme-secondary: hsl(217 91% 50%);
+}
+
+[data-theme-secondary='emerald'] {
+  --theme-secondary: hsl(160 84% 35%);
+}
+
+[data-theme-secondary='orange'] {
+  --theme-secondary: hsl(25 95% 48%);
+}
+
+[data-theme-secondary='red'] {
+  --theme-secondary: hsl(0 84% 50%);
+}
+
+[data-theme-secondary='indigo'] {
+  --theme-secondary: hsl(239 84% 57%);
+}
+
+[data-theme-secondary='teal'] {
+  --theme-secondary: hsl(173 80% 35%);
+}
+
+[data-theme-secondary='slate'] {
+  --theme-secondary: hsl(215 28% 25%);
+}
+
+[data-theme-secondary='amber'] {
+  --theme-secondary: hsl(45 93% 42%);
+}
+
+[data-theme-secondary='lime'] {
+  --theme-secondary: hsl(84 81% 39%);
+}
+
+[data-theme-secondary='cyan'] {
+  --theme-secondary: hsl(188 95% 32%);
+}
+
+[data-theme-secondary='violet'] {
+  --theme-secondary: hsl(262 90% 65%);
+}
+
+[data-theme-secondary='fuchsia'] {
+  --theme-secondary: hsl(292 84% 51%);
+}
+
+[data-theme-secondary='green'] {
+  --theme-secondary: hsl(142 76% 31%);
+}
+
+[data-theme-secondary='yellow'] {
+  --theme-secondary: hsl(54 92% 50%);
+}
+
+/* Mobile-specific utility classes */
+.mobile-safe-padding {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-safe-padding-horizontal {
+  padding-left: constant(safe-area-inset-left);
+  padding-left: env(safe-area-inset-left);
+  padding-right: constant(safe-area-inset-right);
+  padding-right: env(safe-area-inset-right);
+}
+
+.mobile-touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Theme-based gradient utilities - matching web app */
+.themed-gradient-text {
+  background: linear-gradient(to right, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.themed-gradient-bg {
+  background: linear-gradient(to right, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+}
+
+.themed-gradient-button {
+  background: linear-gradient(to right, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+}
+
+/* Additional gradient directions for versatility */
+.themed-gradient-bg-br {
+  background: linear-gradient(to bottom right, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+}
+
+.themed-gradient-bg-vertical {
+  background: linear-gradient(to bottom, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+}
+
+.themed-gradient-bg-diagonal {
+  background: linear-gradient(135deg, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+}
+
+/* Gradient overlay utilities */
+.gradient-overlay-dark {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
+}
+
+.gradient-overlay-light {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
+}
+
+.gradient-overlay-themed {
+  background: linear-gradient(to bottom, hsla(var(--theme-primary), 0), hsla(var(--theme-primary), 0.8));
+}
+
+/* Standardized Spacing Utilities - matching web app */
+.space-xs {
+  gap: var(--spacing-xs);
+}
+.space-sm {
+  gap: var(--spacing-sm);
+}
+.space-base {
+  gap: var(--spacing-base);
+}
+.space-lg {
+  gap: var(--spacing-lg);
+}
+.space-xl {
+  gap: var(--spacing-xl);
+}
+.space-2xl {
+  gap: var(--spacing-2xl);
+}
+
+.p-standard {
+  padding: var(--card-padding);
+}
+.p-standard-sm {
+  padding: var(--card-padding-sm);
+}
+.gap-standard {
+  gap: var(--card-gap);
+}
+.gap-button {
+  gap: var(--button-gap);
+}
+.gap-section {
+  gap: var(--section-gap);
+}
+.gap-page {
+  gap: var(--page-gap);
+}
+
+/* Mobile responsive spacing utilities */
+@media (max-width: 768px) {
+  .p-standard {
+    padding: var(--mobile-card-padding);
+  }
+  .gap-standard {
+    gap: var(--mobile-card-gap);
+  }
+  .gap-button {
+    gap: var(--mobile-button-gap);
+  }
+  .gap-section {
+    gap: var(--mobile-section-gap);
+  }
+  .gap-page {
+    gap: var(--mobile-page-gap);
+  }
+}
+
+/* Complex animations ported from web app */
+
+/* Wiggle animation for emojis */
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+/* Shimmy animation for rating */
+@keyframes shimmy {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-1px) scale(1.02);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(1px) scale(1.02);
+  }
+}
+
+/* Pulse scale animation for rating selection */
+@keyframes pulse-scale {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Fade in down animation */
+@keyframes fade-in-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in up animation */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Emoji slide animations */
+@keyframes emoji-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(30px) scale(0.8);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(15px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes emoji-slide-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(-15px) scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.8);
+  }
+}
+
+/* Rating reveal animation */
+@keyframes rating-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(5px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Bounce animation optimized for mobile */
+@keyframes bounce-light {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40%,
+  43% {
+    transform: translateY(-5px);
+  }
+  70% {
+    transform: translateY(-2px);
+  }
+  90% {
+    transform: translateY(-1px);
+  }
+}
+
+/* Scale with spring effect */
+@keyframes scale-spring {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Stagger animation for lists */
+@keyframes stagger-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation utility classes */
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+.animate-shimmy {
+  animation: shimmy 0.6s ease-in-out;
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 0.5s ease-in-out;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.3s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out;
+}
+
+.animate-emoji-slide-in {
+  animation: emoji-slide-in 0.3s ease-out;
+}
+
+.animate-emoji-slide-out {
+  animation: emoji-slide-out 0.3s ease-out;
+}
+
+.animate-rating-reveal {
+  animation: rating-reveal 0.4s ease-out;
+}
+
+.animate-bounce-light {
+  animation: bounce-light 1s ease-in-out;
+}
+
+.animate-scale-spring {
+  animation: scale-spring 0.2s ease-out;
+}
+
+.animate-stagger-fade-in {
+  animation: stagger-fade-in 0.4s ease-out;
+}
+
+/* Performance optimizations for mobile */
+.mobile-gpu-accelerate {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+.mobile-animate-optimized {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.mobile-interaction-optimize {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Reduce animations on slow devices */
+@media (prefers-reduced-motion: reduce) {
+  .animate-wiggle,
+  .animate-shimmy,
+  .animate-pulse-scale,
+  .animate-fade-in-down,
+  .animate-fade-in-up,
+  .animate-emoji-slide-in,
+  .animate-emoji-slide-out,
+  .animate-rating-reveal,
+  .animate-bounce-light,
+  .animate-scale-spring,
+  .animate-stagger-fade-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}

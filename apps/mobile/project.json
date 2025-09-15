@@ -1,0 +1,79 @@
+{
+  "name": "@vibechecc/mobile",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/mobile",
+  "projectType": "application",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "expo start",
+        "cwd": "apps/mobile"
+      }
+    },
+    "dev:ios": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "expo start --ios",
+        "cwd": "apps/mobile"
+      }
+    },
+    "dev:android": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "expo start --android",
+        "cwd": "apps/mobile"
+      }
+    },
+    "build:ios": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "expo build:ios",
+        "cwd": "apps/mobile"
+      }
+    },
+    "build:android": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "expo build:android",
+        "cwd": "apps/mobile"
+      }
+    },
+    "build:preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "expo build --no-publish",
+        "cwd": "apps/mobile"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/mobile"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "apps/mobile"
+      }
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/mobile"
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rm -rf .expo node_modules",
+        "cwd": "apps/mobile"
+      }
+    }
+  },
+  "tags": ["type:app", "platform:mobile", "framework:expo"]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@vibechecc/app-core",
+  "sourceRoot": "packages/app-core/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:core", "platform:shared"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "packages/app-core"
+      },
+      "inputs": ["default", "^production"]
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "packages/app-core"
+      },
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js"]
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rm -rf .turbo node_modules",
+        "cwd": "packages/app-core"
+      }
+    }
+  }
+}
