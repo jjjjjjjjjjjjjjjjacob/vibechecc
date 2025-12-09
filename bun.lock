@@ -3,6 +3,9 @@
   "workspaces": {
     "": {
       "name": "viberatr",
+      "dependencies": {
+        "react": "^19.2.1",
+      },
       "devDependencies": {
         "@eslint/js": "^9.30.1",
         "@happy-dom/global-registrator": "^17.5.6",
@@ -43,7 +46,7 @@
     },
     "apps/convex": {
       "name": "@vibechecc/convex",
-      "version": "0.1.0-beta.8",
+      "version": "0.1.0-beta.10",
       "dependencies": {
         "convex": "^1.24.8",
         "express": "^5.1.0",
@@ -59,7 +62,7 @@
     },
     "apps/web": {
       "name": "@vibechecc/web",
-      "version": "0.1.0-beta.8",
+      "version": "0.1.0-beta.10",
       "dependencies": {
         "@clerk/backend": "^2.0.0",
         "@clerk/tanstack-react-start": "^0.18.0",
@@ -133,7 +136,7 @@
     },
     "packages/types": {
       "name": "@vibechecc/types",
-      "version": "0.1.0-beta.8",
+      "version": "0.1.0-beta.10",
       "devDependencies": {
         "tsup": "^8.0.1",
         "typescript": "^5.7.2",
@@ -141,7 +144,7 @@
     },
     "packages/utils": {
       "name": "@vibechecc/utils",
-      "version": "0.1.0-beta.8",
+      "version": "0.1.0-beta.10",
       "devDependencies": {
         "tsup": "^8.0.1",
         "typescript": "^5.7.2",
@@ -2788,7 +2791,7 @@
 
     "rc9": ["rc9@2.1.2", "", { "dependencies": { "defu": "^6.1.4", "destr": "^2.0.3" } }, "sha512-btXCnMmRIBINM2LDZoEmOogIZU7Qe7zn4BpomSKZ/ykbLObuBdvG+mFq11DL6fjH1DRwHhrlgtYWG96bJiC7Cg=="],
 
-    "react": ["react@19.1.0", "", {}, "sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg=="],
+    "react": ["react@19.2.1", "", {}, "sha512-DGrYcCWK7tvYMnWh79yrPHt+vdx9tY+1gPZa7nJQtO/p8bLTDaHp4dzwEhQB7pZ4Xe3ok4XKuEPrVuc+wlpkmw=="],
 
     "react-dom": ["react-dom@19.1.0", "", { "dependencies": { "scheduler": "^0.26.0" }, "peerDependencies": { "react": "^19.1.0" } }, "sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g=="],
 
