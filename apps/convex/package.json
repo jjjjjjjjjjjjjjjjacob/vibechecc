@@ -25,8 +25,11 @@
     }
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
+    "@vibechecc/types": "workspace:^",
     "convex": "^1.24.8",
     "express": "^5.1.0",
+    "nanoid": "^5.0.9",
     "node-fetch": "^3.3.2",
     "svix": "^1.69.0",
     "zod": "^3.24.2"

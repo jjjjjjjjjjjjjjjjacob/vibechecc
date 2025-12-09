@@ -165,7 +165,7 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
   // Clear specific filter
   const clearFilter = useCallback(
     (filterKey: keyof SearchFilters) => {
-      const newFilters = { ...filtersFromUrl };
+      const newFilters = { ...filtersFromUrl } as Record<string, unknown>;
       delete newFilters[filterKey];
       updateFilters(newFilters);
     },
@@ -180,9 +180,9 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
   // Toggle array filter (for tags, creators, types)
   const toggleArrayFilter = useCallback(
     (filterKey: 'tags' | 'creators', value: string) => {
-      const currentValues = filtersFromUrl[filterKey] ?? [];
+      const currentValues = (filtersFromUrl[filterKey] as string[] | undefined) ?? [];
       const newValues = currentValues.includes(value)
-        ? currentValues.filter((v) => v !== value)
+        ? currentValues.filter((v: string) => v !== value)
         : [...currentValues, value];
 
       updateFilters({
@@ -195,13 +195,14 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
+    const filters = filtersFromUrl;
     return !!(
-      filtersFromUrl.tags?.length ||
-      filtersFromUrl.minRating !== undefined ||
-      filtersFromUrl.maxRating !== undefined ||
-      filtersFromUrl.dateRange ||
-      filtersFromUrl.creators?.length ||
-      (filtersFromUrl.sort && filtersFromUrl.sort !== 'relevance')
+      filters.tags?.length ||
+      filters.minRating !== undefined ||
+      filters.maxRating !== undefined ||
+      filters.dateRange ||
+      filters.creators?.length ||
+      (filters.sort && filters.sort !== 'relevance')
     );
   }, [filtersFromUrl]);
 

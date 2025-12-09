@@ -27,7 +27,7 @@ import {
 import type { Vibe } from '@vibechecc/types';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
-import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';
+import { VibeCreatedCelebrationV2 } from '@/components/vibe-created-celebration';
 import { useUser } from '@clerk/tanstack-react-start';
 
 // Skeleton for lazy-loaded components
