@@ -274,7 +274,7 @@ export function EmojiSearchCommand({
       />
       <CommandList className={cn('relative', maxHeight)}>
         <div
-          className="absolute inset-0 overflow-x-hidden overflow-y-auto"
+          className="absolute inset-0 overflow-y-auto overflow-x-hidden"
           ref={scrollAreaRef}
           onScroll={(e) => {
             e.stopPropagation();
@@ -285,7 +285,7 @@ export function EmojiSearchCommand({
 
           {!searchValue && popularData.length > 0 && (
             <CommandGroup heading="popular">
-              <div className="grid grid-cols-8 gap-1 px-2 pt-2 pb-1">
+              <div className="grid grid-cols-8 gap-1 px-2 pb-1 pt-2">
                 {popularData.map((emoji) => (
                   <CommandItem
                     key={emoji.emoji}
@@ -306,7 +306,7 @@ export function EmojiSearchCommand({
 
           {searchValue && loadedEmojis.length > 0 && !showCategories && (
             <CommandGroup>
-              <div className="grid grid-cols-8 gap-1 px-2 pt-2 pb-1">
+              <div className="grid grid-cols-8 gap-1 px-2 pb-1 pt-2">
                 {loadedEmojis.map((emoji) => (
                   <CommandItem
                     key={emoji.emoji}
@@ -350,7 +350,7 @@ export function EmojiSearchCommand({
               })
               .map(([category, emojis]) => (
                 <CommandGroup key={category} heading={category}>
-                  <div className="grid grid-cols-8 gap-1 px-2 pt-2 pb-1">
+                  <div className="grid grid-cols-8 gap-1 px-2 pb-1 pt-2">
                     {emojis.map((emoji) => (
                       <CommandItem
                         key={emoji.emoji}

@@ -241,7 +241,7 @@ export function SearchDropdown({
                 {/* Vibes */}
                 {data.vibes && data.vibes.length > 0 && (
                   <div>
-                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium uppercase tracking-wider">
                       Vibes
                     </h3>
                     <div className="space-y-1">
@@ -261,7 +261,7 @@ export function SearchDropdown({
                 {/* Users */}
                 {data.users && data.users.length > 0 && (
                   <div>
-                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium uppercase tracking-wider">
                       Users
                     </h3>
                     <div className="space-y-1">
@@ -281,7 +281,7 @@ export function SearchDropdown({
                 {/* Tags */}
                 {data.tags && data.tags.length > 0 && (
                   <div>
-                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium uppercase tracking-wider">
                       Tags
                     </h3>
                     <div className="space-y-1">
@@ -301,7 +301,7 @@ export function SearchDropdown({
                 {/* Actions */}
                 {data.actions && data.actions.length > 0 && (
                   <div>
-                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium tracking-wider uppercase">
+                    <h3 className="text-muted-foreground mb-2 px-2 text-xs font-medium uppercase tracking-wider">
                       Actions
                     </h3>
                     <div className="space-y-1">

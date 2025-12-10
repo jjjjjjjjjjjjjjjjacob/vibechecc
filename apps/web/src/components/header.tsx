@@ -475,7 +475,7 @@ export function Header() {
                           <>
                             <Bell className="h-4 w-4" />
                             {unreadCount && unreadCount > 0 ? (
-                              <span className="bg-theme-primary/80 text-primary-foreground absolute -top-2 -right-2 flex h-3.5 w-3.5 items-center justify-center rounded-full text-xs font-medium">
+                              <span className="bg-theme-primary/80 text-primary-foreground absolute -right-2 -top-2 flex h-3.5 w-3.5 items-center justify-center rounded-full text-xs font-medium">
                                 {unreadCount > 9 ? '9+' : unreadCount}
                               </span>
                             ) : null}
@@ -582,7 +582,7 @@ export function Header() {
             <TabAccordionContent value="tabs" className="container pb-2">
               <div
                 data-has-mounted={navHasMounted}
-                className="w-fit transition delay-200 duration-300 data-[has-mounted=false]:translate-y-5 data-[has-mounted=false]:opacity-0 data-[has-mounted=true]:translate-y-0 data-[has-mounted=true]:opacity-100"
+                className="w-fit transition delay-200 duration-300 data-[has-mounted=false]:translate-y-5 data-[has-mounted=true]:translate-y-0 data-[has-mounted=false]:opacity-0 data-[has-mounted=true]:opacity-100"
               >
                 <FeedTabs tooltipSide="bottom" />
               </div>
@@ -592,7 +592,7 @@ export function Header() {
                 <div className="grid scale-100 grid-cols-3 gap-8">
                   <div
                     data-has-mounted={navHasMounted}
-                    className="col-span-3 opacity-100 transition delay-250 duration-300 data-[has-mounted=false]:scale-95 data-[has-mounted=false]:opacity-0 sm:col-span-2"
+                    className="delay-250 col-span-3 opacity-100 transition duration-300 data-[has-mounted=false]:scale-95 data-[has-mounted=false]:opacity-0 sm:col-span-2"
                   >
                     <div className="text-muted-foreground py-3 text-sm">
                       <Link

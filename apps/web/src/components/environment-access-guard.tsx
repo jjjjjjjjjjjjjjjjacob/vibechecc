@@ -193,13 +193,13 @@ export function EnvironmentAccessGuard({
           'data-[state=access-check]:from-theme-primary data-[state=access-check]:to-theme-secondary',
           'data-[state=post-check-fade-out]:from-theme-primary data-[state=post-check-fade-out]:to-theme-secondary',
           'data-[state=show-welcome]:from-theme-primary data-[state=show-welcome]:to-theme-secondary',
-          'data-[state=fade-out]:from-background data-[state=fade-out]:to-background data-[state=fade-out]:delay-700 data-[state=fade-out]:duration-600'
+          'data-[state=fade-out]:from-background data-[state=fade-out]:to-background data-[state=fade-out]:duration-600 data-[state=fade-out]:delay-700'
         )}
       >
         <div className="space-y-6 text-center">
           <div
             data-state={loadingState}
-            className="flex flex-col items-center space-y-2 transition duration-800 data-[state=fade-out]:scale-110 data-[state=fade-out]:opacity-0"
+            className="duration-800 flex flex-col items-center space-y-2 transition data-[state=fade-out]:scale-110 data-[state=fade-out]:opacity-0"
           >
             <p
               data-state={loadingState}
@@ -211,7 +211,7 @@ export function EnvironmentAccessGuard({
                 <span
                   data-state={loadingState}
                   className={cn(
-                    'text-foreground animate-pulse-text m-0 inline-flex rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition duration-800',
+                    'text-foreground animate-pulse-text duration-800 m-0 inline-flex rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition',
                     'data-[state=theme-check]:text-foreground',
                     'data-[state=access-check]:text-white',
                     'data-[state=post-check-fade-out]:text-white',
@@ -238,7 +238,7 @@ export function EnvironmentAccessGuard({
                 <span
                   data-state={loadingState}
                   className={cn(
-                    'animate-pulse-dot inline-block size-2 rounded-full bg-black transition duration-800',
+                    'animate-pulse-dot duration-800 inline-block size-2 rounded-full bg-black transition',
                     'data-[state=theme-check]:bg-black',
                     'data-[state=access-check]:bg-white',
                     'data-[state=post-check-fade-out]:bg-white',
@@ -248,7 +248,7 @@ export function EnvironmentAccessGuard({
                 <span
                   data-state={loadingState}
                   className={cn(
-                    'animate-pulse-dot inline-block size-2 rounded-full bg-black transition duration-800',
+                    'animate-pulse-dot duration-800 inline-block size-2 rounded-full bg-black transition',
                     'data-[state=theme-check]:bg-black',
                     'data-[state=access-check]:bg-white',
                     'data-[state=post-check-fade-out]:bg-white',
@@ -259,7 +259,7 @@ export function EnvironmentAccessGuard({
                 <span
                   data-state={loadingState}
                   className={cn(
-                    'animate-pulse-dot inline-block size-2 rounded-full bg-black transition duration-800',
+                    'animate-pulse-dot duration-800 inline-block size-2 rounded-full bg-black transition',
                     'data-[state=theme-check]:bg-black',
                     'data-[state=access-check]:bg-white',
                     'data-[state=post-check-fade-out]:bg-white',
@@ -279,12 +279,12 @@ export function EnvironmentAccessGuard({
               >
                 <p
                   data-state={loadingState}
-                  className="inline-flex w-full items-center justify-center text-center text-lg font-medium text-white opacity-0 transition duration-800 data-[state=fade-out]:opacity-0 data-[state=show-welcome]:opacity-100"
+                  className="duration-800 inline-flex w-full items-center justify-center text-center text-lg font-medium text-white opacity-0 transition data-[state=fade-out]:opacity-0 data-[state=show-welcome]:opacity-100"
                 >
                   {Array.from(welcomeMessage).map((char, i) => (
                     <span
                       data-state={loadingState}
-                      className="animate-pulse-text m-0 h-fit w-fit rounded-full bg-transparent p-0 leading-none tracking-[-1px] whitespace-pre transition duration-800 data-[state=fade-out]:opacity-0"
+                      className="animate-pulse-text duration-800 m-0 h-fit w-fit whitespace-pre rounded-full bg-transparent p-0 leading-none tracking-[-1px] transition data-[state=fade-out]:opacity-0"
                       key={i}
                       style={{ animationDelay: `${i * 25}ms` }}
                     >

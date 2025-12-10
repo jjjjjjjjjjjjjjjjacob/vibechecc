@@ -117,7 +117,7 @@ export function RatingScale({
       <div
         ref={containerRef}
         className={cn(
-          'group/rating-display relative flex items-center select-none',
+          'group/rating-display relative flex select-none items-center',
           sizeClasses[size],
           (onChange || onClick) && 'cursor-pointer'
         )}
@@ -137,7 +137,7 @@ export function RatingScale({
         tabIndex={onClick || onChange ? 0 : -1}
         aria-label={`Rate ${value} out of 5 with ${emoji}`}
       >
-        <div className="font-sans whitespace-pre opacity-30 brightness-60 grayscale-100">
+        <div className="brightness-60 grayscale-100 whitespace-pre font-sans opacity-30">
           {[...Array(5)].map((_, i) => (
             <span key={`unfilled-${i}`}>{emoji}</span>
           ))}
@@ -147,7 +147,7 @@ export function RatingScale({
           style={{ width: `${(displayValue / 5) * 100}%` }}
         >
           <div
-            className={cn('flex', 'font-sans whitespace-pre opacity-[0.99]')}
+            className={cn('flex', 'whitespace-pre font-sans opacity-[0.99]')}
             style={{ color: emojiColor }}
           >
             {[...Array(5)].map((_, i) => (

@@ -59,7 +59,7 @@ export function FeedLayout({
             key={section.id}
             className={cn(
               'bg-background/95 supports-[backdrop-filter]:bg-background/70 sticky z-40 backdrop-blur',
-              '-mx-4 px-4 pt-4 pb-2',
+              '-mx-4 px-4 pb-2 pt-4',
               section.className
             )}
             style={{ top: `${topOffset}px` }}

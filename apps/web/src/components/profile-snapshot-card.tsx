@@ -52,14 +52,14 @@ export function ProfileSnapshotCard() {
           </div>
 
           <div className="min-w-0 flex-1">
-            <h2 className="from-theme-primary to-theme-secondary mb-1 bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase sm:text-xl">
+            <h2 className="from-theme-primary to-theme-secondary mb-1 bg-gradient-to-r bg-clip-text text-lg font-bold lowercase text-transparent sm:text-xl">
               {displayName}
             </h2>
             {username && (
               <p className="text-muted-foreground mb-1 text-sm">@{username}</p>
             )}
             {userEmail && (
-              <p className="text-muted-foreground mb-1 text-sm break-all">
+              <p className="text-muted-foreground mb-1 break-all text-sm">
                 {userEmail}
               </p>
             )}

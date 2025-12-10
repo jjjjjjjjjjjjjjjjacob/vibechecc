@@ -202,7 +202,7 @@ function Profile() {
 
                 <div className="w-full flex-1 text-center sm:text-left">
                   <div className="mb-4">
-                    <h1 className="from-theme-primary to-theme-secondary mb-1.5 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase drop-shadow-md sm:text-2xl">
+                    <h1 className="from-theme-primary to-theme-secondary mb-1.5 bg-gradient-to-r bg-clip-text text-xl font-bold lowercase text-transparent drop-shadow-md sm:text-2xl">
                       {displayName}
                     </h1>
                     {convexUser.username && (
@@ -298,7 +298,7 @@ function Profile() {
 
           {/* C) ACCOUNT MANAGEMENT SECTION */}
           <div className="border-muted/20 border-t pt-6">
-            <h2 className="from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent lowercase sm:text-2xl">
+            <h2 className="from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-xl font-bold lowercase text-transparent sm:text-2xl">
               account management
             </h2>
             <div className="flex justify-center">

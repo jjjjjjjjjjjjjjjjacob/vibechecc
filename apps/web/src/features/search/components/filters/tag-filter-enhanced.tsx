@@ -75,20 +75,20 @@ export function TagFilterEnhanced({
 
       {/* Search input */}
       <div className="relative mb-3">
-        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+        <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
         <Input
           type="text"
           placeholder="Search tags..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pr-10 pl-10"
+          className="pl-10 pr-10"
         />
         {searchQuery && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setSearchQuery('')}
-            className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
+            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
           >
             <X className="h-4 w-4" />
           </Button>

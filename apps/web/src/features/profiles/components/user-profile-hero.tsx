@@ -191,7 +191,7 @@ export function UserProfileHero({
 
           {/* Navigation Tabs */}
           <Tabs defaultValue="vibes" className="w-full">
-            <div className="mt-12 mb-8 flex justify-center">
+            <div className="mb-8 mt-12 flex justify-center">
               <TabsList className="bg-background/60 rounded-2xl border-0 p-1.5 shadow-2xl backdrop-blur-md">
                 <TabsTrigger
                   value="vibes"

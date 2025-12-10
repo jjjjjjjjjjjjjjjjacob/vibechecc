@@ -276,7 +276,7 @@ function ProfileEdit() {
 
           <Card className="bg-background/90 mb-6 border-none shadow-lg backdrop-blur transition-all duration-300 hover:shadow-xl sm:mb-8">
             <CardContent className="p-4 sm:p-6 lg:p-8">
-              <h1 className="from-theme-primary to-theme-secondary mb-6 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase">
+              <h1 className="from-theme-primary to-theme-secondary mb-6 bg-gradient-to-r bg-clip-text text-2xl font-bold lowercase text-transparent">
                 edit profile
               </h1>
 
@@ -297,7 +297,7 @@ function ProfileEdit() {
                     </Avatar>
                     <label
                       htmlFor="image-upload"
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 absolute -right-1 -bottom-1 cursor-pointer rounded-full p-1.5 shadow-md transition-all hover:scale-105"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 absolute -bottom-1 -right-1 cursor-pointer rounded-full p-1.5 shadow-md transition-all hover:scale-105"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

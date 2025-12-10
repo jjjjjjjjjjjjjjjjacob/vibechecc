@@ -77,7 +77,7 @@ export function EmojiSearchCollapsible({
       <div
         data-open={open}
         className={cn(
-          'transition-height relative m-0 flex w-full justify-center overflow-hidden rounded-lg bg-transparent delay-100 duration-300 data-[open=false]:h-38 data-[open=true]:h-84',
+          'transition-height data-[open=false]:h-38 data-[open=true]:h-84 relative m-0 flex w-full justify-center overflow-hidden rounded-lg bg-transparent delay-100 duration-300',
           maxHeight
         )}
       >
@@ -133,7 +133,7 @@ export function EmojiSearchCollapsible({
       {expandButtonVariant === 'circle' && (
         <Button
           variant="secondary"
-          className="border-border/20 hover:border-border/50 absolute right-2 bottom-2 h-fit w-fit rounded-full p-2"
+          className="border-border/20 hover:border-border/50 absolute bottom-2 right-2 h-fit w-fit rounded-full p-2"
           onClick={() => setOpen(!open)}
         >
           <ChevronUp

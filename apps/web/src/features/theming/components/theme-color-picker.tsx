@@ -23,7 +23,7 @@ export function ThemeColorPicker({
       )}
     >
       <CardHeader className="pb-4">
-        <CardTitle className="bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-lg font-bold text-transparent lowercase">
+        <CardTitle className="bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-lg font-bold lowercase text-transparent">
           profile theme
         </CardTitle>
         <p className="text-muted-foreground/80 text-sm">

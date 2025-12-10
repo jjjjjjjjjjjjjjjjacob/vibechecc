@@ -237,7 +237,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
       <div
         data-show-tabs={tabsInView}
         data-has-mounted={hasInitialized}
-        className="mb-4 flex items-center gap-2 transition data-[has-mounted=false]:delay-1000 data-[show-tabs=false]:opacity-0 data-[show-tabs=true]:opacity-100"
+        className="mb-4 flex items-center gap-2 transition data-[show-tabs=false]:opacity-0 data-[show-tabs=true]:opacity-100 data-[has-mounted=false]:delay-1000"
       >
         <TrendingUp className="text-primary h-5 w-5" />
         <h1 className="text-2xl font-bold">feed</h1>
@@ -249,7 +249,7 @@ export function HomeFeed({ className }: HomeFeedProps) {
             data-has-mounted={hasInitialized}
             className={cn(
               'flex gap-2 overflow-x-auto pb-2 transition duration-300 data-[has-mounted=false]:delay-1000',
-              'opacity-100 data-[show-tabs=false]:-translate-y-5 data-[show-tabs=false]:opacity-0 data-[show-tabs=true]:translate-y-0'
+              'opacity-100 data-[show-tabs=false]:-translate-y-5 data-[show-tabs=true]:translate-y-0 data-[show-tabs=false]:opacity-0'
             )}
           >
             {availableTabs.map((tab) => (

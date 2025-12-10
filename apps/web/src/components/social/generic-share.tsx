@@ -175,9 +175,9 @@ export function GenericShare({
                         aria-label="Click to expand preview"
                       />
                     ) : (
-                      <div className="flex h-[300px] w-full flex-col items-center justify-center gap-4 select-none sm:h-[400px]">
+                      <div className="flex h-[300px] w-full select-none flex-col items-center justify-center gap-4 sm:h-[400px]">
                         <Loader2 className="text-muted-foreground h-6 w-6 animate-spin sm:h-8 sm:w-8" />
-                        <span className="text-muted-foreground text-sm select-none sm:text-base">
+                        <span className="text-muted-foreground select-none text-sm sm:text-base">
                           generating {option.label} layout...
                         </span>
                       </div>
@@ -187,7 +187,7 @@ export function GenericShare({
               </TabsDraggableContentContainer>
               <button
                 onClick={onShowPreview}
-                className="bg-background/80 border-border hover:bg-background/90 absolute top-4 right-4 z-10 rounded-lg border p-1.5 backdrop-blur-sm transition-colors"
+                className="bg-background/80 border-border hover:bg-background/90 absolute right-4 top-4 z-10 rounded-lg border p-1.5 backdrop-blur-sm transition-colors"
                 aria-label="Maximize preview"
               >
                 <Maximize2 className="h-4 w-4" />

@@ -27,7 +27,7 @@ import {
 import type { Vibe } from '@vibechecc/types';
 import { VibeCard } from '@/features/vibes/components/vibe-card';
 import { DiscoverSectionWrapper } from '@/components/discover-section-wrapper';
-import { VibeCreatedCelebrationV2 } from '@vibechecc/web/src/components/vibe-created-celebration';
+import { VibeCreatedCelebrationV2 } from '@/components/vibe-created-celebration';
 import { useUser } from '@clerk/tanstack-react-start';
 
 // Skeleton for lazy-loaded components
@@ -221,7 +221,7 @@ function DiscoverPage() {
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
+            <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-3xl font-bold lowercase text-transparent drop-shadow-md sm:text-4xl">
               discover all the vibes
             </h1>
             <p className="text-muted-foreground drop-shadow-sm">

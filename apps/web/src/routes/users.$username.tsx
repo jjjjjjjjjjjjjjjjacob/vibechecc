@@ -58,7 +58,7 @@ function UserProfile() {
             <Card className="bg-background/80 border-theme-primary/20 w-full max-w-md shadow-2xl backdrop-blur-md">
               <CardContent className="p-8 text-center">
                 <div className="mb-4 text-6xl opacity-50">🔍</div>
-                <h1 className="from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase">
+                <h1 className="from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold lowercase text-transparent">
                   user not found
                 </h1>
                 <p className="text-muted-foreground/80">

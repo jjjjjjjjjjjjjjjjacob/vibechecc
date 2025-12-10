@@ -334,7 +334,7 @@ export function VibeCard({
                   className="block min-w-0"
                 >
                   <div className="mb-2">
-                    <h3 className="hover:text-foreground/80 line-clamp-2 text-base leading-tight font-semibold transition-colors">
+                    <h3 className="hover:text-foreground/80 line-clamp-2 text-base font-semibold leading-tight transition-colors">
                       {vibe.title}
                     </h3>
                     {vibe.createdBy && (
@@ -556,7 +556,7 @@ export function VibeCard({
                   <Skeleton className="h-10 w-20 rounded-full bg-white/10" />
                 ) : primaryEmojiRating ? (
                   <button
-                    className="focus:ring-primary flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 backdrop-blur-sm focus:ring-2 focus:outline-none"
+                    className="focus:ring-primary flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 backdrop-blur-sm focus:outline-none focus:ring-2"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -589,7 +589,7 @@ export function VibeCard({
                   </button>
                 ) : (
                   <button
-                    className="focus:ring-primary rounded-full bg-white/10 px-3 py-2 text-sm text-white/70 backdrop-blur-sm focus:ring-2 focus:outline-none"
+                    className="focus:ring-primary rounded-full bg-white/10 px-3 py-2 text-sm text-white/70 backdrop-blur-sm focus:outline-none focus:ring-2"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -663,7 +663,7 @@ export function VibeCard({
         )}
       >
         {/* Avatar skeleton */}
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute left-2 top-2 z-10">
           <Skeleton className="h-6 w-6 rounded-full" />
         </div>
 
@@ -774,7 +774,7 @@ export function VibeCard({
         {/* Avatar positioned absolutely in upper left corner */}
         {vibe.createdBy && (
           <div
-            className="absolute top-2 left-2 z-10"
+            className="absolute left-2 top-2 z-10"
             onMouseEnter={() => setIsAvatarHovered(true)}
             onMouseLeave={() => setIsAvatarHovered(false)}
             role="group"
@@ -887,7 +887,7 @@ export function VibeCard({
               >
                 <h3
                   className={cn(
-                    'min-w-0 flex-1 leading-tight font-bold',
+                    'min-w-0 flex-1 font-bold leading-tight',
                     (() => {
                       switch (finalVariant) {
                         case 'feed-masonry':

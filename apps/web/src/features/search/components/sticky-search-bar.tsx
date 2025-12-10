@@ -84,14 +84,14 @@ export function StickySearchBar({
       <div className="container mx-auto py-4">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+            <Search className="text-muted-foreground absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" />
             <Input
               type="text"
               placeholder="Search vibes, users, or tags..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className={cn(
-                'h-12 pr-10 pl-10 text-base',
+                'h-12 pl-10 pr-10 text-base',
                 isSticky && 'bg-background'
               )}
             />
@@ -100,7 +100,7 @@ export function StickySearchBar({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
+                className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
                 onClick={handleClear}
               >
                 <X className="h-4 w-4" />
@@ -119,7 +119,7 @@ export function StickySearchBar({
             {activeFiltersCount > 0 && (
               <Badge
                 variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs"
+                className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
               >
                 {activeFiltersCount}
               </Badge>

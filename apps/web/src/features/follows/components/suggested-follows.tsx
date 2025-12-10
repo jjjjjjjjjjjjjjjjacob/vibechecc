@@ -87,7 +87,7 @@ export function SuggestedFollows({
               <Sparkles className="text-primary-foreground h-4 w-4" />
             </div>
             <div>
-              <CardTitle className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase">
+              <CardTitle className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold lowercase text-transparent">
                 {title}
               </CardTitle>
               <p className="text-muted-foreground/80 text-sm">
@@ -124,7 +124,7 @@ export function SuggestedFollows({
             <Sparkles className="text-primary-foreground h-4 w-4" />
           </div>
           <div>
-            <CardTitle className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase">
+            <CardTitle className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold lowercase text-transparent">
               {title}
             </CardTitle>
             <p className="text-muted-foreground/80 text-sm">

@@ -127,7 +127,7 @@ export function StoryImagePreview({
                 <Sparkles className="text-theme-primary h-4 w-4" />
               </div>
               <div className="flex flex-col">
-                <h3 className="line-clamp-1 text-sm leading-tight font-semibold">
+                <h3 className="line-clamp-1 text-sm font-semibold leading-tight">
                   {title}
                 </h3>
                 <p className="text-muted-foreground text-xs leading-tight">
