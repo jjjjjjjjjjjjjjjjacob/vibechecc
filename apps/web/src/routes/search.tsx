@@ -388,13 +388,13 @@ function SearchResultsPage() {
       className={cn(
         'group flex h-fit w-full justify-start rounded-lg border p-1 transition',
         'data-[open=false]:border-theme-primary data-[open=false]:justify-center data-[open=true]:border-transparent',
-        'data-[open=false]:hover:from-theme-primary data-[open=false]:hover:via-theme-primary data-[open=false]:hover:to-theme-secondary data-[] data-[open=false]:hover:bg-gradient-to-br data-[open=false]:hover:text-white data-[open=true]:hover:bg-transparent'
+        'data-[open=false]:hover:from-theme-primary data-[open=false]:hover:via-theme-primary data-[open=false]:hover:to-theme-secondary data-[] data-[open=true]:hover:bg-transparent data-[open=false]:hover:bg-gradient-to-br data-[open=false]:hover:text-white'
       )}
     >
       <h2
         data-open={!isMobile && filterExpanded}
         className={cn(
-          'h-10 h-full flex-shrink-0 leading-none font-semibold lowercase transition data-[open=false]:hidden data-[open=false]:opacity-0',
+          'h-10 h-full flex-shrink-0 font-semibold lowercase leading-none transition data-[open=false]:hidden data-[open=false]:opacity-0',
           'from-theme-primary via-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-transparent'
         )}
       >
@@ -403,12 +403,12 @@ function SearchResultsPage() {
       <ChevronLeft
         strokeWidth={4.0}
         data-open={!isMobile && filterExpanded}
-        className="data-[open=false]:text-theme-primary text-theme-secondary transition data-[open=false]:hidden data-[open=false]:opacity-0 data-[open=true]:rotate-180"
+        className="data-[open=false]:text-theme-primary text-theme-secondary transition data-[open=false]:hidden data-[open=true]:rotate-180 data-[open=false]:opacity-0"
       />
       <SlidersHorizontal
         strokeWidth={3.0}
         data-open={!isMobile && filterExpanded}
-        className="text-theme-primary group-hover:text-background transition data-[open=false]:opacity-100 data-[open=true]:hidden data-[open=true]:opacity-0"
+        className="text-theme-primary group-hover:text-background transition data-[open=true]:hidden data-[open=false]:opacity-100 data-[open=true]:opacity-0"
       />
     </Button>
   );
@@ -506,7 +506,7 @@ function SearchResultsPage() {
                   }}
                   variant={tab === tabName ? 'default' : 'outline'}
                   className={cn(
-                    'rounded-lg whitespace-nowrap lowercase transition',
+                    'whitespace-nowrap rounded-lg lowercase transition',
                     tab === tabName
                       ? 'hover:from-theme-primary hover:via-theme-primary hover:to-theme-secondary from-theme-primary/70 via-theme-primary/70 to-theme-secondary/60 border-none bg-transparent bg-gradient-to-br text-xs text-white shadow-lg'
                       : 'border-border/50 text-xs shadow-md'
@@ -602,7 +602,7 @@ function SearchResultsPage() {
               </div>
               <div
                 data-open={!isMobile && filterExpanded}
-                className="transition-width flex w-12 flex-shrink-0 overflow-hidden duration-400 data-[open=true]:w-[334px]"
+                className="transition-width duration-400 flex w-12 flex-shrink-0 overflow-hidden data-[open=true]:w-[334px]"
               >
                 {isMobile ? (
                   <Sheet open={filterExpanded} onOpenChange={setFilterExpanded}>
@@ -610,7 +610,7 @@ function SearchResultsPage() {
                     <SheetContent side="top" className="gap-2 p-4">
                       <h2
                         className={cn(
-                          'h-10 h-full w-fit flex-shrink-0 leading-none font-semibold lowercase transition',
+                          'h-10 h-full w-fit flex-shrink-0 font-semibold lowercase leading-none transition',
                           'from-theme-primary via-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-transparent'
                         )}
                       >

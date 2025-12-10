@@ -44,7 +44,7 @@ export function DebugAuth() {
   }
 
   return (
-    <div className="bg-background fixed top-20 right-4 z-50 max-h-96 max-w-md overflow-y-auto rounded-lg border p-4 text-xs shadow-lg">
+    <div className="bg-background fixed right-4 top-20 z-50 max-h-96 max-w-md overflow-y-auto rounded-lg border p-4 text-xs shadow-lg">
       <h3 className="mb-2 font-bold">Debug Auth Status</h3>
 
       <div className="space-y-2">

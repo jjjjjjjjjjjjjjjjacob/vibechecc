@@ -80,7 +80,7 @@ export function OnboardingCompleteStep({
               style={{ animationDelay: `${0.8 + index * 0.1}s` }}
             >
               <Link to={step.href} className="block">
-                <Card className="border-border/50 group hover:border-primary/20 cursor-pointer border-2 transition-colors">
+                <Card className="border-border/50 hover:border-primary/20 group cursor-pointer border-2 transition-colors">
                   <CardContent className="space-y-3 p-6 text-center">
                     <div className="from-theme-primary/10 to-theme-secondary/10 dark:from-theme-primary/20 dark:to-theme-secondary/20 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r transition-transform group-hover:scale-110">
                       <step.icon className="text-primary h-6 w-6" />

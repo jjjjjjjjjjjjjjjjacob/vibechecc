@@ -773,7 +773,7 @@ function VibePage() {
                               {/* Review Text */}
                               {rating.review && (
                                 <div className="mb-2">
-                                  <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
+                                  <p className="text-muted-foreground whitespace-pre-line text-sm leading-relaxed">
                                     {rating.review}
                                   </p>
                                 </div>

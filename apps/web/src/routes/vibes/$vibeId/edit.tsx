@@ -350,7 +350,7 @@ function EditVibe() {
           {/* Header with gradient text */}
           <div className="my-6 text-center">
             <div className="flex items-center justify-center gap-4">
-              <h1 className="animate-gradient-text drop-shadow-theme-primary/50 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-md sm:text-4xl">
+              <h1 className="animate-gradient-text drop-shadow-theme-primary/50 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-bold lowercase text-transparent drop-shadow-md sm:text-4xl">
                 edit your vibe
               </h1>
               {hasUnsavedChanges && (

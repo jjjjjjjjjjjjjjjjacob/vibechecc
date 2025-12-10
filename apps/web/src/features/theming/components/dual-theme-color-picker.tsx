@@ -57,7 +57,7 @@ export function DualThemeColorPicker({
         <div className="space-y-3">
           <div className="themed-gradient-button relative h-16 overflow-hidden rounded-xl">
             <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-            <div className="absolute bottom-2 left-3 text-xs font-medium text-white/80 lowercase">
+            <div className="absolute bottom-2 left-3 text-xs font-medium lowercase text-white/80">
               live preview
             </div>
           </div>

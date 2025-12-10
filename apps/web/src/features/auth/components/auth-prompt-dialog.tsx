@@ -26,7 +26,7 @@ export function AuthPromptDialog({
 }: AuthPromptDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background/60 drop-shadow-primary/30 border-none drop-shadow-xl/50 backdrop-blur sm:max-w-[425px]">
+      <DialogContent className="bg-background/60 drop-shadow-primary/30 drop-shadow-xl/50 border-none backdrop-blur sm:max-w-[425px]">
         <DialogHeader className="flex text-center sm:text-left">
           <DialogTitle className="bg-gradient-to-r from-violet-600 via-pink-600 to-orange-600 bg-clip-text text-3xl font-bold text-transparent">
             {title}

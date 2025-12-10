@@ -115,7 +115,7 @@ export function AvatarPicker({
             e.stopPropagation();
             triggerFileInput();
           }}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 absolute -right-1 -bottom-1 h-8 w-8 rounded-full p-0 transition-transform hover:scale-110"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 absolute -bottom-1 -right-1 h-8 w-8 rounded-full p-0 transition-transform hover:scale-110"
         >
           <Camera className="h-4 w-4" />
         </Button>

@@ -141,7 +141,7 @@ export function EditableTextCell({
   return (
     <div
       className={cn(
-        'group hover:bg-muted/50 flex cursor-pointer items-center space-x-2 rounded px-2 py-1',
+        'hover:bg-muted/50 group flex cursor-pointer items-center space-x-2 rounded px-2 py-1',
         disabled && 'cursor-not-allowed opacity-50',
         isOptimistic && 'opacity-60',
         className

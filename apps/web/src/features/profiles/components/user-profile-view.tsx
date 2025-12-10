@@ -407,7 +407,7 @@ export function UserProfileView({
 
           {/* Modern Navigation */}
           <Tabs defaultValue="vibes" className="w-full">
-            <div className="mt-12 mb-8 flex justify-center">
+            <div className="mb-8 mt-12 flex justify-center">
               <TabsList className="gap-1 rounded-lg border-0 bg-transparent p-1.5 shadow-2xl backdrop-blur-md">
                 <TabsTrigger
                   value="vibes"
@@ -440,7 +440,7 @@ export function UserProfileView({
               <div className="space-y-8">
                 <div className="text-center">
                   <h2
-                    className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
+                    className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold lowercase text-transparent`}
                   >
                     created vibes
                   </h2>
@@ -471,7 +471,7 @@ export function UserProfileView({
                 <div className="space-y-8">
                   <div className="text-center">
                     <h2
-                      className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
+                      className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold lowercase text-transparent`}
                     >
                       review activity
                     </h2>
@@ -494,7 +494,7 @@ export function UserProfileView({
                           </div>
                           <div>
                             <CardTitle
-                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase`}
+                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold lowercase text-transparent`}
                             >
                               reviews given
                             </CardTitle>
@@ -605,7 +605,7 @@ export function UserProfileView({
                           </div>
                           <div>
                             <CardTitle
-                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase`}
+                              className={`from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold lowercase text-transparent`}
                             >
                               reviews received
                             </CardTitle>
@@ -740,7 +740,7 @@ export function UserProfileView({
               <div className="space-y-8">
                 <div className="text-center">
                   <h2
-                    className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase`}
+                    className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-2xl font-bold lowercase text-transparent`}
                   >
                     about {displayName.toLowerCase()}
                   </h2>
@@ -758,7 +758,7 @@ export function UserProfileView({
                       {user.bio && (
                         <div>
                           <h3
-                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold lowercase text-transparent`}
                           >
                             bio
                           </h3>
@@ -771,7 +771,7 @@ export function UserProfileView({
                       {user.interests && user.interests.length > 0 && (
                         <div>
                           <h3
-                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                            className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold lowercase text-transparent`}
                           >
                             interests
                           </h3>
@@ -791,7 +791,7 @@ export function UserProfileView({
 
                       <div>
                         <h3
-                          className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                          className={`from-theme-primary to-theme-secondary mb-3 bg-gradient-to-r bg-clip-text text-base font-semibold lowercase text-transparent`}
                         >
                           member since
                         </h3>
@@ -806,7 +806,7 @@ export function UserProfileView({
                   >
                     <CardContent className="p-6">
                       <h3
-                        className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                        className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold lowercase text-transparent`}
                       >
                         community impact
                       </h3>
@@ -885,7 +885,7 @@ export function UserProfileView({
                     >
                       <CardContent className="p-6">
                         <h3
-                          className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold text-transparent lowercase`}
+                          className={`from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-base font-semibold lowercase text-transparent`}
                         >
                           emoji personality
                         </h3>

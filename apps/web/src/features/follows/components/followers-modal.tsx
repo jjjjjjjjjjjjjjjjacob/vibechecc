@@ -92,7 +92,7 @@ export function FollowersModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="bg-background/95 border-theme-primary/20 max-w-md shadow-xl backdrop-blur-md">
         <DialogHeader>
-          <DialogTitle className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent lowercase">
+          <DialogTitle className="from-theme-primary to-theme-secondary bg-gradient-to-r bg-clip-text text-lg font-bold lowercase text-transparent">
             <div className="flex items-center gap-2">
               <Users className="text-theme-primary h-5 w-5" />
               {username ? `${username}'s followers` : 'followers'}
@@ -103,19 +103,19 @@ export function FollowersModal({
         <div className="space-y-4">
           {/* Search Input */}
           <div className="relative">
-            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder="search followers..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="bg-background/50 border-theme-primary/20 focus:border-theme-primary/40 pr-10 pl-10 lowercase placeholder:lowercase"
+              className="bg-background/50 border-theme-primary/20 focus:border-theme-primary/40 pl-10 pr-10 lowercase placeholder:lowercase"
             />
             {searchQuery && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearSearch}
-                className="absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2 p-0"
+                className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 p-0"
               >
                 <X className="h-4 w-4" />
               </Button>

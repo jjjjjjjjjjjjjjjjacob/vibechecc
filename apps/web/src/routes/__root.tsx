@@ -310,7 +310,7 @@ function LoadingIndicator() {
   const isLoading = useRouterState({ select: (s) => s.isLoading });
   return (
     <div
-      className={`fixed top-16 right-0 left-0 z-50 h-1 transition-all duration-300 ${
+      className={`fixed left-0 right-0 top-16 z-50 h-1 transition-all duration-300 ${
         isLoading ? `opacity-100 delay-300` : `opacity-0 delay-0`
       }`}
     >

@@ -79,7 +79,7 @@ export function EmojiRatingDisplay({
             />
           </div>
           {rating.count && (
-            <span className="text-muted-foreground text-xs whitespace-pre">
+            <span className="text-muted-foreground whitespace-pre text-xs">
               {rating.count} rating{rating.count !== 1 ? 's' : ''}
             </span>
           )}
@@ -196,7 +196,7 @@ export function TopEmojiRatings({
               e.stopPropagation();
               setShowAllRatingsPopover(true);
             }}
-            className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 text-xs whitespace-pre transition-colors"
+            className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 whitespace-pre text-xs transition-colors"
           >
             <ChevronDown className="h-3 w-3" />
             <span>{emojiRatings.length - 1} more</span>
@@ -206,7 +206,7 @@ export function TopEmojiRatings({
       {emojiRatings.length > 3 && onExpandToggle && (
         <button
           onClick={onExpandToggle}
-          className="text-muted-foreground hover:text-foreground text-xs whitespace-pre transition-colors"
+          className="text-muted-foreground hover:text-foreground whitespace-pre text-xs transition-colors"
         >
           {expanded
             ? 'show less'

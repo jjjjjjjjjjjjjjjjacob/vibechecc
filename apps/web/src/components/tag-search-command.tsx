@@ -94,7 +94,7 @@ export function TagSearchCommand({
             <Badge
               key={tag}
               variant="secondary"
-              className="flex items-center gap-1 pr-1 pl-2"
+              className="flex items-center gap-1 pl-2 pr-1"
             >
               <Hash className="h-3 w-3" />
               {tag}

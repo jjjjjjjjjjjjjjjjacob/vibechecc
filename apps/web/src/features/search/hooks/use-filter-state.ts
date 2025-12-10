@@ -180,7 +180,8 @@ export function useFilterState(options: UseFilterStateOptions = {}) {
   // Toggle array filter (for tags, creators, types)
   const toggleArrayFilter = useCallback(
     (filterKey: 'tags' | 'creators', value: string) => {
-      const currentValues = (filtersFromUrl[filterKey] as string[] | undefined) ?? [];
+      const currentValues =
+        (filtersFromUrl[filterKey] as string[] | undefined) ?? [];
       const newValues = currentValues.includes(value)
         ? currentValues.filter((v: string) => v !== value)
         : [...currentValues, value];

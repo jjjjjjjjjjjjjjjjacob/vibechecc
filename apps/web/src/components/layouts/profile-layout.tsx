@@ -52,7 +52,7 @@ export function ProfileLayout({
 
         {/* Sticky Navigation */}
         {stickyNavigation && (
-          <div className="bg-background/95 border-border/10 sticky top-16 z-40 -mx-4 mb-6 border-b px-4 pt-2 pb-2 backdrop-blur-sm">
+          <div className="bg-background/95 border-border/10 sticky top-16 z-40 -mx-4 mb-6 border-b px-4 pb-2 pt-2 backdrop-blur-sm">
             {stickyNavigation}
           </div>
         )}

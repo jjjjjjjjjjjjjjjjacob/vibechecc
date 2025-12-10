@@ -112,7 +112,7 @@ export function NotificationItem({
     <Link to={href} onClick={handleNotificationClick}>
       <div
         className={cn(
-          'hover:bg-muted/50 flex items-start gap-3 rounded-md px-2 pt-3 pb-2',
+          'hover:bg-muted/50 flex items-start gap-3 rounded-md px-2 pb-2 pt-3',
           !notification.read && 'bg-muted/20'
         )}
       >
@@ -132,7 +132,7 @@ export function NotificationItem({
               ).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="bg-background border-background absolute -right-1 -bottom-1 flex h-6 w-6 items-center justify-center rounded-full border-2">
+          <div className="bg-background border-background absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2">
             {icon}
           </div>
         </div>

@@ -103,7 +103,7 @@ function VibeResultCard({
     <Card className="relative h-full overflow-hidden transition-all duration-200 hover:shadow-md">
       {/* Creator Avatar - positioned absolutely in upper left corner */}
       {result.createdBy && (
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute left-2 top-2 z-10">
           <Avatar className="h-6 w-6 shadow-md">
             <AvatarImage
               src={result.createdBy.avatar}

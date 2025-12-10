@@ -287,7 +287,7 @@ export function RatingPopover({
                 >
                   <button
                     data-mouse-down={isMouseDown ? 'true' : 'false'}
-                    className="flex items-center font-sans text-[5.5rem] leading-none opacity-[0.99] drop-shadow-lg transition-transform duration-4000"
+                    className="duration-4000 flex items-center font-sans text-[5.5rem] leading-none opacity-[0.99] drop-shadow-lg transition-transform"
                     onClick={() => setShowEmojiPicker(true)}
                     onPointerDown={() => setShowEmojiPicker(true)}
                     style={
@@ -343,13 +343,13 @@ export function RatingPopover({
                       </span>
                     </div>
                     {/* Sparkle effects */}
-                    <div className="text-theme-secondary absolute -top-1 -left-1 animate-ping">
+                    <div className="text-theme-secondary absolute -left-1 -top-1 animate-ping">
                       ✦
                     </div>
-                    <div className="animation-delay-200 text-theme-primary absolute -right-1 -bottom-1 animate-ping">
+                    <div className="animation-delay-200 text-theme-primary absolute -bottom-1 -right-1 animate-ping">
                       ✦
                     </div>
-                    <div className="animation-delay-400 text-theme-secondary absolute top-0 right-2 animate-ping">
+                    <div className="animation-delay-400 text-theme-secondary absolute right-2 top-0 animate-ping">
                       ✦
                     </div>
                   </div>
@@ -546,7 +546,7 @@ export function RatingPopover({
         {children}
       </DialogTrigger>
       <DialogContent
-        className="bg-background/95 border-border max-h-[90vh] w-94 gap-0 overflow-y-auto border backdrop-blur-md duration-300 data-[state=closed]:translate-y-[calc(-50%_+2rem)]"
+        className="bg-background/95 border-border w-94 max-h-[90vh] gap-0 overflow-y-auto border backdrop-blur-md duration-300 data-[state=closed]:translate-y-[calc(-50%_+2rem)]"
         onClick={(e) => e.stopPropagation()}
         showCloseButton={false}
         data-testid="dialog-content"

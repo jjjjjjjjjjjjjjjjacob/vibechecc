@@ -108,7 +108,7 @@ export function ImageUpload({
               type="button"
               variant="destructive"
               size="sm"
-              className="absolute top-3 right-3"
+              className="absolute right-3 top-3"
               onClick={handleRemoveImage}
               disabled={disabled || uploadMutation.isPending}
             >

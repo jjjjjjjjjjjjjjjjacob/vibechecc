@@ -36,7 +36,7 @@ export const InstantSearchPreview = forwardRef<
   return (
     <Card
       ref={ref}
-      className="absolute top-full right-0 left-0 z-50 mt-2 shadow-lg"
+      className="absolute left-0 right-0 top-full z-50 mt-2 shadow-lg"
     >
       <ScrollArea className="max-h-[400px]">
         {isLoading ? (
@@ -136,7 +136,7 @@ export const InstantSearchPreview = forwardRef<
               </div>
             )}
 
-            <CardContent className="border-t pt-2 pb-3">
+            <CardContent className="border-t pb-3 pt-2">
               <Link
                 to="/search"
                 search={{ q: query }}

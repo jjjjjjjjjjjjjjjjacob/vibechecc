@@ -288,7 +288,7 @@ export function ProfileContent() {
                     {isEditing && (
                       <label
                         htmlFor="image-upload"
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-0 bottom-0 cursor-pointer rounded-full p-1"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 absolute bottom-0 right-0 cursor-pointer rounded-full p-1"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -420,7 +420,7 @@ export function ProfileContent() {
                   </form>
                 ) : (
                   <div className="flex-1">
-                    <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase drop-shadow-md">
+                    <h1 className="from-theme-primary to-theme-secondary mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold lowercase text-transparent drop-shadow-md">
                       {displayName}
                     </h1>
                     {username && (
@@ -457,7 +457,7 @@ export function ProfileContent() {
           </Card>
 
           <div className="mb-8">
-            <h2 className="from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lowercase">
+            <h2 className="from-theme-primary to-theme-secondary mb-4 bg-gradient-to-r bg-clip-text text-2xl font-bold lowercase text-transparent">
               your vibes
             </h2>
 

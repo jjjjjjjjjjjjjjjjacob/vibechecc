@@ -123,7 +123,7 @@ function CreateVibe() {
           <div className="mx-auto max-w-2xl">
             {/* Header with gradient text */}
             <div className="my-6 text-center">
-              <h1 className="animate-gradient-text drop-shadow-theme-secondary/10 from-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-3xl font-bold text-transparent lowercase drop-shadow-lg sm:text-4xl">
+              <h1 className="animate-gradient-text drop-shadow-theme-secondary/10 from-theme-primary to-theme-secondary bg-gradient-to-br bg-clip-text text-3xl font-bold lowercase text-transparent drop-shadow-lg sm:text-4xl">
                 create a new vibe
               </h1>
               <p className="text-muted-foreground mt-2 text-sm">
